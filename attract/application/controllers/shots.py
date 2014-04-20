@@ -34,6 +34,7 @@ def index():
         shots.append(dict(
             id=shot.id,
             name=shot.name,
+            description=shot.description,
             status=status))
     return render_template('shots/index.html', 
         title='shots',
@@ -50,13 +51,48 @@ def view(shot_id):
   else:
     abort(404)
 
-"""
+
 class ShotForm(Form):
-    name = TextField('Blender-ID')
-    description = TextField('First Name', validators=[DataRequired()])
-    parent_id = IntegerFiled('Last Name', validators=[DataRequired()])
-    cloud_communications = BooleanField('Cloud Communications')
-"""
-@shots.route("/create")
+    name = TextField('Shot Name', validators=[DataRequired()])
+    description = TextField('Description', validators=[DataRequired()])
+
+@shots.route("/create", methods=('GET', 'POST'))
 def create():
-  return 'create here'
+  form = ShotForm()
+  if form.validate_on_submit():
+      shot_type = NodeType.query.filter_by(name='shot').first()
+      shot = Node(
+        name=form.name.data,
+        description=form.description.data,
+        node_type_id=shot_type.id)
+      db.session.add(shot)
+      db.session.commit()
+      return redirect('/')
+  return render_template('shots/create.html', form=form)
+
+
+@shots.route("/edit/<int:shot_id>", methods=('GET', 'POST'))
+def edit(shot_id):
+  shot = Node.query.get(shot_id) 
+  form = ShotForm(
+    name=shot.name,
+    description=shot.description)
+  if form.validate_on_submit():
+      shot.name = form.name.data
+      shot.description=form.description.data
+      db.session.commit()
+      return redirect('/')
+  return render_template(
+    'shots/edit.html', 
+    form=form,
+    shot_id=shot_id)
+
+
+@shots.route("/delete/<int:shot_id>")
+def delete(shot_id):
+  shot = Node.query.get(shot_id)  
+  if shot:
+    db.session.delete(shot)
+    return redirect('/')
+  else:
+    abort(404)
