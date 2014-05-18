@@ -24,7 +24,10 @@ shots = Blueprint('shots', __name__)
 
 @shots.route("/")
 def index():
+    """Full list of shots in the current project"""
     shots = []
+    # Get all nodes with type 'shot'
+    # TODO (fsiddi): add project filtering 
     for shot in Node.query.\
         join(NodeType).\
         filter(NodeType.url == 'shot'):
@@ -43,56 +46,55 @@ def index():
 
 @shots.route("/view/<int:shot_id>")
 def view(shot_id):
-  shot = Node.query.get(shot_id)  
-  if shot and shot.node_type.url == 'shot':
-    return render_template('shots/view.html', 
-      title='shots',
-      shot=shot)
-  else:
-    abort(404)
-
+    """View a single shot"""
+    shot = Node.query.get_or_404(shot_id)  
+    if shot.node_type.url == 'shot':
+        return render_template('shots/view.html', 
+            title='shots',
+            shot=shot)
+       
 
 class ShotForm(Form):
+    """Form class used for shot creation and editing"""
     name = TextField('Shot Name', validators=[DataRequired()])
     description = TextField('Description', validators=[DataRequired()])
+    
 
-@shots.route("/create", methods=('GET', 'POST'))
-def create():
-  form = ShotForm()
-  if form.validate_on_submit():
-      shot_type = NodeType.query.filter_by(name='shot').first()
-      shot = Node(
-        name=form.name.data,
-        description=form.description.data,
-        node_type_id=shot_type.id)
-      db.session.add(shot)
-      db.session.commit()
-      return redirect('/')
-  return render_template('shots/create.html', form=form)
+@shots.route("/add", methods=('GET', 'POST'))
+def add():
+    """Add a shot to the project"""
+    form = ShotForm()
+    if form.validate_on_submit():
+        shot_type = NodeType.query.filter_by(name='shot').first()
+        shot = Node(
+            name=form.name.data,
+            description=form.description.data,
+            node_type_id=shot_type.id)
+        db.session.add(shot)
+        db.session.commit()
+        return redirect('/')
+    return render_template('shots/add.html', form=form)
 
 
 @shots.route("/edit/<int:shot_id>", methods=('GET', 'POST'))
 def edit(shot_id):
-  shot = Node.query.get(shot_id) 
-  form = ShotForm(
-    name=shot.name,
-    description=shot.description)
-  if form.validate_on_submit():
-      shot.name = form.name.data
-      shot.description=form.description.data
-      db.session.commit()
-      return redirect('/')
-  return render_template(
-    'shots/edit.html', 
-    form=form,
-    shot_id=shot_id)
+    shot = Node.query.get_or_404(shot_id) 
+    form = ShotForm(
+        name=shot.name,
+        description=shot.description)
+    if form.validate_on_submit():
+        shot.name = form.name.data
+        shot.description=form.description.data
+        db.session.commit()
+        return redirect('/')
+    return render_template(
+        'shots/edit.html', 
+        form=form,
+        shot_id=shot_id)
 
 
 @shots.route("/delete/<int:shot_id>")
 def delete(shot_id):
-  shot = Node.query.get(shot_id)  
-  if shot:
+    shot = Node.query.get_or_404(shot_id)  
     db.session.delete(shot)
     return redirect('/')
-  else:
-    abort(404)

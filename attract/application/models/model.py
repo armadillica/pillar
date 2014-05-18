@@ -95,6 +95,11 @@ class Node(db.Model):
 
 
 
+class NodeShot(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    start_frame = db.Column(db.Integer)
+    end_frame = db.Column(db.Integer)
+
 # Create Many to Many table
 """
 assets_tags_table = db.Table('assets_tags', db.Model.metadata,
