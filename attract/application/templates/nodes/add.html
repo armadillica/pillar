@@ -2,10 +2,10 @@
 
 {% block body %}
 <div class="col-md-9">
-  <h2>Create Node type</h2>
+  <h2>Add Node type</h2>
   <div class="row">
     <div class="col-md-6">
-      <form method="POST" action="{{url_for('nodes.create')}}">
+      <form method="POST" action="{{url_for('nodes.add')}}">
         {{ form.hidden_tag() }}
         <div class="form-group">
           {{ form.name.label }} 
@@ -23,7 +23,7 @@
           {{ form.is_extended.label }} 
           {{ form.is_extended(class='form-control') }}
         </div>
-        <input class="btn btn-default" type="submit" value="Create Node Type">
+        <input class="btn btn-default" type="submit" value="Add Node Type">
       </form>
     </div>
   </div>

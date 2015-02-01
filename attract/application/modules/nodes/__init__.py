@@ -45,8 +45,8 @@ def index():
         shots=shots)
 
 
-@nodes.route("/create", methods=('GET', 'POST'))
-def create():
+@nodes.route("/add", methods=('GET', 'POST'))
+def add():
     form = NodeTypeForm()
 
     if form.validate_on_submit():
@@ -59,4 +59,4 @@ def create():
         db.session.commit()
 
         return redirect(url_for('nodes.index'))
-    return render_template('nodes/create.html', form=form)
+    return render_template('nodes/add.html', form=form)

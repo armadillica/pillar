@@ -2,10 +2,10 @@
 
 {% block body %}
 <div class="col-md-9">
-  <h2>Create shot</h2>
+  <h2>Add shot</h2>
   <div class="row">
     <div class="col-md-6">
-      <form method="POST" action="{{url_for('shots.create')}}">
+      <form method="POST" action="{{url_for('shots.add')}}">
         {{ form.hidden_tag() }}
         <div class="form-group">
           {{ form.name.label }} 

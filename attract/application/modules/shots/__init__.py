@@ -53,8 +53,8 @@ def view(shot_id):
         abort(404)
 
 
-@shots.route("/create", methods=('GET', 'POST'))
-def create():
+@shots.route("/add", methods=('GET', 'POST'))
+def add():
     form = ShotForm()
 
     if form.validate_on_submit():
@@ -72,7 +72,7 @@ def create():
         db.session.add(shot)
         db.session.commit()
         return redirect('/')
-    return render_template('shots/create.html', form=form)
+    return render_template('shots/add.html', form=form)
 
 
 @shots.route("/edit/<int:shot_id>", methods=('GET', 'POST'))
