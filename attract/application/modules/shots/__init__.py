@@ -10,17 +10,9 @@ from flask.ext.thumbnails import Thumbnail
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import aliased
 
-from flask_wtf import Form
-from wtforms import TextField
-from wtforms import BooleanField
-from wtforms import SelectField
-from wtforms import TextAreaField
-from wtforms import IntegerField
-
-from wtforms.validators import DataRequired
-
 from application import db
 
+from application.modules.shots.forms import ShotForm
 from application.modules.nodes.models import Node, NodeType, Status
 from application.modules.shots.models import NodeShot
 
@@ -59,14 +51,6 @@ def view(shot_id):
             notes=shot.node_shot[0].notes)
     else:
         abort(404)
-
-
-class ShotForm(Form):
-    name = TextField('Shot Name', validators=[DataRequired()])
-    description = TextAreaField('Description', validators=[DataRequired()])
-    status_id = SelectField('Status', coerce=int)
-    duration = IntegerField('Duration')
-    notes = TextAreaField('Notes')
 
 
 @shots.route("/create", methods=('GET', 'POST'))
