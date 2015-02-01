@@ -23,7 +23,7 @@ thumb = Thumbnail(app)
 assets = Environment(app)
 
 # Import controllers
-#from models import model
+from application.modules.nodes import nodes
 from application.modules.main import homepage
 from application.modules.shots import shots
 from application.modules.projects import projects
@@ -32,3 +32,4 @@ from application.modules.projects import projects
 app.register_blueprint(filemanager)
 app.register_blueprint(shots, url_prefix='/shots')
 app.register_blueprint(projects, url_prefix='/projects')
+app.register_blueprint(nodes, url_prefix='/nodes')

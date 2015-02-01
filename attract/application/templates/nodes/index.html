@@ -1,0 +1,51 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+<div class="col-md-9">
+  <div class="row">
+    <div class="col-md-12">
+      <table cellpadding="0" cellspacing="0" border="0" class="table table-striped" id="shots">
+        <thead>
+          <tr>
+            <th>Node Name</th>
+            <th>Url</th>
+            <th>Description</th>
+            <th width="8%"></th>
+          </tr>
+        </thead>
+        <tbody>
+        {% for node_type in node_types %}
+            <tr id="row_{{node_type.id}}">
+              <td>{{node_type.name}}</td>
+              <td>{{node_type.url}}</td>
+              <td>
+                {% if node_type.description %}
+                  {{node_type.description|truncate(25)}}
+                {% endif %}
+              </td>
+              <td>
+                <a class="btn btn-default btn-xs" href="#"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+              </td>
+            </tr>
+        {% endfor %}
+          
+        </tbody>
+        <tfoot>
+          <tr>
+            <th>Node Name</th>
+            <th>Url</th>
+            <th>Description</th>
+            <th width="8%"></th>
+          </tr>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-md-12">
+      <a href="{{url_for('nodes.create')}}" class="btn btn-default">Create</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

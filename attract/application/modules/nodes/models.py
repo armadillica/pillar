@@ -50,12 +50,6 @@ class NodeType(db.Model):
         return self.name
 
 
-# Create Many to Many table
-# nodes_assets_table = db.Table('nodes_assets', db.Model.metadata,
-#                            db.Column('node_id', db.Integer, db.ForeignKey('node.id')),
-#                            db.Column('asset_id', db.Integer, db.ForeignKey('asset.id'))
-#                            )
-
 
 class Node(db.Model):
     id = db.Column(db.Integer, primary_key = True)
@@ -75,8 +69,6 @@ class Node(db.Model):
 
     status_id = db.Column(db.Integer(), db.ForeignKey(Status.id))
     status = db.relationship(Status, backref='Node')
-
-    #assets = db.relationship('Asset', secondary=nodes_assets_table)
 
     def __str__(self):
         return self.name

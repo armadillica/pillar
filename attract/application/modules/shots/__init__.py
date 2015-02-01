@@ -13,7 +13,7 @@ from sqlalchemy.orm import aliased
 from application import db
 
 from application.modules.shots.forms import ShotForm
-from application.modules.nodes.models import Node, NodeType, Status
+from application.modules.nodes.models import Node, NodeType
 from application.modules.shots.models import NodeShot
 
 
@@ -56,8 +56,7 @@ def view(shot_id):
 @shots.route("/create", methods=('GET', 'POST'))
 def create():
     form = ShotForm()
-    # Populate dropdown select with available Statuses
-    form.status_id.choices = [(status.id, status.name) for status in Status.query.all()]
+
     if form.validate_on_submit():
         shot_type = NodeType.query.filter_by(url='shot').first()
         shot = Node(
@@ -85,7 +84,7 @@ def edit(shot_id):
         description=shot.description,
         duration=shot.node_shot[0].duration,
         note=shot.node_shot[0].notes)
-    form.status_id.choices = [(status.id, status.name) for status in Status.query.all()]
+    #form.status_id.choices = [(status.id, status.name) for status in Status.query.all()]
 
     if form.validate_on_submit():
         print shot.node_shot
