@@ -1,5 +1,5 @@
 from application import app
-from application.controllers.shots import index
+from application.modules.shots import index
 
 @app.route("/")
 def homepage():

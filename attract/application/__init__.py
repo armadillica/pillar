@@ -23,9 +23,10 @@ thumb = Thumbnail(app)
 assets = Environment(app)
 
 # Import controllers
-from models import model
-from controllers.shots import shots
-from controllers.projects import projects
+#from models import model
+from application.modules.main import homepage
+from application.modules.shots import shots
+from application.modules.projects import projects
 
 # Register blueprints for the imported controllers
 app.register_blueprint(filemanager)

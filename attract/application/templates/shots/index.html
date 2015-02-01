@@ -20,11 +20,19 @@
         {% for shot in shots %}
             <tr id="row_{{shot['id']}}">
               <td><a href="{{url_for('shots.view', shot_id=shot['id'])}}">{{shot['name']}}</a></td>
-              <td>{{shot['description']}}</td>
-              <td></td>
+              <td>
+                {% if shot['description'] %}
+                  {{shot['description']|truncate(25)}}
+                {% endif %}
+              </td>
+              <td>{{shot['duration']}}</td>
               <td><span class="label label-default" style="background-color:<?php echo $shot['status_color'] ?>">{{shot['status']}}</span></td> 
               <td></td>
-              <td></td>
+              <td>
+                {% if shot['notes'] %}
+                  {{shot['notes']|truncate(25)}}
+                {% endif %}
+              </td>
               <td>
                 <a class="btn btn-default btn-xs" href="{{url_for('shots.edit', shot_id=shot['id'])}}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
               </td>

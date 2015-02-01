@@ -9,6 +9,13 @@
     </div>
     <div class="col-md-6">
       <p>{{shot['description']}}</p>
+      <p>
+        {% if notes %}
+          {{notes}}
+        {% else %}
+          No notes at the moment
+        {% endif %}
+      </p>
     </div>
   </div>
 </div>

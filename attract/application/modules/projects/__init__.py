@@ -9,9 +9,8 @@ from flask.ext.thumbnails import Thumbnail
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import aliased
 
-from application.models.model import (
-    Node,
-    NodeType)
+from application.modules.shots import Node
+from application.modules.shots import NodeType
 
 # Name of the Blueprint
 projects = Blueprint('projects', __name__)
