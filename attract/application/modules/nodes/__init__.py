@@ -11,19 +11,22 @@ from application import db
 
 from application.modules.nodes.models import Node, NodeType
 from application.modules.nodes.forms import NodeTypeForm
+from application.modules.nodes.forms import get_node_form
+from application.modules.nodes.forms import process_node_form
 
 
 # Name of the Blueprint
+node_types = Blueprint('node_types', __name__)
 nodes = Blueprint('nodes', __name__)
 
-@nodes.route("/")
+@node_types.route("/")
 def index():
     """Display the node types
     """
     node_types = [t for t in NodeType.query.all()]
 
-    return render_template('nodes/index.html',
-        title='nodes',
+    return render_template('node_types/index.html',
+        title='node_types',
         node_types=node_types)
 
     shots = []
@@ -45,7 +48,7 @@ def index():
         shots=shots)
 
 
-@nodes.route("/add", methods=('GET', 'POST'))
+@node_types.route("/add", methods=['GET', 'POST'])
 def add():
     form = NodeTypeForm()
 
@@ -58,5 +61,52 @@ def add():
         db.session.add(node_type)
         db.session.commit()
 
-        return redirect(url_for('nodes.index'))
-    return render_template('nodes/add.html', form=form)
+        return redirect(url_for('node_types.index'))
+    return render_template('node_types/add.html', form=form)
+
+
+@nodes.route("/<node_type>/add", methods=['GET', 'POST'])
+def add(node_type):
+    """Generic function to add a node of any type
+    """
+    form = get_node_form(node_type) 
+    if form.validate_on_submit():
+        if process_node_form(form):
+            return redirect('/')
+    else:
+        print form.errors
+    return render_template('nodes/add.html',
+        node_type=node_type,
+        form=form)
+
+
+@nodes.route("/<int:node_id>/edit", methods=['GET', 'POST'])
+def edit(node_id):
+    """Generic node editing form
+    """
+    node = Node.query.get_or_404(node_id)
+    form = get_node_form(node.node_type.url)
+
+    if form.validate_on_submit():
+        if process_node_form(form, node_id):
+            return redirect(url_for('node.edit', node_id=node_id))
+
+    form.name.data = node.name
+    form.description.data = node.description
+
+    # We populate the form, basing ourselves on the default node properties
+    for node_property in node.properties:
+        for field in form:
+            if field.name == node_property.custom_field.name_url:
+                value = node_property.value
+                # We cast values into the right type
+                if node_property.custom_field.field_type == 'integer':
+                    value = int(value)
+                if node_property.custom_field.field_type == 'select':
+                    value = int(value)
+                field.data = value
+
+
+    return render_template('nodes/edit.html',
+        node=node,
+        form=form)

@@ -34,7 +34,7 @@
                 {% endif %}
               </td>
               <td>
-                <a class="btn btn-default btn-xs" href="{{url_for('shots.edit', shot_id=shot['id'])}}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
+                <a class="btn btn-default btn-xs" href="{{url_for('nodes.edit', node_id=shot['id'])}}"><i class="glyphicon glyphicon-edit"></i> Edit</a>
               </td>
             </tr>
         {% endfor %}
@@ -56,7 +56,7 @@
   </div>
   <div class="row">
     <div class="col-md-12">
-      <a href="{{url_for('shots.add')}}" class="btn btn-default">Add</a>
+      <a href="{{url_for('nodes.add', node_type='shot')}}" class="btn btn-default">Add</a>
     </div>
   </div>
 </div>
