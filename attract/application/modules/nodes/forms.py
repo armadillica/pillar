@@ -30,6 +30,9 @@ def get_node_form(node_type):
         'name',
         TextField('Name', validators=[DataRequired()]))
     setattr(ProceduralForm,
+        'url',
+        TextField('Url'))
+    setattr(ProceduralForm,
         'description',
         TextAreaField('Description', validators=[DataRequired()]))
     setattr(ProceduralForm,
