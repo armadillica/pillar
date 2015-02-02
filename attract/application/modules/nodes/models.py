@@ -31,15 +31,6 @@ except OSError:
     pass
 
 
-class Status(db.Model):
-    id = db.Column(db.Integer, primary_key = True)
-    name = db.Column(db.String(120), nullable=False)
-    url = db.Column(db.String(120), nullable=False)
-    description = db.Column(db.Text)
-
-    def __str__(self):
-        return self.name
-
 class NodeType(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     name = db.Column(db.String(120), nullable=False)
@@ -48,7 +39,6 @@ class NodeType(db.Model):
 
     def __str__(self):
         return self.name
-
 
 
 class Node(db.Model):
@@ -67,9 +57,36 @@ class Node(db.Model):
     node_type_id = db.Column(db.Integer(), db.ForeignKey(NodeType.id))
     node_type = db.relationship(NodeType, backref='Node')
 
-    status_id = db.Column(db.Integer(), db.ForeignKey(Status.id))
-    status = db.relationship(Status, backref='Node')
+    properties = db.relationship('NodeProperties', backref='Node')
+
+    def get_property(self, name):
+        for p in self.properties:
+            if p.custom_field.name_url == name:
+                return p
+        print 'p'
+        return None
 
     def __str__(self):
         return self.name
 
+
+class CustomFields(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    node_type_id = db.Column(db.Integer(), db.ForeignKey(NodeType.id))
+    node_type = db.relationship(NodeType, backref='CustomField')
+
+    field_type = db.Column(db.String(128))
+    order = db.Column(db.Integer())
+    name = db.Column(db.String(128))
+    name_url = db.Column(db.String(128))
+    description = db.Column(db.Text())
+
+
+class NodeProperties(db.Model):
+    id = db.Column(db.Integer, primary_key = True)
+    node_id = db.Column(db.Integer(), db.ForeignKey(Node.id)) 
+
+    custom_field_id = db.Column(db.Integer(), db.ForeignKey(CustomFields.id))
+    custom_field = db.relationship(CustomFields, backref='NodeProperties')
+
+    value = db.Column(db.Text())
