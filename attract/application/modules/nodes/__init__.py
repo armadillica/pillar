@@ -65,6 +65,15 @@ def add():
     return render_template('node_types/add.html', form=form)
 
 
+@nodes.route("/", methods=['GET', 'POST'])
+def index():
+    """Generic function to list all nodes
+    """
+    nodes = Node.query.all() 
+    return render_template('nodes/index.html',
+        nodes=nodes)
+
+
 @nodes.route("/<node_type>/add", methods=['GET', 'POST'])
 def add(node_type):
     """Generic function to add a node of any type
@@ -110,3 +119,13 @@ def edit(node_id):
     return render_template('nodes/edit.html',
         node=node,
         form=form)
+
+
+@nodes.route("/<int:node_id>/delete", methods=['GET', 'POST'])
+def delete(node_id):
+    """Generic node deletion
+    """
+    node = Node.query.get_or_404(node_id)
+    db.session.delete(node)
+    db.session.commit()
+    return 'ok'

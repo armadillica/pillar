@@ -21,6 +21,10 @@
           {% endif %}
         {% endfor %}
         <input class="btn btn-default" type="submit" value="Edit {{ node.node_type.name }}">
+        <div class="pull-right">
+          <a class="btn btn-default" href="#">Cancel</a>
+          <a class="btn btn-danger" href="{{url_for('nodes.delete', node_id=node.id)}}">Delete</a>
+        </div>
       </form>
     </div>
   </div>

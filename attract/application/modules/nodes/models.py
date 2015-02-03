@@ -57,7 +57,8 @@ class Node(db.Model):
     node_type_id = db.Column(db.Integer(), db.ForeignKey(NodeType.id))
     node_type = db.relationship(NodeType, backref='Node')
 
-    properties = db.relationship('NodeProperties', backref='Node')
+    properties = db.relationship('NodeProperties', backref='Node',
+        cascade="all, delete, delete-orphan")
 
     def get_property(self, name):
         for p in self.properties:

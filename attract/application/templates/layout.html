@@ -47,7 +47,8 @@
               <li><a role="menuitem" tabindex="-1" href="">Tasks</a></li>
               <li><a role="menuitem" tabindex="-1" href="">Profile</a></li>
               <li class="divider"></li>
-              <li><a role="menuitem" tabindex="-1" href="{{url_for('node_types.index')}}">Task Types</a></li>
+              <li><a role="menuitem" tabindex="-1" href="{{url_for('node_types.index')}}">Node Types</a></li>
+              <li><a role="menuitem" tabindex="-1" href="{{url_for('nodes.index')}}">All Nodes</a></li>
               <li class="divider"></li>
               <li><a role="menuitem" tabindex="-1" href="">Log out</a></li>
             </ul>
@@ -64,7 +65,7 @@
           <div class="col-md-3">
             <div class="list-group">
               <a href="{{url_for('shots.index')}}" class="list-group-item {% if title == 'shots' %}active{% endif %}">Shots</a>
-              <a href="/stats" class="list-group-item {% if title == 'stats' %}active{% endif %}">Stats</a>
+              <a href="#" class="list-group-item {% if title == 'stats' %}active{% endif %}">Assets</a>
             </div>
           </div><!--/end col-md-3 -->
         {% endblock %}

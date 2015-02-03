@@ -13,6 +13,13 @@ from application import db
 
 from application.modules.nodes.models import Node, NodeType, NodeProperties
 
+class CustomFieldForm(Form):
+    field_type = TextField('Field Type', validators=[DataRequired()])
+    name = TextField('Name', validators=[DataRequired()])
+    name_url = TextField('Url', validators=[DataRequired()])
+    description = TextAreaField('Description', validators=[DataRequired()])
+    is_required = BooleanField('Is extended')
+
 
 class NodeTypeForm(Form):
     name = TextField('Name', validators=[DataRequired()])
