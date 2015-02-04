@@ -37,6 +37,9 @@ class NodeType(db.Model):
     description = db.Column(db.Text)
     url = db.Column(db.String(120), nullable=False)
 
+    custom_fields = db.relationship('CustomFields', backref='NodeType',
+        cascade="all, delete, delete-orphan")
+
     def __str__(self):
         return self.name
 
@@ -74,7 +77,6 @@ class Node(db.Model):
 class CustomFields(db.Model):
     id = db.Column(db.Integer, primary_key = True)
     node_type_id = db.Column(db.Integer(), db.ForeignKey(NodeType.id))
-    node_type = db.relationship(NodeType, backref='CustomField')
 
     field_type = db.Column(db.String(128))
     order = db.Column(db.Integer())

@@ -5,6 +5,9 @@ from wtforms import SelectField
 from wtforms import TextAreaField
 from wtforms import IntegerField
 from wtforms import HiddenField
+from wtforms import FieldList
+from wtforms import FormField
+from wtforms import Form as BasicForm
 
 from application.modules.nodes.models import CustomFields
 from wtforms.validators import DataRequired
@@ -13,19 +16,51 @@ from application import db
 
 from application.modules.nodes.models import Node, NodeType, NodeProperties
 
-class CustomFieldForm(Form):
+class CustomFieldForm(BasicForm):
+    id = HiddenField()
     field_type = TextField('Field Type', validators=[DataRequired()])
     name = TextField('Name', validators=[DataRequired()])
     name_url = TextField('Url', validators=[DataRequired()])
-    description = TextAreaField('Description', validators=[DataRequired()])
+    description = TextAreaField('Description')
     is_required = BooleanField('Is extended')
+    def __init__(self, csrf_enabled=False, *args, **kwargs):
+        super(CustomFieldForm, self).__init__(csrf_enabled=False, *args, **kwargs)
 
+class ModelFieldList(FieldList):
+    def __init__(self, *args, **kwargs):         
+        self.model = kwargs.pop("model", None)
+        super(ModelFieldList, self).__init__(*args, **kwargs)
+        if not self.model:
+            raise ValueError("ModelFieldList requires model to be set")
+ 
+    def populate_obj(self, obj, name):
+        while len(getattr(obj, name)) < len(self.entries):
+            newModel = self.model()
+            db.session.add(newModel)
+            getattr(obj, name).append(newModel)
+        while len(getattr(obj, name)) > len(self.entries):
+            db.session.delete(getattr(obj, name).pop())
+        super(ModelFieldList, self).populate_obj(obj, name)
+
+class ChildInline(Form):
+    title = TextField('Title',)
 
 class NodeTypeForm(Form):
     name = TextField('Name', validators=[DataRequired()])
     url = TextField('Url', validators=[DataRequired()])
     description = TextAreaField('Description', validators=[DataRequired()])
     is_extended = BooleanField('Is extended')
+    custom_fields = ModelFieldList(FormField(CustomFieldForm), model=CustomFields)
+
+
+class IMForm(Form):
+    protocol = SelectField(choices=[('aim', 'AIM'), ('msn', 'MSN')])
+    username = TextField()
+
+class ContactForm(Form):
+    first_name  = TextField()
+    last_name   = TextField()
+    im_accounts = FieldList(BooleanField('Is extended'),)
 
 
 def get_node_form(node_type):

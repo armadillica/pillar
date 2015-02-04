@@ -2,10 +2,10 @@
 
 {% block body %}
 <div class="col-md-9">
-  <h2>Add Node type</h2>
+  <h2>Edit Node type</h2>
   <div class="row">
     <div class="col-md-6">
-      <form method="POST" action="{{url_for('node_types.add')}}">
+      <form method="POST" action="{{url_for('node_types.edit', node_type_id=node_type.id)}}">
         {{ form.hidden_tag() }}
         <div class="form-group">
           {{ form.name.label }} 
@@ -24,16 +24,20 @@
           {{ form.is_extended(class='form-control') }}
         </div>
 
-        <div data-toggle="fieldset" id="custom_field-fieldset">
-          {{ form.custom_fields.label }} <button type="button" id="add_another_button">+</button>
+        <div data-toggle="fieldset" id="custom_fields-fieldset">
+          {{ form.custom_fields.label }} <button type="button" data-toggle="fieldset-add-row" data-target="#custom_fields-fieldset">+</button>
           <table>
             <tr>
+              <th>Type</th>
               <th>Name</th>
               <th>Url</th>
               <th>Description</th>
               <th>Is required</th>
               <th></th>
             </tr>
+ 
+            
+
             {% for custom_field in form.custom_fields %}
             <tr data-toggle="fieldset-entry">
               
@@ -50,7 +54,7 @@
           </table>
         </div>
 
-        <input class="btn btn-default" type="submit" value="Add Node Type">
+        <input class="btn btn-default" type="submit" value="Edit Node Type">
       </form>
     </div>
   </div>

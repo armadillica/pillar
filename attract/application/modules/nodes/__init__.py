@@ -11,6 +11,7 @@ from application import db
 
 from application.modules.nodes.models import Node, NodeType
 from application.modules.nodes.forms import NodeTypeForm
+from application.modules.nodes.forms import CustomFieldForm
 from application.modules.nodes.forms import get_node_form
 from application.modules.nodes.forms import process_node_form
 
@@ -63,6 +64,41 @@ def add():
 
         return redirect(url_for('node_types.index'))
     return render_template('node_types/add.html', form=form)
+
+
+@node_types.route("/<int:node_type_id>/edit", methods=['GET', 'POST'])
+def edit(node_type_id):
+    node_type = NodeType.query.get_or_404(node_type_id)
+
+    form = NodeTypeForm(obj=node_type)
+
+    if form.validate_on_submit():
+        node_type.name = form.name.data
+        node_type.description = form.description.data
+        node_type.url = form.url.data
+        # Processing custom fields
+        for field in form.custom_fields:
+            print field.data['id']
+
+        db.session.commit()
+    else:
+        print form.errors
+
+
+    # if form.validate_on_submit():
+    #     node_type = NodeType(
+    #         name=form.name.data,
+    #         description=form.description.data,
+    #         url=form.url.data)
+
+    #     db.session.add(node_type)
+    #     db.session.commit()
+
+    #     return redirect(url_for('node_types.index'))
+    return render_template('node_types/edit.html', 
+        node_type=node_type,
+        form=form)
+
 
 
 @nodes.route("/", methods=['GET', 'POST'])
