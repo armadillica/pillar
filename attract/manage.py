@@ -1,5 +1,5 @@
 from application import app
-from application import db
+#from application import db
 from flask.ext.script import Manager
 # from flask.ext.migrate import Migrate
 # from flask.ext.migrate import MigrateCommand
@@ -10,6 +10,7 @@ manager = Manager(app)
 
 @manager.command
 def create_all_tables():
-    db.create_all()
+    pass
+    #db.create_all()
 
 manager.run()
