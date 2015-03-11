@@ -1,51 +1,43 @@
 from eve import Eve
+from eve.auth import TokenAuth
 
-# import config
-# from flask import Flask, Blueprint
-# from flask.ext.mail import Mail
-# from flask.ext.sqlalchemy import SQLAlchemy
-# from flask.ext.thumbnails import Thumbnail
-# from flask.ext.assets import Environment, Bundle
-
-# Initialize the Flask all object
+import random
+import string
 
 from eve.io.mongo import Validator
 
 class ValidateCustomFields(Validator):
-    def _validate_validcf(self, validcf, field, value):
-        if validcf:
-            print self.document['node_type']
-            if value == 'hi':
-                return True
-            else:
-                self._error(field, "Must be hi")
+    def _validate_valid_properties(self, valid_properties, field, value):
+        node_types = app.data.driver.db['ntypes']
+        lookup = {}
+        lookup['_id'] = self.document['node_type']
+        node_type = node_types.find_one(lookup)
+
+        v = Validator(node_type['dyn_schema'])
+        val = v.validate(value)
+        if val:
+            return True
+        else:
+            self._error(field, "Must be hi")
 
 
-app = Eve(validator=ValidateCustomFields)
+class RolesAuth(TokenAuth):
+    def check_auth(self, token,  allowed_roles, resource, method):
+        accounts = app.data.driver.db['users']
+        lookup = {'token': token}
+        if allowed_roles:
+            lookup['role'] = {'$in': allowed_roles}
+        account = accounts.find_one(lookup)
+        return account
 
 
-# Filemanager used by Flask-Admin extension
-# filemanager = Blueprint('filemanager', __name__, static_folder='static/files')
+def add_token(documents):
+    # Don't use this in production:
+    # You should at least make sure that the token is unique.
+    for document in documents:
+        document["token"] = (''.join(random.choice(string.ascii_uppercase)
+                                     for x in range(10)))
 
-# # Choose the configuration to load
-# app.config.from_object(config.Development)
+app = Eve(validator=ValidateCustomFields, auth=RolesAuth)
+app.on_insert_users += add_token
 
-# # Initialized the available extensions
-# mail = Mail(app)
-# db = SQLAlchemy(app)
-# thumb = Thumbnail(app)
-# assets = Environment(app)
-
-# # Import controllers
-# from application.modules.nodes import node_types
-# from application.modules.nodes import nodes
-# from application.modules.main import homepage
-# from application.modules.shots import shots
-# from application.modules.projects import projects
-
-# # Register blueprints for the imported controllers
-# app.register_blueprint(filemanager)
-# app.register_blueprint(shots, url_prefix='/shots')
-# app.register_blueprint(projects, url_prefix='/projects')
-# app.register_blueprint(node_types, url_prefix='/node-types')
-# app.register_blueprint(nodes, url_prefix='/nodes')

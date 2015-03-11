@@ -8,7 +8,7 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 ITEM_METHODS = ['GET', 'PATCH', 'PUT', 'DELETE']
 
 
-schema = {
+users_schema = {
     # Schema definition, based on Cerberus grammar. Check the Cerberus project
     # (https://github.com/nicolaiarocci/cerberus) for details.
     'firstname': {
@@ -26,9 +26,11 @@ schema = {
         'unique': True,
     },
     # 'role' is a list, and can only contain values from 'allowed'.
+    # changed to string
     'role': {
-        'type': 'list',
+        'type': 'string',
         'allowed': ["author", "contributor", "copy"],
+        'required': True,
     },
     # An embedded 'strongly-typed' dictionary.
     'location': {
@@ -36,7 +38,7 @@ schema = {
         'schema': {
             'address': {'type': 'string'},
             'city': {'type': 'string'}
-        },
+        }
     },
     'born': {
         'type': 'datetime',
@@ -48,21 +50,52 @@ nodes_schema = {
         'type': 'string',
         'minlength': 1,
         'maxlength': 128,
+        'required': True,
+    },
+    'description': {
+        'type': 'string',
+        'minlength': 1,
+        'maxlength': 128,
+    },
+    'thumbnail': {
+        'type': 'string',
+        'minlength': 1,
+        'maxlength': 128,
     },
     'parent': {
         'type': 'objectid',
-        # 'data_relation': {
-        #     'resource': 'node',
-        #     'field': '_id',
-        # },
+         'data_relation': {
+             'resource': 'nodes',
+             'field': '_id',
+         },
     },
     'node_type' : {
         'type' : 'string',
-        'validcf' : True,
+        'required': True,
+         'data_relation': {
+             'resource': 'node_types',
+             'field': '_id',
+         },
     },
-    # 'custom_fields' : {
-    #     'type' : 'dict'
-    # }
+     'properties' : {
+         'type' : 'dict',
+         'valid_properties' : True,
+         'required': True,
+     }
+}
+
+
+node_types_schema = {
+    'name': {
+        'type': 'string',
+        'minlength': 1,
+        'maxlength': 128,
+        'required': True,
+    },
+    'dyn_schema': {
+        'type': 'dict',
+        'required': True,
+    }
 }
 
 
@@ -74,15 +107,22 @@ nodes = {
     # most global settings can be overridden at resource level
     'resource_methods': ['GET', 'POST'],
 
+    'allowed_roles': ['author', 'contributor'],
+
     'schema': nodes_schema
 }
 
 
+node_types = {
 
-people = {
-    # 'title' tag used in item links. Defaults to the resource title minus
-    # the final, plural 's' (works fine in most cases but not for 'people')
-    'item_title': 'person',
+    'resource_methods': ['GET', 'POST'],
+
+    'schema' : node_types_schema,
+}
+
+
+users = {
+    'item_title': 'user',
 
     # by default the standard item entry point is defined as
     # '/people/<ObjectId>'. We leave it untouched, and we also enable an
@@ -100,12 +140,19 @@ people = {
     # most global settings can be overridden at resource level
     'resource_methods': ['GET', 'POST'],
 
-    'schema': schema
+    # Allow 'token' to be returned with POST responses
+    'extra_response_fields': ['token'],
+
+    'public_methods': ['GET', 'POST'],
+    # 'public_item_methods': ['GET'],
+
+    'schema': users_schema
 }
 
 
 DOMAIN = {
-    'people': people,
-    'nodes' : nodes
+    'users': users,
+    'nodes' : nodes,
+    'node_types': node_types,
 }
 
