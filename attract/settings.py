@@ -1,3 +1,6 @@
+import os
+
+
 # Enable reads (GET), inserts (POST) and DELETE for resources/collections
 # (if you omit this line, the API will default to ['GET'] and provide
 # read-only access to the endpoint).
@@ -156,3 +159,9 @@ DOMAIN = {
     'node_types': node_types,
 }
 
+try:
+    os.environ['TEST_ATTRACT']
+    #print ("Using attract_test database")
+    MONGO_DBNAME = 'attract_test'
+except:
+    pass

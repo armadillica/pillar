@@ -5,12 +5,13 @@ import random
 import string
 
 from eve.io.mongo import Validator
+from bson import ObjectId
 
 class ValidateCustomFields(Validator):
     def _validate_valid_properties(self, valid_properties, field, value):
-        node_types = app.data.driver.db['ntypes']
+        node_types = app.data.driver.db['node_types']
         lookup = {}
-        lookup['_id'] = self.document['node_type']
+        lookup['_id'] = ObjectId(self.document['node_type'])
         node_type = node_types.find_one(lookup)
 
         v = Validator(node_type['dyn_schema'])
