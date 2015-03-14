@@ -1,5 +1,6 @@
 import os
 
+from authentication import RolesAuth
 
 # Enable reads (GET), inserts (POST) and DELETE for resources/collections
 # (if you omit this line, the API will default to ['GET'] and provide
@@ -12,8 +13,6 @@ ITEM_METHODS = ['GET', 'PATCH', 'PUT', 'DELETE']
 
 
 users_schema = {
-    # Schema definition, based on Cerberus grammar. Check the Cerberus project
-    # (https://github.com/nicolaiarocci/cerberus) for details.
     'firstname': {
         'type': 'string',
         'minlength': 1,
@@ -23,13 +22,7 @@ users_schema = {
         'type': 'string',
         'minlength': 1,
         'maxlength': 15,
-        'required': True,
-        # talk about hard constraints! For the purpose of the demo
-        # 'lastname' is an API entry-point, so we need it to be unique.
-        'unique': True,
     },
-    # 'role' is a list, and can only contain values from 'allowed'.
-    # changed to string
     'role': {
         'type': 'string',
         'allowed': ["author", "contributor", "copy"],
@@ -102,6 +95,17 @@ node_types_schema = {
 }
 
 
+tokens_schema = {
+    'username': {
+        'type': 'string',
+        'required': True,
+    },
+    'token': {
+        'type': 'string',
+    }
+}
+
+
 nodes = {
     # We choose to override global cache-control directives for this resource.
     'cache_control': 'max-age=10,must-revalidate',
@@ -120,7 +124,7 @@ node_types = {
 
     'resource_methods': ['GET', 'POST'],
 
-    'schema' : node_types_schema,
+    'schema': node_types_schema,
 }
 
 
@@ -143,25 +147,32 @@ users = {
     # most global settings can be overridden at resource level
     'resource_methods': ['GET', 'POST'],
 
-    # Allow 'token' to be returned with POST responses
-    'extra_response_fields': ['token'],
 
     'public_methods': ['GET', 'POST'],
     # 'public_item_methods': ['GET'],
 
+
     'schema': users_schema
 }
 
+tokens = {
+    'resource_methods': ['POST'],
+
+    # Allow 'token' to be returned with POST responses
+    'extra_response_fields': ['token'],
+
+    'schema' : tokens_schema
+}
 
 DOMAIN = {
     'users': users,
     'nodes' : nodes,
     'node_types': node_types,
+    'tokens': tokens,
 }
 
 try:
     os.environ['TEST_ATTRACT']
-    #print ("Using attract_test database")
     MONGO_DBNAME = 'attract_test'
 except:
     pass
