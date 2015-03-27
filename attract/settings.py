@@ -1,7 +1,5 @@
 import os
 
-from authentication import RolesAuth
-
 # Enable reads (GET), inserts (POST) and DELETE for resources/collections
 # (if you omit this line, the API will default to ['GET'] and provide
 # read-only access to the endpoint).
@@ -9,7 +7,7 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 
 # Enable reads (GET), edits (PATCH), replacements (PUT) and deletes of
 # individual items  (defaults to read-only item access).
-ITEM_METHODS = ['GET', 'PATCH', 'PUT', 'DELETE']
+ITEM_METHODS = ['GET', 'PUT', 'DELETE']
 
 
 users_schema = {
@@ -24,8 +22,8 @@ users_schema = {
         'maxlength': 15,
     },
     'role': {
-        'type': 'string',
-        'allowed': ["author", "contributor", "copy"],
+        'type': 'list',
+        'allowed': ["admin"],
         'required': True,
     },
     # An embedded 'strongly-typed' dictionary.
@@ -50,34 +48,39 @@ nodes_schema = {
     },
     'description': {
         'type': 'string',
-        'minlength': 1,
+        'minlength': 0,
         'maxlength': 128,
     },
     'thumbnail': {
         'type': 'string',
-        'minlength': 1,
+        'minlength': 0,
         'maxlength': 128,
     },
+    'order': {
+        'type': 'integer',
+        'minlength': 0,
+    },
     'parent': {
-        'type': 'objectid',
-         'data_relation': {
-             'resource': 'nodes',
-             'field': '_id',
-         },
+        'type': 'string',
+        'default': '',
+         #'data_relation': {
+         #    'resource': 'nodes',
+         #    'field': '_id',
+         #},
     },
-    'node_type' : {
-        'type' : 'string',
+    'node_type': {
+        'type': 'string',
         'required': True,
-         'data_relation': {
-             'resource': 'node_types',
-             'field': '_id',
-         },
+        #'data_relation': {
+        #     'resource': 'node_types',
+        #     'field': '_id',
+        #},
     },
-     'properties' : {
+     'properties': {
          'type' : 'dict',
          'valid_properties' : True,
          'required': True,
-     }
+     },
 }
 
 
@@ -87,6 +90,10 @@ node_types_schema = {
         'minlength': 1,
         'maxlength': 128,
         'required': True,
+    },
+    'description': {
+        'type': 'string',
+        'maxlength': 256,
     },
     'dyn_schema': {
         'type': 'dict',
@@ -110,11 +117,6 @@ nodes = {
     # We choose to override global cache-control directives for this resource.
     'cache_control': 'max-age=10,must-revalidate',
     'cache_expires': 10,
-
-    # most global settings can be overridden at resource level
-    'resource_methods': ['GET', 'POST'],
-
-    'allowed_roles': ['author', 'contributor'],
 
     'schema': nodes_schema
 }

@@ -31,6 +31,7 @@ class BasicsAuth(BasicAuth):
 
 
 class MyTokenAuth(BasicsAuth):
+    """Switch between Basic and Token auth"""
     def __init__(self):
         self.token_auth = TokensAuth()
         self.authorized_protected = BasicsAuth.authorized
@@ -57,7 +58,9 @@ class ValidateCustomFields(Validator):
         if val:
             return True
         else:
-            self._error(field, "Must be hi")
+            print (val.errors)
+            self._error(
+                field, "Error validating properties")
 
 
 def add_token(documents):
