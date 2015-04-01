@@ -16,12 +16,12 @@ def create_all_tables():
 @manager.command
 def runserver():
     try:
-       from application import config
-       PORT = config.Config.PORT
-       HOST = config.Config.HOST
-       DEBUG = config.Config.DEBUG
+       import config
+       PORT = config.Development.PORT
+       HOST = config.Development.HOST
+       DEBUG = config.Development.DEBUG
     except ImportError:
-       PORT = 5000
+       PORT = 4000
        HOST = '0.0.0.0'
        DEBUG = True
 
