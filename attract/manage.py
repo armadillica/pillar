@@ -13,5 +13,22 @@ def create_all_tables():
     pass
     #db.create_all()
 
+@manager.command
+def runserver():
+    try:
+       from application import config
+       PORT = config.Config.PORT
+       HOST = config.Config.HOST
+       DEBUG = config.Config.DEBUG
+    except ImportError:
+       PORT = 5000
+       HOST = '0.0.0.0'
+       DEBUG = True
+
+    app.run(
+        port=PORT,
+        host=HOST,
+        debug=DEBUG)
+
 if __name__ == '__main__':
     manager.run()
