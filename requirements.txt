@@ -4,9 +4,12 @@ Events==0.2.1
 Flask==0.10.1
 Flask-PyMongo==0.3.0
 Flask-Script==2.0.5
-itsdangerous==0.24
 Jinja2==2.7.3
 MarkupSafe==0.23
-pymongo==2.8
-simplejson==3.6.5
 Werkzeug==0.10.1
+argparse==1.2.1
+itsdangerous==0.24
+pymongo==2.8
+requests==2.6.0
+simplejson==3.6.5
+wsgiref==0.1.2
