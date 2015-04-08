@@ -22,6 +22,23 @@ def runserver():
 
 
 @manager.command
+def clear_db():
+    """Wipes the database
+    """
+    from pymongo import MongoClient
+    from pymongo.errors import DuplicateKeyError
+    from bson import ObjectId
+    from datetime import datetime
+
+    client = MongoClient()
+    db = client.eve
+    db.drop_collection('nodes')
+    db.drop_collection('node_types')
+    db.drop_collection('tokens')
+    db.drop_collection('users')
+
+
+@manager.command
 def populate_db_test():
     """Populate the db with sample data
     """
