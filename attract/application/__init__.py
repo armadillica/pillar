@@ -47,9 +47,10 @@ def validate(token):
 
 class TokensAuth(TokenAuth):
     def check_auth(self, token, allowed_roles, resource, method):
+        if not token:
+            return False
         tokens = app.data.driver.db['tokens']
         lookup = {'token': token, 'updated': {"$gt": datetime.now()}}
-        dbtoken = None
         dbtoken = tokens.find_one(lookup)
         if not dbtoken:
             validation = validate(token)
@@ -61,7 +62,7 @@ class TokensAuth(TokenAuth):
                 }
                 tokens.insert(data)
         else:
-            validation = {'valid': True}
+            return True
         return validation['valid']
         """
         users = app.data.driver.db['users']
