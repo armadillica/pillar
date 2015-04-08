@@ -61,7 +61,7 @@ nodes_schema = {
         'minlength': 0,
     },
     'parent': {
-        'type': 'string',
+        'type': 'objectid',
         'default': '',
          #'data_relation': {
          #    'resource': 'nodes',
@@ -69,7 +69,7 @@ nodes_schema = {
          #},
     },
     'node_type': {
-        'type': 'string',
+        'type': 'objectid',
         'required': True,
         #'data_relation': {
         #     'resource': 'node_types',
@@ -123,24 +123,13 @@ nodes = {
 
 
 node_types = {
-
     'resource_methods': ['GET', 'POST'],
-
     'schema': node_types_schema,
 }
 
 
 users = {
     'item_title': 'user',
-
-    # by default the standard item entry point is defined as
-    # '/people/<ObjectId>'. We leave it untouched, and we also enable an
-    # additional read-only entry point. This way consumers can also perform
-    # GET requests at '/people/<lastname>'.
-    'additional_lookup': {
-        'url': 'regex("[\w]+")',
-        'field': 'lastname'
-    },
 
     # We choose to override global cache-control directives for this resource.
     'cache_control': 'max-age=10,must-revalidate',
@@ -149,10 +138,8 @@ users = {
     # most global settings can be overridden at resource level
     'resource_methods': ['GET', 'POST'],
 
-
     'public_methods': ['GET', 'POST'],
     # 'public_item_methods': ['GET'],
-
 
     'schema': users_schema
 }
