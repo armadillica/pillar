@@ -10,6 +10,8 @@ from eve.auth import BasicAuth
 from eve.io.mongo import Validator
 from bson import ObjectId
 
+from datetime import datetime
+from datetime import timedelta
 
 class SystemUtility():
     def __new__(cls, *args, **kwargs):
@@ -45,15 +47,23 @@ def validate(token):
 
 class TokensAuth(TokenAuth):
     def check_auth(self, token, allowed_roles, resource, method):
-        # print (token)
-        validation = validate(token)
-        # print validation['message']
+        tokens = app.data.driver.db['tokens']
+        lookup = {'token': token, 'updated': {"$gt": datetime.now()}}
+        dbtoken = None
+        dbtoken = tokens.find_one(lookup)
+        if not dbtoken:
+            validation = validate(token)
+            if validation['valid']:
+                data = {
+                    'username': '',
+                    'token': token,
+                    'updated': datetime.now()+timedelta(hours=1)
+                }
+                tokens.insert(data)
+        else:
+            validation = {'valid': True}
         return validation['valid']
-        """tokens = app.data.driver.db['tokens']
-        lookup = {'token': token}
-        token = tokens.find_one(lookup)
-        if not token:
-            return False
+        """
         users = app.data.driver.db['users']
         lookup = {'firstname': token['username']}
         if allowed_roles:
@@ -61,11 +71,14 @@ class TokensAuth(TokenAuth):
         user = users.find_one(lookup)
         if not user:
             return False
-        return token"""
+        return token
+        """
+
 
 class BasicsAuth(BasicAuth):
     def check_auth(self, username, password, allowed_roles, resource, method):
-        return username == 'admin' and password == 'secret'
+        # return username == 'admin' and password == 'secret'
+        return True
 
 
 class MyTokenAuth(BasicsAuth):
@@ -75,8 +88,9 @@ class MyTokenAuth(BasicsAuth):
         self.authorized_protected = BasicsAuth.authorized
 
     def authorized(self, allowed_roles, resource, method):
-        if resource=='tokens':
-            return self.authorized_protected(self, allowed_roles, resource, method)
+        if resource == 'tokens':
+            return self.authorized_protected(
+                self, allowed_roles, resource, method)
         else:
             return self.token_auth.authorized(allowed_roles, resource, method)
 
