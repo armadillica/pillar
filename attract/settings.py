@@ -14,12 +14,17 @@ users_schema = {
     'firstname': {
         'type': 'string',
         'minlength': 1,
-        'maxlength': 10,
+        'maxlength': 60,
     },
     'lastname': {
         'type': 'string',
         'minlength': 1,
-        'maxlength': 15,
+        'maxlength': 60,
+    },
+    'email': {
+        'type': 'string',
+        'minlength': 1,
+        'maxlength': 60,
     },
     'role': {
         'type': 'list',
@@ -103,8 +108,8 @@ node_types_schema = {
 
 
 tokens_schema = {
-    'username': {
-        'type': 'string',
+    'user': {
+        'type': 'objectid',
         'required': True,
     },
     'token': {

@@ -40,10 +40,11 @@ def validate(token):
     if r.status_code == 200:
         message = r.json()['message']
         valid = r.json()['valid']
+        user = r.json()['user']
     else:
         message = ""
         valid = False
-    return dict(valid=valid, message=message)
+    return dict(valid=valid, message=message, user=user)
 
 
 class TokensAuth(TokenAuth):
@@ -51,17 +52,33 @@ class TokensAuth(TokenAuth):
         if not token:
             return False
         tokens = app.data.driver.db['tokens']
+        users = app.data.driver.db['users']
         lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
         dbtoken = tokens.find_one(lookup)
         if not dbtoken:
             validation = validate(token)
             if validation['valid']:
-                data = {
-                    'username': '',
+                email = validation['user']['email']
+                dbuser = users.find_one({'email': email})
+                tmpname = email.split('@')[0]
+                if not dbuser:
+                    user_data = {
+                        'firstname': tmpname,
+                        'lastname': tmpname,
+                        'email': email,
+                        'role': ['admin'],
+                    }
+                    r = post_internal('users', user_data)
+                    user_id = r[0]["_id"]
+                else:
+                    user_id = dbuser['_id']
+
+                token_data = {
+                    'user': user_id,
                     'token': token,
                     'expire_time': datetime.now()+timedelta(hours=1)
                 }
-                post_internal('tokens', data)
+                post_internal('tokens', token_data)
         else:
             return True
         return validation['valid']
