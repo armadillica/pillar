@@ -8,6 +8,7 @@ from eve import Eve
 from eve.auth import TokenAuth
 from eve.auth import BasicAuth
 from eve.io.mongo import Validator
+from eve.methods.post import post_internal
 from bson import ObjectId
 
 from datetime import datetime
@@ -50,7 +51,7 @@ class TokensAuth(TokenAuth):
         if not token:
             return False
         tokens = app.data.driver.db['tokens']
-        lookup = {'token': token, 'updated': {"$gt": datetime.now()}}
+        lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
         dbtoken = tokens.find_one(lookup)
         if not dbtoken:
             validation = validate(token)
@@ -58,9 +59,9 @@ class TokensAuth(TokenAuth):
                 data = {
                     'username': '',
                     'token': token,
-                    'updated': datetime.now()+timedelta(hours=1)
+                    'expire_time': datetime.now()+timedelta(hours=1)
                 }
-                tokens.insert(data)
+                post_internal('tokens', data)
         else:
             return True
         return validation['valid']
@@ -89,7 +90,8 @@ class MyTokenAuth(BasicsAuth):
         self.authorized_protected = BasicsAuth.authorized
 
     def authorized(self, allowed_roles, resource, method):
-        if resource == 'tokens':
+        # if resource == 'tokens':
+        if False:
             return self.authorized_protected(
                 self, allowed_roles, resource, method)
         else:

@@ -102,7 +102,7 @@ node_types_schema = {
 }
 
 
-"""tokens_schema = {
+tokens_schema = {
     'username': {
         'type': 'string',
         'required': True,
@@ -110,8 +110,12 @@ node_types_schema = {
     'token': {
         'type': 'string',
         'required': True,
-    }
-}"""
+    },
+    'expire_time': {
+        'type': 'datetime',
+        'required': True,
+    },
+}
 
 
 nodes = {
@@ -145,20 +149,20 @@ users = {
     'schema': users_schema
 }
 
-"""tokens = {
+tokens = {
     'resource_methods': ['POST'],
 
     # Allow 'token' to be returned with POST responses
     #'extra_response_fields': ['token'],
 
     'schema' : tokens_schema
-}"""
+}
 
 DOMAIN = {
     'users': users,
     'nodes': nodes,
     'node_types': node_types,
-    # 'tokens': tokens,
+    'tokens': tokens,
 }
 
 try:
