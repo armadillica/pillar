@@ -44,6 +44,7 @@ def validate(token):
     else:
         message = ""
         valid = False
+        user = None
     return dict(valid=valid, message=message, user=user)
 
 
@@ -135,11 +136,8 @@ class ValidateCustomFields(Validator):
                 field, "Error validating properties")
 
 
-"""def add_token(documents):
-    for document in documents:
-        document["token"] = (''.join(random.choice(string.ascii_uppercase)
-                                     for x in range(10)))"""
+def post_item(entry, data):
+    post_internal(entry, data)
 
 
 app = Eve(validator=ValidateCustomFields, auth=MyTokenAuth)
-# app.on_insert_tokens += add_token

@@ -73,6 +73,10 @@ nodes_schema = {
          #    'field': '_id',
          #},
     },
+    'user': {
+        'type': 'string',
+        'required': True,
+    },
     'node_type': {
         'type': 'objectid',
         'required': True,

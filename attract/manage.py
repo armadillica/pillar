@@ -1,4 +1,5 @@
 from application import app
+from application import post_item
 from flask.ext.script import Manager
 
 manager = Manager(app)
@@ -26,9 +27,6 @@ def clear_db():
     """Wipes the database
     """
     from pymongo import MongoClient
-    from pymongo.errors import DuplicateKeyError
-    from bson import ObjectId
-    from datetime import datetime
 
     client = MongoClient()
     db = client.eve
@@ -42,35 +40,8 @@ def clear_db():
 def populate_db_test():
     """Populate the db with sample data
     """
-    from pymongo import MongoClient
-    from pymongo.errors import DuplicateKeyError
-    from bson import ObjectId
-    from datetime import datetime
-
-    client = MongoClient()
-    db = client.eve
-
-    default_user = {
-        "_id": ObjectId("550171c8135d3248e477f288"),
-        "_updated": datetime.now(),
-        "firstname": "admin",
-        "lastname": "admin",
-        "role": "admin",
-        "email": "admin@admin.com",
-        "_created": datetime.now(),
-        "_etag": "302236e27f51d2e26041ae9de49505d77332b260"
-        }
-
-    default_token = {
-        "_id": ObjectId("5502f289135d3274cb658ba7"),
-        "username": "admin",
-        "token": "ANLGNSIEZJ",
-        "_etag": "1e96ed46b133b7ede5ce6ef0d6d4fc53edd9f2ba"
-        }
 
     shot_node_type = {
-        "_id": ObjectId("55016a52135d32466fc800be"),
-        "_updated": datetime.now(),
         "name": "shot",
         "description": "Shot Node Type, for shots",
         "dyn_schema": {
@@ -106,15 +77,54 @@ def populate_db_test():
                 #},
             }
         },
-        "_created": datetime.now(),
-        "_etag": "0ea3c4f684a0cda85525184d5606c4f4ce6ac5f5"
-        }
+    }
+
+    task_node_type = {
+        "name": "task",
+        "description": "Task Node Type, for tasks",
+        "dyn_schema": {
+            "status": {
+                "type": "string",
+                "allowed": [
+                    "todo",
+                    "in-progress",
+                    "done",
+                    "cbb",
+                    "final1",
+                    "final2",
+                    "review"
+                ],
+                "required": True,
+            },
+            "owners": {
+                "type": "dict",
+                "schema": {
+                    "users": {
+                        "type": "list",
+                    },
+                    "groups": {
+                        "type": "list",
+                    }
+                }
+            },
+            "time": {
+                "type": "dict",
+                "schema": {
+                    "start": {
+                        "type": "datetime"
+                    },
+                    "duration": {
+                        "type": "integer"
+                    },
+                    "chunks": {
+                        "type": "list",
+                    }
+                }
+            }
+        },
+    }
 
     shot = {
-        "_id": ObjectId("55016a52135d32466fc800be"),
-        "_update": datetime.now(),
-        "_created": datetime.now(),
-        "_etag": "0ea3c4f684a0cda85525184d5606c4f4ce6ac5f5",
         "name": "01",
         "description": "A sheep tries to hang itself, but fails",
         "thumbnail": "/tmp/attrackt-thumbnail.png",
@@ -132,25 +142,8 @@ def populate_db_test():
         }
     }
 
-    try:
-        db.users.insert(default_user)
-    except DuplicateKeyError:
-        print ("default_user already exist")
-
-    try:
-        db.node_types.insert(shot_node_type)
-    except DuplicateKeyError:
-        print ("shot_node_type already exist")
-
-    try:
-        db.tokens.insert(default_token)
-    except DuplicateKeyError:
-        print ("default_token already exist")
-
-    try:
-        db.nodes.insert(shot)
-    except DuplicateKeyError:
-        print ("shot already exist")
+    post_item('node_types', shot_node_type)
+    post_item('node_types', task_node_type)
 
 
 if __name__ == '__main__':
