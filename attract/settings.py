@@ -30,18 +30,7 @@ users_schema = {
         'type': 'list',
         'allowed': ["admin"],
         'required': True,
-    },
-    # An embedded 'strongly-typed' dictionary.
-    'location': {
-        'type': 'dict',
-        'schema': {
-            'address': {'type': 'string'},
-            'city': {'type': 'string'}
-        }
-    },
-    'born': {
-        'type': 'datetime',
-    },
+    }
 }
 
 nodes_schema = {
@@ -56,10 +45,8 @@ nodes_schema = {
         'minlength': 0,
         'maxlength': 128,
     },
-    'thumbnail': {
-        'type': 'string',
-        'minlength': 0,
-        'maxlength': 128,
+    'picture': {
+        'type': 'media'
     },
     'order': {
         'type': 'integer',
@@ -74,7 +61,7 @@ nodes_schema = {
          #},
     },
     'user': {
-        'type': 'string',
+        'type': 'objectid',
         'required': True,
     },
     'node_type': {
@@ -91,7 +78,6 @@ nodes_schema = {
          'required': True,
      },
 }
-
 
 node_types_schema = {
     'name': {
@@ -110,7 +96,6 @@ node_types_schema = {
     }
 }
 
-
 tokens_schema = {
     'user': {
         'type': 'objectid',
@@ -126,7 +111,6 @@ tokens_schema = {
     },
 }
 
-
 nodes = {
     # We choose to override global cache-control directives for this resource.
     'cache_control': 'max-age=10,must-revalidate',
@@ -135,12 +119,10 @@ nodes = {
     'schema': nodes_schema
 }
 
-
 node_types = {
     'resource_methods': ['GET', 'POST'],
     'schema': node_types_schema,
 }
-
 
 users = {
     'item_title': 'user',
@@ -159,7 +141,7 @@ users = {
 }
 
 tokens = {
-    'resource_methods': ['POST'],
+    'resource_methods': ['GET', 'POST'],
 
     # Allow 'token' to be returned with POST responses
     #'extra_response_fields': ['token'],

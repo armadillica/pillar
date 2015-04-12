@@ -127,7 +127,7 @@ def populate_db_test():
     shot = {
         "name": "01",
         "description": "A sheep tries to hang itself, but fails",
-        "thumbnail": "/tmp/attrackt-thumbnail.png",
+        "picture": "",
         "order": 0,
         "parent": None,
         "node_type": "55016a52135d32466fc800be",

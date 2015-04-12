@@ -77,7 +77,7 @@ class TokensAuth(TokenAuth):
                 token_data = {
                     'user': user_id,
                     'token': token,
-                    'expire_time': datetime.now()+timedelta(hours=1)
+                    'expire_time': datetime.now() + timedelta(hours=1)
                 }
                 post_internal('tokens', token_data)
         else:
@@ -101,7 +101,7 @@ class BasicsAuth(BasicAuth):
         return True
 
 
-class MyTokenAuth(BasicsAuth):
+class CustomTokenAuth(BasicsAuth):
     """Switch between Basic and Token auth"""
     def __init__(self):
         self.token_auth = TokensAuth()
@@ -140,4 +140,4 @@ def post_item(entry, data):
     post_internal(entry, data)
 
 
-app = Eve(validator=ValidateCustomFields, auth=MyTokenAuth)
+app = Eve(validator=ValidateCustomFields, auth=CustomTokenAuth)
