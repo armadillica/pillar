@@ -120,10 +120,6 @@ tokens_schema = {
 }
 
 nodes = {
-    # We choose to override global cache-control directives for this resource.
-    'cache_control': 'max-age=10,must-revalidate',
-    'cache_expires': 10,
-
     'schema': nodes_schema
 }
 
