@@ -54,7 +54,7 @@ nodes_schema = {
     },
     'parent': {
         'type': 'objectid',
-        'default': '',
+         #'default': '',
          #'data_relation': {
          #    'resource': 'nodes',
          #    'field': '_id',
@@ -91,6 +91,14 @@ node_types_schema = {
         'maxlength': 256,
     },
     'dyn_schema': {
+        'type': 'dict',
+        'required': True,
+    },
+    'form_schema': {
+        'type': 'dict',
+        'required': True,
+    },
+    'parent': {
         'type': 'dict',
         'required': True,
     }

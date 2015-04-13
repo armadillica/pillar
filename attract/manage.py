@@ -37,10 +37,29 @@ def clear_db():
 
 
 @manager.command
+def upgrade_node_types():
+    """Wipes node_types collection
+    and populates it again
+    """
+    from pymongo import MongoClient
+
+    client = MongoClient()
+    db = client.eve
+    node_types = db.node_types.find({})
+    old_ids = {}
+    for nt in node_types:
+        old_ids[nt['name']] = nt['_id']
+    populate_node_types(old_ids)
+
+
+@manager.command
 def populate_db_test():
     """Populate the db with sample data
     """
+    populate_node_types()
 
+
+def populate_node_types(old_ids={}):
     shot_node_type = {
         "name": "shot",
         "description": "Shot Node Type, for shots",
@@ -77,6 +96,18 @@ def populate_db_test():
                 #},
             }
         },
+        "form_schema": {
+            "url": {},
+            "cut_in": {},
+            "cut_out": {},
+            "status": {},
+            "notes": {},
+            "order": {},
+            "shot_group": {}
+        },
+        "parent": {
+            "node_types": []
+        }
     }
 
     task_node_type = {
@@ -118,32 +149,85 @@ def populate_db_test():
                     },
                     "chunks": {
                         "type": "list",
+                        "schema": {
+                            "type": "dict",
+                            "schema": {
+                                "start": {
+                                    "type": "datetime",
+                                },
+                                "duration": {
+                                    "type": "integer",
+                                }
+                            }
+                        }
+                    },
+                }
+            }
+        },
+        "form_schema": {
+            "status": {},
+            "owners": {
+                "schema": {
+                    "users":{},
+                    "groups":{}
+                }
+            },
+            "time": {
+                "schema": {
+                    "start": {},
+                    "duration": {},
+                    "chunks": {
+                        "visible": False,
+                        "schema": {
+                            "start":{},
+                            "duration":{}
+                        }
                     }
                 }
             }
         },
-    }
-
-    shot = {
-        "name": "01",
-        "description": "A sheep tries to hang itself, but fails",
-        "picture": "",
-        "order": 0,
-        "parent": None,
-        "node_type": "55016a52135d32466fc800be",
-        "properties": {
-            "url": "shot01",
-            "cut_in": 100,
-            "cut_out": 900,
-            "status": "todo",
-            "notes": "I think the sheep should scream a bit more",
-            "order": 1,
-            "shot_group": "",
+        "parent": {
+            "node_types": ["shot"],
         }
     }
 
-    post_item('node_types', shot_node_type)
-    post_item('node_types', task_node_type)
+
+    from pymongo import MongoClient
+
+    client = MongoClient()
+    db = client.eve
+
+    def mix_node_type(old_id, node_type_dict):
+        # Take eve parameters
+        node_type = db.node_types.find({'_id':old_id})
+        node_type = node_type[0]
+        for attr in node_type:
+            if attr[0]=='_':
+                # Mix with node type attributes
+                node_type_dict[attr]=node_type[attr]
+        return node_type_dict
+
+
+    shot_name = shot_node_type['name']
+    if shot_name in old_ids:
+        shot_node_type = mix_node_type(old_ids[shot_name], shot_node_type)
+        # Remove old node_type
+        db.node_types.remove({'_id':old_ids[shot_name]})
+        # Insert new node_type
+        db.node_types.insert(shot_node_type)
+    else:
+        post_item('node_types', shot_node_type)
+
+
+    task_name = task_node_type['name']
+    if task_name in old_ids:
+        task_node_type = mix_node_type(old_ids[task_name], task_node_type)
+        # Remove old node_type
+        db.node_types.remove({'_id':old_ids[task_name]})
+        # Insert new node_type
+        db.node_types.insert(task_node_type)
+    else:
+        post_item('node_types', task_node_type)
 
 
 if __name__ == '__main__':
