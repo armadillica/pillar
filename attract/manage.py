@@ -132,9 +132,15 @@ def populate_node_types(old_ids={}):
                 "schema": {
                     "users": {
                         "type": "list",
+                        "schema": {
+                            "type": "string",
+                        }
                     },
                     "groups": {
                         "type": "list",
+                        "schema": {
+                            "type": "string",
+                        }
                     }
                 }
             },

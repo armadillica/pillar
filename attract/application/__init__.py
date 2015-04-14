@@ -14,6 +14,10 @@ from bson import ObjectId
 from datetime import datetime
 from datetime import timedelta
 
+
+RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
+
+
 class SystemUtility():
     def __new__(cls, *args, **kwargs):
         raise TypeError("Base class may not be instantiated")
@@ -125,6 +129,13 @@ class ValidateCustomFields(Validator):
         lookup = {}
         lookup['_id'] = ObjectId(self.document['node_type'])
         node_type = node_types.find_one(lookup)
+
+        # TODO make this REAL!
+        try:
+            value['time']['start'] = datetime.strptime(
+                value['time']['start'], RFC1123_DATE_FORMAT)
+        except:
+            pass
 
         v = Validator(node_type['dyn_schema'])
         val = v.validate(value)
