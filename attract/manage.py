@@ -133,13 +133,13 @@ def populate_node_types(old_ids={}):
                     "users": {
                         "type": "list",
                         "schema": {
-                            "type": "string",
+                            "type": "objectid",
                         }
                     },
                     "groups": {
                         "type": "list",
                         "schema": {
-                            "type": "string",
+                            "type": "objectid",
                         }
                     }
                 }
@@ -174,7 +174,9 @@ def populate_node_types(old_ids={}):
             "status": {},
             "owners": {
                 "schema": {
-                    "users":{},
+                    "users":{
+                        "items": ['User'],
+                    },
                     "groups":{}
                 }
             },

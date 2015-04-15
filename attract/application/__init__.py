@@ -124,14 +124,30 @@ class CustomTokenAuth(BasicsAuth):
 
 def convert_properties(properties, node_schema):
     for prop in node_schema:
+        if not prop in properties:
+            continue
         schema_prop = node_schema[prop]
         prop_type = schema_prop['type']
         if prop_type == 'dict':
             properties[prop] = convert_properties(
                 properties[prop], schema_prop['schema'])
+        if prop_type == 'list':
+            if properties[prop] == '':
+                properties[prop] = []
+            for k, val in enumerate(properties[prop]):
+                if not 'schema' in schema_prop:
+                    continue
+                item_schema = {'item': schema_prop['schema']}
+                item_prop = {'item': properties[prop][k]}
+                properties[prop][k] = convert_properties(
+                    item_prop, item_schema)['item']
+        # Convert datetime string to RFC1123 datetime
         elif prop_type == 'datetime':
             prop_val = properties[prop]
             properties[prop] = datetime.strptime(prop_val, RFC1123_DATE_FORMAT)
+        elif prop_type == 'objectid':
+            prop_val = properties[prop]
+            properties[prop] = ObjectId(prop_val)
 
     return properties
 
@@ -142,14 +158,22 @@ class ValidateCustomFields(Validator):
         lookup['_id'] = ObjectId(self.document['node_type'])
         node_type = node_types.find_one(lookup)
 
-        value = convert_properties(value, node_type['dyn_schema'])
+        try:
+            value = convert_properties(value, node_type['dyn_schema'])
+        except:
+            print ("Error converting")
+        print (value)
 
         v = Validator(node_type['dyn_schema'])
         val = v.validate(value)
+
         if val:
             return True
         else:
-            print (val.errors)
+            try:
+                print (val.errors)
+            except:
+                pass
             self._error(
                 field, "Error validating properties")
 
