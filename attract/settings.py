@@ -7,8 +7,12 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 
 # Enable reads (GET), edits (PATCH), replacements (PUT) and deletes of
 # individual items  (defaults to read-only item access).
-ITEM_METHODS = ['GET', 'PUT', 'DELETE']
+ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
+MEDIA_ENDPOINT = 'test'
+RETURN_MEDIA_AS_URL = True
+RETURN_MEDIA_AS_BASE64_STRING = False
+#EXTENDED_MEDIA_INFO = ['content_type', 'name', 'length']
 
 users_schema = {
     'firstname': {
