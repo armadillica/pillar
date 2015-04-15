@@ -132,7 +132,7 @@ def convert_properties(properties, node_schema):
             properties[prop] = convert_properties(
                 properties[prop], schema_prop['schema'])
         if prop_type == 'list':
-            if properties[prop] == '':
+            if properties[prop] in ['', '[]']:
                 properties[prop] = []
             for k, val in enumerate(properties[prop]):
                 if not 'schema' in schema_prop:
@@ -160,8 +160,8 @@ class ValidateCustomFields(Validator):
 
         try:
             value = convert_properties(value, node_type['dyn_schema'])
-        except:
-            print ("Error converting")
+        except Exception, e:
+            print ("Error converting: {0}".format(e))
         print (value)
 
         v = Validator(node_type['dyn_schema'])
