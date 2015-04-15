@@ -122,6 +122,18 @@ class CustomTokenAuth(BasicsAuth):
     def authorized_protected(self):
         pass
 
+def convert_properties(properties, node_schema):
+    for prop in node_schema:
+        schema_prop = node_schema[prop]
+        prop_type = schema_prop['type']
+        if prop_type == 'dict':
+            properties[prop] = convert_properties(
+                properties[prop], schema_prop['schema'])
+        elif prop_type == 'datetime':
+            prop_val = properties[prop]
+            properties[prop] = datetime.strptime(prop_val, RFC1123_DATE_FORMAT)
+
+    return properties
 
 class ValidateCustomFields(Validator):
     def _validate_valid_properties(self, valid_properties, field, value):
@@ -130,12 +142,7 @@ class ValidateCustomFields(Validator):
         lookup['_id'] = ObjectId(self.document['node_type'])
         node_type = node_types.find_one(lookup)
 
-        # TODO make this REAL!
-        try:
-            value['time']['start'] = datetime.strptime(
-                value['time']['start'], RFC1123_DATE_FORMAT)
-        except:
-            pass
+        value = convert_properties(value, node_type['dyn_schema'])
 
         v = Validator(node_type['dyn_schema'])
         val = v.validate(value)
