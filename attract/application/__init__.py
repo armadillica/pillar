@@ -68,8 +68,8 @@ class TokensAuth(TokenAuth):
                 tmpname = email.split('@')[0]
                 if not dbuser:
                     user_data = {
-                        'firstname': tmpname,
-                        'lastname': tmpname,
+                        'first_name': tmpname,
+                        'last_name': tmpname,
                         'email': email,
                         'role': ['admin'],
                     }
@@ -89,7 +89,7 @@ class TokensAuth(TokenAuth):
         return validation['valid']
         """
         users = app.data.driver.db['users']
-        lookup = {'firstname': token['username']}
+        lookup = {'first_name': token['username']}
         if allowed_roles:
             lookup['role'] = {'$in': allowed_roles}
         user = users.find_one(lookup)

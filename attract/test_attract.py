@@ -15,10 +15,10 @@ class AttractTestCase(unittest.TestCase):
         b64Val = base64.b64encode(usrPass)
         return b64Val
 
-    def addUser(self, firstname, lastname, role):
+    def addUser(self, first_name, last_name, role):
         return self.app.post('/users', data=dict(
-            firstname=firstname,
-            lastname=lastname,
+            first_name=first_name,
+            last_name=last_name,
             role=role,
         ), follow_redirects=True)
 
@@ -118,8 +118,8 @@ class AttractTestCase(unittest.TestCase):
         test_user = {
             "_id": ObjectId("550171c8135d3248e477f288"),
             "_updated": datetime.now(),
-            "firstname": "TestFirstname",
-            "lastname": "TestLastname",
+            "firs_tname": "TestFirstname",
+            "last_name": "TestLastname",
             "role": "author",
             "_created": datetime.now(),
             "_etag": "302236e27f51d2e26041ae9de49505d77332b260"

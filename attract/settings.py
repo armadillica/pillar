@@ -12,12 +12,12 @@ ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 PAGINATION_LIMIT = 100
 
 users_schema = {
-    'firstname': {
+    'first_name': {
         'type': 'string',
         'minlength': 1,
         'maxlength': 60,
     },
-    'lastname': {
+    'last_name': {
         'type': 'string',
         'minlength': 1,
         'maxlength': 60,
