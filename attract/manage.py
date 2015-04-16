@@ -199,6 +199,52 @@ def populate_node_types(old_ids={}):
         }
     }
 
+    file_node_type= {
+        'name': 'file',
+        'description': 'File node type',
+        'dyn_schema': {
+            'contentType': {
+                'type': 'string',
+            },
+            'length': {
+                'type': 'integer',
+            },
+            'uploadDate': {
+                'type': 'datetime',
+            },
+            'md5': {
+                'type': 'string',
+            },
+            'filename': {
+                'type': 'string',
+            },
+            #'thumbnail': {
+            #    'type': 'string',
+            #},
+            #'preview': {
+            #    'type': 'string',
+            #},
+            #'binary_data': {
+            #    'type': 'media',
+            #},
+            'path': {
+                'type': 'string',
+            }
+        },
+        'form_schema': {
+            'contentType': {},
+            'length': {},
+            'uploadDate': {
+                'dateonly': True,
+            },
+            'md5': {},
+            'filename': {},
+            'binary_data': {},
+            'path': {},
+        },
+        'parent': {
+        }
+    }
 
     from pymongo import MongoClient
 
@@ -237,6 +283,16 @@ def populate_node_types(old_ids={}):
     else:
         post_item('node_types', task_node_type)
 
+
+    task_name = file_node_type['name']
+    if task_name in old_ids:
+        file_node_type = mix_node_type(old_ids[task_name], file_node_type)
+        # Remove old node_type
+        db.node_types.remove({'_id':old_ids[task_name]})
+        # Insert new node_type
+        db.node_types.insert(file_node_type)
+    else:
+        post_item('node_types', file_node_type)
 
 if __name__ == '__main__':
     manager.run()
