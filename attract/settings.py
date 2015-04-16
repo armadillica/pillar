@@ -9,6 +9,7 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 # individual items  (defaults to read-only item access).
 ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
+PAGINATION_LIMIT = 100
 
 users_schema = {
     'firstname': {
