@@ -2,6 +2,7 @@
 .project
 *.pyc
 *.sublime*
+*.ropeproject*
 
 config.py
 
