@@ -8,9 +8,6 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 # Enable reads (GET), edits (PATCH), replacements (PUT) and deletes of
 # individual items  (defaults to read-only item access).
 ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
-# EXTENDED_MEDIA_INFO = ['_id', 'content_type', 'name', 'length']
-RETURN_MEDIA_AS_URL = True
-RETURN_MEDIA_AS_BASE64_STRING = False
 
 PAGINATION_LIMIT = 100
 
@@ -50,7 +47,8 @@ nodes_schema = {
         'maxlength': 128,
     },
     'picture': {
-        'type': 'objectid'
+        'type': 'objectid',
+        'nullable': True,
     },
     'order': {
         'type': 'integer',
