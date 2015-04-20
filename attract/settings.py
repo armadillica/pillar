@@ -121,6 +121,54 @@ tokens_schema = {
     },
 }
 
+files_schema = {
+    'name': {
+        'type': 'string',
+        'required': True,
+    },
+    'description': {
+        'type': 'string',
+        'required': True,
+    },
+    'user': {
+        'type': 'objectid',
+        'required': True,
+    },
+    'contentType': {
+        'type': 'string',
+        'required': True,
+    },
+    'length': {
+        'type': 'integer',
+        'required': True,
+    },
+    'uploadDate': {
+        'type': 'datetime',
+        'required': True,
+    },
+    'md5': {
+        'type': 'string',
+        'required': True,
+    },
+    'filename': {
+        'type': 'string',
+        'required': True,
+    },
+    #'thumbnail': {
+    #    'type': 'string',
+    #},
+    #'preview': {
+    #    'type': 'string',
+    #},
+    #'binary_data': {
+    #    'type': 'media',
+    #},
+    'path': {
+        'type': 'string',
+        'required': True,
+    }
+}
+
 nodes = {
     'schema': nodes_schema
 }
@@ -155,11 +203,17 @@ tokens = {
     'schema' : tokens_schema
 }
 
+files = {
+    'resource_methods': ['GET', 'POST'],
+    'schema': files_schema,
+}
+
 DOMAIN = {
     'users': users,
     'nodes': nodes,
     'node_types': node_types,
     'tokens': tokens,
+    'files': files,
 }
 
 try:
