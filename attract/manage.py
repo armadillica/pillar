@@ -106,7 +106,7 @@ def populate_node_types(old_ids={}):
             "shot_group": {}
         },
         "parent": {
-            "node_types": []
+            "node_types": ["scene"]
         }
     }
 
@@ -187,8 +187,8 @@ def populate_node_types(old_ids={}):
                     "chunks": {
                         "visible": False,
                         "schema": {
-                            "start":{},
-                            "duration":{}
+                            "start": {},
+                            "duration": {}
                         }
                     }
                 }
@@ -199,6 +199,35 @@ def populate_node_types(old_ids={}):
         }
     }
 
+    scene_node_type = {
+        'name': 'scene',
+        'description': 'Scene node type',
+        'dyn_schema': {
+            'order': {
+                'type': 'integer',
+            }
+        },
+        'form_schema': {
+            'order': {},
+        },
+        'parent': {
+            "node_types": ["act"]
+        }
+    }
+
+    act_node_type = {
+        'name': 'act',
+        'description': 'Act node type',
+        'dyn_schema': {
+            'order': {
+                'type': 'integer',
+            }
+        },
+        'form_schema': {
+            'order': {},
+        },
+        'parent': {}
+    }
 
     from pymongo import MongoClient
 
@@ -215,27 +244,21 @@ def populate_node_types(old_ids={}):
                 node_type_dict[attr]=node_type[attr]
         return node_type_dict
 
+    def upgrade(node_type, old_ids):
+        node_name = node_type['name']
+        if node_name in old_ids:
+            node_type = mix_node_type(old_ids[node_name], node_type)
+            # Remove old node_type
+            db.node_types.remove({'_id': old_ids[node_name]})
+            # Insert new node_type
+            db.node_types.insert(node_type)
+        else:
+            post_item('node_types', node_type)
 
-    shot_name = shot_node_type['name']
-    if shot_name in old_ids:
-        shot_node_type = mix_node_type(old_ids[shot_name], shot_node_type)
-        # Remove old node_type
-        db.node_types.remove({'_id':old_ids[shot_name]})
-        # Insert new node_type
-        db.node_types.insert(shot_node_type)
-    else:
-        post_item('node_types', shot_node_type)
-
-
-    task_name = task_node_type['name']
-    if task_name in old_ids:
-        task_node_type = mix_node_type(old_ids[task_name], task_node_type)
-        # Remove old node_type
-        db.node_types.remove({'_id':old_ids[task_name]})
-        # Insert new node_type
-        db.node_types.insert(task_node_type)
-    else:
-        post_item('node_types', task_node_type)
+    upgrade(shot_node_type, old_ids)
+    upgrade(task_node_type, old_ids)
+    upgrade(scene_node_type, old_ids)
+    upgrade(act_node_type, old_ids)
 
 
 if __name__ == '__main__':
