@@ -154,6 +154,10 @@ files_schema = {
         'type': 'string',
         'required': True,
     },
+    'backend': {
+        'type': 'string',
+        'required': True,
+    },
     #'thumbnail': {
     #    'type': 'string',
     #},
@@ -165,6 +169,13 @@ files_schema = {
     #},
     'path': {
         'type': 'string',
+        'required': True,
+    }
+}
+
+binary_files_schema = {
+    'data': {
+        'type': 'media',
         'required': True,
     }
 }
@@ -208,12 +219,18 @@ files = {
     'schema': files_schema,
 }
 
+binary_files = {
+    'resource_methods': ['GET', 'POST'],
+    'schema': binary_files_schema,
+}
+
 DOMAIN = {
     'users': users,
     'nodes': nodes,
     'node_types': node_types,
     'tokens': tokens,
     'files': files,
+    'binary_files': binary_files,
 }
 
 try:
