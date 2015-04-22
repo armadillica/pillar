@@ -175,7 +175,7 @@ def populate_node_types(old_ids={}):
             "owners": {
                 "schema": {
                     "users":{
-                        "items": ['User'],
+                        "items": [('User', 'email')],
                     },
                     "groups":{}
                 }
@@ -229,6 +229,32 @@ def populate_node_types(old_ids={}):
         'parent': {}
     }
 
+    comment_node_type = {
+        'name': 'comment',
+        'description': 'Comment node type',
+        'dyn_schema': {
+            'text': {
+                'type': 'string',
+                'maxlength': 256
+            },
+            'attachments': {
+                'type': 'list',
+                'schema': {
+                    'type': 'objectid'
+                }
+            }
+        },
+        'form_schema': {
+            'text': {},
+            'attachments': {
+                'items': [("File", "name")]
+            }
+        },
+        'parent': {
+            "node_types": ["shot", "task"]
+        }
+    }
+
     from pymongo import MongoClient
 
     client = MongoClient()
@@ -259,6 +285,7 @@ def populate_node_types(old_ids={}):
     upgrade(task_node_type, old_ids)
     upgrade(scene_node_type, old_ids)
     upgrade(act_node_type, old_ids)
+    upgrade(comment_node_type, old_ids)
 
 
 if __name__ == '__main__':
