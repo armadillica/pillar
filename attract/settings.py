@@ -11,6 +11,9 @@ ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
 PAGINATION_LIMIT = 100
 
+# To be implemented on Eve 0.6
+# RETURN_MEDIA_AS_URL = True
+
 users_schema = {
     'first_name': {
         'type': 'string',
