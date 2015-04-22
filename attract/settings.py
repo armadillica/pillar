@@ -157,6 +157,7 @@ files_schema = {
     'backend': {
         'type': 'string',
         'required': True,
+        'allowed': ["fs.files", "attract-web"]
     },
     #'thumbnail': {
     #    'type': 'string',
