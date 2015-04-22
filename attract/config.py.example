@@ -20,7 +20,9 @@ class Config(object):
 
 class Development(Config):
     SECRET_KEY=''
-    SERVER_NAME='attract.local:5555'
+    #SERVER_NAME='attract.local:5555'
+    HOST='0.0.0.0'
+    PORT=5000
     DEBUG=True
     SQLALCHEMY_DATABASE_URI=''
     SECURITY_REGISTERABLE=True
