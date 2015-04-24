@@ -52,6 +52,11 @@ nodes_schema = {
     'picture': {
         'type': 'objectid',
         'nullable': True,
+        'data_relation': {
+           'resource': 'files',
+           'field': '_id',
+           'embeddable': True
+        },
     },
     'order': {
         'type': 'integer',
@@ -161,17 +166,8 @@ files_schema = {
     'backend': {
         'type': 'string',
         'required': True,
-        'allowed': ["fs.files", "attract-web", "attract"]
+        'allowed': ["attract-web", "attract"]
     },
-    #'thumbnail': {
-    #    'type': 'string',
-    #},
-    #'preview': {
-    #    'type': 'string',
-    #},
-    #'binary_data': {
-    #    'type': 'media',
-    #},
     'path': {
         'type': 'string',
         'required': True,
