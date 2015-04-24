@@ -59,11 +59,11 @@ nodes_schema = {
     },
     'parent': {
         'type': 'objectid',
-         #'default': '',
-         #'data_relation': {
-         #    'resource': 'nodes',
-         #    'field': '_id',
-         #},
+         'data_relation': {
+            'resource': 'nodes',
+            'field': '_id',
+            'embeddable': True
+         },
     },
     'user': {
         'type': 'objectid',
@@ -72,10 +72,11 @@ nodes_schema = {
     'node_type': {
         'type': 'objectid',
         'required': True,
-        #'data_relation': {
-        #     'resource': 'node_types',
-        #     'field': '_id',
-        #},
+        'data_relation': {
+            'resource': 'node_types',
+            'field': '_id',
+            'embeddable': True
+        },
     },
      'properties': {
          'type' : 'dict',
