@@ -14,8 +14,6 @@ from bson import ObjectId
 from datetime import datetime
 from datetime import timedelta
 
-from file_server import file_server
-
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
 
@@ -184,4 +182,7 @@ def post_item(entry, data):
 
 
 app = Eve(validator=ValidateCustomFields, auth=CustomTokenAuth)
+
+# The file_server module needs app to be defined
+from file_server import file_server
 app.register_blueprint(file_server, url_prefix='/file_server')

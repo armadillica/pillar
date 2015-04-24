@@ -1,3 +1,4 @@
+import os
 from application import app
 from application import post_item
 from flask.ext.script import Manager
@@ -7,14 +8,22 @@ manager = Manager(app)
 @manager.command
 def runserver():
     try:
-       import config
-       PORT = config.Development.PORT
-       HOST = config.Development.HOST
-       DEBUG = config.Development.DEBUG
+        import config
+        PORT = config.Development.PORT
+        HOST = config.Development.HOST
+        DEBUG = config.Development.DEBUG
+        app.config['FILE_STORAGE'] = config.Development.FILE_STORAGE
     except ImportError:
-       PORT = 5000
-       HOST = '0.0.0.0'
-       DEBUG = True
+        # Default settings
+        PORT = 5000
+        HOST = '0.0.0.0'
+        DEBUG = True
+        app.config['FILE_STORAGE'] = '{0}/application/static/storage'.format(
+            os.path.join(os.path.dirname(__file__)))
+
+    # Automatic creation of FILE_STORAGE path if it's missing
+    if not os.path.exists(app.config['FILE_STORAGE']):
+        os.mkdir(app.config['FILE_STORAGE'])
 
     app.run(
         port=PORT,
