@@ -73,6 +73,11 @@ nodes_schema = {
     'user': {
         'type': 'objectid',
         'required': True,
+        'data_relation': {
+            'resource': 'users',
+            'field': '_id',
+            'embeddable': True
+        },
     },
     'node_type': {
         'type': 'objectid',

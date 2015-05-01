@@ -249,7 +249,12 @@ def populate_node_types(old_ids={}):
             'attachments': {
                 'type': 'list',
                 'schema': {
-                    'type': 'objectid'
+                    'type': 'objectid',
+                    'data_relation': {
+                        'resource': 'files',
+                        'field': '_id',
+                        'embeddable': True
+                    }
                 }
             }
         },
