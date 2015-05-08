@@ -178,7 +178,7 @@ class ValidateCustomFields(Validator):
 
 
 def post_item(entry, data):
-    post_internal(entry, data)
+    return post_internal(entry, data)
 
 
 app = Eve(validator=ValidateCustomFields, auth=CustomTokenAuth)

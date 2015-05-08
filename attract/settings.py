@@ -9,7 +9,7 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 # individual items  (defaults to read-only item access).
 ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
-PAGINATION_LIMIT = 100
+PAGINATION_LIMIT = 999
 
 # To be implemented on Eve 0.6
 # RETURN_MEDIA_AS_URL = True
@@ -144,6 +144,12 @@ files_schema = {
         'type': 'string',
         'required': True,
     },
+    'is_preview': {
+        'type': 'boolean'
+    },
+    'preview_name': {
+        'type': 'string'
+    },
     'user': {
         'type': 'objectid',
         'required': True,
@@ -176,6 +182,18 @@ files_schema = {
     'path': {
         'type': 'string',
         'required': True,
+        'unique': True,
+    },
+    'previews': {
+        'type': 'list',
+        'schema': {
+            'type': 'objectid',
+            'data_relation': {
+                'resource': 'files',
+                'field': '_id',
+                'embeddable': True
+            }
+        }
     }
 }
 
