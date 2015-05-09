@@ -66,16 +66,19 @@ def build_previews(file_name=None):
             resized_file_name)
 
         # Create thumbnail
-        if not os.path.isfile(resized_file_path):
-            try:
-                im = Image.open(file_path)
-            except IOError:
-                return "", 500
-            im.thumbnail(size_dict[size])
-            try:
-                im.save(resized_file_path)
-            except IOError:
-                return "", 500
+        #if not os.path.isfile(resized_file_path):
+        try:
+            im = Image.open(file_path)
+        except IOError:
+            return "", 500
+        im.thumbnail(size_dict[size])
+        width = im.size[0]
+        height = im.size[1]
+        format = im.format.lower()
+        try:
+            im.save(resized_file_path)
+        except IOError:
+            return "", 500
 
         # file_static_path = os.path.join("", folder_name, size, file_name)
         picture_file_file = open(resized_file_path, 'rb')
@@ -90,8 +93,12 @@ def build_previews(file_name=None):
         prop['name'] = resized_file_name
         prop['description'] = description
         prop['user'] = user
+        # Preview properties:
         prop['is_preview'] = True
-        prop['preview_name'] = "{0}_png".format(size)
+        prop['size'] = size
+        prop['format'] = format
+        prop['width'] = width
+        prop['height'] = height
         # TODO set proper contentType and length
         prop['contentType'] = 'image/png'
         prop['length'] = 0

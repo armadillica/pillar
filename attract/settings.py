@@ -144,12 +144,23 @@ files_schema = {
         'type': 'string',
         'required': True,
     },
+    # Preview parameters:
     'is_preview': {
         'type': 'boolean'
     },
-    'preview_name': {
+    'size': {
         'type': 'string'
     },
+    'format': {
+        'type': 'string'
+    },
+    'width': {
+        'type': 'integer'
+    },
+    'height': {
+        'type': 'integer'
+    },
+    #
     'user': {
         'type': 'objectid',
         'required': True,
