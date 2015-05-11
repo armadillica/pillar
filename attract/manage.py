@@ -19,11 +19,11 @@ def runserver():
         HOST = '0.0.0.0'
         DEBUG = True
         app.config['FILE_STORAGE'] = '{0}/application/static/storage'.format(
-            os.path.join(os.path.dirname(__file__)))
+            os.path.dirname(os.path.realpath(__file__)))
 
     # Automatic creation of FILE_STORAGE path if it's missing
     if not os.path.exists(app.config['FILE_STORAGE']):
-        os.mkdir(app.config['FILE_STORAGE'])
+        os.makedirs(app.config['FILE_STORAGE'])
 
     app.run(
         port=PORT,
