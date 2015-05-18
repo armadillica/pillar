@@ -34,6 +34,18 @@ users_schema = {
         'type': 'list',
         'allowed': ["admin"],
         'required': True,
+    },
+    'groups': {
+        'type': 'list',
+        'default': [],
+        'items': {
+            'type': 'objectid',
+            'data_relation': {
+                'resource': 'groups',
+                'field': '_id',
+                'embeddable': True
+            }
+        }
     }
 }
 
@@ -211,7 +223,37 @@ files_schema = {
 binary_files_schema = {
     'data': {
         'type': 'media',
+        'required': True
+    }
+}
+
+groups_schema = {
+    'name': {
+        'type': 'string',
+        'required': True
+    },
+    'permissions': {
+        'type': 'list',
         'required': True,
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                'node_type': {
+                    'type': 'objectid',
+                    'required': True,
+                    'data_relation': {
+                        'resource': 'node_types',
+                        'field': '_id',
+                        'embeddable': True
+                    }
+                },
+                'permissions': {
+                    'type': 'list',
+                    'required': True,
+                    'allowed': ['GET', 'POST', 'UPDATE', 'DELETE']
+                }
+            }
+        }
     }
 }
 
@@ -259,6 +301,11 @@ binary_files = {
     'schema': binary_files_schema,
 }
 
+groups = {
+    'resource_methods': ['GET', 'POST'],
+    'schema': groups_schema,
+}
+
 DOMAIN = {
     'users': users,
     'nodes': nodes,
@@ -266,6 +313,7 @@ DOMAIN = {
     'tokens': tokens,
     'files': files,
     'binary_files': binary_files,
+    'groups': groups
 }
 
 try:

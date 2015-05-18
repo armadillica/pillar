@@ -61,6 +61,88 @@ def upgrade_node_types():
     populate_node_types(old_ids)
 
 
+def get_id(collection, name):
+    """Returns the _id of the given collection
+    and name."""
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client.eve
+    node = db[collection].find({'name': name})
+    print (node[0]['_id'])
+    return node[0]['_id']
+
+
+@manager.command
+def add_groups():
+    """Add permisions
+    """
+    admin_group = {
+        'name': 'admin',
+        'permissions': [
+            {'node_type': get_id('node_types', 'shot'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'task'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'scene'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'act'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'comment'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+        ]
+    }
+    post_item('groups', admin_group)
+
+    owner_group = {
+        'name': 'owner',
+        'permissions': [
+            {'node_type': get_id('node_types', 'shot'),
+             'permissions': ['GET', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'task'),
+             'permissions': ['GET', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'scene'),
+             'permissions': ['GET', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'act'),
+             'permissions': ['GET', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'comment'),
+             'permissions': ['GET', 'UPDATE', 'DELETE']
+             },
+        ]
+    }
+    post_item('groups', owner_group)
+
+    world_group = {
+        'name': 'world',
+        'permissions': [
+            {'node_type': get_id('node_types', 'shot'),
+             'permissions': ['GET']
+             },
+            {'node_type': get_id('node_types', 'task'),
+             'permissions': ['GET']
+             },
+            {'node_type': get_id('node_types', 'scene'),
+             'permissions': ['GET']
+             },
+            {'node_type': get_id('node_types', 'act'),
+             'permissions': ['GET']
+             },
+            {'node_type': get_id('node_types', 'comment'),
+             'permissions': ['GET', 'POST']
+             },
+        ]
+    }
+    post_item('groups', world_group)
+
+
 @manager.command
 def populate_db_test():
     """Populate the db with sample data

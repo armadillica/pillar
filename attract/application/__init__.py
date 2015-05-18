@@ -4,12 +4,17 @@ from eve import Eve
 
 # import random
 # import string
+import json
 
 from eve.auth import TokenAuth
 from eve.auth import BasicAuth
 from eve.io.mongo import Validator
 from eve.methods.post import post_internal
 from bson import ObjectId
+
+from flask import g
+from flask import abort
+from flask import request
 
 from datetime import datetime
 from datetime import timedelta
@@ -31,6 +36,8 @@ class SystemUtility():
 
 
 def validate(token):
+    """Validate a Token against Blender ID server
+    """
     import requests
     payload = dict(
         token=token)
@@ -51,41 +58,241 @@ def validate(token):
     return dict(valid=valid, message=message, user=user)
 
 
+def validate_token():
+    token = request.authorization.username
+    tokens = app.data.driver.db['tokens']
+    users = app.data.driver.db['users']
+    lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
+    dbtoken = tokens.find_one(lookup)
+    if not dbtoken:
+        validation = validate(token)
+        if validation['valid']:
+            email = validation['user']['email']
+            dbuser = users.find_one({'email': email})
+            tmpname = email.split('@')[0]
+            if not dbuser:
+                user_data = {
+                    'first_name': tmpname,
+                    'last_name': tmpname,
+                    'email': email,
+                    'role': ['admin'],
+                }
+                r = post_internal('users', user_data)
+                user_id = r[0]["_id"]
+            else:
+                user_id = dbuser['_id']
+
+            token_data = {
+                'user': user_id,
+                'token': token,
+                'expire_time': datetime.now() + timedelta(hours=1)
+            }
+            post_internal('tokens', token_data)
+            return token_data
+        else:
+            return None
+    else:
+        token_data = {
+            'user': dbtoken['user'],
+            'token': dbtoken['token'],
+            'expire_time': dbtoken['expire_time']
+        }
+        return token_data
+
+
+def global_validation():
+    setattr(g, 'token_data', validate_token())
+    setattr(g, 'validate', validate(g.get('token_data')['token']))
+    check_permissions(g.get('token_data')['user'])
+
+
+def permissions_lookup(action, lookup):
+    type_world_permissions = g.get('type_world_permissions')
+    type_owner_permissions = g.get('type_owner_permissions')
+    node_types = []
+    # Get all node_types allowed by world:
+    for per in type_world_permissions:
+        if action in type_world_permissions[per]:
+            node_types.append(str(per))
+    # Get all nodes with node_type allowed by owner if user == owner
+    owner_lookup = []
+    for per in type_owner_permissions:
+        if action in type_owner_permissions[per]:
+            if action not in type_world_permissions[per]:
+                # If one of the following is true
+                # If node_type==node_type and user==user
+                owner_lookup.append(
+                    {'$and': [{'node_type': str(per)},
+                              {'user': str(g.get('token_data')['user'])}]})
+    lookup['$or'] = [{'node_type': {'$in': node_types}}]
+    if len(owner_lookup) > 0:
+        lookup['$or'].append({'$or': owner_lookup})
+    return lookup
+
+
+def pre_GET(request, lookup):
+    # Only get allowed documents
+    global_validation()
+    # print ("Get")
+    # print ("Owner: {0}".format(g.get('owner_permissions')))
+    # print ("World: {0}".format(g.get('world_permissions')))
+    action = 'GET'
+    if 'token_type' not in lookup and '_id' not in request.view_args:
+        # Is quering for all nodes (mixed types)
+        lookup = permissions_lookup(action, lookup)
+    else:
+        # Is quering for one specific node
+        if action not in g.get('world_permissions'):
+            lookup['user'] = g.get('token_data')['user']
+    # token_data = validate_token()
+    # validate(token_data['token'])
+
+    # lookup["userr"] = "user"
+    # print ("Lookup")
+    # print (lookup)
+
+
+def pre_PUT(request, lookup):
+    # Only Update allowed documents
+    global_validation()
+    # print ("Put")
+    # print ("Owner: {0}".format(g.get('owner_permissions')))
+    # print ("World: {0}".format(g.get('world_permissions')))
+    action = 'UPDATE'
+    if 'token_type' not in lookup and '_id' not in request.view_args:
+        # Is updating all nodes (mixed types)
+        lookup = permissions_lookup(action, lookup)
+    else:
+        # Is updating one specific node
+        if action not in g.get('world_permissions'):
+            lookup['user'] = g.get('token_data')['user']
+
+    # print ("Lookup")
+    # print (lookup)
+
+
+def pre_PATCH(request, lookup):
+    print ("Patch")
+
+
+def pre_POST(request):
+    # Only Post allowed documents
+    global_validation()
+    # print ("Post")
+    # print ("World: {0}".format(g.get('world_permissions')))
+    action = 'POST'
+    # Is quering for one specific node
+    if action not in g.get('world_permissions'):
+        abort(403)
+
+
+def pre_DELETE(request, lookup):
+    # Only Delete allowed documents
+    global_validation()
+    type_world_permissions = g.get('type_world_permissions')
+    type_owner_permissions = g.get('type_owner_permissions')
+    print ("Delete")
+    # print ("Owner: {0}".format(type_owner_permissions))
+    # print ("World: {0}".format(type_world_permissions))
+    action = 'DELETE'
+
+    if '_id' in lookup:
+        nodes = app.data.driver.db['nodes']
+        dbnode = nodes.find_one({'_id': ObjectId(lookup['_id'])})
+        # print (dbnode.count())
+        node_type = dbnode['node_type']
+        if g.get('token_data')['user'] == dbnode['user']:
+            owner = True
+        else:
+            owner = False
+        if action not in type_world_permissions[node_type]:
+            if action not in type_owner_permissions[node_type]:
+                print ("Abort1")
+                abort(403)
+            else:
+                if not owner:
+                    print ("Abort2")
+                    abort(403)
+    else:
+        print ("Abort3")
+        abort(403)
+
+
+def check_permissions(user):
+    node_type = None
+    dbnode = None
+    owner_permissions = []
+    world_permissions = []
+    groups = app.data.driver.db['groups']
+    owner_group = groups.find_one({'name': 'owner'})
+    world_group = groups.find_one({'name': 'world'})
+    # Entry point should be nodes
+    entry_point = request.path.split("/")[1]
+    if entry_point != 'nodes':
+        return
+    # If is requesting a specific node
+    try:
+        uuid = request.path.split("/")[2]
+        nodes = app.data.driver.db['nodes']
+        lookup = {'_id': ObjectId(uuid)}
+        dbnode = nodes.find_one(lookup)
+    except IndexError:
+        pass
+    if dbnode:
+        node_type = str(dbnode['node_type'])
+
+    json_data = json.loads(request.data)
+    if not node_type and json_data:
+        if 'node_type' in json_data:
+            node_type = json_data['node_type']
+
+    # Extract query lookup
+    # which node_type is asking for?
+    for arg in request.args:
+        if arg == 'where':
+            try:
+                where = json.loads(request.args[arg])
+            except ValueError:
+                raise
+            if where.get('node_type'):
+                node_type = where.get('node_type')
+            break
+
+    # Get and store permissions for that node_type
+    type_owner_permissions = {}
+    type_world_permissions = {}
+
+    for per in owner_group['permissions']:
+        type_owner_permissions[per['node_type']] = per['permissions']
+        if str(per['node_type']) == node_type:
+            owner_permissions = per['permissions']
+
+    for per in world_group['permissions']:
+        type_world_permissions[per['node_type']] = per['permissions']
+        if str(per['node_type']) == node_type:
+            world_permissions = per['permissions']
+
+    # Store permission properties on global
+    setattr(g, 'owner_permissions', owner_permissions)
+    setattr(g, 'world_permissions', world_permissions)
+    setattr(g, 'type_world_permissions', type_world_permissions)
+    setattr(g, 'type_owner_permissions', type_owner_permissions)
+
+
 class TokensAuth(TokenAuth):
+
     def check_auth(self, token, allowed_roles, resource, method):
         if not token:
             return False
-        tokens = app.data.driver.db['tokens']
-        users = app.data.driver.db['users']
-        lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
-        dbtoken = tokens.find_one(lookup)
-        if not dbtoken:
-            validation = validate(token)
-            if validation['valid']:
-                email = validation['user']['email']
-                dbuser = users.find_one({'email': email})
-                tmpname = email.split('@')[0]
-                if not dbuser:
-                    user_data = {
-                        'first_name': tmpname,
-                        'last_name': tmpname,
-                        'email': email,
-                        'role': ['admin'],
-                    }
-                    r = post_internal('users', user_data)
-                    user_id = r[0]["_id"]
-                else:
-                    user_id = dbuser['_id']
 
-                token_data = {
-                    'user': user_id,
-                    'token': token,
-                    'expire_time': datetime.now() + timedelta(hours=1)
-                }
-                post_internal('tokens', token_data)
-        else:
-            return True
-        return validation['valid']
+        validate_token()
+
+        # if dbtoken:
+        #     check_permissions(dbtoken['user'])
+        #     return True
+
+        # return validation['valid']
+        return True
         """
         users = app.data.driver.db['users']
         lookup = {'first_name': token['username']}
@@ -147,8 +354,8 @@ def convert_properties(properties, node_schema):
         elif prop_type == 'objectid':
             prop_val = properties[prop]
             properties[prop] = ObjectId(prop_val)
-
     return properties
+
 
 class ValidateCustomFields(Validator):
     def _validate_valid_properties(self, valid_properties, field, value):
@@ -182,6 +389,11 @@ def post_item(entry, data):
 
 
 app = Eve(validator=ValidateCustomFields, auth=CustomTokenAuth)
+app.on_pre_GET_nodes += pre_GET
+app.on_pre_POST_nodes += pre_POST
+app.on_pre_PATCH_nodes += pre_PATCH
+app.on_pre_PUT_nodes += pre_PUT
+app.on_pre_DELETE_nodes += pre_DELETE
 
 # The file_server module needs app to be defined
 from file_server import file_server
