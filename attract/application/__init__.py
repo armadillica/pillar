@@ -182,6 +182,7 @@ def pre_POST(request):
     global_validation()
     # print ("Post")
     # print ("World: {0}".format(g.get('world_permissions')))
+    # print ("Group: {0}".format(g.get('groups_permissions')))
     action = 'POST'
     print (g.get('type_groups_permissions'))
     # Is quering for one specific node
@@ -195,9 +196,11 @@ def pre_DELETE(request, lookup):
     global_validation()
     type_world_permissions = g.get('type_world_permissions')
     type_owner_permissions = g.get('type_owner_permissions')
+    type_groups_permissions = g.get('type_groups_permissions')
     # print ("Delete")
-    # print ("Owner: {0}".format(type_owner_permissions))
-    # print ("World: {0}".format(type_world_permissions))
+    print ("Owner: {0}".format(type_owner_permissions))
+    print ("World: {0}".format(type_world_permissions))
+    print ("Groups: {0}".format(type_groups_permissions))
     action = 'DELETE'
 
     if '_id' in lookup:
@@ -210,7 +213,7 @@ def pre_DELETE(request, lookup):
         else:
             owner = False
         if action not in type_world_permissions[node_type] and \
-            action not in g.get('groups_permissions'):
+            action not in type_groups_permissions[node_type]:
             if action not in type_owner_permissions[node_type]:
                 print ("Abort1")
                 abort(403)
@@ -228,6 +231,7 @@ def check_permissions(user):
     dbnode = None
     owner_permissions = []
     world_permissions = []
+    groups_permissions = []
     groups = app.data.driver.db['groups']
     users = app.data.driver.db['users']
     owner_group = groups.find_one({'name': 'owner'})
@@ -248,7 +252,11 @@ def check_permissions(user):
     if dbnode:
         node_type = str(dbnode['node_type'])
 
-    json_data = json.loads(request.data)
+    json_data = None
+    try:
+        json_data = json.loads(request.data)
+    except ValueError:
+        pass
     if not node_type and json_data:
         if 'node_type' in json_data:
             node_type = json_data['node_type']
@@ -268,7 +276,7 @@ def check_permissions(user):
     # Get and store permissions for that node_type
     type_owner_permissions = {}
     type_world_permissions = {}
-    groups_permissions = []
+    type_groups_permissions = {}
 
     for per in owner_group['permissions']:
         type_owner_permissions[per['node_type']] = per['permissions']
@@ -280,19 +288,27 @@ def check_permissions(user):
         if str(per['node_type']) == node_type:
             world_permissions = per['permissions']
 
+        # Adding empty permissions
+        if per['node_type'] not in type_groups_permissions:
+            type_groups_permissions[per['node_type']] = []
+
     groups_data = user_data.get('groups')
     if groups_data:
         for group in groups_data:
             group_data = groups.find_one({'_id': ObjectId(group)})
             for per in group_data['permissions']:
-                groups_permissions += per['permissions']
+                type_groups_permissions[per['node_type']] += \
+                    per['permissions']
+                if str(per['node_type']) == node_type:
+                    groups_permissions = per['permissions']
 
     # Store permission properties on global
     setattr(g, 'owner_permissions', owner_permissions)
     setattr(g, 'world_permissions', world_permissions)
-    setattr(g, 'type_world_permissions', type_world_permissions)
-    setattr(g, 'type_owner_permissions', type_owner_permissions)
     setattr(g, 'groups_permissions', groups_permissions)
+    setattr(g, 'type_owner_permissions', type_owner_permissions)
+    setattr(g, 'type_world_permissions', type_world_permissions)
+    setattr(g, 'type_groups_permissions', type_groups_permissions)
 
 
 class TokensAuth(TokenAuth):
