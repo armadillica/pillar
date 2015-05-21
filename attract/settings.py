@@ -38,7 +38,7 @@ users_schema = {
     'groups': {
         'type': 'list',
         'default': [],
-        'items': {
+        'schema': {
             'type': 'objectid',
             'data_relation': {
                 'resource': 'groups',
