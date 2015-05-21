@@ -155,6 +155,7 @@ def compute_permissions(user, data_driver):
     type_owner_permissions = {}
     type_world_permissions = {}
     type_groups_permissions = {}
+    type_mixed_permissions = {}
 
     for per in owner_group['permissions']:
         type_owner_permissions[str(per['node_type'])] = per['permissions']
@@ -170,12 +171,16 @@ def compute_permissions(user, data_driver):
         if str(per['node_type']) not in type_groups_permissions:
             type_groups_permissions[str(per['node_type'])] = []
 
+    type_mixed_permissions = type_world_permissions
+
     groups_data = user_data.get('groups')
     if groups_data:
         for group in groups_data:
             group_data = groups.find_one({'_id': ObjectId(group)})
             for per in group_data['permissions']:
                 type_groups_permissions[str(per['node_type'])] += \
+                    per['permissions']
+                type_mixed_permissions[str(per['node_type'])] += \
                     per['permissions']
                 if str(per['node_type']) == node_type:
                     groups_permissions = per['permissions']
@@ -186,7 +191,8 @@ def compute_permissions(user, data_driver):
         'groups_permissions': groups_permissions,
         'type_owner_permissions': type_owner_permissions,
         'type_world_permissions': type_world_permissions,
-        'type_groups_permissions': type_groups_permissions
+        'type_groups_permissions': type_groups_permissions,
+        'type_mixed_permissions': type_mixed_permissions
     }
 
 
