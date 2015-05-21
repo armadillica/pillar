@@ -73,6 +73,82 @@ def get_id(collection, name):
 
 
 @manager.command
+def manage_groups():
+    """Take user email and group name,
+    and add or remove the user from that group.
+    """
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client.eve
+
+    print ("")
+    print ("Add or Remove user from group")
+    print ("leave empty to cancel")
+    print ("")
+
+    # Select Action
+    print ("Do you want to Add or Remove the user from the group?")
+    retry = True
+    while retry:
+        action = raw_input('add/remove: ')
+        if action == '':
+            return
+        elif action.lower() in ['add', 'a', 'insert']:
+            action == 'add'
+            retry = False
+        elif action.lower() in ['remove', 'r', 'rmv', 'rem', 'delete', 'del']:
+            action = 'remove'
+            retry = False
+        else:
+            print ("Incorrect action, press type 'add' or 'remove'")
+
+    # Select User
+    retry = True
+    while retry:
+        user_email = raw_input('User email: ')
+        if user_email == '':
+            return
+        user = db.users.find_one({'email': user_email})
+        if user:
+            retry = False
+        else:
+            print ("Incorrect user email, try again, or leave empty to cancel")
+
+    # Select group
+    retry = True
+    while retry:
+        group_name = raw_input('Group name: ')
+        if group_name == '':
+            return
+        group = db.groups.find_one({'name': group_name})
+        if group:
+            retry = False
+        else:
+            print ("Incorrect group name, try again, or leave empty to cancel")
+
+    # Do
+    current_groups = user.get('groups', [])
+    if action == 'add':
+        if group['_id'] in current_groups:
+            print "User {0} is already in group {1}".format(
+                user_email, group_name)
+        else:
+            current_groups.append(group['_id'])
+            db.users.update({'_id': user['_id']},
+                            {"$set": {'groups': current_groups}})
+            print "User {0} added to group {1}".format(user_email, group_name)
+    elif action == 'remove':
+        if group['_id'] not in current_groups:
+            print "User {0} is not in group {1}".format(user_email, group_name)
+        else:
+            current_groups.remove(group['_id'])
+            db.users.update({'_id': user['_id']},
+                            {"$set": {'groups': current_groups}})
+            print "User {0} removed from group {1}".format(
+                user_email, group_name)
+
+
+@manager.command
 def add_groups():
     """Add permisions
     """
