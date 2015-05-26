@@ -84,11 +84,13 @@ def populate_node_types(old_ids={}):
             },
             "status": {
                 "type": "string",
-                "allowed": ["on_hold",
-                            "todo",
-                            "in_progress",
-                            "review_required",
-                            "final"],
+                "allowed": [
+                    "on_hold",
+                    "todo",
+                    "in_progress",
+                    "review_required",
+                    "final"
+                ],
             },
             "notes": {
                 "type": "string",
@@ -127,14 +129,20 @@ def populate_node_types(old_ids={}):
                 "type": "string",
                 "allowed": [
                     "todo",
-                    "in-progress",
+                    "in_progress",
                     "done",
                     "cbb",
-                    "final1",
-                    "final2",
-                    "review"
+                    "final",
+                    "review",
+                    "conflict"
                 ],
                 "required": True,
+            },
+            "filepath": {
+                "type": "string",
+            },
+            "revision": {
+                "type": "integer",
             },
             "owners": {
                 "type": "dict",
@@ -181,12 +189,14 @@ def populate_node_types(old_ids={}):
         },
         "form_schema": {
             "status": {},
+            "filepath": {},
+            "revision": {},
             "owners": {
                 "schema": {
                     "users":{
                         "items": [('User', 'email')],
                     },
-                    "groups":{}
+                    "groups": {}
                 }
             },
             "time": {
