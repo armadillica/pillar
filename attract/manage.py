@@ -130,7 +130,8 @@ def populate_node_types(old_ids={}):
                 "allowed": [
                     "todo",
                     "in_progress",
-                    "done",
+                    "on_hold",
+                    "approved",
                     "cbb",
                     "final",
                     "review",
@@ -194,7 +195,7 @@ def populate_node_types(old_ids={}):
             "owners": {
                 "schema": {
                     "users":{
-                        "items": [('User', 'email')],
+                        "items": [('User', 'first_name')],
                     },
                     "groups": {}
                 }
