@@ -88,7 +88,7 @@ def populate_node_types(old_ids={}):
                     "on_hold",
                     "todo",
                     "in_progress",
-                    "review_required",
+                    "review",
                     "final"
                 ],
             },
@@ -96,15 +96,15 @@ def populate_node_types(old_ids={}):
                 "type": "string",
                 "maxlength": 256,
             },
-            "order": {
-                "type": "integer",
-            },
             "shot_group": {
                 "type": "string",
                 #"data_relation": {
                 #    "resource": "nodes",
                 #    "field": "_id",
                 #},
+            },
+            "order": {
+                "type": "integer",
             }
         },
         "form_schema": {
@@ -134,8 +134,7 @@ def populate_node_types(old_ids={}):
                     "approved",
                     "cbb",
                     "final",
-                    "review",
-                    "conflict"
+                    "review"
                 ],
                 "required": True,
             },
@@ -186,7 +185,17 @@ def populate_node_types(old_ids={}):
                         }
                     },
                 }
+            },
+            "is_conflicting" : {
+                "type": "boolean"
+            },
+            "is_processing" : {
+                "type": "boolean"
+            },
+            "is_open" : {
+                "type": "boolean"
             }
+
         },
         "form_schema": {
             "status": {},
@@ -212,7 +221,10 @@ def populate_node_types(old_ids={}):
                         }
                     }
                 }
-            }
+            },
+            "is_conflicting": {},
+            "is_open": {},
+            "is_processing": {},
         },
         "parent": {
             "node_types": ["shot"],
