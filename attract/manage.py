@@ -46,6 +46,25 @@ def clear_db():
 
 
 @manager.command
+def remove_properties_order():
+    """Removes properties.order
+    """
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client.eve
+    nodes = db.nodes.find()
+    for node in nodes:
+        new_prop = {}
+        for prop in node['properties']:
+            if prop == 'order':
+                continue
+            else:
+                new_prop[prop] = node['properties'][prop]
+        db.nodes.update({"_id": node['_id']},
+                        {"$set": {"properties": new_prop}})
+
+
+@manager.command
 def upgrade_node_types():
     """Wipes node_types collection
     and populates it again
@@ -103,9 +122,6 @@ def populate_node_types(old_ids={}):
                 #    "field": "_id",
                 #},
             },
-            "order": {
-                "type": "integer",
-            }
         },
         "form_schema": {
             "url": {},
@@ -113,7 +129,6 @@ def populate_node_types(old_ids={}):
             "cut_out": {},
             "status": {},
             "notes": {},
-            "order": {},
             "shot_group": {}
         },
         "parent": {
