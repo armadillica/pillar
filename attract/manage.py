@@ -46,6 +46,25 @@ def clear_db():
 
 
 @manager.command
+def remove_properties_order():
+    """Removes properties.order
+    """
+    from pymongo import MongoClient
+    client = MongoClient()
+    db = client.eve
+    nodes = db.nodes.find()
+    for node in nodes:
+        new_prop = {}
+        for prop in node['properties']:
+            if prop == 'order':
+                continue
+            else:
+                new_prop[prop] = node['properties'][prop]
+        db.nodes.update({"_id": node['_id']},
+                        {"$set": {"properties": new_prop}})
+
+
+@manager.command
 def upgrade_node_types():
     """Wipes node_types collection
     and populates it again
@@ -242,18 +261,17 @@ def populate_node_types(old_ids={}):
             },
             "status": {
                 "type": "string",
-                "allowed": ["on_hold",
-                            "todo",
-                            "in_progress",
-                            "review_required",
-                            "final"],
+                "allowed": [
+                    "on_hold",
+                    "todo",
+                    "in_progress",
+                    "review",
+                    "final"
+                ],
             },
             "notes": {
                 "type": "string",
                 "maxlength": 256,
-            },
-            "order": {
-                "type": "integer",
             },
             "shot_group": {
                 "type": "string",
@@ -261,7 +279,7 @@ def populate_node_types(old_ids={}):
                 #    "resource": "nodes",
                 #    "field": "_id",
                 #},
-            }
+            },
         },
         "form_schema": {
             "url": {},
@@ -269,7 +287,6 @@ def populate_node_types(old_ids={}):
             "cut_out": {},
             "status": {},
             "notes": {},
-            "order": {},
             "shot_group": {}
         },
         "parent": {
@@ -285,14 +302,20 @@ def populate_node_types(old_ids={}):
                 "type": "string",
                 "allowed": [
                     "todo",
-                    "in-progress",
-                    "done",
+                    "in_progress",
+                    "on_hold",
+                    "approved",
                     "cbb",
-                    "final1",
-                    "final2",
+                    "final",
                     "review"
                 ],
                 "required": True,
+            },
+            "filepath": {
+                "type": "string",
+            },
+            "revision": {
+                "type": "integer",
             },
             "owners": {
                 "type": "dict",
@@ -335,16 +358,28 @@ def populate_node_types(old_ids={}):
                         }
                     },
                 }
+            },
+            "is_conflicting" : {
+                "type": "boolean"
+            },
+            "is_processing" : {
+                "type": "boolean"
+            },
+            "is_open" : {
+                "type": "boolean"
             }
+
         },
         "form_schema": {
             "status": {},
+            "filepath": {},
+            "revision": {},
             "owners": {
                 "schema": {
                     "users":{
-                        "items": [('User', 'email')],
+                        "items": [('User', 'first_name')],
                     },
-                    "groups":{}
+                    "groups": {}
                 }
             },
             "time": {
@@ -359,7 +394,10 @@ def populate_node_types(old_ids={}):
                         }
                     }
                 }
-            }
+            },
+            "is_conflicting": {},
+            "is_open": {},
+            "is_processing": {},
         },
         "parent": {
             "node_types": ["shot"],

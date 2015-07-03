@@ -197,7 +197,7 @@ class ValidateCustomFields(Validator):
             value = convert_properties(value, node_type['dyn_schema'])
         except Exception, e:
             print ("Error converting: {0}".format(e))
-        print (value)
+        #print (value)
 
         v = Validator(node_type['dyn_schema'])
         val = v.validate(value)
