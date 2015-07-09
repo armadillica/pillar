@@ -275,11 +275,12 @@ app.on_pre_DELETE_nodes += pre_DELETE_nodes
 
 def post_GET_user(request, payload):
     json_data = json.loads(payload.data)
+    # Check if we are querying the users endpoint (instead of the single user)
+    if json_data.get('_id') is None:
+        return
     json_data['computed_permissions'] = \
         compute_permissions(json_data['_id'], app.data.driver)
-    # print (json_data)
     payload.data = json.dumps(json_data)
-    # print (payload.data)
 
 
 app.on_post_GET_users += post_GET_user
