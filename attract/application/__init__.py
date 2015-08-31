@@ -182,7 +182,11 @@ def convert_properties(properties, node_schema):
             properties[prop] = datetime.strptime(prop_val, RFC1123_DATE_FORMAT)
         elif prop_type == 'objectid':
             prop_val = properties[prop]
-            properties[prop] = ObjectId(prop_val)
+            if prop_val:
+                properties[prop] = ObjectId(prop_val)
+            else:
+                properties[prop] = None
+
     return properties
 
 

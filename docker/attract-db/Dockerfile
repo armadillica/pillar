@@ -1,17 +1,26 @@
-FROM ubuntu:14.04
-MAINTAINER Eibriel <eibriel@eibriel.com>
+FROM debian
+MAINTAINER Francesco Siddi <francesco@blender.org>
 
 RUN apt-get update && apt-get install -y \
-mongodb
-
-#RUN mkdir /data && mkdir /data/db
+python \
+python-dev \
+python-pip \
+git \
+nano
 
 RUN mkdir /data
+RUN mkdir /data/www
+RUN mkdir /data/www/attract_server_dev
+#RUN git clone https://github.com/armadillica/attract.git /data/www/attract
 
-VOLUME /data/db 
+RUN pip install virtualenv
+RUN virtualenv /data/venv
+#RUN . /data/venv/bin/activate
+#RUN pip install -r requirements.txt
 
-CMD ["mongod", "--smallfiles"]
+VOLUME /data/www/attract_server_dev
 
-EXPOSE 27017
+EXPOSE 5000
 
-#CMD ["python", "/attract/attract/manage.py", "runserver", "-DFOREGROUND"]
+ENTRYPOINT . /data/venv/bin/activate; \
+cd /data/www/attract_server_dev; \

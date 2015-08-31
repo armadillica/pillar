@@ -247,160 +247,160 @@ def populate_db_test():
 
 def populate_node_types(old_ids={}):
     shot_node_type = {
-        "name": "shot",
-        "description": "Shot Node Type, for shots",
-        "dyn_schema": {
-            "url": {
-                "type": "string",
+        'name': 'shot',
+        'description': 'Shot Node Type, for shots',
+        'dyn_schema': {
+            'url': {
+                'type': 'string',
             },
-            "cut_in": {
-                "type": "integer"
+            'cut_in': {
+                'type': 'integer'
             },
-            "cut_out": {
-                "type": "integer"
+            'cut_out': {
+                'type': 'integer'
             },
-            "status": {
-                "type": "string",
-                "allowed": [
-                    "on_hold",
-                    "todo",
-                    "in_progress",
-                    "review",
-                    "final"
+            'status': {
+                'type': 'string',
+                'allowed': [
+                    'on_hold',
+                    'todo',
+                    'in_progress',
+                    'review',
+                    'final'
                 ],
             },
-            "notes": {
-                "type": "string",
-                "maxlength": 256,
+            'notes': {
+                'type': 'string',
+                'maxlength': 256,
             },
-            "shot_group": {
-                "type": "string",
-                #"data_relation": {
-                #    "resource": "nodes",
-                #    "field": "_id",
+            'shot_group': {
+                'type': 'string',
+                #'data_relation': {
+                #    'resource': 'nodes',
+                #    'field': '_id',
                 #},
             },
         },
-        "form_schema": {
-            "url": {},
-            "cut_in": {},
-            "cut_out": {},
-            "status": {},
-            "notes": {},
-            "shot_group": {}
+        'form_schema': {
+            'url': {},
+            'cut_in': {},
+            'cut_out': {},
+            'status': {},
+            'notes': {},
+            'shot_group': {}
         },
-        "parent": {
-            "node_types": ["scene"]
+        'parent': {
+            'node_types': ['scene']
         }
     }
 
     task_node_type = {
-        "name": "task",
-        "description": "Task Node Type, for tasks",
-        "dyn_schema": {
-            "status": {
-                "type": "string",
-                "allowed": [
-                    "todo",
-                    "in_progress",
-                    "on_hold",
-                    "approved",
-                    "cbb",
-                    "final",
-                    "review"
+        'name': 'task',
+        'description': 'Task Node Type, for tasks',
+        'dyn_schema': {
+            'status': {
+                'type': 'string',
+                'allowed': [
+                    'todo',
+                    'in_progress',
+                    'on_hold',
+                    'approved',
+                    'cbb',
+                    'final',
+                    'review'
                 ],
-                "required": True,
+                'required': True,
             },
-            "filepath": {
-                "type": "string",
+            'filepath': {
+                'type': 'string',
             },
-            "revision": {
-                "type": "integer",
+            'revision': {
+                'type': 'integer',
             },
-            "owners": {
-                "type": "dict",
-                "schema": {
-                    "users": {
-                        "type": "list",
-                        "schema": {
-                            "type": "objectid",
+            'owners': {
+                'type': 'dict',
+                'schema': {
+                    'users': {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'objectid',
                         }
                     },
-                    "groups": {
-                        "type": "list",
-                        "schema": {
-                            "type": "objectid",
+                    'groups': {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'objectid',
                         }
                     }
                 }
             },
-            "time": {
-                "type": "dict",
-                "schema": {
-                    "start": {
-                        "type": "datetime"
+            'time': {
+                'type': 'dict',
+                'schema': {
+                    'start': {
+                        'type': 'datetime'
                     },
-                    "duration": {
-                        "type": "integer"
+                    'duration': {
+                        'type': 'integer'
                     },
-                    "chunks": {
-                        "type": "list",
-                        "schema": {
-                            "type": "dict",
-                            "schema": {
-                                "start": {
-                                    "type": "datetime",
+                    'chunks': {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'dict',
+                            'schema': {
+                                'start': {
+                                    'type': 'datetime',
                                 },
-                                "duration": {
-                                    "type": "integer",
+                                'duration': {
+                                    'type': 'integer',
                                 }
                             }
                         }
                     },
                 }
             },
-            "is_conflicting" : {
-                "type": "boolean"
+            'is_conflicting' : {
+                'type': 'boolean'
             },
-            "is_processing" : {
-                "type": "boolean"
+            'is_processing' : {
+                'type': 'boolean'
             },
-            "is_open" : {
-                "type": "boolean"
+            'is_open' : {
+                'type': 'boolean'
             }
 
         },
-        "form_schema": {
-            "status": {},
-            "filepath": {},
-            "revision": {},
-            "owners": {
-                "schema": {
-                    "users":{
-                        "items": [('User', 'first_name')],
+        'form_schema': {
+            'status': {},
+            'filepath': {},
+            'revision': {},
+            'owners': {
+                'schema': {
+                    'users':{
+                        'items': [('User', 'first_name')],
                     },
-                    "groups": {}
+                    'groups': {}
                 }
             },
-            "time": {
-                "schema": {
-                    "start": {},
-                    "duration": {},
-                    "chunks": {
-                        "visible": False,
-                        "schema": {
-                            "start": {},
-                            "duration": {}
+            'time': {
+                'schema': {
+                    'start': {},
+                    'duration': {},
+                    'chunks': {
+                        'visible': False,
+                        'schema': {
+                            'start': {},
+                            'duration': {}
                         }
                     }
                 }
             },
-            "is_conflicting": {},
-            "is_open": {},
-            "is_processing": {},
+            'is_conflicting': {},
+            'is_open': {},
+            'is_processing': {},
         },
-        "parent": {
-            "node_types": ["shot"],
+        'parent': {
+            'node_types': ['shot'],
         }
     }
 
@@ -465,6 +465,127 @@ def populate_node_types(old_ids={}):
         }
     }
 
+    project_node_type = {
+        'name': 'project',
+        'parent': {},
+        'description': 'The official project type',
+        'dyn_schema': {
+            'category': {
+                'type': 'string',
+                'allowed': [
+                    'film',
+                    'assets',
+                    'software',
+                    'game'
+                ],
+                'required': True,
+            },
+            'is_private': {
+                'type': 'boolean'
+            },
+            'url': {
+                'type': 'string'
+            },
+            'organization': {
+                'type': 'objectid',
+                'nullable': True,
+                'data_relation': {
+                   'resource': 'organizations',
+                   'field': '_id',
+                   'embeddable': True
+                },
+            },
+            'owners': {
+                'type': 'dict',
+                'schema': {
+                    'users': {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'objectid',
+                        }
+                    },
+                    'groups': {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'objectid',
+                            'data_relation': {
+                                'resource': 'groups',
+                                'field': '_id',
+                                'embeddable': True
+                            }
+                        }
+                    }
+                }
+            },
+            # Logo
+            'picture_1': {
+                'type': 'objectid',
+                'nullable': True,
+                'data_relation': {
+                   'resource': 'files',
+                   'field': '_id',
+                   'embeddable': True
+                },
+            },
+            # Header
+            'picture_2': {
+                'type': 'objectid',
+                'nullable': True,
+                'data_relation': {
+                   'resource': 'files',
+                   'field': '_id',
+                   'embeddable': True
+                },
+            },
+        },
+        'form_schema': {
+            'is_private': {},
+            # TODO add group parsing
+            'category': {},
+            'url': {},
+            'organization': {},
+            'picture_1': {},
+            'picture_2': {},
+            'owners': {
+                'schema': {
+                    'users':{
+                        'items': [('User', 'first_name')],
+                    },
+                    'groups': {
+                        'items': [('Group', 'name')],
+                    },
+                }
+            },
+        },
+    }
+
+    group_node_type = {
+        'name': 'group',
+        'description': 'Generic group node type',
+        'dyn_schema': {
+            'url': {
+                'type': 'string',
+            },
+            'status': {
+                'type': 'string',
+                'allowed': [
+                    'published',
+                    'pending'
+                ],
+            },
+            'notes': {
+                'type': 'string',
+                'maxlength': 256,
+            },
+            'parent': {}
+        },
+        'form_schema': {
+            'url': {},
+            'status': {},
+            'notes': {},
+        },
+    }
+
     from pymongo import MongoClient
 
     client = MongoClient()
@@ -489,13 +610,52 @@ def populate_node_types(old_ids={}):
             # Insert new node_type
             db.node_types.insert(node_type)
         else:
+            print("Making the node")
+            print node_type
             post_item('node_types', node_type)
 
-    upgrade(shot_node_type, old_ids)
-    upgrade(task_node_type, old_ids)
-    upgrade(scene_node_type, old_ids)
-    upgrade(act_node_type, old_ids)
-    upgrade(comment_node_type, old_ids)
+    # upgrade(shot_node_type, old_ids)
+    # upgrade(task_node_type, old_ids)
+    # upgrade(scene_node_type, old_ids)
+    # upgrade(act_node_type, old_ids)
+    # upgrade(comment_node_type, old_ids)
+    upgrade(project_node_type, old_ids)
+
+
+@manager.command
+def migrate_custom():
+    from pymongo import MongoClient
+
+    client = MongoClient()
+    db = client.eve
+
+    group_node_type = {
+        'name': 'group',
+        'description': 'Generic group node type',
+        'dyn_schema': {
+            'url': {
+                'type': 'string',
+            },
+            'status': {
+                'type': 'string',
+                'allowed': [
+                    'published',
+                    'pending'
+                ],
+            },
+            'notes': {
+                'type': 'string',
+                'maxlength': 256,
+            },
+            'parent': {}
+        },
+        'form_schema': {
+            'url': {},
+            'status': {},
+            'notes': {},
+        },
+    }
+    db.node_types.insert(group_node_type)
 
 
 if __name__ == '__main__':

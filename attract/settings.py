@@ -25,6 +25,12 @@ users_schema = {
         'minlength': 1,
         'maxlength': 60,
     },
+    'username': {
+        'type': 'string',
+        'minlength': 1,
+        'maxlength': 60,
+        'required': True,
+    },
     'email': {
         'type': 'string',
         'minlength': 1,
@@ -48,6 +54,96 @@ users_schema = {
         }
     }
 }
+
+organizations_schema = {
+    'name': {
+        'type': 'string',
+        'minlength': 1,
+        'maxlength': 128,
+        'required': True
+    },
+    'url': {
+        'type': 'string',
+        'minlength': 1,
+        'maxlength': 128,
+        'required': True
+    },
+    'description': {
+        'type': 'string',
+        'maxlength': 256,
+    },
+    'website': {
+        'type': 'string',
+        'maxlength': 256,
+    },
+    'location': {
+        'type': 'string',
+        'maxlength': 256,
+    },
+    'picture': {
+        'type': 'objectid',
+        'nullable': True,
+        'data_relation': {
+           'resource': 'files',
+           'field': '_id',
+           'embeddable': True
+        },
+    },
+    'users': {
+        'type': 'list',
+        'default': [],
+        'schema': {
+            'type': 'objectid',
+            'data_relation': {
+                'resource': 'users',
+                'field': '_id',
+                'embeddable': True
+            }
+        }
+    },
+    'teams': {
+        'type': 'list',
+        'default': [],
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                # Team name
+                'name': {
+                    'type': 'string',
+                    'minlength': 1,
+                    'maxlength': 128,
+                    'required': True
+                },
+                # List of user ids for the team
+                'users': {
+                    'type': 'list',
+                    'default': [],
+                    'schema': {
+                        'type': 'objectid',
+                        'data_relation': {
+                            'resource': 'users',
+                            'field': '_id',
+                        }
+                    }
+                },
+                # List of groups assigned to the team (this will automatically
+                # update the groups property of each user in the team)
+                'groups': {
+                    'type': 'list',
+                    'default': [],
+                    'schema': {
+                        'type': 'objectid',
+                        'data_relation': {
+                            'resource': 'groups',
+                            'field': '_id',
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 nodes_schema = {
     'name': {
@@ -306,6 +402,10 @@ groups = {
     'schema': groups_schema,
 }
 
+organizations = {
+    'schema': organizations_schema,
+}
+
 DOMAIN = {
     'users': users,
     'nodes': nodes,
@@ -313,7 +413,8 @@ DOMAIN = {
     'tokens': tokens,
     'files': files,
     'binary_files': binary_files,
-    'groups': groups
+    'groups': groups,
+    'organizations': organizations
 }
 
 try:
@@ -321,3 +422,6 @@ try:
     MONGO_DBNAME = 'attract_test'
 except:
     pass
+
+if os.environ.get('MONGO_HOST'):
+    MONGO_HOST = os.environ.get('MONGO_HOST')
