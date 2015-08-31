@@ -10,17 +10,18 @@ nano
 
 RUN mkdir /data
 RUN mkdir /data/www
-RUN mkdir /data/www/attract_server_dev
-#RUN git clone https://github.com/armadillica/attract.git /data/www/attract
+RUN mkdir /data/www/pillar_dev
 
 RUN pip install virtualenv
 RUN virtualenv /data/venv
 #RUN . /data/venv/bin/activate
 #RUN pip install -r requirements.txt
 
-VOLUME /data/www/attract_server_dev
+VOLUME /data/www/pillar_dev
+
+ENV MONGO_HOST='mongo_pillar'
 
 EXPOSE 5000
 
-ENTRYPOINT . /data/venv/bin/activate; \
-cd /data/www/attract_server_dev; \
+#ENTRYPOINT . /data/venv/bin/activate; \
+#cd /data/www/pillar_dev; \

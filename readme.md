@@ -1,6 +1,5 @@
-Attract - Flask edition
-========================
+Pillar
+======
 
-At the moment this is just an experimental branch. I am going to work on it further in the coming weeks and investigate if it makes a good candidate to replace the current codeigniter-based Attract.
-
-Installation instructions, docs and roadmap willl be published in a few days as well.
+This is the latest iteration on the Attract project. We are building a unified
+framework called Pillar. Pillar will combine Blender Cloud and Attract.

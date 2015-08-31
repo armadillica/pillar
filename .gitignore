@@ -8,4 +8,4 @@ config.py
 
 .ropeproject/*
 
-attract/application/static/storage/
+pillar/application/static/storage/
