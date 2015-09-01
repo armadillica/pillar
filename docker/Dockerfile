@@ -10,18 +10,22 @@ nano
 
 RUN mkdir /data
 RUN mkdir /data/www
-RUN mkdir /data/www/pillar_dev
+RUN mkdir /data/www/pillar
+RUN mkdir /data/dev
+RUN mkdir /data/dev/pillar
+
+RUN git clone https://github.com/armadillica/pillar.git /data/www/pillar
 
 RUN pip install virtualenv
 RUN virtualenv /data/venv
-#RUN . /data/venv/bin/activate
-#RUN pip install -r requirements.txt
+RUN . /data/venv/bin/activate && pip install -r /data/www/pillar/requirements.txt
 
-VOLUME /data/www/pillar_dev
+VOLUME /data/dev/pillar
 
-ENV MONGO_HOST='mongo_pillar'
+ENV MONGO_HOST mongo_pillar
 
 EXPOSE 5000
 
-#ENTRYPOINT . /data/venv/bin/activate; \
-#cd /data/www/pillar_dev; \
+ADD runserver.sh /runserver.sh
+
+ENTRYPOINT ["bash", "/runserver.sh"]
