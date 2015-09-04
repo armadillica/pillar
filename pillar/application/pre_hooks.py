@@ -13,18 +13,18 @@ def permissions_lookup(action, lookup):
     type_owner_permissions = g.get('type_owner_permissions')
     node_types = []
     # Get all node_types allowed by world:
-    for per in type_world_permissions:
-        if action in type_world_permissions[per]:
-            node_types.append(str(per))
+    for perm in type_world_permissions:
+        if action in type_world_permissions[perm]:
+            node_types.append(str(perm))
     # Get all nodes with node_type allowed by owner if user == owner
     owner_lookup = []
-    for per in type_owner_permissions:
-        if action in type_owner_permissions[per]:
-            if action not in type_world_permissions[per]:
+    for perm in type_owner_permissions:
+        if action in type_owner_permissions[perm]:
+            if action not in type_world_permissions[perm]:
                 # If one of the following is true
                 # If node_type==node_type and user==user
                 owner_lookup.append(
-                    {'$and': [{'node_type': str(per)},
+                    {'$and': [{'node_type': str(perm)},
                               {'user': str(g.get('token_data')['user'])}]})
     lookup['$or'] = [{'node_type': {'$in': node_types}}]
     if len(owner_lookup) > 0:
@@ -116,10 +116,15 @@ def compute_permissions(user, data_driver):
     groups_permissions = []
     groups = data_driver.db['groups']
     users = data_driver.db['users']
+    # The hardcoded owners group. In this group we define the default permission
+    # level that the user associated with a node has. These permissions can be
+    # overridden by custom group and world.
     owner_group = groups.find_one({'name': 'owner'})
+    # The world group is always evaluated, especially when the user is not logged
+    # in.
     world_group = groups.find_one({'name': 'world'})
     user_data = users.find_one({'_id': ObjectId(user)})
-    # If is requesting a specific node
+    # If we are requesting a specific node
     try:
         uuid = request.path.split("/")[2]
         nodes = data_driver.db['nodes']
@@ -128,9 +133,12 @@ def compute_permissions(user, data_driver):
     except IndexError:
         pass
     if dbnode:
+        # If a node object is found, extract the node_type ObjectID
         node_type = str(dbnode['node_type'])
 
+    # If we are creating a new node, we get the node_type ObjectID from the request
     json_data = None
+    # TODO(fsiddi): handle creation vs everything else in a more efficient way
     try:
         json_data = json.loads(request.data)
     except ValueError:
@@ -141,15 +149,17 @@ def compute_permissions(user, data_driver):
 
     # Extract query lookup
     # which node_type is asking for?
-    for arg in request.args:
-        if arg == 'where':
-            try:
-                where = json.loads(request.args[arg])
-            except ValueError:
-                raise
-            if where.get('node_type'):
-                node_type = where.get('node_type')
-            break
+    # TODO(fsiddi): It's not clear if this code is being used at all
+
+    # for arg in request.args:
+    #     if arg == 'where':
+    #         try:
+    #             where = json.loads(request.args[arg])
+    #         except ValueError:
+    #             raise
+    #         if where.get('node_type'):
+    #             node_type = where.get('node_type')
+    #         break
 
     # Get and store permissions for that node_type
     type_owner_permissions = {}
@@ -157,33 +167,45 @@ def compute_permissions(user, data_driver):
     type_groups_permissions = {}
     type_mixed_permissions = {}
 
-    for per in owner_group['permissions']:
-        type_owner_permissions[str(per['node_type'])] = per['permissions']
-        if str(per['node_type']) == node_type:
-            owner_permissions = per['permissions']
+    for perm in owner_group['permissions']:
+        # Build the global type_owner_permission dictionary
+        type_owner_permissions[str(perm['node_type'])] = perm['permissions']
+        if str(perm['node_type']) == node_type:
+            # If a node_type ObjectID matches the requested node_type, populate
+            # the actual owner permissions for the current user
+            owner_permissions = perm['permissions']
 
-    for per in world_group['permissions']:
-        type_world_permissions[str(per['node_type'])] = per['permissions']
-        if str(per['node_type']) == node_type:
-            world_permissions = per['permissions']
+    for perm in world_group['permissions']:
+        # Build the global type_owner_permission dictionary
+        type_world_permissions[str(perm['node_type'])] = perm['permissions']
+        if str(perm['node_type']) == node_type:
+            # If a node_type ObjectID matches the requested node_type, populate
+            # the actual world permissions in relation to the current user
+            world_permissions = perm['permissions']
 
         # Adding empty permissions
-        if str(per['node_type']) not in type_groups_permissions:
-            type_groups_permissions[str(per['node_type'])] = []
+        if str(perm['node_type']) not in type_groups_permissions:
+            type_groups_permissions[str(perm['node_type'])] = []
 
+    # This dictionary will hold the combined permissions. Why?
     type_mixed_permissions = type_world_permissions
 
+    # Get group ObjectID associated with the requesting user
     groups_data = user_data.get('groups')
     if groups_data:
         for group in groups_data:
             group_data = groups.find_one({'_id': ObjectId(group)})
-            for per in group_data['permissions']:
-                type_groups_permissions[str(per['node_type'])] += \
-                    per['permissions']
-                type_mixed_permissions[str(per['node_type'])] += \
-                    per['permissions']
-                if str(per['node_type']) == node_type:
-                    groups_permissions = per['permissions']
+            for perm in group_data['permissions']:
+                # Populate the group permissions. This searches in the
+                # type_groups_permissions dict, which is generated previously
+                # using the world permissions. If a world permission is not
+                # defined for a certain node type, this will fail.
+                type_groups_permissions[str(perm['node_type'])] += \
+                    perm['permissions']
+                type_mixed_permissions[str(perm['node_type'])] += \
+                    perm['permissions']
+                if str(perm['node_type']) == node_type:
+                    groups_permissions = perm['permissions']
 
     return {
         'owner_permissions': owner_permissions,
@@ -210,5 +232,4 @@ def check_permissions(user, data_driver):
     setattr(g, 'groups_permissions', permissions['groups_permissions'])
     setattr(g, 'type_owner_permissions', permissions['type_owner_permissions'])
     setattr(g, 'type_world_permissions', permissions['type_world_permissions'])
-    setattr(g, 'type_groups_permissions',
-            permissions['type_groups_permissions'])
+    setattr(g, 'type_groups_permissions', permissions['type_groups_permissions'])
