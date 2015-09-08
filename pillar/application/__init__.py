@@ -14,6 +14,7 @@ from bson import ObjectId
 
 from flask import g
 from flask import request
+from flask import url_for
 
 from pre_hooks import pre_GET
 from pre_hooks import pre_PUT
@@ -289,6 +290,27 @@ def post_GET_user(request, payload):
 
 app.on_post_GET_users += post_GET_user
 
+# Hook to check the backend of a file resource, to build an appropriate link
+# that can be used by the client to retrieve the actual file.
+def generate_link(backend, path):
+    if backend == 'pillar':
+        link = url_for('file_server.index', file_name=path, _external=True)
+    elif backend == 'cdnsun':
+        pass
+    else:
+        link = None
+    return link
+
+def before_returning_file(response):
+    response['link'] = generate_link(response['backend'], response['path'])
+
+def before_returning_files(response):
+    for item in response['_items']:
+        item['link'] = generate_link(item['backend'], item['path'])
+
+
+app.on_fetched_item_files += before_returning_file
+app.on_fetched_resource_files += before_returning_files
 
 # The file_server module needs app to be defined
 from file_server import file_server

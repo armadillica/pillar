@@ -170,6 +170,9 @@ nodes_schema = {
         'type': 'integer',
         'minlength': 0,
     },
+    'revision': {
+        'type': 'integer',
+    },
     'parent': {
         'type': 'objectid',
          'data_relation': {
@@ -252,32 +255,45 @@ files_schema = {
         'type': 'string',
         'required': True,
     },
-    # Preview parameters:
-    'is_preview': {
-        'type': 'boolean'
+    # If the object has a parent, it is a variation of its parent. When querying
+    # for a file we are going to check if the object does NOT have a parent. In
+    # this case we will query for all files with the ObjectID as parent and we
+    # will aggregate them according of the type (if it's an image we will use
+    # some prefix, if it's a video we will combine the contentType and a custom
+    # prefix, such as 720p)
+    'parent': {
+        'type': 'objectid',
+         'data_relation': {
+            'resource': 'files',
+            'field': '_id',
+            'embeddable': True
+         },
     },
-    'size': {
+    'contentType': { # MIME type image/png video/mp4
+        'type': 'string',
+        'required': True,
+    },
+    # Duration in seconds, only if it's a video
+    'duration': {
+        'type': 'integer',
+    },
+    'size': { # xs, s, b, 720p, 2K
         'type': 'string'
     },
-    'format': {
+    'format': { # human readable format, like mp4, HLS, webm, mov
         'type': 'string'
     },
-    'width': {
+    'width': { # valid for images and video contentType
         'type': 'integer'
     },
     'height': {
         'type': 'integer'
     },
-    #
     'user': {
         'type': 'objectid',
         'required': True,
     },
-    'contentType': {
-        'type': 'string',
-        'required': True,
-    },
-    'length': {
+    'length': { # Size in bytes
         'type': 'integer',
         'required': True,
     },
@@ -296,14 +312,14 @@ files_schema = {
     'backend': {
         'type': 'string',
         'required': True,
-        'allowed': ["attract-web", "attract"]
+        'allowed': ["attract-web", "pillar"]
     },
     'path': {
         'type': 'string',
         'required': True,
         'unique': True,
     },
-    'previews': {
+    'previews': { # Deprecated (see comments above)
         'type': 'list',
         'schema': {
             'type': 'objectid',
@@ -313,6 +329,10 @@ files_schema = {
                 'embeddable': True
             }
         }
+    },
+    # Preview parameters:
+    'is_preview': { # Deprecated
+        'type': 'boolean'
     }
 }
 

@@ -5,6 +5,8 @@ from flask.ext.script import Manager
 
 manager = Manager(app)
 
+MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
+
 @manager.command
 def runserver():
     try:
@@ -37,7 +39,7 @@ def clear_db():
     """
     from pymongo import MongoClient
 
-    client = MongoClient()
+    client = MongoClient(MONGO_HOST, 27017)
     db = client.eve
     db.drop_collection('nodes')
     db.drop_collection('node_types')
@@ -50,7 +52,7 @@ def remove_properties_order():
     """Removes properties.order
     """
     from pymongo import MongoClient
-    client = MongoClient()
+    client = MongoClient(MONGO_HOST, 27017)
     db = client.eve
     nodes = db.nodes.find()
     for node in nodes:
@@ -71,7 +73,7 @@ def upgrade_node_types():
     """
     from pymongo import MongoClient
 
-    client = MongoClient()
+    client = MongoClient(MONGO_HOST, 27017)
     db = client.eve
     node_types = db.node_types.find({})
     old_ids = {}
@@ -84,7 +86,7 @@ def get_id(collection, name):
     """Returns the _id of the given collection
     and name."""
     from pymongo import MongoClient
-    client = MongoClient()
+    client = MongoClient(MONGO_HOST, 27017)
     db = client.eve
     node = db[collection].find({'name': name})
     print (node[0]['_id'])
@@ -97,7 +99,7 @@ def manage_groups():
     and add or remove the user from that group.
     """
     from pymongo import MongoClient
-    client = MongoClient()
+    client = MongoClient(MONGO_HOST, 27017)
     db = client.eve
 
     print ("")
@@ -562,6 +564,7 @@ def populate_node_types(old_ids={}):
     group_node_type = {
         'name': 'group',
         'description': 'Generic group node type',
+        'parent': {},
         'dyn_schema': {
             'url': {
                 'type': 'string',
@@ -577,7 +580,6 @@ def populate_node_types(old_ids={}):
                 'type': 'string',
                 'maxlength': 256,
             },
-            'parent': {}
         },
         'form_schema': {
             'url': {},
@@ -586,9 +588,47 @@ def populate_node_types(old_ids={}):
         },
     }
 
+    asset_node_type = {
+        'name': 'asset',
+        'description': 'Assets for Elephants Dream',
+        # This data type does not have parent limitations (can be child
+        # of any node). An empty parent declaration is required.
+        'parent': {},
+        'dyn_schema': {
+            'status': {
+                'type': 'string',
+                'allowed': [
+                    'published',
+                    'pending',
+                    'processing'
+                ],
+            },
+            # We expose the type of asset we point to. Usually image, video,
+            # zipfile, ect.
+            'contentType':{
+                'type': 'string'
+            },
+            # We point to the original file (and use it to extract any relevant
+            # variation useful for our scope).
+            'file': {
+                'type': 'objectid',
+                'data_relation': {
+                    'resource': 'files',
+                    'field': '_id',
+                    'embeddable': True
+                },
+            }
+        },
+        'form_schema': {
+            'status': {},
+            'contentType': {},
+            'file': {},
+        }
+    }
+
     from pymongo import MongoClient
 
-    client = MongoClient()
+    client = MongoClient(MONGO_HOST, 27017)
     db = client.eve
 
     def mix_node_type(old_id, node_type_dict):
@@ -619,43 +659,60 @@ def populate_node_types(old_ids={}):
     # upgrade(scene_node_type, old_ids)
     # upgrade(act_node_type, old_ids)
     # upgrade(comment_node_type, old_ids)
-    upgrade(project_node_type, old_ids)
+    # upgrade(project_node_type, old_ids)
+    upgrade(asset_node_type, old_ids)
+
+@manager.command
+def add_group():
+    owners_group = {
+        'name': 'owners',
+        'permissions': [
+            {'node_type': get_id('node_types', 'shot'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'task'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'scene'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'act'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+            {'node_type': get_id('node_types', 'comment'),
+             'permissions': ['GET', 'POST', 'UPDATE', 'DELETE']
+             },
+        ]
+    }
+    post_item('groups', world_group)
 
 
 @manager.command
-def migrate_custom():
-    from pymongo import MongoClient
-
-    client = MongoClient()
-    db = client.eve
-
-    group_node_type = {
-        'name': 'group',
-        'description': 'Generic group node type',
-        'dyn_schema': {
-            'url': {
-                'type': 'string',
-            },
-            'status': {
-                'type': 'string',
-                'allowed': [
-                    'published',
-                    'pending'
-                ],
-            },
-            'notes': {
-                'type': 'string',
-                'maxlength': 256,
-            },
-            'parent': {}
-        },
-        'form_schema': {
-            'url': {},
-            'status': {},
-            'notes': {},
-        },
+def add_file():
+    from datetime import datetime
+    RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
+    video = {
+        'name': 'Video test',
+        'description': 'Video test description',
+        # 'parent': 'objectid',
+        'contentType': 'video/mp4',
+        # Duration in seconds, only if it's a video
+        'duration': 50,
+        'size': '720p',
+        'format': 'mp4',
+        'width': 1280,
+        'height': 720,
+        'user': '552b066b41acdf5dec4436f2',
+        'length': 15000,
+        'uploadDate': datetime.strftime(
+            datetime.now(), RFC1123_DATE_FORMAT),
+        'md5': 'md5',
+        'filename': 'The file name',
+        'backend': 'pillar',
+        'path': '0000.mp4',
     }
-    db.node_types.insert(group_node_type)
+    r = post_item('files', video)
+    print r
 
 
 if __name__ == '__main__':
