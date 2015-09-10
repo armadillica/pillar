@@ -159,13 +159,11 @@ def build_previews(file_name=None):
 
 
 @file_server.route('/file', methods=['POST'])
-@file_server.route('/file/<file_name>')
+@file_server.route('/file/<path:file_name>')
 def index(file_name=None):
     #GET file
     if file_name:
-        folder_name = file_name[:2]
-        file_path = os.path.join("", folder_name, file_name)
-        return file_server.send_static_file(file_path)
+        return file_server.send_static_file(file_name)
     #POST file
     file_name = request.form['name']
     folder_name = file_name[:2]
