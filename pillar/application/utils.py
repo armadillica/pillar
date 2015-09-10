@@ -3,6 +3,8 @@ from hashlib import md5
 from application import app
 
 def hash_file_path(file_path, expiry_timestamp=None):
+  if not file_path.startswith('/'):
+        file_path = '/' + file_path;
   service_domain = app.config['CDN_SERVICE_DOMAIN']
   domain_subfolder = app.config['CDN_CONTENT_SUBFOLDER']
   asset_url = app.config['CDN_SERVICE_DOMAIN_PROTOCOL'] + \
@@ -14,9 +16,6 @@ def hash_file_path(file_path, expiry_timestamp=None):
   if app.config['CDN_USE_URL_SIGNING']:
 
     url_signing_key = app.config['CDN_URL_SIGNING_KEY']
-    if not file_path.startswith('/'):
-        file_path = '/' + file_path;
-
     hash_string = domain_subfolder + file_path + url_signing_key;
 
     if not expiry_timestamp:
