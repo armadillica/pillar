@@ -224,6 +224,8 @@ def post_item(entry, data):
 
 app = Eve(validator=ValidateCustomFields, auth=CustomTokenAuth)
 
+import config
+app.config.from_object(config.Deployment)
 
 def global_validation():
     setattr(g, 'token_data', validate_token())
@@ -290,13 +292,14 @@ def post_GET_user(request, payload):
 
 app.on_post_GET_users += post_GET_user
 
+from utils import hash_file_path
 # Hook to check the backend of a file resource, to build an appropriate link
 # that can be used by the client to retrieve the actual file.
 def generate_link(backend, path):
     if backend == 'pillar':
         link = url_for('file_server.index', file_name=path, _external=True)
     elif backend == 'cdnsun':
-        pass
+        link = hash_file_path(path, None)
     else:
         link = None
     return link

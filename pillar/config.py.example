@@ -1,5 +1,4 @@
 import os
-
 class Config(object):
     # Configured for GMAIL
     MAIL_SERVER = ''
@@ -9,20 +8,13 @@ class Config(object):
     MAIL_PASSWORD = ''
     DEFAULT_MAIL_SENDER = ''
 
-    # Flask-Security setup
-    SECURITY_LOGIN_WITHOUT_CONFIRMATION = True
-    SECURITY_REGISTERABLE = True
-    SECURITY_RECOVERABLE = True
-    SECURITY_CHANGEABLE = True
-    SECUIRTY_POST_LOGIN = '/'
-    SECURITY_PASSWORD_HASH = ''
-    SECURITY_PASSWORD_SALT = ''
-    SECURITY_EMAIL_SENDER = ''
-
 class Development(Config):
-    SECRET_KEY = ''
-    HOST = '0.0.0.0'
-    PORT = 5000
-    DEBUG = True
     FILE_STORAGE = '{0}/application/static/storage'.format(
         os.path.join(os.path.dirname(__file__)))
+    CDN_USE_URL_SIGNING = False
+    CDN_SERVICE_DOMAIN_PROTOCOL = 'https'
+    CDN_SERVICE_DOMAIN = ''
+    CDN_CONTENT_SUBFOLDER = ''
+    CDN_URL_SIGNING_KEY = ''
+    CDN_STORAGE_USER = ''
+    CDN_STORAGE_ADDRESS = ''

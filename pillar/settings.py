@@ -155,7 +155,7 @@ nodes_schema = {
     'description': {
         'type': 'string',
         'minlength': 0,
-        'maxlength': 128,
+        'maxlength': 512,
     },
     'picture': {
         'type': 'objectid',
@@ -253,7 +253,6 @@ files_schema = {
     },
     'description': {
         'type': 'string',
-        'required': True,
     },
     # If the object has a parent, it is a variation of its parent. When querying
     # for a file we are going to check if the object does NOT have a parent. In
@@ -297,10 +296,6 @@ files_schema = {
         'type': 'integer',
         'required': True,
     },
-    'uploadDate': {
-        'type': 'datetime',
-        'required': True,
-    },
     'md5': {
         'type': 'string',
         'required': True,
@@ -312,7 +307,7 @@ files_schema = {
     'backend': {
         'type': 'string',
         'required': True,
-        'allowed': ["attract-web", "pillar"]
+        'allowed': ["attract-web", "pillar", "cdnsun"]
     },
     'path': {
         'type': 'string',
