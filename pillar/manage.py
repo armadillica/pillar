@@ -727,7 +727,7 @@ def add_node_asset(file_id):
     return r
 
 @manager.command
-def load_migration(path):
+def import_data(path):
     import json
     import os
     from bson import json_util
@@ -759,8 +759,6 @@ def load_migration(path):
                 del f['parent']
 
         #r = [{'_status': 'OK', '_id': 'DRY-ID'}]
-        print 'just before commit'
-        print f
         r = post_item(collection, f)
         if r[0]['_status'] == 'ERR':
             print r[0]['_issues']
@@ -867,7 +865,17 @@ def load_migration(path):
                     print "Adding picture link to node {0}".format(node['picture'])
                 if tree_index == 0:
                     # We are at the root of the tree (so we link to the project)
+                    node_type_project = db.node_types.find_one({"name": "project"})
+                    node['node_type'] = node_type_project['_id']
                     parent = None
+                    if node['properties'].get('picture_1'):
+                        picture = [p for p in d['files_group'] if p['name'] == node['properties']['picture_1'][:-4]][0]
+                        node['properties']['picture_1'] = picture['_id']
+                        print "Adding picture_1 link to node"
+                    if node['properties'].get('picture_2'):
+                        picture = [p for p in d['files_group'] if p['name'] == node['properties']['picture_2'][:-4]][0]
+                        node['properties']['picture_2'] = picture['_id']
+                        print "Adding picture_2 link to node"
                 else:
                     # Get the parent node id
                     parents_list_node_id = parents_list[tree_index - 1]
@@ -881,7 +889,6 @@ def load_migration(path):
         parent_node = [p for p in nodes_group if p['node_id'] == parents_list[-1]][0]
         asset_file = [a for a in d['files'] if a['md5'] == n['properties']['file']][0]
         n['properties']['file'] = str(asset_file['_id'])
-        print n
         commit_object('nodes', n, parent_node['_id'])
 
     return
