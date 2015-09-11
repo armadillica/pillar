@@ -18,3 +18,12 @@ class Development(Config):
     CDN_URL_SIGNING_KEY = ''
     CDN_STORAGE_USER = ''
     CDN_STORAGE_ADDRESS = ''
+
+    UPLOADS_LOCAL_STORAGE_THUMBNAILS = {
+        's': {'size': (90, 90), 'crop': True},
+        'b': {'size': (160, 160), 'crop': True},
+        't': {'size': (160, 160), 'crop': False},
+        'm': {'size': (320, 320), 'crop': False},
+        'l': {'size': (1024, 1024), 'crop': False},
+        'h': {'size': (2048, 2048), 'crop': False}
+    }
