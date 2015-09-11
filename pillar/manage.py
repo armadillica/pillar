@@ -736,9 +736,6 @@ def import_data(path):
         return "File does not exist"
     with open(path, 'r') as infile:
         d = json.load(infile)
-    from pymongo import MongoClient
-    client = MongoClient(MONGO_HOST, 27017)
-    db = client.eve
 
     def commit_object(collection, f, parent=None):
         variation_id = f.get('variation_id')
@@ -843,10 +840,12 @@ def import_data(path):
 
     for n in nodes_asset:
         node_type_asset = db.node_types.find_one({"name": "asset"})
-        pictures = [p for p in d['files_asset'] if p['name'] == n['picture'][:-4]]
-        if pictures:
-            n['picture'] = pictures[0]['_id']
-            print "Adding picture link {0}".format(n['picture'])
+        if n.get('picture'):
+            filename = os.path.splitext(n['picture'])[0]
+            pictures = [p for p in d['files_asset'] if p['name'] == filename]
+            if pictures:
+                n['picture'] = pictures[0]['_id']
+                print "Adding picture link {0}".format(n['picture'])
         n['node_type'] = node_type_asset['_id']
         # An asset node must have a parent
         # parent = [p for p in nodes_group if p['node_id'] == n['parent']][0]
@@ -861,7 +860,8 @@ def import_data(path):
                 node['node_type'] = node_type_group['_id']
                 # Assign picture to the node group
                 if node.get('picture'):
-                    picture = [p for p in d['files_group'] if p['name'] == node['picture'][:-4]][0]
+                    filename = os.path.splitext(node['picture'])[0]
+                    picture = [p for p in d['files_group'] if p['name'] == filename][0]
                     node['picture'] = picture['_id']
                     print "Adding picture link to node {0}".format(node['picture'])
                 if tree_index == 0:
@@ -870,11 +870,13 @@ def import_data(path):
                     node['node_type'] = node_type_project['_id']
                     parent = None
                     if node['properties'].get('picture_square'):
-                        picture = [p for p in d['files_group'] if p['name'] == node['properties']['picture_square'][:-4]][0]
+                        filename = os.path.splitext(node['properties']['picture_square'])[0]
+                        picture = [p for p in d['files_group'] if p['name'] == filename][0]
                         node['properties']['picture_square'] = picture['_id']
                         print "Adding picture_square link to node"
                     if node['properties'].get('picture_header'):
-                        picture = [p for p in d['files_group'] if p['name'] == node['properties']['picture_header'][:-4]][0]
+                        filename = os.path.splitext(node['properties']['picture_header'])[0]
+                        picture = [p for p in d['files_group'] if p['name'] == filename][0]
                         node['properties']['picture_header'] = picture['_id']
                         print "Adding picture_header link to node"
                 else:
@@ -886,11 +888,14 @@ def import_data(path):
                 commit_object('nodes', node, parent)
             tree_index += 1
         # Commit the asset
-        print "About to commit Asset"
+        print "About to commit Asset {0}".format(n['asset_id'])
         parent_node = [p for p in nodes_group if p['node_id'] == parents_list[-1]][0]
-        asset_file = [a for a in d['files'] if a['md5'] == n['properties']['file']][0]
-        n['properties']['file'] = str(asset_file['_id'])
-        commit_object('nodes', n, parent_node['_id'])
+        try:
+            asset_file = [a for a in d['files'] if a['md5'] == n['properties']['file']][0]
+            n['properties']['file'] = str(asset_file['_id'])
+            commit_object('nodes', n, parent_node['_id'])
+        except IndexError:
+            pass
 
     return
 
@@ -909,7 +914,8 @@ def make_thumbnails():
         if f['content_type'].split('/')[0] == 'image':
 
             if '-' in f['path']:
-                print "Skipping {0}".format(f['path'])
+                pass
+                #print "Skipping {0}".format(f['path'])
             else:
                 print "Building {0}".format(f['path'])
                 t = build_thumbnails(f['path'])
