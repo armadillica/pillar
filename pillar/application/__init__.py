@@ -2,6 +2,7 @@ import os
 import json
 
 from eve import Eve
+from pymongo import MongoClient
 
 # import random
 # import string
@@ -226,6 +227,11 @@ app = Eve(validator=ValidateCustomFields, auth=CustomTokenAuth)
 
 import config
 app.config.from_object(config.Deployment)
+app.config['MONGO_HOST'] = os.environ.get('MONGO_HOST', 'localhost')
+
+client = MongoClient(app.config['MONGO_HOST'], 27017)
+db = client.eve
+
 
 def global_validation():
     setattr(g, 'token_data', validate_token())
@@ -292,7 +298,7 @@ def post_GET_user(request, payload):
 
 app.on_post_GET_users += post_GET_user
 
-from utils import hash_file_path
+from utils.cdn import hash_file_path
 # Hook to check the backend of a file resource, to build an appropriate link
 # that can be used by the client to retrieve the actual file.
 def generate_link(backend, path):

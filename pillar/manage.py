@@ -1,5 +1,6 @@
 import os
 from application import app
+from application import db
 from application import post_item
 from flask.ext.script import Manager
 
@@ -673,7 +674,7 @@ def add_file_video():
         'name': 'Video test',
         'description': 'Video test description',
         # 'parent': 'objectid',
-        'contentType': 'video/mp4',
+        'content_type': 'video/mp4',
         # Duration in seconds, only if it's a video
         'duration': 50,
         'size': '720p',
@@ -707,7 +708,7 @@ def add_node_asset(file_id):
     file_object = db.files.find_one({"_id": ObjectId(file_id)})
     node_type = db.node_types.find_one({"name": "asset"})
 
-    print file_object['contentType'].split('/')[0]
+    print file_object['content_type'].split('/')[0]
 
     node = {
         'name': file_object['name'],
@@ -718,7 +719,7 @@ def add_node_asset(file_id):
         'node_type': node_type['_id'],
         'properties': {
             'status': 'published',
-            'contentType': file_object['contentType'].split('/')[0],
+            'content_type': file_object['content_type'].split('/')[0],
             'file': file_id
             }
         }
@@ -900,6 +901,19 @@ def import_data(path):
         json.dump(d, outfile, default=json_util.default)
     return
 
+@manager.command
+def make_thumbnails():
+    from application.file_server import build_thumbnails
+    files = db.files.find()
+    for f in files:
+        if f['content_type'].split('/')[0] == 'image':
+
+            if '-' in f['path']:
+                print "Skipping {0}".format(f['path'])
+            else:
+                print "Building {0}".format(f['path'])
+                t = build_thumbnails(f['path'])
+                print t
 
 
 if __name__ == '__main__':

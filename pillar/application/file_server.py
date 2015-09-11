@@ -1,17 +1,15 @@
 import os
 import hashlib
-
+from datetime import datetime
+from PIL import Image
+from bson import ObjectId
 from flask import Blueprint
 from flask import request
-
 from application import app
+from application import db
 from application import post_item
+from application.utils.imaging import generate_local_thumbnails
 
-from datetime import datetime
-
-from PIL import Image
-
-from bson import ObjectId
 
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
@@ -29,131 +27,47 @@ def hashfile(afile, hasher, blocksize=65536):
     return hasher.hexdigest()
 
 
-@file_server.route('/build_previews/<file_name>')
-def build_previews(file_name=None):
-    from pymongo import MongoClient
-
-    # Get File
-    client = MongoClient()
-    db = client.eve
-    file_ = db.files.find({"path": "{0}".format(file_name)})
+@file_server.route('/build_thumbnails/<path:file_path>')
+def build_thumbnails(file_path):
+    # Search file with backend "pillar" and path=file_path
+    file_ = db.files.find({"path": "{0}".format(file_path)})
     file_ = file_[0]
     user = file_['user']
 
-    folder_name = file_name[:2]
-    file_folder_path = os.path.join(app.config['FILE_STORAGE'],
-                                    folder_name)
-    # The original file exists?
-    file_path = os.path.join(file_folder_path, file_name)
-    if not os.path.isfile(file_path):
+    file_full_path = os.path.join(app.config['FILE_STORAGE'],file_path)
+    # Does the original file exist?
+    if not os.path.isfile(file_full_path):
         return "", 404
+    else:
+        thumbnails = generate_local_thumbnails(file_full_path,
+            return_image_stats=True)
 
-    sizes = ["xs", "s", "m", "l", "xl"]
-    size_dict = {
-        "xs": (32, 32),
-        "s": (64, 64),
-        "m": (128, 128),
-        "l": (640, 480),
-        "xl": (1024, 768)
-        }
-
-    # Generate
-    preview_list = []
-    for size in sizes:
-        resized_file_name = "{0}_{1}".format(size, file_name)
-        resized_file_path = os.path.join(
-            app.config['FILE_STORAGE'],
-            resized_file_name)
-
-        # Create thumbnail
-        #if not os.path.isfile(resized_file_path):
-        try:
-            im = Image.open(file_path)
-        except IOError:
-            return "", 500
-        im.thumbnail(size_dict[size])
-        width = im.size[0]
-        height = im.size[1]
-        format = im.format.lower()
-        try:
-            im.save(resized_file_path)
-        except IOError:
-            return "", 500
-
-        # file_static_path = os.path.join("", folder_name, size, file_name)
-        picture_file_file = open(resized_file_path, 'rb')
-        hash_ = hashfile(picture_file_file, hashlib.md5())
-        name = "{0}{1}".format(hash_,
-                                os.path.splitext(file_name)[1])
-        picture_file_file.close()
-        description = "Thumbnail {0} for file {1}".format(
-            size, file_name)
-
-        prop = {}
-        prop['name'] = resized_file_name
-        prop['description'] = description
-        prop['user'] = user
-        # Preview properties:
-        prop['is_preview'] = True
-        prop['size'] = size
-        prop['format'] = format
-        prop['width'] = width
-        prop['height'] = height
-        # TODO set proper contentType and length
-        prop['contentType'] = 'image/png'
-        prop['length'] = 0
-        prop['uploadDate'] = datetime.strftime(
-            datetime.now(), RFC1123_DATE_FORMAT)
-        prop['md5'] = hash_
-        prop['filename'] = resized_file_name
-        prop['backend'] = 'attract'
-        prop['path'] = name
-
-        entry = post_item ('files', prop)
-        if entry[0]['_status'] == 'ERR':
-            entry = db.files.find({"path": name})
-
-        entry = entry[0]
-        prop['_id'] = entry['_id']
-
-        new_folder_name = name[:2]
-        new_folder_path = os.path.join(
-            app.config['FILE_STORAGE'],
-            new_folder_name)
-        new_file_path = os.path.join(
-            new_folder_path,
-            name)
-
-        if not os.path.exists(new_folder_path):
-            os.makedirs(new_folder_path)
-
-        # Clean up temporary file
-        os.rename(
-            resized_file_path,
-            new_file_path)
-
-        preview_list.append(str(prop['_id']))
-        #print (new_file_path)
-
-    # Add previews to file
-    previews = []
-    try:
-        previews = file_['previews']
-    except KeyError:
-        pass
-
-    preview_list = preview_list + previews
-
-    #print (previews)
-    #print (preview_list)
-    #print (file_['_id'])
-
-    file_ = db.files.update(
-        {"_id": ObjectId(file_['_id'])},
-        {"$set": {"previews": preview_list}}
-    )
-
-    #print (file_)
+    for size, thumbnail in thumbnails.iteritems():
+        if thumbnail.get('exists'):
+            # If a thumbnail was already made, we just continue
+            continue
+        basename = os.path.basename(thumbnail['path'])
+        root, ext = os.path.splitext(basename)
+        path = os.path.join(basename[:2], basename)
+        file_object = dict(
+            name=root,
+            description="Preview of file {0}".format(file_['name']),
+            user=user,
+            parent=file_['_id'],
+            size=size,
+            format=ext[1:],
+            width=thumbnail['width'],
+            height=thumbnail['height'],
+            content_type=thumbnail['content_type'],
+            length=thumbnail['length'],
+            md5=thumbnail['md5'],
+            filename=basename,
+            backend='pillar',
+            path=path)
+        # Commit to database
+        r = post_item('files', file_object)
+        if r[0]['_status'] == 'ERR':
+            return "", r[3] # The error code from the request
 
     return "", 200
 

@@ -6,7 +6,10 @@ python \
 python-dev \
 python-pip \
 git \
-nano
+nano \
+zlib1g-dev \
+libjpeg-dev \
+
 
 RUN mkdir /data
 RUN mkdir /data/www
