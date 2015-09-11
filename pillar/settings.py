@@ -268,7 +268,7 @@ files_schema = {
             'embeddable': True
          },
     },
-    'contentType': { # MIME type image/png video/mp4
+    'content_type': { # MIME type image/png video/mp4
         'type': 'string',
         'required': True,
     },
