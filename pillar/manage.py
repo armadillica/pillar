@@ -521,7 +521,7 @@ def populate_node_types(old_ids={}):
                 }
             },
             # Logo
-            'picture_1': {
+            'picture_square': {
                 'type': 'objectid',
                 'nullable': True,
                 'data_relation': {
@@ -531,7 +531,7 @@ def populate_node_types(old_ids={}):
                 },
             },
             # Header
-            'picture_2': {
+            'picture_header': {
                 'type': 'objectid',
                 'nullable': True,
                 'data_relation': {
@@ -547,8 +547,8 @@ def populate_node_types(old_ids={}):
             'category': {},
             'url': {},
             'organization': {},
-            'picture_1': {},
-            'picture_2': {},
+            'picture_square': {},
+            'picture_header': {},
             'owners': {
                 'schema': {
                     'users':{
@@ -662,7 +662,7 @@ def populate_node_types(old_ids={}):
     # upgrade(scene_node_type, old_ids)
     # upgrade(act_node_type, old_ids)
     # upgrade(comment_node_type, old_ids)
-    # upgrade(project_node_type, old_ids)
+    upgrade(project_node_type, old_ids)
     upgrade(asset_node_type, old_ids)
 
 
@@ -869,14 +869,14 @@ def import_data(path):
                     node_type_project = db.node_types.find_one({"name": "project"})
                     node['node_type'] = node_type_project['_id']
                     parent = None
-                    if node['properties'].get('picture_1'):
-                        picture = [p for p in d['files_group'] if p['name'] == node['properties']['picture_1'][:-4]][0]
-                        node['properties']['picture_1'] = picture['_id']
-                        print "Adding picture_1 link to node"
-                    if node['properties'].get('picture_2'):
-                        picture = [p for p in d['files_group'] if p['name'] == node['properties']['picture_2'][:-4]][0]
-                        node['properties']['picture_2'] = picture['_id']
-                        print "Adding picture_2 link to node"
+                    if node['properties'].get('picture_square'):
+                        picture = [p for p in d['files_group'] if p['name'] == node['properties']['picture_square'][:-4]][0]
+                        node['properties']['picture_square'] = picture['_id']
+                        print "Adding picture_square link to node"
+                    if node['properties'].get('picture_header'):
+                        picture = [p for p in d['files_group'] if p['name'] == node['properties']['picture_header'][:-4]][0]
+                        node['properties']['picture_header'] = picture['_id']
+                        print "Adding picture_header link to node"
                 else:
                     # Get the parent node id
                     parents_list_node_id = parents_list[tree_index - 1]
