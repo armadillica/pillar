@@ -540,6 +540,11 @@ def populate_node_types(old_ids={}):
                    'embeddable': True
                 },
             },
+            # Short summary for the project
+            'summary': {
+                'type': 'string',
+                'maxlength': 128
+            }
         },
         'form_schema': {
             'is_private': {},
@@ -549,6 +554,7 @@ def populate_node_types(old_ids={}):
             'organization': {},
             'picture_square': {},
             'picture_header': {},
+            'summary': {},
             'owners': {
                 'schema': {
                     'users':{
