@@ -9,7 +9,7 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 # individual items  (defaults to read-only item access).
 ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
-PAGINATION_LIMIT = 999
+PAGINATION_LIMIT = 25
 
 # To be implemented on Eve 0.6
 # RETURN_MEDIA_AS_URL = True
@@ -281,7 +281,7 @@ files_schema = {
     'format': { # human readable format, like mp4, HLS, webm, mov
         'type': 'string'
     },
-    'width': { # valid for images and video contentType
+    'width': { # valid for images and video content_type
         'type': 'integer'
     },
     'height': {
@@ -310,7 +310,7 @@ files_schema = {
     },
     'path': {
         'type': 'string',
-        'required': True,
+        #'required': True,
         'unique': True,
     },
     'previews': { # Deprecated (see comments above)

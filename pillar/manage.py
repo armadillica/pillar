@@ -914,7 +914,7 @@ def import_data(path):
 
 @manager.command
 def make_thumbnails():
-    from application.file_server import build_thumbnails
+    from application.modules.file_storage import build_thumbnails
     files = db.files.find()
     for f in files:
         if f['content_type'].split('/')[0] == 'image':

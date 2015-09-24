@@ -72,7 +72,9 @@ def pre_PATCH(request, lookup, data_driver):
 def pre_POST(request, data_driver):
     # Only Post allowed documents
     action = 'POST'
-    print (g.get('type_groups_permissions'))
+    #print(g.get('type_groups_permissions'))
+    print(g.get('groups_permissions'))
+    print(g.get('world_permissions'))
     # Is quering for one specific node
     if action not in g.get('world_permissions') and \
             action not in g.get('groups_permissions'):

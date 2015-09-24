@@ -295,15 +295,26 @@ def post_GET_user(request, payload):
         compute_permissions(json_data['_id'], app.data.driver)
     payload.data = json.dumps(json_data)
 
-
 app.on_post_GET_users += post_GET_user
+
+from modules.file_storage import process_file
+
+def post_POST_files(request, payload):
+    """After an file object has been created, we do the necessary processing
+    and further update it.
+    """
+    process_file(request.get_json())
+
+
+#app.on_pre_POST_files += pre_POST_files
+app.on_post_POST_files += post_POST_files
 
 from utils.cdn import hash_file_path
 # Hook to check the backend of a file resource, to build an appropriate link
 # that can be used by the client to retrieve the actual file.
 def generate_link(backend, path):
     if backend == 'pillar':
-        link = url_for('file_server.index', file_name=path, _external=True)
+        link = url_for('file_storage.index', file_name=path, _external=True)
     elif backend == 'cdnsun':
         link = hash_file_path(path, None)
     else:
@@ -321,6 +332,7 @@ def before_returning_files(response):
 app.on_fetched_item_files += before_returning_file
 app.on_fetched_resource_files += before_returning_files
 
-# The file_server module needs app to be defined
-from file_server import file_server
-app.register_blueprint(file_server, url_prefix='/file_server')
+# The file_storage module needs app to be defined
+from modules.file_storage import file_storage
+#from modules.file_storage.serve import *
+app.register_blueprint(file_storage, url_prefix='/storage')

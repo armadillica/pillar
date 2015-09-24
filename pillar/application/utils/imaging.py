@@ -1,4 +1,6 @@
 import os
+import json
+import subprocess
 from PIL import Image
 from application import app
 
@@ -110,3 +112,92 @@ def resize_and_crop(img_path, modified_path, size, crop_type='middle'):
             Image.ANTIALIAS)
     # If the scale is the same, we do not need to crop
     img.save(modified_path, "JPEG")
+
+
+def get_video_data(filepath):
+
+    outdata = False
+
+    ffprobe_ouput = json.loads(
+        subprocess.check_output(
+            [app.config['BIN_FFPROBE'],
+            '-loglevel',
+            'error',
+            '-show_streams',
+            filepath,
+            '-print_format',
+            'json']))
+    video = ffprobe_ouput['streams'][0]
+
+    if video['codec_type'] == 'video':
+        # If video is webm we can't get the duration (seems to be an ffprobe issue)
+        if video['codec_name'] == 'vp8':
+            duration = None
+        else:
+            duration = int(float(video['duration']))
+        outdata = dict(
+            duration = duration,
+            res_x = video['width'],
+            res_y = video['height'],
+            )
+        if video['sample_aspect_ratio'] != '1:1':
+            print '[warning] Pixel aspect ratio is not square!'
+
+    return outdata
+
+
+def ffmpeg_encode(src, format, res_y=720):
+    # The specific FFMpeg command, called multiple times
+    args = []
+    args.append("-i")
+    args.append(src)
+
+    if format == 'mp4':
+        # Example mp4 encoding
+        # ffmpeg -i INPUT -vcodec libx264 -pix_fmt yuv420p -preset fast -crf 20
+        # -acodec libfdk_aac -ab 112k -ar 44100 -movflags +faststart OUTPUT
+        args.extend([
+            '-threads', '1',
+            '-vf', 'scale=-2:{0}'.format(res_y),
+            '-vcodec', 'libx264',
+            '-pix_fmt', 'yuv420p',
+            '-preset', 'fast',
+            '-crf', '20',
+            '-acodec', 'libfdk_aac', '-ab', '112k', '-ar', '44100',
+            '-movflags', '+faststart'])
+    elif format == 'webm':
+        # Example webm encoding
+        # ffmpeg -i INPUT -vcodec libvpx -g 120 -lag-in-frames 16 -deadline good
+        # -cpu-used 0 -vprofile 0 -qmax 51 -qmin 11 -slices 4 -b:v 2M -f webm
+
+        args.extend([
+            '-vf', 'scale=-2:{0}'.format(res_y),
+            '-vcodec', 'libvpx',
+            '-g', '120',
+            '-lag-in-frames', '16',
+            '-deadline', 'good',
+            '-cpu-used', '0',
+            '-vprofile', '0',
+            '-qmax', '51', '-qmin', '11', '-slices', '4','-b:v', '2M',
+            #'-acodec', 'libmp3lame', '-ab', '112k', '-ar', '44100',
+            '-f', 'webm'])
+
+    if not os.environ.get('VERBOSE'):
+        args.extend(['-loglevel', 'quiet'])
+
+    dst = os.path.splitext(src)
+    dst = "{0}-{1}p.{2}".format(dst[0], res_y, format)
+    args.append(dst)
+    print "Encoding {0} to {1}".format(src, format)
+    returncode = subprocess.call([app.config['BIN_FFMPEG']] + args)
+    if returncode == 0:
+        print "Successfully encoded {0}".format(dst)
+    else:
+        print "Error during encode"
+        print "Code:    {0}".format(returncode)
+        print "Command: {0}".format(app.config['BIN_FFMPEG'] + " " + " ".join(args))
+        dst = None
+    # return path of the encoded video
+    return dst
+
+
