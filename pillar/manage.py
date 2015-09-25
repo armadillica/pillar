@@ -476,6 +476,7 @@ def populate_node_types(old_ids={}):
             'category': {
                 'type': 'string',
                 'allowed': [
+                    'training',
                     'film',
                     'assets',
                     'software',
@@ -736,7 +737,7 @@ def add_node_asset(file_id):
 @manager.command
 def import_data(path):
     import json
-    import os
+    import pprint
     from bson import json_util
     if not os.path.isfile(path):
         return "File does not exist"
@@ -766,6 +767,8 @@ def import_data(path):
         r = post_item(collection, f)
         if r[0]['_status'] == 'ERR':
             print r[0]['_issues']
+            print "Tried to commit the following object"
+            pprint.pprint(f)
 
         # Assign the Mongo ObjectID
         f['_id'] = str(r[0]['_id'])
@@ -776,7 +779,10 @@ def import_data(path):
             f['asset_id'] = asset_id
         if node_id:
             f['node_id'] = node_id
-        print "{0} {1}".format(f['_id'], f['name'])
+        try:
+            print "{0} {1}".format(f['_id'], f['name'])
+        except UnicodeEncodeError:
+            print "{0}".format(f['_id'])
         return f
 
     # Build list of parent files
@@ -924,7 +930,7 @@ def make_thumbnails():
                 #print "Skipping {0}".format(f['path'])
             else:
                 print "Building {0}".format(f['path'])
-                t = build_thumbnails(f['path'])
+                t = build_thumbnails(file_path=f['path'])
                 print t
 
 
