@@ -9,6 +9,9 @@ git \
 nano \
 zlib1g-dev \
 libjpeg-dev \
+python-crypto \
+python-openssl \
+libssl-dev \
 software-properties-common
 
 RUN add-apt-repository ppa:mc3man/trusty-media \

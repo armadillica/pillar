@@ -1,20 +1,48 @@
 import os
+import json
 from multiprocessing import Process
 from bson import ObjectId
 from flask import request
 from flask import Blueprint
+from flask import abort
+from flask import jsonify
 from application import app
 from application import db
 from application import post_item
 from application.utils.imaging import generate_local_thumbnails
 from application.utils.imaging import get_video_data
 from application.utils.imaging import ffmpeg_encode
-
 from application.utils.storage import remote_storage_sync
+from application.utils.gcs import GoogleCloudStorageBucket
 
 file_storage = Blueprint('file_storage', __name__,
                         template_folder='templates',
                         static_folder='../../static/storage',)
+
+
+@file_storage.route('/gcs/<bucket_name>/<subdir>/')
+@file_storage.route('/gcs/<bucket_name>/<subdir>/<path:file_path>')
+def browse_gcs(bucket_name, subdir, file_path=None):
+    """Browse the content of a Google Cloud Storage bucket"""
+
+    # Initialize storage client
+    storage = GoogleCloudStorageBucket(bucket_name, subdir=subdir)
+    if file_path:
+        # If we provided a file_path, we try to fetch it
+        file_object = storage.Get(file_path)
+        if file_object:
+            # If it exists, return file properties in a dictionary
+            return jsonify(file_object)
+        else:
+            listing = storage.List(file_path)
+            return jsonify(listing)
+            # We always return an empty listing even if the directory does not
+            # exist. This can be changed later.
+            # return abort(404)
+
+    else:
+        listing = storage.List('')
+        return jsonify(listing)
 
 
 @file_storage.route('/build_thumbnails/<path:file_path>')
@@ -180,7 +208,7 @@ def process_file(src_file):
         p = Process(target=encode, args=(file_abs_path, variations, res_y))
         p.start()
     if mime_type != 'video':
-         # Sync the whole subfolder
+         # Sync the whole subdir
         sync_path = os.path.split(file_abs_path)[0]
     else:
         sync_path = file_abs_path

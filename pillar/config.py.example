@@ -13,13 +13,21 @@ class Config(object):
 class Development(Config):
     FILE_STORAGE = '{0}/application/static/storage'.format(
         os.path.join(os.path.dirname(__file__)))
+    SHARED_DIR = '/storage/shared'
+    PORT = 5000
+    HOST = '0.0.0.0'
+    DEBUG = True
     CDN_USE_URL_SIGNING = False
     CDN_SERVICE_DOMAIN_PROTOCOL = 'https'
     CDN_SERVICE_DOMAIN = ''
     CDN_CONTENT_SUBFOLDER = ''
     CDN_URL_SIGNING_KEY = ''
+
     CDN_STORAGE_USER = ''
     CDN_STORAGE_ADDRESS = ''
+    CDN_SYNC_LOGS = ''
+    CDN_RSA_KEY = ''
+    CDN_KNOWN_HOSTS = ''
 
     UPLOADS_LOCAL_STORAGE_THUMBNAILS = {
         's': {'size': (90, 90), 'crop': True},
@@ -29,3 +37,16 @@ class Development(Config):
         'l': {'size': (1024, 1024), 'crop': False},
         'h': {'size': (2048, 2048), 'crop': False}
     }
+
+    BIN_FFPROBE ='/usr/bin/ffprobe'
+    BIN_FFMPEG = '/usr/bin/ffmpeg'
+    BIN_SSH = '/usr/bin/ssh'
+    BIN_RSYNC = '/usr/bin/rsync'
+
+
+    GCS_CLIENT_EMAIL = ''
+    GCS_PRIVATE_KEY_P12 = ''
+    GCS_PRIVATE_KEY_PEM = ''
+    CGS_PROJECT_NAME = ''
+
+class Deployment(Development): pass
