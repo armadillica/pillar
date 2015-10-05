@@ -62,6 +62,9 @@ organizations_schema = {
         'maxlength': 128,
         'required': True
     },
+    'email': {
+        'type': 'string'
+    },
     'url': {
         'type': 'string',
         'minlength': 1,
