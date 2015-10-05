@@ -144,7 +144,6 @@ organizations_schema = {
     }
 }
 
-
 nodes_schema = {
     'name': {
         'type': 'string',

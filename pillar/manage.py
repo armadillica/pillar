@@ -658,7 +658,6 @@ def populate_node_types(old_ids={}):
             'backend': {
                 'type': 'string',
             },
-
         },
         'form_schema': {
             'subdir': {},
@@ -667,6 +666,77 @@ def populate_node_types(old_ids={}):
         },
         'parent': {
             "node_types": ["group", "project"]
+        }
+    }
+
+    node_type_comment = {
+        'name': 'comment',
+        'description': 'Comments for asset asset nodes, pages, etc.',
+        'dyn_schema': {
+            # The actual comment content (initially Markdown format)
+            'content': {
+                'type': 'string',
+                'minlength': 5,
+            },
+            'status': {
+                'type': 'string',
+                'allowed': [
+                    'published',
+                    'deleted',
+                    'flagged',
+                    'edited'
+                ],
+            },
+            # Total count of positive ratings (updated at every rating action)
+            'rating_positive': {
+                'type': 'integer',
+            },
+            # Total count of negative ratings (updated at every rating action)
+            'rating_negative': {
+                'type': 'integer',
+            },
+            # Collection of ratings, keyed by user
+            'ratings': {
+                'type': 'dict',
+                'schema': {
+                    'user': {
+                        'type': 'objectid'
+                    },
+                    'is_positive': {
+                        'type': 'boolean'
+                    },
+                    # Weight of the rating based on user rep and the context.
+                    # Currently we have the following weights:
+                    # - 1 auto null
+                    # - 2 manual null
+                    # - 3 auto valid
+                    # - 4 manual valid
+                    'weight': {
+                        'type': 'integer'
+                    }
+                }
+            },
+            'confidence': {
+                'type': 'float'
+            }
+
+        },
+        'form_schema': {
+            'content': {},
+            'status': {},
+            'rating_positive': {},
+            'rating_negative': {},
+            'ratings': {
+                'schema': {
+                    'user': {},
+                    'is_positive': {},
+                    'weight': {}
+                }
+            },
+            'confidence': {}
+        },
+        'parent': {
+            'node_types': ['asset',]
         }
     }
 
@@ -686,6 +756,7 @@ def populate_node_types(old_ids={}):
         return node_type_dict
 
     def upgrade(node_type, old_ids):
+        print("Node {0}".format(node_type['name']))
         node_name = node_type['name']
         if node_name in old_ids:
             node_type = mix_node_type(old_ids[node_name], node_type)
@@ -695,7 +766,7 @@ def populate_node_types(old_ids={}):
             db.node_types.insert(node_type)
         else:
             print("Making the node")
-            print node_type
+            print(node_type)
             post_item('node_types', node_type)
 
     # upgrade(shot_node_type, old_ids)
@@ -706,6 +777,7 @@ def populate_node_types(old_ids={}):
     upgrade(project_node_type, old_ids)
     upgrade(asset_node_type, old_ids)
     upgrade(node_type_storage, old_ids)
+    upgrade(node_type_comment, old_ids)
 
 
 @manager.command
