@@ -697,22 +697,25 @@ def populate_node_types(old_ids={}):
             },
             # Collection of ratings, keyed by user
             'ratings': {
-                'type': 'dict',
+                'type': 'list',
                 'schema': {
-                    'user': {
-                        'type': 'objectid'
-                    },
-                    'is_positive': {
-                        'type': 'boolean'
-                    },
-                    # Weight of the rating based on user rep and the context.
-                    # Currently we have the following weights:
-                    # - 1 auto null
-                    # - 2 manual null
-                    # - 3 auto valid
-                    # - 4 manual valid
-                    'weight': {
-                        'type': 'integer'
+                    'type': 'dict',
+                    'schema': {
+                        'user': {
+                            'type': 'objectid'
+                        },
+                        'is_positive': {
+                            'type': 'boolean'
+                        },
+                        # Weight of the rating based on user rep and the context.
+                        # Currently we have the following weights:
+                        # - 1 auto null
+                        # - 2 manual null
+                        # - 3 auto valid
+                        # - 4 manual valid
+                        'weight': {
+                            'type': 'integer'
+                        }
                     }
                 }
             },
@@ -726,13 +729,7 @@ def populate_node_types(old_ids={}):
             'status': {},
             'rating_positive': {},
             'rating_negative': {},
-            'ratings': {
-                'schema': {
-                    'user': {},
-                    'is_positive': {},
-                    'weight': {}
-                }
-            },
+            'ratings': {},
             'confidence': {}
         },
         'parent': {
