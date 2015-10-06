@@ -12,6 +12,7 @@ libjpeg-dev \
 python-crypto \
 python-openssl \
 libssl-dev \
+libffi-dev \
 software-properties-common
 
 RUN add-apt-repository ppa:mc3man/trusty-media \
