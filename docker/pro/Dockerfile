@@ -33,6 +33,15 @@ RUN mkdir /data \
 && mkdir /data/config \
 && mkdir /storage/logs
 
+ENV APACHE_RUN_USER www-data
+ENV APACHE_RUN_GROUP www-data
+ENV APACHE_LOG_DIR /var/log/apache2
+ENV APACHE_PID_FILE /var/run/apache2.pid
+ENV APACHE_RUN_DIR /var/run/apache2
+ENV APACHE_LOCK_DIR /var/lock/apache2
+
+RUN mkdir -p $APACHE_RUN_DIR $APACHE_LOCK_DIR $APACHE_LOG_DIR
+
 RUN git clone https://github.com/armadillica/pillar.git /data/www/pillar
 
 RUN pip install virtualenv \
@@ -48,7 +57,7 @@ VOLUME /storage/pillar
 
 ENV MONGO_HOST mongo_pillar
 
-EXPOSE 5000
+EXPOSE 80
 
 ADD 000-default.conf /etc/apache2/sites-available/000-default.conf
 
