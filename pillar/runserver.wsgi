@@ -5,7 +5,7 @@ execfile(activate_this, dict(__file__=activate_this))
 from flup.server.fcgi import WSGIServer
 
 sys.path.append('/data/dev/pillar/pillar/')
-from application import app
+from application import app as application
 
 if __name__ == '__main__':
-    WSGIServer(app).run()
+    WSGIServer(application).run()
