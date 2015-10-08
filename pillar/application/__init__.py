@@ -1,5 +1,6 @@
 import os
 import json
+import requests
 
 from eve import Eve
 from pymongo import MongoClient
@@ -48,7 +49,7 @@ class SystemUtility():
 def validate(token):
     """Validate a Token against Blender ID server
     """
-    import requests
+
     payload = dict(
         token=token)
     try:
@@ -159,40 +160,40 @@ class CustomTokenAuth(BasicsAuth):
     def authorized_protected(self):
         pass
 
-def convert_properties(properties, node_schema):
-    for prop in node_schema:
-        if not prop in properties:
-            continue
-        schema_prop = node_schema[prop]
-        prop_type = schema_prop['type']
-        if prop_type == 'dict':
-            properties[prop] = convert_properties(
-                properties[prop], schema_prop['schema'])
-        if prop_type == 'list':
-            if properties[prop] in ['', '[]']:
-                properties[prop] = []
-            for k, val in enumerate(properties[prop]):
-                if not 'schema' in schema_prop:
-                    continue
-                item_schema = {'item': schema_prop['schema']}
-                item_prop = {'item': properties[prop][k]}
-                properties[prop][k] = convert_properties(
-                    item_prop, item_schema)['item']
-        # Convert datetime string to RFC1123 datetime
-        elif prop_type == 'datetime':
-            prop_val = properties[prop]
-            properties[prop] = datetime.strptime(prop_val, RFC1123_DATE_FORMAT)
-        elif prop_type == 'objectid':
-            prop_val = properties[prop]
-            if prop_val:
-                properties[prop] = ObjectId(prop_val)
-            else:
-                properties[prop] = None
-
-    return properties
-
 
 class ValidateCustomFields(Validator):
+    def convert_properties(properties, node_schema):
+        for prop in node_schema:
+            if not prop in properties:
+                continue
+            schema_prop = node_schema[prop]
+            prop_type = schema_prop['type']
+            if prop_type == 'dict':
+                properties[prop] = convert_properties(
+                    properties[prop], schema_prop['schema'])
+            if prop_type == 'list':
+                if properties[prop] in ['', '[]']:
+                    properties[prop] = []
+                for k, val in enumerate(properties[prop]):
+                    if not 'schema' in schema_prop:
+                        continue
+                    item_schema = {'item': schema_prop['schema']}
+                    item_prop = {'item': properties[prop][k]}
+                    properties[prop][k] = convert_properties(
+                        item_prop, item_schema)['item']
+            # Convert datetime string to RFC1123 datetime
+            elif prop_type == 'datetime':
+                prop_val = properties[prop]
+                properties[prop] = datetime.strptime(prop_val, RFC1123_DATE_FORMAT)
+            elif prop_type == 'objectid':
+                prop_val = properties[prop]
+                if prop_val:
+                    properties[prop] = ObjectId(prop_val)
+                else:
+                    properties[prop] = None
+
+        return properties
+
     def _validate_valid_properties(self, valid_properties, field, value):
         node_types = app.data.driver.db['node_types']
         lookup = {}
@@ -200,7 +201,7 @@ class ValidateCustomFields(Validator):
         node_type = node_types.find_one(lookup)
 
         try:
-            value = convert_properties(value, node_type['dyn_schema'])
+            value = self.convert_properties(value, node_type['dyn_schema'])
         except Exception, e:
             print ("Error converting: {0}".format(e))
         #print (value)
