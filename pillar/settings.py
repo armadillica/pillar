@@ -332,12 +332,6 @@ files_schema = {
     }
 }
 
-binary_files_schema = {
-    'data': {
-        'type': 'media',
-        'required': True
-    }
-}
 
 groups_schema = {
     'name': {
@@ -408,10 +402,6 @@ files = {
     'schema': files_schema,
 }
 
-binary_files = {
-    'resource_methods': ['GET', 'POST'],
-    'schema': binary_files_schema,
-}
 
 groups = {
     'resource_methods': ['GET', 'POST'],
@@ -428,7 +418,6 @@ DOMAIN = {
     'node_types': node_types,
     'tokens': tokens,
     'files': files,
-    'binary_files': binary_files,
     'groups': groups,
     'organizations': organizations
 }
