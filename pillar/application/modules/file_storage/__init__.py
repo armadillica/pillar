@@ -6,6 +6,7 @@ from flask import request
 from flask import Blueprint
 from flask import abort
 from flask import jsonify
+from flask import send_from_directory
 from application import app
 from application import db
 from application import post_item
@@ -101,7 +102,7 @@ def build_thumbnails(file_path=None, file_id=None):
 def index(file_name=None):
     #GET file
     if file_name:
-        return file_storage.send_static_file(file_name)
+        return send_from_directory(app.config['STORAGE_DIR'], file_name)
     #POST file
     file_name = request.form['name']
     folder_name = file_name[:2]
