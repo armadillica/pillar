@@ -223,8 +223,11 @@ class ValidateCustomFields(Validator):
 def post_item(entry, data):
     return post_internal(entry, data)
 
-
-app = Eve(validator=ValidateCustomFields, auth=CustomTokenAuth)
+# We specify a settings.py file because when running on wsgi we can't detect it
+# automatically. The default path (which work in Docker) can be overriden with
+# an env variable.
+settings_path = os.environ.get('EVE_SETTINGS', '/data/dev/pillar/pillar/settings.py')
+app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=CustomTokenAuth)
 
 import config
 app.config.from_object(config.Deployment)
