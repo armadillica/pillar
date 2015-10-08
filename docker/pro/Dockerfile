@@ -16,7 +16,8 @@ libssl-dev \
 libffi-dev \
 software-properties-common \
 apache2-mpm-event \
-libapache2-mod-wsgi
+libapache2-mod-wsgi \
+libapache2-mod-xsendfile
 
 RUN add-apt-repository ppa:mc3man/trusty-media \
 && apt-get update && apt-get install -y \

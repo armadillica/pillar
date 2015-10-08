@@ -14,6 +14,7 @@ class Development(Config):
     STORAGE_DIR = '{0}/application/static/storage'.format(
         os.path.join(os.path.dirname(__file__)))
     SHARED_DIR = '/storage/shared'
+    USE_X_SENDFILE = False
     PORT = 5000
     HOST = '0.0.0.0'
     DEBUG = True
