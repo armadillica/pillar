@@ -433,11 +433,6 @@ DOMAIN = {
     'organizations': organizations
 }
 
-try:
-    os.environ['TEST_ATTRACT']
-    MONGO_DBNAME = 'attract_test'
-except:
-    pass
 
 if os.environ.get('MONGO_HOST'):
     MONGO_HOST = os.environ.get('MONGO_HOST')
