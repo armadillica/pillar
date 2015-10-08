@@ -15,18 +15,18 @@ def runserver():
         PORT = config.Development.PORT
         HOST = config.Development.HOST
         DEBUG = config.Development.DEBUG
-        app.config['FILE_STORAGE'] = config.Development.FILE_STORAGE
+        app.config['STORAGE_DIR'] = config.Development.STORAGE_DIR
     except ImportError:
         # Default settings
         PORT = 5000
         HOST = '0.0.0.0'
         DEBUG = True
-        app.config['FILE_STORAGE'] = '{0}/application/static/storage'.format(
+        app.config['STORAGE_DIR'] = '{0}/application/static/storage'.format(
             os.path.dirname(os.path.realpath(__file__)))
 
-    # Automatic creation of FILE_STORAGE path if it's missing
-    if not os.path.exists(app.config['FILE_STORAGE']):
-        os.makedirs(app.config['FILE_STORAGE'])
+    # Automatic creation of STORAGE_DIR path if it's missing
+    if not os.path.exists(app.config['STORAGE_DIR']):
+        os.makedirs(app.config['STORAGE_DIR'])
 
     app.run(
         port=PORT,

@@ -105,7 +105,7 @@ def index(file_name=None):
     #POST file
     file_name = request.form['name']
     folder_name = file_name[:2]
-    file_folder_path = os.path.join(app.config['FILE_STORAGE'],
+    file_folder_path = os.path.join(app.config['STORAGE_DIR'],
                                     folder_name)
     if not os.path.exists(file_folder_path):
         os.mkdir(file_folder_path)
