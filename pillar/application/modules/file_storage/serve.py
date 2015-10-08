@@ -64,7 +64,8 @@ def build_thumbnails(file_path=None, file_id=None):
 def index(file_name=None):
     #GET file
     if file_name:
-        return file_storage.send_static_file(file_name)
+        return file_storage.send_from_directory(app.config['STORAGE_DIR'],
+                                                file_name)
     #POST file
     file_name = request.form['name']
     folder_name = file_name[:2]
