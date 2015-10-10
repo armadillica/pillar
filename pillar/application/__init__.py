@@ -70,6 +70,8 @@ def validate(token):
 
 
 def validate_token():
+    if not request.authorization:
+        return None
     token = request.authorization.username
     tokens = app.data.driver.db['tokens']
     users = app.data.driver.db['users']
@@ -162,14 +164,14 @@ class CustomTokenAuth(BasicsAuth):
 
 
 class ValidateCustomFields(Validator):
-    def convert_properties(properties, node_schema):
+    def convert_properties(self, properties, node_schema):
         for prop in node_schema:
             if not prop in properties:
                 continue
             schema_prop = node_schema[prop]
             prop_type = schema_prop['type']
             if prop_type == 'dict':
-                properties[prop] = convert_properties(
+                properties[prop] = self.convert_properties(
                     properties[prop], schema_prop['schema'])
             if prop_type == 'list':
                 if properties[prop] in ['', '[]']:
@@ -179,7 +181,7 @@ class ValidateCustomFields(Validator):
                         continue
                     item_schema = {'item': schema_prop['schema']}
                     item_prop = {'item': properties[prop][k]}
-                    properties[prop][k] = convert_properties(
+                    properties[prop][k] = self.convert_properties(
                         item_prop, item_schema)['item']
             # Convert datetime string to RFC1123 datetime
             elif prop_type == 'datetime':
@@ -238,9 +240,11 @@ db = client.eve
 
 
 def global_validation():
-    setattr(g, 'token_data', validate_token())
-    setattr(g, 'validate', validate(g.get('token_data')['token']))
-    check_permissions(g.get('token_data')['user'], app.data.driver)
+    token_data = validate_token()
+    if token_data:
+        setattr(g, 'token_data', token_data)
+        setattr(g, 'validate', validate(token_data['token']))
+        check_permissions(token_data['user'], app.data.driver)
 
 
 def pre_GET_nodes(request, lookup):
