@@ -11,8 +11,6 @@ ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
 PAGINATION_LIMIT = 25
 
-# To be implemented on Eve 0.6
-# RETURN_MEDIA_AS_URL = True
 
 users_schema = {
     'first_name': {
@@ -147,6 +145,56 @@ organizations_schema = {
     }
 }
 
+permissions_embedded_schema = {
+    'groups': {
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                'group': {
+                    'type': 'objectid',
+                    'required': True,
+                    'data_relation': {
+                        'resource': 'groups',
+                        'field': '_id',
+                        'embeddable': True
+                    }
+                },
+                'methods': {
+                    'type': 'list',
+                    'required': True,
+                    'allowed': ['GET', 'PUT', 'POST', 'DELETE']
+                }
+            }
+        },
+    },
+    'users': {
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                'user' : {
+                    'type': 'objectid',
+                    'required': True,
+                },
+                'methods': {
+                    'type': 'list',
+                    'required': True,
+                    'allowed': ['GET', 'PUT', 'POST', 'DELETE']
+                }
+            }
+        }
+    },
+    'world': {
+        'type': 'list',
+        #'required': True,
+        'allowed': ['GET',]
+    },
+    'is_free': {
+        'type': 'boolean',
+    }
+}
+
 nodes_schema = {
     'name': {
         'type': 'string',
@@ -200,11 +248,15 @@ nodes_schema = {
             'embeddable': True
         },
     },
-     'properties': {
-         'type' : 'dict',
-         'valid_properties' : True,
-         'required': True,
+    'properties': {
+        'type' : 'dict',
+        'valid_properties' : True,
+        'required': True,
      },
+    'permissions': {
+        'type': 'dict',
+        'schema': permissions_embedded_schema
+    }
 }
 
 node_types_schema = {
@@ -229,6 +281,11 @@ node_types_schema = {
     'parent': {
         'type': 'dict',
         'required': True,
+    },
+    'permissions': {
+        'type': 'dict',
+        'required': True,
+        'schema': permissions_embedded_schema
     }
 }
 
@@ -332,7 +389,6 @@ files_schema = {
     }
 }
 
-
 groups_schema = {
     'name': {
         'type': 'string',
@@ -364,11 +420,15 @@ groups_schema = {
 }
 
 nodes = {
-    'schema': nodes_schema
+    'schema': nodes_schema,
+    'public_methods': ['GET'],
+    'public_item_methods': ['GET']
 }
 
 node_types = {
     'resource_methods': ['GET', 'POST'],
+    'public_methods': ['GET'],
+    'public_item_methods': ['GET'],
     'schema': node_types_schema,
 }
 
@@ -379,7 +439,6 @@ users = {
     'cache_control': 'max-age=10,must-revalidate',
     'cache_expires': 10,
 
-    # most global settings can be overridden at resource level
     'resource_methods': ['GET', 'POST'],
 
     'public_methods': ['GET', 'POST'],
@@ -399,7 +458,9 @@ tokens = {
 
 files = {
     'resource_methods': ['GET', 'POST'],
-    'schema': files_schema,
+    'public_methods': ['GET'],
+    'public_item_methods': ['GET'],
+    'schema': files_schema
 }
 
 
@@ -423,5 +484,5 @@ DOMAIN = {
 }
 
 
-if os.environ.get('MONGO_HOST'):
-    MONGO_HOST = os.environ.get('MONGO_HOST')
+MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
+MONGO_PORT = os.environ.get('MONGO_PORT', 27017)

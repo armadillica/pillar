@@ -17,14 +17,15 @@ from bson import ObjectId
 from flask import g
 from flask import request
 from flask import url_for
+from flask import abort
 
 from pre_hooks import pre_GET
 from pre_hooks import pre_PUT
 from pre_hooks import pre_PATCH
 from pre_hooks import pre_POST
 from pre_hooks import pre_DELETE
-from pre_hooks import check_permissions
-from pre_hooks import compute_permissions
+# from pre_hooks import check_permissions
+# from pre_hooks import compute_permissions
 
 from datetime import datetime
 from datetime import timedelta
@@ -47,9 +48,13 @@ class SystemUtility():
 
 
 def validate(token):
-    """Validate a Token against Blender ID server
-    """
+    """Validate a token against the Blender ID server. This simple lookup
+    returns a dictionary with the following keys:
 
+    - message: a success message
+    - valid: a boolean, stating if the token is valid
+    - user: a dictionary with information regarding the user
+    """
     payload = dict(
         token=token)
     try:
@@ -59,41 +64,55 @@ def validate(token):
         raise e
 
     if r.status_code == 200:
-        message = r.json()['message']
-        valid = r.json()['valid']
-        user = r.json()['user']
+        response = r.json()
+        validation_result = dict(
+            message=response['message'],
+            valid=response['valid'],
+            user=response['user'])
     else:
-        message = ""
-        valid = False
-        user = None
-    return dict(valid=valid, message=message, user=user)
+        validation_result = dict(valid=False)
+    return validation_result
 
 
 def validate_token():
+    """Validate the token provided in the request and populate the current_user
+    flask.g object, so that permissions and access to a resource can be defined
+    from it.
+    """
     if not request.authorization:
+        # If no authorization headers are provided, we are getting a request
+        # from a non logged in user. Proceed accordingly.
         return None
+
+    current_user = {}
+
     token = request.authorization.username
     tokens = app.data.driver.db['tokens']
-    users = app.data.driver.db['users']
+
     lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
-    dbtoken = tokens.find_one(lookup)
-    if not dbtoken:
+    db_token = tokens.find_one(lookup)
+    if not db_token:
+        # If no valid token is found, we issue a new request to the Blender ID
+        # to verify the validity of the token. We will get basic user info if
+        # the user is authorized and we will make a new token.
         validation = validate(token)
         if validation['valid']:
+            users = app.data.driver.db['users']
             email = validation['user']['email']
-            dbuser = users.find_one({'email': email})
+            db_user = users.find_one({'email': email})
             tmpname = email.split('@')[0]
-            if not dbuser:
+            if not db_user:
                 user_data = {
                     'first_name': tmpname,
                     'last_name': tmpname,
                     'email': email,
-                    'role': ['admin'],
                 }
                 r = post_internal('users', user_data)
-                user_id = r[0]["_id"]
+                user_id = r[0]['_id']
+                groups = None
             else:
-                user_id = dbuser['_id']
+                user_id = db_user['_id']
+                groups = db_user['groups']
 
             token_data = {
                 'user': user_id,
@@ -101,20 +120,27 @@ def validate_token():
                 'expire_time': datetime.now() + timedelta(hours=1)
             }
             post_internal('tokens', token_data)
-            return token_data
+            current_user = dict(
+                user_id=user_id,
+                token=token,
+                groups=groups,
+                token_expire_time=datetime.now() + timedelta(hours=1))
+            #return token_data
         else:
             return None
     else:
-        token_data = {
-            'user': dbtoken['user'],
-            'token': dbtoken['token'],
-            'expire_time': dbtoken['expire_time']
-        }
-        return token_data
+        users = app.data.driver.db['users']
+        db_user = users.find_one(db_token['user'])
+        current_user = dict(
+            user_id=db_token['user'],
+            token=db_token['token'],
+            groups=db_user['groups'],
+            token_expire_time=db_token['expire_time'])
+
+    setattr(g, 'current_user', current_user)
 
 
 class TokensAuth(TokenAuth):
-
     def check_auth(self, token, allowed_roles, resource, method):
         if not token:
             return False
@@ -127,21 +153,13 @@ class TokensAuth(TokenAuth):
 
         # return validation['valid']
         return True
-        """
-        users = app.data.driver.db['users']
-        lookup = {'first_name': token['username']}
-        if allowed_roles:
-            lookup['role'] = {'$in': allowed_roles}
-        user = users.find_one(lookup)
-        if not user:
-            return False
-        return token
-        """
 
 
 class BasicsAuth(BasicAuth):
     def check_auth(self, username, password, allowed_roles, resource, method):
         # return username == 'admin' and password == 'secret'
+        print username
+        print password
         return True
 
 
@@ -157,10 +175,27 @@ class CustomTokenAuth(BasicsAuth):
             return self.authorized_protected(
                 self, allowed_roles, resource, method)
         else:
+            print 'is auth'
             return self.token_auth.authorized(allowed_roles, resource, method)
 
     def authorized_protected(self):
         pass
+
+
+class NewAuth(TokenAuth):
+    def check_auth(self, token, allowed_roles, resource, method):
+        if not token:
+            return False
+        else:
+            print '---'
+            print 'validating'
+            print token
+            print resource
+            print method
+            print '---'
+            validate_token()
+
+        return True
 
 
 class ValidateCustomFields(Validator):
@@ -229,11 +264,10 @@ def post_item(entry, data):
 # automatically. The default path (which work in Docker) can be overriden with
 # an env variable.
 settings_path = os.environ.get('EVE_SETTINGS', '/data/dev/pillar/pillar/settings.py')
-app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=CustomTokenAuth)
+app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=NewAuth)
 
 import config
 app.config.from_object(config.Deployment)
-app.config['MONGO_HOST'] = os.environ.get('MONGO_HOST', 'localhost')
 
 client = MongoClient(app.config['MONGO_HOST'], 27017)
 db = client.eve
@@ -243,8 +277,10 @@ def global_validation():
     token_data = validate_token()
     if token_data:
         setattr(g, 'token_data', token_data)
-        setattr(g, 'validate', validate(token_data['token']))
+        #setattr(g, 'validate', validate(token_data['token']))
         check_permissions(token_data['user'], app.data.driver)
+    else:
+        print 'NO TOKEN'
 
 
 def pre_GET_nodes(request, lookup):
@@ -270,11 +306,13 @@ def pre_PATCH_nodes(request):
 
 
 def pre_POST_nodes(request):
-    global_validation()
+    # global_validation()
     # print ("Post")
     # print ("World: {0}".format(g.get('world_permissions')))
     # print ("Group: {0}".format(g.get('groups_permissions')))
-    return pre_POST(request, app.data.driver)
+    # return pre_POST(request, app.data.driver)
+    print 'pre posting'
+    print request
 
 
 def pre_DELETE_nodes(request, lookup):
@@ -287,20 +325,80 @@ def pre_DELETE_nodes(request, lookup):
     return pre_DELETE(request, lookup, app.data.driver)
 
 
-app.on_pre_GET_nodes += pre_GET_nodes
+#app.on_pre_GET_nodes += pre_GET_nodes
 app.on_pre_POST_nodes += pre_POST_nodes
-app.on_pre_PATCH_nodes += pre_PATCH_nodes
-app.on_pre_PUT_nodes += pre_PUT_nodes
+# app.on_pre_PATCH_nodes += pre_PATCH_nodes
+#app.on_pre_PUT_nodes += pre_PUT_nodes
 app.on_pre_DELETE_nodes += pre_DELETE_nodes
 
 
+def check_permissions(resource, method):
+    """Check user permissions to access a node. We look up node permissions from
+    world to groups to users and match them with the computed user permissions.
+    If there is not match, we return 403.
+    """
+    current_user = g.get('current_user', None)
+
+    if 'permissions' in resource:
+        # If permissions are embedde in the node (this overrides any other
+        # permission previously set)
+        resource_permissions = resource['permissions']
+    elif type(resource['node_type']) is dict:
+        # If the node_type is embedded in the document, extract permissions
+        # from there
+        resource_permissions = resource['node_type']['permissions']
+    else:
+        # If the node_type is referenced with an ObjectID (was not embedded on
+        # request) query for if from the database and get the permissions
+        node_types_collection = app.data.driver.db['node_types']
+        node_type = node_types_collection.find_one(resource['node_type'])
+        resource_permissions = node_type['permissions']
+
+    if current_user:
+        # If the user is authenticated, proceed to compare the group permissions
+        for permission in resource_permissions['groups']:
+            if permission['group'] in current_user['groups']:
+                if method in permission['methods']:
+                    return
+
+        for permission in resource_permissions['users']:
+            if current_user['user_id'] == permission['user']:
+                if method in permission['methods']:
+                    return
+
+    # Check if the node is public or private. This must be set for non logged
+    # in users to see the content. For most BI projects this is on by default,
+    # while for private project this will not be set at all.
+    if 'world' in permissions and method in permissions['world']:
+        return
+
+    abort(403)
+
+def before_returning_node(response):
+    # Run validation process, since GET on nodes entry point is public
+    validate_token()
+    check_permissions(response, 'GET')
+
+def before_replacing_node(item, original):
+    check_permissions(original, 'PUT')
+
+def before_inserting_nodes(items):
+    for item in items:
+        check_permissions(item, 'POST')
+
+app.on_fetched_item_nodes += before_returning_node
+app.on_replace_nodes += before_replacing_node
+app.on_insert_nodes += before_inserting_nodes
+
+
 def post_GET_user(request, payload):
+    print 'computing permissions'
     json_data = json.loads(payload.data)
     # Check if we are querying the users endpoint (instead of the single user)
     if json_data.get('_id') is None:
         return
-    json_data['computed_permissions'] = \
-        compute_permissions(json_data['_id'], app.data.driver)
+    # json_data['computed_permissions'] = \
+    #     compute_permissions(json_data['_id'], app.data.driver)
     payload.data = json.dumps(json_data)
 
 app.on_post_GET_users += post_GET_user

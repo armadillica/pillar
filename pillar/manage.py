@@ -1,4 +1,5 @@
 import os
+from eve.methods.put import put_internal
 from application import app
 from application import db
 from application import post_item
@@ -46,25 +47,6 @@ def clear_db():
     db.drop_collection('node_types')
     db.drop_collection('tokens')
     db.drop_collection('users')
-
-
-@manager.command
-def remove_properties_order():
-    """Removes properties.order
-    """
-    from pymongo import MongoClient
-    client = MongoClient(MONGO_HOST, 27017)
-    db = client.eve
-    nodes = db.nodes.find()
-    for node in nodes:
-        new_prop = {}
-        for prop in node['properties']:
-            if prop == 'order':
-                continue
-            else:
-                new_prop[prop] = node['properties'][prop]
-        db.nodes.update({"_id": node['_id']},
-                        {"$set": {"properties": new_prop}})
 
 
 @manager.command
@@ -410,14 +392,6 @@ def populate_node_types(old_ids={}):
     scene_node_type = {
         'name': 'scene',
         'description': 'Scene node type',
-        'dyn_schema': {
-            'order': {
-                'type': 'integer',
-            }
-        },
-        'form_schema': {
-            'order': {},
-        },
         'parent': {
             "node_types": ["act"]
         }
@@ -426,49 +400,11 @@ def populate_node_types(old_ids={}):
     act_node_type = {
         'name': 'act',
         'description': 'Act node type',
-        'dyn_schema': {
-            'order': {
-                'type': 'integer',
-            }
-        },
-        'form_schema': {
-            'order': {},
-        },
         'parent': {}
     }
 
-    comment_node_type = {
-        'name': 'comment',
-        'description': 'Comment node type',
-        'dyn_schema': {
-            'text': {
-                'type': 'string',
-                'maxlength': 256
-            },
-            'attachments': {
-                'type': 'list',
-                'schema': {
-                    'type': 'objectid',
-                    'data_relation': {
-                        'resource': 'files',
-                        'field': '_id',
-                        'embeddable': True
-                    }
-                }
-            }
-        },
-        'form_schema': {
-            'text': {},
-            'attachments': {
-                'items': [("File", "name")]
-            }
-        },
-        'parent': {
-            "node_types": ["shot", "task"]
-        }
-    }
 
-    project_node_type = {
+    node_type_project = {
         'name': 'project',
         'parent': {},
         'description': 'The official project type',
@@ -567,9 +503,17 @@ def populate_node_types(old_ids={}):
                 }
             },
         },
+        'permissions': {
+            'groups': [{
+                'group': '5596e975ea893b269af85c0e',
+                'methods': ['GET', 'PUT', 'POST']
+            }],
+            'users': [],
+            'world': ['GET']
+        }
     }
 
-    group_node_type = {
+    node_type_group = {
         'name': 'group',
         'description': 'Generic group node type',
         'parent': {},
@@ -594,9 +538,17 @@ def populate_node_types(old_ids={}):
             'status': {},
             'notes': {},
         },
+        'permissions': {
+            'groups': [{
+                'group': '5596e975ea893b269af85c0e',
+                'methods': ['GET', 'PUT', 'POST']
+            }],
+            'users': [],
+            'world': ['GET']
+        }
     }
 
-    asset_node_type = {
+    node_type_asset = {
         'name': 'asset',
         'description': 'Assets for Elephants Dream',
         # This data type does not have parent limitations (can be child
@@ -633,6 +585,14 @@ def populate_node_types(old_ids={}):
             'status': {},
             'content_type': {},
             'file': {},
+        },
+        'permissions': {
+            'groups': [{
+                'group': '5596e975ea893b269af85c0e',
+                'methods': ['GET', 'PUT', 'POST']
+            }],
+            'users': [],
+            'world': ['GET']
         }
     }
 
@@ -666,6 +626,14 @@ def populate_node_types(old_ids={}):
         },
         'parent': {
             "node_types": ["group", "project"]
+        },
+        'permissions': {
+            'groups': [{
+                'group': '5596e975ea893b269af85c0e',
+                'methods': ['GET', 'PUT', 'POST']
+            }],
+            'users': [],
+            'world': ['GET']
         }
     }
 
@@ -734,6 +702,14 @@ def populate_node_types(old_ids={}):
         },
         'parent': {
             'node_types': ['asset',]
+        },
+        'permissions': {
+            'groups': [{
+                'group': '5596e975ea893b269af85c0e',
+                'methods': ['GET', 'PUT', 'POST']
+            }],
+            'users': [],
+            'world': ['GET']
         }
     }
 
@@ -757,10 +733,16 @@ def populate_node_types(old_ids={}):
         node_name = node_type['name']
         if node_name in old_ids:
             node_type = mix_node_type(old_ids[node_name], node_type)
-            # Remove old node_type
-            db.node_types.remove({'_id': old_ids[node_name]})
-            # Insert new node_type
-            db.node_types.insert(node_type)
+            node_id = node_type['_id']
+
+            # Removed internal fields that would cause validation error
+            internal_fields = ['_id', '_etag', '_updated', '_created']
+            for field in internal_fields:
+                node_type.pop(field, None)
+
+            p = put_internal('node_types', node_type, **{'_id': node_id})
+            print p
+
         else:
             print("Making the node")
             print(node_type)
@@ -770,9 +752,9 @@ def populate_node_types(old_ids={}):
     # upgrade(task_node_type, old_ids)
     # upgrade(scene_node_type, old_ids)
     # upgrade(act_node_type, old_ids)
-    # upgrade(comment_node_type, old_ids)
-    upgrade(project_node_type, old_ids)
-    upgrade(asset_node_type, old_ids)
+    upgrade(node_type_project, old_ids)
+    upgrade(node_type_group, old_ids)
+    upgrade(node_type_asset, old_ids)
     upgrade(node_type_storage, old_ids)
     upgrade(node_type_comment, old_ids)
 
@@ -1037,6 +1019,23 @@ def make_thumbnails():
                 t = build_thumbnails(file_path=f['path'])
                 print t
 
+@manager.command
+def add_node_permissions():
+    import codecs
+    import sys
+    UTF8Writer = codecs.getwriter('utf8')
+    sys.stdout = UTF8Writer(sys.stdout)
+    nodes_collection = app.data.driver.db['nodes']
+    node_types_collection = app.data.driver.db['node_types']
+    nodes = nodes_collection.find()
+    for node in nodes:
+        print u"{0}".format(node['name'])
+        if 'permissions' not in node:
+            node_type = node_types_collection.find_one(node['node_type'])
+            # nodes_collection.update({'_id': node['_id']},
+            #                 {"$set": {'permissions': node_type['permissions']}})
+            print node['_id']
+        break
 
 if __name__ == '__main__':
     manager.run()
