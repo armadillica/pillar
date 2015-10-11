@@ -261,7 +261,7 @@ def check_permissions(resource, method):
     # Check if the node is public or private. This must be set for non logged
     # in users to see the content. For most BI projects this is on by default,
     # while for private project this will not be set at all.
-    if 'world' in permissions and method in permissions['world']:
+    if 'world' in resource_permissions and method in resource_permissions['world']:
         return
 
     abort(403)
