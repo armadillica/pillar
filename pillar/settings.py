@@ -466,11 +466,15 @@ files = {
 
 groups = {
     'resource_methods': ['GET', 'POST'],
+    'public_methods': ['GET'],
+    'public_item_methods': ['GET'],
     'schema': groups_schema,
 }
 
 organizations = {
     'schema': organizations_schema,
+    'public_item_methods': ['GET'],
+    'public_methods': ['GET']
 }
 
 DOMAIN = {
