@@ -8,7 +8,6 @@ from flask import abort
 from flask import jsonify
 from flask import send_from_directory
 from application import app
-from application import db
 from application import post_item
 from application.utils.imaging import generate_local_thumbnails
 from application.utils.imaging import get_video_data
@@ -48,13 +47,14 @@ def browse_gcs(bucket_name, subdir, file_path=None):
 
 @file_storage.route('/build_thumbnails/<path:file_path>')
 def build_thumbnails(file_path=None, file_id=None):
+    files = app.data.driver.db['files']
     if file_path:
         # Search file with backend "pillar" and path=file_path
-        file_ = db.files.find({"path": "{0}".format(file_path)})
+        file_ = files.find({"path": "{0}".format(file_path)})
         file_ = file_[0]
 
     if file_id:
-        file_ = db.files.find_one({"_id": ObjectId(file_id)})
+        file_ = files.find_one({"_id": ObjectId(file_id)})
         file_path = file_['name']
 
     user = file_['user']
@@ -120,6 +120,8 @@ def process_file(src_file):
     """Process the file
     """
 
+    files_collection = app.data.driver.db['files']
+
     file_abs_path = os.path.join(app.config['SHARED_DIR'], src_file['name'])
     src_file['length'] = os.stat(file_abs_path).st_size
     # Remove properties that do not belong in the collection
@@ -181,7 +183,7 @@ def process_file(src_file):
                 backend='pillar',
                 path=filename)
 
-            file_object_id = db.files.save(file_object)
+            file_object_id = files_collection.save(file_object)
             # Append the ObjectId to the new list
             variations[v] = file_object_id
 
@@ -194,10 +196,10 @@ def process_file(src_file):
                 # Update size data after encoding
                 # (TODO) update status (non existing now)
                 file_size = os.stat(path).st_size
-                variation = db.files.find_one(variations[v])
+                variation = files_collection.find_one(variations[v])
                 variation['length'] = file_size
                 # print variation
-                file_asset = db.files.find_and_modify(
+                file_asset = files_collection.find_and_modify(
                     {'_id': variations[v]},
                     variation)
 
