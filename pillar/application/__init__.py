@@ -19,13 +19,6 @@ from flask import request
 from flask import url_for
 from flask import abort
 
-from pre_hooks import pre_GET
-from pre_hooks import pre_PUT
-from pre_hooks import pre_PATCH
-from pre_hooks import pre_POST
-from pre_hooks import pre_DELETE
-# from pre_hooks import check_permissions
-# from pre_hooks import compute_permissions
 
 from datetime import datetime
 from datetime import timedelta
@@ -140,59 +133,17 @@ def validate_token():
     setattr(g, 'current_user', current_user)
 
 
-class TokensAuth(TokenAuth):
-    def check_auth(self, token, allowed_roles, resource, method):
-        if not token:
-            return False
-
-        validate_token()
-
-        # if dbtoken:
-        #     check_permissions(dbtoken['user'])
-        #     return True
-
-        # return validation['valid']
-        return True
-
-
-class BasicsAuth(BasicAuth):
-    def check_auth(self, username, password, allowed_roles, resource, method):
-        # return username == 'admin' and password == 'secret'
-        print username
-        print password
-        return True
-
-
-class CustomTokenAuth(BasicsAuth):
-    """Switch between Basic and Token auth"""
-    def __init__(self):
-        self.token_auth = TokensAuth()
-        self.authorized_protected = BasicsAuth.authorized
-
-    def authorized(self, allowed_roles, resource, method):
-        # if resource == 'tokens':
-        if False:
-            return self.authorized_protected(
-                self, allowed_roles, resource, method)
-        else:
-            print 'is auth'
-            return self.token_auth.authorized(allowed_roles, resource, method)
-
-    def authorized_protected(self):
-        pass
-
-
 class NewAuth(TokenAuth):
     def check_auth(self, token, allowed_roles, resource, method):
         if not token:
             return False
         else:
-            print '---'
-            print 'validating'
-            print token
-            print resource
-            print method
-            print '---'
+            # print '---'
+            # print 'validating'
+            # print token
+            # print resource
+            # print method
+            # print '---'
             validate_token()
 
         return True
@@ -271,65 +222,6 @@ app.config.from_object(config.Deployment)
 
 client = MongoClient(app.config['MONGO_HOST'], 27017)
 db = client.eve
-
-
-def global_validation():
-    token_data = validate_token()
-    if token_data:
-        setattr(g, 'token_data', token_data)
-        #setattr(g, 'validate', validate(token_data['token']))
-        check_permissions(token_data['user'], app.data.driver)
-    else:
-        print 'NO TOKEN'
-
-
-def pre_GET_nodes(request, lookup):
-    # Only get allowed documents
-    global_validation()
-    # print ("Get")
-    # print ("Owner: {0}".format(g.get('owner_permissions')))
-    # print ("World: {0}".format(g.get('world_permissions')))
-    return pre_GET(request, lookup, app.data.driver)
-
-
-def pre_PUT_nodes(request, lookup):
-    # Only Update allowed documents
-    global_validation()
-    # print ("Put")
-    # print ("Owner: {0}".format(g.get('owner_permissions')))
-    # print ("World: {0}".format(g.get('world_permissions')))
-    return pre_PUT(request, lookup, app.data.driver)
-
-
-def pre_PATCH_nodes(request):
-    return pre_PATCH(request, app.data.driver)
-
-
-def pre_POST_nodes(request):
-    # global_validation()
-    # print ("Post")
-    # print ("World: {0}".format(g.get('world_permissions')))
-    # print ("Group: {0}".format(g.get('groups_permissions')))
-    # return pre_POST(request, app.data.driver)
-    print 'pre posting'
-    print request
-
-
-def pre_DELETE_nodes(request, lookup):
-    # Only Delete allowed documents
-    global_validation()
-    # print ("Delete")
-    # print ("Owner: {0}".format(type_owner_permissions))
-    # print ("World: {0}".format(type_world_permissions))
-    # print ("Groups: {0}".format(type_groups_permissions))
-    return pre_DELETE(request, lookup, app.data.driver)
-
-
-#app.on_pre_GET_nodes += pre_GET_nodes
-app.on_pre_POST_nodes += pre_POST_nodes
-# app.on_pre_PATCH_nodes += pre_PATCH_nodes
-#app.on_pre_PUT_nodes += pre_PUT_nodes
-app.on_pre_DELETE_nodes += pre_DELETE_nodes
 
 
 def check_permissions(resource, method):
