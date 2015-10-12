@@ -224,11 +224,16 @@ client = MongoClient(app.config['MONGO_HOST'], 27017)
 db = client.eve
 
 
-def check_permissions(resource, method):
+def check_permissions(resource, method, append_allowed_methods=False):
     """Check user permissions to access a node. We look up node permissions from
     world to groups to users and match them with the computed user permissions.
     If there is not match, we return 403.
     """
+    if method != 'GET' and append_allowed_methods:
+        raise ValueError("append_allowed_methods only allowed with 'GET' method")
+
+    allowed_methods = []
+
     current_user = g.get('current_user', None)
 
     if 'permissions' in resource:
@@ -250,18 +255,26 @@ def check_permissions(resource, method):
         # If the user is authenticated, proceed to compare the group permissions
         for permission in resource_permissions['groups']:
             if permission['group'] in current_user['groups']:
-                if method in permission['methods']:
+                allowed_methods += permission['methods']
+                if method in permission['methods'] and not append_allowed_methods:
                     return
 
         for permission in resource_permissions['users']:
             if current_user['user_id'] == permission['user']:
-                if method in permission['methods']:
+                allowed_methods += permission['methods']
+                if method in permission['methods'] and not append_allowed_methods:
                     return
 
     # Check if the node is public or private. This must be set for non logged
     # in users to see the content. For most BI projects this is on by default,
     # while for private project this will not be set at all.
-    if 'world' in resource_permissions and method in resource_permissions['world']:
+    if 'world' in resource_permissions:
+        allowed_methods += resource_permissions['world']
+        if method in resource_permissions['world'] and not append_allowed_methods:
+            return
+
+    if append_allowed_methods and method in allowed_methods:
+        resource['allowed_methods'] = list(set(allowed_methods))
         return
 
     abort(403)
@@ -269,7 +282,7 @@ def check_permissions(resource, method):
 def before_returning_node(response):
     # Run validation process, since GET on nodes entry point is public
     validate_token()
-    check_permissions(response, 'GET')
+    check_permissions(response, 'GET', append_allowed_methods=True)
 
 def before_replacing_node(item, original):
     check_permissions(original, 'PUT')
@@ -277,6 +290,7 @@ def before_replacing_node(item, original):
 def before_inserting_nodes(items):
     for item in items:
         check_permissions(item, 'POST')
+
 
 app.on_fetched_item_nodes += before_returning_node
 app.on_replace_nodes += before_replacing_node
