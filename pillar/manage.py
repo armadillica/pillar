@@ -583,8 +583,8 @@ def populate_node_types(old_ids={}):
         },
         'form_schema': {
             'status': {},
-            'content_type': {},
-            'file': {},
+            'content_type': {'visible': False},
+            'file': {'visible': False},
         },
         'permissions': {
             'groups': [{
