@@ -516,7 +516,9 @@ def populate_node_types(old_ids={}):
     node_type_group = {
         'name': 'group',
         'description': 'Generic group node type',
-        'parent': {},
+        'parent': {
+            'node_types': ['group', 'project']
+        },
         'dyn_schema': {
             'url': {
                 'type': 'string',
