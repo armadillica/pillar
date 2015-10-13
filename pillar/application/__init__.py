@@ -89,15 +89,20 @@ def validate_token():
             users = app.data.driver.db['users']
             email = validation['data']['user']['email']
             db_user = users.find_one({'email': email})
-            tmpname = email.split('@')[0]
+            username = email.split('@')[0]
+            full_name = username
             if not db_user:
                 user_data = {
-                    'full_name': tmpname,
+                    'full_name': full_name,
+                    'username': username,
                     'email': email,
-                    'auth': list(dict(provider='blender-id',
-                        user_id=validation['data']['user']['id']))
+                    'auth': [{
+                        'provider': 'blender-id',
+                        'user_id': str(validation['data']['user']['id']),
+                        'token': ''}]
                 }
                 r = post_internal('users', user_data)
+                print r
                 user_id = r[0]['_id']
                 groups = None
             else:

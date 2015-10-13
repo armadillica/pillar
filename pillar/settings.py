@@ -32,7 +32,6 @@ users_schema = {
     'roles': {
         'type': 'list',
         'allowed': ["admin"],
-        'required': True,
     },
     'groups': {
         'type': 'list',
