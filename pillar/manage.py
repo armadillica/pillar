@@ -481,6 +481,20 @@ def populate_node_types(old_ids={}):
             'summary': {
                 'type': 'string',
                 'maxlength': 128
+            },
+            # Latest nodes being edited
+            'nodes_latest': {
+                'type': 'list',
+                'schema': {
+                    'type': 'objectid',
+                }
+            },
+            # Featured nodes, manually added
+            'nodes_featured': {
+                'type': 'list',
+                'schema': {
+                    'type': 'objectid',
+                }
             }
         },
         'form_schema': {
@@ -502,6 +516,8 @@ def populate_node_types(old_ids={}):
                     },
                 }
             },
+            'nodes_featured': {},
+            'nodes_latest': {}
         },
         'permissions': {
             'groups': [{
