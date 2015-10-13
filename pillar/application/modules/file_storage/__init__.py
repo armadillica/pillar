@@ -47,14 +47,14 @@ def browse_gcs(bucket_name, subdir, file_path=None):
 
 @file_storage.route('/build_thumbnails/<path:file_path>')
 def build_thumbnails(file_path=None, file_id=None):
-    files = app.data.driver.db['files']
+    files_collection = app.data.driver.db['files']
     if file_path:
         # Search file with backend "pillar" and path=file_path
-        file_ = files.find({"path": "{0}".format(file_path)})
+        file_ = files_collection.find({"path": "{0}".format(file_path)})
         file_ = file_[0]
 
     if file_id:
-        file_ = files.find_one({"_id": ObjectId(file_id)})
+        file_ = files_collection.find_one({"_id": ObjectId(file_id)})
         file_path = file_['name']
 
     user = file_['user']
@@ -87,7 +87,7 @@ def build_thumbnails(file_path=None, file_id=None):
             length=thumbnail['length'],
             md5=thumbnail['md5'],
             filename=basename,
-            backend='pillar',
+            backend=file_['backend'],
             path=path)
         # Commit to database
         r = post_item('files', file_object)
@@ -180,7 +180,7 @@ def process_file(src_file):
                 length=0, # Available after encode
                 md5="", # Available after encode
                 filename=os.path.split(filename)[1],
-                backend='pillar',
+                backend=src_file['backend'],
                 path=filename)
 
             file_object_id = files_collection.save(file_object)
@@ -217,7 +217,7 @@ def process_file(src_file):
         sync_path = file_abs_path
     remote_storage_sync(sync_path)
 
-    files = app.data.driver.db['files']
-    file_asset = files.find_and_modify(
+    files_collection = app.data.driver.db['files']
+    file_asset = files_collection.find_and_modify(
         {'_id': src_file['_id']},
         src_file)
