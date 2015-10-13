@@ -13,15 +13,10 @@ PAGINATION_LIMIT = 25
 
 
 users_schema = {
-    'first_name': {
+    'full_name': {
         'type': 'string',
         'minlength': 1,
-        'maxlength': 60,
-    },
-    'last_name': {
-        'type': 'string',
-        'minlength': 1,
-        'maxlength': 60,
+        'maxlength': 128,
     },
     'username': {
         'type': 'string',
@@ -34,7 +29,7 @@ users_schema = {
         'minlength': 1,
         'maxlength': 60,
     },
-    'role': {
+    'roles': {
         'type': 'list',
         'allowed': ["admin"],
         'required': True,
@@ -48,6 +43,27 @@ users_schema = {
                 'resource': 'groups',
                 'field': '_id',
                 'embeddable': True
+            }
+        }
+    },
+    'auth': {
+        # Storage of authentication credentials (one will be able to auth with
+        # multiple providers on the same account)
+        'type': 'list',
+        'required': True,
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                'provider': {
+                    'type': 'string',
+                    'allowed': ["blender-id",],
+                },
+                'user_id' : {
+                    'type': 'string'
+                },
+                'token': {
+                    'type': 'string'
+                }
             }
         }
     }

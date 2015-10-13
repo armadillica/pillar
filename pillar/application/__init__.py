@@ -58,13 +58,9 @@ def validate(token):
 
     if r.status_code == 200:
         response = r.json()
-        validation_result = dict(
-            message=response['message'],
-            valid=response['valid'],
-            user=response['user'])
     else:
-        validation_result = dict(valid=False)
-    return validation_result
+        response = None
+    return response
 
 
 def validate_token():
@@ -89,16 +85,17 @@ def validate_token():
         # to verify the validity of the token. We will get basic user info if
         # the user is authorized and we will make a new token.
         validation = validate(token)
-        if validation['valid']:
+        if validation['status'] == 'success':
             users = app.data.driver.db['users']
-            email = validation['user']['email']
+            email = validation['data']['user']['email']
             db_user = users.find_one({'email': email})
             tmpname = email.split('@')[0]
             if not db_user:
                 user_data = {
-                    'first_name': tmpname,
-                    'last_name': tmpname,
+                    'full_name': tmpname,
                     'email': email,
+                    'auth': list(dict(provider='blender-id',
+                        user_id=validation['data']['user']['id']))
                 }
                 r = post_internal('users', user_data)
                 user_id = r[0]['_id']
