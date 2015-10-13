@@ -298,7 +298,6 @@ app.on_insert_nodes += before_inserting_nodes
 
 
 def post_GET_user(request, payload):
-    print 'computing permissions'
     json_data = json.loads(payload.data)
     # Check if we are querying the users endpoint (instead of the single user)
     if json_data.get('_id') is None:
