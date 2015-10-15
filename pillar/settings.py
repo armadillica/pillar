@@ -478,7 +478,6 @@ files = {
     'schema': files_schema
 }
 
-
 groups = {
     'resource_methods': ['GET', 'POST'],
     'public_methods': ['GET'],

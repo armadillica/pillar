@@ -744,7 +744,7 @@ def populate_node_types(old_ids={}):
             }
         },
         'form_schema': {
-            'url': {},
+            'categories': {},
             'template': {},
         },
         'parent': {
@@ -783,11 +783,15 @@ def populate_node_types(old_ids={}):
             'category': {
                 'type': 'string',
             },
+            'url': {
+                'type': 'string'
+            }
         },
         'form_schema': {
             'content': {},
             'status': {},
             'category': {},
+            'url': {}
         },
         'parent': {
             'node_types': ['blog',]
