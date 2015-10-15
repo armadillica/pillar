@@ -403,7 +403,6 @@ def populate_node_types(old_ids={}):
         'parent': {}
     }
 
-
     node_type_project = {
         'name': 'project',
         'parent': {},
@@ -508,9 +507,7 @@ def populate_node_types(old_ids={}):
             'summary': {},
             'owners': {
                 'schema': {
-                    'users':{
-                        'items': [('User', 'first_name')],
-                    },
+                    'users': {},
                     'groups': {
                         'items': [('Group', 'name')],
                     },
