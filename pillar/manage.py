@@ -768,6 +768,7 @@ def populate_node_types(old_ids={}):
             'content': {
                 'type': 'string',
                 'minlength': 5,
+                'maxlength': 90000,
                 'required': True
             },
             'status': {
