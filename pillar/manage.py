@@ -518,7 +518,7 @@ def populate_node_types(old_ids={}):
         },
         'permissions': {
             'groups': [{
-                'group': '5596e975ea893b269af85c0e',
+                'group': app.config['ADMIN_USER_GROUP'],
                 'methods': ['GET', 'PUT', 'POST']
             }],
             'users': [],
@@ -555,7 +555,7 @@ def populate_node_types(old_ids={}):
         },
         'permissions': {
             'groups': [{
-                'group': '5596e975ea893b269af85c0e',
+                'group': app.config['ADMIN_USER_GROUP'],
                 'methods': ['GET', 'PUT', 'POST']
             }],
             'users': [],
@@ -603,7 +603,7 @@ def populate_node_types(old_ids={}):
         },
         'permissions': {
             'groups': [{
-                'group': '5596e975ea893b269af85c0e',
+                'group': app.config['ADMIN_USER_GROUP'],
                 'methods': ['GET', 'PUT', 'POST']
             }],
             'users': [],
@@ -644,7 +644,7 @@ def populate_node_types(old_ids={}):
         },
         'permissions': {
             'groups': [{
-                'group': '5596e975ea893b269af85c0e',
+                'group': app.config['ADMIN_USER_GROUP'],
                 'methods': ['GET', 'PUT', 'POST']
             }],
             'users': [],
@@ -720,13 +720,89 @@ def populate_node_types(old_ids={}):
         },
         'permissions': {
             'groups': [{
-                'group': '5596e975ea893b269af85c0e',
+                'group': app.config['ADMIN_USER_GROUP'],
                 'methods': ['GET', 'PUT', 'POST']
             }],
             'users': [],
             'world': ['GET']
         }
     }
+
+    node_type_blog = {
+        'name': 'blog',
+        'description': 'Container for node_type post.',
+        'dyn_schema': {
+            # Path for a custom template to be used for rendering the posts
+            'template': {
+                'type': 'string',
+            },
+            'categories' : {
+                'type': 'list',
+                'schema': {
+                    'type': 'string'
+                }
+            }
+        },
+        'form_schema': {
+            'url': {},
+            'template': {},
+        },
+        'parent': {
+            'node_types': ['project',]
+        },
+        'permissions': {
+            'groups': [{
+                'group': app.config['ADMIN_USER_GROUP'],
+                'methods': ['GET', 'PUT', 'POST']
+            }],
+            'users': [],
+            'world': ['GET']
+        }
+    }
+
+    node_type_post = {
+        'name': 'post',
+        'description': 'A blog post, for any project',
+        'dyn_schema': {
+            # The blogpost content (Markdown format)
+            'content': {
+                'type': 'string',
+                'minlength': 5,
+                'required': True
+            },
+            'status': {
+                'type': 'string',
+                'allowed': [
+                    'published',
+                    'deleted',
+                    'pending'
+                ],
+                'default': 'pending'
+            },
+            # Global categories, will be enforced to be 1 word
+            'category': {
+                'type': 'string',
+            },
+        },
+        'form_schema': {
+            'content': {},
+            'status': {},
+            'category': {},
+        },
+        'parent': {
+            'node_types': ['blog',]
+        },
+        'permissions': {
+            'groups': [{
+                'group': app.config['ADMIN_USER_GROUP'],
+                'methods': ['GET', 'PUT', 'POST']
+            }],
+            'users': [],
+            'world': ['GET']
+        }
+    }
+
+
 
     from pymongo import MongoClient
 
@@ -772,6 +848,8 @@ def populate_node_types(old_ids={}):
     upgrade(node_type_asset, old_ids)
     upgrade(node_type_storage, old_ids)
     upgrade(node_type_comment, old_ids)
+    upgrade(node_type_blog, old_ids)
+    upgrade(node_type_post, old_ids)
 
 
 @manager.command
