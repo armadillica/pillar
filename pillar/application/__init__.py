@@ -277,7 +277,7 @@ def check_permissions(resource, method, append_allowed_methods=False):
 
     if append_allowed_methods and method in allowed_methods:
         resource['allowed_methods'] = list(set(allowed_methods))
-        return
+        return resource
 
     abort(403)
 
@@ -285,6 +285,14 @@ def before_returning_node(response):
     # Run validation process, since GET on nodes entry point is public
     validate_token()
     check_permissions(response, 'GET', append_allowed_methods=True)
+
+def before_returning_nodes(response):
+    for item in response['_items']:
+        print item
+        validate_token()
+        item = check_permissions(item, 'GET', append_allowed_methods=True)
+        print item
+    print response['_items']
 
 def before_replacing_node(item, original):
     check_permissions(original, 'PUT')
@@ -295,6 +303,7 @@ def before_inserting_nodes(items):
 
 
 app.on_fetched_item_nodes += before_returning_node
+app.on_fetched_resource_nodes += before_returning_nodes
 app.on_replace_nodes += before_replacing_node
 app.on_insert_nodes += before_inserting_nodes
 
