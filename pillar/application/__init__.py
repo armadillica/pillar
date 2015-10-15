@@ -288,11 +288,8 @@ def before_returning_node(response):
 
 def before_returning_nodes(response):
     for item in response['_items']:
-        print item
         validate_token()
         item = check_permissions(item, 'GET', append_allowed_methods=True)
-        print item
-    print response['_items']
 
 def before_replacing_node(item, original):
     check_permissions(original, 'PUT')
