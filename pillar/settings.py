@@ -31,7 +31,7 @@ users_schema = {
     },
     'roles': {
         'type': 'list',
-        'allowed': ["admin"],
+        'allowed': ["admin", "subscriber"],
     },
     'groups': {
         'type': 'list',
