@@ -140,12 +140,6 @@ class NewAuth(TokenAuth):
         if not token:
             return False
         else:
-            # print '---'
-            # print 'validating'
-            # print token
-            # print resource
-            # print method
-            # print '---'
             validate_token()
 
         return True
@@ -279,17 +273,19 @@ def check_permissions(resource, method, append_allowed_methods=False):
         resource['allowed_methods'] = list(set(allowed_methods))
         return resource
 
-    abort(403)
+    return None
 
 def before_returning_node(response):
     # Run validation process, since GET on nodes entry point is public
     validate_token()
-    check_permissions(response, 'GET', append_allowed_methods=True)
+    if not check_permissions(response, 'GET', append_allowed_methods=True):
+        return abort(403)
 
 def before_returning_nodes(response):
     for item in response['_items']:
         validate_token()
-        item = check_permissions(item, 'GET', append_allowed_methods=True)
+        check_permissions(item, 'GET', append_allowed_methods=True)
+
 
 def before_replacing_node(item, original):
     check_permissions(original, 'PUT')
@@ -324,8 +320,6 @@ def post_POST_files(request, payload):
     """
     process_file(request.get_json())
 
-
-#app.on_pre_POST_files += pre_POST_files
 app.on_post_POST_files += post_POST_files
 
 from utils.cdn import hash_file_path
