@@ -1,13 +1,10 @@
 import os
 import json
 import requests
-
+import bugsnag
+from bugsnag.flask import handle_exceptions
 from eve import Eve
 from pymongo import MongoClient
-
-# import random
-# import string
-
 from eve.auth import TokenAuth
 from eve.auth import BasicAuth
 from eve.io.mongo import Validator
@@ -207,6 +204,7 @@ class ValidateCustomFields(Validator):
 def post_item(entry, data):
     return post_internal(entry, data)
 
+
 # We specify a settings.py file because when running on wsgi we can't detect it
 # automatically. The default path (which work in Docker) can be overriden with
 # an env variable.
@@ -218,6 +216,11 @@ app.config.from_object(config.Deployment)
 
 client = MongoClient(app.config['MONGO_HOST'], 27017)
 db = client.eve
+bugsnag.configure(
+  api_key = app.config['BUGSNAG_API_KEY'],
+  project_root = "/date/dev/pillar/pillar",
+)
+handle_exceptions(app)
 
 
 def check_permissions(resource, method, append_allowed_methods=False):
