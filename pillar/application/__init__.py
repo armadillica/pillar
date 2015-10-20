@@ -275,16 +275,17 @@ def check_permissions(resource, method, append_allowed_methods=False):
 
     return None
 
-def before_returning_node(response):
+def before_returning_item_permissions(response):
     # Run validation process, since GET on nodes entry point is public
     validate_token()
     if not check_permissions(response, 'GET', append_allowed_methods=True):
         return abort(403)
 
-def before_returning_nodes(response):
+def before_returning_resource_permissions(response):
     for item in response['_items']:
         validate_token()
         check_permissions(item, 'GET', append_allowed_methods=True)
+
 
 
 def before_replacing_node(item, original):
@@ -295,8 +296,10 @@ def before_inserting_nodes(items):
         check_permissions(item, 'POST')
 
 
-app.on_fetched_item_nodes += before_returning_node
-app.on_fetched_resource_nodes += before_returning_nodes
+app.on_fetched_item_nodes += before_returning_item_permissions
+app.on_fetched_resource_nodes += before_returning_resource_permissions
+app.on_fetched_item_node_types += before_returning_item_permissions
+app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
 app.on_insert_nodes += before_inserting_nodes
 
