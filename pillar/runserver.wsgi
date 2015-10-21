@@ -4,7 +4,7 @@ activate_this = '/data/venv/bin/activate_this.py'
 execfile(activate_this, dict(__file__=activate_this))
 from flup.server.fcgi import WSGIServer
 
-sys.path.append('/data/dev/pillar/pillar/')
+sys.path.append('/data/git/pillar/pillar/')
 from application import app as application
 
 if __name__ == '__main__':
