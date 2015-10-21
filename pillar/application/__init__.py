@@ -208,7 +208,7 @@ def post_item(entry, data):
 # We specify a settings.py file because when running on wsgi we can't detect it
 # automatically. The default path (which work in Docker) can be overriden with
 # an env variable.
-settings_path = os.environ.get('EVE_SETTINGS', '/data/dev/pillar/pillar/settings.py')
+settings_path = os.environ.get('EVE_SETTINGS', '/data/git/pillar/pillar/settings.py')
 app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=NewAuth)
 
 import config
@@ -218,7 +218,7 @@ client = MongoClient(app.config['MONGO_HOST'], 27017)
 db = client.eve
 bugsnag.configure(
   api_key = app.config['BUGSNAG_API_KEY'],
-  project_root = "/data/dev/pillar/pillar",
+  project_root = "/data/git/pillar/pillar",
 )
 handle_exceptions(app)
 
