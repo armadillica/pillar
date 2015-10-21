@@ -1,3 +1,3 @@
 #!/bin/bash
 
-. /data/venv/bin/activate && python /data/dev/pillar/pillar/manage.py runserver
+. /data/venv/bin/activate && python /data/git/pillar/pillar/manage.py runserver

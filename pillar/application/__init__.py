@@ -218,7 +218,7 @@ client = MongoClient(app.config['MONGO_HOST'], 27017)
 db = client.eve
 bugsnag.configure(
   api_key = app.config['BUGSNAG_API_KEY'],
-  project_root = "/date/dev/pillar/pillar",
+  project_root = "/data/dev/pillar/pillar",
 )
 handle_exceptions(app)
 

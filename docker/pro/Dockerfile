@@ -5,7 +5,6 @@ RUN apt-get update && apt-get install -y \
 python \
 python-dev \
 python-pip \
-git \
 vim \
 nano \
 zlib1g-dev \
@@ -23,16 +22,11 @@ RUN add-apt-repository ppa:mc3man/trusty-media \
 && apt-get update && apt-get install -y \
 ffmpeg
 
-RUN mkdir /data \
-&& mkdir /data/www \
-&& mkdir /data/www/pillar \
-&& mkdir /data/dev \
-&& mkdir /data/dev/pillar \
-&& mkdir /storage \
-&& mkdir /storage/shared \
-&& mkdir /storage/pillar \
-&& mkdir /data/config \
-&& mkdir /storage/logs
+RUN mkdir -p /data/git/pillar \
+&& mkdir -p /data/storage/shared \
+&& mkdir -p /data/storage/pillar \
+&& mkdir -p /data/config \
+&& mkdir -p /data/storage/logs
 
 ENV APACHE_RUN_USER www-data
 ENV APACHE_RUN_GROUP www-data
@@ -43,18 +37,19 @@ ENV APACHE_LOCK_DIR /var/lock/apache2
 
 RUN mkdir -p $APACHE_RUN_DIR $APACHE_LOCK_DIR $APACHE_LOG_DIR
 
-RUN git clone https://github.com/armadillica/pillar.git /data/www/pillar
-
 RUN pip install virtualenv \
 && virtualenv /data/venv
 
-RUN . /data/venv/bin/activate \
-&& pip install -r /data/www/pillar/requirements.txt
+ENV PIP_PACKAGES_VERSION = 1
+ADD requirements.txt /requirements.txt
 
-VOLUME /data/dev/pillar
+RUN . /data/venv/bin/activate \
+&& pip install -r /requirements.txt
+
+VOLUME /data/git/pillar
 VOLUME /data/config
-VOLUME /storage/shared
-VOLUME /storage/pillar
+VOLUME /data/storage/shared
+VOLUME /data/storage/pillar
 
 ENV MONGO_HOST mongo_pillar
 
