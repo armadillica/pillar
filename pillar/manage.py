@@ -1104,7 +1104,9 @@ def import_data(path):
 
 @manager.command
 def make_thumbnails():
+    from bson.objectid import ObjectId
     from application.modules.file_storage import build_thumbnails
+    import shutil
     files = db.files.find()
     for f in files:
         if f['content_type'].split('/')[0] == 'image':
@@ -1112,10 +1114,38 @@ def make_thumbnails():
             if '-' in f['path']:
                 pass
                 #print "Skipping {0}".format(f['path'])
+            elif f['backend'] == 'pillar':
+                a = db.files.find({'parent': ObjectId(f['_id'])})
+                a_count = 0
+                for b in a:
+                    a_count += 1
+                if a_count == 0:
+                    file_path = f['path']
+                    print "Building {0}".format(file_path)
+                    file_full_path = os.path.join(
+                        app.config['STORAGE_DIR'], file_path)
+                    if not os.path.exists(file_full_path):
+                        src_shared_full_path = os.path.join(
+                            app.config['SHARED_DIR'], 'files', file_path[3:])
+                        print src_shared_full_path
+
+                        dst_root_dir = os.path.join(
+                            app.config['STORAGE_DIR'], file_path[:3])
+                        dst_file_full_path_ = os.path.join(
+                            app.config['STORAGE_DIR'], file_path)
+                        if not os.path.exists(dst_root_dir):
+                            os.makedirs(dst_root_dir)
+                        shutil.copy(src_shared_full_path,
+                            dst_file_full_path_)
+                        print dst_file_full_path_
+                    else:
+                        t = build_thumbnails(file_path=file_path)
+                        print t
+
+                #t = build_thumbnails(file_path=f['path'])
+                #print t
             else:
-                print "Building {0}".format(f['path'])
-                t = build_thumbnails(file_path=f['path'])
-                print t
+                pass
 
 @manager.command
 def add_node_permissions():
