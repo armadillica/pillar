@@ -59,7 +59,7 @@ def build_thumbnails(file_path=None, file_id=None):
 
     user = file_['user']
 
-    file_full_path = os.path.join(app.config['SHARED_DIR'], file_path)
+    file_full_path = os.path.join(app.config['STORAGE_DIR'], file_path)
     # Does the original file exist?
     if not os.path.isfile(file_full_path):
         return "", 404
