@@ -245,6 +245,14 @@ nodes_schema = {
             'embeddable': True
          },
     },
+    'project': {
+        'type': 'objectid',
+         'data_relation': {
+            'resource': 'nodes',
+            'field': '_id',
+            'embeddable': True
+         },
+    },
     'user': {
         'type': 'objectid',
         'required': True,
