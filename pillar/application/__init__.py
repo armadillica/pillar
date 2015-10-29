@@ -289,14 +289,30 @@ def before_returning_resource_permissions(response):
         validate_token()
         check_permissions(item, 'GET', append_allowed_methods=True)
 
-
-
 def before_replacing_node(item, original):
     check_permissions(original, 'PUT')
 
 def before_inserting_nodes(items):
+    """Before inserting a node in the collection we check if the user is allowed
+    and we append the project id to it.
+    """
+    nodes_collection = app.data.driver.db['nodes']
+    def find_parent_project(node):
+        """Recursive function that finds the ultimate parent of a node."""
+        if node and 'parent' in node:
+            parent = nodes_collection.find_one({'_id': node['parent']})
+            return find_parent_project(parent)
+        if node:
+            return node
+        else:
+            return None
     for item in items:
         check_permissions(item, 'POST')
+        if 'parent' in item:
+            parent = nodes_collection.find_one({'_id': item['parent']})
+            project = find_parent_project(parent)
+            if project:
+                item['project'] = project['_id']
 
 
 app.on_fetched_item_nodes += before_returning_item_permissions

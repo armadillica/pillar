@@ -52,3 +52,6 @@ def remote_storage_sync(path): #can be both folder and file
     else:
         if os.path.exists(path):
             rsync(path)
+        else:
+            raise IOError('ERROR: path not found')
+

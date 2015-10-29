@@ -1165,5 +1165,43 @@ def add_node_permissions():
             print node['_id']
         break
 
+@manager.command
+def add_parent_to_nodes():
+    import codecs
+    import sys
+    from bson.objectid import ObjectId
+    UTF8Writer = codecs.getwriter('utf8')
+    sys.stdout = UTF8Writer(sys.stdout)
+
+    nodes_collection = app.data.driver.db['nodes']
+    def find_parent_project(node):
+        if node and 'parent' in node:
+            parent = nodes_collection.find_one({'_id': node['parent']})
+            return find_parent_project(parent)
+        if node:
+            return node
+        else:
+            return None
+    nodes = nodes_collection.find()
+    nodes_index = 0
+    nodes_orphan = 0
+    for node in nodes:
+        nodes_index += 1
+        if node['node_type'] == ObjectId("55a615cfea893bd7d0489f2d"):
+            print u"Skipping project node - {0}".format(node['name'])
+        else:
+            project = find_parent_project(node)
+            if project:
+                nodes_collection.update({'_id': node['_id']},
+                                {"$set": {'project': project['_id']}})
+                print u"{0} {1}".format(node['_id'], node['name'])
+            else:
+                nodes_orphan += 1
+                nodes_collection.remove({'_id': node['_id']})
+                print "Removed {0} {1}".format(node['_id'], node['name'])
+
+    print "Edited {0} nodes".format(nodes_index)
+    print "Orphan {0} nodes".format(nodes_orphan)
+
 if __name__ == '__main__':
     manager.run()

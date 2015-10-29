@@ -125,8 +125,8 @@ def process_file(src_file):
     file_abs_path = os.path.join(app.config['SHARED_DIR'], src_file['name'])
     src_file['length'] = os.stat(file_abs_path).st_size
     # Remove properties that do not belong in the collection
-    del src_file['_status']
-    del src_file['_links']
+    src_file.pop('_status', None)
+    src_file.pop('_links', None)
     content_type = src_file['content_type'].split('/')
     src_file['format'] = content_type[1]
     mime_type = content_type[0]
@@ -217,7 +217,6 @@ def process_file(src_file):
         sync_path = file_abs_path
     remote_storage_sync(sync_path)
 
-    files_collection = app.data.driver.db['files']
     file_asset = files_collection.find_and_modify(
         {'_id': src_file['_id']},
         src_file)
