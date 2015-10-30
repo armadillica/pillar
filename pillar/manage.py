@@ -494,6 +494,13 @@ def populate_node_types(old_ids={}):
                 'schema': {
                     'type': 'objectid',
                 }
+            },
+            # Latest blog posts, manually added
+            'nodes_blog': {
+                'type': 'list',
+                'schema': {
+                    'type': 'objectid',
+                }
             }
         },
         'form_schema': {
@@ -514,7 +521,8 @@ def populate_node_types(old_ids={}):
                 }
             },
             'nodes_featured': {},
-            'nodes_latest': {}
+            'nodes_latest': {},
+            'nodes_blog': {}
         },
         'permissions': {
             'groups': [{
