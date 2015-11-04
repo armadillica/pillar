@@ -17,6 +17,7 @@ users_schema = {
         'type': 'string',
         'minlength': 3,
         'maxlength': 128,
+        'required': True,
     },
     'username': {
         'type': 'string',
