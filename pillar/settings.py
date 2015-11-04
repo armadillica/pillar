@@ -15,18 +15,19 @@ PAGINATION_LIMIT = 25
 users_schema = {
     'full_name': {
         'type': 'string',
-        'minlength': 1,
+        'minlength': 3,
         'maxlength': 128,
     },
     'username': {
         'type': 'string',
-        'minlength': 1,
-        'maxlength': 60,
+        'minlength': 3,
+        'maxlength': 128,
         'required': True,
+        'unique': True,
     },
     'email': {
         'type': 'string',
-        'minlength': 1,
+        'minlength': 5,
         'maxlength': 60,
     },
     'roles': {
