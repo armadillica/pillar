@@ -2,6 +2,7 @@ import os
 import subprocess
 #import logging
 from application import app
+from application.utils.gcs import GoogleCloudStorageBucket
 
 BIN_FFPROBE = app.config['BIN_FFPROBE']
 BIN_FFMPEG = app.config['BIN_FFMPEG']
@@ -55,3 +56,27 @@ def remote_storage_sync(path): #can be both folder and file
         else:
             raise IOError('ERROR: path not found')
 
+
+def push_to_storage(project_id, full_path, backend='cgs'):
+    """Move a file from temporary/processing local storage to a storage endpoint.
+    By default we store items in a Google Cloud Storage bucket named after the
+    project id.
+    """
+    def push_single_file(project_id, full_path, backend):
+        if backend == 'cgs':
+            storage = GoogleCloudStorageBucket(project_id, subdir='_')
+            storage.Post(full_path)
+            os.remove(full_path)
+
+    if os.path.isfile(full_path):
+        push_single_file(project_id, full_path, backend)
+    else:
+        if os.path.exists(full_path):
+            for root, dirs, files in os.walk(full_path):
+                for name in files:
+                    push_single_file(project_id, os.path.join(root, name), backend)
+
+        else:
+            raise IOError('ERROR: path not found')
+
+    pass

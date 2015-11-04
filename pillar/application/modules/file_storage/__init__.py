@@ -13,6 +13,7 @@ from application.utils.imaging import generate_local_thumbnails
 from application.utils.imaging import get_video_data
 from application.utils.imaging import ffmpeg_encode
 from application.utils.storage import remote_storage_sync
+from application.utils.storage import push_to_storage
 from application.utils.gcs import GoogleCloudStorageBucket
 
 file_storage = Blueprint('file_storage', __name__,
@@ -45,7 +46,7 @@ def browse_gcs(bucket_name, subdir, file_path=None):
         return jsonify(listing)
 
 
-@file_storage.route('/build_thumbnails/<path:file_path>')
+#@file_storage.route('/build_thumbnails/<path:file_path>')
 def build_thumbnails(file_path=None, file_id=None):
     files_collection = app.data.driver.db['files']
     if file_path:
@@ -59,7 +60,7 @@ def build_thumbnails(file_path=None, file_id=None):
 
     user = file_['user']
 
-    file_full_path = os.path.join(app.config['STORAGE_DIR'], file_path)
+    file_full_path = os.path.join(app.config['SHARED_DIR'], file_path[:2], file_path)
     # Does the original file exist?
     if not os.path.isfile(file_full_path):
         return "", 404
@@ -73,7 +74,6 @@ def build_thumbnails(file_path=None, file_id=None):
             continue
         basename = os.path.basename(thumbnail['path'])
         root, ext = os.path.splitext(basename)
-        path = os.path.join(basename[:2], basename)
         file_object = dict(
             name=root,
             #description="Preview of file {0}".format(file_['name']),
@@ -88,7 +88,8 @@ def build_thumbnails(file_path=None, file_id=None):
             md5=thumbnail['md5'],
             filename=basename,
             backend=file_['backend'],
-            path=path)
+            path=basename,
+            project=file_['project'])
         # Commit to database
         r = post_item('files', file_object)
         if r[0]['_status'] == 'ERR':
@@ -122,7 +123,7 @@ def process_file(src_file):
 
     files_collection = app.data.driver.db['files']
 
-    file_abs_path = os.path.join(app.config['SHARED_DIR'], src_file['name'])
+    file_abs_path = os.path.join(app.config['SHARED_DIR'], src_file['name'][:2], src_file['name'])
     src_file['length'] = os.stat(file_abs_path).st_size
     # Remove properties that do not belong in the collection
     src_file.pop('_status', None)
@@ -169,6 +170,7 @@ def process_file(src_file):
             file_object = dict(
                 name=os.path.split(filename)[1],
                 #description="Preview of file {0}".format(file_['name']),
+                project=src_file['project'],
                 user=src_file['user'],
                 parent=src_file['_id'],
                 size="{0}p".format(res_y),
@@ -204,7 +206,7 @@ def process_file(src_file):
                     variation)
 
                 # rsync the file file (this is async)
-                remote_storage_sync(path)
+                #remote_storage_sync(path)
                 # When all encodes are done, delete source file
 
 
@@ -215,8 +217,10 @@ def process_file(src_file):
         sync_path = os.path.split(file_abs_path)[0]
     else:
         sync_path = file_abs_path
-    remote_storage_sync(sync_path)
+    #remote_storage_sync(sync_path)
+    push_to_storage(str(src_file['project']), sync_path)
 
+    # Update the original file with additional info, e.g. image resolution
     file_asset = files_collection.find_and_modify(
         {'_id': src_file['_id']},
         src_file)

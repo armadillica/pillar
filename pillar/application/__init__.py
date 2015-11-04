@@ -73,10 +73,10 @@ def validate_token():
     current_user = {}
 
     token = request.authorization.username
-    tokens = app.data.driver.db['tokens']
+    tokens_collection = app.data.driver.db['tokens']
 
     lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
-    db_token = tokens.find_one(lookup)
+    db_token = tokens_collection.find_one(lookup)
     if not db_token:
         # If no valid token is found, we issue a new request to the Blender ID
         # to verify the validity of the token. We will get basic user info if
@@ -99,7 +99,6 @@ def validate_token():
                         'token': ''}]
                 }
                 r = post_internal('users', user_data)
-                print r
                 user_id = r[0]['_id']
                 groups = None
             else:
@@ -345,10 +344,15 @@ def post_POST_files(request, payload):
 app.on_post_POST_files += post_POST_files
 
 from utils.cdn import hash_file_path
+from application.utils.gcs import GoogleCloudStorageBucket
 # Hook to check the backend of a file resource, to build an appropriate link
 # that can be used by the client to retrieve the actual file.
-def generate_link(backend, path):
-    if backend == 'pillar':
+def generate_link(backend, path, project_id=None):
+    if backend == 'gcs':
+        storage = GoogleCloudStorageBucket(project_id)
+        blob = storage.Get(path)
+        link = blob['signed_url']
+    elif backend == 'pillar':
         link = url_for('file_storage.index', file_name=path, _external=True)
     elif backend == 'cdnsun':
         link = hash_file_path(path, None)
@@ -357,11 +361,15 @@ def generate_link(backend, path):
     return link
 
 def before_returning_file(response):
-    response['link'] = generate_link(response['backend'], response['path'])
+    # TODO: add project id to all files
+    project_id = None if 'project' not in response else str(response['project'])
+    response['link'] = generate_link(response['backend'], response['path'], project_id)
 
 def before_returning_files(response):
     for item in response['_items']:
-        item['link'] = generate_link(item['backend'], item['path'])
+        # TODO: add project id to all files
+        project_id = None if 'project' not in item else str(item['project'])
+        item['link'] = generate_link(item['backend'], item['path'], project_id)
 
 
 app.on_fetched_item_files += before_returning_file

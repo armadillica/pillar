@@ -21,28 +21,28 @@ class GoogleCloudStorageBucket(object):
     :param subdir: The local entrypoint to browse the bucket.
 
     """
+    CGS_PROJECT_NAME = app.config['CGS_PROJECT_NAME']
+    GCS_CLIENT_EMAIL = app.config['GCS_CLIENT_EMAIL']
+    GCS_PRIVATE_KEY_PEM = app.config['GCS_PRIVATE_KEY_PEM']
+    GCS_PRIVATE_KEY_P12 = app.config['GCS_PRIVATE_KEY_P12']
+
+    # Load private key in pem format (used by the API)
+    with open(GCS_PRIVATE_KEY_PEM) as f:
+      private_key_pem = f.read()
+    credentials_pem = SignedJwtAssertionCredentials(GCS_CLIENT_EMAIL,
+        private_key_pem,
+        'https://www.googleapis.com/auth/devstorage.read_write')
+
+    # Load private key in p12 format (used by the singed urls generator)
+    with open(GCS_PRIVATE_KEY_P12) as f:
+      private_key_pkcs12 = f.read()
+    credentials_p12 = SignedJwtAssertionCredentials(GCS_CLIENT_EMAIL,
+        private_key_pkcs12,
+        'https://www.googleapis.com/auth/devstorage.read_write')
+
 
     def __init__(self, bucket_name, subdir='_/'):
-        CGS_PROJECT_NAME = app.config['CGS_PROJECT_NAME']
-        GCS_CLIENT_EMAIL = app.config['GCS_CLIENT_EMAIL']
-        GCS_PRIVATE_KEY_PEM = app.config['GCS_PRIVATE_KEY_PEM']
-        GCS_PRIVATE_KEY_P12 = app.config['GCS_PRIVATE_KEY_P12']
-
-        # Load private key in pem format (used by the API)
-        with open(GCS_PRIVATE_KEY_PEM) as f:
-          private_key_pem = f.read()
-        credentials_pem = SignedJwtAssertionCredentials(GCS_CLIENT_EMAIL,
-            private_key_pem,
-            'https://www.googleapis.com/auth/devstorage.read_write')
-
-        # Load private key in p12 format (used by the singed urls generator)
-        with open(GCS_PRIVATE_KEY_P12) as f:
-          private_key_pkcs12 = f.read()
-        self.credentials_p12 = SignedJwtAssertionCredentials(GCS_CLIENT_EMAIL,
-            private_key_pkcs12,
-            'https://www.googleapis.com/auth/devstorage.read_write')
-
-        gcs = Client(project=CGS_PROJECT_NAME, credentials=credentials_pem)
+        gcs = Client(project=self.CGS_PROJECT_NAME, credentials=self.credentials_pem)
         self.bucket = gcs.get_bucket(bucket_name)
         self.subdir = subdir
 
@@ -89,6 +89,18 @@ class GoogleCloudStorageBucket(object):
         return list_dict
 
 
+    def blob_to_dict(self, blob):
+        blob.reload()
+        expiration = datetime.datetime.now() + datetime.timedelta(days=1)
+        expiration = int(time.mktime(expiration.timetuple()))
+        return dict(
+            updated=blob.updated,
+            name=os.path.basename(blob.name),
+            size=blob.size,
+            content_type=blob.content_type,
+            signed_url=blob.generate_signed_url(expiration, credentials=self.credentials_p12))
+
+
     def Get(self, path):
         """Get selected file info if the path matches.
 
@@ -96,17 +108,17 @@ class GoogleCloudStorageBucket(object):
         :param path: The relative path to the file.
         """
         path = os.path.join(self.subdir, path)
-        f = self.bucket.blob(path)
-        if f.exists():
-            f.reload()
-            expiration = datetime.datetime.now() + datetime.timedelta(days=1)
-            expiration = int(time.mktime(expiration.timetuple()))
-            file_dict = dict(
-                updated=f.updated,
-                name=os.path.basename(f.name),
-                size=f.size,
-                content_type=f.content_type,
-                signed_url=f.generate_signed_url(expiration, credentials=self.credentials_p12))
-            return file_dict
+        blob = self.bucket.blob(path)
+        if blob.exists():
+            return self.blob_to_dict(blob)
         else:
             return None
+
+
+    def Post(self, full_path, path=None):
+        """Create new blob and upload data to it.
+        """
+        path = path if path else os.path.join('_', os.path.basename(full_path))
+        blob = self.bucket.blob(path)
+        blob.upload_from_filename(full_path)
+        return self.blob_to_dict(blob)
