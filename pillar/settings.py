@@ -388,12 +388,24 @@ files_schema = {
     'backend': {
         'type': 'string',
         'required': True,
-        'allowed': ["attract-web", "pillar", "cdnsun"]
+        'allowed': ["attract-web", "pillar", "cdnsun", "gcs"]
     },
     'path': {
         'type': 'string',
         #'required': True,
         'unique': True,
+    },
+    'project': {
+        # The project node the files belongs to (does not matter if it is
+        # attached to an asset or something else). We use the project id as
+        # top level filtering, folder or bucket name. Later on we will be able
+        # to join permissions from the project and verify user access.
+        'type': 'objectid',
+        'data_relation': {
+            'resource': 'nodes',
+            'field': '_id',
+            'embeddable': True
+        },
     },
     'previews': { # Deprecated (see comments above)
         'type': 'list',
