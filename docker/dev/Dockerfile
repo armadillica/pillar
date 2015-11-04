@@ -27,7 +27,7 @@ RUN mkdir -p /data/git/pillar \
 RUN pip install virtualenv \
 && virtualenv /data/venv
 
-ENV PIP_PACKAGES_VERSION = 1
+ENV PIP_PACKAGES_VERSION = 2
 ADD requirements.txt /requirements.txt
 
 RUN . /data/venv/bin/activate && pip install -r /requirements.txt
