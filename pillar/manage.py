@@ -456,6 +456,13 @@ def populate_node_types(old_ids={}):
                     }
                 }
             },
+            'status': {
+                'type': 'string',
+                'allowed': [
+                    'published',
+                    'pending'
+                ],
+            },
             # Logo
             'picture_square': {
                 'type': 'objectid',
@@ -520,6 +527,7 @@ def populate_node_types(old_ids={}):
                     },
                 }
             },
+            'status': {},
             'nodes_featured': {},
             'nodes_latest': {},
             'nodes_blog': {}
