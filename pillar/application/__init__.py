@@ -86,7 +86,22 @@ def validate_token():
             users = app.data.driver.db['users']
             email = validation['data']['user']['email']
             db_user = users.find_one({'email': email})
+            # Ensure unique username
             username = email.split('@')[0]
+            def make_unique_username(username, index=1):
+                """Ensure uniqueness of a username by appending an incremental
+                digit at the end of it.
+                """
+                user_from_username = users.find_one({'username': username})
+                if user_from_username:
+                    if index > 1:
+                        index += 1
+                        username = username[:-1]
+                    username = "{0}{1}".format(username, index)
+                    return make_unique_username(username, index=index)
+                return username
+            username = make_unique_username(username)
+
             full_name = username
             if not db_user:
                 user_data = {
