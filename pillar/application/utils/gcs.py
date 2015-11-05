@@ -120,5 +120,8 @@ class GoogleCloudStorageBucket(object):
         """
         path = path if path else os.path.join('_', os.path.basename(full_path))
         blob = self.bucket.blob(path)
+        if blob.exists():
+            return None
         blob.upload_from_filename(full_path)
-        return self.blob_to_dict(blob)
+        return blob
+        # return self.blob_to_dict(blob) # Has issues with threading

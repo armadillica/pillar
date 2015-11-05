@@ -206,19 +206,21 @@ def process_file(src_file):
                     variation)
 
                 # rsync the file file (this is async)
-                #remote_storage_sync(path)
-                # When all encodes are done, delete source file
-
+                # remote_storage_sync(path)
+                # push_to_storage(str(src_file['project']), path)
+            # When all encodes are done, delete source file
+            sync_path = os.path.split(file_abs_path)[0]
+            push_to_storage(str(src_file['project']), sync_path)
 
         p = Process(target=encode, args=(file_abs_path, variations, res_y))
         p.start()
     if mime_type != 'video':
-         # Sync the whole subdir
+        # Sync the whole subdir
         sync_path = os.path.split(file_abs_path)[0]
+        push_to_storage(str(src_file['project']), sync_path)
     else:
         sync_path = file_abs_path
     #remote_storage_sync(sync_path)
-    push_to_storage(str(src_file['project']), sync_path)
 
     # Update the original file with additional info, e.g. image resolution
     file_asset = files_collection.find_and_modify(
