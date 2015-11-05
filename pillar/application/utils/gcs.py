@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 from gcloud.storage.client import Client
+from gcloud.exceptions import NotFound
 from oauth2client.client import SignedJwtAssertionCredentials
 from application import app
 
@@ -101,7 +102,7 @@ class GoogleCloudStorageBucket(object):
             signed_url=blob.generate_signed_url(expiration, credentials=self.credentials_p12))
 
 
-    def Get(self, path):
+    def Get(self, path, to_dict=True):
         """Get selected file info if the path matches.
 
         :type path: string
@@ -110,7 +111,10 @@ class GoogleCloudStorageBucket(object):
         path = os.path.join(self.subdir, path)
         blob = self.bucket.blob(path)
         if blob.exists():
-            return self.blob_to_dict(blob)
+            if to_dict:
+                return self.blob_to_dict(blob)
+            else:
+                return blob
         else:
             return None
 
@@ -125,3 +129,15 @@ class GoogleCloudStorageBucket(object):
         blob.upload_from_filename(full_path)
         return blob
         # return self.blob_to_dict(blob) # Has issues with threading
+
+
+    def Delete(self, path):
+        """Delete blob (when removing an asset or replacing a preview)"""
+
+        # We want to get the actual blob to delete
+        blob = self.Get(path, to_dict=False)
+        try:
+            blob.delete()
+            return True
+        except NotFound:
+            return None

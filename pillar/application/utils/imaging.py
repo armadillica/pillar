@@ -43,7 +43,7 @@ def generate_local_thumbnails(src, return_image_stats=False):
             format = im.format.lower()
             # Get format
             thumbnails[size] = dict(
-                path=dst, # Full path, to be processed before storage
+                file_path=dst, # Full path, to be processed before storage
                 length=length,
                 width=width,
                 height=height,

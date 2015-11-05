@@ -349,6 +349,7 @@ def post_GET_user(request, payload):
 app.on_post_GET_users += post_GET_user
 
 from modules.file_storage import process_file
+from modules.file_storage import delete_file
 
 def post_POST_files(request, payload):
     """After an file object has been created, we do the necessary processing
@@ -362,15 +363,15 @@ from utils.cdn import hash_file_path
 from application.utils.gcs import GoogleCloudStorageBucket
 # Hook to check the backend of a file resource, to build an appropriate link
 # that can be used by the client to retrieve the actual file.
-def generate_link(backend, path, project_id=None):
+def generate_link(backend, file_path, project_id=None):
     if backend == 'gcs':
         storage = GoogleCloudStorageBucket(project_id)
-        blob = storage.Get(path)
+        blob = storage.Get(file_path)
         link = blob['signed_url']
     elif backend == 'pillar':
-        link = url_for('file_storage.index', file_name=path, _external=True)
+        link = url_for('file_storage.index', file_name=file_path, _external=True)
     elif backend == 'cdnsun':
-        link = hash_file_path(path, None)
+        link = hash_file_path(file_path, None)
     else:
         link = None
     return link
@@ -378,17 +379,23 @@ def generate_link(backend, path, project_id=None):
 def before_returning_file(response):
     # TODO: add project id to all files
     project_id = None if 'project' not in response else str(response['project'])
-    response['link'] = generate_link(response['backend'], response['path'], project_id)
+    response['link'] = generate_link(response['backend'], response['file_path'], project_id)
 
 def before_returning_files(response):
     for item in response['_items']:
         # TODO: add project id to all files
         project_id = None if 'project' not in item else str(item['project'])
-        item['link'] = generate_link(item['backend'], item['path'], project_id)
+        item['link'] = generate_link(item['backend'], item['file_path'], project_id)
 
 
 app.on_fetched_item_files += before_returning_file
 app.on_fetched_resource_files += before_returning_files
+
+
+def before_deleting_file(item):
+    delete_file(item)
+
+app.on_delete_item_files += before_deleting_file
 
 # The file_storage module needs app to be defined
 from modules.file_storage import file_storage

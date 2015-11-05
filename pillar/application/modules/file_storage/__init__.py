@@ -51,7 +51,7 @@ def build_thumbnails(file_path=None, file_id=None):
     files_collection = app.data.driver.db['files']
     if file_path:
         # Search file with backend "pillar" and path=file_path
-        file_ = files_collection.find({"path": "{0}".format(file_path)})
+        file_ = files_collection.find({"file_path": "{0}".format(file_path)})
         file_ = file_[0]
 
     if file_id:
@@ -72,7 +72,7 @@ def build_thumbnails(file_path=None, file_id=None):
         if thumbnail.get('exists'):
             # If a thumbnail was already made, we just continue
             continue
-        basename = os.path.basename(thumbnail['path'])
+        basename = os.path.basename(thumbnail['file_path'])
         root, ext = os.path.splitext(basename)
         file_object = dict(
             name=root,
@@ -88,7 +88,7 @@ def build_thumbnails(file_path=None, file_id=None):
             md5=thumbnail['md5'],
             filename=basename,
             backend=file_['backend'],
-            path=basename,
+            file_path=basename,
             project=file_['project'])
         # Commit to database
         r = post_item('files', file_object)
@@ -131,7 +131,7 @@ def process_file(src_file):
     content_type = src_file['content_type'].split('/')
     src_file['format'] = content_type[1]
     mime_type = content_type[0]
-    src_file['path'] = src_file['name']
+    src_file['file_path'] = src_file['name']
 
     if mime_type == 'image':
         from PIL import Image
@@ -183,7 +183,7 @@ def process_file(src_file):
                 md5="", # Available after encode
                 filename=os.path.split(filename)[1],
                 backend=src_file['backend'],
-                path=filename)
+                file_path=filename)
 
             file_object_id = files_collection.save(file_object)
             # Append the ObjectId to the new list
@@ -226,3 +226,27 @@ def process_file(src_file):
     file_asset = files_collection.find_and_modify(
         {'_id': src_file['_id']},
         src_file)
+
+
+def delete_file(file_item):
+    def process_file_delete(file_item):
+        """Given a file item, delete the actual file from the storage backend.
+        This function can be probably made self-calling."""
+        if file_item['backend'] == 'gcs':
+            storage = GoogleCloudStorageBucket(str(file_item['project']))
+            storage.Delete(file_item['file_path'])
+            return True
+        elif backend == 'pillar':
+            pass
+        elif backend == 'cdnsun':
+            pass
+        else:
+            pass
+    files_collection = app.data.driver.db['files']
+    # Collect children (variations) of the original file
+    children = files_collection.find({'parent': file_item['_id']})
+    for child in children:
+        process_file_delete(child)
+    # Finally remove the original file
+    process_file_delete(file_item)
+

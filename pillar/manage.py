@@ -623,7 +623,6 @@ def populate_node_types(old_ids={}):
                 'methods': ['GET', 'PUT', 'POST']
             }],
             'users': [],
-            'world': ['GET']
         }
     }
 
@@ -664,7 +663,6 @@ def populate_node_types(old_ids={}):
                 'methods': ['GET', 'PUT', 'POST']
             }],
             'users': [],
-            'world': ['GET']
         }
     }
 

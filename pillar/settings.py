@@ -392,7 +392,7 @@ files_schema = {
         'required': True,
         'allowed': ["attract-web", "pillar", "cdnsun", "gcs"]
     },
-    'path': {
+    'file_path': {
         'type': 'string',
         #'required': True,
         'unique': True,
