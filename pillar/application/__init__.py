@@ -322,7 +322,7 @@ def before_inserting_nodes(items):
             return None
     for item in items:
         check_permissions(item, 'POST')
-        if 'parent' in item:
+        if 'parent' in item and 'project' not in item:
             parent = nodes_collection.find_one({'_id': item['parent']})
             project = find_parent_project(parent)
             if project:
