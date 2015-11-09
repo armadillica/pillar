@@ -11,6 +11,7 @@ class Config(object):
 
 
 class Development(Config):
+    SCHEME = 'http'
     STORAGE_DIR = '{0}/application/static/storage'.format(
         os.path.join(os.path.dirname(__file__)))
     SHARED_DIR = '/storage/shared'

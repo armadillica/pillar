@@ -369,7 +369,8 @@ def generate_link(backend, file_path, project_id=None):
         blob = storage.Get(file_path)
         link = blob['signed_url']
     elif backend == 'pillar':
-        link = url_for('file_storage.index', file_name=file_path, _external=True)
+        link = url_for('file_storage.index', file_name=file_path, _external=True,
+        _scheme=app.config['SCHEME'])
     elif backend == 'cdnsun':
         link = hash_file_path(file_path, None)
     else:
