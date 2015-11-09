@@ -236,9 +236,9 @@ def delete_file(file_item):
             storage = GoogleCloudStorageBucket(str(file_item['project']))
             storage.Delete(file_item['file_path'])
             return True
-        elif backend == 'pillar':
+        elif file_item['backend'] == 'pillar':
             pass
-        elif backend == 'cdnsun':
+        elif file_item['backend'] == 'cdnsun':
             pass
         else:
             pass
