@@ -367,7 +367,7 @@ def generate_link(backend, file_path, project_id=None):
     if backend == 'gcs':
         storage = GoogleCloudStorageBucket(project_id)
         blob = storage.Get(file_path)
-        link = blob['signed_url']
+        link = None if not blob else blob['signed_url']
     elif backend == 'pillar':
         link = url_for('file_storage.index', file_name=file_path, _external=True,
         _scheme=app.config['SCHEME'])
