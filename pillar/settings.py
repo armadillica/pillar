@@ -67,6 +67,15 @@ users_schema = {
                 }
             }
         }
+    },
+    'settings': {
+        'type': 'dict',
+        'schema': {
+            'email_communications': {
+                'type': 'integer',
+                'allowed': [0, 1]
+            }
+        }
     }
 }
 
