@@ -111,7 +111,10 @@ def validate_token():
                     'auth': [{
                         'provider': 'blender-id',
                         'user_id': str(validation['data']['user']['id']),
-                        'token': ''}]
+                        'token': ''}],
+                    'settings': {
+                        'email_communications': 1
+                    }
                 }
                 r = post_internal('users', user_data)
                 user_id = r[0]['_id']
