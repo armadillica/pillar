@@ -255,40 +255,40 @@ def check_permissions(resource, method, append_allowed_methods=False):
     if 'permissions' in resource:
         # If permissions are embedded in the node (this overrides any other
         # matching permission originally set at node_type level)
-        resource_permissions_override = resource['permissions']
+        resource_permissions = resource['permissions']
     else:
-        resource_permissions_override = None
+        resource_permissions = None
 
     if 'node_type' in resource:
         if type(resource['node_type']) is dict:
             # If the node_type is embedded in the document, extract permissions
             # from there
-            resource_permissions = resource['node_type']['permissions']
+            computed_permissions = resource['node_type']['permissions']
         else:
             # If the node_type is referenced with an ObjectID (was not embedded on
             # request) query for if from the database and get the permissions
             node_types_collection = app.data.driver.db['node_types']
             node_type = node_types_collection.find_one(resource['node_type'])
-            resource_permissions = node_type['permissions']
+            computed_permissions = node_type['permissions']
     else:
-        resource_permissions = None
+        computed_permissions = None
 
-    # Override resource_permissions if override is provided
-    if resource_permissions_override and resource_permissions:
-        for k, v in resource_permissions_override.iteritems():
-            resource_permissions[k] = v
-    elif resource_permissions_override and not resource_permissions:
-        resource_permissions = resource_permissions_override
+    # Override computed_permissions if override is provided
+    if resource_permissions and computed_permissions:
+        for k, v in resource_permissions.iteritems():
+            computed_permissions[k] = v
+    elif resource_permissions and not computed_permissions:
+        computed_permissions = resource_permissions
 
     if current_user:
         # If the user is authenticated, proceed to compare the group permissions
-        for permission in resource_permissions['groups']:
+        for permission in computed_permissions['groups']:
             if permission['group'] in current_user['groups']:
                 allowed_methods += permission['methods']
                 if method in permission['methods'] and not append_allowed_methods:
                     return
 
-        for permission in resource_permissions['users']:
+        for permission in computed_permissions['users']:
             if current_user['user_id'] == permission['user']:
                 allowed_methods += permission['methods']
                 if method in permission['methods'] and not append_allowed_methods:
@@ -297,9 +297,9 @@ def check_permissions(resource, method, append_allowed_methods=False):
     # Check if the node is public or private. This must be set for non logged
     # in users to see the content. For most BI projects this is on by default,
     # while for private project this will not be set at all.
-    if 'world' in resource_permissions:
-        allowed_methods += resource_permissions['world']
-        if method in resource_permissions['world'] and not append_allowed_methods:
+    if 'world' in computed_permissions:
+        allowed_methods += computed_permissions['world']
+        if method in computed_permissions['world'] and not append_allowed_methods:
             return
 
     if append_allowed_methods and method in allowed_methods:
