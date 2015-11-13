@@ -460,7 +460,8 @@ def populate_node_types(old_ids={}):
                 'type': 'string',
                 'allowed': [
                     'published',
-                    'pending'
+                    'pending',
+                    'deleted'
                 ],
             },
             # Logo
@@ -556,7 +557,8 @@ def populate_node_types(old_ids={}):
                 'type': 'string',
                 'allowed': [
                     'published',
-                    'pending'
+                    'pending',
+                    'deleted'
                 ],
             },
             'notes': {
@@ -593,7 +595,8 @@ def populate_node_types(old_ids={}):
                 'allowed': [
                     'published',
                     'pending',
-                    'processing'
+                    'processing',
+                    'deleted'
                 ],
             },
             # We expose the type of asset we point to. Usually image, video,
