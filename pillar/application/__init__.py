@@ -253,19 +253,32 @@ def check_permissions(resource, method, append_allowed_methods=False):
     current_user = g.get('current_user', None)
 
     if 'permissions' in resource:
-        # If permissions are embedde in the node (this overrides any other
-        # permission previously set)
-        resource_permissions = resource['permissions']
-    elif type(resource['node_type']) is dict:
-        # If the node_type is embedded in the document, extract permissions
-        # from there
-        resource_permissions = resource['node_type']['permissions']
+        # If permissions are embedded in the node (this overrides any other
+        # matching permission originally set at node_type level)
+        resource_permissions_override = resource['permissions']
     else:
-        # If the node_type is referenced with an ObjectID (was not embedded on
-        # request) query for if from the database and get the permissions
-        node_types_collection = app.data.driver.db['node_types']
-        node_type = node_types_collection.find_one(resource['node_type'])
-        resource_permissions = node_type['permissions']
+        resource_permissions_override = None
+
+    if 'node_type' in resource:
+        if type(resource['node_type']) is dict:
+            # If the node_type is embedded in the document, extract permissions
+            # from there
+            resource_permissions = resource['node_type']['permissions']
+        else:
+            # If the node_type is referenced with an ObjectID (was not embedded on
+            # request) query for if from the database and get the permissions
+            node_types_collection = app.data.driver.db['node_types']
+            node_type = node_types_collection.find_one(resource['node_type'])
+            resource_permissions = node_type['permissions']
+    else:
+        resource_permissions = None
+
+    # Override resource_permissions if override is provided
+    if resource_permissions_override and resource_permissions:
+        for k, v in resource_permissions_override.iteritems():
+            resource_permissions[k] = v
+    elif resource_permissions_override and not resource_permissions:
+        resource_permissions = resource_permissions_override
 
     if current_user:
         # If the user is authenticated, proceed to compare the group permissions
