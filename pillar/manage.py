@@ -62,23 +62,17 @@ def clear_db():
 
 @manager.command
 def upgrade_node_types():
-    """Wipes node_types collection
-    and populates it again
-    """
-    from pymongo import MongoClient
-
-    client = MongoClient(MONGO_HOST, 27017)
-    db = client.eve
-    node_types = db.node_types.find({})
+    """Wipes node_types collection and populates it again"""
+    node_types_collection = app.data.driver.db['node_types']
+    node_types = node_types_collection.find({})
     old_ids = {}
-    for nt in node_types:
-        old_ids[nt['name']] = nt['_id']
+    for node_type in node_types:
+        old_ids[node_type['name']] = node_type['_id']
     populate_node_types(old_ids)
 
 
 def get_id(collection, name):
-    """Returns the _id of the given collection
-    and name."""
+    """Returns the _id of the given collection and name"""
     from pymongo import MongoClient
     client = MongoClient(MONGO_HOST, 27017)
     db = client.eve
@@ -164,37 +158,32 @@ def manage_groups():
 
 
 def populate_node_types(old_ids={}):
-
-    from pymongo import MongoClient
-
-    client = MongoClient(MONGO_HOST, 27017)
-    db = client.eve
+    node_types_collection = app.data.driver.db['node_types']
 
     def mix_node_type(old_id, node_type_dict):
         # Take eve parameters
-        node_type = db.node_types.find({'_id':old_id})
-        node_type = node_type[0]
+        node_type = node_types_collection.find_one({'_id': old_id})
         for attr in node_type:
-            if attr[0]=='_':
-                # Mix with node type attributes
-                node_type_dict[attr]=node_type[attr]
+            if attr[0] == '_':
+                # Mix with node eve attributes. This is really not needed since
+                # the attributes are stripped before doing a put_internal.
+                node_type_dict[attr] = node_type[attr]
+            elif attr == 'permissions':
+                node_type_dict['permissions'] = node_type['permissions']
         return node_type_dict
 
     def upgrade(node_type, old_ids):
         print("Node {0}".format(node_type['name']))
         node_name = node_type['name']
         if node_name in old_ids:
-            node_type = mix_node_type(old_ids[node_name], node_type)
-            node_id = node_type['_id']
+            node_id = old_ids[node_name]
+            node_type = mix_node_type(node_id, node_type)
 
             # Removed internal fields that would cause validation error
             internal_fields = ['_id', '_etag', '_updated', '_created']
             for field in internal_fields:
                 node_type.pop(field, None)
-            # Also remove permissions, since they are managed separately
-            node_type.pop('permissions', None)
             p = put_internal('node_types', node_type, **{'_id': node_id})
-
         else:
             print("Making the node")
             print(node_type)

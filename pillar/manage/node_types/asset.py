@@ -1,3 +1,5 @@
+from manage.node_types import _file_embedded_schema
+
 node_type_asset = {
     'name': 'asset',
     'description': 'Basic Asset Type',
@@ -23,19 +25,26 @@ node_type_asset = {
         },
         # We point to the original file (and use it to extract any relevant
         # variation useful for our scope).
-        'file': {
-            'type': 'objectid',
-            'data_relation': {
-                'resource': 'files',
-                'field': '_id',
-                'embeddable': True
-            },
+        'file': _file_embedded_schema,
+        'description_attachments': {
+            'type': 'list',
+            'schema': {
+                'type': 'dict',
+                'schema': {
+                    'file': _file_embedded_schema,
+                    'url': {
+                        'type': 'string',
+                        'minlength': 1
+                    }
+                }
+            }
         }
     },
     'form_schema': {
         'status': {},
         'content_type': {'visible': False},
         'file': {'visible': False},
+        'description_attachments': {'visible': False},
     },
     'permissions': {
         # 'groups': [{

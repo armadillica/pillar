@@ -1,3 +1,5 @@
+from manage.node_types import _file_embedded_schema
+
 node_type_project = {
     'name': 'project',
     'parent': {},
@@ -60,25 +62,9 @@ node_type_project = {
             ],
         },
         # Logo
-        'picture_square': {
-            'type': 'objectid',
-            'nullable': True,
-            'data_relation': {
-               'resource': 'files',
-               'field': '_id',
-               'embeddable': True
-            },
-        },
+        'picture_square': _file_embedded_schema,
         # Header
-        'picture_header': {
-            'type': 'objectid',
-            'nullable': True,
-            'data_relation': {
-               'resource': 'files',
-               'field': '_id',
-               'embeddable': True
-            },
-        },
+        'picture_header': _file_embedded_schema,
         # Short summary for the project
         'summary': {
             'type': 'string',
