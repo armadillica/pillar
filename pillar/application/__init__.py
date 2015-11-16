@@ -366,7 +366,8 @@ def parse_attachments(response):
                     l = generate_link(p['backend'], p['file_path'], str(p['project']))
                     # Build Markdown img string
                     l = '![{0}]({1} "{2}")'.format(slug, l, f['name'])
-                    response[field_name] = field_content.replace(slug_tag, l)
+                    field_content = field_content.replace(slug_tag, l)
+                response[field_name] = field_content
 
 
 app.on_fetched_item_nodes += before_returning_item_permissions
