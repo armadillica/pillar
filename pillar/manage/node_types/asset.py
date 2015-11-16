@@ -26,15 +26,22 @@ node_type_asset = {
         # We point to the original file (and use it to extract any relevant
         # variation useful for our scope).
         'file': _file_embedded_schema,
-        'description_attachments': {
+        'attachments': {
             'type': 'list',
             'schema': {
-                'type': 'dict',
+            'type': 'dict',
                 'schema': {
-                    'file': _file_embedded_schema,
-                    'url': {
-                        'type': 'string',
-                        'minlength': 1
+                    'field': {'type': 'string'},
+                    'files' : {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'dict',
+                            'schema': {
+                                'file': _file_embedded_schema,
+                                'slug': {'type': 'string', 'minlength': 1},
+                                'size': {'type': 'string'}
+                            }
+                        }
                     }
                 }
             }
@@ -44,7 +51,7 @@ node_type_asset = {
         'status': {},
         'content_type': {'visible': False},
         'file': {'visible': False},
-        'description_attachments': {'visible': False},
+        'attachments': {'visible': False},
     },
     'permissions': {
         # 'groups': [{

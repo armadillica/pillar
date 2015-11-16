@@ -344,8 +344,33 @@ def before_inserting_nodes(items):
             if project:
                 item['project'] = project['_id']
 
+def parse_attachments(response):
+    """Before returning a response, check if the 'attachments' property is
+    defined. If yes, load the file (for the moment only images) in the required
+    variation, get the link and build a Markdown representation. Search in the
+    'field' specified in the attachmentand replace the 'slug' tag with the
+    generated link.
+    """
+    if 'properties' in response and 'attachments' in response['properties']:
+        files_collection = app.data.driver.db['files']
+        for field in response['properties']['attachments']:
+            for attachment in response['properties']['attachments']:
+                field_name = attachment['field']
+                field_content = response[field_name]
+                for f in attachment['files']:
+                    slug = f['slug']
+                    slug_tag = "[{0}]".format(slug)
+                    f = files_collection.find_one({'_id': f['file']})
+                    size = f['size'] if 'size' in f else 'l'
+                    p = files_collection.find_one({'parent': f['_id'], 'size': size})
+                    l = generate_link(p['backend'], p['file_path'], str(p['project']))
+                    # Build Markdown img string
+                    l = '![{0}]({1} "{2}")'.format(slug, l, f['name'])
+                    response[field_name] = field_content.replace(slug_tag, l)
+
 
 app.on_fetched_item_nodes += before_returning_item_permissions
+app.on_fetched_item_nodes += parse_attachments
 app.on_fetched_resource_nodes += before_returning_resource_permissions
 app.on_fetched_item_node_types += before_returning_item_permissions
 app.on_fetched_resource_node_types += before_returning_resource_permissions
