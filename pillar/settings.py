@@ -230,7 +230,6 @@ nodes_schema = {
     },
     'description': {
         'type': 'string',
-        'maxlength': 5000,
     },
     'picture': {
         'type': 'objectid',
