@@ -1,6 +1,6 @@
 node_type_comment = {
     'name': 'comment',
-    'description': 'Comments for asset asset nodes, pages, etc.',
+    'description': 'Comments for asset nodes, pages, etc.',
     'dyn_schema': {
         # The actual comment content (initially Markdown format)
         'content': {
@@ -48,10 +48,8 @@ node_type_comment = {
                 }
             }
         },
-        'confidence': {
-            'type': 'float'
-        }
-
+        'confidence': {'type': 'float'},
+        'is_reply': {'type': 'boolean'}
     },
     'form_schema': {
         'content': {},
@@ -59,10 +57,11 @@ node_type_comment = {
         'rating_positive': {},
         'rating_negative': {},
         'ratings': {},
-        'confidence': {}
+        'confidence': {},
+        'is_reply': {}
     },
     'parent': {
-        'node_types': ['asset',]
+        'node_types': ['asset', 'comment']
     },
     'permissions': {
         # 'groups': [{
