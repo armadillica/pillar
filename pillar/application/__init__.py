@@ -100,6 +100,8 @@ def validate_token():
                     username = "{0}{1}".format(username, index)
                     return make_unique_username(username, index=index)
                 return username
+            # Check for min length of username (otherwise validation fails)
+            username = "___{0}".format(username) if len(username) < 3 else username
             username = make_unique_username(username)
 
             full_name = username
