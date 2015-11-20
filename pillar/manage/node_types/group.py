@@ -5,6 +5,10 @@ node_type_group = {
         'node_types': ['group', 'project']
     },
     'dyn_schema': {
+        # Used for sorting within the context of a group
+        'order': {
+            'type': 'integer'
+        },
         'url': {
             'type': 'string',
         },
@@ -25,6 +29,7 @@ node_type_group = {
         'url': {},
         'status': {},
         'notes': {},
+        'order': {}
     },
     'permissions': {
         # 'groups': [{

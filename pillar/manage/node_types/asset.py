@@ -18,9 +18,13 @@ node_type_asset = {
                 'deleted'
             ],
         },
+        # Used for sorting within the context of a group
+        'order': {
+            'type': 'integer'
+        },
         # We expose the type of asset we point to. Usually image, video,
         # zipfile, ect.
-        'content_type':{
+        'content_type': {
             'type': 'string'
         },
         # We point to the original file (and use it to extract any relevant
@@ -52,6 +56,7 @@ node_type_asset = {
         'content_type': {'visible': False},
         'file': {'visible': False},
         'attachments': {'visible': False},
+        'order': {}
     },
     'permissions': {
         # 'groups': [{
