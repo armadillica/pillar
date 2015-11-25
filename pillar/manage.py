@@ -241,5 +241,64 @@ def add_parent_to_nodes():
     print "Edited {0} nodes".format(nodes_index)
     print "Orphan {0} nodes".format(nodes_orphan)
 
+
+@manager.command
+def embed_children_in_files():
+    """Embed children file objects in to their parent"""
+    files_collection = app.data.driver.db['files']
+    for f in files_collection.find():
+        # Give some feedback
+        print "processing {0}".format(f['_id'])
+        # Proceed only if the node is a child
+        file_id = f['_id']
+        if 'parent' in f:
+            # Get the parent node
+            parent = files_collection.find_one({'_id': f['parent']})
+            parent_id = parent['_id']
+            if not parent:
+                print "No parent found for {0}".format(file_id)
+                files_collection.remove({'_id': file_id})
+                continue
+            # Prepare to loop through the properties required for a variation
+            properties = ['content_type', 'duration', 'size', 'format', 'width',
+                'height', 'length', 'md5', 'file_path']
+            variation = {}
+            # Build dict with variation properties
+            for p in properties:
+                if p in f:
+                    variation[p] = f[p]
+
+            # the variation was generated
+            if variation:
+                # If the parent file does not have a variation property
+                if 'variations' not in parent:
+                    parent['variations'] = []
+                # Append the variation to the variations
+                parent['variations'].append(variation)
+
+            # Removed internal fields that would cause validation error
+            internal_fields = ['_id', '_etag', '_updated', '_created']
+            for field in internal_fields:
+                parent.pop(field, None)
+            p = put_internal('files', parent, **{'_id': parent_id})
+            if p[0]['_status'] == 'ERR':
+                print p[0]['_issues']
+                print "PARENT: {0}".format(parent)
+                print "VARIATION: {0}".format(variation)
+                return
+
+
+@manager.command
+def remove_children_files():
+    """Remove any file object with a parent field"""
+    files_collection = app.data.driver.db['files']
+    for f in files_collection.find():
+        if 'parent' in f:
+            file_id = f['_id']
+            # Delete child object
+            files_collection.remove({'_id': file_id})
+            print "deleted {0}".format(file_id)
+
+
 if __name__ == '__main__':
     manager.run()

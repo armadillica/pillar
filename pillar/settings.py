@@ -417,6 +417,44 @@ files_schema = {
             'embeddable': True
         },
     },
+    'variations': { # File variations (used to be children, see above)
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                'content_type': { # MIME type image/png video/mp4
+                    'type': 'string',
+                    'required': True,
+                },
+                'duration': {
+                    'type': 'integer',
+                },
+                'size': { # xs, s, b, 720p, 2K
+                    'type': 'string'
+                },
+                'format': { # human readable format, like mp4, HLS, webm, mov
+                    'type': 'string'
+                },
+                'width': { # valid for images and video content_type
+                    'type': 'integer'
+                },
+                'height': {
+                    'type': 'integer'
+                },
+                'length': { # Size in bytes
+                    'type': 'integer',
+                    'required': True,
+                },
+                'md5': {
+                    'type': 'string',
+                    'required': True,
+                },
+                'file_path': {
+                    'type': 'string',
+                },
+            }
+        }
+    },
     'previews': { # Deprecated (see comments above)
         'type': 'list',
         'schema': {

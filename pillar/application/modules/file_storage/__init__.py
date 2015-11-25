@@ -7,6 +7,7 @@ from flask import Blueprint
 from flask import abort
 from flask import jsonify
 from flask import send_from_directory
+from eve.methods.put import put_internal
 from application import app
 from application import post_item
 from application.utils.imaging import generate_local_thumbnails
@@ -48,6 +49,11 @@ def browse_gcs(bucket_name, subdir, file_path=None):
 
 #@file_storage.route('/build_thumbnails/<path:file_path>')
 def build_thumbnails(file_path=None, file_id=None):
+    """Given a file path or file ObjectId pointing to an image file, fetch it
+    and generate a set of predefined variations (using generate_local_thumbnails).
+    Return a list of dictionaries containing the various image properties and
+    variation properties.
+    """
     files_collection = app.data.driver.db['files']
     if file_path:
         # Search file with backend "pillar" and path=file_path
@@ -58,8 +64,6 @@ def build_thumbnails(file_path=None, file_id=None):
         file_ = files_collection.find_one({"_id": ObjectId(file_id)})
         file_path = file_['name']
 
-    user = file_['user']
-
     file_full_path = os.path.join(app.config['SHARED_DIR'], file_path[:2], file_path)
     # Does the original file exist?
     if not os.path.isfile(file_full_path):
@@ -68,17 +72,14 @@ def build_thumbnails(file_path=None, file_id=None):
         thumbnails = generate_local_thumbnails(file_full_path,
             return_image_stats=True)
 
+    file_variations = []
     for size, thumbnail in thumbnails.iteritems():
         if thumbnail.get('exists'):
             # If a thumbnail was already made, we just continue
             continue
         basename = os.path.basename(thumbnail['file_path'])
         root, ext = os.path.splitext(basename)
-        file_object = dict(
-            name=root,
-            #description="Preview of file {0}".format(file_['name']),
-            user=user,
-            parent=file_['_id'],
+        file_variation = dict(
             size=size,
             format=ext[1:],
             width=thumbnail['width'],
@@ -86,16 +87,12 @@ def build_thumbnails(file_path=None, file_id=None):
             content_type=thumbnail['content_type'],
             length=thumbnail['length'],
             md5=thumbnail['md5'],
-            filename=basename,
-            backend=file_['backend'],
             file_path=basename,
-            project=file_['project'])
-        # Commit to database
-        r = post_item('files', file_object)
-        if r[0]['_status'] == 'ERR':
-            return "", r[3] # The error code from the request
+            )
 
-    return "", 200
+        file_variations.append(file_variation)
+
+    return file_variations
 
 
 @file_storage.route('/file', methods=['POST'])
@@ -120,14 +117,16 @@ def index(file_name=None):
 def process_file(src_file):
     """Process the file
     """
+    file_id = src_file['_id']
+    # Remove properties that do not belong in the collection
+    internal_fields = ['_id', '_etag', '_updated', '_created', '_status']
+    for field in internal_fields:
+        src_file.pop(field, None)
 
     files_collection = app.data.driver.db['files']
-
     file_abs_path = os.path.join(app.config['SHARED_DIR'], src_file['name'][:2], src_file['name'])
+
     src_file['length'] = os.stat(file_abs_path).st_size
-    # Remove properties that do not belong in the collection
-    src_file.pop('_status', None)
-    src_file.pop('_links', None)
     content_type = src_file['content_type'].split('/')
     src_file['format'] = content_type[1]
     mime_type = content_type[0]
@@ -140,8 +139,7 @@ def process_file(src_file):
         src_file['width'] = res[0]
         src_file['height'] = res[1]
         # Generate previews
-
-        build_thumbnails(file_id=src_file['_id'])
+        src_file['variations'] = build_thumbnails(file_id=file_id)
     elif mime_type == 'video':
         pass
         # Generate variations
@@ -172,7 +170,7 @@ def process_file(src_file):
                 #description="Preview of file {0}".format(file_['name']),
                 project=src_file['project'],
                 user=src_file['user'],
-                parent=src_file['_id'],
+                parent=file_id,
                 size="{0}p".format(res_y),
                 duration=video_duration,
                 format=v,
@@ -220,12 +218,9 @@ def process_file(src_file):
         push_to_storage(str(src_file['project']), sync_path)
     else:
         sync_path = file_abs_path
-    #remote_storage_sync(sync_path)
 
     # Update the original file with additional info, e.g. image resolution
-    file_asset = files_collection.find_and_modify(
-        {'_id': src_file['_id']},
-        src_file)
+    r = put_internal('files', src_file, **{'_id': ObjectId(file_id)})
 
 
 def delete_file(file_item):

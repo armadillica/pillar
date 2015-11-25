@@ -364,10 +364,14 @@ def parse_attachments(response):
                     slug_tag = "[{0}]".format(slug)
                     f = files_collection.find_one({'_id': f['file']})
                     size = f['size'] if 'size' in f else 'l'
-                    p = files_collection.find_one({'parent': f['_id'], 'size': size})
-                    l = generate_link(p['backend'], p['file_path'], str(p['project']))
+                    # Get the correc variation from the file
+                    thumbnail = next((item for item in f['variations'] if
+                        item['size'] == size), None)
+                    l = generate_link(f['backend'], thumbnail['file_path'], str(f['project']))
                     # Build Markdown img string
                     l = '![{0}]({1} "{2}")'.format(slug, l, f['name'])
+                    # Parse the content of the file and replace the attachment
+                    # tag with the actual image link
                     field_content = field_content.replace(slug_tag, l)
                 response[field_name] = field_content
 
@@ -424,7 +428,12 @@ def generate_link(backend, file_path, project_id=None):
 def before_returning_file(response):
     # TODO: add project id to all files
     project_id = None if 'project' not in response else str(response['project'])
-    response['link'] = generate_link(response['backend'], response['file_path'], project_id)
+    response['link'] = generate_link(
+        response['backend'], response['file_path'], project_id)
+    if 'variations' in response:
+        for variation in response['variations']:
+            variation['link'] = generate_link(
+                response['backend'], variation['file_path'], project_id)
 
 def before_returning_files(response):
     for item in response['_items']:
