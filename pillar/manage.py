@@ -254,11 +254,11 @@ def embed_children_in_files():
         if 'parent' in f:
             # Get the parent node
             parent = files_collection.find_one({'_id': f['parent']})
-            parent_id = parent['_id']
             if not parent:
                 print "No parent found for {0}".format(file_id)
                 files_collection.remove({'_id': file_id})
                 continue
+            parent_id = parent['_id']
             # Prepare to loop through the properties required for a variation
             properties = ['content_type', 'duration', 'size', 'format', 'width',
                 'height', 'length', 'md5', 'file_path']
