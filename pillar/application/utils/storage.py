@@ -75,7 +75,6 @@ def push_to_storage(project_id, full_path, backend='cgs'):
             for root, dirs, files in os.walk(full_path):
                 for name in files:
                     push_single_file(project_id, os.path.join(root, name), backend)
-
         else:
             raise IOError('ERROR: path not found')
 

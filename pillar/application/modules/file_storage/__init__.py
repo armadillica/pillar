@@ -199,7 +199,9 @@ def process_file(src_file):
     if mime_type != 'video':
         # Sync the whole subdir
         sync_path = os.path.split(file_abs_path)[0]
-        push_to_storage(str(src_file['project']), sync_path)
+        # push_to_storage(str(src_file['project']), sync_path)
+        p = Process(target=push_to_storage, args=(str(src_file['project']), sync_path))
+        p.start()
     else:
         sync_path = file_abs_path
 
