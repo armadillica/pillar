@@ -157,7 +157,9 @@ def process_file(src_file):
         elif src_video_data['res_y'] >= 1080:
             res_y = 1080
 
-        # Create variations in database
+        # Add variations property to the file
+        src_file['variations'] = []
+        # Create variations
         for v in variations:
             root, ext = os.path.splitext(src_file['name'])
             filename = "{0}-{1}p.{2}".format(root, res_y, v)
@@ -165,12 +167,7 @@ def process_file(src_file):
             if src_video_data['duration']:
                 video_duration = src_video_data['duration']
 
-            file_object = dict(
-                name=os.path.split(filename)[1],
-                #description="Preview of file {0}".format(file_['name']),
-                project=src_file['project'],
-                user=src_file['user'],
-                parent=file_id,
+            file_variation = dict(
                 size="{0}p".format(res_y),
                 duration=video_duration,
                 format=v,
@@ -179,38 +176,25 @@ def process_file(src_file):
                 content_type="video/{0}".format(v),
                 length=0, # Available after encode
                 md5="", # Available after encode
-                filename=os.path.split(filename)[1],
-                backend=src_file['backend'],
-                file_path=filename)
-
-            file_object_id = files_collection.save(file_object)
-            # Append the ObjectId to the new list
-            variations[v] = file_object_id
-
+                file_path=filename,
+                )
+            # Append file variation
+            src_file['variations'].append(file_variation)
 
         def encode(src, variations, res_y):
             # For every variation in the list call video_encode
             # print "encoding {0}".format(variations)
             for v in variations:
-                path = ffmpeg_encode(file_abs_path, v, res_y)
+                path = ffmpeg_encode(file_abs_path, v['format'], res_y)
                 # Update size data after encoding
-                # (TODO) update status (non existing now)
-                file_size = os.stat(path).st_size
-                variation = files_collection.find_one(variations[v])
-                variation['length'] = file_size
-                # print variation
-                file_asset = files_collection.find_and_modify(
-                    {'_id': variations[v]},
-                    variation)
+                v['length'] = os.stat(path).st_size
 
-                # rsync the file file (this is async)
-                # remote_storage_sync(path)
-                # push_to_storage(str(src_file['project']), path)
+            r = put_internal('files', src_file, **{'_id': ObjectId(file_id)})
             # When all encodes are done, delete source file
             sync_path = os.path.split(file_abs_path)[0]
             push_to_storage(str(src_file['project']), sync_path)
 
-        p = Process(target=encode, args=(file_abs_path, variations, res_y))
+        p = Process(target=encode, args=(file_abs_path, src_file['variations'], res_y))
         p.start()
     if mime_type != 'video':
         # Sync the whole subdir
