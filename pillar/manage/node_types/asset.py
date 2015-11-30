@@ -49,6 +49,18 @@ node_type_asset = {
                     }
                 }
             }
+        },
+        # Tags for search
+        'tags': {
+            'type': 'list',
+            'schema': {
+                'type': 'string'
+            }
+        },
+        # Simple string to represent hierarchical categories. Should follow
+        # this schema: "Root > Nested Category > One More Nested Category"
+        'categories': {
+            'type': 'string'
         }
     },
     'form_schema': {
@@ -56,7 +68,9 @@ node_type_asset = {
         'content_type': {'visible': False},
         'file': {'visible': False},
         'attachments': {'visible': False},
-        'order': {}
+        'order': {},
+        'tags' : {},
+        'categories': {}
     },
     'permissions': {
         # 'groups': [{
