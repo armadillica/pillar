@@ -357,8 +357,15 @@ def parse_attachments(response):
         files_collection = app.data.driver.db['files']
         for field in response['properties']['attachments']:
             for attachment in response['properties']['attachments']:
-                field_name = attachment['field']
-                field_content = response[field_name]
+                # Make a list from the property path
+                field_name_path = attachment['field'].split('.')
+                # This currently allow to access only properties inside of
+                # the properties property
+                if len(field_name_path) > 1:
+                    field_content = response[field_name_path[0]][field_name_path[1]]
+                # This is for the "normal" first level property
+                else:
+                    field_content = response[field_name_path[0]]
                 for f in attachment['files']:
                     slug = f['slug']
                     slug_tag = "[{0}]".format(slug)
@@ -373,7 +380,12 @@ def parse_attachments(response):
                     # Parse the content of the file and replace the attachment
                     # tag with the actual image link
                     field_content = field_content.replace(slug_tag, l)
-                response[field_name] = field_content
+                # Apply the parsed value back to the property. See above for
+                # clarifications on how this is done.
+                if len(field_name_path) > 1:
+                    response[field_name_path[0]][field_name_path[1]] = field_content
+                else:
+                    response[field_name_path[0]] = field_content
 
 
 app.on_fetched_item_nodes += before_returning_item_permissions
