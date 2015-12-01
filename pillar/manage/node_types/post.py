@@ -1,3 +1,5 @@
+from manage.node_types import _file_embedded_schema
+
 node_type_post = {
     'name': 'post',
     'description': 'A blog post, for any project',
@@ -24,13 +26,34 @@ node_type_post = {
         },
         'url': {
             'type': 'string'
+        },
+        'attachments': {
+            'type': 'list',
+            'schema': {
+            'type': 'dict',
+                'schema': {
+                    'field': {'type': 'string'},
+                    'files' : {
+                        'type': 'list',
+                        'schema': {
+                            'type': 'dict',
+                            'schema': {
+                                'file': _file_embedded_schema,
+                                'slug': {'type': 'string', 'minlength': 1},
+                                'size': {'type': 'string'}
+                            }
+                        }
+                    }
+                }
+            }
         }
     },
     'form_schema': {
         'content': {},
         'status': {},
         'category': {},
-        'url': {}
+        'url': {},
+        'attachments': {'visible': False},
     },
     'parent': {
         'node_types': ['blog',]
