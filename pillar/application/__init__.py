@@ -346,7 +346,7 @@ def before_inserting_nodes(items):
             if project:
                 item['project'] = project['_id']
 
-def parse_attachments(response):
+def item_parse_attachments(response):
     """Before returning a response, check if the 'attachments' property is
     defined. If yes, load the file (for the moment only images) in the required
     variation, get the link and build a Markdown representation. Search in the
@@ -387,10 +387,14 @@ def parse_attachments(response):
                 else:
                     response[field_name_path[0]] = field_content
 
+def resource_parse_attachments(response):
+    for item in response['_items']:
+        item_parse_attachments(item)
 
 app.on_fetched_item_nodes += before_returning_item_permissions
-app.on_fetched_item_nodes += parse_attachments
+app.on_fetched_item_nodes += item_parse_attachments
 app.on_fetched_resource_nodes += before_returning_resource_permissions
+app.on_fetched_resource_nodes += resource_parse_attachments
 app.on_fetched_item_node_types += before_returning_item_permissions
 app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
