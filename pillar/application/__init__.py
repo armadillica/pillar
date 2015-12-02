@@ -394,7 +394,7 @@ def resource_parse_attachments(response):
 app.on_fetched_item_nodes += before_returning_item_permissions
 app.on_fetched_item_nodes += item_parse_attachments
 app.on_fetched_resource_nodes += before_returning_resource_permissions
-# app.on_fetched_resource_nodes += resource_parse_attachments
+app.on_fetched_resource_nodes += resource_parse_attachments
 app.on_fetched_item_node_types += before_returning_item_permissions
 app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
