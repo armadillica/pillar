@@ -1,5 +1,7 @@
+from __future__ import division
 import os
 from eve.methods.put import put_internal
+from eve.methods.post import post_internal
 from flask.ext.script import Manager
 from application import app
 from application import db
@@ -15,6 +17,8 @@ from manage.node_types.scene import node_type_scene
 from manage.node_types.shot import node_type_shot
 from manage.node_types.storage import node_type_storage
 from manage.node_types.task import node_type_task
+from manage.node_types.texture import node_type_texture
+from manage.node_types.group_texture import node_type_group_texture
 
 manager = Manager(app)
 
@@ -44,6 +48,17 @@ def runserver():
         port=PORT,
         host=HOST,
         debug=DEBUG)
+
+
+def put_item(collection, item):
+    item_id = item['_id']
+    internal_fields = ['_id', '_etag', '_updated', '_created']
+    for field in internal_fields:
+        item.pop(field, None)
+    p = put_internal(collection, item, **{'_id': item_id})
+    if p[0]['_status'] == 'ERR':
+        print p
+        print item
 
 
 @manager.command
@@ -200,6 +215,8 @@ def populate_node_types(old_ids={}):
     upgrade(node_type_comment, old_ids)
     upgrade(node_type_blog, old_ids)
     upgrade(node_type_post, old_ids)
+    upgrade(node_type_texture, old_ids)
+    upgrade(node_type_group_texture, old_ids)
 
 
 @manager.command
@@ -298,6 +315,135 @@ def remove_children_files():
             # Delete child object
             files_collection.remove({'_id': file_id})
             print "deleted {0}".format(file_id)
+
+
+@manager.command
+def make_project_public(project_id):
+    """Convert every node of a project from pending to public"""
+    from bson.objectid import ObjectId
+    DRY_RUN = False
+    nodes_collection = app.data.driver.db['nodes']
+    for n in nodes_collection.find({'project': ObjectId(project_id)}):
+        n['properties']['status'] = 'published'
+        print "Publishing {0} {1}".format(n['_id'], n['name'])
+        if not DRY_RUN:
+            put_item('nodes', n)
+
+
+@manager.command
+def convert_assets_to_textures(project_id):
+    """Get any node of type asset in a certain project and convert it to a
+    node_type texture.
+    """
+
+    DRY_RUN = False
+
+    node_types_collection = app.data.driver.db['node_types']
+    files_collection = app.data.driver.db['files']
+    nodes_collection = app.data.driver.db['nodes']
+
+    def parse_name(name):
+        """Parse a texture name to infer properties"""
+        variation = 'col'
+        is_tileable = False
+        variations = ['_bump', '_spec', '_nor', '_col', '_translucency']
+        for v in variations:
+            if v in name:
+                variation = v[1:]
+                break
+        if '_tileable' in name:
+            is_tileable = True
+        return dict(variation=variation, is_tileable=is_tileable)
+
+    def make_texture_node(base_node, files, parent_id=None):
+        texture_node_type = node_types_collection.find_one({'name':'texture'})
+        files_list = []
+        is_tileable = False
+
+        if parent_id is None:
+            parent_id = base_node['parent']
+        else:
+            print "Using provided parent {0}".format(parent_id)
+
+        # Create a list with all the file fariations for the texture
+        for f in files:
+            print "Processing {1} {0}".format(f['name'], f['_id'])
+            attributes = parse_name(f['name'])
+            if attributes['is_tileable']:
+                is_tileable = True
+            file_entry = dict(
+                file=f['properties']['file'],
+                is_tileable=attributes['is_tileable'],
+                map_type=attributes['variation'])
+            files_list.append(file_entry)
+        # Get the first file from the files list and use it as base for some
+        # node properties
+        first_file = files_collection.find_one({'_id': files[0]['properties']['file']})
+        if 'picture' in base_node and base_node['picture'] != None:
+            picture = base_node['picture']
+        else:
+            picture = first_file['_id']
+        if 'height' in first_file:
+            node = dict(
+                name=base_node['name'],
+                picture=picture,
+                parent=parent_id,
+                project=base_node['project'],
+                user=base_node['user'],
+                node_type=texture_node_type['_id'],
+                properties=dict(
+                    status=base_node['properties']['status'],
+                    files=files_list,
+                    resolution="{0}x{1}".format(first_file['height'], first_file['width']),
+                    is_tileable=is_tileable,
+                    is_landscape=(first_file['height'] < first_file['width']),
+                    aspect_ratio=round(
+                        (first_file['width'] / first_file['height']), 2)
+                    )
+                )
+            print "Making {0}".format(node['name'])
+            if not DRY_RUN:
+                p = post_internal('nodes', node)
+                if p[0]['_status'] == 'ERR':
+                    print p
+                    import pprint
+                    pprint.pprint(node)
+
+    from bson.objectid import ObjectId
+    nodes_collection = app.data.driver.db['nodes']
+
+    for n in nodes_collection.find({'project': ObjectId(project_id)}):
+        n_type = node_types_collection.find_one({'_id': n['node_type']})
+        processed_nodes = []
+        if n_type['name'] == 'group' and n['name'].startswith('_'):
+            print "Processing {0}".format(n['name'])
+            # Get the content of the group
+            children = [c for c in nodes_collection.find({'parent': n['_id']})]
+            make_texture_node(children[0], children, parent_id=n['parent'])
+            processed_nodes += children
+            processed_nodes.append(n)
+        elif n_type['name'] == 'group':
+            # Change group type to texture group
+            node_type_texture = node_types_collection.find_one({'name':'group_texture'})
+            n['node_type'] = node_type_texture['_id']
+            n['properties'].pop('notes', None)
+            print "Updating {0}".format(n['name'])
+            if not DRY_RUN:
+                put_item('nodes', n)
+        # Delete processed nodes
+        for node in processed_nodes:
+            print "Removing {0} {1}".format(node['_id'], node['name'])
+            if not DRY_RUN:
+                nodes_collection.remove({'_id': node['_id']})
+    # Make texture out of single image
+    for n in nodes_collection.find({'project': ObjectId(project_id)}):
+        n_type = node_types_collection.find_one({'_id': n['node_type']})
+        if n_type['name'] == 'asset':
+            make_texture_node(n, [n])
+            # Delete processed nodes
+            print "Removing {0} {1}".format(n['_id'], n['name'])
+            if not DRY_RUN:
+                nodes_collection.remove({'_id': n['_id']})
 
 
 if __name__ == '__main__':

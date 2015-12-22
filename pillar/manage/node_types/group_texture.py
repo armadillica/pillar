@@ -1,8 +1,8 @@
-node_type_group = {
-    'name': 'group',
-    'description': 'Generic group node type',
+node_type_group_texture = {
+    'name': 'group_texture',
+    'description': 'Group for texture node type',
     'parent': {
-        'node_types': ['group', 'project']
+        'node_types': ['group_texture', 'project']
     },
     'dyn_schema': {
         # Used for sorting within the context of a group
@@ -19,16 +19,11 @@ node_type_group = {
                 'pending',
                 'deleted'
             ],
-        },
-        'notes': {
-            'type': 'string',
-            'maxlength': 256,
-        },
+        }
     },
     'form_schema': {
         'url': {},
         'status': {},
-        'notes': {},
         'order': {}
     },
     'permissions': {
