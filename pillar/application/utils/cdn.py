@@ -19,7 +19,7 @@ def hash_file_path(file_path, expiry_timestamp=None):
     hash_string = domain_subfolder + file_path + url_signing_key;
 
     if not expiry_timestamp:
-      expiry_timestamp = datetime.datetime.now() + datetime.timedelta(hours=12)
+      expiry_timestamp = datetime.datetime.now() + datetime.timedelta(hours=24)
       expiry_timestamp = expiry_timestamp.strftime('%s')
 
     hash_string = expiry_timestamp + hash_string;
