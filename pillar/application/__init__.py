@@ -254,7 +254,8 @@ def update_file_name(item):
         if f['backend'] == 'gcs':
             storage = GoogleCloudStorageBucket(str(item['project']))
             blob = storage.Get(f['file_path'], to_dict=False)
-            storage.update_name(blob, item['name'])
+            storage.update_name(blob, "{0}.{1}".format(
+                item['name'], f['format']))
 
     # Currently we search for 'file' and 'files' keys in the object properties.
     # This could become a bit more flexible and realy on a true reference of the
