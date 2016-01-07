@@ -32,14 +32,14 @@ class GoogleCloudStorageBucket(object):
       private_key_pem = f.read()
     credentials_pem = SignedJwtAssertionCredentials(GCS_CLIENT_EMAIL,
         private_key_pem,
-        'https://www.googleapis.com/auth/devstorage.read_write')
+        'https://www.googleapis.com/auth/devstorage.full_control')
 
     # Load private key in p12 format (used by the singed urls generator)
     with open(GCS_PRIVATE_KEY_P12) as f:
       private_key_pkcs12 = f.read()
     credentials_p12 = SignedJwtAssertionCredentials(GCS_CLIENT_EMAIL,
         private_key_pkcs12,
-        'https://www.googleapis.com/auth/devstorage.read_write')
+        'https://www.googleapis.com/auth/devstorage.full_control')
 
 
     def __init__(self, bucket_name, subdir='_/'):
@@ -141,3 +141,12 @@ class GoogleCloudStorageBucket(object):
             return True
         except NotFound:
             return None
+
+
+    def update_name(self, blob, name):
+        """Set the ContentDisposition metadata so that when a file is downloaded
+        it has a human-readable name.
+        """
+        blob.content_disposition = "attachment; filename={0}".format(name)
+        blob.patch()
+

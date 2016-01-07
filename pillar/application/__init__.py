@@ -240,6 +240,31 @@ bugsnag.configure(
   project_root = "/data/git/pillar/pillar",
 )
 handle_exceptions(app)
+from utils.cdn import hash_file_path
+from application.utils.gcs import GoogleCloudStorageBucket
+
+def update_file_name(item):
+    """Assign to the CGS blob the same name of the asset node. This way when
+    downloading an asset we get a human-readable name.
+    """
+
+    def _update_name(item, file_id):
+        files_collection = app.data.driver.db['files']
+        f = files_collection.find_one({'_id': file_id})
+        if f['backend'] == 'gcs':
+            storage = GoogleCloudStorageBucket(str(item['project']))
+            blob = storage.Get(f['file_path'], to_dict=False)
+            storage.update_name(blob, item['name'])
+
+    # Currently we search for 'file' and 'files' keys in the object properties.
+    # This could become a bit more flexible and realy on a true reference of the
+    # file object type from the schema.
+    if 'file' in item['properties']:
+        _update_name(item, item['properties']['file'])
+
+    elif 'files' in item['properties']:
+        for f in item['properties']['files']:
+            _update_name(item, f['file'])
 
 
 def check_permissions(resource, method, append_allowed_methods=False):
@@ -323,6 +348,7 @@ def before_returning_resource_permissions(response):
 
 def before_replacing_node(item, original):
     check_permissions(original, 'PUT')
+    update_file_name(item)
 
 def before_inserting_nodes(items):
     """Before inserting a node in the collection we check if the user is allowed
@@ -400,7 +426,6 @@ app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
 app.on_insert_nodes += before_inserting_nodes
 
-
 def post_GET_user(request, payload):
     json_data = json.loads(payload.data)
     # Check if we are querying the users endpoint (instead of the single user)
@@ -423,8 +448,7 @@ def post_POST_files(request, payload):
 
 app.on_post_POST_files += post_POST_files
 
-from utils.cdn import hash_file_path
-from application.utils.gcs import GoogleCloudStorageBucket
+
 # Hook to check the backend of a file resource, to build an appropriate link
 # that can be used by the client to retrieve the actual file.
 def generate_link(backend, file_path, project_id=None):
