@@ -248,6 +248,14 @@ def update_file_name(item):
     downloading an asset we get a human-readable name.
     """
 
+    def _format_name(name, format, size=None):
+        # If the name already has an extention, and such extension matches the
+        # format, only inject the size.
+        root, ext = os.path.splitext(name)
+        size = "-{0}".format(size) if size else ''
+        ext = ext if len(ext) > 1 and ext[1:] == format else ".{0}".format(format)
+        return "{0}{1}{2}".format(root, size, ext)
+
     def _update_name(item, file_id):
         files_collection = app.data.driver.db['files']
         f = files_collection.find_one({'_id': file_id})
@@ -257,14 +265,14 @@ def update_file_name(item):
             try:
                 storage = GoogleCloudStorageBucket(str(item['project']))
                 blob = storage.Get(f['file_path'], to_dict=False)
-                storage.update_name(blob, "{0}.{1}".format(
-                    item['name'], f['format']))
+                name = _format_name(item['name'], f['format'])
+                storage.update_name(blob, name)
                 try:
                     # Assign the same name to variations
                     for v in f['variations']:
                         blob = storage.Get(v['file_path'], to_dict=False)
-                        storage.update_name(blob, "{0}-{1}.{2}".format(
-                            item['name'], v['size'], v['format']))
+                        name = _format_name(item['name'], v['format'], v['size'])
+                        storage.update_name(blob, name)
                 except KeyError:
                     pass
             except AttributeError:
