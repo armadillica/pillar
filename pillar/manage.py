@@ -463,7 +463,7 @@ def files_verify_project():
     """Verify for missing or conflicting node/file ids"""
     nodes_collection = app.data.driver.db['nodes']
     files_collection = app.data.driver.db['files']
-    issues = dict(missing=[], conflicting=[])
+    issues = dict(missing=[], conflicting=[], processing=[])
 
     def _parse_file(item, file_id):
         f = files_collection.find_one({'_id': file_id})
@@ -471,6 +471,9 @@ def files_verify_project():
             if 'project' in item and 'project' in f:
                 if item['project'] != f['project']:
                     issues['conflicting'].append(item['_id'])
+                if 'status' in item['properties'] \
+                    and item['properties']['status'] == 'processing':
+                    issues['processing'].append(item['_id'])
         else:
             issues['missing'].append(
                 "{0} missing {1}".format(item['_id'], file_id))
@@ -483,17 +486,13 @@ def files_verify_project():
             for f in item['properties']['files']:
                 _parse_file(item, f['file'])
 
-    if issues:
-        print "The following issues were detected:"
-        if issues['missing']:
-            print "Missing:"
-            for i in issues['missing']:
-                print i
-            print "==="
-        if issues['conflicting']:
-            print "Conflicts:"
-            for i in issues['conflicting']:
-                print i
+    print "==="
+    print "Issues detected:"
+    for k, v in issues.iteritems():
+        print "{0}:".format(k)
+        for i in v:
+            print i
+        print "==="
 
 if __name__ == '__main__':
     manager.run()

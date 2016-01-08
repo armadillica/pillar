@@ -251,7 +251,9 @@ def update_file_name(item):
     def _update_name(item, file_id):
         files_collection = app.data.driver.db['files']
         f = files_collection.find_one({'_id': file_id})
-        if f and f['backend'] == 'gcs':
+        status = item['properties']['status']
+        if f and f['backend'] == 'gcs' and status != 'processing':
+            # Process only files that are on GCS and that are not processing
             try:
                 storage = GoogleCloudStorageBucket(str(item['project']))
                 blob = storage.Get(f['file_path'], to_dict=False)
