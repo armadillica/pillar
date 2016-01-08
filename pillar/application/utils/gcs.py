@@ -149,4 +149,3 @@ class GoogleCloudStorageBucket(object):
         """
         blob.content_disposition = "attachment; filename={0}".format(name)
         blob.patch()
-

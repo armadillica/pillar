@@ -446,5 +446,54 @@ def convert_assets_to_textures(project_id):
                 nodes_collection.remove({'_id': n['_id']})
 
 
+@manager.command
+def set_attachment_names():
+    """Loop through all existing nodes and assign proper ContentDisposition
+    metadata to referenced files that are using GCS.
+    """
+    from application import update_file_name
+    nodes_collection = app.data.driver.db['nodes']
+    for n in nodes_collection.find():
+        print "Updating node {0}".format(n['_id'])
+        update_file_name(n)
+
+
+@manager.command
+def files_verify_project():
+    """Verify for missing or conflicting node/file ids"""
+    nodes_collection = app.data.driver.db['nodes']
+    files_collection = app.data.driver.db['files']
+    issues = dict(missing=[], conflicting=[])
+
+    def _parse_file(item, file_id):
+        f = files_collection.find_one({'_id': file_id})
+        if f:
+            if 'project' in item and 'project' in f:
+                if item['project'] != f['project']:
+                    issues['conflicting'].append(item['_id'])
+        else:
+            issues['missing'].append(
+                "{0} missing {1}".format(item['_id'], file_id))
+
+    for item in nodes_collection.find():
+        print "Verifying node {0}".format(item['_id'])
+        if 'file' in item['properties']:
+            _parse_file(item, item['properties']['file'])
+        elif 'files' in item['properties']:
+            for f in item['properties']['files']:
+                _parse_file(item, f['file'])
+
+    if issues:
+        print "The following issues were detected:"
+        if issues['missing']:
+            print "Missing:"
+            for i in issues['missing']:
+                print i
+            print "==="
+        if issues['conflicting']:
+            print "Conflicts:"
+            for i in issues['conflicting']:
+                print i
+
 if __name__ == '__main__':
     manager.run()

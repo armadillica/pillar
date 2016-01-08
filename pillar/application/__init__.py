@@ -251,11 +251,24 @@ def update_file_name(item):
     def _update_name(item, file_id):
         files_collection = app.data.driver.db['files']
         f = files_collection.find_one({'_id': file_id})
-        if f['backend'] == 'gcs':
-            storage = GoogleCloudStorageBucket(str(item['project']))
-            blob = storage.Get(f['file_path'], to_dict=False)
-            storage.update_name(blob, "{0}.{1}".format(
-                item['name'], f['format']))
+        if f and f['backend'] == 'gcs':
+            try:
+                storage = GoogleCloudStorageBucket(str(item['project']))
+                blob = storage.Get(f['file_path'], to_dict=False)
+                storage.update_name(blob, "{0}.{1}".format(
+                    item['name'], f['format']))
+                try:
+                    # Assign the same name to variations
+                    for v in f['variations']:
+                        blob = storage.Get(v['file_path'], to_dict=False)
+                        storage.update_name(blob, "{0}-{1}.{2}".format(
+                            item['name'], v['size'], v['format']))
+                except KeyError:
+                    pass
+            except AttributeError:
+                bugsnag.notify(Exception('Missing or conflicting ids detected'),
+                    meta_data={'nodes_info':
+                        {'node_id': item['_id'], 'file_id': file_id}})
 
     # Currently we search for 'file' and 'files' keys in the object properties.
     # This could become a bit more flexible and realy on a true reference of the
