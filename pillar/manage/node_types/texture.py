@@ -5,9 +5,7 @@ node_type_texture = {
     'description': 'Image Texture',
     # This data type does not have parent limitations (can be child
     # of any node). An empty parent declaration is required.
-    'parent': {
-        "node_types": ["group",]
-    },
+    'parent': ['group',],
     'dyn_schema': {
         'status': {
             'type': 'string',

@@ -41,7 +41,5 @@ node_type_shot = {
         'notes': {},
         'shot_group': {}
     },
-    'parent': {
-        'node_types': ['scene']
-    }
+    'parent': ['scene']
 }

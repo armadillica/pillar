@@ -55,9 +55,7 @@ node_type_post = {
         'url': {},
         'attachments': {'visible': False},
     },
-    'parent': {
-        'node_types': ['blog',]
-    },
+    'parent': ['blog',],
     'permissions': {
         # 'groups': [{
         #     'group': app.config['ADMIN_USER_GROUP'],

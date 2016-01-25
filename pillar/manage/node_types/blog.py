@@ -17,9 +17,7 @@ node_type_blog = {
         'categories': {},
         'template': {},
     },
-    'parent': {
-        'node_types': ['project',]
-    },
+    'parent': ['project',],
     'permissions': {
         # 'groups': [{
         #     'group': app.config['ADMIN_USER_GROUP'],

@@ -60,9 +60,7 @@ node_type_comment = {
         'confidence': {},
         'is_reply': {}
     },
-    'parent': {
-        'node_types': ['asset', 'comment']
-    },
+    'parent': ['asset', 'comment'],
     'permissions': {
         # 'groups': [{
         #     'group': app.config['ADMIN_USER_GROUP'],

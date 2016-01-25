@@ -1,5 +1,6 @@
 from __future__ import division
 import os
+from bson.objectid import ObjectId
 from eve.methods.put import put_internal
 from eve.methods.post import post_internal
 from flask.ext.script import Manager
@@ -55,6 +56,8 @@ def put_item(collection, item):
     internal_fields = ['_id', '_etag', '_updated', '_created']
     for field in internal_fields:
         item.pop(field, None)
+    # print item
+    # print type(item_id)
     p = put_internal(collection, item, **{'_id': item_id})
     if p[0]['_status'] == 'ERR':
         print p
@@ -224,7 +227,7 @@ def add_parent_to_nodes():
     """Find the parent of any node in the nodes collection"""
     import codecs
     import sys
-    from bson.objectid import ObjectId
+
     UTF8Writer = codecs.getwriter('utf8')
     sys.stdout = UTF8Writer(sys.stdout)
 
@@ -320,7 +323,7 @@ def remove_children_files():
 @manager.command
 def make_project_public(project_id):
     """Convert every node of a project from pending to public"""
-    from bson.objectid import ObjectId
+
     DRY_RUN = False
     nodes_collection = app.data.driver.db['nodes']
     for n in nodes_collection.find({'project': ObjectId(project_id)}):
@@ -405,11 +408,10 @@ def convert_assets_to_textures(project_id):
             if not DRY_RUN:
                 p = post_internal('nodes', node)
                 if p[0]['_status'] == 'ERR':
-                    print p
                     import pprint
                     pprint.pprint(node)
 
-    from bson.objectid import ObjectId
+
     nodes_collection = app.data.driver.db['nodes']
 
     for n in nodes_collection.find({'project': ObjectId(project_id)}):
@@ -493,6 +495,58 @@ def files_verify_project():
         for i in v:
             print i
         print "==="
+
+
+def replace_node_type(project, node_type_name, new_node_type):
+    """Update or create the specified node type. We rely on the fact that
+    node_types have a unique name in a project.
+    """
+
+    old_node_type = next(
+        (item for item in project['node_types'] if item.get('name') \
+            and item['name'] == node_type_name), None)
+    if old_node_type:
+        for i, v in enumerate(project['node_types']):
+            if v['name'] == node_type_name:
+                project['node_types'][i] = new_node_type
+    else:
+        project['node_types'].append(new_node_type)
+
+
+@manager.command
+def project_upgrade_node_types(project_id):
+    projects_collection = app.data.driver.db['projects']
+    project = projects_collection.find_one({'_id': ObjectId(project_id)})
+    replace_node_type(project, 'group', node_type_group)
+    replace_node_type(project, 'asset', node_type_asset)
+    replace_node_type(project, 'storage', node_type_storage)
+    replace_node_type(project, 'comment', node_type_comment)
+    replace_node_type(project, 'blog', node_type_blog)
+    replace_node_type(project, 'post', node_type_post)
+    replace_node_type(project, 'texture', node_type_texture)
+    put_item('projects', project)
+
+
+@manager.command
+def test_put_item(node_id):
+    import pprint
+    nodes_collection = app.data.driver.db['nodes']
+    node = nodes_collection.find_one(ObjectId(node_id))
+    pprint.pprint(node)
+    put_item('nodes', node)
+
+
+@manager.command
+def test_post_internal(node_id):
+    import pprint
+    nodes_collection = app.data.driver.db['nodes']
+    node = nodes_collection.find_one(ObjectId(node_id))
+    internal_fields = ['_id', '_etag', '_updated', '_created']
+    for field in internal_fields:
+        node.pop(field, None)
+    pprint.pprint(node)
+    print post_internal('nodes', node)
+
 
 if __name__ == '__main__':
     manager.run()
