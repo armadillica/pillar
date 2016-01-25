@@ -11,6 +11,15 @@ ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
 PAGINATION_LIMIT = 25
 
+_file_embedded_schema = {
+    'type': 'objectid',
+    'data_relation': {
+        'resource': 'files',
+        'field': '_id',
+        'embeddable': True
+    }
+}
+
 
 users_schema = {
     'full_name': {
@@ -258,7 +267,7 @@ nodes_schema = {
     'project': {
         'type': 'objectid',
          'data_relation': {
-            'resource': 'nodes',
+            'resource': 'projects',
             'field': '_id',
             'embeddable': True
          },
@@ -273,13 +282,8 @@ nodes_schema = {
         },
     },
     'node_type': {
-        'type': 'objectid',
-        'required': True,
-        'data_relation': {
-            'resource': 'node_types',
-            'field': '_id',
-            'embeddable': True
-        },
+        'type': 'string',
+        'required': True
     },
     'properties': {
         'type' : 'dict',
@@ -502,6 +506,151 @@ groups_schema = {
     }
 }
 
+projects_schema = {
+    'name': {
+        'type': 'string',
+        'minlength': 1,
+        'maxlength': 128,
+        'required': True,
+    },
+    'description': {
+        'type': 'string',
+    },
+    # Short summary for the project
+    'summary': {
+        'type': 'string',
+        'maxlength': 128
+    },
+    # Logo
+    'picture_square': _file_embedded_schema,
+    # Header
+    'picture_header': _file_embedded_schema,
+    'user': {
+        'type': 'objectid',
+        'required': True,
+        'data_relation': {
+            'resource': 'users',
+            'field': '_id',
+            'embeddable': True
+        },
+    },
+    'category': {
+        'type': 'string',
+        'allowed': [
+            'training',
+            'film',
+            'assets',
+            'software',
+            'game'
+        ],
+        'required': True,
+    },
+    'is_private': {
+        'type': 'boolean'
+    },
+    'url': {
+        'type': 'string'
+    },
+    'organization': {
+        'type': 'objectid',
+        'nullable': True,
+        'data_relation': {
+           'resource': 'organizations',
+           'field': '_id',
+           'embeddable': True
+        },
+    },
+    'owners': {
+        'type': 'dict',
+        'schema': {
+            'users': {
+                'type': 'list',
+                'schema': {
+                    'type': 'objectid',
+                }
+            },
+            'groups': {
+                'type': 'list',
+                'schema': {
+                    'type': 'objectid',
+                    'data_relation': {
+                        'resource': 'groups',
+                        'field': '_id',
+                        'embeddable': True
+                    }
+                }
+            }
+        }
+    },
+    'status': {
+        'type': 'string',
+        'allowed': [
+            'published',
+            'pending',
+            'deleted'
+        ],
+    },
+    # Latest nodes being edited
+    'nodes_latest': {
+        'type': 'list',
+        'schema': {
+            'type': 'objectid',
+        }
+    },
+    # Featured nodes, manually added
+    'nodes_featured': {
+        'type': 'list',
+        'schema': {
+            'type': 'objectid',
+        }
+    },
+    # Latest blog posts, manually added
+    'nodes_blog': {
+        'type': 'list',
+        'schema': {
+            'type': 'objectid',
+        }
+    },
+    # Where Node type schemas for every projects are defined
+    'node_types': {
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                # URL is the way we identify a node_type when calling it via
+                # the helper methods in the Project API.
+                'url': {'type': 'string'},
+                'name': {'type': 'string'},
+                'description': {'type': 'string'},
+                # Allowed parents for the node_type
+                'parent': {
+                    'type': 'list',
+                    'schema': {
+                        'type': 'string'
+                    }
+                },
+                'dyn_schema': {
+                    'type': 'dict',
+                    'allow_unknown': True
+                },
+                'form_schema': {
+                    'type': 'dict',
+                    'allow_unknown': True
+                },
+                'permissions': {
+                    'type': 'dict',
+                    'schema': permissions_embedded_schema
+                }
+            },
+
+        }
+    },
+    'permissions': {
+        'type': 'dict',
+        'schema': permissions_embedded_schema
+    }
+}
+
 nodes = {
     'schema': nodes_schema,
     'public_methods': ['GET'],
@@ -559,6 +708,12 @@ organizations = {
     'public_methods': ['GET']
 }
 
+projects = {
+    'schema': projects_schema,
+    'public_item_methods': ['GET'],
+    'public_methods': ['GET']
+}
+
 DOMAIN = {
     'users': users,
     'nodes': nodes,
@@ -566,7 +721,8 @@ DOMAIN = {
     'tokens': tokens,
     'files': files,
     'groups': groups,
-    'organizations': organizations
+    'organizations': organizations,
+    'projects': projects
 }
 
 

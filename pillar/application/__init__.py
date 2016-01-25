@@ -195,16 +195,16 @@ class ValidateCustomFields(Validator):
         return properties
 
     def _validate_valid_properties(self, valid_properties, field, value):
-        node_types = app.data.driver.db['node_types']
-        lookup = {}
-        lookup['_id'] = ObjectId(self.document['node_type'])
-        node_type = node_types.find_one(lookup)
-
+        projects_collection = app.data.driver.db['projects']
+        lookup = {'_id': ObjectId(self.document['project'])}
+        project = projects_collection.find_one(lookup)
+        node_type = next(
+            (item for item in project['node_types'] if item.get('name') \
+                and item['name'] == self.document['node_type']), None)
         try:
             value = self.convert_properties(value, node_type['dyn_schema'])
         except Exception, e:
             print ("Error converting: {0}".format(e))
-        #print (value)
 
         v = Validator(node_type['dyn_schema'])
         val = v.validate(value)
@@ -309,7 +309,6 @@ def check_permissions(resource, method, append_allowed_methods=False):
         resource_permissions = resource['permissions']
     else:
         resource_permissions = None
-
     if 'node_type' in resource:
         if type(resource['node_type']) is dict:
             # If the node_type is embedded in the document, extract permissions
@@ -318,8 +317,18 @@ def check_permissions(resource, method, append_allowed_methods=False):
         else:
             # If the node_type is referenced with an ObjectID (was not embedded on
             # request) query for if from the database and get the permissions
-            node_types_collection = app.data.driver.db['node_types']
-            node_type = node_types_collection.find_one(resource['node_type'])
+
+            # node_types_collection = app.data.driver.db['node_types']
+            # node_type = node_types_collection.find_one(resource['node_type'])
+
+            if type(resource['project']) is dict:
+                project = resource['project']
+            else:
+                projects_collection = app.data.driver.db['projects']
+                project = projects_collection.find_one(resource['project'])
+            node_type = next(
+                (item for item in project['node_types'] if item.get('name') \
+                    and item['name'] == resource['node_type']), None)
             computed_permissions = node_type['permissions']
     else:
         computed_permissions = None
@@ -449,6 +458,8 @@ app.on_fetched_item_node_types += before_returning_item_permissions
 app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
 app.on_insert_nodes += before_inserting_nodes
+app.on_fetched_item_projects += before_returning_item_permissions
+app.on_fetched_resource_projects += before_returning_resource_permissions
 
 def post_GET_user(request, payload):
     json_data = json.loads(payload.data)

@@ -103,7 +103,5 @@ node_type_task = {
         'is_open': {},
         'is_processing': {},
     },
-    'parent': {
-        'node_types': ['shot'],
-    }
+    'parent': ['shot']
 }

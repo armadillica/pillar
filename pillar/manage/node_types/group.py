@@ -1,9 +1,7 @@
 node_type_group = {
     'name': 'group',
-    'description': 'Generic group node type',
-    'parent': {
-        'node_types': ['group', 'project']
-    },
+    'description': 'Generic group node type edited',
+    'parent': ['group', 'project'],
     'dyn_schema': {
         # Used for sorting within the context of a group
         'order': {
