@@ -9,7 +9,6 @@ from flask import jsonify
 from flask import send_from_directory
 from eve.methods.put import put_internal
 from application import app
-from application import post_item
 from application.utils.imaging import generate_local_thumbnails
 from application.utils.imaging import get_video_data
 from application.utils.imaging import ffmpeg_encode

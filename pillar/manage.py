@@ -5,8 +5,6 @@ from eve.methods.put import put_internal
 from eve.methods.post import post_internal
 from flask.ext.script import Manager
 from application import app
-from application import db
-from application import post_item
 from manage.node_types.act import node_type_act
 from manage.node_types.asset import node_type_asset
 from manage.node_types.blog import node_type_blog
@@ -49,6 +47,10 @@ def runserver():
         port=PORT,
         host=HOST,
         debug=DEBUG)
+
+
+def post_item(entry, data):
+    return post_internal(entry, data)
 
 
 def put_item(collection, item):

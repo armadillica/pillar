@@ -1,6 +1,7 @@
 import os
 import time
 import datetime
+import bugsnag
 from gcloud.storage.client import Client
 from gcloud.exceptions import NotFound
 from oauth2client.client import SignedJwtAssertionCredentials
@@ -149,3 +150,51 @@ class GoogleCloudStorageBucket(object):
         """
         blob.content_disposition = "attachment; filename={0}".format(name)
         blob.patch()
+
+
+def update_file_name(item):
+    """Assign to the CGS blob the same name of the asset node. This way when
+    downloading an asset we get a human-readable name.
+    """
+
+    def _format_name(name, format, size=None):
+        # If the name already has an extention, and such extension matches the
+        # format, only inject the size.
+        root, ext = os.path.splitext(name)
+        size = "-{0}".format(size) if size else ''
+        ext = ext if len(ext) > 1 and ext[1:] == format else ".{0}".format(format)
+        return "{0}{1}{2}".format(root, size, ext)
+
+    def _update_name(item, file_id):
+        files_collection = app.data.driver.db['files']
+        f = files_collection.find_one({'_id': file_id})
+        status = item['properties']['status']
+        if f and f['backend'] == 'gcs' and status != 'processing':
+            # Process only files that are on GCS and that are not processing
+            try:
+                storage = GoogleCloudStorageBucket(str(item['project']))
+                blob = storage.Get(f['file_path'], to_dict=False)
+                name = _format_name(item['name'], f['format'])
+                storage.update_name(blob, name)
+                try:
+                    # Assign the same name to variations
+                    for v in f['variations']:
+                        blob = storage.Get(v['file_path'], to_dict=False)
+                        name = _format_name(item['name'], v['format'], v['size'])
+                        storage.update_name(blob, name)
+                except KeyError:
+                    pass
+            except AttributeError:
+                bugsnag.notify(Exception('Missing or conflicting ids detected'),
+                    meta_data={'nodes_info':
+                        {'node_id': item['_id'], 'file_id': file_id}})
+
+    # Currently we search for 'file' and 'files' keys in the object properties.
+    # This could become a bit more flexible and realy on a true reference of the
+    # file object type from the schema.
+    if 'file' in item['properties']:
+        _update_name(item, item['properties']['file'])
+
+    elif 'files' in item['properties']:
+        for f in item['properties']['files']:
+            _update_name(item, f['file'])
