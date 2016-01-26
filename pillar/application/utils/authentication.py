@@ -1,3 +1,4 @@
+import os
 import requests
 from datetime import datetime
 from datetime import timedelta
@@ -5,9 +6,9 @@ from flask import g
 from flask import request
 from flask import url_for
 from flask import abort
+from eve.methods.post import post_internal
 
-from eve.auth import TokenAuth
-from eve.auth import BasicAuth
+from application import app
 
 class SystemUtility():
     def __new__(cls, *args, **kwargs):
@@ -135,12 +136,3 @@ def validate_token():
 
     setattr(g, 'current_user', current_user)
 
-
-class NewAuth(TokenAuth):
-    def check_auth(self, token, allowed_roles, resource, method):
-        if not token:
-            return False
-        else:
-            validate_token()
-
-        return True

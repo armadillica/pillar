@@ -9,11 +9,18 @@ from flask import request
 from flask import url_for
 from flask import abort
 from eve import Eve
+from eve.auth import TokenAuth
 from eve.io.mongo import Validator
-from application.utils.authentication import validate_token
-from application.utils.authentication import NewAuth
 
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
+
+class NewAuth(TokenAuth):
+    def check_auth(self, token, allowed_roles, resource, method):
+        if not token:
+            return False
+        else:
+            validate_token()
+        return True
 
 class ValidateCustomFields(Validator):
     def convert_properties(self, properties, node_schema):
@@ -88,6 +95,7 @@ bugsnag.configure(
 )
 handle_exceptions(app)
 
+from application.utils.authentication import validate_token
 from application.utils.authorization import check_permissions
 from application.utils.cdn import hash_file_path
 from application.utils.gcs import GoogleCloudStorageBucket
@@ -176,6 +184,27 @@ def resource_parse_attachments(response):
     for item in response['_items']:
         item_parse_attachments(item)
 
+def project_node_type_has_method(response):
+    """Check for a specific request arg, and check generate the allowed_methods
+    list for the required node_type.
+    """
+    try:
+        node_type_name = request.args['node_type']
+    except KeyError:
+        return
+    # Proceed only node_type has been requested
+    if node_type_name:
+        # Look up the node type in the project document
+        node_type = next(
+            (item for item in response['node_types'] if item.get('name') \
+                and item['name'] == node_type_name), None)
+        if not node_type:
+            return abort(404)
+        # Check permissions and append the allowed_methods to the node_type
+        if not check_permissions(node_type, 'GET', append_allowed_methods=True):
+            return abort(403)
+
+
 app.on_fetched_item_nodes += before_returning_item_permissions
 app.on_fetched_item_nodes += item_parse_attachments
 app.on_fetched_resource_nodes += before_returning_resource_permissions
@@ -185,6 +214,7 @@ app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
 app.on_insert_nodes += before_inserting_nodes
 app.on_fetched_item_projects += before_returning_item_permissions
+app.on_fetched_item_projects += project_node_type_has_method
 app.on_fetched_resource_projects += before_returning_resource_permissions
 
 def post_GET_user(request, payload):
