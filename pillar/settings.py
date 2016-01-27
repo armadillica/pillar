@@ -416,7 +416,7 @@ files_schema = {
         # to join permissions from the project and verify user access.
         'type': 'objectid',
         'data_relation': {
-            'resource': 'nodes',
+            'resource': 'projects',
             'field': '_id',
             'embeddable': True
         },
