@@ -115,9 +115,8 @@ def resize_and_crop(img_path, modified_path, size, crop_type='middle'):
 
 
 def get_video_data(filepath):
-
-    outdata = False
-
+    """Return video duration and resolution given an input file path"""
+    outdata = None
     ffprobe_ouput = json.loads(
         subprocess.check_output(
             [app.config['BIN_FFPROBE'],
@@ -127,20 +126,25 @@ def get_video_data(filepath):
             filepath,
             '-print_format',
             'json']))
-    video = ffprobe_ouput['streams'][0]
 
-    if video['codec_type'] == 'video':
+    video_stream = None
+    # Loop throught audio and video streams searching for the video
+    for stream in ffprobe_ouput['streams']:
+        if stream['codec_type'] == 'video':
+            video_stream = stream
+
+    if video_stream:
         # If video is webm we can't get the duration (seems to be an ffprobe issue)
-        if video['codec_name'] == 'vp8':
+        if video_stream['codec_name'] == 'vp8':
             duration = None
         else:
-            duration = int(float(video['duration']))
+            duration = int(float(video_stream['duration']))
         outdata = dict(
             duration = duration,
-            res_x = video['width'],
-            res_y = video['height'],
+            res_x = video_stream['width'],
+            res_y = video_stream['height'],
             )
-        if video['sample_aspect_ratio'] != '1:1':
+        if video_stream['sample_aspect_ratio'] != '1:1':
             print '[warning] Pixel aspect ratio is not square!'
 
     return outdata
