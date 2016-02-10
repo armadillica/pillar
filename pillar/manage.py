@@ -550,5 +550,14 @@ def test_post_internal(node_id):
     print post_internal('nodes', node)
 
 
+@manager.command
+def algolia_push_users():
+    """Loop through all users and push them to Algolia"""
+    from application.utils.algolia import algolia_index_user_save
+    users_collection = app.data.driver.db['users']
+    for user in users_collection.find():
+        print "Pushing {0}".format(user['username'])
+        algolia_index_user_save(user)
+
 if __name__ == '__main__':
     manager.run()

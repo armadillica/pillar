@@ -42,7 +42,7 @@ users_schema = {
     },
     'roles': {
         'type': 'list',
-        'allowed': ["admin", "subscriber"],
+        'allowed': ["admin", "subscriber", "demo"],
     },
     'groups': {
         'type': 'list',

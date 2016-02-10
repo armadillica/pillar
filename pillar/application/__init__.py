@@ -4,6 +4,7 @@ from bson import ObjectId
 from datetime import datetime
 import bugsnag
 from bugsnag.flask import handle_exceptions
+from algoliasearch import algoliasearch
 from flask import g
 from flask import request
 from flask import url_for
@@ -95,11 +96,21 @@ bugsnag.configure(
 )
 handle_exceptions(app)
 
+# Algolia search
+if 'ALGOLIA_USER' in app.config:
+    client = algoliasearch.Client(
+            app.config['ALGOLIA_USER'],
+            app.config['ALGOLIA_API_KEY'])
+    algolia_index_users = client.init_index(app.config['ALGOLIA_INDEX_USERS'])
+else:
+    algolia_index_users = None
+
 from application.utils.authentication import validate_token
 from application.utils.authorization import check_permissions
 from application.utils.cdn import hash_file_path
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.gcs import update_file_name
+from application.utils.algolia import algolia_index_user_save
 
 
 def before_returning_item_permissions(response):
@@ -226,7 +237,12 @@ def post_GET_user(request, payload):
     #     compute_permissions(json_data['_id'], app.data.driver)
     payload.data = json.dumps(json_data)
 
+def after_replacing_user(item, original):
+    """Push an update to the Algolia index when a user item is updated"""
+    algolia_index_user_save(item)
+
 app.on_post_GET_users += post_GET_user
+app.on_replace_users += after_replacing_user
 
 from modules.file_storage import process_file
 from modules.file_storage import delete_file
