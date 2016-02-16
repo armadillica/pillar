@@ -62,8 +62,8 @@ def put_item(collection, item):
     # print type(item_id)
     p = put_internal(collection, item, **{'_id': item_id})
     if p[0]['_status'] == 'ERR':
-        print p
-        print item
+        print(p)
+        print(item)
 
 
 @manager.command
