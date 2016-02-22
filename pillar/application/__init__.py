@@ -5,11 +5,13 @@ from datetime import datetime
 import bugsnag
 from bugsnag.flask import handle_exceptions
 from algoliasearch import algoliasearch
+from zencoder import Zencoder
 from flask import g
 from flask import request
 from flask import url_for
 from flask import abort
 from eve import Eve
+
 from eve.auth import TokenAuth
 from eve.io.mongo import Validator
 
@@ -104,6 +106,12 @@ if 'ALGOLIA_USER' in app.config:
     algolia_index_users = client.init_index(app.config['ALGOLIA_INDEX_USERS'])
 else:
     algolia_index_users = None
+
+# Encoding backend
+if app.config['ENCODING_BACKEND'] == 'zencoder':
+    encoding_service_client = Zencoder(app.config['ZENCODER_API_KEY'])
+else:
+    encoding_service_client = None
 
 from application.utils.authentication import validate_token
 from application.utils.authorization import check_permissions
@@ -302,3 +310,6 @@ app.on_delete_item_files += before_deleting_file
 from modules.file_storage import file_storage
 #from modules.file_storage.serve import *
 app.register_blueprint(file_storage, url_prefix='/storage')
+# The encoding module (receive notification and report progress)
+from modules.encoding import encoding
+app.register_blueprint(encoding, url_prefix='/encoding')

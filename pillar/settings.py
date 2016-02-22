@@ -349,20 +349,6 @@ files_schema = {
     'description': {
         'type': 'string',
     },
-    # If the object has a parent, it is a variation of its parent. When querying
-    # for a file we are going to check if the object does NOT have a parent. In
-    # this case we will query for all files with the ObjectID as parent and we
-    # will aggregate them according of the type (if it's an image we will use
-    # some prefix, if it's a video we will combine the contentType and a custom
-    # prefix, such as 720p)
-    'parent': {
-        'type': 'objectid',
-         'data_relation': {
-            'resource': 'files',
-            'field': '_id',
-            'embeddable': True
-         },
-    },
     'content_type': { # MIME type image/png video/mp4
         'type': 'string',
         'required': True,
@@ -459,20 +445,22 @@ files_schema = {
             }
         }
     },
-    'previews': { # Deprecated (see comments above)
-        'type': 'list',
+    'processing': {
+        'type': 'dict',
         'schema': {
-            'type': 'objectid',
-            'data_relation': {
-                'resource': 'files',
-                'field': '_id',
-                'embeddable': True
-            }
+            'job_id': {
+                'type': 'string' # can be int, depending on the backend
+            },
+            'backend': {
+                'type': 'string',
+                'allowed': ["zencoder", "local"]
+            },
+            'status': {
+                'type': 'string',
+                'allowed': ["pending", "waiting", "processing", "finished",
+                    "failed", "cancelled"]
+            },
         }
-    },
-    # Preview parameters:
-    'is_preview': { # Deprecated
-        'type': 'boolean'
     }
 }
 

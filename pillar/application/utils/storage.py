@@ -78,4 +78,3 @@ def push_to_storage(project_id, full_path, backend='cgs'):
         else:
             raise IOError('ERROR: path not found')
 
-    pass

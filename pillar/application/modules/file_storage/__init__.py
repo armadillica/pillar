@@ -15,6 +15,7 @@ from application.utils.imaging import ffmpeg_encode
 from application.utils.storage import remote_storage_sync
 from application.utils.storage import push_to_storage
 from application.utils.gcs import GoogleCloudStorageBucket
+from application.utils.encoding import Encoder
 
 file_storage = Blueprint('file_storage', __name__,
                         template_folder='templates',
@@ -123,7 +124,8 @@ def process_file(src_file):
         src_file.pop(field, None)
 
     files_collection = app.data.driver.db['files']
-    file_abs_path = os.path.join(app.config['SHARED_DIR'], src_file['name'][:2], src_file['name'])
+    file_abs_path = os.path.join(
+        app.config['SHARED_DIR'], src_file['name'][:2], src_file['name'])
 
     src_file['length'] = os.stat(file_abs_path).st_size
     content_type = src_file['content_type'].split('/')
@@ -180,26 +182,45 @@ def process_file(src_file):
             # Append file variation
             src_file['variations'].append(file_variation)
 
-        def encode(src, variations, res_y):
+        def encode(src_path, src_file, res_y):
             # For every variation in the list call video_encode
             # print "encoding {0}".format(variations)
-            for v in variations:
-                path = ffmpeg_encode(file_abs_path, v['format'], res_y)
-                # Update size data after encoding
-                v['length'] = os.stat(path).st_size
+            if app.config['ENCODING_BACKEND'] == 'zencoder':
+                # Move the source file in place on the remote storage (which can
+                # be accessed from zencoder)
+                push_to_storage(str(src_file['project']), src_path)
+                j = Encoder.job_create(src_file)
+                try:
+                    if j:
+                        src_file['processing'] = dict(
+                            status='pending',
+                            job_id="{0}".format(j['process_id']),
+                            backend=j['backend'])
+                        # Add the processing status to the file object
+                        r = put_internal('files',
+                            src_file, **{'_id': ObjectId(file_id)})
+                        pass
+                except KeyError:
+                    pass
+            elif app.config['ENCODING_BACKEND'] == 'local':
+                for v in src_file['variations']:
+                    path = ffmpeg_encode(src_path, v['format'], res_y)
+                    # Update size data after encoding
+                    v['length'] = os.stat(path).st_size
 
-            r = put_internal('files', src_file, **{'_id': ObjectId(file_id)})
-            # When all encodes are done, delete source file
-            sync_path = os.path.split(file_abs_path)[0]
-            push_to_storage(str(src_file['project']), sync_path)
+                r = put_internal('files', src_file, **{'_id': ObjectId(file_id)})
+                # When all encodes are done, delete source file
+                sync_path = os.path.split(src_path)[0]
+                push_to_storage(str(src_file['project']), sync_path)
 
-        p = Process(target=encode, args=(file_abs_path, src_file['variations'], res_y))
+        p = Process(target=encode, args=(file_abs_path, src_file, res_y))
         p.start()
     if mime_type != 'video':
         # Sync the whole subdir
         sync_path = os.path.split(file_abs_path)[0]
         # push_to_storage(str(src_file['project']), sync_path)
-        p = Process(target=push_to_storage, args=(str(src_file['project']), sync_path))
+        p = Process(target=push_to_storage, args=(
+            str(src_file['project']), sync_path))
         p.start()
     else:
         sync_path = file_abs_path

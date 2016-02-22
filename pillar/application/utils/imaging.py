@@ -204,4 +204,3 @@ def ffmpeg_encode(src, format, res_y=720):
     # return path of the encoded video
     return dst
 
-
