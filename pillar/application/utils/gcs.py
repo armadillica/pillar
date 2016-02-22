@@ -2,6 +2,7 @@ import os
 import time
 import datetime
 import bugsnag
+from bson import ObjectId
 from gcloud.storage.client import Client
 from gcloud.exceptions import NotFound
 from oauth2client.client import SignedJwtAssertionCredentials
@@ -167,7 +168,7 @@ def update_file_name(item):
 
     def _update_name(item, file_id):
         files_collection = app.data.driver.db['files']
-        f = files_collection.find_one({'_id': file_id})
+        f = files_collection.find_one({'_id': ObjectId(file_id)})
         status = item['properties']['status']
         if f and f['backend'] == 'gcs' and status != 'processing':
             # Process only files that are on GCS and that are not processing
