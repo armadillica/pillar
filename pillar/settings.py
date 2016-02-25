@@ -693,6 +693,6 @@ DOMAIN = {
 
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
 MONGO_PORT = os.environ.get('MONGO_PORT', 27017)
-MONGO_DBNAME = os.environ.get('MONGO_DBNAME', 'pillar')
+MONGO_DBNAME = os.environ.get('MONGO_DBNAME', 'eve')
 CACHE_EXPIRES = 60
 HATEOAS = False
