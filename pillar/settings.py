@@ -468,29 +468,6 @@ groups_schema = {
     'name': {
         'type': 'string',
         'required': True
-    },
-    'permissions': {
-        'type': 'list',
-        'required': True,
-        'schema': {
-            'type': 'dict',
-            'schema': {
-                'node_type': {
-                    'type': 'objectid',
-                    'required': True,
-                    'data_relation': {
-                        'resource': 'node_types',
-                        'field': '_id',
-                        'embeddable': True
-                    }
-                },
-                'permissions': {
-                    'type': 'list',
-                    'required': True,
-                    'allowed': ['GET', 'POST', 'UPDATE', 'DELETE']
-                }
-            }
-        }
     }
 }
 
@@ -716,5 +693,6 @@ DOMAIN = {
 
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
 MONGO_PORT = os.environ.get('MONGO_PORT', 27017)
+MONGO_DBNAME = os.environ.get('MONGO_DBNAME', 'pillar')
 CACHE_EXPIRES = 60
 HATEOAS = False

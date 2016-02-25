@@ -67,6 +67,42 @@ def put_item(collection, item):
 
 
 @manager.command
+def setup_db():
+    """Setup the database
+    - Create admin, subscriber and demo Group collection
+    - Create admin user (must use valid blender-id credentials)
+    - Create one project
+    """
+    # groups_collection = app.data.driver.db['groups']
+    groups_list = []
+    for group in ['admin', 'subscriber', 'demo']:
+        g = {'name': group}
+        g = post_internal('groups', g)
+        groups_list.append(g[0]['_id'])
+        print("Creating group {0}".format(group))
+
+    while True:
+        admin_username = raw_input('Admin email:')
+        if len(admin_username) < 1:
+            print ("Username is too short")
+        else:
+            break
+
+    user = dict(
+        username=admin_username,
+        groups=groups_list,
+        roles=['admin', 'subscriber', 'demo'],
+        settings=dict(email_communications=1),
+        auth=[],
+        full_name=admin_username,
+        email=admin_username,
+        )
+    user = post_internal('users', user)
+    print("Created user {0}".format(user[0]['_id']))
+
+    # TODO: Create a default project
+
+@manager.command
 def clear_db():
     """Wipes the database
     """
@@ -89,16 +125,6 @@ def upgrade_node_types():
     for node_type in node_types:
         old_ids[node_type['name']] = node_type['_id']
     populate_node_types(old_ids)
-
-
-def get_id(collection, name):
-    """Returns the _id of the given collection and name"""
-    from pymongo import MongoClient
-    client = MongoClient(MONGO_HOST, 27017)
-    db = client.eve
-    node = db[collection].find({'name': name})
-    print (node[0]['_id'])
-    return node[0]['_id']
 
 
 @manager.command
@@ -262,52 +288,6 @@ def add_parent_to_nodes():
 
     print "Edited {0} nodes".format(nodes_index)
     print "Orphan {0} nodes".format(nodes_orphan)
-
-
-@manager.command
-def embed_children_in_files():
-    """Embed children file objects in to their parent"""
-    files_collection = app.data.driver.db['files']
-    for f in files_collection.find():
-        # Give some feedback
-        print "processing {0}".format(f['_id'])
-        # Proceed only if the node is a child
-        file_id = f['_id']
-        if 'parent' in f:
-            # Get the parent node
-            parent = files_collection.find_one({'_id': f['parent']})
-            if not parent:
-                print "No parent found for {0}".format(file_id)
-                files_collection.remove({'_id': file_id})
-                continue
-            parent_id = parent['_id']
-            # Prepare to loop through the properties required for a variation
-            properties = ['content_type', 'duration', 'size', 'format', 'width',
-                'height', 'length', 'md5', 'file_path']
-            variation = {}
-            # Build dict with variation properties
-            for p in properties:
-                if p in f:
-                    variation[p] = f[p]
-
-            # the variation was generated
-            if variation:
-                # If the parent file does not have a variation property
-                if 'variations' not in parent:
-                    parent['variations'] = []
-                # Append the variation to the variations
-                parent['variations'].append(variation)
-
-            # Removed internal fields that would cause validation error
-            internal_fields = ['_id', '_etag', '_updated', '_created']
-            for field in internal_fields:
-                parent.pop(field, None)
-            p = put_internal('files', parent, **{'_id': parent_id})
-            if p[0]['_status'] == 'ERR':
-                print p[0]['_issues']
-                print "PARENT: {0}".format(parent)
-                print "VARIATION: {0}".format(variation)
-                return
 
 
 @manager.command

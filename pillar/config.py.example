@@ -1,36 +1,39 @@
-import os
-class Config(object):
-    # Configured for GMAIL
-    MAIL_SERVER = ''
-    MAIL_PORT = 465
-    MAIL_USE_SSL = True
-    MAIL_USERNAME = ''
-    MAIL_PASSWORD = ''
-    DEFAULT_MAIL_SENDER = ''
-    RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
-
-
-class Development(Config):
-    SCHEME = 'http'
-    STORAGE_DIR = '{0}/application/static/storage'.format(
-        os.path.join(os.path.dirname(__file__)))
-    SHARED_DIR = '/storage/shared'
-    USE_X_SENDFILE = False
+class Development(object):
     PORT = 5000
     HOST = '0.0.0.0'
+    SCHEME = 'http'
     DEBUG = True
-    CDN_USE_URL_SIGNING = False
-    CDN_SERVICE_DOMAIN_PROTOCOL = 'https'
-    CDN_SERVICE_DOMAIN = ''
-    CDN_CONTENT_SUBFOLDER = ''
-    CDN_URL_SIGNING_KEY = ''
+    RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
+    BUGSNAG_API_KEY = ''
 
+    # Settings for storage
+    STORAGE_DIR = '/data/storage/pillar'
+    SHARED_DIR = '/data/storage/shared'
+    USE_X_SENDFILE = False
+
+    # Fill in only if we are going to use a CDN-attached storage solution.
+    # Currently we use GCS and do not have enough traffic to justify that
     CDN_STORAGE_USER = ''
     CDN_STORAGE_ADDRESS = ''
     CDN_SYNC_LOGS = ''
     CDN_RSA_KEY = ''
     CDN_KNOWN_HOSTS = ''
 
+    # Credentials to access project on the Google Cloud where Google Cloud
+    # Storage is enabled (Pillar will automatically create and manage buckets)
+    GCS_CLIENT_EMAIL = ''
+    GCS_PRIVATE_KEY_P12 = ''
+    GCS_PRIVATE_KEY_PEM = ''
+    CGS_PROJECT_NAME = ''
+
+    # Fill in only if we plan to sign our urls using a the CDN
+    CDN_USE_URL_SIGNING = False
+    CDN_SERVICE_DOMAIN_PROTOCOL = 'https'
+    CDN_SERVICE_DOMAIN = ''
+    CDN_CONTENT_SUBFOLDER = ''
+    CDN_URL_SIGNING_KEY = ''
+
+    # Settings for image processing (good defaults, should not be altered)
     UPLOADS_LOCAL_STORAGE_THUMBNAILS = {
         's': {'size': (90, 90), 'crop': True},
         'b': {'size': (160, 160), 'crop': True},
@@ -40,15 +43,24 @@ class Development(Config):
         'h': {'size': (2048, 2048), 'crop': False}
     }
 
+    # Settings for encoder (local will run FFMPEG on the server and is discouraged
+    # for production setups)
+    ENCODING_BACKEND = 'zencoder' #local, flamenco
+
+    # Zencoder is a production ready encoding solution
+    ZENCODER_API_KEY = ''
+    ZENCODER_NOTIFICATIONS_SECRET = ''
+    ZENCODER_NOTIFICATIONS_URL = 'http://zencoderfetcher/'
+
     BIN_FFPROBE ='/usr/bin/ffprobe'
     BIN_FFMPEG = '/usr/bin/ffmpeg'
     BIN_SSH = '/usr/bin/ssh'
     BIN_RSYNC = '/usr/bin/rsync'
 
+    # Settings for indexing (currently only Algolia is supported)
+    ALGOLIA_USER = ''
+    ALGOLIA_API_KEY = ''
+    ALGOLIA_INDEX_USERS = ''
 
-    GCS_CLIENT_EMAIL = ''
-    GCS_PRIVATE_KEY_P12 = ''
-    GCS_PRIVATE_KEY_PEM = ''
-    CGS_PROJECT_NAME = ''
 
 class Deployment(Development): pass
