@@ -91,6 +91,12 @@ def build_thumbnails(file_path=None, file_id=None):
             md5=thumbnail['md5'],
             file_path=basename,
             )
+        # XXX Inject is_public for size 't' (should be part of the upload),
+        # and currently we set it here and then on the fly during blob
+        # creation by simply parsing the extension of the filename. This is
+        # bad.
+        if size == 't':
+            file_variation['is_public'] = True
 
         file_variations.append(file_variation)
 

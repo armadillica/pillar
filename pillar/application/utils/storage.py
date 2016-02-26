@@ -65,7 +65,12 @@ def push_to_storage(project_id, full_path, backend='cgs'):
     def push_single_file(project_id, full_path, backend):
         if backend == 'cgs':
             storage = GoogleCloudStorageBucket(project_id, subdir='_')
-            storage.Post(full_path)
+            blob = storage.Post(full_path)
+            # XXX Make public on the fly if it's an image and small preview.
+            # This should happen by reading the database (push to storage
+            # should change to accomodate it).
+            if full_path.endswith('-t.jpg'):
+                blob.make_public()
             os.remove(full_path)
 
     if os.path.isfile(full_path):
