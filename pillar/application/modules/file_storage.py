@@ -7,6 +7,7 @@ from flask import Blueprint
 from flask import abort
 from flask import jsonify
 from flask import send_from_directory
+from flask import url_for
 from eve.methods.put import put_internal
 from application import app
 from application.utils.imaging import generate_local_thumbnails
@@ -14,6 +15,7 @@ from application.utils.imaging import get_video_data
 from application.utils.imaging import ffmpeg_encode
 from application.utils.storage import remote_storage_sync
 from application.utils.storage import push_to_storage
+from application.utils.cdn import hash_file_path
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.encoding import Encoder
 
@@ -222,8 +224,6 @@ def process_file(src_file):
         p = Process(target=push_to_storage, args=(
             str(src_file['project']), sync_path))
         p.start()
-    else:
-        sync_path = file_abs_path
 
     # Update the original file with additional info, e.g. image resolution
     r = put_internal('files', src_file, **{'_id': ObjectId(file_id)})
@@ -251,3 +251,25 @@ def delete_file(file_item):
     # Finally remove the original file
     process_file_delete(file_item)
 
+
+def generate_link(backend, file_path, project_id=None, is_public=False):
+    """Hook to check the backend of a file resource, to build an appropriate link
+    that can be used by the client to retrieve the actual file.
+    """
+    if backend == 'gcs':
+        storage = GoogleCloudStorageBucket(project_id)
+        blob = storage.Get(file_path)
+        if blob and not is_public:
+            link = blob['signed_url']
+        elif blob and is_public:
+            link = blob['public_url']
+        else:
+            link = None
+    elif backend == 'pillar':
+        link = url_for('file_storage.index', file_name=file_path, _external=True,
+        _scheme=app.config['SCHEME'])
+    elif backend == 'cdnsun':
+        link = hash_file_path(file_path, None)
+    else:
+        link = None
+    return link

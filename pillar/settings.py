@@ -20,7 +20,6 @@ _file_embedded_schema = {
     }
 }
 
-
 users_schema = {
     'full_name': {
         'type': 'string',
@@ -412,6 +411,9 @@ files_schema = {
         'schema': {
             'type': 'dict',
             'schema': {
+                'is_public': { # If True, the link will not be hashed or signed
+                    'type': 'boolean'
+                },
                 'content_type': { # MIME type image/png video/mp4
                     'type': 'string',
                     'required': True,

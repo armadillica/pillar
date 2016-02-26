@@ -104,8 +104,10 @@ if 'ALGOLIA_USER' in app.config:
             app.config['ALGOLIA_USER'],
             app.config['ALGOLIA_API_KEY'])
     algolia_index_users = client.init_index(app.config['ALGOLIA_INDEX_USERS'])
+    algolia_index_nodes = client.init_index(app.config['ALGOLIA_INDEX_NODES'])
 else:
     algolia_index_users = None
+    algolia_index_nodes = None
 
 # Encoding backend
 if app.config['ENCODING_BACKEND'] == 'zencoder':
@@ -115,10 +117,12 @@ else:
 
 from application.utils.authentication import validate_token
 from application.utils.authorization import check_permissions
-from application.utils.cdn import hash_file_path
-from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.gcs import update_file_name
 from application.utils.algolia import algolia_index_user_save
+from application.utils.algolia import algolia_index_node_save
+from modules.file_storage import process_file
+from modules.file_storage import delete_file
+from modules.file_storage import generate_link
 
 
 def before_returning_item_permissions(response):
@@ -135,6 +139,10 @@ def before_returning_resource_permissions(response):
 def before_replacing_node(item, original):
     check_permissions(original, 'PUT')
     update_file_name(item)
+
+def after_replacing_node(item, original):
+    """Push an update to the Algolia index when a node item is updated"""
+    algolia_index_node_save(item)
 
 def before_inserting_nodes(items):
     """Before inserting a node in the collection we check if the user is allowed
@@ -231,6 +239,7 @@ app.on_fetched_resource_nodes += resource_parse_attachments
 app.on_fetched_item_node_types += before_returning_item_permissions
 app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
+app.on_replaced_nodes += after_replacing_node
 app.on_insert_nodes += before_inserting_nodes
 app.on_fetched_item_projects += before_returning_item_permissions
 app.on_fetched_item_projects += project_node_type_has_method
@@ -252,9 +261,6 @@ def after_replacing_user(item, original):
 app.on_post_GET_users += post_GET_user
 app.on_replace_users += after_replacing_user
 
-from modules.file_storage import process_file
-from modules.file_storage import delete_file
-
 def post_POST_files(request, payload):
     """After an file object has been created, we do the necessary processing
     and further update it.
@@ -263,22 +269,6 @@ def post_POST_files(request, payload):
 
 app.on_post_POST_files += post_POST_files
 
-
-# Hook to check the backend of a file resource, to build an appropriate link
-# that can be used by the client to retrieve the actual file.
-def generate_link(backend, file_path, project_id=None):
-    if backend == 'gcs':
-        storage = GoogleCloudStorageBucket(project_id)
-        blob = storage.Get(file_path)
-        link = None if not blob else blob['signed_url']
-    elif backend == 'pillar':
-        link = url_for('file_storage.index', file_name=file_path, _external=True,
-        _scheme=app.config['SCHEME'])
-    elif backend == 'cdnsun':
-        link = hash_file_path(file_path, None)
-    else:
-        link = None
-    return link
 
 def before_returning_file(response):
     # TODO: add project id to all files

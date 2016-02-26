@@ -101,7 +101,9 @@ class GoogleCloudStorageBucket(object):
             name=os.path.basename(blob.name),
             size=blob.size,
             content_type=blob.content_type,
-            signed_url=blob.generate_signed_url(expiration, credentials=self.credentials_p12))
+            signed_url=blob.generate_signed_url(
+                expiration, credentials=self.credentials_p12),
+            public_url=blob.public_url)
 
 
     def Get(self, path, to_dict=True):
