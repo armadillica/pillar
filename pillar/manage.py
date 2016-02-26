@@ -573,7 +573,7 @@ def files_make_public_t():
                         blob.make_public()
                     except InternalServerError:
                         print("Internal Server Error")
-                    else:
+                    except Exception:
                         pass
 
 
