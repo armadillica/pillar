@@ -572,6 +572,8 @@ def files_make_public_t():
                         print("Making blob public: {0}".format(blob.path))
                         blob.make_public()
                     except InternalServerError:
+                        print("Internal Server Error")
+                    else:
                         pass
 
 
