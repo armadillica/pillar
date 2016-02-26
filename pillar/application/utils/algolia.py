@@ -54,12 +54,13 @@ def algolia_index_node_save(node):
             files_collection = app.data.driver.db['files']
             lookup = {'_id': ObjectId(node['picture'])}
             picture = files_collection.find_one(lookup)
-            variation_t = next((item for item in picture['variations'] \
-                if item['size'] == 't'), None)
-            if variation_t:
-                node_ob['picture'] = generate_link(picture['backend'],
-                    variation_t['file_path'], project_id=str(picture['project']),
-                    is_public=True)
+            if picture['backend'] == 'gcs':
+                variation_t = next((item for item in picture['variations'] \
+                    if item['size'] == 't'), None)
+                if variation_t:
+                    node_ob['picture'] = generate_link(picture['backend'],
+                        variation_t['file_path'], project_id=str(picture['project']),
+                        is_public=True)
         # If the node has world permissions, compute the Free permission
         if 'permissions' in node and 'world' in node['permissions']:
             if 'GET' in node['permissions']:

@@ -310,7 +310,7 @@ def make_project_public(project_id):
     nodes_collection = app.data.driver.db['nodes']
     for n in nodes_collection.find({'project': ObjectId(project_id)}):
         n['properties']['status'] = 'published'
-        print "Publishing {0} {1}".format(n['_id'], n['name'])
+        print u"Publishing {0} {1}".format(n['_id'], n['name'].encode('ascii', 'ignore'))
         if not DRY_RUN:
             put_item('nodes', n)
 
@@ -408,7 +408,8 @@ def convert_assets_to_textures(project_id):
             processed_nodes.append(n)
         elif n_type['name'] == 'group':
             # Change group type to texture group
-            node_type_texture = node_types_collection.find_one({'name':'group_texture'})
+            node_type_texture = node_types_collection.find_one(
+                {'name':'group_texture'})
             n['node_type'] = node_type_texture['_id']
             n['properties'].pop('notes', None)
             print "Updating {0}".format(n['name'])
@@ -538,6 +539,36 @@ def algolia_push_users():
     for user in users_collection.find():
         print "Pushing {0}".format(user['username'])
         algolia_index_user_save(user)
+
+
+@manager.command
+def algolia_push_nodes():
+    """Loop through all nodes and push them to Algolia"""
+    from application.utils.algolia import algolia_index_node_save
+    nodes_collection = app.data.driver.db['nodes']
+    for node in nodes_collection.find():
+        print u"Pushing {0}: {1}".format(node['_id'], node['name'].encode(
+            'ascii', 'ignore'))
+        algolia_index_node_save(node)
+
+
+@manager.command
+def files_make_public_t():
+    """Loop through all files and if they are images on GCS, make the size t
+    public
+    """
+    from application.utils.gcs import GoogleCloudStorageBucket
+    files_collection = app.data.driver.db['files']
+    for f in files_collection.find({'backend': 'gcs'}):
+        if 'variations' in f:
+            variation_t = next((item for item in f['variations'] \
+                if item['size'] == 't'), None)
+            if variation_t:
+                storage = GoogleCloudStorageBucket(str(f['project']))
+                blob = storage.Get(variation_t['file_path'], to_dict=False)
+                if blob:
+                    blob.make_public()
+
 
 if __name__ == '__main__':
     manager.run()
