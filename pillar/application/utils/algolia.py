@@ -27,6 +27,11 @@ def algolia_index_user_save(user):
 def algolia_index_node_save(node):
     accepted_node_types = ['asset', 'texture', 'group']
     if node['node_type'] in accepted_node_types and algolia_index_nodes:
+        # If a nodes does not have status published, do not index
+        if 'status' in node['properties'] \
+            and node['properties']['status'] != 'published':
+            return
+
         projects_collection = app.data.driver.db['projects']
         project = projects_collection.find_one({'_id': ObjectId(node['project'])})
 
