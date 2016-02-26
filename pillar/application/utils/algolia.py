@@ -28,8 +28,10 @@ def algolia_index_node_save(node):
     accepted_node_types = ['asset', 'texture', 'group']
     if node['node_type'] in accepted_node_types and algolia_index_nodes:
         projects_collection = app.data.driver.db['projects']
-        lookup = {'_id': ObjectId(node['project'])}
-        project = projects_collection.find_one(lookup)
+        project = projects_collection.find_one({'_id': ObjectId(node['project'])})
+
+        users_collection = app.data.driver.db['users']
+        user = users_collection.find_one({'_id': ObjectId(node['user'])})
 
         node_ob = {
             'objectID': node['_id'],
@@ -37,6 +39,13 @@ def algolia_index_node_save(node):
             'project': {
                 '_id': project['_id'],
                 'name': project['name']
+                },
+            'created': node['_created'],
+            'updated': node['_updated'],
+            'node_type': node['node_type'],
+            'user': {
+                '_id': user['_id'],
+                'full_name': user['full_name']
                 },
             }
         if 'description' in node and node['description']:
@@ -51,5 +60,15 @@ def algolia_index_node_save(node):
                 node_ob['picture'] = generate_link(picture['backend'],
                     variation_t['file_path'], project_id=str(picture['project']),
                     is_public=True)
+        # If the node has world permissions, compute the Free permission
+        if 'permissions' in node and 'world' in node['permissions']:
+            if 'GET' in node['permissions']:
+                node_ob['is_free'] = True
+        # Append the media key if the node is of node_type 'asset'
+        if node['node_type'] == 'asset':
+            node_ob['media'] = node['properties']['content_type']
+        # Add tags
+        if 'tags' in node['properties']:
+            node_ob['tags'] = node['properties']['tags']
 
         algolia_index_nodes.save_object(node_ob)
