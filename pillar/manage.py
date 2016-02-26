@@ -557,6 +557,7 @@ def files_make_public_t():
     """Loop through all files and if they are images on GCS, make the size t
     public
     """
+    from gcloud.exceptions import InternalServerError
     from application.utils.gcs import GoogleCloudStorageBucket
     files_collection = app.data.driver.db['files']
     for f in files_collection.find({'backend': 'gcs'}):
@@ -567,7 +568,11 @@ def files_make_public_t():
                 storage = GoogleCloudStorageBucket(str(f['project']))
                 blob = storage.Get(variation_t['file_path'], to_dict=False)
                 if blob:
-                    blob.make_public()
+                    try:
+                        print("Making blob public: {0}".format(blob.path))
+                        blob.make_public()
+                    except InternalServerError:
+                        pass
 
 
 if __name__ == '__main__':
