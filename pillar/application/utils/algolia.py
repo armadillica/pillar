@@ -68,7 +68,7 @@ def algolia_index_node_save(node):
                         is_public=True)
         # If the node has world permissions, compute the Free permission
         if 'permissions' in node and 'world' in node['permissions']:
-            if 'GET' in node['permissions']:
+            if 'GET' in node['permissions']['world']:
                 node_ob['is_free'] = True
         # Append the media key if the node is of node_type 'asset'
         if node['node_type'] == 'asset':
