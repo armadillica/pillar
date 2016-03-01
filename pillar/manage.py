@@ -565,17 +565,21 @@ def files_make_public_t():
             variation_t = next((item for item in f['variations'] \
                 if item['size'] == 't'), None)
             if variation_t:
-                storage = GoogleCloudStorageBucket(str(f['project']))
-                blob = storage.Get(variation_t['file_path'], to_dict=False)
-                if blob:
-                    try:
-                        print("Making blob public: {0}".format(blob.path))
-                        blob.make_public()
-                    except InternalServerError:
-                        print("Internal Server Error")
-                    except Exception:
-                        pass
-
+                try:
+                    storage = GoogleCloudStorageBucket(str(f['project']))
+                    blob = storage.Get(variation_t['file_path'], to_dict=False)
+                    if blob:
+                        try:
+                            print("Making blob public: {0}".format(blob.path))
+                            blob.make_public()
+                        except InternalServerError:
+                            print("Internal Server Error")
+                        except Exception:
+                            pass
+                except InternalServerError:
+                    print("Internal Server Error")
+                except Exception:
+                    pass
 
 if __name__ == '__main__':
     manager.run()
