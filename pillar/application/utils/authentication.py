@@ -125,6 +125,13 @@ def validate_token():
 
 
 def make_unique_username(email):
+    """Creates a unique username from the email address.
+
+    @param email: the email address
+    @returns: the new username
+    @rtype: str
+    """
+
     username = email.split('@')[0]
     # Check for min length of username (otherwise validation fails)
     username = "___{0}".format(username) if len(username) < 3 else username
