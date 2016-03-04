@@ -42,10 +42,6 @@ class AuthenticationTests(unittest.TestCase):
             auth.create_new_user(TEST_EMAIL_ADDRESS, TEST_EMAIL_USER, 'test1234')
             self.assertEqual('%s1' % TEST_EMAIL_USER, auth.make_unique_username(TEST_EMAIL_ADDRESS))
 
-    def test_validate_token__not_logged_in(self):
-        with app.test_request_context():
-            self.assertFalse(auth.validate_token())
-
     def delete_test_data(self):
         app.data.driver.db.drop_collection('users')
         app.data.driver.db.drop_collection('tokens')
@@ -66,6 +62,11 @@ class AuthenticationTests(unittest.TestCase):
                                body=json.dumps({'data': {'user': {'email': TEST_EMAIL_ADDRESS, 'id': 5123}},
                                                 'status': 'success'}),
                                content_type="application/json")
+
+    @httpretty.activate
+    def test_validate_token__not_logged_in(self):
+        with app.test_request_context():
+            self.assertFalse(auth.validate_token())
 
     @httpretty.activate
     def test_validate_token__unknown_token(self):
