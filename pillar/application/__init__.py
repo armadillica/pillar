@@ -17,13 +17,11 @@ from eve.io.mongo import Validator
 
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
+
 class NewAuth(TokenAuth):
     def check_auth(self, token, allowed_roles, resource, method):
-        if not token:
-            return False
-        else:
-            validate_token()
-        return True
+        return validate_token()
+
 
 class ValidateCustomFields(Validator):
     def convert_properties(self, properties, node_schema):

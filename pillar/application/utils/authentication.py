@@ -54,13 +54,17 @@ def validate_token():
     """Validate the token provided in the request and populate the current_user
     flask.g object, so that permissions and access to a resource can be defined
     from it.
+
+    When the token is succesfully validated, sets `g.current_user` to contain
+    the user information.
+
+    @returns True iff the user is logged in with a valid Blender ID token.
     """
+
     if not request.authorization:
         # If no authorization headers are provided, we are getting a request
         # from a non logged in user. Proceed accordingly.
-        return None
-
-    current_user = {}
+        return False
 
     token = request.authorization.username
     tokens_collection = app.data.driver.db['tokens']
@@ -68,12 +72,12 @@ def validate_token():
     lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
     db_token = tokens_collection.find_one(lookup)
     if not db_token:
-        # If no valid token is found, we issue a new request to the Blender ID
-        # to verify the validity of the token. We will get basic user info if
-        # the user is authorized and we will make a new token.
+        # If no valid token is found in our local database, we issue a new request to the Blender ID
+        # server to verify the validity of the token passed via the HTTP header. We will get basic user info if
+        # the user is authorized, and we will store the token in our local database.
         validation = validate(token)
-        if validation is None or validation['status'] != 'success':
-            return None
+        if validation is None or validation.get('status', '') != 'success':
+            return False
 
         users = app.data.driver.db['users']
         email = validation['data']['user']['email']
@@ -81,20 +85,8 @@ def validate_token():
         username = make_unique_username(email)
 
         if not db_user:
-            user_data = {
-                'full_name': username,
-                'username': username,
-                'email': email,
-                'auth': [{
-                    'provider': 'blender-id',
-                    'user_id': str(validation['data']['user']['id']),
-                    'token': ''}],
-                'settings': {
-                    'email_communications': 1
-                }
-            }
-            r = post_internal('users', user_data)
-            user_id = r[0]['_id']
+            # We don't even know this user; create it on the fly.
+            user_id = create_new_user(email, username, validation['data']['user']['id'])
             groups = None
         else:
             user_id = db_user['_id']
@@ -111,7 +103,6 @@ def validate_token():
             token=token,
             groups=groups,
             token_expire_time=datetime.now() + timedelta(hours=1))
-        #return token_data
     else:
         users = app.data.driver.db['users']
         db_user = users.find_one(db_token['user'])
@@ -122,6 +113,34 @@ def validate_token():
             token_expire_time=db_token['expire_time'])
 
     g.current_user = current_user
+
+    return True
+
+
+def create_new_user(email, username, user_id):
+    """Creates a new user in our local database.
+
+    @param email: the user's email
+    @param username: the username, which is also used as full name.
+    @param user_id: the user ID from the Blender ID server.
+    @returns: the user ID from our local database.
+    """
+
+    user_data = {
+        'full_name': username,
+        'username': username,
+        'email': email,
+        'auth': [{
+            'provider': 'blender-id',
+            'user_id': str(user_id),
+            'token': ''}],
+        'settings': {
+            'email_communications': 1
+        }
+    }
+    r = post_internal('users', user_data)
+    user_id = r[0]['_id']
+    return user_id
 
 
 def make_unique_username(email):
