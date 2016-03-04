@@ -242,6 +242,10 @@ def delete_file(file_item):
         if file_item['backend'] == 'gcs':
             storage = GoogleCloudStorageBucket(str(file_item['project']))
             storage.Delete(file_item['file_path'])
+            # Delete any file variation found in the file_item document
+            if 'variations' in file_item:
+                for v in file_item['variations']:
+                    storage.Delete(v['file_path'])
             return True
         elif file_item['backend'] == 'pillar':
             pass
