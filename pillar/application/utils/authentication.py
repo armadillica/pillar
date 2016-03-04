@@ -1,5 +1,6 @@
 import os
 import requests
+
 from datetime import datetime
 from datetime import timedelta
 from flask import g
@@ -9,6 +10,7 @@ from flask import abort
 from eve.methods.post import post_internal
 
 from application import app
+
 
 class SystemUtility():
     def __new__(cls, *args, **kwargs):
@@ -20,7 +22,7 @@ class SystemUtility():
         is defined, it's possible to override the (default) production address.
         """
         return os.environ.get(
-            'BLENDER_ID_ENDPOINT', "https://www.blender.org/id")
+            'BLENDER_ID_ENDPOINT', "https://www.blender.org/id").rstrip('/')
 
 
 def validate(token):
