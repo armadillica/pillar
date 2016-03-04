@@ -2,9 +2,6 @@ algoliasearch==1.8.0
 blinker==1.4
 bugsnag==2.3.1
 Cerberus==0.9.1
-cffi==1.5.2
-cryptography==1.2.2
-enum34==1.1.2
 Eve==0.5.3
 Events==0.2.1
 Flask==0.10.1
@@ -21,14 +18,12 @@ oauth2client==1.5.1
 Pillow==2.8.1
 protobuf==3.0.0a1
 protorpc==0.11.1
-pyasn1==0.1.9
-pyasn1-modules==0.0.8
 pycparser==2.14
 pycrypto==2.6.1
 pymongo==2.9.1
 pyOpenSSL==0.15.1
 requests==2.9.1
-rsa==3.2
+rsa==3.3
 simplejson==3.8.1
 six==1.10.0
 WebOb==1.5.0
