@@ -41,11 +41,11 @@ def validate(token):
     except requests.exceptions.ConnectionError as e:
         raise e
 
-    if r.status_code == 200:
-        response = r.json()
-    else:
-        response = None
-    return response
+    if r.status_code != 200:
+        print('HTTP error %i validating token:\n%s' % (r.status_code, r.content))
+        return None
+
+    return r.json()
 
 
 def validate_token():
@@ -70,63 +70,63 @@ def validate_token():
         # to verify the validity of the token. We will get basic user info if
         # the user is authorized and we will make a new token.
         validation = validate(token)
-        if validation['status'] == 'success':
-            users = app.data.driver.db['users']
-            email = validation['data']['user']['email']
-            db_user = users.find_one({'email': email})
-            # Ensure unique username
-            username = email.split('@')[0]
-            def make_unique_username(username, index=1):
-                """Ensure uniqueness of a username by appending an incremental
-                digit at the end of it.
-                """
-                user_from_username = users.find_one({'username': username})
-                if user_from_username:
-                    if index > 1:
-                        index += 1
-                        username = username[:-1]
-                    username = "{0}{1}".format(username, index)
-                    return make_unique_username(username, index=index)
-                return username
-            # Check for min length of username (otherwise validation fails)
-            username = "___{0}".format(username) if len(username) < 3 else username
-            username = make_unique_username(username)
-
-            full_name = username
-            if not db_user:
-                user_data = {
-                    'full_name': full_name,
-                    'username': username,
-                    'email': email,
-                    'auth': [{
-                        'provider': 'blender-id',
-                        'user_id': str(validation['data']['user']['id']),
-                        'token': ''}],
-                    'settings': {
-                        'email_communications': 1
-                    }
-                }
-                r = post_internal('users', user_data)
-                user_id = r[0]['_id']
-                groups = None
-            else:
-                user_id = db_user['_id']
-                groups = db_user['groups']
-
-            token_data = {
-                'user': user_id,
-                'token': token,
-                'expire_time': datetime.now() + timedelta(hours=1)
-            }
-            post_internal('tokens', token_data)
-            current_user = dict(
-                user_id=user_id,
-                token=token,
-                groups=groups,
-                token_expire_time=datetime.now() + timedelta(hours=1))
-            #return token_data
-        else:
+        if validation is None or validation['status'] != 'success':
             return None
+
+        users = app.data.driver.db['users']
+        email = validation['data']['user']['email']
+        db_user = users.find_one({'email': email})
+        # Ensure unique username
+        username = email.split('@')[0]
+        def make_unique_username(username, index=1):
+            """Ensure uniqueness of a username by appending an incremental
+            digit at the end of it.
+            """
+            user_from_username = users.find_one({'username': username})
+            if user_from_username:
+                if index > 1:
+                    index += 1
+                    username = username[:-1]
+                username = "{0}{1}".format(username, index)
+                return make_unique_username(username, index=index)
+            return username
+        # Check for min length of username (otherwise validation fails)
+        username = "___{0}".format(username) if len(username) < 3 else username
+        username = make_unique_username(username)
+
+        full_name = username
+        if not db_user:
+            user_data = {
+                'full_name': full_name,
+                'username': username,
+                'email': email,
+                'auth': [{
+                    'provider': 'blender-id',
+                    'user_id': str(validation['data']['user']['id']),
+                    'token': ''}],
+                'settings': {
+                    'email_communications': 1
+                }
+            }
+            r = post_internal('users', user_data)
+            user_id = r[0]['_id']
+            groups = None
+        else:
+            user_id = db_user['_id']
+            groups = db_user['groups']
+
+        token_data = {
+            'user': user_id,
+            'token': token,
+            'expire_time': datetime.now() + timedelta(hours=1)
+        }
+        post_internal('tokens', token_data)
+        current_user = dict(
+            user_id=user_id,
+            token=token,
+            groups=groups,
+            token_expire_time=datetime.now() + timedelta(hours=1))
+        #return token_data
     else:
         users = app.data.driver.db['users']
         db_user = users.find_one(db_token['user'])
@@ -136,5 +136,5 @@ def validate_token():
             groups=db_user['groups'],
             token_expire_time=db_token['expire_time'])
 
-    setattr(g, 'current_user', current_user)
+    g.current_user = current_user
 
