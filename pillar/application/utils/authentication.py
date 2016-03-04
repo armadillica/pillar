@@ -1,4 +1,6 @@
 import os
+import random
+
 import requests
 
 from datetime import datetime
@@ -76,28 +78,11 @@ def validate_token():
         users = app.data.driver.db['users']
         email = validation['data']['user']['email']
         db_user = users.find_one({'email': email})
-        # Ensure unique username
-        username = email.split('@')[0]
-        def make_unique_username(username, index=1):
-            """Ensure uniqueness of a username by appending an incremental
-            digit at the end of it.
-            """
-            user_from_username = users.find_one({'username': username})
-            if user_from_username:
-                if index > 1:
-                    index += 1
-                    username = username[:-1]
-                username = "{0}{1}".format(username, index)
-                return make_unique_username(username, index=index)
-            return username
-        # Check for min length of username (otherwise validation fails)
-        username = "___{0}".format(username) if len(username) < 3 else username
-        username = make_unique_username(username)
+        username = make_unique_username(email)
 
-        full_name = username
         if not db_user:
             user_data = {
-                'full_name': full_name,
+                'full_name': username,
                 'username': username,
                 'email': email,
                 'auth': [{
@@ -138,3 +123,23 @@ def validate_token():
 
     g.current_user = current_user
 
+
+def make_unique_username(email):
+    username = email.split('@')[0]
+    # Check for min length of username (otherwise validation fails)
+    username = "___{0}".format(username) if len(username) < 3 else username
+
+    users = app.data.driver.db['users']
+    user_from_username = users.find_one({'username': username})
+
+    if not user_from_username:
+        return username
+
+    # Username exists, make it unique by adding some number after it.
+    suffix = 1
+    while True:
+        unique_name = '%s%i' % (username, suffix)
+        user_from_username = users.find_one({'username': unique_name})
+        if user_from_username is None:
+            return unique_name
+        suffix += 1
