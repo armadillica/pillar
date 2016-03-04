@@ -20,6 +20,16 @@ _file_embedded_schema = {
     }
 }
 
+_activity_object_type = {
+    'type': 'string',
+    'required': True,
+    'allowed': [
+        'project',
+        'user',
+        'node'
+    ],
+}
+
 users_schema = {
     'full_name': {
         'type': 'string',
@@ -618,6 +628,65 @@ projects_schema = {
     }
 }
 
+activities_subscriptions_schema = {
+    'user': {
+        'type': 'objectid',
+        'required': True
+    },
+    'context_object_type': _activity_object_type,
+    'context_object': {
+        'type': 'objectid',
+        'required': True
+    },
+    'notifications': {
+        'type': 'dict',
+        'schema': {
+            'email': {
+                'type': 'boolean',
+            },
+            'web': {
+                'type': 'boolean',
+            },
+        }
+    }
+}
+
+activities_schema = {
+    'actor_user': {
+        'type': 'objectid',
+        'required': True
+    },
+    'verb': {
+        'type': 'string',
+        'required': True
+    },
+    'object_type': _activity_object_type,
+    'object': {
+        'type': 'objectid',
+        'required': True
+    },
+    'context_object_type': _activity_object_type,
+    'context_object': {
+        'type': 'objectid',
+        'required': True
+    },
+}
+
+notifications_schema = {
+    'user': {
+        'type': 'objectid',
+        'required': True
+    },
+    'activity': {
+        'type': 'objectid',
+        'required': True
+    },
+    'is_read': {
+        'type': 'boolean',
+    },
+}
+
+
 nodes = {
     'schema': nodes_schema,
     'public_methods': ['GET'],
@@ -681,6 +750,25 @@ projects = {
     'public_methods': ['GET']
 }
 
+activities = {
+    'schema': activities_schema,
+    'public_item_methods': None,
+    'public_methods': None
+}
+
+activities_subscriptions = {
+    'schema': activities_subscriptions_schema,
+    'public_item_methods': None,
+    'public_methods': None
+}
+
+notifications = {
+    'schema': activities_subscriptions_schema,
+    'public_item_methods': None,
+    'public_methods': None
+}
+
+
 DOMAIN = {
     'users': users,
     'nodes': nodes,
@@ -689,7 +777,10 @@ DOMAIN = {
     'files': files,
     'groups': groups,
     'organizations': organizations,
-    'projects': projects
+    'projects': projects,
+    'activities': activities,
+    'activities-subscriptions': activities_subscriptions,
+    'notifications': notifications
 }
 
 
