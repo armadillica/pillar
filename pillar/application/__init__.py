@@ -15,6 +15,7 @@ from eve import Eve
 from eve.auth import TokenAuth
 from eve.io.mongo import Validator
 
+
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
 
@@ -118,6 +119,9 @@ from application.utils.authorization import check_permissions
 from application.utils.gcs import update_file_name
 from application.utils.algolia import algolia_index_user_save
 from application.utils.algolia import algolia_index_node_save
+from application.utils.activities import activity_create
+from application.utils.activities import activity_subscribe
+# from application.utils.activities import notification_parse
 from modules.file_storage import process_file
 from modules.file_storage import delete_file
 from modules.file_storage import generate_link
@@ -163,6 +167,22 @@ def before_inserting_nodes(items):
             project = find_parent_project(parent)
             if project:
                 item['project'] = project['_id']
+
+def after_inserting_nodes(items):
+    for item in items:
+        activity_create(item['user'], 'node', item['_id'])
+        if item['node_type'] == 'comment':
+            verb = 'commented'
+        else:
+            verb = 'posted'
+        activity_subscribe(
+            item['user'],
+            verb,
+            'node',
+            item['_id'],
+            'node',
+            item['parent']
+            )
 
 def item_parse_attachments(response):
     """Before returning a response, check if the 'attachments' property is
@@ -229,16 +249,21 @@ def project_node_type_has_method(response):
         if not check_permissions(node_type, 'GET', append_allowed_methods=True):
             return abort(403)
 
+# def before_returning_notifications(response):
+#     for item in response['_items']:
+#         notification_parse(item)
 
 app.on_fetched_item_nodes += before_returning_item_permissions
 app.on_fetched_item_nodes += item_parse_attachments
 app.on_fetched_resource_nodes += before_returning_resource_permissions
 app.on_fetched_resource_nodes += resource_parse_attachments
 app.on_fetched_item_node_types += before_returning_item_permissions
+# app.on_fetched_resource_notifications += before_returning_notifications
 app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
 app.on_replaced_nodes += after_replacing_node
 app.on_insert_nodes += before_inserting_nodes
+app.on_inserted_nodes += after_inserting_nodes
 app.on_fetched_item_projects += before_returning_item_permissions
 app.on_fetched_item_projects += project_node_type_has_method
 app.on_fetched_resource_projects += before_returning_resource_permissions

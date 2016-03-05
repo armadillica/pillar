@@ -20,6 +20,16 @@ _file_embedded_schema = {
     }
 }
 
+_required_user_embedded_schema = {
+    'type': 'objectid',
+    'required': True,
+    'data_relation': {
+        'resource': 'users',
+        'field': '_id',
+        'embeddable': True
+    },
+}
+
 _activity_object_type = {
     'type': 'string',
     'required': True,
@@ -251,7 +261,6 @@ nodes_schema = {
     },
     'picture': {
         'type': 'objectid',
-        'nullable': True,
         'data_relation': {
            'resource': 'files',
            'field': '_id',
@@ -629,10 +638,7 @@ projects_schema = {
 }
 
 activities_subscriptions_schema = {
-    'user': {
-        'type': 'objectid',
-        'required': True
-    },
+    'user': _required_user_embedded_schema,
     'context_object_type': _activity_object_type,
     'context_object': {
         'type': 'objectid',
@@ -646,16 +652,18 @@ activities_subscriptions_schema = {
             },
             'web': {
                 'type': 'boolean',
+                'default': True
             },
         }
+    },
+    'is_subscribed': {
+        'type': 'boolean',
+        'default': True
     }
 }
 
 activities_schema = {
-    'actor_user': {
-        'type': 'objectid',
-        'required': True
-    },
+    'actor_user': _required_user_embedded_schema,
     'verb': {
         'type': 'string',
         'required': True
@@ -673,13 +681,10 @@ activities_schema = {
 }
 
 notifications_schema = {
-    'user': {
-        'type': 'objectid',
-        'required': True
-    },
+    'user': _required_user_embedded_schema,
     'activity': {
         'type': 'objectid',
-        'required': True
+        'required': True,
     },
     'is_read': {
         'type': 'boolean',
@@ -752,20 +757,14 @@ projects = {
 
 activities = {
     'schema': activities_schema,
-    'public_item_methods': None,
-    'public_methods': None
 }
 
 activities_subscriptions = {
     'schema': activities_subscriptions_schema,
-    'public_item_methods': None,
-    'public_methods': None
 }
 
 notifications = {
-    'schema': activities_subscriptions_schema,
-    'public_item_methods': None,
-    'public_methods': None
+    'schema': notifications_schema,
 }
 
 
