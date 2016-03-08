@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 from bson import ObjectId
@@ -90,6 +91,14 @@ app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=NewAuth)
 
 import config
 app.config.from_object(config.Deployment)
+
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG if app.config['DEBUG'] else logging.INFO,
+)
+log = logging.getLogger(__name__)
+log.info('Pillar starting')
+
 
 bugsnag.configure(
   api_key = app.config['BUGSNAG_API_KEY'],
