@@ -93,10 +93,9 @@ import config
 app.config.from_object(config.Deployment)
 
 # Configure logging
-logging.basicConfig(
-    level=logging.DEBUG if app.config['DEBUG'] else logging.INFO,
-)
+logging.basicConfig(level=logging.WARNING)
 log = logging.getLogger(__name__)
+log.setLevel(logging.DEBUG if app.config['DEBUG'] else logging.INFO)
 log.info('Pillar starting')
 
 
