@@ -70,7 +70,6 @@ def notification_get_subscriptions(context_object_type, context_object_id, actor
         'context_object': context_object_id,
         'is_subscribed': True,
     }
-    print lookup
     return subscriptions_collection.find(lookup)
 
 
