@@ -138,8 +138,7 @@ from modules.file_storage import generate_link
 def before_returning_item_permissions(response):
     # Run validation process, since GET on nodes entry point is public
     validate_token()
-    if not check_permissions(response, 'GET', append_allowed_methods=True):
-        return abort(403)
+    check_permissions(response, 'GET', append_allowed_methods=True)
 
 def before_returning_resource_permissions(response):
     for item in response['_items']:
@@ -254,8 +253,7 @@ def project_node_type_has_method(response):
         if not node_type:
             return abort(404)
         # Check permissions and append the allowed_methods to the node_type
-        if not check_permissions(node_type, 'GET', append_allowed_methods=True):
-            return abort(403)
+        check_permissions(node_type, 'GET', append_allowed_methods=True)
 
 # def before_returning_notifications(response):
 #     for item in response['_items']:

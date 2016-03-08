@@ -1,19 +1,21 @@
+import logging
+
 from flask import g
 from flask import request
 from flask import url_for
 from flask import abort
 from application import app
 
+log = logging.getLogger(__name__)
+
 
 def check_permissions(resource, method, append_allowed_methods=False):
     """Check user permissions to access a node. We look up node permissions from
     world to groups to users and match them with the computed user permissions.
-    If there is not match, we return 403.
+    If there is not match, we raise 403.
     """
     if method != 'GET' and append_allowed_methods:
         raise ValueError("append_allowed_methods only allowed with 'GET' method")
-
-    allowed_methods = []
 
     current_user = g.get('current_user', None)
 
@@ -54,30 +56,34 @@ def check_permissions(resource, method, append_allowed_methods=False):
     elif resource_permissions and not computed_permissions:
         computed_permissions = resource_permissions
 
+    if not computed_permissions:
+        log.info('No permissions available to compute for %s on resource %r',
+                 method, resource.get('node_type', resource))
+        abort(403)
+
+    # Accumulate allowed methods from the user, group and world level.
+    allowed_methods = set()
+
     if current_user:
         # If the user is authenticated, proceed to compare the group permissions
         for permission in computed_permissions['groups']:
             if permission['group'] in current_user['groups']:
-                allowed_methods += permission['methods']
-                if method in permission['methods'] and not append_allowed_methods:
-                    return
+                allowed_methods.update(permission['methods'])
 
         for permission in computed_permissions['users']:
             if current_user['user_id'] == permission['user']:
-                allowed_methods += permission['methods']
-                if method in permission['methods'] and not append_allowed_methods:
-                    return
+                allowed_methods.update(permission['methods'])
 
     # Check if the node is public or private. This must be set for non logged
     # in users to see the content. For most BI projects this is on by default,
     # while for private project this will not be set at all.
     if 'world' in computed_permissions:
-        allowed_methods += computed_permissions['world']
-        if method in computed_permissions['world'] and not append_allowed_methods:
-            return
+        allowed_methods.update(computed_permissions['world'])
 
-    if append_allowed_methods and method in allowed_methods:
-        resource['allowed_methods'] = list(set(allowed_methods))
-        return resource
+    permission_granted = method in allowed_methods
+    if permission_granted:
+        if append_allowed_methods:
+            resource['allowed_methods'] = list(set(allowed_methods))
+        return
 
-    return None
+    abort(403)
