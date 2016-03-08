@@ -1,3 +1,4 @@
+import logging
 import os
 import json
 from multiprocessing import Process
@@ -7,7 +8,7 @@ from flask import Blueprint
 from flask import abort
 from flask import jsonify
 from flask import send_from_directory
-from flask import url_for
+from flask import url_for, helpers
 from eve.methods.put import put_internal
 from application import app
 from application.utils.imaging import generate_local_thumbnails
@@ -18,6 +19,9 @@ from application.utils.storage import push_to_storage
 from application.utils.cdn import hash_file_path
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.encoding import Encoder
+
+
+log = logging.getLogger(__name__)
 
 file_storage = Blueprint('file_storage', __name__,
                         template_folder='templates',
@@ -104,22 +108,34 @@ def build_thumbnails(file_path=None, file_id=None):
 
 
 @file_storage.route('/file', methods=['POST'])
-@file_storage.route('/file/<path:file_name>')
+@file_storage.route('/file/<path:file_name>', endpoint='index_with_path', methods=['GET', 'POST'])
 def index(file_name=None):
-    #GET file
-    if file_name:
+    # GET file -> read it
+    if request.method == 'GET':
         return send_from_directory(app.config['STORAGE_DIR'], file_name)
-    #POST file
+
+    # POST file -> save it
+
+    # Sanitize the filename; source: http://stackoverflow.com/questions/7406102/
     file_name = request.form['name']
+    keepcharacters = {' ', '.', '_'}
+    file_name = ''.join(c for c in file_name if c.isalnum() or c in keepcharacters).strip()
+    file_name = file_name.lstrip('.')
+
+    # Determine & create storage directory
     folder_name = file_name[:2]
-    file_folder_path = os.path.join(app.config['STORAGE_DIR'],
-                                    folder_name)
+    file_folder_path = helpers.safe_join(app.config['STORAGE_DIR'], folder_name)
     if not os.path.exists(file_folder_path):
+        log.info('Creating folder path %r', file_folder_path)
         os.mkdir(file_folder_path)
-    file_path = os.path.join(file_folder_path, file_name)
+
+    # Save uploaded file
+    file_path = helpers.safe_join(file_folder_path, file_name)
+    log.info('Saving file %r', file_path)
     request.files['data'].save(file_path)
 
-    return "{}", 200
+    # TODO: possibly nicer to just return a redirect to the file's URL.
+    return jsonify({'url': url_for('file_storage.index_with_path', file_name=file_name)})
 
 
 def process_file(src_file):
