@@ -1,66 +1,80 @@
+from flask import g
 from eve.methods.post import post_internal
 from application import app
 
-# def notification_parse(notification):
-#     # TODO: finish fixing this
-#     activities_collection = app.data.driver.db['activities']
-#     users_collection = app.data.driver.db['users']
-#     nodes_collection = app.data.driver.db['nodes']
-#     activity = activities_collection.find_one({'_id': notification['_id']})
-#     actor = users_collection.find_one({'_id': activity['actor_user']})
-#     # Context is optional
-#     context_object_type = None
-#     context_object_name = None
-#     context_object_url = None
+def notification_parse(notification):
+    # notification = dict(a='n')
+    # TODO: finish fixing this
+    activities_collection = app.data.driver.db['activities']
+    activities_subscriptions_collection = app.data.driver.db['activities-subscriptions']
+    users_collection = app.data.driver.db['users']
+    nodes_collection = app.data.driver.db['nodes']
+    activity = activities_collection.find_one({'_id': notification['activity']})
+    # actor = users_collection.find_one({'_id': activity['actor_user']})
+    # Context is optional
+    context_object_type = None
+    context_object_name = None
+    context_object_url = None
 
-#     if activity['object_type'] == 'node':
-#         node = nodes_collection.find_one({'_id': activity['object']})
-#         # project = Project.find(node.project, {
-#         #     'projection': '{"name":1, "url":1}'}, api=api)
-#         # Initial support only for node_type comments
-#         if node['node_type'] == 'comment':
-#             # comment = Comment.query.get_or_404(notification_object.object_id)
-#             node['parent'] = nodes_collection.find_one({'_id': node['parent']})
-#             object_type = 'comment'
-#             object_name = ''
+    if activity['object_type'] != 'node':
+        return
+    node = nodes_collection.find_one({'_id': activity['object']})
+    # Initial support only for node_type comments
+    if node['node_type'] != 'comment':
+        return
+    node['parent'] = nodes_collection.find_one({'_id': node['parent']})
+    object_type = 'comment'
+    object_name = ''
+    object_id = activity['object']
 
-#             object_url = url_for('nodes.view', node_id=node._id, redir=1)
-#             if node.parent.user == current_user.objectid:
-#                 owner = "your {0}".format(node.parent.node_type)
-#             else:
-#                 parent_comment_user = User.find(node.parent.user, api=api)
-#                 owner = "{0}'s {1}".format(parent_comment_user.username,
-#                     node.parent.node_type)
+    if node['parent']['user'] == g.current_user['user_id']:
+        owner = "your {0}".format(node['parent']['node_type'])
+    else:
 
-#             context_object_type = node.parent.node_type
-#             context_object_name = owner
-#             context_object_url = url_for('nodes.view', node_id=node.parent._id, redir=1)
-#             if activity.verb == 'replied':
-#                 action = 'replied to'
-#             elif activity.verb == 'commented':
-#                 action = 'left a comment on'
-#             else:
-#                 action = activity.verb
-#         else:
-#             return None
-#     else:
-#         return None
+        parent_comment_user = users_collection.find_one(
+            {'_id': node['parent']['user']})
+        owner = "{0}'s {1}".format(parent_comment_user['username'],
+            node['parent']['node_type'])
 
-#     return dict(
-#         _id=notification._id,
-#         username=actor.username,
-#         username_avatar=actor.gravatar(),
-#         action=action,
-#         object_type=object_type,
-#         object_name=object_name,
-#         object_url=object_url,
-#         context_object_type=context_object_type,
-#         context_object_name=context_object_name,
-#         context_object_url=context_object_url,
-#         date=pretty_date(activity._created),
-#         is_read=notification.is_read,
-#         # is_subscribed=notification.is_subscribed
-#         )
+    context_object_type = node['parent']['node_type']
+    context_object_name = owner
+    context_object_id = activity['context_object']
+    if activity['verb'] == 'replied':
+        action = 'replied to'
+    elif activity['verb'] == 'commented':
+        action = 'left a comment on'
+    else:
+        action = activity['verb']
+
+    lookup = {
+        'user': g.current_user['user_id'],
+        'context_object_type': 'node',
+        'context_object': context_object_id,
+    }
+
+    subscription = activities_subscriptions_collection.find_one(lookup)
+    if subscription and subscription['notifications']['web'] == True:
+        is_subscribed = True
+    else:
+        is_subscribed = False
+
+    updates = dict(
+        _id=notification['_id'],
+        actor=activity['actor_user'],
+        action=action,
+        object_type=object_type,
+        object_name=object_name,
+        object_id=str(object_id),
+        context_object_type=context_object_type,
+        context_object_name=context_object_name,
+        context_object_id=str(context_object_id),
+        date=activity['_created'],
+        is_read=('is_read' in notification and notification['is_read']),
+        is_subscribed=is_subscribed,
+        subscription=subscription['_id']
+        )
+    notification.update(updates)
+
 
 def notification_get_subscriptions(context_object_type, context_object_id, actor_user_id):
     subscriptions_collection = app.data.driver.db['activities-subscriptions']
@@ -73,7 +87,7 @@ def notification_get_subscriptions(context_object_type, context_object_id, actor
     return subscriptions_collection.find(lookup)
 
 
-def activity_create(user_id, context_object_type, context_object_id):
+def activity_subscribe(user_id, context_object_type, context_object_id):
     """Subscribe a user to changes for a specific context. We create a subscription
     if none is found.
 
@@ -94,7 +108,7 @@ def activity_create(user_id, context_object_type, context_object_id):
         post_internal('activities-subscriptions', lookup)
 
 
-def activity_subscribe(actor_user_id, verb, object_type, object_id,
+def activity_object_add(actor_user_id, verb, object_type, object_id,
         context_object_type, context_object_id):
     """Add a notification object and creates a notification for each user that
     - is not the original author of the post
@@ -124,6 +138,9 @@ def activity_subscribe(actor_user_id, verb, object_type, object_id,
             )
 
         activity = post_internal('activities', activity)
+        if activity[3] != 201:
+            # If creation failed for any reason, do not create a any notifcation
+            return
         for subscription in subscriptions:
             notification = dict(
                 user=subscription['user'],

@@ -127,9 +127,9 @@ from application.utils.authorization import check_permissions
 from application.utils.gcs import update_file_name
 from application.utils.algolia import algolia_index_user_save
 from application.utils.algolia import algolia_index_node_save
-from application.utils.activities import activity_create
 from application.utils.activities import activity_subscribe
-# from application.utils.activities import notification_parse
+from application.utils.activities import activity_object_add
+from application.utils.activities import notification_parse
 from modules.file_storage import process_file
 from modules.file_storage import delete_file
 from modules.file_storage import generate_link
@@ -177,18 +177,34 @@ def before_inserting_nodes(items):
 
 def after_inserting_nodes(items):
     for item in items:
-        activity_create(item['user'], 'node', item['_id'])
+        context_object_id = item['parent']
         if item['node_type'] == 'comment':
-            verb = 'commented'
+            nodes_collection = app.data.driver.db['nodes']
+            parent = nodes_collection.find_one({'_id': item['parent']})
+            # Always subscribe to the parent node
+            activity_subscribe(item['user'], 'node', item['parent'])
+            if parent['node_type'] == 'comment':
+                # If the parent is a comment, we provide its own parent as
+                # context. We do this in order to point the user to an asset
+                # or group when viewing the notification.
+                verb = 'replied'
+                context_object_id = parent['parent']
+                # Subscribe to the parent of the parent comment (post or group)
+                activity_subscribe(item['user'], 'node', parent['parent'])
+            else:
+                activity_subscribe(item['user'], 'node', item['_id'])
+                verb = 'commented'
         else:
             verb = 'posted'
-        activity_subscribe(
+            activity_subscribe(item['user'], 'node', item['_id'])
+
+        activity_object_add(
             item['user'],
             verb,
             'node',
             item['_id'],
             'node',
-            item['parent']
+            context_object_id
             )
 
 def item_parse_attachments(response):
@@ -255,16 +271,22 @@ def project_node_type_has_method(response):
         # Check permissions and append the allowed_methods to the node_type
         check_permissions(node_type, 'GET', append_allowed_methods=True)
 
-# def before_returning_notifications(response):
-#     for item in response['_items']:
-#         notification_parse(item)
+def before_returning_item_notifications(response):
+    if request.args.get('parse'):
+        notification_parse(response)
+
+def before_returning_resource_notifications(response):
+    for item in response['_items']:
+        if request.args.get('parse'):
+            notification_parse(item)
 
 app.on_fetched_item_nodes += before_returning_item_permissions
 app.on_fetched_item_nodes += item_parse_attachments
 app.on_fetched_resource_nodes += before_returning_resource_permissions
 app.on_fetched_resource_nodes += resource_parse_attachments
 app.on_fetched_item_node_types += before_returning_item_permissions
-# app.on_fetched_resource_notifications += before_returning_notifications
+app.on_fetched_item_notifications += before_returning_item_notifications
+app.on_fetched_resource_notifications += before_returning_resource_notifications
 app.on_fetched_resource_node_types += before_returning_resource_permissions
 app.on_replace_nodes += before_replacing_node
 app.on_replaced_nodes += after_replacing_node
