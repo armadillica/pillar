@@ -581,5 +581,17 @@ def files_make_public_t():
                 except Exception:
                     pass
 
+@manager.command
+def subscribe_node_owners():
+    """Automatically subscribe node owners to notifications for items created
+    in the past.
+    """
+    from application import after_inserting_nodes
+    nodes_collection = app.data.driver.db['nodes']
+    for n in nodes_collection.find():
+        if 'parent' in n:
+            after_inserting_nodes([n])
+
+
 if __name__ == '__main__':
     manager.run()
