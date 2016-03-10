@@ -108,7 +108,7 @@ def build_thumbnails(file_path=None, file_id=None):
 
 
 @file_storage.route('/file', methods=['POST'])
-@file_storage.route('/file/<path:file_name>', endpoint='index_with_path', methods=['GET', 'POST'])
+@file_storage.route('/file/<path:file_name>', methods=['GET', 'POST'])
 def index(file_name=None):
     # GET file -> read it
     if request.method == 'GET':
@@ -135,7 +135,7 @@ def index(file_name=None):
     request.files['data'].save(file_path)
 
     # TODO: possibly nicer to just return a redirect to the file's URL.
-    return jsonify({'url': url_for('file_storage.index_with_path', file_name=file_name)})
+    return jsonify({'url': url_for('file_storage.index', file_name=file_name)})
 
 
 def process_file(src_file):
