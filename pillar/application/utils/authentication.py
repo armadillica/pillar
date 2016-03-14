@@ -1,5 +1,5 @@
 import os
-import random
+import logging
 
 import requests
 
@@ -7,11 +7,11 @@ from datetime import datetime
 from datetime import timedelta
 from flask import g
 from flask import request
-from flask import url_for
-from flask import abort
 from eve.methods.post import post_internal
 
 from application import app
+
+log = logging.getLogger(__name__)
 
 
 class SystemUtility():
@@ -23,8 +23,7 @@ class SystemUtility():
         """Gets the endpoint for the authentication API. If the env variable
         is defined, it's possible to override the (default) production address.
         """
-        return os.environ.get(
-            'BLENDER_ID_ENDPOINT', "https://www.blender.org/id").rstrip('/')
+        return app.config['BLENDER_ID_ENDPOINT']
 
 
 def validate(token):
@@ -35,6 +34,8 @@ def validate(token):
     - valid: a boolean, stating if the token is valid
     - user: a dictionary with information regarding the user
     """
+
+    log.debug("Validating token %s", token)
     payload = dict(
         token=token)
     try:
@@ -44,7 +45,7 @@ def validate(token):
         raise e
 
     if r.status_code != 200:
-        print('HTTP error %i validating token:\n%s' % (r.status_code, r.content))
+        log.info('HTTP error %i validating token: %s', r.status_code, r.content)
         return None
 
     return r.json()
@@ -72,9 +73,10 @@ def validate_token():
     lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
     db_token = tokens_collection.find_one(lookup)
     if not db_token:
-        # If no valid token is found in our local database, we issue a new request to the Blender ID
-        # server to verify the validity of the token passed via the HTTP header. We will get basic user info if
-        # the user is authorized, and we will store the token in our local database.
+        # If no valid token is found in our local database, we issue a new
+        # request to the Blender ID server to verify the validity of the token
+        #  passed via the HTTP header. We will get basic user info if the user
+        # is authorized, and we will store the token in our local database.
         validation = validate(token)
         if validation is None or validation.get('status', '') != 'success':
             return False
@@ -86,7 +88,8 @@ def validate_token():
 
         if not db_user:
             # We don't even know this user; create it on the fly.
-            user_id = create_new_user(email, username, validation['data']['user']['id'])
+            user_id = create_new_user(
+                email, username, validation['data']['user']['id'])
             groups = None
         else:
             user_id = db_user['_id']

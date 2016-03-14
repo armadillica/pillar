@@ -6,6 +6,10 @@ class Development(object):
     RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
     BUGSNAG_API_KEY = ''
 
+    # Authentication settings
+    BLENDER_ID_ENDPOINT = os.environ.get(
+        'BLENDER_ID_ENDPOINT', "https://www.blender.org/id").rstrip("/")
+
     # Settings for storage
     STORAGE_DIR = '/data/storage/pillar'
     SHARED_DIR = '/data/storage/shared'
