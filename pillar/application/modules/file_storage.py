@@ -1,11 +1,9 @@
 import logging
 import os
-import json
 from multiprocessing import Process
 from bson import ObjectId
 from flask import request
 from flask import Blueprint
-from flask import abort
 from flask import jsonify
 from flask import send_from_directory
 from flask import url_for, helpers
@@ -14,7 +12,6 @@ from application import app
 from application.utils.imaging import generate_local_thumbnails
 from application.utils.imaging import get_video_data
 from application.utils.imaging import ffmpeg_encode
-from application.utils.storage import remote_storage_sync
 from application.utils.storage import push_to_storage
 from application.utils.cdn import hash_file_path
 from application.utils.gcs import GoogleCloudStorageBucket
@@ -24,8 +21,8 @@ from application.utils.encoding import Encoder
 log = logging.getLogger(__name__)
 
 file_storage = Blueprint('file_storage', __name__,
-                        template_folder='templates',
-                        static_folder='../../static/storage',)
+                         template_folder='templates',
+                         static_folder='../../static/storage',)
 
 
 @file_storage.route('/gcs/<bucket_name>/<subdir>/')
@@ -70,13 +67,14 @@ def build_thumbnails(file_path=None, file_id=None):
         file_ = files_collection.find_one({"_id": ObjectId(file_id)})
         file_path = file_['name']
 
-    file_full_path = os.path.join(app.config['SHARED_DIR'], file_path[:2], file_path)
+    file_full_path = os.path.join(app.config['SHARED_DIR'], file_path[:2],
+                                  file_path)
     # Does the original file exist?
     if not os.path.isfile(file_full_path):
         return "", 404
     else:
         thumbnails = generate_local_thumbnails(file_full_path,
-            return_image_stats=True)
+                                               return_image_stats=True)
 
     file_variations = []
     for size, thumbnail in thumbnails.iteritems():
@@ -119,7 +117,8 @@ def index(file_name=None):
     # Sanitize the filename; source: http://stackoverflow.com/questions/7406102/
     file_name = request.form['name']
     keepcharacters = {' ', '.', '_'}
-    file_name = ''.join(c for c in file_name if c.isalnum() or c in keepcharacters).strip()
+    file_name = ''.join(
+        c for c in file_name if c.isalnum() or c in keepcharacters).strip()
     file_name = file_name.lstrip('.')
 
     # Determine & create storage directory

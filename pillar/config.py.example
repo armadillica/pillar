@@ -25,10 +25,8 @@ class Development(object):
 
     # Credentials to access project on the Google Cloud where Google Cloud
     # Storage is enabled (Pillar will automatically create and manage buckets)
-    GCS_CLIENT_EMAIL = ''
-    GCS_PRIVATE_KEY_P12 = ''
-    GCS_PRIVATE_KEY_PEM = ''
-    CGS_PROJECT_NAME = ''
+    GOOGLE_APPLICATION_CREDENTIALS = os.environ.get(
+        'GOOGLE_APPLICATION_CREDENTIALS', '/data/config/google_app.json')
 
     # Fill in only if we plan to sign our urls using a the CDN
     CDN_USE_URL_SIGNING = False

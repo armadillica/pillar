@@ -5,14 +5,13 @@ import bugsnag
 from bson import ObjectId
 from gcloud.storage.client import Client
 from gcloud.exceptions import NotFound
-from oauth2client.client import SignedJwtAssertionCredentials
 from application import app
 
 
 class GoogleCloudStorageBucket(object):
     """Cloud Storage bucket interface. We create a bucket for every project. In
     the bucket we create first level subdirs as follows:
-    - '_' (will contain hashed assets, and stays on top of defaul listing)
+    - '_' (will contain hashed assets, and stays on top of default listing)
     - 'svn' (svn checkout mirror)
     - 'shared' (any additional folder of static folder that is accessed via a
       node of 'storage' node_type)
@@ -21,31 +20,12 @@ class GoogleCloudStorageBucket(object):
     :param bucket_name: Name of the bucket.
 
     :type subdir: string
-    :param subdir: The local entrypoint to browse the bucket.
+    :param subdir: The local entry point to browse the bucket.
 
     """
-    CGS_PROJECT_NAME = app.config['CGS_PROJECT_NAME']
-    GCS_CLIENT_EMAIL = app.config['GCS_CLIENT_EMAIL']
-    GCS_PRIVATE_KEY_PEM = app.config['GCS_PRIVATE_KEY_PEM']
-    GCS_PRIVATE_KEY_P12 = app.config['GCS_PRIVATE_KEY_P12']
-
-    # Load private key in pem format (used by the API)
-    with open(GCS_PRIVATE_KEY_PEM) as f:
-      private_key_pem = f.read()
-    credentials_pem = SignedJwtAssertionCredentials(GCS_CLIENT_EMAIL,
-        private_key_pem,
-        'https://www.googleapis.com/auth/devstorage.full_control')
-
-    # Load private key in p12 format (used by the singed urls generator)
-    with open(GCS_PRIVATE_KEY_P12) as f:
-      private_key_pkcs12 = f.read()
-    credentials_p12 = SignedJwtAssertionCredentials(GCS_CLIENT_EMAIL,
-        private_key_pkcs12,
-        'https://www.googleapis.com/auth/devstorage.full_control')
-
 
     def __init__(self, bucket_name, subdir='_/'):
-        gcs = Client(project=self.CGS_PROJECT_NAME, credentials=self.credentials_pem)
+        gcs = Client()
         self.bucket = gcs.get_bucket(bucket_name)
         self.subdir = subdir
 
@@ -62,7 +42,7 @@ class GoogleCloudStorageBucket(object):
 
         fields_to_return = 'nextPageToken,items(name,size,contentType),prefixes'
         req = self.bucket.list_blobs(fields=fields_to_return, prefix=prefix,
-            delimiter='/')
+                                     delimiter='/')
 
         files = []
         for f in req:
@@ -86,11 +66,10 @@ class GoogleCloudStorageBucket(object):
         list_dict = dict(
             name=os.path.basename(os.path.normpath(path)),
             type='group_storage',
-            children = files + directories
+            children=files + directories
             )
 
         return list_dict
-
 
     def blob_to_dict(self, blob):
         blob.reload()
@@ -101,16 +80,16 @@ class GoogleCloudStorageBucket(object):
             name=os.path.basename(blob.name),
             size=blob.size,
             content_type=blob.content_type,
-            signed_url=blob.generate_signed_url(
-                expiration, credentials=self.credentials_p12),
+            signed_url=blob.generate_signed_url(expiration),
             public_url=blob.public_url)
-
 
     def Get(self, path, to_dict=True):
         """Get selected file info if the path matches.
 
         :type path: string
         :param path: The relative path to the file.
+        :type to_dict: bool
+        :param to_dict: Return the object as a dictionary.
         """
         path = os.path.join(self.subdir, path)
         blob = self.bucket.blob(path)
@@ -121,7 +100,6 @@ class GoogleCloudStorageBucket(object):
                 return blob
         else:
             return None
-
 
     def Post(self, full_path, path=None):
         """Create new blob and upload data to it.
@@ -134,7 +112,6 @@ class GoogleCloudStorageBucket(object):
         return blob
         # return self.blob_to_dict(blob) # Has issues with threading
 
-
     def Delete(self, path):
         """Delete blob (when removing an asset or replacing a preview)"""
 
@@ -145,7 +122,6 @@ class GoogleCloudStorageBucket(object):
             return True
         except NotFound:
             return None
-
 
     def update_name(self, blob, name):
         """Set the ContentDisposition metadata so that when a file is downloaded

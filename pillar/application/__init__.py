@@ -84,7 +84,7 @@ class ValidateCustomFields(Validator):
                 field, "Error validating properties")
 
 # We specify a settings.py file because when running on wsgi we can't detect it
-# automatically. The default path (which works in Docker) can be overriden with
+# automatically. The default path (which works in Docker) can be overridden with
 # an env variable.
 settings_path = os.environ.get(
     'EVE_SETTINGS', '/data/git/pillar/pillar/settings.py')
@@ -105,6 +105,16 @@ bugsnag.configure(
 )
 handle_exceptions(app)
 
+# Storage backend (GCS)
+try:
+    os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = \
+        app.config['GOOGLE_APPLICATION_CREDENTIALS']
+except KeyError:
+    log.debug("The GOOGLE_APPLICATION_CREDENTIALS configuration value should "
+              "point to an existing and valid JSON file.")
+    raise
+
+
 # Algolia search
 if 'ALGOLIA_USER' in app.config:
     client = algoliasearch.Client(
@@ -122,14 +132,14 @@ if app.config['ENCODING_BACKEND'] == 'zencoder':
 else:
     encoding_service_client = None
 
-from application.utils.authentication import validate_token
-from application.utils.authorization import check_permissions
-from application.utils.gcs import update_file_name
-from application.utils.algolia import algolia_index_user_save
-from application.utils.algolia import algolia_index_node_save
-from application.utils.activities import activity_subscribe
-from application.utils.activities import activity_object_add
-from application.utils.activities import notification_parse
+from utils.authentication import validate_token
+from utils.authorization import check_permissions
+from utils.gcs import update_file_name
+from utils.algolia import algolia_index_user_save
+from utils.algolia import algolia_index_node_save
+from utils.activities import activity_subscribe
+from utils.activities import activity_object_add
+from utils.activities import notification_parse
 from modules.file_storage import process_file
 from modules.file_storage import delete_file
 from modules.file_storage import generate_link
