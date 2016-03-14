@@ -105,14 +105,19 @@ bugsnag.configure(
 )
 handle_exceptions(app)
 
-# Storage backend (GCS)
+# Google Cloud project
 try:
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = \
-        app.config['GOOGLE_APPLICATION_CREDENTIALS']
+        app.config['GCLOUD_APP_CREDENTIALS']
 except KeyError:
-    log.debug("The GOOGLE_APPLICATION_CREDENTIALS configuration value should "
-              "point to an existing and valid JSON file.")
-    raise
+    raise SystemExit('GOOGLE_APPLICATION_CREDENTIALS configuration is missing')
+
+# Storage backend (GCS)
+try:
+    os.environ['GCLOUD_PROJECT'] = \
+        app.config['GCLOUD_PROJECT']
+except KeyError:
+    raise SystemExit('GCLOUD_PROJECT configuration value is missing')
 
 
 # Algolia search
