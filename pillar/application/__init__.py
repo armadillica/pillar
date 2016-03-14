@@ -86,7 +86,8 @@ class ValidateCustomFields(Validator):
 # We specify a settings.py file because when running on wsgi we can't detect it
 # automatically. The default path (which works in Docker) can be overriden with
 # an env variable.
-settings_path = os.environ.get('EVE_SETTINGS', '/data/git/pillar/pillar/settings.py')
+settings_path = os.environ.get(
+    'EVE_SETTINGS', '/data/git/pillar/pillar/settings.py')
 app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=NewAuth)
 
 import config
@@ -98,10 +99,9 @@ log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG if app.config['DEBUG'] else logging.INFO)
 log.info('Pillar starting')
 
-
 bugsnag.configure(
-  api_key = app.config['BUGSNAG_API_KEY'],
-  project_root = "/data/git/pillar/pillar",
+  api_key=app.config['BUGSNAG_API_KEY'],
+  project_root="/data/git/pillar/pillar",
 )
 handle_exceptions(app)
 
@@ -211,7 +211,7 @@ def item_parse_attachments(response):
     """Before returning a response, check if the 'attachments' property is
     defined. If yes, load the file (for the moment only images) in the required
     variation, get the link and build a Markdown representation. Search in the
-    'field' specified in the attachmentand replace the 'slug' tag with the
+    'field' specified in the attachment and replace the 'slug' tag with the
     generated link.
     """
     if 'properties' in response and 'attachments' in response['properties']:

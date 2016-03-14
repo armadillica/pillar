@@ -5,23 +5,20 @@ from eve.methods.put import put_internal
 from eve.methods.post import post_internal
 from flask.ext.script import Manager
 from application import app
-from manage.node_types.act import node_type_act
 from manage.node_types.asset import node_type_asset
 from manage.node_types.blog import node_type_blog
 from manage.node_types.comment import node_type_comment
 from manage.node_types.group import node_type_group
 from manage.node_types.post import node_type_post
 from manage.node_types.project import node_type_project
-from manage.node_types.scene import node_type_scene
-from manage.node_types.shot import node_type_shot
 from manage.node_types.storage import node_type_storage
-from manage.node_types.task import node_type_task
 from manage.node_types.texture import node_type_texture
 from manage.node_types.group_texture import node_type_group_texture
 
 manager = Manager(app)
 
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
+
 
 @manager.command
 def runserver():
@@ -101,6 +98,7 @@ def setup_db():
     print("Created user {0}".format(user[0]['_id']))
 
     # TODO: Create a default project
+
 
 @manager.command
 def clear_db():
