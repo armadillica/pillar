@@ -29,7 +29,6 @@ class Development(object):
         'GOOGLE_APPLICATION_CREDENTIALS', '/data/config/google_app.json')
     GCLOUD_PROJECT = os.environ.get('GCLOUD_PROJECT', 'blender-cloud')
 
-
     # Fill in only if we plan to sign our urls using a the CDN
     CDN_USE_URL_SIGNING = False
     CDN_SERVICE_DOMAIN_PROTOCOL = 'https'
