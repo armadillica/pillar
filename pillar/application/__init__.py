@@ -110,15 +110,13 @@ try:
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = \
         app.config['GCLOUD_APP_CREDENTIALS']
 except KeyError:
-    raise SystemExit('GOOGLE_APPLICATION_CREDENTIALS configuration is missing')
+    raise SystemExit('GCLOUD_APP_CREDENTIALS configuration is missing')
 
 # Storage backend (GCS)
 try:
-    os.environ['GCLOUD_PROJECT'] = \
-        app.config['GCLOUD_PROJECT']
+    os.environ['GCLOUD_PROJECT'] = app.config['GCLOUD_PROJECT']
 except KeyError:
     raise SystemExit('GCLOUD_PROJECT configuration value is missing')
-
 
 # Algolia search
 if 'ALGOLIA_USER' in app.config:

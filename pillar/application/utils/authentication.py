@@ -56,7 +56,7 @@ def validate_token():
     flask.g object, so that permissions and access to a resource can be defined
     from it.
 
-    When the token is succesfully validated, sets `g.current_user` to contain
+    When the token is successfully validated, sets `g.current_user` to contain
     the user information.
 
     @returns True iff the user is logged in with a valid Blender ID token.

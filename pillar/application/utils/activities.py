@@ -6,15 +6,11 @@ def notification_parse(notification):
     # notification = dict(a='n')
     # TODO: finish fixing this
     activities_collection = app.data.driver.db['activities']
-    activities_subscriptions_collection = app.data.driver.db['activities-subscriptions']
+    activities_subscriptions_collection = \
+        app.data.driver.db['activities-subscriptions']
     users_collection = app.data.driver.db['users']
     nodes_collection = app.data.driver.db['nodes']
     activity = activities_collection.find_one({'_id': notification['activity']})
-    # actor = users_collection.find_one({'_id': activity['actor_user']})
-    # Context is optional
-    context_object_type = None
-    context_object_name = None
-    context_object_url = None
 
     if activity['object_type'] != 'node':
         return
@@ -30,11 +26,10 @@ def notification_parse(notification):
     if node['parent']['user'] == g.current_user['user_id']:
         owner = "your {0}".format(node['parent']['node_type'])
     else:
-
         parent_comment_user = users_collection.find_one(
             {'_id': node['parent']['user']})
         owner = "{0}'s {1}".format(parent_comment_user['username'],
-            node['parent']['node_type'])
+                                   node['parent']['node_type'])
 
     context_object_type = node['parent']['node_type']
     context_object_name = owner
@@ -51,7 +46,6 @@ def notification_parse(notification):
         'context_object_type': 'node',
         'context_object': context_object_id,
     }
-
     subscription = activities_subscriptions_collection.find_one(lookup)
     if subscription and subscription['notifications']['web'] == True:
         is_subscribed = True
