@@ -9,7 +9,6 @@ from algoliasearch import algoliasearch
 from zencoder import Zencoder
 from flask import g
 from flask import request
-from flask import url_for
 from flask import abort
 from eve import Eve
 
@@ -193,6 +192,7 @@ def before_inserting_nodes(items):
             if project:
                 item['project'] = project['_id']
 
+
 def after_inserting_nodes(items):
     for item in items:
         context_object_id = item['parent']
@@ -289,9 +289,11 @@ def project_node_type_has_method(response):
         # Check permissions and append the allowed_methods to the node_type
         check_permissions(node_type, 'GET', append_allowed_methods=True)
 
+
 def before_returning_item_notifications(response):
     if request.args.get('parse'):
         notification_parse(response)
+
 
 def before_returning_resource_notifications(response):
     for item in response['_items']:

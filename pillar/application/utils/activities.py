@@ -2,6 +2,7 @@ from flask import g
 from eve.methods.post import post_internal
 from application import app
 
+
 def notification_parse(notification):
     # notification = dict(a='n')
     # TODO: finish fixing this

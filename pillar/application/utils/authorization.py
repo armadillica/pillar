@@ -31,8 +31,8 @@ def check_permissions(resource, method, append_allowed_methods=False):
             # from there
             computed_permissions = resource['node_type']['permissions']
         else:
-            # If the node_type is referenced with an ObjectID (was not embedded on
-            # request) query for if from the database and get the permissions
+            # If the node_type is referenced with an ObjectID (was not embedded
+            # on request) query for if from the database and get the permissions
 
             # node_types_collection = app.data.driver.db['node_types']
             # node_type = node_types_collection.find_one(resource['node_type'])

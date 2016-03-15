@@ -7,6 +7,7 @@ from application import app
 
 encoding = Blueprint('encoding', __name__)
 
+
 @encoding.route('/zencoder/notifications', methods=['POST'])
 def zencoder_notifications():
     if app.config['ENCODING_BACKEND'] == 'zencoder':
