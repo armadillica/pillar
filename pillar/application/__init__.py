@@ -94,7 +94,12 @@ import config
 app.config.from_object(config.Deployment)
 
 # Configure logging
-logging.basicConfig(level=logging.WARNING)
+logging.basicConfig(
+    level=logging.WARNING,
+    format='%(asctime)-15s %(levelname)8s %(name)s %(message)s')
+
+logging.getLogger('werkzeug').setLevel(logging.INFO)
+
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG if app.config['DEBUG'] else logging.INFO)
 log.info('Pillar starting')

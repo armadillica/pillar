@@ -39,8 +39,9 @@ def validate(token):
     payload = dict(
         token=token)
     try:
-        r = requests.post("{0}/u/validate_token".format(
-            SystemUtility.blender_id_endpoint()), data=payload)
+        url = "{0}/u/validate_token".format(SystemUtility.blender_id_endpoint())
+        log.debug('POSTing to %r', url)
+        r = requests.post(url, data=payload)
     except requests.exceptions.ConnectionError as e:
         raise e
 
