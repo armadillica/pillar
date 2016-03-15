@@ -1,4 +1,3 @@
-import os
 import logging
 
 import requests
@@ -14,16 +13,11 @@ from application import app
 log = logging.getLogger(__name__)
 
 
-class SystemUtility():
-    def __new__(cls, *args, **kwargs):
-        raise TypeError("Base class may not be instantiated")
-
-    @staticmethod
-    def blender_id_endpoint():
-        """Gets the endpoint for the authentication API. If the env variable
-        is defined, it's possible to override the (default) production address.
-        """
-        return app.config['BLENDER_ID_ENDPOINT']
+def blender_id_endpoint():
+    """Gets the endpoint for the authentication API. If the env variable
+    is defined, it's possible to override the (default) production address.
+    """
+    return app.config['BLENDER_ID_ENDPOINT'].rstrip('/')
 
 
 def validate(token):
@@ -39,7 +33,7 @@ def validate(token):
     payload = dict(
         token=token)
     try:
-        url = "{0}/u/validate_token".format(SystemUtility.blender_id_endpoint())
+        url = "{0}/u/validate_token".format(blender_id_endpoint())
         log.debug('POSTing to %r', url)
         r = requests.post(url, data=payload)
     except requests.exceptions.ConnectionError as e:
