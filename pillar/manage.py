@@ -4,6 +4,12 @@ from bson.objectid import ObjectId
 from eve.methods.put import put_internal
 from eve.methods.post import post_internal
 from flask.ext.script import Manager
+
+# Use a sensible default when running manage.py commands.
+if not os.environ.get('EVE_SETTINGS'):
+    settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.py')
+    os.environ['EVE_SETTINGS'] = settings_path
+
 from application import app
 from manage.node_types.asset import node_type_asset
 from manage.node_types.blog import node_type_blog
