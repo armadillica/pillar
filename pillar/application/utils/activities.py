@@ -1,11 +1,10 @@
 from flask import g
 from eve.methods.post import post_internal
 from application import app
+from application.modules.users import gravatar
 
 
 def notification_parse(notification):
-    # notification = dict(a='n')
-    # TODO: finish fixing this
     activities_collection = app.data.driver.db['activities']
     activities_subscriptions_collection = \
         app.data.driver.db['activities-subscriptions']
@@ -53,9 +52,18 @@ def notification_parse(notification):
     else:
         is_subscribed = False
 
+    # Parse user_actor
+    actor = users_collection.find_one({'_id': activity['actor_user']})
+    if actor:
+        parsed_actor = {
+            'username': actor['username'],
+            'avatar': gravatar(actor['email'])}
+    else:
+        parsed_actor = None
+
     updates = dict(
         _id=notification['_id'],
-        actor=activity['actor_user'],
+        actor=parsed_actor,
         action=action,
         object_type=object_type,
         object_name=object_name,
