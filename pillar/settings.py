@@ -413,6 +413,12 @@ files_schema = {
         #'required': True,
         'unique': True,
     },
+    'link': {
+        'type': 'string',
+    },
+    'link_expires': {
+        'type': 'datetime',
+    },
     'project': {
         # The project node the files belongs to (does not matter if it is
         # attached to an asset or something else). We use the project id as
@@ -463,6 +469,9 @@ files_schema = {
                 'file_path': {
                     'type': 'string',
                 },
+                'link': {
+                    'type': 'string',
+                }
             }
         }
     },

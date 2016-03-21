@@ -102,7 +102,7 @@ logging.getLogger('werkzeug').setLevel(logging.INFO)
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG if app.config['DEBUG'] else logging.INFO)
-log.info('Pillar starting')
+log.info('Pillar starting, debug=%s', app.config['DEBUG'])
 
 bugsnag.configure(
     api_key=app.config['BUGSNAG_API_KEY'],
@@ -148,9 +148,7 @@ from utils.algolia import algolia_index_node_save
 from utils.activities import activity_subscribe
 from utils.activities import activity_object_add
 from utils.activities import notification_parse
-from modules.file_storage import process_file
-from modules.file_storage import delete_file
-from modules.file_storage import generate_link
+from .modules import file_storage
 
 
 def before_returning_item_permissions(response):
@@ -261,7 +259,7 @@ def item_parse_attachments(response):
                     # Get the correc variation from the file
                     thumbnail = next((item for item in f['variations'] if
                                       item['size'] == size), None)
-                    l = generate_link(f['backend'], thumbnail['file_path'], str(f['project']))
+                    l = file_storage.generate_link(f['backend'], thumbnail['file_path'], str(f['project']))
                     # Build Markdown img string
                     l = '![{0}]({1} "{2}")'.format(slug, l, f['name'])
                     # Parse the content of the file and replace the attachment
@@ -351,36 +349,17 @@ def post_POST_files(request, payload):
     """After an file object has been created, we do the necessary processing
     and further update it.
     """
-    process_file(request.get_json())
+    file_storage.process_file(request.get_json())
 
 
 app.on_post_POST_files += post_POST_files
 
-
-def before_returning_file(response):
-    # TODO: add project id to all files
-    project_id = None if 'project' not in response else str(response['project'])
-    response['link'] = generate_link(
-        response['backend'], response['file_path'], project_id)
-    if 'variations' in response:
-        for variation in response['variations']:
-            variation['link'] = generate_link(
-                response['backend'], variation['file_path'], project_id)
-
-
-def before_returning_files(response):
-    for item in response['_items']:
-        # TODO: add project id to all files
-        project_id = None if 'project' not in item else str(item['project'])
-        item['link'] = generate_link(item['backend'], item['file_path'], project_id)
-
-
-app.on_fetched_item_files += before_returning_file
-app.on_fetched_resource_files += before_returning_files
+app.on_fetched_item_files += file_storage.before_returning_file
+app.on_fetched_resource_files += file_storage.before_returning_files
 
 
 def before_deleting_file(item):
-    delete_file(item)
+    file_storage.delete_file(item)
 
 
 app.on_delete_item_files += before_deleting_file

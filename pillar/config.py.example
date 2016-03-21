@@ -65,5 +65,12 @@ class Development(object):
     ALGOLIA_API_KEY = ''
     ALGOLIA_INDEX_USERS = ''
 
+    # Validity period of links, per file storage backend. Expressed in seconds.
+    # Shouldn't be more than a year, as this isn't supported by HTTP/1.1.
+    FILE_LINK_VALIDITY = defaultdict(
+        lambda: 3600 * 24 * 30,  # default of 1 month.
+        gcs=3600 * 23,  # 23 hours for Google Cloud Storage.
+    )
+
 
 class Deployment(Development): pass

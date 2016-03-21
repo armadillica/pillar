@@ -1,6 +1,9 @@
+import datetime
 import logging
 import os
 from multiprocessing import Process
+
+import bson.tz_util
 from bson import ObjectId
 from flask import request
 from flask import Blueprint
@@ -8,7 +11,10 @@ from flask import jsonify
 from flask import send_from_directory
 from flask import url_for, helpers
 from eve.methods.put import put_internal
+from eve.methods.patch import patch_internal
+
 from application import app
+from application.utils import remove_private_keys
 from application.utils.imaging import generate_local_thumbnails
 from application.utils.imaging import get_video_data
 from application.utils.imaging import ffmpeg_encode
@@ -298,3 +304,52 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
     else:
         link = None
     return link
+
+
+def before_returning_file(response):
+    ensure_valid_link(response)
+
+
+def before_returning_files(response):
+    for item in response['_items']:
+        ensure_valid_link(item)
+
+
+def ensure_valid_link(response):
+    """Ensures the file item has valid file links using generate_link(...)."""
+
+    log.debug('Inspecting link for file %s', response['_id'])
+
+    # Check link expiry.
+    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    if 'link_expires' in response:
+        link_expires = response['link_expires']
+        if now < link_expires:
+            # Not expired yet, so don't bother regenerating anything.
+            log.debug('Link expires at %s, which is in the future, so not generating new link', link_expires)
+            return
+
+        log.debug('Link expired at %s, which is in the past; generating new link', link_expires)
+    else:
+        log.debug('No expiry date for link; generating new link')
+
+    # Generate a new link for the file and all its variations.
+    project_id = str(response['project']) if 'project' in response else None  # TODO: add project id to all files
+    backend = response['backend']
+    response['link'] = generate_link(backend, response['file_path'], project_id)
+    if 'variations' in response:
+        for variation in response['variations']:
+            variation['link'] = generate_link(backend, variation['file_path'], project_id)
+
+    # Construct the new expiry datetime.
+    validity_secs = app.config['FILE_LINK_VALIDITY'][backend]
+    response['link_expires'] = now + datetime.timedelta(seconds=validity_secs)
+
+    patch_info = remove_private_keys(response)
+    (patch_resp, _, _, _) = patch_internal('files', patch_info, _id=ObjectId(response['_id']))
+    if patch_resp.get('_status') == 'ERR':
+        log.warning('Unable to save new links for file %s: %r', response['_id'], patch_resp)
+        # TODO: raise a snag.
+        response['_updated'] = now
+    else:
+        response['_updated'] = patch_resp['_updated']
