@@ -5,23 +5,23 @@ from multiprocessing import Process
 
 import bson.tz_util
 from bson import ObjectId
-from flask import request
+from eve.methods.patch import patch_internal
+from eve.methods.put import put_internal
 from flask import Blueprint
 from flask import jsonify
+from flask import request
 from flask import send_from_directory
 from flask import url_for, helpers
-from eve.methods.put import put_internal
-from eve.methods.patch import patch_internal
 
 from application import app
 from application.utils import remove_private_keys
+from application.utils.cdn import hash_file_path
+from application.utils.encoding import Encoder
+from application.utils.gcs import GoogleCloudStorageBucket
+from application.utils.imaging import ffmpeg_encode
 from application.utils.imaging import generate_local_thumbnails
 from application.utils.imaging import get_video_data
-from application.utils.imaging import ffmpeg_encode
 from application.utils.storage import push_to_storage
-from application.utils.cdn import hash_file_path
-from application.utils.gcs import GoogleCloudStorageBucket
-from application.utils.encoding import Encoder
 
 log = logging.getLogger(__name__)
 
