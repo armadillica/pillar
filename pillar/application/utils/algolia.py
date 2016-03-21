@@ -4,6 +4,7 @@ from application import algolia_index_users
 from application import algolia_index_nodes
 from application.modules.file_storage import generate_link
 
+
 def algolia_index_user_save(user):
     # Define accepted roles
     accepted_roles = ['admin', 'subscriber', 'demo']
@@ -29,7 +30,7 @@ def algolia_index_node_save(node):
     if node['node_type'] in accepted_node_types and algolia_index_nodes:
         # If a nodes does not have status published, do not index
         if 'status' in node['properties'] \
-            and node['properties']['status'] != 'published':
+                and node['properties']['status'] != 'published':
             return
 
         projects_collection = app.data.driver.db['projects']
@@ -44,15 +45,15 @@ def algolia_index_node_save(node):
             'project': {
                 '_id': project['_id'],
                 'name': project['name']
-                },
+            },
             'created': node['_created'],
             'updated': node['_updated'],
             'node_type': node['node_type'],
             'user': {
                 '_id': user['_id'],
                 'full_name': user['full_name']
-                },
-            }
+            },
+        }
         if 'description' in node and node['description']:
             node_ob['description'] = node['description']
         if 'picture' in node and node['picture']:
@@ -61,11 +62,11 @@ def algolia_index_node_save(node):
             picture = files_collection.find_one(lookup)
             if picture['backend'] == 'gcs':
                 variation_t = next((item for item in picture['variations'] \
-                    if item['size'] == 't'), None)
+                                    if item['size'] == 't'), None)
                 if variation_t:
                     node_ob['picture'] = generate_link(picture['backend'],
-                        variation_t['file_path'], project_id=str(picture['project']),
-                        is_public=True)
+                                                       variation_t['file_path'], project_id=str(picture['project']),
+                                                       is_public=True)
         # If the node has world permissions, compute the Free permission
         if 'permissions' in node and 'world' in node['permissions']:
             if 'GET' in node['permissions']['world']:

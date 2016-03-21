@@ -17,12 +17,11 @@ from application.utils.cdn import hash_file_path
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.encoding import Encoder
 
-
 log = logging.getLogger(__name__)
 
 file_storage = Blueprint('file_storage', __name__,
                          template_folder='templates',
-                         static_folder='../../static/storage',)
+                         static_folder='../../static/storage', )
 
 
 @file_storage.route('/gcs/<bucket_name>/<subdir>/')
@@ -50,7 +49,7 @@ def browse_gcs(bucket_name, subdir, file_path=None):
         return jsonify(listing)
 
 
-#@file_storage.route('/build_thumbnails/<path:file_path>')
+# @file_storage.route('/build_thumbnails/<path:file_path>')
 def build_thumbnails(file_path=None, file_id=None):
     """Given a file path or file ObjectId pointing to an image file, fetch it
     and generate a set of predefined variations (using generate_local_thumbnails).
@@ -92,7 +91,7 @@ def build_thumbnails(file_path=None, file_id=None):
             length=thumbnail['length'],
             md5=thumbnail['md5'],
             file_path=basename,
-            )
+        )
         # XXX Inject is_public for size 't' (should be part of the upload),
         # and currently we set it here and then on the fly during blob
         # creation by simply parsing the extension of the filename. This is
@@ -198,10 +197,10 @@ def process_file(src_file):
                 width=src_video_data['res_x'],
                 height=src_video_data['res_y'],
                 content_type="video/{0}".format(v),
-                length=0, # Available after encode
-                md5="", # Available after encode
+                length=0,  # Available after encode
+                md5="",  # Available after encode
                 file_path=filename,
-                )
+            )
             # Append file variation
             src_file['variations'].append(file_variation)
 
@@ -221,7 +220,7 @@ def process_file(src_file):
                             backend=j['backend'])
                         # Add the processing status to the file object
                         r = put_internal('files',
-                            src_file, **{'_id': ObjectId(file_id)})
+                                         src_file, **{'_id': ObjectId(file_id)})
                         pass
                 except KeyError:
                     pass
@@ -268,6 +267,7 @@ def delete_file(file_item):
             pass
         else:
             pass
+
     files_collection = app.data.driver.db['files']
     # Collect children (variations) of the original file
     children = files_collection.find({'parent': file_item['_id']})
@@ -292,7 +292,7 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
             link = None
     elif backend == 'pillar':
         link = url_for('file_storage.index', file_name=file_path, _external=True,
-        _scheme=app.config['SCHEME'])
+                       _scheme=app.config['SCHEME'])
     elif backend == 'cdnsun':
         link = hash_file_path(file_path, None)
     else:

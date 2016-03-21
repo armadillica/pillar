@@ -43,13 +43,13 @@ def generate_local_thumbnails(src, return_image_stats=False):
             format = im.format.lower()
             # Get format
             thumbnails[size] = dict(
-                file_path=dst, # Full path, to be processed before storage
+                file_path=dst,  # Full path, to be processed before storage
                 length=length,
                 width=width,
                 height=height,
                 md5='--',
                 content_type='image/' + format,
-                )
+            )
 
     if return_image_stats:
         return thumbnails
@@ -78,38 +78,38 @@ def resize_and_crop(img_path, modified_path, size, crop_type='middle'):
     # Get current and desired ratio for the images
     img_ratio = img.size[0] / float(img.size[1])
     ratio = size[0] / float(size[1])
-    #The image is scaled/cropped vertically or horizontally depending on the ratio
+    # The image is scaled/cropped vertically or horizontally depending on the ratio
     if ratio > img_ratio:
         img = img.resize((size[0], int(round(size[0] * img.size[1] / img.size[0]))),
-            Image.ANTIALIAS)
+                         Image.ANTIALIAS)
         # Crop in the top, middle or bottom
         if crop_type == 'top':
             box = (0, 0, img.size[0], size[1])
         elif crop_type == 'middle':
             box = (0, int(round((img.size[1] - size[1]) / 2)), img.size[0],
-                int(round((img.size[1] + size[1]) / 2)))
+                   int(round((img.size[1] + size[1]) / 2)))
         elif crop_type == 'bottom':
             box = (0, img.size[1] - size[1], img.size[0], img.size[1])
-        else :
+        else:
             raise ValueError('ERROR: invalid value for crop_type')
         img = img.crop(box)
     elif ratio < img_ratio:
         img = img.resize((int(round(size[1] * img.size[0] / img.size[1])), size[1]),
-            Image.ANTIALIAS)
+                         Image.ANTIALIAS)
         # Crop in the top, middle or bottom
         if crop_type == 'top':
             box = (0, 0, size[0], img.size[1])
         elif crop_type == 'middle':
             box = (int(round((img.size[0] - size[0]) / 2)), 0,
-                int(round((img.size[0] + size[0]) / 2)), img.size[1])
+                   int(round((img.size[0] + size[0]) / 2)), img.size[1])
         elif crop_type == 'bottom':
             box = (img.size[0] - size[0], 0, img.size[0], img.size[1])
-        else :
+        else:
             raise ValueError('ERROR: invalid value for crop_type')
         img = img.crop(box)
-    else :
+    else:
         img = img.resize((size[0], size[1]),
-            Image.ANTIALIAS)
+                         Image.ANTIALIAS)
     # If the scale is the same, we do not need to crop
     img.save(modified_path, "JPEG")
 
@@ -145,7 +145,7 @@ def get_video_data(filepath):
             duration=duration,
             res_x=video_stream['width'],
             res_y=video_stream['height'],
-            )
+        )
         if video_stream['sample_aspect_ratio'] != '1:1':
             print '[warning] Pixel aspect ratio is not square!'
 
@@ -184,8 +184,8 @@ def ffmpeg_encode(src, format, res_y=720):
             '-deadline', 'good',
             '-cpu-used', '0',
             '-vprofile', '0',
-            '-qmax', '51', '-qmin', '11', '-slices', '4','-b:v', '2M',
-            #'-acodec', 'libmp3lame', '-ab', '112k', '-ar', '44100',
+            '-qmax', '51', '-qmin', '11', '-slices', '4', '-b:v', '2M',
+            # '-acodec', 'libmp3lame', '-ab', '112k', '-ar', '44100',
             '-f', 'webm'])
 
     if not os.environ.get('VERBOSE'):
@@ -205,4 +205,3 @@ def ffmpeg_encode(src, format, res_y=720):
         dst = None
     # return path of the encoded video
     return dst
-

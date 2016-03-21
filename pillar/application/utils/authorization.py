@@ -44,7 +44,7 @@ def check_permissions(resource, method, append_allowed_methods=False):
                 project = projects_collection.find_one(resource['project'])
             node_type = next(
                 (item for item in project['node_types'] if item.get('name') \
-                    and item['name'] == resource['node_type']), None)
+                 and item['name'] == resource['node_type']), None)
             computed_permissions = node_type['permissions']
     else:
         computed_permissions = None

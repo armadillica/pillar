@@ -47,7 +47,7 @@ class GoogleCloudStorageBucket(object):
         files = []
         for f in req:
             filename = os.path.basename(f.name)
-            if filename != '': # Skip own folder name
+            if filename != '':  # Skip own folder name
                 files.append(dict(
                     path=os.path.relpath(f.name, self.subdir),
                     text=filename,
@@ -67,7 +67,7 @@ class GoogleCloudStorageBucket(object):
             name=os.path.basename(os.path.normpath(path)),
             type='group_storage',
             children=files + directories
-            )
+        )
 
         return list_dict
 
@@ -165,8 +165,8 @@ def update_file_name(item):
                     pass
             except AttributeError:
                 bugsnag.notify(Exception('Missing or conflicting ids detected'),
-                    meta_data={'nodes_info':
-                        {'node_id': item['_id'], 'file_id': file_id}})
+                               meta_data={'nodes_info':
+                                              {'node_id': item['_id'], 'file_id': file_id}})
 
     # Currently we search for 'file' and 'files' keys in the object properties.
     # This could become a bit more flexible and realy on a true reference of the

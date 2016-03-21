@@ -3,6 +3,7 @@ from zencoder import Zencoder
 from application import encoding_service_client
 from application import app
 
+
 class Encoder:
     """Generic Encoder wrapper. Provides a consistent API, independent from
     the encoding backend enabled.
@@ -26,7 +27,7 @@ class Encoder:
                     'witdh': v['width'],
                     'url': os.path.join(storage_base, v['file_path'])})
             r = encoding_service_client.job.create(file_input, outputs=outputs,
-                options=options)
+                                                   options=options)
             if r.code == 201:
                 return dict(process_id=r.body['id'], backend='zencoder')
             else:

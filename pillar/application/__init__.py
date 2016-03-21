@@ -15,7 +15,6 @@ from eve import Eve
 from eve.auth import TokenAuth
 from eve.io.mongo import Validator
 
-
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
 
@@ -63,7 +62,7 @@ class ValidateCustomFields(Validator):
         project = projects_collection.find_one(lookup)
         node_type = next(
             (item for item in project['node_types'] if item.get('name') \
-                and item['name'] == self.document['node_type']), None)
+             and item['name'] == self.document['node_type']), None)
         try:
             value = self.convert_properties(value, node_type['dyn_schema'])
         except Exception, e:
@@ -82,6 +81,7 @@ class ValidateCustomFields(Validator):
             self._error(
                 field, "Error validating properties")
 
+
 # We specify a settings.py file because when running on wsgi we can't detect it
 # automatically. The default path (which works in Docker) can be overridden with
 # an env variable.
@@ -90,6 +90,7 @@ settings_path = os.environ.get(
 app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=NewAuth)
 
 import config
+
 app.config.from_object(config.Deployment)
 
 # Configure logging
@@ -104,8 +105,8 @@ log.setLevel(logging.DEBUG if app.config['DEBUG'] else logging.INFO)
 log.info('Pillar starting')
 
 bugsnag.configure(
-  api_key=app.config['BUGSNAG_API_KEY'],
-  project_root="/data/git/pillar/pillar",
+    api_key=app.config['BUGSNAG_API_KEY'],
+    project_root="/data/git/pillar/pillar",
 )
 handle_exceptions(app)
 
@@ -125,8 +126,8 @@ except KeyError:
 # Algolia search
 if 'ALGOLIA_USER' in app.config:
     client = algoliasearch.Client(
-            app.config['ALGOLIA_USER'],
-            app.config['ALGOLIA_API_KEY'])
+        app.config['ALGOLIA_USER'],
+        app.config['ALGOLIA_API_KEY'])
     algolia_index_users = client.init_index(app.config['ALGOLIA_INDEX_USERS'])
     algolia_index_nodes = client.init_index(app.config['ALGOLIA_INDEX_NODES'])
 else:
@@ -157,24 +158,29 @@ def before_returning_item_permissions(response):
     validate_token()
     check_permissions(response, 'GET', append_allowed_methods=True)
 
+
 def before_returning_resource_permissions(response):
     for item in response['_items']:
         validate_token()
         check_permissions(item, 'GET', append_allowed_methods=True)
 
+
 def before_replacing_node(item, original):
     check_permissions(original, 'PUT')
     update_file_name(item)
 
+
 def after_replacing_node(item, original):
     """Push an update to the Algolia index when a node item is updated"""
     algolia_index_node_save(item)
+
 
 def before_inserting_nodes(items):
     """Before inserting a node in the collection we check if the user is allowed
     and we append the project id to it.
     """
     nodes_collection = app.data.driver.db['nodes']
+
     def find_parent_project(node):
         """Recursive function that finds the ultimate parent of a node."""
         if node and 'parent' in node:
@@ -184,6 +190,7 @@ def before_inserting_nodes(items):
             return node
         else:
             return None
+
     for item in items:
         check_permissions(item, 'POST')
         if 'parent' in item and 'project' not in item:
@@ -223,7 +230,8 @@ def after_inserting_nodes(items):
             item['_id'],
             'node',
             context_object_id
-            )
+        )
+
 
 def item_parse_attachments(response):
     """Before returning a response, check if the 'attachments' property is
@@ -252,7 +260,7 @@ def item_parse_attachments(response):
                     size = f['size'] if 'size' in f else 'l'
                     # Get the correc variation from the file
                     thumbnail = next((item for item in f['variations'] if
-                        item['size'] == size), None)
+                                      item['size'] == size), None)
                     l = generate_link(f['backend'], thumbnail['file_path'], str(f['project']))
                     # Build Markdown img string
                     l = '![{0}]({1} "{2}")'.format(slug, l, f['name'])
@@ -266,9 +274,11 @@ def item_parse_attachments(response):
                 else:
                     response[field_name_path[0]] = field_content
 
+
 def resource_parse_attachments(response):
     for item in response['_items']:
         item_parse_attachments(item)
+
 
 def project_node_type_has_method(response):
     """Check for a specific request arg, and check generate the allowed_methods
@@ -283,7 +293,7 @@ def project_node_type_has_method(response):
         # Look up the node type in the project document
         node_type = next(
             (item for item in response['node_types'] if item.get('name') \
-                and item['name'] == node_type_name), None)
+             and item['name'] == node_type_name), None)
         if not node_type:
             return abort(404)
         # Check permissions and append the allowed_methods to the node_type
@@ -299,6 +309,7 @@ def before_returning_resource_notifications(response):
     for item in response['_items']:
         if request.args.get('parse'):
             notification_parse(item)
+
 
 app.on_fetched_item_nodes += before_returning_item_permissions
 app.on_fetched_item_nodes += item_parse_attachments
@@ -316,6 +327,7 @@ app.on_fetched_item_projects += before_returning_item_permissions
 app.on_fetched_item_projects += project_node_type_has_method
 app.on_fetched_resource_projects += before_returning_resource_permissions
 
+
 def post_GET_user(request, payload):
     json_data = json.loads(payload.data)
     # Check if we are querying the users endpoint (instead of the single user)
@@ -325,18 +337,22 @@ def post_GET_user(request, payload):
     #     compute_permissions(json_data['_id'], app.data.driver)
     payload.data = json.dumps(json_data)
 
+
 def after_replacing_user(item, original):
     """Push an update to the Algolia index when a user item is updated"""
     algolia_index_user_save(item)
 
+
 app.on_post_GET_users += post_GET_user
 app.on_replace_users += after_replacing_user
+
 
 def post_POST_files(request, payload):
     """After an file object has been created, we do the necessary processing
     and further update it.
     """
     process_file(request.get_json())
+
 
 app.on_post_POST_files += post_POST_files
 
@@ -350,6 +366,7 @@ def before_returning_file(response):
         for variation in response['variations']:
             variation['link'] = generate_link(
                 response['backend'], variation['file_path'], project_id)
+
 
 def before_returning_files(response):
     for item in response['_items']:
@@ -365,12 +382,15 @@ app.on_fetched_resource_files += before_returning_files
 def before_deleting_file(item):
     delete_file(item)
 
+
 app.on_delete_item_files += before_deleting_file
 
 # The file_storage module needs app to be defined
 from modules.file_storage import file_storage
-#from modules.file_storage.serve import *
+
+# from modules.file_storage.serve import *
 app.register_blueprint(file_storage, url_prefix='/storage')
 # The encoding module (receive notification and report progress)
 from modules.encoding import encoding
+
 app.register_blueprint(encoding, url_prefix='/encoding')

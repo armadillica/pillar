@@ -75,7 +75,7 @@ def notification_parse(notification):
         is_read=('is_read' in notification and notification['is_read']),
         is_subscribed=is_subscribed,
         subscription=subscription['_id']
-        )
+    )
     notification.update(updates)
 
 
@@ -112,7 +112,7 @@ def activity_subscribe(user_id, context_object_type, context_object_id):
 
 
 def activity_object_add(actor_user_id, verb, object_type, object_id,
-        context_object_type, context_object_id):
+                        context_object_type, context_object_id):
     """Add a notification object and creates a notification for each user that
     - is not the original author of the post
     - is actively subscribed to the object
@@ -138,7 +138,7 @@ def activity_object_add(actor_user_id, verb, object_type, object_id,
             object=object_id,
             context_object_type=context_object_type,
             context_object=context_object_id
-            )
+        )
 
         activity = post_internal('activities', activity)
         if activity[3] != 201:

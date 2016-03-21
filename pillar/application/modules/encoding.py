@@ -15,7 +15,7 @@ def zencoder_notifications():
             # If we are in production, look for the Zencoder header secret
             try:
                 notification_secret_request = request.headers[
-                'X-Zencoder-Notification-Secret']
+                    'X-Zencoder-Notification-Secret']
             except KeyError:
                 return abort(401)
             # If the header is found, check it agains the one in the config
@@ -44,7 +44,7 @@ def zencoder_notifications():
                 format = 'mp4' if format == 'mpeg4' else format
                 # Find a variation matching format and resolution
                 variation = next((v for v in f['variations'] if v['format'] == format \
-                    and v['width'] == output['width']), None)
+                                  and v['width'] == output['width']), None)
                 # If found, update with delivered file size
                 # TODO: calculate md5 on the storage
                 if variation:
