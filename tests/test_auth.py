@@ -10,7 +10,9 @@ TEST_EMAIL_ADDRESS = '%s@testing.blender.org' % TEST_EMAIL_USER
 
 os.environ['BLENDER_ID_ENDPOINT'] = BLENDER_ID_ENDPOINT
 os.environ['MONGO_DBNAME'] = 'unittest'
-os.environ['EVE_SETTINGS'] = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'settings.py')
+os.environ['EVE_SETTINGS'] = os.path.join(
+    os.path.dirname(os.path.dirname(__file__)),
+    'pillar', 'settings.py')
 
 from application import app
 from application.utils import authentication as auth

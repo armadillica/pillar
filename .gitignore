@@ -3,9 +3,13 @@
 *.pyc
 *.sublime*
 *.ropeproject*
+*.swp
 
 config.py
 
 .ropeproject/*
 
 pillar/application/static/storage/
+/build
+/.cache
+/pillar/pillar.egg-info/
