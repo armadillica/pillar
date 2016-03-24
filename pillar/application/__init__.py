@@ -148,7 +148,13 @@ from utils.algolia import algolia_index_node_save
 from utils.activities import activity_subscribe
 from utils.activities import activity_object_add
 from utils.activities import notification_parse
-from .modules import file_storage
+from modules.file_storage import process_file
+from modules.file_storage import delete_file
+from modules.file_storage import generate_link
+from modules.file_storage import before_returning_file
+from modules.file_storage import before_returning_files
+from modules.projects import before_inserting_projects
+from modules.projects import after_inserting_projects
 
 
 def before_returning_item_permissions(response):
@@ -200,6 +206,11 @@ def before_inserting_nodes(items):
 
 def after_inserting_nodes(items):
     for item in items:
+        # Skip subscriptions for first level items (since the context is not a
+        # node, but a project).
+        # TODO: support should be added for mixed context
+        if 'parent' not in item:
+            return
         context_object_id = item['parent']
         if item['node_type'] == 'comment':
             nodes_collection = app.data.driver.db['nodes']
@@ -259,7 +270,7 @@ def item_parse_attachments(response):
                     # Get the correc variation from the file
                     thumbnail = next((item for item in f['variations'] if
                                       item['size'] == size), None)
-                    l = file_storage.generate_link(f['backend'], thumbnail['file_path'], str(f['project']))
+                    l = generate_link(f['backend'], thumbnail['file_path'], str(f['project']))
                     # Build Markdown img string
                     l = '![{0}]({1} "{2}")'.format(slug, l, f['name'])
                     # Parse the content of the file and replace the attachment
@@ -324,6 +335,9 @@ app.on_inserted_nodes += after_inserting_nodes
 app.on_fetched_item_projects += before_returning_item_permissions
 app.on_fetched_item_projects += project_node_type_has_method
 app.on_fetched_resource_projects += before_returning_resource_permissions
+# Projects hooks
+app.on_insert_projects += before_inserting_projects
+app.on_inserted_projects += after_inserting_projects
 
 
 def post_GET_user(request, payload):
@@ -349,17 +363,17 @@ def post_POST_files(request, payload):
     """After an file object has been created, we do the necessary processing
     and further update it.
     """
-    file_storage.process_file(request.get_json())
+    process_file(request.get_json())
 
 
 app.on_post_POST_files += post_POST_files
 
-app.on_fetched_item_files += file_storage.before_returning_file
-app.on_fetched_resource_files += file_storage.before_returning_files
+app.on_fetched_item_files += before_returning_file
+app.on_fetched_resource_files += before_returning_files
 
 
 def before_deleting_file(item):
-    file_storage.delete_file(item)
+    delete_file(item)
 
 
 app.on_delete_item_files += before_deleting_file
