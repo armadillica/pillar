@@ -30,10 +30,10 @@ node_type_post = {
         'attachments': {
             'type': 'list',
             'schema': {
-            'type': 'dict',
+                'type': 'dict',
                 'schema': {
                     'field': {'type': 'string'},
-                    'files' : {
+                    'files': {
                         'type': 'list',
                         'schema': {
                             'type': 'dict',
@@ -55,14 +55,6 @@ node_type_post = {
         'url': {},
         'attachments': {'visible': False},
     },
-    'parent': ['blog',],
-    'permissions': {
-        # 'groups': [{
-        #     'group': app.config['ADMIN_USER_GROUP'],
-        #     'methods': ['GET', 'PUT', 'POST']
-        # }],
-        # 'users': [],
-        # 'world': ['GET']
-    }
+    'parent': ['blog', ],
+    'permissions': {}
 }
-
