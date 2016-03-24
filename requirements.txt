@@ -6,7 +6,7 @@ Eve==0.5.3
 Events==0.2.1
 Flask-Script==2.0.5
 flup==1.0.2
-gcloud==0.11.0
+-e git+https://github.com/GoogleCloudPlatform/gcloud-python.git@dbb22a7fddcf12228bba7b191774f2c4a2adfe35#egg=gcloud
 google-apitools==0.4.11
 httplib2==0.9.2
 idna==2.0
@@ -22,3 +22,7 @@ simplejson==3.8.1
 WebOb==1.5.0
 wheel==0.24.0
 zencoder==0.6.5
+
+# development requirements
+httpretty==0.8.14
+pytest==2.9.1

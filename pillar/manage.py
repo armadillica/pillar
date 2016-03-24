@@ -9,10 +9,12 @@ from flask.ext.script import Manager
 
 # Use a sensible default when running manage.py commands.
 if not os.environ.get('EVE_SETTINGS'):
-    settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'settings.py')
+    settings_path = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                 'settings.py')
     os.environ['EVE_SETTINGS'] = settings_path
 
 from application import app
+from application.utils.gcs import GoogleCloudStorageBucket
 from manage.node_types.asset import node_type_asset
 from manage.node_types.blog import node_type_blog
 from manage.node_types.comment import node_type_comment
@@ -106,6 +108,45 @@ def setup_db():
     print("Created user {0}".format(user[0]['_id']))
 
     # TODO: Create a default project
+    groups_collection = app.data.driver.db['groups']
+    admin_group = groups_collection.find_one({'name': 'admin'})
+
+    default_permissions = dict(
+        world=['GET'],
+        users=[],
+        groups=[
+            dict(group=admin_group['_id'],
+                 methods=['GET', 'PUT', 'POST'])
+        ]
+    )
+
+    node_type_blog['permissions'] = default_permissions
+    node_type_post['permissions'] = default_permissions
+    node_type_comment['permissions'] = default_permissions
+
+    project = dict(
+        owners=dict(users=[], groups=[]),
+        description='Default Project',
+        name='Default Project',
+        node_types=[
+            node_type_blog,
+            node_type_post,
+            node_type_comment
+        ],
+        status='published',
+        user=user[0]['_id'],
+        is_private=False,
+        permissions=default_permissions,
+        url='default-project',
+        summary='Default Project summary',
+        category='training'
+    )
+    project = post_internal('projects', project)
+    print("Created default project {0}".format(project[0]['_id']))
+    gcs_storage = GoogleCloudStorageBucket(str(project[0]['_id']))
+
+    if gcs_storage.bucket.exists():
+        print("Created CGS instance")
 
 
 @manager.command

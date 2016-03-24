@@ -26,8 +26,16 @@ class GoogleCloudStorageBucket(object):
 
     def __init__(self, bucket_name, subdir='_/'):
         gcs = Client()
-        self.bucket = gcs.get_bucket(bucket_name)
+        try:
+            self.bucket = gcs.get_bucket(bucket_name)
+        except NotFound:
+            self.bucket = gcs.bucket(bucket_name)
+            # Hardcode the bucket location to EU
+            self.bucket.location = 'EU'
+            self.bucket.create()
+
         self.subdir = subdir
+
 
     def List(self, path=None):
         """Display the content of a subdir in the project bucket. If the path
