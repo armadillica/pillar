@@ -141,9 +141,12 @@ def setup_db():
         summary='Default Project summary',
         category='training'
     )
-    project = post_internal('projects', project)
-    print("Created default project {0}".format(project[0]['_id']))
-    gcs_storage = GoogleCloudStorageBucket(str(project[0]['_id']))
+    # Manually insert into db, since using post_internal would trigger hook
+    # TODO: fix this by bassing the context (and the user to g object)
+    projects_collection = app.data.driver.db['projects']
+    project = projects_collection.insert_one(project)
+    print("Created default project {0}".format(project.inserted_id))
+    gcs_storage = GoogleCloudStorageBucket(str(project.inserted_id))
 
     if gcs_storage.bucket.exists():
         print("Created CGS instance")
