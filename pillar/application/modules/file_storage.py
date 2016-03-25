@@ -329,6 +329,7 @@ def before_returning_files(response):
 def ensure_valid_link(response):
     """Ensures the file item has valid file links using generate_link(...)."""
 
+    from application import app
     log.debug('Inspecting link for file %s', response['_id'])
 
     # Check link expiry.
