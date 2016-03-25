@@ -12,12 +12,10 @@ from common_test_data import EXAMPLE_FILE
 
 
 class FileUploadingTest(AbstractPillarTest):
-
     def test_create_file_missing_on_fs(self):
-        from application import utils
-        from application.utils import PillarJSONEncoder
+        from application.utils import PillarJSONEncoder, remove_private_keys
 
-        to_post = utils.remove_private_keys(EXAMPLE_FILE)
+        to_post = remove_private_keys(EXAMPLE_FILE)
         json_file = json.dumps(to_post, cls=PillarJSONEncoder)
 
         with self.app.test_request_context():
@@ -29,15 +27,13 @@ class FileUploadingTest(AbstractPillarTest):
 
         self.assertEqual(422, resp.status_code)
 
-
     def test_create_file_exists_on_fs(self):
-        from application import utils
-        from application.utils import PillarJSONEncoder
+        from application.utils import PillarJSONEncoder, remove_private_keys
 
         filename = 'BlenderDesktopLogo.png'
         full_file = copy.deepcopy(EXAMPLE_FILE)
         full_file[u'name'] = filename
-        to_post = utils.remove_private_keys(full_file)
+        to_post = remove_private_keys(full_file)
         json_file = json.dumps(to_post, cls=PillarJSONEncoder)
 
         with self.app.test_request_context():
@@ -55,4 +51,3 @@ class FileUploadingTest(AbstractPillarTest):
                                     headers={'Content-Type': 'application/json'})
 
         self.assertEqual(201, resp.status_code)
-
