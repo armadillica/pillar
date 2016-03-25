@@ -148,11 +148,7 @@ from utils.algolia import algolia_index_node_save
 from utils.activities import activity_subscribe
 from utils.activities import activity_object_add
 from utils.activities import notification_parse
-from modules.file_storage import process_file
-from modules.file_storage import delete_file
-from modules.file_storage import generate_link
-from modules.file_storage import before_returning_file
-from modules.file_storage import before_returning_files
+from modules import file_storage
 from modules.projects import before_inserting_projects
 from modules.projects import after_inserting_projects
 
@@ -270,7 +266,8 @@ def item_parse_attachments(response):
                     # Get the correc variation from the file
                     thumbnail = next((item for item in f['variations'] if
                                       item['size'] == size), None)
-                    l = generate_link(f['backend'], thumbnail['file_path'], str(f['project']))
+                    l = file_storage.generate_link(f['backend'], thumbnail['file_path'],
+                                                   str(f['project']))
                     # Build Markdown img string
                     l = '![{0}]({1} "{2}")'.format(slug, l, f['name'])
                     # Parse the content of the file and replace the attachment
@@ -358,31 +355,8 @@ def after_replacing_user(item, original):
 app.on_post_GET_users += post_GET_user
 app.on_replace_users += after_replacing_user
 
+file_storage.setup_app(app, url_prefix='/storage')
 
-def post_POST_files(request, payload):
-    """After an file object has been created, we do the necessary processing
-    and further update it.
-    """
-    process_file(request.get_json())
-
-
-app.on_post_POST_files += post_POST_files
-
-app.on_fetched_item_files += before_returning_file
-app.on_fetched_resource_files += before_returning_files
-
-
-def before_deleting_file(item):
-    delete_file(item)
-
-
-app.on_delete_item_files += before_deleting_file
-
-# The file_storage module needs app to be defined
-from modules.file_storage import file_storage
-
-# from modules.file_storage.serve import *
-app.register_blueprint(file_storage, url_prefix='/storage')
 # The encoding module (receive notification and report progress)
 from modules.encoding import encoding
 

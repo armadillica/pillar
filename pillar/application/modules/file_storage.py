@@ -4,6 +4,7 @@ import os
 from multiprocessing import Process
 
 import bson.tz_util
+import eve.utils
 from bson import ObjectId
 from eve.methods.patch import patch_internal
 from eve.methods.put import put_internal
@@ -13,7 +14,6 @@ from flask import request
 from flask import send_from_directory
 from flask import url_for, helpers
 
-from application import app
 from application.utils import remove_private_keys
 from application.utils.cdn import hash_file_path
 from application.utils.encoding import Encoder
@@ -62,6 +62,9 @@ def build_thumbnails(file_path=None, file_id=None):
     Return a list of dictionaries containing the various image properties and
     variation properties.
     """
+
+    from application import app
+
     files_collection = app.data.driver.db['files']
     if file_path:
         # Search file with backend "pillar" and path=file_path
@@ -113,6 +116,8 @@ def build_thumbnails(file_path=None, file_id=None):
 @file_storage.route('/file', methods=['POST'])
 @file_storage.route('/file/<path:file_name>', methods=['GET', 'POST'])
 def index(file_name=None):
+    from application import app
+
     # GET file -> read it
     if request.method == 'GET':
         return send_from_directory(app.config['STORAGE_DIR'], file_name)
@@ -145,6 +150,8 @@ def index(file_name=None):
 def process_file(src_file):
     """Process the file
     """
+    from application import app
+
     file_id = src_file['_id']
     # Remove properties that do not belong in the collection
     internal_fields = ['_id', '_etag', '_updated', '_created', '_status']
@@ -274,6 +281,8 @@ def delete_file(file_item):
         else:
             pass
 
+    from application import app
+
     files_collection = app.data.driver.db['files']
     # Collect children (variations) of the original file
     children = files_collection.find({'parent': file_item['_id']})
@@ -287,6 +296,8 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
     """Hook to check the backend of a file resource, to build an appropriate link
     that can be used by the client to retrieve the actual file.
     """
+    from application import app
+
     if backend == 'gcs':
         storage = GoogleCloudStorageBucket(project_id)
         blob = storage.Get(file_path)
@@ -353,3 +364,25 @@ def ensure_valid_link(response):
         response['_updated'] = now
     else:
         response['_updated'] = patch_resp['_updated']
+
+
+def post_POST_files(request, payload):
+    """After an file object has been created, we do the necessary processing
+    and further update it.
+    """
+    process_file(request.get_json())
+
+
+def before_deleting_file(item):
+    delete_file(item)
+
+
+def setup_app(app, url_prefix):
+    app.on_post_POST_files += post_POST_files
+
+    app.on_fetched_item_files += before_returning_file
+    app.on_fetched_resource_files += before_returning_files
+
+    app.on_delete_item_files += before_deleting_file
+
+    app.register_blueprint(file_storage, url_prefix='/storage')
