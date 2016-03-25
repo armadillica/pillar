@@ -329,8 +329,7 @@ def before_returning_files(response):
 def ensure_valid_link(response):
     """Ensures the file item has valid file links using generate_link(...)."""
 
-    from application import app
-    log.debug('Inspecting link for file %s', response['_id'])
+    # log.debug('Inspecting link for file %s', response['_id'])
 
     # Check link expiry.
     now = datetime.datetime.now(tz=bson.tz_util.utc)
@@ -338,15 +337,28 @@ def ensure_valid_link(response):
         link_expires = response['link_expires']
         if now < link_expires:
             # Not expired yet, so don't bother regenerating anything.
-            log.debug('Link expires at %s, which is in the future, so not generating new link', link_expires)
+            log.debug('Link expires at %s, which is in the future, so not generating new link',
+                      link_expires)
             return
 
         log.debug('Link expired at %s, which is in the past; generating new link', link_expires)
     else:
         log.debug('No expiry date for link; generating new link')
 
-    # Generate a new link for the file and all its variations.
-    project_id = str(response['project']) if 'project' in response else None  # TODO: add project id to all files
+    _generate_all_links(response, now)
+
+
+def _generate_all_links(response, now):
+    """Generate a new link for the file and all its variations.
+
+    :param response: the file document that should be updated.
+    :param now: datetime that reflects 'now', for consistent expiry generation.
+    """
+
+    from application import app
+
+    project_id = str(
+        response['project']) if 'project' in response else None  # TODO: add project id to all files
     backend = response['backend']
     response['link'] = generate_link(backend, response['file_path'], project_id)
     if 'variations' in response:
@@ -378,7 +390,26 @@ def before_deleting_file(item):
     delete_file(item)
 
 
+def on_pre_get_files(_, lookup):
+    from application import app
+
+    # Override the HTTP header, we always want to fetch the document from MongoDB.
+    parsed_req = eve.utils.parse_request('files')
+    parsed_req.if_modified_since = None
+
+    # Only fetch it if the date got expired.
+    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    lookup_expired = lookup.copy()
+    lookup_expired['link_expires'] = {'$lte': now}
+
+    cursor = app.data.find('files', parsed_req, lookup_expired)
+    for file_doc in cursor:
+        log.debug('Updating expired links for file %r.', file_doc['_id'])
+        _generate_all_links(file_doc, now)
+
+
 def setup_app(app, url_prefix):
+    app.on_pre_GET_files += on_pre_get_files
     app.on_post_POST_files += post_POST_files
 
     app.on_fetched_item_files += before_returning_file
