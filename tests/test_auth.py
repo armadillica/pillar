@@ -17,6 +17,8 @@ os.environ['EVE_SETTINGS'] = os.path.join(
 from application import app
 from application.utils import authentication as auth
 
+app.config['BLENDER_ID_ENDPOINT'] = BLENDER_ID_ENDPOINT
+
 
 def make_header(username, password=''):
     """Returns a Basic HTTP Authentication header value."""
