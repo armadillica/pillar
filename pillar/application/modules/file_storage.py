@@ -8,12 +8,14 @@ import eve.utils
 from bson import ObjectId
 from eve.methods.patch import patch_internal
 from eve.methods.put import put_internal
-from flask import Blueprint
+from flask import Blueprint, safe_join
 from flask import jsonify
 from flask import request
+from flask import abort
 from flask import send_from_directory
 from flask import url_for, helpers
 
+from application import utils
 from application.utils import remove_private_keys
 from application.utils.cdn import hash_file_path
 from application.utils.encoding import Encoder
@@ -75,8 +77,8 @@ def build_thumbnails(file_path=None, file_id=None):
         file_ = files_collection.find_one({"_id": ObjectId(file_id)})
         file_path = file_['name']
 
-    file_full_path = os.path.join(app.config['SHARED_DIR'], file_path[:2],
-                                  file_path)
+    file_full_path = safe_join(safe_join(app.config['SHARED_DIR'], file_path[:2]),
+                               file_path)
     # Does the original file exist?
     if not os.path.isfile(file_full_path):
         return "", 404
@@ -147,26 +149,29 @@ def index(file_name=None):
     return jsonify({'url': url_for('file_storage.index', file_name=file_name)})
 
 
-def process_file(src_file):
-    """Process the file
+def process_file(file_id, src_file):
+    """Process the file.
+
+    :param file_id: '_id' key of the file
+    :param src_file: POSTed data of the file, lacks private properties.
     """
     from application import app
 
-    file_id = src_file['_id']
-    # Remove properties that do not belong in the collection
-    internal_fields = ['_id', '_etag', '_updated', '_created', '_status']
-    for field in internal_fields:
-        src_file.pop(field, None)
+    src_file = utils.remove_private_keys(src_file)
 
-    files_collection = app.data.driver.db['files']
-    file_abs_path = os.path.join(
-        app.config['SHARED_DIR'], src_file['name'][:2], src_file['name'])
+    filename = src_file['name']
+    file_abs_path = safe_join(safe_join(app.config['SHARED_DIR'], filename[:2]), filename)
+
+    if not os.path.exists(file_abs_path):
+        log.warning("POSTed file document %r refers to non-existant file on file system %s!",
+                    file_id, file_abs_path)
+        abort(422, "POSTed file document refers to non-existant file on file system!")
 
     src_file['length'] = os.stat(file_abs_path).st_size
     content_type = src_file['content_type'].split('/')
     src_file['format'] = content_type[1]
     mime_type = content_type[0]
-    src_file['file_path'] = src_file['name']
+    src_file['file_path'] = filename
 
     if mime_type == 'image':
         from PIL import Image
@@ -197,7 +202,7 @@ def process_file(src_file):
         src_file['variations'] = []
         # Create variations
         for v in variations:
-            root, ext = os.path.splitext(src_file['name'])
+            root, ext = os.path.splitext(filename)
             filename = "{0}-{1}p.{2}".format(root, res_y, v)
             video_duration = None
             if src_video_data['duration']:
@@ -250,6 +255,9 @@ def process_file(src_file):
 
         p = Process(target=encode, args=(file_abs_path, src_file, res_y))
         p.start()
+    else:
+        log.info("POSTed file was of type %r, which isn't thumbnailed/encoded.", mime_type)
+
     if mime_type != 'video':
         # Sync the whole subdir
         sync_path = os.path.split(file_abs_path)[0]
@@ -259,7 +267,7 @@ def process_file(src_file):
         p.start()
 
     # Update the original file with additional info, e.g. image resolution
-    r = put_internal('files', src_file, **{'_id': ObjectId(file_id)})
+    put_internal('files', src_file, _id=ObjectId(file_id))
 
 
 def delete_file(file_item):
@@ -383,7 +391,14 @@ def post_POST_files(request, payload):
     """After an file object has been created, we do the necessary processing
     and further update it.
     """
-    process_file(request.get_json())
+
+    if 200 <= payload.status_code < 300:
+        import json
+        posted_properties = json.loads(request.data)
+        private_properties = json.loads(payload.data)
+        file_id = private_properties['_id']
+
+        process_file(file_id, posted_properties)
 
 
 def before_deleting_file(item):

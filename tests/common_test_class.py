@@ -34,6 +34,7 @@ class AbstractPillarTest(TestMinimal):
         app.config['BLENDER_ID_ENDPOINT'] = BLENDER_ID_ENDPOINT
         logging.getLogger('application').setLevel(logging.DEBUG)
         logging.getLogger('werkzeug').setLevel(logging.DEBUG)
+        logging.getLogger('eve').setLevel(logging.DEBUG)
 
         self.app = app
         self.client = app.test_client()
@@ -59,7 +60,20 @@ class AbstractPillarTest(TestMinimal):
             projects_collection.insert_one(EXAMPLE_PROJECT)
             result = files_collection.insert_one(file)
             file_id = result.inserted_id
-        return file_id, EXAMPLE_FILE
+        return file_id, file
+
+    def ensure_project_exists(self, project_overrides=None):
+        with self.app.test_request_context():
+            projects_collection = self.app.data.driver.db['projects']
+            assert isinstance(projects_collection, pymongo.collection.Collection)
+
+            project = copy.deepcopy(EXAMPLE_PROJECT)
+            if project_overrides is not None:
+                project.update(project_overrides)
+
+            result = projects_collection.insert_one(project)
+            project_id = result.inserted_id
+        return project_id, project
 
     def htp_blenderid_validate_unhappy(self):
         """Sets up HTTPretty to mock unhappy validation flow."""

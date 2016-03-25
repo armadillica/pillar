@@ -70,7 +70,7 @@ def push_to_storage(project_id, full_path, backend='cgs'):
             # XXX Make public on the fly if it's an image and small preview.
             # This should happen by reading the database (push to storage
             # should change to accomodate it).
-            if full_path.endswith('-t.jpg'):
+            if blob is not None and full_path.endswith('-t.jpg'):
                 blob.make_public()
             os.remove(full_path)
 
