@@ -9,7 +9,7 @@ import pymongo.collection
 from flask.testing import FlaskClient
 import httpretty
 
-from test_data import EXAMPLE_PROJECT, EXAMPLE_FILE
+from common_test_data import EXAMPLE_PROJECT, EXAMPLE_FILE
 
 BLENDER_ID_ENDPOINT = 'http://127.0.0.1:8001'  # nonexistant server, no trailing slash!
 MY_PATH = os.path.dirname(os.path.abspath(__file__))
@@ -24,7 +24,7 @@ logging.basicConfig(
 
 class AbstractPillarTest(TestMinimal):
     def setUp(self, **kwargs):
-        settings_file = os.path.join(MY_PATH, 'test_settings.py')
+        settings_file = os.path.join(MY_PATH, 'common_test_settings.py')
         kwargs['settings_file'] = settings_file
         os.environ['EVE_SETTINGS'] = settings_file
         super(AbstractPillarTest, self).setUp(**kwargs)
@@ -46,7 +46,7 @@ class AbstractPillarTest(TestMinimal):
         # but also un-import the application.
         del sys.modules['application']
 
-    def _ensure_file_exists(self, file_overrides=None):
+    def ensure_file_exists(self, file_overrides=None):
         with self.app.test_request_context():
             files_collection = self.app.data.driver.db['files']
             projects_collection = self.app.data.driver.db['projects']

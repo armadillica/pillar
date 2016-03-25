@@ -1,7 +1,7 @@
 import base64
 import httpretty
 
-from common_test_stuff import AbstractPillarTest, TEST_EMAIL_USER, TEST_EMAIL_ADDRESS
+from common_test_class import AbstractPillarTest, TEST_EMAIL_USER, TEST_EMAIL_ADDRESS
 
 
 def make_header(username, password=''):

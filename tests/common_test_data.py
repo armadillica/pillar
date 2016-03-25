@@ -239,7 +239,7 @@ EXAMPLE_PROJECT = {
                                      u'is_tileable': {u'type': u'boolean'},
                                      u'order': {u'type': u'integer'},
                                      u'resolution': {u'type': u'string'},
-                                     u'status': {u'allowed': [u'published',
+                                     u'stat_ensure_file_existsus': {u'allowed': [u'published',
                                                               u'pending',
                                                               u'processing',
                                                               u'deleted'],
