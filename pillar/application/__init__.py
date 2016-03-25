@@ -261,9 +261,11 @@ def item_parse_attachments(response):
                 for f in attachment['files']:
                     slug = f['slug']
                     slug_tag = "[{0}]".format(slug)
-                    f = files_collection.find_one({'_id': f['file']})
+                    f = files_collection.find_one({'_id': ObjectId(f['file'])})
+                    if f is None:
+                        abort(404)
                     size = f['size'] if 'size' in f else 'l'
-                    # Get the correc variation from the file
+                    # Get the correct variation from the file
                     thumbnail = next((item for item in f['variations'] if
                                       item['size'] == size), None)
                     l = file_storage.generate_link(f['backend'], thumbnail['file_path'],
