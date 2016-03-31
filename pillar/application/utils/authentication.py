@@ -32,12 +32,14 @@ def validate(token):
     log.debug("Validating token %s", token)
     payload = dict(
         token=token)
+    url = "{0}/u/validate_token".format(blender_id_endpoint())
+
     try:
-        url = "{0}/u/validate_token".format(blender_id_endpoint())
         log.debug('POSTing to %r', url)
         r = requests.post(url, data=payload)
     except requests.exceptions.ConnectionError as e:
-        raise e
+        log.error('Connection error trying to POST to %s, handling as invalid token.', url)
+        return None
 
     if r.status_code != 200:
         log.info('HTTP error %i validating token: %s', r.status_code, r.content)
