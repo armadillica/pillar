@@ -153,15 +153,18 @@ from modules.projects import before_inserting_projects
 from modules.projects import after_inserting_projects
 
 
+@app.before_request
+def validate_token_at_every_request():
+    validate_token()
+
+
 def before_returning_item_permissions(response):
     # Run validation process, since GET on nodes entry point is public
-    validate_token()
     check_permissions(response, 'GET', append_allowed_methods=True)
 
 
 def before_returning_resource_permissions(response):
     for item in response['_items']:
-        validate_token()
         check_permissions(item, 'GET', append_allowed_methods=True)
 
 
