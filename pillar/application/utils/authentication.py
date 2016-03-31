@@ -52,14 +52,18 @@ def validate_token():
     from it.
 
     When the token is successfully validated, sets `g.current_user` to contain
-    the user information.
+    the user information, otherwise it is set to None.
 
     @returns True iff the user is logged in with a valid Blender ID token.
     """
 
+    # Default to no user at all.
+    g.current_user = None
+
     if not request.authorization:
         # If no authorization headers are provided, we are getting a request
         # from a non logged in user. Proceed accordingly.
+        log.debug('No authentication headers, so not logged in.')
         return False
 
     token = request.authorization.username

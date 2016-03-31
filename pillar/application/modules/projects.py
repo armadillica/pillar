@@ -33,7 +33,7 @@ def after_inserting_projects(items):
 
     :param items: List of project docs that have been inserted (normally one)
     """
-    current_user = g.get('current_user', None)
+    current_user = g.current_user
     users_collection = app.data.driver.db['users']
     user = users_collection.find_one({'_id': current_user['user_id']})
 

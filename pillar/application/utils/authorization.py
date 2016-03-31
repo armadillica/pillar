@@ -17,7 +17,7 @@ def check_permissions(resource, method, append_allowed_methods=False):
     if method != 'GET' and append_allowed_methods:
         raise ValueError("append_allowed_methods only allowed with 'GET' method")
 
-    current_user = g.get('current_user', None)
+    current_user = g.current_user
 
     if 'permissions' in resource:
         # If permissions are embedded in the node (this overrides any other
