@@ -109,7 +109,7 @@ def validate_token():
             user_id=user_id,
             token=token,
             groups=groups,
-            token_expire_time=datetime.now() + timedelta(hours=1))
+            token_expire_time=token_data['expire_time'])
     else:
         log.debug("User is already in our database and token hasn't expired yet.")
         users = app.data.driver.db['users']
