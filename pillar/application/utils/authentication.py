@@ -80,6 +80,7 @@ def validate_token():
         # is authorized, and we will store the token in our local database.
         validation = validate(token)
         if validation is None or validation.get('status', '') != 'success':
+            log.debug('Validation failed, result is %r', validation)
             return False
 
         users = app.data.driver.db['users']
@@ -89,10 +90,12 @@ def validate_token():
 
         if not db_user:
             # We don't even know this user; create it on the fly.
+            log.debug('Validation success, creating new user in our database.')
             user_id = create_new_user(
                 email, username, validation['data']['user']['id'])
             groups = None
         else:
+            log.debug('Validation success, user is already in our database.')
             user_id = db_user['_id']
             groups = db_user['groups']
 
@@ -108,6 +111,7 @@ def validate_token():
             groups=groups,
             token_expire_time=datetime.now() + timedelta(hours=1))
     else:
+        log.debug("User is already in our database and token hasn't expired yet.")
         users = app.data.driver.db['users']
         db_user = users.find_one(db_token['user'])
         current_user = dict(
