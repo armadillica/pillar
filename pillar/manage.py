@@ -659,5 +659,28 @@ def refresh_project_links(project, chunk_size=50, quiet=False):
     file_storage.refresh_links_for_project(project, chunk_size, 2 * 3600)
 
 
+@manager.command
+def expire_all_project_links(project_uuid):
+    """Expires all file links for a certain project without refreshing.
+
+    This is just for testing.
+    """
+
+    import datetime
+    import bson.tz_util
+
+    files_collection = app.data.driver.db['files']
+
+    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    expires = now - datetime.timedelta(days=1)
+
+    result = files_collection.update_many(
+        {'project': ObjectId(project_uuid)},
+        {'$set': {'link_expires': expires}}
+    )
+
+    print('Expired %i links' % result.matched_count)
+
+
 if __name__ == '__main__':
     manager.run()
