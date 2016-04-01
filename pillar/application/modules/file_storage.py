@@ -430,7 +430,10 @@ def on_pre_get_files(_, lookup):
 def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
     from application import app
 
-    log.info('Refreshing the first %i links for project %s', chunk_size, project_uuid)
+    if chunk_size:
+        log.info('Refreshing the first %i links for project %s', chunk_size, project_uuid)
+    else:
+        log.info('Refreshing all links for project %s', project_uuid)
 
     # Retrieve expired links.
     files_collection = app.data.driver.db['files']
