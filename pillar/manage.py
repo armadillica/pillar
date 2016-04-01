@@ -644,11 +644,17 @@ def subscribe_node_owners():
 
 
 @manager.command
-def refresh_project_links(project, chunk_size=50):
+def refresh_project_links(project, chunk_size=50, quiet=False):
     """Regenerates almost-expired file links for a certain project."""
 
-    chunk_size = int(chunk_size)  # CLI parameters are passed as strings
+    if quiet:
+        import logging
+        from application import log
 
+        logging.getLogger().setLevel(logging.WARNING)
+        log.setLevel(logging.WARNING)
+
+    chunk_size = int(chunk_size)  # CLI parameters are passed as strings
     from application.modules import file_storage
     file_storage.refresh_links_for_project(project, chunk_size, 2 * 3600)
 

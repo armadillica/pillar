@@ -102,7 +102,8 @@ logging.getLogger('werkzeug').setLevel(logging.INFO)
 
 log = logging.getLogger(__name__)
 log.setLevel(logging.DEBUG if app.config['DEBUG'] else logging.INFO)
-log.info('Pillar starting, debug=%s', app.config['DEBUG'])
+if app.config['DEBUG']:
+    log.info('Pillar starting, debug=%s', app.config['DEBUG'])
 
 bugsnag.configure(
     api_key=app.config['BUGSNAG_API_KEY'],
@@ -355,7 +356,6 @@ def post_GET_user(request, payload):
 def after_replacing_user(item, original):
     """Push an update to the Algolia index when a user item is updated"""
     algolia_index_user_save(item)
-
 
 app.on_post_GET_users += post_GET_user
 app.on_replace_users += after_replacing_user
