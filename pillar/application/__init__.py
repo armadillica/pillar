@@ -262,12 +262,13 @@ def item_parse_attachments(response):
                 # This is for the "normal" first level property
                 else:
                     field_content = response[field_name_path[0]]
-                for f in attachment['files']:
-                    slug = f['slug']
+                for af in attachment['files']:
+                    slug = af['slug']
                     slug_tag = "[{0}]".format(slug)
-                    f = files_collection.find_one({'_id': ObjectId(f['file'])})
+                    f = files_collection.find_one({'_id': ObjectId(af['file'])})
                     if f is None:
-                        abort(404)
+                        af['file'] = None
+                        continue
                     size = f['size'] if 'size' in f else 'l'
                     # Get the correct variation from the file
                     thumbnail = next((item for item in f['variations'] if
