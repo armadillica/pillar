@@ -643,5 +643,15 @@ def subscribe_node_owners():
             after_inserting_nodes([n])
 
 
+@manager.command
+def refresh_project_links(project, chunk_size=50):
+    """Regenerates almost-expired file links for a certain project."""
+
+    chunk_size = int(chunk_size)  # CLI parameters are passed as strings
+
+    from application.modules import file_storage
+    file_storage.refresh_links_for_project(project, chunk_size, 2 * 3600)
+
+
 if __name__ == '__main__':
     manager.run()

@@ -2,6 +2,7 @@ import datetime
 
 from bson import tz_util, ObjectId
 
+EXAMPLE_PROJECT_ID = ObjectId('5672beecc0261b2005ed1a33')
 
 EXAMPLE_FILE = {u'_id': ObjectId('5672e2c1c379cf0007b31995'),
                 u'_updated': datetime.datetime(2016, 3, 25, 10, 28, 24, tzinfo=tz_util.utc),
@@ -17,7 +18,7 @@ EXAMPLE_FILE = {u'_id': ObjectId('5672e2c1c379cf0007b31995'),
                      u'md5': '--', u'file_path': 'c2a5c897769ce1ef0eb10f8fa1c472bcb8e2d5a4-h.jpg',
                      u'size': 'h'}, ],
                 u'filename': 'brick_dutch_soft_bump.png',
-                u'project': ObjectId('5672beecc0261b2005ed1a33'),
+                u'project': EXAMPLE_PROJECT_ID,
                 u'width': 2048, u'length': 6227670, u'user': ObjectId('56264fc4fa3a250344bd10c5'),
                 u'content_type': 'image/png', u'_etag': '044ce3aede2e123e261c0d8bd77212f264d4f7b0',
                 u'_created': datetime.datetime(2015, 12, 17, 16, 28, 49, tzinfo=tz_util.utc),
@@ -30,7 +31,7 @@ EXAMPLE_FILE = {u'_id': ObjectId('5672e2c1c379cf0007b31995'),
 EXAMPLE_PROJECT = {
     u'_created': datetime.datetime(2015, 12, 17, 13, 22, 56, tzinfo=tz_util.utc),
     u'_etag': u'cc4643e98d3606f87bbfaaa200bfbae941b642f3',
-    u'_id': ObjectId('5672beecc0261b2005ed1a33'),
+    u'_id': EXAMPLE_PROJECT_ID,
     u'_updated': datetime.datetime(2016, 1, 7, 18, 59, 4, tzinfo=tz_util.utc),
     u'category': u'assets',
     u'description': u'Welcome to this curated collection of Blender Institute textures and image resources. This collection is an on-going project, as with each project we create a number of textures based on our own resources (photographs, scans, etc.) or made completely from scratch. At the moment you can find all the textures from the past Open Projects that were deemed re-usable. \r\n\r\nPeople who have contributed to these textures:\r\n\r\nAndrea Weikert, Andy Goralczyk, Basse Salmela, Ben Dansie, Campbell Barton, Enrico Valenza, Ian Hubert, Kjartan Tysdal, Manu J\xe4rvinen, Massimiliana Pulieso, Matt Ebb, Pablo Vazquez, Rob Tuytel, Roland Hess, Sarah Feldlaufer, S\xf6nke M\xe4ter',

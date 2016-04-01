@@ -406,7 +406,7 @@ files_schema = {
     'backend': {
         'type': 'string',
         'required': True,
-        'allowed': ["attract-web", "pillar", "cdnsun", "gcs"]
+        'allowed': ["attract-web", "pillar", "cdnsun", "gcs", "unittest"]
     },
     'file_path': {
         'type': 'string',

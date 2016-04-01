@@ -2,9 +2,11 @@ import datetime
 import logging
 import os
 from multiprocessing import Process
+from hashlib import md5
 
 import bson.tz_util
 import eve.utils
+import pymongo
 from bson import ObjectId
 from eve.methods.patch import patch_internal
 from eve.methods.put import put_internal
@@ -320,6 +322,8 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
                        _scheme=app.config['SCHEME'])
     elif backend == 'cdnsun':
         link = hash_file_path(file_path, None)
+    elif backend == 'unittest':
+        link = md5(file_path).hexdigest()
     else:
         link = None
     return link
@@ -422,6 +426,33 @@ def on_pre_get_files(_, lookup):
         log.debug('Updating expired links for file %r.', file_doc['_id'])
         _generate_all_links(file_doc, now)
 
+
+def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
+    from application import app
+
+    log.info('Refreshing the first %i links for project %s', chunk_size, project_uuid)
+
+    # Retrieve expired links.
+    files_collection = app.data.driver.db['files']
+
+    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    expire_before = now + datetime.timedelta(seconds=expiry_seconds)
+    log.info('Limiting to links that expire before %s', expire_before)
+
+    to_refresh = files_collection.find(
+        {'project': ObjectId(project_uuid),
+         'link_expires': {'$lt': expire_before},
+         }).sort([('link_expires', pymongo.ASCENDING)]).limit(chunk_size)
+
+    if to_refresh.count() == 0:
+        log.info('No links to refresh.')
+        return
+
+    for file_doc in to_refresh:
+        log.debug('Refreshing links for file %s', file_doc['_id'])
+        _generate_all_links(file_doc, now)
+
+    log.info('Refreshed %i links', min(chunk_size, to_refresh.count()))
 
 def setup_app(app, url_prefix):
     app.on_pre_GET_files += on_pre_get_files

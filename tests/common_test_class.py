@@ -4,6 +4,7 @@ import sys
 import logging
 import os
 
+from bson import ObjectId
 from eve.tests import TestMinimal
 import pymongo.collection
 from flask.testing import FlaskClient
@@ -48,19 +49,22 @@ class AbstractPillarTest(TestMinimal):
         del sys.modules['application']
 
     def ensure_file_exists(self, file_overrides=None):
+        self.ensure_project_exists()
         with self.app.test_request_context():
             files_collection = self.app.data.driver.db['files']
-            projects_collection = self.app.data.driver.db['projects']
             assert isinstance(files_collection, pymongo.collection.Collection)
 
             file = copy.deepcopy(EXAMPLE_FILE)
             if file_overrides is not None:
                 file.update(file_overrides)
 
-            projects_collection.insert_one(EXAMPLE_PROJECT)
             result = files_collection.insert_one(file)
             file_id = result.inserted_id
-        return file_id, file
+
+            # Re-fetch from the database, so that we're sure we return the same as is stored.
+            # This is necessary as datetimes are rounded by MongoDB.
+            from_db = files_collection.find_one(file_id)
+            return file_id, from_db
 
     def ensure_project_exists(self, project_overrides=None):
         with self.app.test_request_context():
@@ -71,9 +75,12 @@ class AbstractPillarTest(TestMinimal):
             if project_overrides is not None:
                 project.update(project_overrides)
 
-            result = projects_collection.insert_one(project)
-            project_id = result.inserted_id
-        return project_id, project
+            found = projects_collection.find_one(project['_id'])
+            if found is None:
+                result = projects_collection.insert_one(project)
+                return result.inserted_id, project
+
+            return found['_id'], found
 
     def htp_blenderid_validate_unhappy(self):
         """Sets up HTTPretty to mock unhappy validation flow."""
