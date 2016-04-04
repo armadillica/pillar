@@ -182,7 +182,7 @@ def manage_groups():
         if action == '':
             return
         elif action.lower() in ['add', 'a', 'insert']:
-            action == 'add'
+            action = 'add'
             retry = False
         elif action.lower() in ['remove', 'r', 'rmv', 'rem', 'delete', 'del']:
             action = 'remove'
