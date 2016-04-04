@@ -12,7 +12,6 @@ import httpretty
 
 from common_test_data import EXAMPLE_PROJECT, EXAMPLE_FILE
 
-BLENDER_ID_ENDPOINT = 'http://127.0.0.1:8001'  # nonexistant server, no trailing slash!
 MY_PATH = os.path.dirname(os.path.abspath(__file__))
 
 TEST_EMAIL_USER = 'koro'
@@ -25,14 +24,15 @@ logging.basicConfig(
 
 class AbstractPillarTest(TestMinimal):
     def setUp(self, **kwargs):
-        settings_file = os.path.join(MY_PATH, 'common_test_settings.py')
-        kwargs['settings_file'] = settings_file
-        os.environ['EVE_SETTINGS'] = settings_file
+        eve_settings_file = os.path.join(MY_PATH, 'common_test_settings.py')
+        pillar_config_file = os.path.join(MY_PATH, 'config_testing.py')
+        kwargs['settings_file'] = eve_settings_file
+        os.environ['EVE_SETTINGS'] = eve_settings_file
+        os.environ['PILLAR_CONFIG'] = pillar_config_file
         super(AbstractPillarTest, self).setUp(**kwargs)
 
         from application import app
 
-        app.config['BLENDER_ID_ENDPOINT'] = BLENDER_ID_ENDPOINT
         logging.getLogger('application').setLevel(logging.DEBUG)
         logging.getLogger('werkzeug').setLevel(logging.DEBUG)
         logging.getLogger('eve').setLevel(logging.DEBUG)
@@ -86,7 +86,7 @@ class AbstractPillarTest(TestMinimal):
         """Sets up HTTPretty to mock unhappy validation flow."""
 
         httpretty.register_uri(httpretty.POST,
-                               '%s/u/validate_token' % BLENDER_ID_ENDPOINT,
+                               '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
                                body=json.dumps(
                                    {'data': {'token': 'Token is invalid'}, 'status': 'fail'}),
                                content_type="application/json")
@@ -95,7 +95,7 @@ class AbstractPillarTest(TestMinimal):
         """Sets up HTTPretty to mock happy validation flow."""
 
         httpretty.register_uri(httpretty.POST,
-                               '%s/u/validate_token' % BLENDER_ID_ENDPOINT,
+                               '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
                                body=json.dumps(
                                    {'data': {'user': {'email': TEST_EMAIL_ADDRESS, 'id': 5123}},
                                     'status': 'success'}),

@@ -32,28 +32,11 @@ MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
 
 @manager.command
 def runserver():
-    try:
-        import config
-        PORT = config.Development.PORT
-        HOST = config.Development.HOST
-        DEBUG = config.Development.DEBUG
-        app.config['STORAGE_DIR'] = config.Development.STORAGE_DIR
-    except ImportError:
-        # Default settings
-        PORT = 5000
-        HOST = '0.0.0.0'
-        DEBUG = True
-        app.config['STORAGE_DIR'] = '{0}/application/static/storage'.format(
-            os.path.dirname(os.path.realpath(__file__)))
-
     # Automatic creation of STORAGE_DIR path if it's missing
     if not os.path.exists(app.config['STORAGE_DIR']):
         os.makedirs(app.config['STORAGE_DIR'])
 
-    app.run(
-        port=PORT,
-        host=HOST,
-        debug=DEBUG)
+    app.run()
 
 
 def post_item(entry, data):

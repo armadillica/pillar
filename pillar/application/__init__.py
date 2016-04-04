@@ -4,7 +4,8 @@ import json
 from bson import ObjectId
 from datetime import datetime
 import bugsnag
-from bugsnag.flask import handle_exceptions
+import bugsnag.flask
+import bugsnag.handlers
 from algoliasearch import algoliasearch
 from zencoder import Zencoder
 from flask import g
@@ -89,9 +90,17 @@ settings_path = os.environ.get(
     'EVE_SETTINGS', '/data/git/pillar/pillar/settings.py')
 app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=NewAuth)
 
-import config
-
-app.config.from_object(config.Deployment)
+# Load configuration from three different sources, to make it easy to override
+# settings with secrets, as well as for development & testing.
+app_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+app.config.from_pyfile(os.path.join(app_root, 'config.py'), silent=False)
+app.config.from_pyfile(os.path.join(app_root, 'config_local.py'), silent=True)
+from_envvar = os.environ.get('PILLAR_CONFIG')
+if from_envvar:
+    # Don't use from_envvar, as we want different behaviour. If the envvar
+    # is not set, it's fine (i.e. silent=True), but if it is set and the
+    # configfile doesn't exist, it should error out (i.e. silent=False).
+    app.config.from_pyfile(from_envvar, silent=False)
 
 # Configure logging
 logging.basicConfig(
@@ -105,11 +114,17 @@ log.setLevel(logging.DEBUG if app.config['DEBUG'] else logging.INFO)
 if app.config['DEBUG']:
     log.info('Pillar starting, debug=%s', app.config['DEBUG'])
 
-bugsnag.configure(
-    api_key=app.config['BUGSNAG_API_KEY'],
-    project_root="/data/git/pillar/pillar",
-)
-handle_exceptions(app)
+# Configure Bugsnag
+if not app.config.get('TESTING'):
+    bugsnag.configure(
+        api_key=app.config['BUGSNAG_API_KEY'],
+        project_root="/data/git/pillar/pillar",
+    )
+    bugsnag.flask.handle_exceptions(app)
+
+    bs_handler = bugsnag.handlers.BugsnagHandler()
+    bs_handler.setLevel(logging.ERROR)
+    log.addHandler(bs_handler)
 
 # Google Cloud project
 try:

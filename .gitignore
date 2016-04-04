@@ -5,11 +5,11 @@
 *.ropeproject*
 *.swp
 
-config.py
+/pillar/config_local.py
 
 .ropeproject/*
 
-pillar/application/static/storage/
+/pillar/application/static/storage/
 /build
 /.cache
 /pillar/pillar.egg-info/
