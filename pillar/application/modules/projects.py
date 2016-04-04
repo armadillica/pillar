@@ -6,10 +6,10 @@ from eve.methods.post import post_internal
 from application import app
 from application.utils import remove_private_keys
 from application.utils.gcs import GoogleCloudStorageBucket
-from manage.node_types.asset import node_type_asset
-from manage.node_types.group import node_type_group
-from manage.node_types.page import node_type_page
-from manage.node_types.comment import node_type_comment
+from manage_extra.node_types.asset import node_type_asset
+from manage_extra.node_types.group import node_type_group
+from manage_extra.node_types.page import node_type_page
+from manage_extra.node_types.comment import node_type_comment
 
 log = logging.getLogger(__name__)
 

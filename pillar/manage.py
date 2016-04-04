@@ -15,15 +15,15 @@ if not os.environ.get('EVE_SETTINGS'):
 
 from application import app
 from application.utils.gcs import GoogleCloudStorageBucket
-from manage.node_types.asset import node_type_asset
-from manage.node_types.blog import node_type_blog
-from manage.node_types.comment import node_type_comment
-from manage.node_types.group import node_type_group
-from manage.node_types.post import node_type_post
-from manage.node_types.project import node_type_project
-from manage.node_types.storage import node_type_storage
-from manage.node_types.texture import node_type_texture
-from manage.node_types.group_texture import node_type_group_texture
+from manage_extra.node_types.asset import node_type_asset
+from manage_extra.node_types.blog import node_type_blog
+from manage_extra.node_types.comment import node_type_comment
+from manage_extra.node_types.group import node_type_group
+from manage_extra.node_types.post import node_type_post
+from manage_extra.node_types.project import node_type_project
+from manage_extra.node_types.storage import node_type_storage
+from manage_extra.node_types.texture import node_type_texture
+from manage_extra.node_types.group_texture import node_type_group_texture
 
 manager = Manager(app)
 

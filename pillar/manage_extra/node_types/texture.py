@@ -1,4 +1,4 @@
-from manage.node_types import _file_embedded_schema
+from manage_extra.node_types import _file_embedded_schema
 
 node_type_texture = {
     'name': 'texture',
