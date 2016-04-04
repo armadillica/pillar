@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
+from __future__ import print_function
 from __future__ import division
+
 import os
 from bson.objectid import ObjectId
 from eve.methods.put import put_internal
@@ -218,22 +220,22 @@ def manage_groups():
     current_groups = user.get('groups', [])
     if action == 'add':
         if group['_id'] in current_groups:
-            print "User {0} is already in group {1}".format(
-                user_email, group_name)
+            print("User {0} is already in group {1}".format(
+                user_email, group_name))
         else:
             current_groups.append(group['_id'])
             db.users.update({'_id': user['_id']},
                             {"$set": {'groups': current_groups}})
-            print "User {0} added to group {1}".format(user_email, group_name)
+            print("User {0} added to group {1}".format(user_email, group_name))
     elif action == 'remove':
         if group['_id'] not in current_groups:
-            print "User {0} is not in group {1}".format(user_email, group_name)
+            print("User {0} is not in group {1}".format(user_email, group_name))
         else:
             current_groups.remove(group['_id'])
             db.users.update({'_id': user['_id']},
                             {"$set": {'groups': current_groups}})
-            print "User {0} removed from group {1}".format(
-                user_email, group_name)
+            print("User {0} removed from group {1}".format(
+                user_email, group_name))
 
 
 def populate_node_types(old_ids={}):
@@ -307,20 +309,20 @@ def add_parent_to_nodes():
     for node in nodes:
         nodes_index += 1
         if node['node_type'] == ObjectId("55a615cfea893bd7d0489f2d"):
-            print u"Skipping project node - {0}".format(node['name'])
+            print(u"Skipping project node - {0}".format(node['name']))
         else:
             project = find_parent_project(node)
             if project:
                 nodes_collection.update({'_id': node['_id']},
                                 {"$set": {'project': project['_id']}})
-                print u"{0} {1}".format(node['_id'], node['name'])
+                print(u"{0} {1}".format(node['_id'], node['name']))
             else:
                 nodes_orphan += 1
                 nodes_collection.remove({'_id': node['_id']})
-                print "Removed {0} {1}".format(node['_id'], node['name'])
+                print("Removed {0} {1}".format(node['_id'], node['name']))
 
-    print "Edited {0} nodes".format(nodes_index)
-    print "Orphan {0} nodes".format(nodes_orphan)
+    print("Edited {0} nodes".format(nodes_index))
+    print("Orphan {0} nodes".format(nodes_orphan))
 
 
 @manager.command
@@ -332,7 +334,7 @@ def remove_children_files():
             file_id = f['_id']
             # Delete child object
             files_collection.remove({'_id': file_id})
-            print "deleted {0}".format(file_id)
+            print("deleted {0}".format(file_id))
 
 
 @manager.command
@@ -343,7 +345,7 @@ def make_project_public(project_id):
     nodes_collection = app.data.driver.db['nodes']
     for n in nodes_collection.find({'project': ObjectId(project_id)}):
         n['properties']['status'] = 'published'
-        print u"Publishing {0} {1}".format(n['_id'], n['name'].encode('ascii', 'ignore'))
+        print(u"Publishing {0} {1}".format(n['_id'], n['name'].encode('ascii', 'ignore')))
         if not DRY_RUN:
             put_item('nodes', n)
 
@@ -381,11 +383,11 @@ def convert_assets_to_textures(project_id):
         if parent_id is None:
             parent_id = base_node['parent']
         else:
-            print "Using provided parent {0}".format(parent_id)
+            print("Using provided parent {0}".format(parent_id))
 
         # Create a list with all the file fariations for the texture
         for f in files:
-            print "Processing {1} {0}".format(f['name'], f['_id'])
+            print("Processing {1} {0}".format(f['name'], f['_id']))
             attributes = parse_name(f['name'])
             if attributes['is_tileable']:
                 is_tileable = True
@@ -419,7 +421,7 @@ def convert_assets_to_textures(project_id):
                         (first_file['width'] / first_file['height']), 2)
                     )
                 )
-            print "Making {0}".format(node['name'])
+            print("Making {0}".format(node['name']))
             if not DRY_RUN:
                 p = post_internal('nodes', node)
                 if p[0]['_status'] == 'ERR':
@@ -433,7 +435,7 @@ def convert_assets_to_textures(project_id):
         n_type = node_types_collection.find_one({'_id': n['node_type']})
         processed_nodes = []
         if n_type['name'] == 'group' and n['name'].startswith('_'):
-            print "Processing {0}".format(n['name'])
+            print("Processing {0}".format(n['name']))
             # Get the content of the group
             children = [c for c in nodes_collection.find({'parent': n['_id']})]
             make_texture_node(children[0], children, parent_id=n['parent'])
@@ -445,12 +447,12 @@ def convert_assets_to_textures(project_id):
                 {'name':'group_texture'})
             n['node_type'] = node_type_texture['_id']
             n['properties'].pop('notes', None)
-            print "Updating {0}".format(n['name'])
+            print("Updating {0}".format(n['name']))
             if not DRY_RUN:
                 put_item('nodes', n)
         # Delete processed nodes
         for node in processed_nodes:
-            print "Removing {0} {1}".format(node['_id'], node['name'])
+            print("Removing {0} {1}".format(node['_id'], node['name']))
             if not DRY_RUN:
                 nodes_collection.remove({'_id': node['_id']})
     # Make texture out of single image
@@ -459,7 +461,7 @@ def convert_assets_to_textures(project_id):
         if n_type['name'] == 'asset':
             make_texture_node(n, [n])
             # Delete processed nodes
-            print "Removing {0} {1}".format(n['_id'], n['name'])
+            print("Removing {0} {1}".format(n['_id'], n['name']))
             if not DRY_RUN:
                 nodes_collection.remove({'_id': n['_id']})
 
@@ -472,7 +474,7 @@ def set_attachment_names():
     from application import update_file_name
     nodes_collection = app.data.driver.db['nodes']
     for n in nodes_collection.find():
-        print "Updating node {0}".format(n['_id'])
+        print("Updating node {0}".format(n['_id']))
         update_file_name(n)
 
 
@@ -497,20 +499,20 @@ def files_verify_project():
                 "{0} missing {1}".format(item['_id'], file_id))
 
     for item in nodes_collection.find():
-        print "Verifying node {0}".format(item['_id'])
+        print("Verifying node {0}".format(item['_id']))
         if 'file' in item['properties']:
             _parse_file(item, item['properties']['file'])
         elif 'files' in item['properties']:
             for f in item['properties']['files']:
                 _parse_file(item, f['file'])
 
-    print "==="
-    print "Issues detected:"
+    print("===")
+    print("Issues detected:")
     for k, v in issues.iteritems():
-        print "{0}:".format(k)
+        print("{0}:".format(k))
         for i in v:
-            print i
-        print "==="
+            print(i)
+        print("===")
 
 
 def replace_node_type(project, node_type_name, new_node_type):
@@ -561,7 +563,7 @@ def test_post_internal(node_id):
     for field in internal_fields:
         node.pop(field, None)
     pprint.pprint(node)
-    print post_internal('nodes', node)
+    print(post_internal('nodes', node))
 
 
 @manager.command
@@ -570,7 +572,7 @@ def algolia_push_users():
     from application.utils.algolia import algolia_index_user_save
     users_collection = app.data.driver.db['users']
     for user in users_collection.find():
-        print "Pushing {0}".format(user['username'])
+        print("Pushing {0}".format(user['username']))
         algolia_index_user_save(user)
 
 
@@ -580,8 +582,8 @@ def algolia_push_nodes():
     from application.utils.algolia import algolia_index_node_save
     nodes_collection = app.data.driver.db['nodes']
     for node in nodes_collection.find():
-        print u"Pushing {0}: {1}".format(node['_id'], node['name'].encode(
-            'ascii', 'ignore'))
+        print(u"Pushing {0}: {1}".format(node['_id'], node['name'].encode(
+            'ascii', 'ignore')))
         algolia_index_node_save(node)
 
 
