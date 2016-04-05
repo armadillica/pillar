@@ -169,7 +169,6 @@ def setup_for_attract(project_uuid, replace=False):
     from manage_extra.node_types.act import node_type_act
     from manage_extra.node_types.scene import node_type_scene
     from manage_extra.node_types.shot import node_type_shot
-    from application.utils import remove_private_keys
 
     default_permissions = _default_permissions()
     node_type_act['permissions'] = default_permissions
@@ -231,14 +230,14 @@ def _update_project(project_uuid, project):
     :rtype: dict
     """
 
-    projects_collection = app.data.driver.db['projects']
+    from application.utils import remove_private_keys
+
     project_id = ObjectId(project_uuid)
-
     project = remove_private_keys(project)
-    result = projects_collection.update_one({'_id': project_id}, {'$set': project})
+    result, _, _, _ = put_internal('projects', project, _id=project_id)
 
-    if not result.matched_count:
-        log.error("Can't update project %s, it doesn't exist.", project_uuid)
+    if result['_status'] != 'OK':
+        log.error("Can't update project %s, issues: %s", project_uuid, result['_issues'])
         raise SystemExit()
 
 
