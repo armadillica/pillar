@@ -43,7 +43,9 @@ def runserver():
     if not os.path.exists(app.config['STORAGE_DIR']):
         os.makedirs(app.config['STORAGE_DIR'])
 
-    app.run()
+    app.run(host=app.config['HOST'],
+            port=app.config['PORT'],
+            debug=app.config['DEBUG'])
 
 
 def post_item(entry, data):
