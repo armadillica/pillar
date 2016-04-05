@@ -5,6 +5,8 @@ import datetime
 import bson
 from eve import RFC1123_DATE_FORMAT
 
+__all__ = ('remove_private_keys', 'PillarJSONEncoder')
+
 
 def remove_private_keys(document):
     """Removes any key that starts with an underscore, returns result as new

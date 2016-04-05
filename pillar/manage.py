@@ -4,6 +4,8 @@ from __future__ import print_function
 from __future__ import division
 
 import os
+import logging
+
 from bson.objectid import ObjectId
 from eve.methods.put import put_internal
 from eve.methods.post import post_internal
@@ -28,6 +30,9 @@ from manage_extra.node_types.texture import node_type_texture
 from manage_extra.node_types.group_texture import node_type_group_texture
 
 manager = Manager(app)
+
+log = logging.getLogger('manage')
+log.setLevel(logging.INFO)
 
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
 
@@ -93,17 +98,7 @@ def setup_db():
     print("Created user {0}".format(user[0]['_id']))
 
     # TODO: Create a default project
-    groups_collection = app.data.driver.db['groups']
-    admin_group = groups_collection.find_one({'name': 'admin'})
-
-    default_permissions = dict(
-        world=['GET'],
-        users=[],
-        groups=[
-            dict(group=admin_group['_id'],
-                 methods=['GET', 'PUT', 'POST'])
-        ]
-    )
+    default_permissions = _default_permissions()
 
     node_type_blog['permissions'] = default_permissions
     node_type_post['permissions'] = default_permissions
@@ -135,6 +130,116 @@ def setup_db():
 
     if gcs_storage.bucket.exists():
         print("Created CGS instance")
+
+
+def _default_permissions():
+    """Returns a dict of default permissions.
+
+    Usable for projects, node types, and others.
+
+    :rtype: dict
+    """
+
+    groups_collection = app.data.driver.db['groups']
+    admin_group = groups_collection.find_one({'name': 'admin'})
+
+    default_permissions = {
+        'world': ['GET'],
+        'users': [],
+        'groups': [
+            {'group': admin_group['_id'],
+             'methods': ['GET', 'PUT', 'POST']},
+        ]
+    }
+
+    return default_permissions
+
+
+@manager.command
+def setup_for_attract(project_uuid, replace=False):
+    """Adds Attract node types to the project.
+
+    :param project_uuid: the UUID of the project to update
+    :type project_uuid: str
+    :param replace: whether to replace existing Attract node types (True),
+        or to keep existing node types (False, the default).
+    :type replace: bool
+    """
+
+    from manage_extra.node_types.act import node_type_act
+    from manage_extra.node_types.scene import node_type_scene
+    from manage_extra.node_types.shot import node_type_shot
+    from application.utils import remove_private_keys
+
+    default_permissions = _default_permissions()
+    node_type_act['permissions'] = default_permissions
+    node_type_scene['permissions'] = default_permissions
+    node_type_shot['permissions'] = default_permissions
+
+    project = _get_project(project_uuid)
+
+    # Add the missing node types.
+    for node_type in (node_type_act, node_type_scene, node_type_shot):
+        found = [nt for nt in project['node_types']
+                 if nt['name'] == node_type['name']]
+        if found:
+            assert len(found) == 1, 'node type name should be unique (found %ix)' % len(found)
+
+            # TODO: validate that the node type contains all the properties Attract needs.
+            if replace:
+                log.info('Replacing existing node type %s', node_type['name'])
+                project['node_types'].remove(found[0])
+            else:
+                continue
+
+        project['node_types'].append(node_type)
+
+    _update_project(project_uuid, project)
+
+    log.info('Project %s was updated for Attract.', project_uuid)
+
+
+def _get_project(project_uuid):
+    """Find a project in the database, or SystemExit()s.
+
+    :param project_uuid: UUID of the project
+    :type: str
+    :return: the project
+    :rtype: dict
+    """
+
+    projects_collection = app.data.driver.db['projects']
+    project_id = ObjectId(project_uuid)
+
+    # Find the project in the database.
+    project = projects_collection.find_one(project_id)
+    if not project:
+        log.error('Project %s does not exist.', project_uuid)
+        raise SystemExit()
+
+    return project
+
+
+def _update_project(project_uuid, project):
+    """Updates a project in the database, or SystemExit()s.
+
+    :param project_uuid: UUID of the project
+    :type: str
+    :param project: the project data, should be the entire project document
+    :type: dict
+    :return: the project
+    :rtype: dict
+    """
+
+    projects_collection = app.data.driver.db['projects']
+    project_id = ObjectId(project_uuid)
+
+    project = remove_private_keys(project)
+    result = projects_collection.update_one({'_id': project_id}, {'$set': project})
+
+    if not result.matched_count:
+        log.error("Can't update project %s, it doesn't exist.", project_uuid)
+        raise SystemExit()
 
 
 @manager.command
