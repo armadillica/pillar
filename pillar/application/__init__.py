@@ -380,5 +380,7 @@ file_storage.setup_app(app, url_prefix='/storage')
 
 # The encoding module (receive notification and report progress)
 from modules.encoding import encoding
+from modules.blender_id import blender_id
 
 app.register_blueprint(encoding, url_prefix='/encoding')
+app.register_blueprint(blender_id, url_prefix='/blender_id')

@@ -64,3 +64,6 @@ FILE_LINK_VALIDITY = defaultdict(
     gcs=3600 * 23,  # 23 hours for Google Cloud Storage.
 )
 
+# Client and Subclient IDs for Blender ID
+BLENDER_ID_CLIENT_ID = 'SPECIAL-SNOWFLAKE-57'
+BLENDER_ID_SUBCLIENT_ID = 'PILLAR'

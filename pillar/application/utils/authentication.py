@@ -134,6 +134,15 @@ def create_new_user(email, username, user_id):
     @returns: the user ID from our local database.
     """
 
+    user_data = create_new_user_document(email, user_id, username)
+    r = post_internal('users', user_data)
+    user_id = r[0]['_id']
+    return user_id
+
+
+def create_new_user_document(email, user_id, username, token=''):
+    """Creates a new user document, without storing it in MongoDB."""
+
     user_data = {
         'full_name': username,
         'username': username,
@@ -141,14 +150,12 @@ def create_new_user(email, username, user_id):
         'auth': [{
             'provider': 'blender-id',
             'user_id': str(user_id),
-            'token': ''}],
+            'token': token}],
         'settings': {
             'email_communications': 1
         }
     }
-    r = post_internal('users', user_data)
-    user_id = r[0]['_id']
-    return user_id
+    return user_data
 
 
 def make_unique_username(email):
