@@ -90,12 +90,15 @@ def validate_subclient_token(user_id, scst):
 
 
 def find_user_in_db(user_id, scst, email, full_name):
+    """Find the user in our database, creating/updating it where needed."""
+
     users = current_app.data.driver.db['users']
 
     query = {'auth': {'$elemMatch': {'user_id': user_id, 'provider': 'blender-id'}}}
     log.debug('Querying: %s', query)
     db_user = users.find_one(query)
 
+    # TODO: include token expiry in database.
     if db_user:
         log.debug('User %r already in our database, updating with info from Blender ID.', user_id)
         db_user['full_name'] = full_name

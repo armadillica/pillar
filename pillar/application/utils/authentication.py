@@ -68,7 +68,25 @@ def validate_token():
         log.debug('No authentication headers, so not logged in.')
         return False
 
+    # Check the users to see if there is one with this Blender ID token.
     token = request.authorization.username
+    db_user = find_user_by_token(token)
+    if db_user is not None:
+        log.debug(u'Token for %s found as locally stored blender-id subclient token.',
+                  db_user['full_name'])
+        current_user = dict(
+            user_id=db_user['_id'],
+            token=token,
+            groups=db_user['groups'],
+            token_expire_time=datetime.now() + timedelta(hours=1)  # TODO: get from Blender ID
+        )
+        g.current_user = current_user
+        return True
+
+    # Fall back to deprecated behaviour.
+    log.debug('Token not found as locally stored blender-id subclient token; '
+              'falling back on deprecated behaviour.')
+
     tokens_collection = app.data.driver.db['tokens']
 
     lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
@@ -184,3 +202,11 @@ def make_unique_username(email):
         if user_from_username is None:
             return unique_name
         suffix += 1
+
+
+def find_user_by_token(scst):
+    users = app.data.driver.db['users']
+
+    query = {'auth': {'$elemMatch': {'provider': 'blender-id',
+                                     'token': scst}}}
+    return users.find_one(query)
