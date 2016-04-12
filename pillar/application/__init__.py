@@ -371,7 +371,15 @@ def post_GET_user(request, payload):
 
 def after_replacing_user(item, original):
     """Push an update to the Algolia index when a user item is updated"""
-    algolia_index_user_save(item)
+
+    from algoliasearch.client import AlgoliaException
+
+    try:
+        algolia_index_user_save(item)
+    except AlgoliaException as ex:
+        log.warning('Unable to push user info to Algolia for user "%s", id=%s; %s',
+                    item.get('username'), item.get('_id'), ex)
+
 
 app.on_post_GET_users += post_GET_user
 app.on_replace_users += after_replacing_user
