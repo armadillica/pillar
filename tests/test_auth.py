@@ -1,13 +1,6 @@
-import base64
 import httpretty
 
 from common_test_class import AbstractPillarTest, TEST_EMAIL_USER, TEST_EMAIL_ADDRESS
-
-
-def make_header(username, password=''):
-    """Returns a Basic HTTP Authentication header value."""
-
-    return 'basic ' + base64.b64encode('%s:%s' % (username, password))
 
 
 class AuthenticationTests(AbstractPillarTest):
@@ -36,7 +29,8 @@ class AuthenticationTests(AbstractPillarTest):
         from application.utils import authentication as auth
 
         self.htp_blenderid_validate_unhappy()
-        with self.app.test_request_context(headers={'Authorization': make_header('unknowntoken')}):
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('unknowntoken')}):
             self.assertFalse(auth.validate_token())
 
     @httpretty.activate
@@ -46,5 +40,6 @@ class AuthenticationTests(AbstractPillarTest):
         from application.utils import authentication as auth
 
         self.htp_blenderid_validate_happy()
-        with self.app.test_request_context(headers={'Authorization': make_header('knowntoken')}):
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('knowntoken')}):
             self.assertTrue(auth.validate_token())

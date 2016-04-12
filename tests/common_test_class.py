@@ -3,6 +3,7 @@ import copy
 import sys
 import logging
 import os
+import base64
 
 from bson import ObjectId
 from eve.tests import TestMinimal
@@ -101,3 +102,7 @@ class AbstractPillarTest(TestMinimal):
                                     'status': 'success'}),
                                content_type="application/json")
 
+    def make_header(self, username, password=''):
+        """Returns a Basic HTTP Authentication header value."""
+
+        return 'basic ' + base64.b64encode('%s:%s' % (username, password))

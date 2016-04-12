@@ -4,7 +4,7 @@ import logging
 from pprint import pformat
 
 import requests
-from flask import Blueprint, request, current_app, abort
+from flask import Blueprint, request, current_app, abort, jsonify
 from eve.methods.post import post_internal
 from eve.methods.put import put_internal
 
@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 def store_subclient_token():
     """Verifies & stores a user's subclient-specific token."""
 
-    user_id = request.form['user_id']
+    user_id = request.form['user_id']  # User ID at BlenderID
     scst = request.form['scst']
 
     # Verify with Blender ID
@@ -27,23 +27,28 @@ def store_subclient_token():
 
     if user_info is None:
         log.warning('Unable to verify subclient token with Blender ID.')
-        return 'BLENDER ID ERROR', 403
+        return jsonify({'status': 'fail',
+                        'error': 'BLENDER ID ERROR'}), 403
 
     # Store the user info in MongoDB.
     log.info('Obtained user info from Blender ID: %s', user_info)
     db_user = find_user_in_db(user_id, scst, **user_info)
-    log.debug('Storing updated/created user:\n%s', pformat(db_user))
 
     if '_id' in db_user:
+        # Update the existing user
         db_id = db_user['_id']
         r, _, _, status = put_internal('users', remove_private_keys(db_user), _id=db_id)
     else:
+        # Create a new user
         r, _, _, status = post_internal('users', db_user)
-    if status != 200:
+        db_id = r['_id']
+
+    if status not in (200, 201):
         log.error('internal response: %r %r', status, r)
         return abort(500)
 
-    return 'OK', 200
+    return jsonify({'status': 'success',
+                    'subclient_user_id': str(db_id)}), status
 
 
 def validate_subclient_token(user_id, scst):
