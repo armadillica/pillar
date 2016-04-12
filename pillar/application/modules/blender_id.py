@@ -62,7 +62,7 @@ def validate_subclient_token(user_id, scst):
     client_id = current_app.config['BLENDER_ID_CLIENT_ID']
     subclient_id = current_app.config['BLENDER_ID_SUBCLIENT_ID']
 
-    log.debug('Validating subclient token %s for Blender ID user %s', scst, user_id)
+    log.debug('Validating subclient token for Blender ID user %s', user_id)
     payload = {'client_id': client_id,
                'subclient_id': subclient_id,
                'user_id': user_id,

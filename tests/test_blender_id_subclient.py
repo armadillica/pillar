@@ -42,6 +42,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
 
         user_info = json.loads(resp.data)  # {'status': 'success', 'subclient_user_id': '...'}
         self.assertEqual('success', user_info['status'])
+
         # Check that the user was correctly updated
         with self.app.test_request_context():
             users = self.app.data.driver.db['users']
