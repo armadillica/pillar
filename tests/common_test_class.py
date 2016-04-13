@@ -1,3 +1,5 @@
+# -*- encoding: utf-8 -*-
+
 import json
 import copy
 import sys
@@ -9,7 +11,7 @@ from bson import ObjectId
 from eve.tests import TestMinimal
 import pymongo.collection
 from flask.testing import FlaskClient
-import httpretty
+import responses
 
 from common_test_data import EXAMPLE_PROJECT, EXAMPLE_FILE
 
@@ -17,6 +19,14 @@ MY_PATH = os.path.dirname(os.path.abspath(__file__))
 
 TEST_EMAIL_USER = 'koro'
 TEST_EMAIL_ADDRESS = '%s@testing.blender.org' % TEST_EMAIL_USER
+TEST_FULL_NAME = u'врач Сергей'
+TEST_SUBCLIENT_TOKEN = 'my-subclient-token-for-pillar'
+BLENDER_ID_TEST_USERID = 1896
+BLENDER_ID_USER_RESPONSE = {'status': 'success',
+                            'user': {'email': TEST_EMAIL_ADDRESS,
+                                     'full_name': TEST_FULL_NAME,
+                                     'user_id': BLENDER_ID_TEST_USERID},
+                            'token_expires': 'Mon, 1 Jan 2018 01:02:03 GMT'}
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -83,26 +93,23 @@ class AbstractPillarTest(TestMinimal):
 
             return found['_id'], found
 
-    def htp_blenderid_validate_unhappy(self):
-        """Sets up HTTPretty to mock unhappy validation flow."""
+    def mock_blenderid_validate_unhappy(self):
+        """Sets up Responses to mock unhappy validation flow."""
 
-        httpretty.register_uri(httpretty.POST,
-                               '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
-                               body=json.dumps(
-                                   {'data': {'token': 'Token is invalid'}, 'status': 'fail'}),
-                               content_type="application/json")
+        responses.add(responses.POST,
+                      '%s/subclients/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      json={'status': 'fail'},
+                      status=404)
 
-    def htp_blenderid_validate_happy(self):
-        """Sets up HTTPretty to mock happy validation flow."""
+    def mock_blenderid_validate_happy(self):
+        """Sets up Responses to mock happy validation flow."""
 
-        httpretty.register_uri(httpretty.POST,
-                               '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
-                               body=json.dumps(
-                                   {'data': {'user': {'email': TEST_EMAIL_ADDRESS, 'id': 5123}},
-                                    'status': 'success'}),
-                               content_type="application/json")
+        responses.add(responses.POST,
+                      '%s/subclients/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      json=BLENDER_ID_USER_RESPONSE,
+                      status=200)
 
-    def make_header(self, username, password=''):
+    def make_header(self, username, subclient_id=''):
         """Returns a Basic HTTP Authentication header value."""
 
-        return 'basic ' + base64.b64encode('%s:%s' % (username, password))
+        return 'basic ' + base64.b64encode('%s:%s' % (username, subclient_id))

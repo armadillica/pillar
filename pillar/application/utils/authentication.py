@@ -1,9 +1,14 @@
+"""Generic authentication.
+
+Contains functionality to validate tokens, create users and tokens, and make
+unique usernames from emails. Calls out to the application.modules.blender_id
+module for Blender ID communication.
+"""
+
 import logging
 
-import requests
-
+from bson import tz_util
 from datetime import datetime
-from datetime import timedelta
 from flask import g
 from flask import request
 from eve.methods.post import post_internal
@@ -11,41 +16,6 @@ from eve.methods.post import post_internal
 from application import app
 
 log = logging.getLogger(__name__)
-
-
-def blender_id_endpoint():
-    """Gets the endpoint for the authentication API. If the env variable
-    is defined, it's possible to override the (default) production address.
-    """
-    return app.config['BLENDER_ID_ENDPOINT'].rstrip('/')
-
-
-def validate(token):
-    """Validate a token against the Blender ID server. This simple lookup
-    returns a dictionary with the following keys:
-
-    - message: a success message
-    - valid: a boolean, stating if the token is valid
-    - user: a dictionary with information regarding the user
-    """
-
-    log.debug("Validating token %s", token)
-    payload = dict(
-        token=token)
-    url = "{0}/u/validate_token".format(blender_id_endpoint())
-
-    try:
-        log.debug('POSTing to %r', url)
-        r = requests.post(url, data=payload)
-    except requests.exceptions.ConnectionError as e:
-        log.error('Connection error trying to POST to %s, handling as invalid token.', url)
-        return None
-
-    if r.status_code != 200:
-        log.info('HTTP error %i validating token: %s', r.status_code, r.content)
-        return None
-
-    return r.json()
 
 
 def validate_token():
@@ -70,77 +40,66 @@ def validate_token():
 
     # Check the users to see if there is one with this Blender ID token.
     token = request.authorization.username
-    db_user = find_user_by_token(token)
-    if db_user is not None:
-        log.debug(u'Token for %s found as locally stored blender-id subclient token.',
-                  db_user['full_name'])
-        current_user = dict(
-            user_id=db_user['_id'],
-            token=token,
-            groups=db_user['groups'],
-            token_expire_time=datetime.now() + timedelta(hours=1)  # TODO: get from Blender ID
-        )
-        g.current_user = current_user
-        return True
+    oauth_subclient = request.authorization.password
 
-    # Fall back to deprecated behaviour.
-    log.debug('Token not found as locally stored blender-id subclient token; '
-              'falling back on deprecated behaviour.')
-
-    tokens_collection = app.data.driver.db['tokens']
-
-    lookup = {'token': token, 'expire_time': {"$gt": datetime.now()}}
-    db_token = tokens_collection.find_one(lookup)
+    db_token = find_token(token)
     if not db_token:
+        log.debug('Token %s not found in our local database.', token)
+
         # If no valid token is found in our local database, we issue a new
         # request to the Blender ID server to verify the validity of the token
-        #  passed via the HTTP header. We will get basic user info if the user
+        # passed via the HTTP header. We will get basic user info if the user
         # is authorized, and we will store the token in our local database.
-        validation = validate(token)
-        if validation is None or validation.get('status', '') != 'success':
-            log.debug('Validation failed, result is %r', validation)
-            return False
+        from application.modules import blender_id
 
-        users = app.data.driver.db['users']
-        email = validation['data']['user']['email']
-        db_user = users.find_one({'email': email})
-        username = make_unique_username(email)
-
-        if not db_user:
-            # We don't even know this user; create it on the fly.
-            log.debug('Validation success, creating new user in our database.')
-            user_id = create_new_user(
-                email, username, validation['data']['user']['id'])
-            groups = None
-        else:
-            log.debug('Validation success, user is already in our database.')
-            user_id = db_user['_id']
-            groups = db_user['groups']
-
-        token_data = {
-            'user': user_id,
-            'token': token,
-            'expire_time': datetime.now() + timedelta(hours=1)
-        }
-        post_internal('tokens', token_data)
-        current_user = dict(
-            user_id=user_id,
-            token=token,
-            groups=groups,
-            token_expire_time=token_data['expire_time'])
+        db_user, status = blender_id.validate_create_user('', token, oauth_subclient)
     else:
         log.debug("User is already in our database and token hasn't expired yet.")
         users = app.data.driver.db['users']
         db_user = users.find_one(db_token['user'])
-        current_user = dict(
-            user_id=db_token['user'],
-            token=db_token['token'],
-            groups=db_user['groups'],
-            token_expire_time=db_token['expire_time'])
 
-    g.current_user = current_user
+    if db_user is None:
+        log.debug('Validation failed, user not logged in')
+        return False
+
+    g.current_user = {'user_id': db_user['_id'],
+                      'groups': db_user['groups']}
 
     return True
+
+
+def find_token(token, **extra_filters):
+    """Returns the token document, or None if it doesn't exist (or is expired)."""
+
+    tokens_collection = app.data.driver.db['tokens']
+
+    # TODO: remove expired tokens from collection.
+    lookup = {'token': token,
+              'expire_time': {"$gt": datetime.now(tz=tz_util.utc)}}
+    lookup.update(extra_filters)
+
+    db_token = tokens_collection.find_one(lookup)
+    return db_token
+
+
+def store_token(user_id, token, token_expiry):
+    """Stores an authentication token.
+
+    :returns: the token document from MongoDB
+    """
+
+    token_data = {
+        'user': user_id,
+        'token': token,
+        'expire_time': token_expiry,
+    }
+    r, _, _, status = post_internal('tokens', token_data)
+
+    if status not in {200, 201}:
+        log.error('Unable to store authentication token: %s', r)
+        raise RuntimeError('Unable to store authentication token.')
+
+    return r
 
 
 def create_new_user(email, username, user_id):
@@ -158,7 +117,7 @@ def create_new_user(email, username, user_id):
     return user_id
 
 
-def create_new_user_document(email, user_id, username, token=''):
+def create_new_user_document(email, user_id, username):
     """Creates a new user document, without storing it in MongoDB."""
 
     user_data = {
@@ -168,10 +127,11 @@ def create_new_user_document(email, user_id, username, token=''):
         'auth': [{
             'provider': 'blender-id',
             'user_id': str(user_id),
-            'token': token}],
+            'token': ''}],  # TODO: remove 'token' field altogether.
         'settings': {
             'email_communications': 1
-        }
+        },
+        'groups': [],
     }
     return user_data
 
@@ -202,11 +162,3 @@ def make_unique_username(email):
         if user_from_username is None:
             return unique_name
         suffix += 1
-
-
-def find_user_by_token(scst):
-    users = app.data.driver.db['users']
-
-    query = {'auth': {'$elemMatch': {'provider': 'blender-id',
-                                     'token': scst}}}
-    return users.find_one(query)
