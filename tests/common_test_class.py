@@ -97,15 +97,15 @@ class AbstractPillarTest(TestMinimal):
         """Sets up Responses to mock unhappy validation flow."""
 
         responses.add(responses.POST,
-                      '%s/subclients/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
                       json={'status': 'fail'},
-                      status=404)
+                      status=403)
 
     def mock_blenderid_validate_happy(self):
         """Sets up Responses to mock happy validation flow."""
 
         responses.add(responses.POST,
-                      '%s/subclients/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
                       json=BLENDER_ID_USER_RESPONSE,
                       status=200)
 

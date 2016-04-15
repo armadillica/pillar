@@ -114,7 +114,7 @@ def validate_token(user_id, token, oauth_subclient_id):
     if oauth_subclient_id:
         payload['subclient_id'] = oauth_subclient_id
 
-    url = '{0}/subclients/validate_token'.format(blender_id_endpoint())
+    url = '{0}/u/validate_token'.format(blender_id_endpoint())
     log.debug('POSTing to %r', url)
 
     # POST to Blender ID, handling errors as negative verification results.
