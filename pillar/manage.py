@@ -3,6 +3,7 @@
 from __future__ import print_function
 from __future__ import division
 
+import copy
 import os
 import logging
 
@@ -172,12 +173,22 @@ def setup_for_attract(project_uuid, replace=False):
     from manage_extra.node_types.scene import node_type_scene
     from manage_extra.node_types.shot import node_type_shot
 
-    default_permissions = _default_permissions()
-    node_type_act['permissions'] = default_permissions
-    node_type_scene['permissions'] = default_permissions
-    node_type_shot['permissions'] = default_permissions
-
+    # Copy permissions from the project, then give everyone with PUT
+    # access also DELETE access.
     project = _get_project(project_uuid)
+    permissions = copy.deepcopy(project['permissions'])
+
+    for perms in permissions.values():
+        for perm in perms:
+            methods = set(perm['methods'])
+            if 'PUT' not in perm['methods']:
+                continue
+            methods.add('DELETE')
+            perm['methods'] = list(methods)
+
+    node_type_act['permissions'] = permissions
+    node_type_scene['permissions'] = permissions
+    node_type_shot['permissions'] = permissions
 
     # Add the missing node types.
     for node_type in (node_type_act, node_type_scene, node_type_shot):
