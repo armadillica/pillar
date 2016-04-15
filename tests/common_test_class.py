@@ -4,10 +4,12 @@ import json
 import copy
 import sys
 import logging
+
+import datetime
 import os
 import base64
 
-from bson import ObjectId
+from bson import ObjectId, tz_util
 from eve.tests import TestMinimal
 import pymongo.collection
 from flask.testing import FlaskClient
@@ -92,6 +94,28 @@ class AbstractPillarTest(TestMinimal):
                 return result.inserted_id, project
 
             return found['_id'], found
+
+    def create_user(self):
+        with self.app.test_request_context():
+            users = self.app.data.driver.db['users']
+            assert isinstance(users, pymongo.collection.Collection)
+
+            result = users.insert_one({
+                '_id': ObjectId('cafef00dc379cf10c4aaceaf'),
+                '_updated': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
+                '_created': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
+                'username': 'tester',
+                'groups': [],
+                'roles': ['subscriber'],
+                'settings': {'email_communications': 1},
+                'auth': [{'token': '',
+                          'user_id': unicode(BLENDER_ID_TEST_USERID),
+                          'provider': 'blender-id'}],
+                'full_name': u'คนรักของผัดไทย',
+                'email': TEST_EMAIL_ADDRESS
+            })
+
+            return result.inserted_id
 
     def mock_blenderid_validate_unhappy(self):
         """Sets up Responses to mock unhappy validation flow."""

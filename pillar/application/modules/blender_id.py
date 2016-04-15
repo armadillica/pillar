@@ -85,7 +85,7 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
         return abort(500)
 
     # Store the token in MongoDB.
-    authentication.store_token(db_id, token, token_expiry)
+    authentication.store_token(db_id, token, token_expiry, oauth_subclient_id)
 
     return db_user, status
 

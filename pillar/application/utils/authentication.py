@@ -42,7 +42,7 @@ def validate_token():
     token = request.authorization.username
     oauth_subclient = request.authorization.password
 
-    db_token = find_token(token)
+    db_token = find_token(token, oauth_subclient)
     if not db_token:
         log.debug('Token %s not found in our local database.', token)
 
@@ -68,13 +68,14 @@ def validate_token():
     return True
 
 
-def find_token(token, **extra_filters):
+def find_token(token, is_subclient_token=False, **extra_filters):
     """Returns the token document, or None if it doesn't exist (or is expired)."""
 
     tokens_collection = app.data.driver.db['tokens']
 
     # TODO: remove expired tokens from collection.
     lookup = {'token': token,
+              'is_subclient_token': True if is_subclient_token else {'$in': [False, None]},
               'expire_time': {"$gt": datetime.now(tz=tz_util.utc)}}
     lookup.update(extra_filters)
 
@@ -82,7 +83,7 @@ def find_token(token, **extra_filters):
     return db_token
 
 
-def store_token(user_id, token, token_expiry):
+def store_token(user_id, token, token_expiry, oauth_subclient_id):
     """Stores an authentication token.
 
     :returns: the token document from MongoDB
@@ -91,6 +92,7 @@ def store_token(user_id, token, token_expiry):
     token_data = {
         'user': user_id,
         'token': token,
+        'is_subclient_token': bool(oauth_subclient_id),
         'expire_time': token_expiry,
     }
     r, _, _, status = post_internal('tokens', token_data)
@@ -99,7 +101,8 @@ def store_token(user_id, token, token_expiry):
         log.error('Unable to store authentication token: %s', r)
         raise RuntimeError('Unable to store authentication token.')
 
-    return r
+    token_data.update(r)
+    return token_data
 
 
 def create_new_user(email, username, user_id):

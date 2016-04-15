@@ -1,4 +1,6 @@
+import datetime
 import responses
+from bson import tz_util
 
 from common_test_class import AbstractPillarTest, TEST_EMAIL_USER, TEST_EMAIL_ADDRESS
 
@@ -43,3 +45,51 @@ class AuthenticationTests(AbstractPillarTest):
         with self.app.test_request_context(
                 headers={'Authorization': self.make_header('knowntoken')}):
             self.assertTrue(auth.validate_token())
+
+    @responses.activate
+    def test_find_token(self):
+        """Test finding of various tokens."""
+
+        from application.utils import authentication as auth
+
+        user_id = self.create_user()
+
+        now = datetime.datetime.now(tz_util.utc)
+        future = now + datetime.timedelta(days=1)
+        past = now - datetime.timedelta(days=1)
+        subclient = self.app.config['BLENDER_ID_SUBCLIENT_ID']
+
+        with self.app.test_request_context():
+            auth.store_token(user_id, 'nonexpired-main', future, None)
+            auth.store_token(user_id, 'nonexpired-sub', future, subclient)
+            token3 = auth.store_token(user_id, 'expired-sub', past, subclient)
+
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('nonexpired-main')}):
+            self.assertTrue(auth.validate_token())
+
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('nonexpired-main', subclient)}):
+            self.assertFalse(auth.validate_token())
+
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('nonexpired-sub')}):
+            self.assertFalse(auth.validate_token())
+
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('nonexpired-sub', subclient)}):
+            self.assertTrue(auth.validate_token())
+
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('expired-sub', subclient)}):
+            self.assertFalse(auth.validate_token())
+
+        self.mock_blenderid_validate_happy()
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('expired-sub', subclient)}):
+            self.assertTrue(auth.validate_token())
+
+            # We now should be able to find a new token for this user.
+            found_token = auth.find_token('expired-sub', subclient)
+            self.assertIsNotNone(found_token)
+            self.assertNotEqual(token3['_id'], found_token['_id'])

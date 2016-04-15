@@ -357,6 +357,11 @@ tokens_schema = {
         'type': 'datetime',
         'required': True,
     },
+    'is_subclient_token': {
+        'type': 'boolean',
+        'required': False,
+        'default': False,
+    }
 }
 
 files_schema = {
