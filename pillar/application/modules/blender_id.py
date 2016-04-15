@@ -65,7 +65,7 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
     # Blender ID can be queried without user ID, and will always include the
     # correct user ID in its response.
     log.info('Obtained user info from Blender ID: %s', user_info)
-    blender_id_user_id = user_info['user_id']
+    blender_id_user_id = user_info['id']
 
     # Store the user info in MongoDB.
     db_user = find_user_in_db(blender_id_user_id, user_info)
