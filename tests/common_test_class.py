@@ -25,7 +25,7 @@ BLENDER_ID_TEST_USERID = 1896
 BLENDER_ID_USER_RESPONSE = {'status': 'success',
                             'user': {'email': TEST_EMAIL_ADDRESS,
                                      'full_name': TEST_FULL_NAME,
-                                     'user_id': BLENDER_ID_TEST_USERID},
+                                     'id': BLENDER_ID_TEST_USERID},
                             'token_expires': 'Mon, 1 Jan 2018 01:02:03 GMT'}
 
 logging.basicConfig(
