@@ -24,7 +24,7 @@ def check_permissions(resource, method, append_allowed_methods=False):
         # matching permission originally set at node_type level)
         resource_permissions = resource['permissions']
     else:
-        resource_permissions = None
+        resource_permissions = {}
     if 'node_type' in resource:
         if type(resource['node_type']) is dict:
             # If the node_type is embedded in the document, extract permissions
@@ -47,14 +47,10 @@ def check_permissions(resource, method, append_allowed_methods=False):
                  and item['name'] == resource['node_type']), None)
             computed_permissions = node_type['permissions']
     else:
-        computed_permissions = None
+        computed_permissions = {}
 
     # Override computed_permissions if override is provided
-    if resource_permissions and computed_permissions:
-        for k, v in resource_permissions.iteritems():
-            computed_permissions[k] = v
-    elif resource_permissions and not computed_permissions:
-        computed_permissions = resource_permissions
+    computed_permissions.update(resource_permissions)
 
     if not computed_permissions:
         log.info('No permissions available to compute for %s on resource %r',
