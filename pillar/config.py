@@ -3,7 +3,7 @@ from collections import defaultdict
 
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
-SCHEME = 'http'
+SCHEME = 'https'
 STORAGE_DIR = '/data/storage/pillar'
 SHARED_DIR = '/data/storage/shared'
 PORT = 5000
