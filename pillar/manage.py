@@ -762,6 +762,22 @@ def refresh_project_links(project, chunk_size=50, quiet=False):
 
 
 @manager.command
+def refresh_backend_links(backend_name, chunk_size=50, quiet=False):
+    """Refreshes all file links that are using a certain storage backend."""
+
+    if quiet:
+        import logging
+        from application import log
+
+        logging.getLogger().setLevel(logging.WARNING)
+        log.setLevel(logging.WARNING)
+
+    chunk_size = int(chunk_size)  # CLI parameters are passed as strings
+    from application.modules import file_storage
+    file_storage.refresh_links_for_backend(backend_name, chunk_size, 2 * 3600)
+
+
+@manager.command
 def expire_all_project_links(project_uuid):
     """Expires all file links for a certain project without refreshing.
 

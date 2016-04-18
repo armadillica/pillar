@@ -457,6 +457,34 @@ def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
 
     log.info('Refreshed %i links', min(chunk_size, to_refresh.count()))
 
+
+def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
+    from flask import current_app
+
+    # Retrieve expired links.
+    files_collection = current_app.data.driver.db['files']
+
+    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    expire_before = now + datetime.timedelta(seconds=expiry_seconds)
+    log.info('Limiting to links that expire before %s', expire_before)
+
+    to_refresh = files_collection.find(
+        {'$or': [{'backend': backend_name, 'link_expires': None},
+                 {'backend': backend_name, 'link_expires': {'$lt': expire_before}},
+                 {'backend': backend_name, 'link': None}]
+        }).sort([('link_expires', pymongo.ASCENDING)]).limit(chunk_size)
+
+    if to_refresh.count() == 0:
+        log.info('No links to refresh.')
+        return
+
+    for file_doc in to_refresh:
+        log.debug('Refreshing links for file %s', file_doc['_id'])
+        _generate_all_links(file_doc, now)
+
+    log.info('Refreshed %i links', min(chunk_size, to_refresh.count()))
+
+
 def setup_app(app, url_prefix):
     app.on_pre_GET_files += on_pre_get_files
     app.on_post_POST_files += post_POST_files
