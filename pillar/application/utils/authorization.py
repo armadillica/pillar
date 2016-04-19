@@ -1,4 +1,5 @@
 import logging
+import functools
 
 from flask import g
 from flask import request
@@ -83,3 +84,28 @@ def check_permissions(resource, method, append_allowed_methods=False):
         return
 
     abort(403)
+
+
+def require_login(require_roles=set()):
+    """Decorator that enforces users to authenticate.
+
+    Optionally only allows access to users with a certain role./
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            current_user = g.get('current_user')
+
+            if current_user is None:
+                log.warning('Unauthenticated acces to %s attempted.', func)
+                abort(403)
+
+            if require_roles and not require_roles.intersection(set(current_user['roles'])):
+                log.warning('User %s is authenticated, but does not have any required role %s to '
+                            'access %s', current_user['user_id'], require_roles, func)
+                abort(403)
+
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator

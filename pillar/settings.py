@@ -560,28 +560,6 @@ projects_schema = {
            'embeddable': True
         },
     },
-    'owners': {
-        'type': 'dict',
-        'schema': {
-            'users': {
-                'type': 'list',
-                'schema': {
-                    'type': 'objectid',
-                }
-            },
-            'groups': {
-                'type': 'list',
-                'schema': {
-                    'type': 'objectid',
-                    'data_relation': {
-                        'resource': 'groups',
-                        'field': '_id',
-                        'embeddable': True
-                    }
-                }
-            }
-        }
-    },
     'status': {
         'type': 'string',
         'allowed': [

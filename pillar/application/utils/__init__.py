@@ -25,8 +25,6 @@ class PillarJSONEncoder(json.JSONEncoder):
 
     def default(self, obj):
         if isinstance(obj, datetime.datetime):
-            if obj.tzinfo is None:
-                raise ValueError('All datetime.datetime objects should be timezone-aware.')
             return obj.strftime(RFC1123_DATE_FORMAT)
 
         if isinstance(obj, bson.ObjectId):
