@@ -8,6 +8,7 @@ from flask import g, Blueprint, request, abort, current_app
 
 from application.utils import remove_private_keys, authorization, PillarJSONEncoder
 from application.utils.gcs import GoogleCloudStorageBucket
+from application.utils.authorization import user_has_role
 from manage_extra.node_types.asset import node_type_asset
 from manage_extra.node_types.blog import node_type_blog
 from manage_extra.node_types.comment import node_type_comment
@@ -25,6 +26,11 @@ def before_inserting_projects(items):
 
     :param items: List of project docs that have been inserted (normally one)
     """
+
+    # Allow admin users to do whatever they want.
+    if user_has_role(u'admin'):
+        return
+
     for item in items:
         item.pop('url', None)
 
@@ -93,7 +99,10 @@ def after_inserting_project(project, db_user):
         node_type_asset,
         node_type_page,
         node_type_comment]
-    project['url'] = "p-{!s}".format(project_id)
+
+    # Allow admin users to use whatever url they want.
+    if not user_has_role(u'admin') or not project.get('url'):
+        project['url'] = "p-{!s}".format(project_id)
 
     # Initialize storage page (defaults to GCS)
     if current_app.config.get('TESTING'):
@@ -112,13 +121,8 @@ def after_inserting_project(project, db_user):
         abort_with_error(status)
 
 
-@blueprint.route('/create', methods=['POST'])
-@authorization.require_login(require_roles={'admin', 'subscriber'})
-def create_project():
-    """Creates a new project."""
-
-    project_name = request.form['project_name']
-    user_id = g.current_user['user_id']
+def _create_new_project(project_name, user_id, overrides):
+    """Creates a new project owned by the given user."""
 
     log.info('Creating new project "%s" for user %s', project_name, user_id)
 
@@ -136,6 +140,8 @@ def create_project():
                'summary': '',
                'category': 'assets',  # TODO: allow the user to choose this.
                }
+    if overrides is not None:
+        project.update(overrides)
 
     result, _, _, status = post_internal('projects', project)
     if status != 201:
@@ -143,14 +149,26 @@ def create_project():
         return abort_with_error(status)
     project.update(result)
 
-    project_id = result['_id']
-    log.info('Created project %s for user %s', project_id, user_id)
+    log.info('Created project %s for user %s', project['_id'], user_id)
+
+    return project
+
+
+@blueprint.route('/create', methods=['POST'])
+@authorization.require_login(require_roles={'admin', 'subscriber'})
+def create_project(overrides=None):
+    """Creates a new project."""
+
+    project_name = request.form['project_name']
+    user_id = g.current_user['user_id']
+
+    project = _create_new_project(project_name, user_id, overrides)
 
     # Return the project in the response.
     resp = current_app.response_class(json.dumps(project, cls=PillarJSONEncoder),
                                       mimetype='application/json',
                                       status=201,
-                                      headers={'Location': '/projects/%s' % project_id})
+                                      headers={'Location': '/projects/%s' % project['_id']})
     return resp
 
 

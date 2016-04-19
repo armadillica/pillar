@@ -96,13 +96,13 @@ class AbstractPillarTest(TestMinimal):
 
             return found['_id'], found
 
-    def create_user(self, roles=('subscriber', )):
+    def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber', )):
         with self.app.test_request_context():
             users = self.app.data.driver.db['users']
             assert isinstance(users, pymongo.collection.Collection)
 
             result = users.insert_one({
-                '_id': ObjectId('cafef00dc379cf10c4aaceaf'),
+                '_id': ObjectId(user_id),
                 '_updated': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
                 '_created': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
                 'username': 'tester',

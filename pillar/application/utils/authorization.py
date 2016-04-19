@@ -109,3 +109,13 @@ def require_login(require_roles=set()):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+
+def user_has_role(role):
+    """Returns True iff the user is logged in and has the given role."""
+
+    current_user = g.get('current_user')
+    if current_user is None:
+        return False
+
+    return role in current_user['roles']
