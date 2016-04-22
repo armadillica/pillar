@@ -1,8 +1,5 @@
 import logging
-
 from flask import g
-from flask import request
-from flask import url_for
 from flask import abort
 from application import app
 
