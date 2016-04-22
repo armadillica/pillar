@@ -28,8 +28,11 @@ def notification_parse(notification):
     else:
         parent_comment_user = users_collection.find_one(
             {'_id': node['parent']['user']})
-        owner = "{0}'s {1}".format(parent_comment_user['username'],
-                                   node['parent']['node_type'])
+        if parent_comment_user['_id'] == node['user']:
+            user_name = 'their'
+        else:
+            user_name = "{0}'s".format(parent_comment_user['username'])
+        owner = "{0} {1}".format(user_name, node['parent']['node_type'])
 
     context_object_type = node['parent']['node_type']
     context_object_name = owner
