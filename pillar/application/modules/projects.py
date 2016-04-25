@@ -1,3 +1,4 @@
+import copy
 import logging
 import json
 
@@ -8,7 +9,7 @@ from flask import g, Blueprint, request, abort, current_app
 
 from application.utils import remove_private_keys, authorization, PillarJSONEncoder
 from application.utils.gcs import GoogleCloudStorageBucket
-from application.utils.authorization import user_has_role
+from application.utils.authorization import user_has_role, check_permissions
 from manage_extra.node_types.asset import node_type_asset
 from manage_extra.node_types.blog import node_type_blog
 from manage_extra.node_types.comment import node_type_comment
@@ -33,6 +34,34 @@ def before_inserting_projects(items):
 
     for item in items:
         item.pop('url', None)
+
+
+def before_edit_check_permissions(document, original):
+    # Allow admin users to do whatever they want.
+    # TODO: possibly move this into the check_permissions function.
+    if user_has_role(u'admin'):
+        return
+
+    check_permissions(original, request.method)
+
+
+def protect_sensitive_fields(document, original):
+    """When not logged in as admin, prevents update to certain fields."""
+
+    # Allow admin users to do whatever they want.
+    if user_has_role(u'admin'):
+        return
+
+    def revert(name):
+        if name not in original:
+            return
+        document[name] = original[name]
+
+    revert('url')
+    revert('is_private')
+    revert('status')
+    revert('category')
+    revert('user')
 
 
 def after_inserting_projects(items):
@@ -86,19 +115,18 @@ def after_inserting_project(project, db_user):
         ]
     }
 
+    def with_permissions(node_type):
+        copied = copy.deepcopy(node_type)
+        copied['permissions'] = permissions
+        return copied
+
     # Assign permissions to the project itself, as well as to the node_types
     project['permissions'] = permissions
-    node_type_asset['permissions'] = permissions
-    node_type_group['permissions'] = permissions
-    node_type_page['permissions'] = permissions
-    node_type_comment['permissions'] = permissions
-
-    # Assign the basic 'group', 'asset' and 'page' node_types
     project['node_types'] = [
-        node_type_group,
-        node_type_asset,
-        node_type_page,
-        node_type_comment]
+        with_permissions(node_type_group),
+        with_permissions(node_type_asset),
+        with_permissions(node_type_page),
+        with_permissions(node_type_comment)]
 
     # Allow admin users to use whatever url they want.
     if not user_has_role(u'admin') or not project.get('url'):
@@ -114,11 +142,14 @@ def after_inserting_project(project, db_user):
         else:
             log.warning('Unable to create CGS instance for project %s', project_id)
 
-    # Commit the changes
-    result, _, _, status = put_internal('projects', remove_private_keys(project), _id=project_id)
-    if status != 200:
-        log.warning('Unable to update project %s: %s', project_id, result)
-        abort_with_error(status)
+    # Commit the changes directly to the MongoDB; a PUT is not allowed yet,
+    # as the project doesn't have a valid permission structure.
+    projects_collection = current_app.data.driver.db['projects']
+    result = projects_collection.update_one({'_id': project_id},
+                                            {'$set': remove_private_keys(project)})
+    if result.matched_count != 1:
+        log.warning('Unable to update project %s: %s', project_id, result.raw_result)
+        abort_with_error(500)
 
 
 def _create_new_project(project_name, user_id, overrides):
@@ -188,6 +219,10 @@ def abort_with_error(status):
 
 
 def setup_app(app, url_prefix):
+    app.on_replace_projects += before_edit_check_permissions
+    app.on_replace_projects += protect_sensitive_fields
+    app.on_update_projects += before_edit_check_permissions
+    app.on_update_projects += protect_sensitive_fields
     app.on_insert_projects += before_inserting_projects
     app.on_inserted_projects += after_inserting_projects
     app.register_blueprint(blueprint, url_prefix=url_prefix)
