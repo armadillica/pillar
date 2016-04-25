@@ -12,4 +12,5 @@
 /pillar/application/static/storage/
 /build
 /.cache
+/.coverage
 /pillar/pillar.egg-info/
