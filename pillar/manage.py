@@ -67,13 +67,14 @@ def put_item(collection, item):
 
 
 @manager.command
-def setup_db():
+def setup_db(admin_email):
     """Setup the database
     - Create admin, subscriber and demo Group collection
     - Create admin user (must use valid blender-id credentials)
     - Create one project
     """
-    # groups_collection = app.data.driver.db['groups']
+
+    # Create default groups
     groups_list = []
     for group in ['admin', 'subscriber', 'demo']:
         g = {'name': group}
@@ -81,58 +82,31 @@ def setup_db():
         groups_list.append(g[0]['_id'])
         print("Creating group {0}".format(group))
 
-    while True:
-        admin_username = raw_input('Admin email:')
-        if len(admin_username) < 1:
-            print ("Username is too short")
-        else:
-            break
+    # Create admin user
+    user = {'username': admin_email,
+            'groups': groups_list,
+            'roles': ['admin', 'subscriber', 'demo'],
+            'settings': {'email_communications': 1},
+            'auth': [],
+            'full_name': admin_email,
+            'email': admin_email}
+    result, _, _, status = post_internal('users', user)
+    if status != 201:
+        raise SystemExit('Error creating user {}: {}'.format(admin_email, result))
+    user.update(result)
+    print("Created user {0}".format(user['_id']))
 
-    user = dict(
-        username=admin_username,
-        groups=groups_list,
-        roles=['admin', 'subscriber', 'demo'],
-        settings=dict(email_communications=1),
-        auth=[],
-        full_name=admin_username,
-        email=admin_username,
-        )
-    user = post_internal('users', user)
-    print("Created user {0}".format(user[0]['_id']))
+    # Create a default project by faking a POST request.
+    with app.test_request_context(data={'project_name': u'Default Project'}):
+        from flask import g
+        from application.modules import projects
 
-    # TODO: Create a default project
-    default_permissions = _default_permissions()
+        g.current_user = {'user_id': user['_id'],
+                          'groups': user['groups'],
+                          'roles': set(user['roles'])}
 
-    node_type_blog['permissions'] = default_permissions
-    node_type_post['permissions'] = default_permissions
-    node_type_comment['permissions'] = default_permissions
-
-    project = dict(
-        owners=dict(users=[], groups=[]),
-        description='Default Project',
-        name='Default Project',
-        node_types=[
-            node_type_blog,
-            node_type_post,
-            node_type_comment
-        ],
-        status='published',
-        user=user[0]['_id'],
-        is_private=False,
-        permissions=default_permissions,
-        url='default-project',
-        summary='Default Project summary',
-        category='training'
-    )
-    # Manually insert into db, since using post_internal would trigger hook
-    # TODO: fix this by bassing the context (and the user to g object)
-    projects_collection = app.data.driver.db['projects']
-    project = projects_collection.insert_one(project)
-    print("Created default project {0}".format(project.inserted_id))
-    gcs_storage = GoogleCloudStorageBucket(str(project.inserted_id))
-
-    if gcs_storage.bucket.exists():
-        print("Created CGS instance")
+        projects.create_project(overrides={'url': 'default-project',
+                                           'is_private': False})
 
 
 def _default_permissions():

@@ -354,9 +354,6 @@ app.on_inserted_nodes += after_inserting_nodes
 app.on_fetched_item_projects += before_returning_item_permissions
 app.on_fetched_item_projects += project_node_type_has_method
 app.on_fetched_resource_projects += before_returning_resource_permissions
-# Projects hooks
-app.on_insert_projects += before_inserting_projects
-app.on_inserted_projects += after_inserting_projects
 
 
 def post_GET_user(request, payload):
@@ -389,6 +386,8 @@ file_storage.setup_app(app, url_prefix='/storage')
 # The encoding module (receive notification and report progress)
 from modules.encoding import encoding
 from modules.blender_id import blender_id
+from modules import projects
 
 app.register_blueprint(encoding, url_prefix='/encoding')
 app.register_blueprint(blender_id, url_prefix='/blender_id')
+projects.setup_app(app, url_prefix='/p')

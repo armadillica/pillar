@@ -63,7 +63,8 @@ def validate_token():
         return False
 
     g.current_user = {'user_id': db_user['_id'],
-                      'groups': db_user['groups']}
+                      'groups': db_user['groups'],
+                      'roles': set(db_user.get('roles', []))}
 
     return True
 

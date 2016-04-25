@@ -46,6 +46,7 @@ class AbstractPillarTest(TestMinimal):
 
         from application import app
 
+        logging.getLogger('').setLevel(logging.DEBUG)
         logging.getLogger('application').setLevel(logging.DEBUG)
         logging.getLogger('werkzeug').setLevel(logging.DEBUG)
         logging.getLogger('eve').setLevel(logging.DEBUG)
@@ -95,18 +96,18 @@ class AbstractPillarTest(TestMinimal):
 
             return found['_id'], found
 
-    def create_user(self):
+    def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber', )):
         with self.app.test_request_context():
             users = self.app.data.driver.db['users']
             assert isinstance(users, pymongo.collection.Collection)
 
             result = users.insert_one({
-                '_id': ObjectId('cafef00dc379cf10c4aaceaf'),
+                '_id': ObjectId(user_id),
                 '_updated': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
                 '_created': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
                 'username': 'tester',
                 'groups': [],
-                'roles': ['subscriber'],
+                'roles': list(roles),
                 'settings': {'email_communications': 1},
                 'auth': [{'token': '',
                           'user_id': unicode(BLENDER_ID_TEST_USERID),
@@ -116,6 +117,17 @@ class AbstractPillarTest(TestMinimal):
             })
 
             return result.inserted_id
+
+    def create_valid_auth_token(self, user_id, token='token'):
+        now = datetime.datetime.now(tz_util.utc)
+        future = now + datetime.timedelta(days=1)
+
+        with self.app.test_request_context():
+            from application.utils import authentication as auth
+
+            token_data = auth.store_token(user_id, token, future, None)
+
+        return token_data
 
     def mock_blenderid_validate_unhappy(self):
         """Sets up Responses to mock unhappy validation flow."""
