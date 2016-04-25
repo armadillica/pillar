@@ -744,7 +744,8 @@ organizations = {
 projects = {
     'schema': projects_schema,
     'public_item_methods': ['GET'],
-    'public_methods': ['GET']
+    'public_methods': ['GET'],
+    'soft_delete': True,
 }
 
 activities = {

@@ -5,6 +5,7 @@
 import functools
 import json
 import logging
+import urllib
 
 from bson import ObjectId
 
@@ -236,6 +237,42 @@ class ProjectEditTest(AbstractProjectTest):
                                         'Content-Type': 'application/json',
                                         'If-Match': project['_etag']})
         self.assertEqual(403, resp.status_code, resp.data)
+
+    def test_delete_by_admin(self):
+        # Create test project.
+        project_info = self._create_user_and_project([u'subscriber'])
+        project_id = project_info['_id']
+        project_url = '/projects/%s' % project_id
+
+        # Create test user.
+        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeef')
+
+        # Admin user should be able to DELETE.
+        resp = self.client.delete(project_url,
+                                  headers={'Authorization': self.make_header('admin-token'),
+                                           'If-Match': project_info['_etag']})
+        self.assertEqual(204, resp.status_code, resp.data)
+
+        # Check that the project is gone.
+        resp = self.client.get(project_url)
+        self.assertEqual(404, resp.status_code, resp.data)
+
+        # ... but we should still get it in the body.
+        db_proj = json.loads(resp.data)
+        self.assertEqual(u'Prøject El Niño', db_proj['name'])
+        self.assertTrue(db_proj['_deleted'])
+
+        # Querying for deleted projects should include it.
+        # Also see http://python-eve.org/features.html#soft-delete
+        projection = json.dumps({'name': 1, 'permissions': 1})
+        where = json.dumps({'_deleted': True})  # MUST be True, 1 does not work.
+        resp = self.client.get('/projects?where=%s&projection=%s' %
+                               (urllib.quote(where), urllib.quote(projection)))
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        projlist = json.loads(resp.data)
+        self.assertEqual(1, projlist['_meta']['total'])
+        self.assertEqual(u'Prøject El Niño', projlist['_items'][0]['name'])
 
     def _create_user_and_project(self, roles):
         self._create_user_with_token(roles, 'token')
