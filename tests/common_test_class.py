@@ -51,6 +51,9 @@ class AbstractPillarTest(TestMinimal):
         logging.getLogger('werkzeug').setLevel(logging.DEBUG)
         logging.getLogger('eve').setLevel(logging.DEBUG)
 
+        from eve.utils import config
+        config.DEBUG = True
+
         self.app = app
         self.client = app.test_client()
         assert isinstance(self.client, FlaskClient)
