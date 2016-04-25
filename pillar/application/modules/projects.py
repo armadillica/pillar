@@ -149,6 +149,12 @@ def _create_new_project(project_name, user_id, overrides):
         return abort_with_error(status)
     project.update(result)
 
+    # Now re-fetch the etag, as both the initial document and the returned
+    # result do not contain the same etag as the database.
+    document = current_app.data.driver.db['projects'].find_one(project['_id'],
+                                                               projection={'_etag': 1})
+    project.update(document)
+
     log.info('Created project %s for user %s', project['_id'], user_id)
 
     return project

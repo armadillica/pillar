@@ -50,6 +50,11 @@ class ProjectCreationTest(AbstractPillarTest):
         self.assertEqual('p-%s' % project_id, project['url'])
         self.assertEqual(1, len(project['permissions']['groups']))
 
+        # Check the etag
+        resp = self.client.get('/projects/%s' % project_id)
+        from_db = json.loads(resp.data)
+        self.assertEqual(from_db['_etag'], project['_etag'])
+
         group_id = ObjectId(project['permissions']['groups'][0]['group'])
 
         # Check that there is a group for the project, and that the user is member of it.
