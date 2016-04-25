@@ -6,7 +6,6 @@ from datetime import datetime
 import bugsnag
 import bugsnag.flask
 import bugsnag.handlers
-from algoliasearch import algoliasearch
 from zencoder import Zencoder
 from flask import g
 from flask import request
@@ -141,6 +140,8 @@ except KeyError:
 
 # Algolia search
 if 'ALGOLIA_USER' in app.config:
+    from algoliasearch import algoliasearch
+
     client = algoliasearch.Client(
         app.config['ALGOLIA_USER'],
         app.config['ALGOLIA_API_KEY'])
@@ -159,8 +160,6 @@ else:
 from utils.authentication import validate_token
 from utils.authorization import check_permissions
 from utils.gcs import update_file_name
-from utils.algolia import algolia_index_user_save
-from utils.algolia import algolia_index_node_save
 from utils.activities import activity_subscribe
 from utils.activities import activity_object_add
 from utils.activities import notification_parse
@@ -191,7 +190,15 @@ def before_replacing_node(item, original):
 
 def after_replacing_node(item, original):
     """Push an update to the Algolia index when a node item is updated"""
-    algolia_index_node_save(item)
+
+    from algoliasearch.client import AlgoliaException
+    from utils.algolia import algolia_index_node_save
+
+    try:
+        algolia_index_node_save(item)
+    except AlgoliaException as ex:
+        log.warning('Unable to push node info to Algolia for node %s; %s',
+                    item.get('_id'), ex)
 
 
 def before_inserting_nodes(items):
@@ -355,32 +362,6 @@ app.on_fetched_item_projects += before_returning_item_permissions
 app.on_fetched_item_projects += project_node_type_has_method
 app.on_fetched_resource_projects += before_returning_resource_permissions
 
-
-def post_GET_user(request, payload):
-    json_data = json.loads(payload.data)
-    # Check if we are querying the users endpoint (instead of the single user)
-    if json_data.get('_id') is None:
-        return
-    # json_data['computed_permissions'] = \
-    #     compute_permissions(json_data['_id'], app.data.driver)
-    payload.data = json.dumps(json_data)
-
-
-def after_replacing_user(item, original):
-    """Push an update to the Algolia index when a user item is updated"""
-
-    from algoliasearch.client import AlgoliaException
-
-    try:
-        algolia_index_user_save(item)
-    except AlgoliaException as ex:
-        log.warning('Unable to push user info to Algolia for user "%s", id=%s; %s',
-                    item.get('username'), item.get('_id'), ex)
-
-
-app.on_post_GET_users += post_GET_user
-app.on_replace_users += after_replacing_user
-
 file_storage.setup_app(app, url_prefix='/storage')
 
 # The encoding module (receive notification and report progress)
@@ -388,8 +369,10 @@ from modules.encoding import encoding
 from modules.blender_id import blender_id
 from modules import projects
 from modules import local_auth
+from modules import users
 
 app.register_blueprint(encoding, url_prefix='/encoding')
 app.register_blueprint(blender_id, url_prefix='/blender_id')
 projects.setup_app(app, url_prefix='/p')
 local_auth.setup_app(app, url_prefix='/auth')
+users.setup_app(app)
