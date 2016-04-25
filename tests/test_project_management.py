@@ -165,7 +165,6 @@ class ProjectEditTest(AbstractProjectTest):
         put_project['category'] = 'software'
         put_project['user'] = other_user_id
 
-
         resp = self.client.put(project_url,
                                data=dumps(put_project),
                                headers={'Authorization': self.make_header('token'),
@@ -273,6 +272,27 @@ class ProjectEditTest(AbstractProjectTest):
         projlist = json.loads(resp.data)
         self.assertEqual(1, projlist['_meta']['total'])
         self.assertEqual(u'Prøject El Niño', projlist['_items'][0]['name'])
+
+    def test_delete_by_subscriber(self):
+        # Create test project.
+        project_info = self._create_user_and_project([u'subscriber'])
+        project_id = project_info['_id']
+        project_url = '/projects/%s' % project_id
+
+        # Create test user.
+        self._create_user_with_token(['subscriber'], 'mortal-token', user_id='cafef00dbeef')
+
+        # Other user should NOT be able to DELETE.
+        resp = self.client.delete(project_url,
+                                  headers={'Authorization': self.make_header('mortal-token'),
+                                           'If-Match': project_info['_etag']})
+        self.assertEqual(403, resp.status_code, resp.data)
+
+        # Owner should be able to DELETE
+        resp = self.client.delete(project_url,
+                                  headers={'Authorization': self.make_header('token'),
+                                           'If-Match': project_info['_etag']})
+        self.assertEqual(204, resp.status_code, resp.data)
 
     def _create_user_and_project(self, roles):
         self._create_user_with_token(roles, 'token')

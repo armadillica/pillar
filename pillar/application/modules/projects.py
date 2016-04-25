@@ -44,6 +44,17 @@ def before_edit_check_permissions(document, original):
     check_permissions(original, request.method)
 
 
+def before_delete_project(document):
+    """Checks permissions before we allow deletion"""
+
+    # Allow admin users to do whatever they want.
+    # TODO: possibly move this into the check_permissions function.
+    if user_has_role(u'admin'):
+        return
+
+    check_permissions(document, request.method)
+
+
 def protect_sensitive_fields(document, original):
     """When not logged in as admin, prevents update to certain fields."""
 
@@ -53,6 +64,10 @@ def protect_sensitive_fields(document, original):
 
     def revert(name):
         if name not in original:
+            try:
+                del document[name]
+            except KeyError:
+                pass
             return
         document[name] = original[name]
 
@@ -110,7 +125,7 @@ def after_inserting_project(project, db_user):
         'users': [],
         'groups': [
             {'group': admin_group_id,
-             'methods': ['GET', 'PUT', 'POST']},
+             'methods': ['GET', 'PUT', 'POST', 'DELETE']},
         ]
     }
 
@@ -222,6 +237,7 @@ def setup_app(app, url_prefix):
     app.on_replace_projects += protect_sensitive_fields
     app.on_update_projects += before_edit_check_permissions
     app.on_update_projects += protect_sensitive_fields
+    app.on_delete_item_projects += before_delete_project
     app.on_insert_projects += before_inserting_projects
     app.on_inserted_projects += after_inserting_projects
     app.register_blueprint(blueprint, url_prefix=url_prefix)
