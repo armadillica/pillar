@@ -12,12 +12,12 @@ def remove_private_keys(document):
     """Removes any key that starts with an underscore, returns result as new
     dictionary.
     """
-    patch_info = copy.deepcopy(document)
-    for key in list(patch_info.keys()):
+    doc_copy = copy.deepcopy(document)
+    for key in list(doc_copy.keys()):
         if key.startswith('_'):
-            del patch_info[key]
+            del doc_copy[key]
 
-    return patch_info
+    return doc_copy
 
 
 class PillarJSONEncoder(json.JSONEncoder):
