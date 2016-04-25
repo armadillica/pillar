@@ -1,7 +1,9 @@
 import os
+
+from flask import current_app
 from zencoder import Zencoder
+
 from application import encoding_service_client
-from application import app
 
 
 class Encoder:
@@ -20,7 +22,7 @@ class Encoder:
                 storage_base = "gcs://{0}/_/".format(src_file['project'])
             file_input = os.path.join(storage_base, src_file['file_path'])
             outputs = []
-            options = dict(notifications=app.config['ZENCODER_NOTIFICATIONS_URL'])
+            options = dict(notifications=current_app.config['ZENCODER_NOTIFICATIONS_URL'])
             for v in src_file['variations']:
                 outputs.append({
                     'format': v['format'],

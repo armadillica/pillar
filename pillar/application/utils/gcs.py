@@ -5,7 +5,7 @@ import bugsnag
 from bson import ObjectId
 from gcloud.storage.client import Client
 from gcloud.exceptions import NotFound
-from application import app
+from flask import current_app
 
 
 class GoogleCloudStorageBucket(object):
@@ -153,7 +153,7 @@ def update_file_name(item):
         return "{0}{1}{2}".format(root, size, ext)
 
     def _update_name(item, file_id):
-        files_collection = app.data.driver.db['files']
+        files_collection = current_app.data.driver.db['files']
         f = files_collection.find_one({'_id': ObjectId(file_id)})
         status = item['properties']['status']
         if f and f['backend'] == 'gcs' and status != 'processing':

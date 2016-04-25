@@ -11,9 +11,8 @@ from bson import tz_util
 from datetime import datetime
 from flask import g
 from flask import request
+from flask import current_app
 from eve.methods.post import post_internal
-
-from application import app
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +54,7 @@ def validate_token():
         db_user, status = blender_id.validate_create_user('', token, oauth_subclient)
     else:
         log.debug("User is already in our database and token hasn't expired yet.")
-        users = app.data.driver.db['users']
+        users = current_app.data.driver.db['users']
         db_user = users.find_one(db_token['user'])
 
     if db_user is None:
@@ -72,7 +71,7 @@ def validate_token():
 def find_token(token, is_subclient_token=False, **extra_filters):
     """Returns the token document, or None if it doesn't exist (or is expired)."""
 
-    tokens_collection = app.data.driver.db['tokens']
+    tokens_collection = current_app.data.driver.db['tokens']
 
     # TODO: remove expired tokens from collection.
     lookup = {'token': token,
@@ -152,7 +151,7 @@ def make_unique_username(email):
     # Check for min length of username (otherwise validation fails)
     username = "___{0}".format(username) if len(username) < 3 else username
 
-    users = app.data.driver.db['users']
+    users = current_app.data.driver.db['users']
     user_from_username = users.find_one({'username': username})
 
     if not user_from_username:

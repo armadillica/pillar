@@ -16,6 +16,7 @@ from flask import request
 from flask import abort
 from flask import send_from_directory
 from flask import url_for, helpers
+from flask import current_app
 
 from application import utils
 from application.utils import remove_private_keys
@@ -67,9 +68,7 @@ def build_thumbnails(file_path=None, file_id=None):
     variation properties.
     """
 
-    from application import app
-
-    files_collection = app.data.driver.db['files']
+    files_collection = current_app.data.driver.db['files']
     if file_path:
         # Search file with backend "pillar" and path=file_path
         file_ = files_collection.find({"file_path": "{0}".format(file_path)})
@@ -79,7 +78,7 @@ def build_thumbnails(file_path=None, file_id=None):
         file_ = files_collection.find_one({"_id": ObjectId(file_id)})
         file_path = file_['name']
 
-    file_full_path = safe_join(safe_join(app.config['SHARED_DIR'], file_path[:2]),
+    file_full_path = safe_join(safe_join(current_app.config['SHARED_DIR'], file_path[:2]),
                                file_path)
     # Does the original file exist?
     if not os.path.isfile(file_full_path):
@@ -120,11 +119,10 @@ def build_thumbnails(file_path=None, file_id=None):
 @file_storage.route('/file', methods=['POST'])
 @file_storage.route('/file/<path:file_name>', methods=['GET', 'POST'])
 def index(file_name=None):
-    from application import app
 
     # GET file -> read it
     if request.method == 'GET':
-        return send_from_directory(app.config['STORAGE_DIR'], file_name)
+        return send_from_directory(current_app.config['STORAGE_DIR'], file_name)
 
     # POST file -> save it
 
@@ -137,7 +135,7 @@ def index(file_name=None):
 
     # Determine & create storage directory
     folder_name = file_name[:2]
-    file_folder_path = helpers.safe_join(app.config['STORAGE_DIR'], folder_name)
+    file_folder_path = helpers.safe_join(current_app.config['STORAGE_DIR'], folder_name)
     if not os.path.exists(file_folder_path):
         log.info('Creating folder path %r', file_folder_path)
         os.mkdir(file_folder_path)
@@ -157,12 +155,11 @@ def process_file(file_id, src_file):
     :param file_id: '_id' key of the file
     :param src_file: POSTed data of the file, lacks private properties.
     """
-    from application import app
 
     src_file = utils.remove_private_keys(src_file)
 
     filename = src_file['name']
-    file_abs_path = safe_join(safe_join(app.config['SHARED_DIR'], filename[:2]), filename)
+    file_abs_path = safe_join(safe_join(current_app.config['SHARED_DIR'], filename[:2]), filename)
 
     if not os.path.exists(file_abs_path):
         log.warning("POSTed file document %r refers to non-existant file on file system %s!",
@@ -227,7 +224,7 @@ def process_file(file_id, src_file):
         def encode(src_path, src_file, res_y):
             # For every variation in the list call video_encode
             # print "encoding {0}".format(variations)
-            if app.config['ENCODING_BACKEND'] == 'zencoder':
+            if current_app.config['ENCODING_BACKEND'] == 'zencoder':
                 # Move the source file in place on the remote storage (which can
                 # be accessed from zencoder)
                 push_to_storage(str(src_file['project']), src_path)
@@ -244,7 +241,7 @@ def process_file(file_id, src_file):
                         pass
                 except KeyError:
                     pass
-            elif app.config['ENCODING_BACKEND'] == 'local':
+            elif current_app.config['ENCODING_BACKEND'] == 'local':
                 for v in src_file['variations']:
                     path = ffmpeg_encode(src_path, v['format'], res_y)
                     # Update size data after encoding
@@ -291,9 +288,7 @@ def delete_file(file_item):
         else:
             pass
 
-    from application import app
-
-    files_collection = app.data.driver.db['files']
+    files_collection = current_app.data.driver.db['files']
     # Collect children (variations) of the original file
     children = files_collection.find({'parent': file_item['_id']})
     for child in children:
@@ -306,7 +301,6 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
     """Hook to check the backend of a file resource, to build an appropriate link
     that can be used by the client to retrieve the actual file.
     """
-    from application import app
 
     if backend == 'gcs':
         storage = GoogleCloudStorageBucket(project_id)
@@ -319,7 +313,7 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
             link = None
     elif backend == 'pillar':
         link = url_for('file_storage.index', file_name=file_path, _external=True,
-                       _scheme=app.config['SCHEME'])
+                       _scheme=current_app.config['SCHEME'])
     elif backend == 'cdnsun':
         link = hash_file_path(file_path, None)
     elif backend == 'unittest':
@@ -367,8 +361,6 @@ def _generate_all_links(response, now):
     :param now: datetime that reflects 'now', for consistent expiry generation.
     """
 
-    from application import app
-
     project_id = str(
         response['project']) if 'project' in response else None  # TODO: add project id to all files
     backend = response['backend']
@@ -378,7 +370,7 @@ def _generate_all_links(response, now):
             variation['link'] = generate_link(backend, variation['file_path'], project_id)
 
     # Construct the new expiry datetime.
-    validity_secs = app.config['FILE_LINK_VALIDITY'][backend]
+    validity_secs = current_app.config['FILE_LINK_VALIDITY'][backend]
     response['link_expires'] = now + datetime.timedelta(seconds=validity_secs)
 
     patch_info = remove_private_keys(response)
@@ -410,8 +402,6 @@ def before_deleting_file(item):
 
 
 def on_pre_get_files(_, lookup):
-    from application import app
-
     # Override the HTTP header, we always want to fetch the document from MongoDB.
     parsed_req = eve.utils.parse_request('files')
     parsed_req.if_modified_since = None
@@ -421,22 +411,20 @@ def on_pre_get_files(_, lookup):
     lookup_expired = lookup.copy()
     lookup_expired['link_expires'] = {'$lte': now}
 
-    cursor = app.data.find('files', parsed_req, lookup_expired)
+    cursor = current_app.data.find('files', parsed_req, lookup_expired)
     for file_doc in cursor:
         log.debug('Updating expired links for file %r.', file_doc['_id'])
         _generate_all_links(file_doc, now)
 
 
 def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
-    from application import app
-
     if chunk_size:
         log.info('Refreshing the first %i links for project %s', chunk_size, project_uuid)
     else:
         log.info('Refreshing all links for project %s', project_uuid)
 
     # Retrieve expired links.
-    files_collection = app.data.driver.db['files']
+    files_collection = current_app.data.driver.db['files']
 
     now = datetime.datetime.now(tz=bson.tz_util.utc)
     expire_before = now + datetime.timedelta(seconds=expiry_seconds)

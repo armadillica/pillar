@@ -1,13 +1,8 @@
 import os
 import subprocess
-# import logging
-from application import app
-from application.utils.gcs import GoogleCloudStorageBucket
 
-BIN_FFPROBE = app.config['BIN_FFPROBE']
-BIN_FFMPEG = app.config['BIN_FFMPEG']
-BIN_SSH = app.config['BIN_SSH']
-BIN_RSYNC = app.config['BIN_RSYNC']
+from flask import current_app
+from application.utils.gcs import GoogleCloudStorageBucket
 
 
 def get_sizedata(filepath):
@@ -18,13 +13,16 @@ def get_sizedata(filepath):
 
 
 def rsync(path, remote_dir=''):
+    BIN_SSH = current_app.config['BIN_SSH']
+    BIN_RSYNC = current_app.config['BIN_RSYNC']
+
     DRY_RUN = False
     arguments = ['--verbose', '--ignore-existing', '--recursive', '--human-readable']
-    logs_path = app.config['CDN_SYNC_LOGS']
-    storage_address = app.config['CDN_STORAGE_ADDRESS']
-    user = app.config['CDN_STORAGE_USER']
-    rsa_key_path = app.config['CDN_RSA_KEY']
-    known_hosts_path = app.config['CDN_KNOWN_HOSTS']
+    logs_path = current_app.config['CDN_SYNC_LOGS']
+    storage_address = current_app.config['CDN_STORAGE_ADDRESS']
+    user = current_app.config['CDN_STORAGE_USER']
+    rsa_key_path = current_app.config['CDN_RSA_KEY']
+    known_hosts_path = current_app.config['CDN_KNOWN_HOSTS']
 
     if DRY_RUN:
         arguments.append('--dry-run')

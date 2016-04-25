@@ -1,5 +1,5 @@
 from bson import ObjectId
-from application import app
+from flask import current_app
 from application import algolia_index_users
 from application import algolia_index_nodes
 from application.modules.file_storage import generate_link
@@ -33,10 +33,10 @@ def algolia_index_node_save(node):
                 and node['properties']['status'] != 'published':
             return
 
-        projects_collection = app.data.driver.db['projects']
+        projects_collection = current_app.data.driver.db['projects']
         project = projects_collection.find_one({'_id': ObjectId(node['project'])})
 
-        users_collection = app.data.driver.db['users']
+        users_collection = current_app.data.driver.db['users']
         user = users_collection.find_one({'_id': ObjectId(node['user'])})
 
         node_ob = {
@@ -57,7 +57,7 @@ def algolia_index_node_save(node):
         if 'description' in node and node['description']:
             node_ob['description'] = node['description']
         if 'picture' in node and node['picture']:
-            files_collection = app.data.driver.db['files']
+            files_collection = current_app.data.driver.db['files']
             lookup = {'_id': ObjectId(node['picture'])}
             picture = files_collection.find_one(lookup)
             if picture['backend'] == 'gcs':

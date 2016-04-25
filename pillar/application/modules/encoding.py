@@ -5,7 +5,7 @@ from eve.methods.put import put_internal
 from flask import Blueprint
 from flask import abort
 from flask import request
-from application import app
+from flask import current_app
 from application import utils
 
 encoding = Blueprint('encoding', __name__)
@@ -14,11 +14,11 @@ log = logging.getLogger(__name__)
 
 @encoding.route('/zencoder/notifications', methods=['POST'])
 def zencoder_notifications():
-    if app.config['ENCODING_BACKEND'] != 'zencoder':
+    if current_app.config['ENCODING_BACKEND'] != 'zencoder':
         log.warning('Received notification from Zencoder but app not configured for Zencoder.')
         return abort(403)
 
-    if not app.config['DEBUG']:
+    if not current_app.config['DEBUG']:
         # If we are in production, look for the Zencoder header secret
         try:
             notification_secret_request = request.headers[
@@ -27,14 +27,14 @@ def zencoder_notifications():
             log.warning('Received Zencoder notification without secret.')
             return abort(401)
         # If the header is found, check it agains the one in the config
-        notification_secret = app.config['ZENCODER_NOTIFICATIONS_SECRET']
+        notification_secret = current_app.config['ZENCODER_NOTIFICATIONS_SECRET']
         if notification_secret_request != notification_secret:
             log.warning('Received Zencoder notification with incorrect secret.')
             return abort(401)
 
     # Cast request data into a dict
     data = request.get_json()
-    files_collection = app.data.driver.db['files']
+    files_collection = current_app.data.driver.db['files']
     # Find the file object based on processing backend and job_id
     lookup = {'processing.backend': 'zencoder', 'processing.job_id': str(data['job']['id'])}
     f = files_collection.find_one(lookup)

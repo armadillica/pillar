@@ -3,7 +3,6 @@ import logging
 import json
 
 from eve.methods.post import post_internal
-from eve.methods.put import put_internal
 from eve.methods.patch import patch_internal
 from flask import g, Blueprint, request, abort, current_app
 

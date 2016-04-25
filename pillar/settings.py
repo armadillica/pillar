@@ -780,3 +780,4 @@ MONGO_PORT = os.environ.get('MONGO_PORT', 27017)
 MONGO_DBNAME = os.environ.get('MONGO_DBNAME', 'eve')
 CACHE_EXPIRES = 60
 HATEOAS = False
+UPSET_ON_PUT = False  # do not create new document on PUT of non-existant URL.

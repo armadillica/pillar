@@ -2,7 +2,7 @@ import logging
 import functools
 from flask import g
 from flask import abort
-from application import app
+from flask import current_app
 
 log = logging.getLogger(__name__)
 
@@ -38,7 +38,7 @@ def check_permissions(resource, method, append_allowed_methods=False):
             if type(resource['project']) is dict:
                 project = resource['project']
             else:
-                projects_collection = app.data.driver.db['projects']
+                projects_collection = current_app.data.driver.db['projects']
                 project = projects_collection.find_one(resource['project'])
             node_type = next(
                 (item for item in project['node_types'] if item.get('name') \
@@ -77,6 +77,7 @@ def check_permissions(resource, method, append_allowed_methods=False):
     permission_granted = method in allowed_methods
     if permission_granted:
         if append_allowed_methods:
+            # TODO: rename this field _allowed_methods
             resource['allowed_methods'] = list(set(allowed_methods))
         return
 
@@ -116,3 +117,5 @@ def user_has_role(role):
         return False
 
     return role in current_user['roles']
+
+

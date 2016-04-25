@@ -41,14 +41,20 @@ class ProjectCreationTest(AbstractProjectTest):
     def test_project_creation_good_role(self):
         user_id = self._create_user_with_token([u'subscriber'], 'token')
         resp = self._create_project(u'Prøject El Niño', 'token')
-
         self.assertEqual(201, resp.status_code)
-        project = json.loads(resp.data.decode('utf-8'))
-        project_id = project['_id']
+
+        # The response of a POST is not the entire document, just some _xxx fields.
+        project_info = json.loads(resp.data.decode('utf-8'))
+        project_id = project_info['_id']
 
         # Test that the Location header contains the location of the project document.
         self.assertEqual('http://localhost/projects/%s' % project_id,
                          resp.headers['Location'])
+
+        # Actually get the project.
+        resp = self.client.get(resp.headers['Location'])
+        project = json.loads(resp.data.decode('utf-8'))
+        project_id = project['_id']
 
         # Check some of the more complex/interesting fields.
         self.assertEqual(u'Prøject El Niño', project['name'])
@@ -82,8 +88,11 @@ class ProjectEditTest(AbstractProjectTest):
         from application.utils import remove_private_keys, PillarJSONEncoder
         dumps = functools.partial(json.dumps, cls=PillarJSONEncoder)
 
-        project = self._create_user_and_project([u'subscriber'])
-        project_url = '/projects/%(_id)s' % project
+        project_info = self._create_user_and_project([u'subscriber'])
+        project_url = '/projects/%(_id)s' % project_info
+
+        resp = self.client.get(project_url)
+        project = json.loads(resp.data.decode('utf-8'))
 
         # Create another user we can try and assign the project to.
         other_user_id = 'f00dd00df00dd00df00dd00d'
@@ -133,8 +142,11 @@ class ProjectEditTest(AbstractProjectTest):
         from application.utils import remove_private_keys, PillarJSONEncoder
         dumps = functools.partial(json.dumps, cls=PillarJSONEncoder)
 
-        project = self._create_user_and_project([u'subscriber', u'admin'])
-        project_url = '/projects/%(_id)s' % project
+        project_info = self._create_user_and_project([u'subscriber', u'admin'])
+        project_url = '/projects/%(_id)s' % project_info
+
+        resp = self.client.get(project_url)
+        project = json.loads(resp.data.decode('utf-8'))
 
         # Create another user we can try and assign the project to.
         other_user_id = 'f00dd00df00dd00df00dd00d'
@@ -151,6 +163,7 @@ class ProjectEditTest(AbstractProjectTest):
         put_project['status'] = 'deleted'
         put_project['category'] = 'software'
         put_project['user'] = other_user_id
+
 
         resp = self.client.put(project_url,
                                data=dumps(put_project),

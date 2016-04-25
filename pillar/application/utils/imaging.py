@@ -2,7 +2,7 @@ import os
 import json
 import subprocess
 from PIL import Image
-from application import app
+from flask import current_app
 
 
 def generate_local_thumbnails(src, return_image_stats=False):
@@ -15,7 +15,7 @@ def generate_local_thumbnails(src, return_image_stats=False):
     resolution, format and path of the thumbnailed image
     """
 
-    thumbnail_settings = app.config['UPLOADS_LOCAL_STORAGE_THUMBNAILS']
+    thumbnail_settings = current_app.config['UPLOADS_LOCAL_STORAGE_THUMBNAILS']
     thumbnails = {}
     for size, settings in thumbnail_settings.iteritems():
         root, ext = os.path.splitext(src)
@@ -118,7 +118,7 @@ def get_video_data(filepath):
     """Return video duration and resolution given an input file path"""
     outdata = None
     ffprobe_inspect = [
-        app.config['BIN_FFPROBE'],
+        current_app.config['BIN_FFPROBE'],
         '-loglevel',
         'error',
         '-show_streams',
@@ -195,13 +195,13 @@ def ffmpeg_encode(src, format, res_y=720):
     dst = "{0}-{1}p.{2}".format(dst[0], res_y, format)
     args.append(dst)
     print "Encoding {0} to {1}".format(src, format)
-    returncode = subprocess.call([app.config['BIN_FFMPEG']] + args)
+    returncode = subprocess.call([current_app.config['BIN_FFMPEG']] + args)
     if returncode == 0:
         print "Successfully encoded {0}".format(dst)
     else:
         print "Error during encode"
         print "Code:    {0}".format(returncode)
-        print "Command: {0}".format(app.config['BIN_FFMPEG'] + " " + " ".join(args))
+        print "Command: {0}".format(current_app.config['BIN_FFMPEG'] + " " + " ".join(args))
         dst = None
     # return path of the encoded video
     return dst

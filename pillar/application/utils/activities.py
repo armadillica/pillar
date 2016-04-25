@@ -1,15 +1,15 @@
 from flask import g
+from flask import current_app
 from eve.methods.post import post_internal
-from application import app
 from application.modules.users import gravatar
 
 
 def notification_parse(notification):
-    activities_collection = app.data.driver.db['activities']
+    activities_collection = current_app.data.driver.db['activities']
     activities_subscriptions_collection = \
-        app.data.driver.db['activities-subscriptions']
-    users_collection = app.data.driver.db['users']
-    nodes_collection = app.data.driver.db['nodes']
+        current_app.data.driver.db['activities-subscriptions']
+    users_collection = current_app.data.driver.db['users']
+    nodes_collection = current_app.data.driver.db['nodes']
     activity = activities_collection.find_one({'_id': notification['activity']})
 
     if activity['object_type'] != 'node':
@@ -83,7 +83,7 @@ def notification_parse(notification):
 
 
 def notification_get_subscriptions(context_object_type, context_object_id, actor_user_id):
-    subscriptions_collection = app.data.driver.db['activities-subscriptions']
+    subscriptions_collection = current_app.data.driver.db['activities-subscriptions']
     lookup = {
         'user': {"$ne": actor_user_id},
         'context_object_type': context_object_type,
@@ -101,7 +101,7 @@ def activity_subscribe(user_id, context_object_type, context_object_id):
     :param context_object_type: hardcoded index, check the notifications/model.py
     :param context_object_id: object id, to be traced with context_object_type_id
     """
-    subscriptions_collection = app.data.driver.db['activities-subscriptions']
+    subscriptions_collection = current_app.data.driver.db['activities-subscriptions']
     lookup = {
         'user': user_id,
         'context_object_type': context_object_type,

@@ -17,6 +17,11 @@ def remove_private_keys(document):
         if key.startswith('_'):
             del doc_copy[key]
 
+    try:
+        del doc_copy['allowed_methods']
+    except KeyError:
+        pass
+
     return doc_copy
 
 
