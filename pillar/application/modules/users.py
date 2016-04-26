@@ -3,6 +3,12 @@ import json
 import logging
 import urllib
 
+from flask import g
+from eve.auth import TokenAuth
+from werkzeug.exceptions import Forbidden
+
+from application.utils.authorization import user_has_role
+
 log = logging.getLogger(__name__)
 
 
@@ -36,6 +42,42 @@ def after_replacing_user(item, original):
                     item.get('username'), item.get('_id'), ex)
 
 
+def before_getting_users(request, lookup):
+    """Modifies the lookup dict to limit returned user info."""
+
+    # No access when not logged in.
+    current_user = g.get('current_user')
+    if current_user is None:
+        raise Forbidden()
+
+    # Admins can do anything and get everything, except the 'auth' block.
+    if user_has_role(u'admin'):
+        return
+
+    # Only allow access to the current user.
+    if '_id' in lookup:
+        if str(lookup['_id']) != str(current_user['user_id']):
+            raise Forbidden()
+        return
+
+    # Add a filter to only return the current user.
+    lookup['_id'] = current_user['user_id']
+
+
+def after_fetching_user(user):
+    # Deny access to auth block; authentication stuff is managed by
+    # custom end-points.
+    user.pop('auth', None)
+
+
+def after_fetching_user_resource(response):
+    for user in response['_items']:
+        after_fetching_user(user)
+
+
 def setup_app(app):
+    app.on_pre_GET_users += before_getting_users
     app.on_post_GET_users += post_GET_user
     app.on_replace_users += after_replacing_user
+    app.on_fetched_item_users += after_fetching_user
+    app.on_fetched_resource_users += after_fetching_user_resource

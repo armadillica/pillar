@@ -707,8 +707,11 @@ users = {
 
     'resource_methods': ['GET', 'POST'],
 
-    'public_methods': ['GET', 'POST'],
-    # 'public_item_methods': ['GET'],
+    'public_methods': [],
+
+    # By default don't include the 'auth' field. It can still be obtained
+    # using projections, though, so we block that in hooks.
+    'datasource': {'projection': {u'auth': 0}},
 
     'schema': users_schema
 }

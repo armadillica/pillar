@@ -158,3 +158,88 @@ class AuthenticationTests(AbstractPillarTest):
             db_user = users.find_one(user_id)
 
             self.assertEqual([u'subscriber'], db_user['roles'])
+
+
+class UserListTests(AbstractPillarTest):
+    """Security-related tests."""
+
+    def setUp(self, **kwargs):
+        super(UserListTests, self).setUp()
+
+        self.create_user(roles=[u'subscriber'], user_id='123456789abc123456789abc')
+        self.create_user(roles=[u'admin'], user_id='223456789abc123456789abc')
+        self.create_user(roles=[u'subscriber'], user_id='323456789abc123456789abc')
+
+        self.create_valid_auth_token('123456789abc123456789abc', 'token')
+        self.create_valid_auth_token('223456789abc123456789abc', 'admin-token')
+
+    def test_list_all_users_anonymous(self):
+        # Anonymous access should be denied.
+        resp = self.client.get('/users')
+        self.assertEqual(403, resp.status_code)
+
+    def test_list_all_users_subscriber(self):
+        # Regular access should result in only your own info.
+        resp = self.client.get('/users', headers={'Authorization': self.make_header('token')})
+        users = json.loads(resp.data)
+
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(1, users['_meta']['total'])
+
+        # The 'auth' section should be removed.
+        user_info = users['_items'][0]
+        self.assertNotIn('auth', user_info)
+
+    def test_list_all_users_admin(self):
+        # Admin access should result in all users
+        resp = self.client.get('/users', headers={'Authorization': self.make_header('admin-token')})
+        users = json.loads(resp.data)
+
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(3, users['_meta']['total'])
+
+        # The 'auth' section should be removed.
+        for user_info in users['_items']:
+            self.assertNotIn('auth', user_info)
+
+    def test_list_all_users_admin_explicit_projection(self):
+        # Admin access should result in all users
+        projection = json.dumps({'auth': 1})
+        resp = self.client.get('/users?projection=%s' % projection,
+                               headers={'Authorization': self.make_header('admin-token')})
+        users = json.loads(resp.data)
+
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(3, users['_meta']['total'])
+
+        # The 'auth' section should be removed.
+        for user_info in users['_items']:
+            self.assertNotIn('auth', user_info)
+
+    def test_own_user_subscriber(self):
+        # Regular access should result in only your own info.
+        resp = self.client.get('/users/%s' % '123456789abc123456789abc',
+                               headers={'Authorization': self.make_header('token')})
+        user_info = json.loads(resp.data)
+
+        self.assertEqual(200, resp.status_code)
+        self.assertNotIn('auth', user_info)
+
+    def test_own_user_subscriber_explicit_projection(self):
+        # With a custom projection requesting the auth list
+        projection = json.dumps({'auth': 1})
+        resp = self.client.get('/users/%s?projection=%s' % ('123456789abc123456789abc', projection),
+                               headers={'Authorization': self.make_header('token')})
+        user_info = json.loads(resp.data)
+
+        self.assertEqual(200, resp.status_code)
+        self.assertNotIn('auth', user_info)
+
+    def test_other_user_subscriber(self):
+        # Requesting another user should be denied.
+        resp = self.client.get('/users/%s' % '223456789abc123456789abc',
+                               headers={'Authorization': self.make_header('token')})
+        user_info = json.loads(resp.data)
+
+        self.assertEqual(403, resp.status_code)
+        self.assertNotIn('auth', user_info)
