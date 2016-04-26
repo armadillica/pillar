@@ -705,8 +705,8 @@ users = {
     'cache_control': 'max-age=10,must-revalidate',
     'cache_expires': 10,
 
-    'resource_methods': ['GET', 'POST'],
-
+    'resource_methods': ['GET'],
+    'item_methods': ['GET', 'PUT'],
     'public_methods': [],
 
     # By default don't include the 'auth' field. It can still be obtained
