@@ -387,7 +387,9 @@ file_storage.setup_app(app, url_prefix='/storage')
 from modules.encoding import encoding
 from modules.blender_id import blender_id
 from modules import projects
+from modules import local_auth
 
 app.register_blueprint(encoding, url_prefix='/encoding')
 app.register_blueprint(blender_id, url_prefix='/blender_id')
 projects.setup_app(app, url_prefix='/p')
+local_auth.setup_app(app, url_prefix='/auth')

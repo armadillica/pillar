@@ -85,11 +85,13 @@ users_schema = {
             'schema': {
                 'provider': {
                     'type': 'string',
-                    'allowed': ["blender-id",],
+                    'allowed': ["blender-id", "local"],
                 },
-                'user_id' : {
+                'user_id': {
                     'type': 'string'
                 },
+                # A token is considered a "password" in case the provider is
+                # "local".
                 'token': {
                     'type': 'string'
                 }
@@ -360,7 +362,6 @@ tokens_schema = {
     'is_subclient_token': {
         'type': 'boolean',
         'required': False,
-        'default': False,
     }
 }
 

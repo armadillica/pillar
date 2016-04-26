@@ -774,5 +774,10 @@ def expire_all_project_links(project_uuid):
     print('Expired %i links' % result.matched_count)
 
 
+@manager.command
+def register_local_user(email, password):
+    from application.modules.local_auth import create_local_user
+    create_local_user(email, password)
+
 if __name__ == '__main__':
     manager.run()

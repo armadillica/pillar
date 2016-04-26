@@ -83,7 +83,7 @@ def find_token(token, is_subclient_token=False, **extra_filters):
     return db_token
 
 
-def store_token(user_id, token, token_expiry, oauth_subclient_id):
+def store_token(user_id, token, token_expiry, oauth_subclient_id=False):
     """Stores an authentication token.
 
     :returns: the token document from MongoDB
@@ -92,9 +92,11 @@ def store_token(user_id, token, token_expiry, oauth_subclient_id):
     token_data = {
         'user': user_id,
         'token': token,
-        'is_subclient_token': bool(oauth_subclient_id),
         'expire_time': token_expiry,
     }
+    if oauth_subclient_id:
+        token_data['is_subclient_token'] = True
+
     r, _, _, status = post_internal('tokens', token_data)
 
     if status not in {200, 201}:
@@ -120,17 +122,20 @@ def create_new_user(email, username, user_id):
     return user_id
 
 
-def create_new_user_document(email, user_id, username):
-    """Creates a new user document, without storing it in MongoDB."""
+def create_new_user_document(email, user_id, username, provider='blender-id',
+                             token=''):
+    """Creates a new user document, without storing it in MongoDB. The token
+    parameter is a password in case provider is "local".
+    """
 
     user_data = {
         'full_name': username,
         'username': username,
         'email': email,
         'auth': [{
-            'provider': 'blender-id',
+            'provider': provider,
             'user_id': str(user_id),
-            'token': ''}],  # TODO: remove 'token' field altogether.
+            'token': token}],
         'settings': {
             'email_communications': 1
         },
