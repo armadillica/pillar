@@ -53,11 +53,12 @@ class LocalAuthTest(AbstractPillarTest):
 
             exp = datetime.datetime.now(tz=tz_util.utc) - datetime.timedelta(1)
             result = tokens.update_one({'token': token},
-                              {'$set': {'expire_time': exp}})
+                                       {'$set': {'expire_time': exp}})
             self.assertEqual(1, result.modified_count)
 
+        # Do something restricted.
         headers = {'Authorization': self.make_header(token)}
-        resp = self.client.get('/users/%s' % user_id,
+        resp = self.client.put('/users/%s' % user_id,
                                headers=headers)
         self.assertEqual(403, resp.status_code, resp.data)
 

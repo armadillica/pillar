@@ -7,6 +7,8 @@ from bson import tz_util, ObjectId
 
 from common_test_class import AbstractPillarTest, TEST_EMAIL_USER, TEST_EMAIL_ADDRESS
 
+PUBLIC_USER_FIELDS = {'full_name', 'email'}
+
 
 class AuthenticationTests(AbstractPillarTest):
     def test_make_unique_username(self):
@@ -169,7 +171,7 @@ class UserListTests(AbstractPillarTest):
         self.create_valid_auth_token('323456789abc123456789abc', 'other-token')
 
     def test_list_all_users_anonymous(self):
-        # Anonymous access should be denied.
+        # Listing all users should be forbidden
         resp = self.client.get('/users')
         self.assertEqual(403, resp.status_code)
 
@@ -211,9 +213,20 @@ class UserListTests(AbstractPillarTest):
         for user_info in users['_items']:
             self.assertNotIn('auth', user_info)
 
+    def test_user_anonymous(self):
+        from application.utils import remove_private_keys
+
+        # Getting a user should be limited to certain fields
+        resp = self.client.get('/users/123456789abc123456789abc')
+        self.assertEqual(200, resp.status_code)
+
+        user_info = json.loads(resp.data)
+        regular_info = remove_private_keys(user_info)
+        self.assertEqual(PUBLIC_USER_FIELDS, set(regular_info.keys()))
+
     def test_own_user_subscriber(self):
         # Regular access should result in only your own info.
-        resp = self.client.get('/users/%s' % '123456789abc123456789abc',
+        resp = self.client.get('/users/123456789abc123456789abc',
                                headers={'Authorization': self.make_header('token')})
         user_info = json.loads(resp.data)
 
@@ -231,13 +244,18 @@ class UserListTests(AbstractPillarTest):
         self.assertNotIn('auth', user_info)
 
     def test_other_user_subscriber(self):
-        # Requesting another user should be denied.
+        from application.utils import remove_private_keys
+
+        # Requesting another user should be limited to full name and email.
         resp = self.client.get('/users/%s' % '223456789abc123456789abc',
                                headers={'Authorization': self.make_header('token')})
         user_info = json.loads(resp.data)
 
-        self.assertEqual(403, resp.status_code)
+        self.assertEqual(200, resp.status_code)
         self.assertNotIn('auth', user_info)
+
+        regular_info = remove_private_keys(user_info)
+        self.assertEqual(PUBLIC_USER_FIELDS, set(regular_info.keys()))
 
     def test_put_user(self):
         from application.utils import remove_private_keys

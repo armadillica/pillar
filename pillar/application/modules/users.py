@@ -66,27 +66,55 @@ def check_user_access(request, lookup):
 
     # No access when not logged in.
     current_user = g.get('current_user')
-    if current_user is None:
-        raise Forbidden()
+    current_user_id = current_user['user_id'] if current_user else None
 
     # Admins can do anything and get everything, except the 'auth' block.
     if user_has_role(u'admin'):
         return
 
-    # Only allow access to the current user.
-    if '_id' in lookup:
-        if str(lookup['_id']) != str(current_user['user_id']):
-            raise Forbidden()
-        return
+    if not lookup and not current_user:
+        raise Forbidden()
 
     # Add a filter to only return the current user.
-    lookup['_id'] = current_user['user_id']
+    if '_id' not in lookup:
+        lookup['_id'] = current_user['user_id']
+
+
+def check_put_access(request, lookup):
+    """Only allow PUT to the current user, or all users if admin."""
+
+    if user_has_role(u'admin'):
+        return
+
+    current_user = g.get('current_user')
+    if not current_user:
+        raise Forbidden()
+
+    if str(lookup['_id']) != str(current_user['user_id']):
+        raise Forbidden()
 
 
 def after_fetching_user(user):
     # Deny access to auth block; authentication stuff is managed by
     # custom end-points.
     user.pop('auth', None)
+
+    current_user = g.get('current_user')
+    current_user_id = current_user['user_id'] if current_user else None
+
+    # Admins can do anything and get everything, except the 'auth' block.
+    if user_has_role(u'admin'):
+        return
+
+    # Only allow full access to the current user.
+    if str(user['_id']) == str(current_user_id):
+        return
+
+    # Remove all fields except public ones.
+    public_fields = {'full_name', 'email'}
+    for field in list(user.keys()):
+        if field not in public_fields:
+            del user[field]
 
 
 def after_fetching_user_resource(response):
@@ -97,7 +125,7 @@ def after_fetching_user_resource(response):
 def setup_app(app):
     app.on_pre_GET_users += check_user_access
     app.on_post_GET_users += post_GET_user
-    app.on_pre_PUT_users += check_user_access
+    app.on_pre_PUT_users += check_put_access
     app.on_pre_PUT_users += before_replacing_user
     app.on_replaced_users += after_replacing_user
     app.on_fetched_item_users += after_fetching_user

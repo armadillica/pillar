@@ -707,7 +707,7 @@ users = {
 
     'resource_methods': ['GET'],
     'item_methods': ['GET', 'PUT'],
-    'public_methods': [],
+    'public_item_methods': ['GET'],
 
     # By default don't include the 'auth' field. It can still be obtained
     # using projections, though, so we block that in hooks.
