@@ -4,12 +4,17 @@ import json
 import copy
 import sys
 import logging
-
 import datetime
 import os
 import base64
 
 from bson import ObjectId, tz_util
+
+# Override Eve settings before importing eve.tests.
+import common_test_settings
+
+common_test_settings.override_eve()
+
 from eve.tests import TestMinimal
 import pymongo.collection
 from flask.testing import FlaskClient
