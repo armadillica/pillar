@@ -779,5 +779,37 @@ def register_local_user(email, password):
     from application.modules.local_auth import create_local_user
     create_local_user(email, password)
 
+
+@manager.command
+def add_group_to_projects(group_name):
+    """Prototype to add a specific group, in read-only mode, to all node_types
+    for all projects.
+    """
+    methods = ['GET']
+    groups_collection = app.data.driver.db['groups']
+    projects_collections = app.data.driver.db['projects']
+    group = groups_collection.find_one({'name': group_name})
+    for project in projects_collections.find():
+        print("Processing: {}".format(project['name']))
+        for node_type in project['node_types']:
+            node_type_name = node_type['name']
+            base_node_types = ['group', 'asset', 'blog', 'post', 'page',
+                               'comment', 'group_texture', 'storage', 'texture']
+            if node_type_name in base_node_types:
+                print("Processing: {0}".format(node_type_name))
+                # Check if group already exists in the permissions
+                g = next((g for g in node_type['permissions']['groups']
+                          if g['group'] == group['_id']), None)
+                # If not, we add it
+                if g is None:
+                    print("Adding permissions")
+                    permissions = {
+                        'group': group['_id'],
+                        'methods': methods}
+                    node_type['permissions']['groups'].append(permissions)
+                    projects_collections.update(
+                        {'_id': project['_id']}, project)
+
+
 if __name__ == '__main__':
     manager.run()
