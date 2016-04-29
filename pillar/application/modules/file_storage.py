@@ -482,4 +482,4 @@ def setup_app(app, url_prefix):
 
     app.on_delete_item_files += before_deleting_file
 
-    app.register_blueprint(file_storage, url_prefix='/storage')
+    app.register_blueprint(file_storage, url_prefix=url_prefix)
