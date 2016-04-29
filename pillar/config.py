@@ -40,7 +40,7 @@ BIN_SSH = '/usr/bin/ssh'
 BIN_RSYNC = '/usr/bin/rsync'
 
 GCLOUD_APP_CREDENTIALS = os.path.join(os.path.dirname(__file__), 'google_app.json')
-GCLOUD_PROJECT = 'blender-cloud'
+GCLOUD_PROJECT = '-SECRET-'
 
 ADMIN_USER_GROUP = '5596e975ea893b269af85c0e'
 SUBSCRIBER_USER_GROUP = '5596e975ea893b269af85c0f'
