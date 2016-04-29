@@ -139,7 +139,6 @@ def after_inserting_project(project, db_user):
     project['node_types'] = [
         with_permissions(node_type_group),
         with_permissions(node_type_asset),
-        with_permissions(node_type_page),
         with_permissions(node_type_comment)]
 
     # Allow admin users to use whatever url they want.
@@ -174,9 +173,7 @@ def _create_new_project(project_name, user_id, overrides):
     # Create the project itself, the rest will be done by the after-insert hook.
     project = {'description': '',
                'name': project_name,
-               'node_types': [node_type_blog,
-                              node_type_post,
-                              node_type_comment],
+               'node_types': [],
                'status': 'published',
                'user': user_id,
                'is_private': True,
