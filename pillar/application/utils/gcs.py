@@ -135,7 +135,7 @@ class GoogleCloudStorageBucket(object):
         """Set the ContentDisposition metadata so that when a file is downloaded
         it has a human-readable name.
         """
-        blob.content_disposition = "attachment; filename={0}".format(name)
+        blob.content_disposition = 'attachment; filename="{0}"'.format(name)
         blob.patch()
 
 
@@ -161,7 +161,9 @@ def update_file_name(item):
             try:
                 storage = GoogleCloudStorageBucket(str(item['project']))
                 blob = storage.Get(f['file_path'], to_dict=False)
-                name = _format_name(item['name'], f['format'])
+                # Pick file extension from original filename
+                _, ext = os.path.splitext(f['filename'])
+                name = _format_name(item['name'], ext[1:])
                 storage.update_name(blob, name)
                 try:
                     # Assign the same name to variations
