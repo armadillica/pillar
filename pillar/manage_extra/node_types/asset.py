@@ -66,7 +66,7 @@ node_type_asset = {
         'content_type': {'visible': False},
         'file': {},
         'attachments': {'visible': False},
-        'order': {},
+        'order': {'visible': False},
         'tags': {'visible': False},
         'categories': {'visible': False}
     },
