@@ -62,11 +62,5 @@ node_type_comment = {
     },
     'parent': ['asset', 'comment'],
     'permissions': {
-        # 'groups': [{
-        #     'group': app.config['ADMIN_USER_GROUP'],
-        #     'methods': ['GET', 'PUT', 'POST']
-        # }],
-        # 'users': [],
-        # 'world': ['GET']
     }
 }

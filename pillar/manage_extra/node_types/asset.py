@@ -5,7 +5,7 @@ node_type_asset = {
     'description': 'Basic Asset Type',
     # This data type does not have parent limitations (can be child
     # of any node). An empty parent declaration is required.
-    'parent': ['group',],
+    'parent': ['group', ],
     'dyn_schema': {
         'status': {
             'type': 'string',
@@ -31,7 +31,7 @@ node_type_asset = {
         'attachments': {
             'type': 'list',
             'schema': {
-            'type': 'dict',
+                'type': 'dict',
                 'schema': {
                     'field': {'type': 'string'},
                     'files' : {
@@ -64,17 +64,12 @@ node_type_asset = {
     'form_schema': {
         'status': {},
         'content_type': {'visible': False},
-        'file': {'visible': False},
+        'file': {},
         'attachments': {'visible': False},
         'order': {},
-        'tags' : {},
-        'categories': {}
+        'tags': {'visible': False},
+        'categories': {'visible': False}
     },
     'permissions': {
-        # 'groups': [{
-        #     'group': app.config['ADMIN_USER_GROUP'],
-        #     'methods': ['GET', 'PUT', 'POST']
-        # }],
-        # 'users': [],
     }
 }

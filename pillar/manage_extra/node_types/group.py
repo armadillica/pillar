@@ -24,7 +24,7 @@ node_type_group = {
         },
     },
     'form_schema': {
-        'url': {},
+        'url': {'visible': False},
         'status': {},
         'notes': {},
         'order': {}
