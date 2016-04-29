@@ -189,7 +189,15 @@ def before_replacing_node(item, original):
 
 
 def after_replacing_node(item, original):
-    """Push an update to the Algolia index when a node item is updated"""
+    """Push an update to the Algolia index when a node item is updated. If the
+    project is private, prevent public indexing.
+    """
+    projects_collection = app.data.driver.db['projects']
+    project = projects_collection.find_one({'_id': item['project']},
+                                           {'is_private': 1})
+    if 'is_private' in project and project['is_private']:
+        # Skip index updating and return
+        return
 
     from algoliasearch.client import AlgoliaException
     from utils.algolia import algolia_index_node_save
