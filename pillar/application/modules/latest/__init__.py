@@ -27,7 +27,7 @@ def latest_nodes(db_filter, projection, py_filter, limit):
                            py_filter, limit)
 
     result = list(itertools.islice(latest, limit))
-    return jsonify({'_items': result})
+    return result
 
 
 def has_public_project(node_doc):
@@ -56,7 +56,7 @@ def latest_assets():
                            'properties.content_type': 1,
                            'permissions.world': 1},
                           has_public_project, 12)
-    return latest
+    return jsonify({'_items': latest})
 
 
 @blueprint.route('/comments')
@@ -66,7 +66,22 @@ def latest_comments():
                            'properties.content': 1, 'node_type': 1, 'properties.status': 1,
                            'properties.is_reply': 1},
                           has_public_project, 6)
-    return latest
+
+    # Embed the comments' parents.
+    nodes = current_app.data.driver.db['nodes']
+    parents = {}
+    for comment in latest:
+        parent_id = comment['parent']
+
+        if parent_id in parents:
+            comment['parent'] = parents[parent_id]
+            continue
+
+        parent = nodes.find_one(parent_id)
+        parents[parent_id] = parent
+        comment['parent'] = parent
+
+    return jsonify({'_items': latest})
 
 
 def setup_app(app, url_prefix):
