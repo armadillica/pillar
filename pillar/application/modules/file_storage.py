@@ -25,7 +25,7 @@ from werkzeug.exceptions import NotFound, InternalServerError
 
 from application import utils
 from application.utils import remove_private_keys
-from application.utils.authorization import require_login
+from application.utils.authorization import require_login, user_has_role
 from application.utils.cdn import hash_file_path
 from application.utils.encoding import Encoder
 from application.utils.gcs import GoogleCloudStorageBucket
@@ -193,6 +193,12 @@ def process_file(gcs, file_id, local_file):
     # Update the 'format' field from the content type.
     # TODO: overrule the content type based on file extention & magic numbers.
     mime_category, src_file['format'] = src_file['content_type'].split('/', 1)
+
+    # Prevent video handling for non-admins.
+    if not user_has_role(u'admin') and mime_category == 'video':
+        src_file['content_type'] = 'application/x-%s' % src_file['format']
+        mime_category = 'application'
+        log.info('Not processing video file %s for non-admin user', file_id)
 
     # Run the required processor, based on the MIME category.
     processors = {
