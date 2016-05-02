@@ -2,6 +2,7 @@ import logging
 
 from bson import ObjectId
 from flask import current_app
+from werkzeug.exceptions import UnprocessableEntity
 
 from application.modules import file_storage
 from application.utils.authorization import check_permissions
@@ -73,6 +74,7 @@ def after_replacing_node(item, original):
     """Push an update to the Algolia index when a node item is updated. If the
     project is private, prevent public indexing.
     """
+
     projects_collection = current_app.data.driver.db['projects']
     project = projects_collection.find_one({'_id': item['project']},
                                            {'is_private': 1})
@@ -153,6 +155,40 @@ def after_inserting_nodes(items):
         )
 
 
+def deduct_content_type(node_doc, original):
+    """Deduct the content type from the attached file, if any."""
+
+    if node_doc['node_type'] != 'asset':
+        log.debug('deduct_content_type: called on node type %r, ignoring', node_doc['node_type'])
+        return
+
+    node_id = node_doc['_id']
+    try:
+        file_id = ObjectId(node_doc['properties']['file'])
+    except KeyError:
+        log.warning('deduct_content_type: Asset without properties.file, rejecting.')
+        raise UnprocessableEntity('Missing file property for asset node')
+
+    files = current_app.data.driver.db['files']
+    file_doc = files.find_one({'_id': file_id},
+                              {'content_type': 1})
+    if not file_doc:
+        log.warning('deduct_content_type: Node %s refers to non-existing file %s, rejecting.',
+                    node_id, file_id)
+        raise UnprocessableEntity('File property refers to non-existing file')
+
+    # Guess the node content type from the file content type
+    file_type = file_doc['content_type']
+    if file_type.startswith('video/'):
+        content_type = 'video'
+    elif file_type.startswith('image/'):
+        content_type = 'image'
+    else:
+        content_type = 'file'
+
+    node_doc['properties']['content_type'] = content_type
+
+
 def setup_app(app):
     from application import before_returning_item_permissions, before_returning_resource_permissions
 
@@ -166,3 +202,5 @@ def setup_app(app):
     app.on_replaced_nodes += after_replacing_node
     app.on_insert_nodes += before_inserting_nodes
     app.on_inserted_nodes += after_inserting_nodes
+
+    app.on_replace_nodes += deduct_content_type
