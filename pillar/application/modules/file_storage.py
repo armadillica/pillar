@@ -9,6 +9,7 @@ import bson.tz_util
 import eve.utils
 import pymongo
 from bson import ObjectId
+from bson.errors import InvalidId
 from eve.methods.patch import patch_internal
 from eve.methods.post import post_internal
 from eve.methods.put import put_internal
@@ -19,6 +20,7 @@ from flask import send_from_directory
 from flask import url_for, helpers
 from flask import current_app
 from flask import g
+from flask import make_response
 from werkzeug.exceptions import NotFound, InternalServerError
 
 from application import utils
@@ -438,11 +440,9 @@ def create_file_doc(name, filename, content_type, length, project, backend='gcs'
     return file_doc
 
 
-@file_storage.route('/stream/<string:project_id>', methods=['POST'])
+@file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
+@require_login(require_roles={u'subscriber', u'admin', u'demo'})
 def stream_to_gcs(project_id):
-    log.info('Streaming file to bucket for project %s', project_id)
-
-    uploaded_file = request.files['file']
 
     projects = current_app.data.driver.db['projects']
     try:
@@ -451,6 +451,9 @@ def stream_to_gcs(project_id):
         project = None
     if not project:
         raise NotFound('Project %s does not exist' % project_id)
+
+    log.info('Streaming file to bucket for project %s', project_id)
+    uploaded_file = request.files['file']
 
     file_id, internal_fname, status = create_file_doc_for_upload(project['_id'], uploaded_file)
 
@@ -494,7 +497,21 @@ def stream_to_gcs(project_id):
     log.debug('Handled uploaded file id=%s, fname=%s, size=%i', file_id, internal_fname, blob.size)
 
     # Status is 200 if the file already existed, and 201 if it was newly created.
-    return jsonify(status='ok', file_id=str(file_id)), status
+    resp = jsonify(status='ok', file_id=str(file_id))
+    resp.status_code = status
+    add_access_control_headers(resp)
+    return resp
+
+
+def add_access_control_headers(resp):
+    """Allows cross-site requests from the configured domain."""
+
+    if 'Origin' not in request.headers:
+        return resp
+
+    resp.headers['Access-Control-Allow-Origin'] = request.headers['Origin']
+    resp.headers['Access-Control-Allow-Credentials'] = 'true'
+    return resp
 
 
 def update_file_doc(file_id, **updates):
