@@ -697,18 +697,10 @@ notifications_schema = {
     },
 }
 
-
 nodes = {
     'schema': nodes_schema,
     'public_methods': ['GET'],
-    'public_item_methods': ['GET']
-}
-
-node_types = {
-    'resource_methods': ['GET', 'POST'],
-    'public_methods': ['GET'],
     'public_item_methods': ['GET'],
-    'schema': node_types_schema,
 }
 
 users = {
@@ -781,7 +773,6 @@ notifications = {
 DOMAIN = {
     'users': users,
     'nodes': nodes,
-    'node_types': node_types,
     'tokens': tokens,
     'files': files,
     'groups': groups,
