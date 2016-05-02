@@ -445,7 +445,10 @@ def stream_to_gcs(project_id):
     uploaded_file = request.files['file']
 
     projects = current_app.data.driver.db['projects']
-    project = projects.find_one(ObjectId(project_id), projection={'_id': 1})
+    try:
+        project = projects.find_one(ObjectId(project_id), projection={'_id': 1})
+    except InvalidId:
+        project = None
     if not project:
         raise NotFound('Project %s does not exist' % project_id)
 
