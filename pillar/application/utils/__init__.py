@@ -4,6 +4,7 @@ import datetime
 
 import bson
 from eve import RFC1123_DATE_FORMAT
+from flask import current_app
 
 __all__ = ('remove_private_keys', 'PillarJSONEncoder')
 
@@ -37,3 +38,12 @@ class PillarJSONEncoder(json.JSONEncoder):
 
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
+
+
+def jsonify(mongo_doc, status=200, headers=None):
+    """JSonifies a Mongo document into a Flask response object."""
+    
+    return current_app.response_class(json.dumps(mongo_doc, cls=PillarJSONEncoder),
+                                      mimetype='application/json',
+                                      status=status,
+                                      headers=headers)

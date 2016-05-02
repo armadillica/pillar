@@ -6,7 +6,7 @@ from eve.methods.post import post_internal
 from eve.methods.patch import patch_internal
 from flask import g, Blueprint, request, abort, current_app
 
-from application.utils import remove_private_keys, authorization, PillarJSONEncoder
+from application.utils import remove_private_keys, authorization, jsonify
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.authorization import user_has_role, check_permissions
 from manage_extra.node_types.asset import node_type_asset
@@ -213,11 +213,7 @@ def create_project(overrides=None):
     project = _create_new_project(project_name, user_id, overrides)
 
     # Return the project in the response.
-    resp = current_app.response_class(json.dumps(project, cls=PillarJSONEncoder),
-                                      mimetype='application/json',
-                                      status=201,
-                                      headers={'Location': '/projects/%s' % project['_id']})
-    return resp
+    return jsonify(project, status=201, headers={'Location': '/projects/%s' % project['_id']})
 
 
 def abort_with_error(status):

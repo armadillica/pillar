@@ -101,6 +101,8 @@ if from_envvar:
     # configfile doesn't exist, it should error out (i.e. silent=False).
     app.config.from_pyfile(from_envvar, silent=False)
 
+# Set the TMP
+
 # Configure logging
 logging.basicConfig(
     level=logging.WARNING,
@@ -225,11 +227,13 @@ from modules import local_auth
 from modules import file_storage
 from modules import users
 from modules import nodes
+from modules import latest
 
 app.register_blueprint(encoding, url_prefix='/encoding')
 app.register_blueprint(blender_id, url_prefix='/blender_id')
 projects.setup_app(app, url_prefix='/p')
 local_auth.setup_app(app, url_prefix='/auth')
 file_storage.setup_app(app, url_prefix='/storage')
+latest.setup_app(app, url_prefix='/latest')
 users.setup_app(app)
 nodes.setup_app(app)
