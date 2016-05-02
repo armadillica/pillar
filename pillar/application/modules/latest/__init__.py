@@ -63,15 +63,26 @@ def latest_assets():
                            'permissions.world': 1},
                           has_public_project, 12)
 
-    # Embed the user
+    embed_user(latest)
+
+    return jsonify({'_items': latest})
+
+
+def embed_user(latest):
     users = current_app.data.driver.db['users']
+
     for comment in latest:
         user_id = comment['user']
         comment['user'] = users.find_one(user_id, {'auth': 0, 'groups': 0, 'roles': 0,
                                                    'settings': 0, 'email': 0,
                                                    '_created': 0, '_updated': 0, '_etag': 0})
 
-    return jsonify({'_items': latest})
+def embed_project(latest):
+    projects = current_app.data.driver.db['projects']
+
+    for comment in latest:
+        project_id = comment['project']
+        comment['project'] = projects.find_one(project_id, {'_id': 1, 'name': 1, 'url': 1})
 
 
 @blueprint.route('/comments')
@@ -95,6 +106,9 @@ def latest_comments():
         parent = nodes.find_one(parent_id)
         parents[parent_id] = parent
         comment['parent'] = parent
+
+    embed_project(latest)
+    embed_user(latest)
 
     return jsonify({'_items': latest})
 
