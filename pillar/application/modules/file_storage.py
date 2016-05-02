@@ -331,13 +331,18 @@ def _generate_all_links(response, now):
     response['link_expires'] = now + datetime.timedelta(seconds=validity_secs)
 
     patch_info = remove_private_keys(response)
-    (patch_resp, _, _, _) = patch_internal('files', patch_info, _id=ObjectId(response['_id']))
+    file_id = ObjectId(response['_id'])
+    (patch_resp, _, _, _) = patch_internal('files', patch_info, _id=file_id)
     if patch_resp.get('_status') == 'ERR':
         log.warning('Unable to save new links for file %s: %r', response['_id'], patch_resp)
         # TODO: raise a snag.
         response['_updated'] = now
     else:
         response['_updated'] = patch_resp['_updated']
+
+    # Be silly and re-fetch the etag ourselves. TODO: handle this better.
+    etag_doc = current_app.data.driver.db['files'].find_one({'_id': file_id}, {'_etag': 1})
+    response['_etag'] = etag_doc['_etag']
 
 
 def before_deleting_file(item):
@@ -497,6 +502,7 @@ def stream_to_gcs(project_id):
     log.debug('Handled uploaded file id=%s, fname=%s, size=%i', file_id, internal_fname, blob.size)
 
     # Status is 200 if the file already existed, and 201 if it was newly created.
+    # TODO: add a link to a thumbnail in the response.
     resp = jsonify(status='ok', file_id=str(file_id))
     resp.status_code = status
     add_access_control_headers(resp)
