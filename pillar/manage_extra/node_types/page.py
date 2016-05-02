@@ -15,7 +15,6 @@ node_type_page = {
             'type': 'string',
             'allowed': [
                 'published',
-                'deleted',
                 'pending'
             ],
             'default': 'pending'

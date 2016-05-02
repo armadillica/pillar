@@ -579,7 +579,6 @@ projects_schema = {
         'allowed': [
             'published',
             'pending',
-            'deleted'
         ],
     },
     # Latest nodes being edited
@@ -701,6 +700,7 @@ nodes = {
     'schema': nodes_schema,
     'public_methods': ['GET'],
     'public_item_methods': ['GET'],
+    'soft_delete': True,
 }
 
 users = {

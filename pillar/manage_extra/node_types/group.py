@@ -15,7 +15,6 @@ node_type_group = {
             'allowed': [
                 'published',
                 'pending',
-                'deleted'
             ],
         },
         'notes': {

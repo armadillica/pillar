@@ -58,7 +58,6 @@ node_type_project = {
             'allowed': [
                 'published',
                 'pending',
-                'deleted'
             ],
         },
         # Logo

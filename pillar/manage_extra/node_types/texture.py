@@ -13,7 +13,6 @@ node_type_texture = {
                 'published',
                 'pending',
                 'processing',
-                'deleted'
             ],
         },
         # Used for sorting within the context of a group

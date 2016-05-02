@@ -113,7 +113,7 @@ class ProjectEditTest(AbstractProjectTest):
         put_project['name'] = u'โครงการปั่นเมฆ'
         put_project['summary'] = u'Это переведена на Google'
         put_project['is_private'] = False
-        put_project['status'] = 'deleted'
+        put_project['status'] = 'pending'
         put_project['category'] = 'software'
         put_project['user'] = other_user_id
 
@@ -161,7 +161,7 @@ class ProjectEditTest(AbstractProjectTest):
         put_project['name'] = u'โครงการปั่นเมฆ'
         put_project['summary'] = u'Это переведена на Google'
         put_project['is_private'] = False
-        put_project['status'] = 'deleted'
+        put_project['status'] = 'pending'
         put_project['category'] = 'software'
         put_project['user'] = other_user_id
 

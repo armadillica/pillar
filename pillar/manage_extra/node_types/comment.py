@@ -11,7 +11,6 @@ node_type_comment = {
             'type': 'string',
             'allowed': [
                 'published',
-                'deleted',
                 'flagged',
                 'edited'
             ],

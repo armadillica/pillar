@@ -15,7 +15,6 @@ node_type_group_texture = {
             'allowed': [
                 'published',
                 'pending',
-                'deleted'
             ],
         }
     },

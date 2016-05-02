@@ -15,7 +15,6 @@ node_type_post = {
             'type': 'string',
             'allowed': [
                 'published',
-                'deleted',
                 'pending'
             ],
             'default': 'pending'
