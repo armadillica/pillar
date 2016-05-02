@@ -2,7 +2,7 @@ import datetime
 import logging
 import os
 import tempfile
-import multiprocessing
+import uuid
 from hashlib import md5
 
 import bson.tz_util
@@ -12,14 +12,14 @@ from bson import ObjectId
 from eve.methods.patch import patch_internal
 from eve.methods.post import post_internal
 from eve.methods.put import put_internal
-from flask import Blueprint, safe_join
+from flask import Blueprint
 from flask import jsonify
 from flask import request
 from flask import send_from_directory
 from flask import url_for, helpers
 from flask import current_app
 from flask import g
-from werkzeug.exceptions import UnprocessableEntity, NotFound, InternalServerError, Forbidden
+from werkzeug.exceptions import NotFound, InternalServerError
 
 from application import utils
 from application.utils import remove_private_keys
@@ -27,10 +27,7 @@ from application.utils.authorization import require_login
 from application.utils.cdn import hash_file_path
 from application.utils.encoding import Encoder
 from application.utils.gcs import GoogleCloudStorageBucket
-from application.utils.imaging import ffmpeg_encode
 from application.utils.imaging import generate_local_thumbnails
-from application.utils.imaging import get_video_data
-from application.utils.storage import push_to_storage
 
 log = logging.getLogger(__name__)
 
@@ -139,7 +136,7 @@ def _process_video(gcs, file_id, local_file, src_file):
     log.info('Processing video for file %s', file_id)
 
     # Create variations
-    root, _ = os.path.splitext(src_file['filename'])
+    root, _ = os.path.splitext(src_file['file_path'])
     src_file['variations'] = []
 
     for v in ('mp4', 'webm'):
@@ -147,7 +144,7 @@ def _process_video(gcs, file_id, local_file, src_file):
         file_variation = dict(
             format=v,
             content_type='video/{}'.format(v),
-            file_path='{}.{}'.format(root, v),
+            file_path='{}-{}.{}'.format(root, v, v),
             size='',
             duration=0,
             width=0,
@@ -452,7 +449,7 @@ def stream_to_gcs(project_id):
     if not project:
         raise NotFound('Project %s does not exist' % project_id)
 
-    file_id, fname, status = create_file_doc_for_upload(project['_id'], uploaded_file)
+    file_id, internal_fname, status = create_file_doc_for_upload(project['_id'], uploaded_file)
 
     if uploaded_file.content_type.startswith('image/'):
         # We need to do local thumbnailing, so we have to write the stream
@@ -468,7 +465,7 @@ def stream_to_gcs(project_id):
     # Upload the file to GCS.
     try:
         gcs = GoogleCloudStorageBucket(project_id)
-        blob = gcs.bucket.blob('_/' + fname, chunk_size=256 * 1024 * 2)
+        blob = gcs.bucket.blob('_/' + internal_fname, chunk_size=256 * 1024 * 2)
         blob.upload_from_file(stream_for_gcs,
                               content_type=uploaded_file.mimetype,
                               size=uploaded_file.content_length)
@@ -482,7 +479,7 @@ def stream_to_gcs(project_id):
     blob.reload()
     update_file_doc(file_id,
                     status='queued_for_processing',
-                    file_path=fname,
+                    file_path=internal_fname,
                     length=blob.size)
 
     process_file(gcs, file_id, local_file)
@@ -491,7 +488,7 @@ def stream_to_gcs(project_id):
     if local_file is not None:
         local_file.close()
 
-    log.debug('Handled uploaded file id=%s, fname=%s, size=%i', file_id, fname, blob.size)
+    log.debug('Handled uploaded file id=%s, fname=%s, size=%i', file_id, internal_fname, blob.size)
 
     # Status is 200 if the file already existed, and 201 if it was newly created.
     return jsonify(status='ok', file_id=str(file_id)), status
@@ -514,19 +511,24 @@ def create_file_doc_for_upload(project_id, uploaded_file):
 
     :param uploaded_file: file from request.files['form-key']
     :type uploaded_file: werkzeug.datastructures.FileStorage
-    :returns: a tuple (file_id, filename, status), where 'filename' is the secured
-              name stored in file_doc['filename'].
+    :returns: a tuple (file_id, filename, status), where 'filename' is the internal
+            filename used on GCS.
     """
 
     project_id = ObjectId(project_id)
 
-    # TODO: hash the filename with path info to get the internal name.
-    internal_filename = uploaded_file.filename
+    # Hash the filename with path info to get the internal name. This should
+    # be unique for the project.
+    # internal_filename = uploaded_file.filename
+    _, ext = os.path.splitext(uploaded_file.filename)
+    internal_filename = uuid.uuid4().hex + ext
 
-    # See if we can find a pre-existing file doc
-    files = current_app.data.driver.db['files']
-    file_doc = files.find_one({'project': project_id,
-                               'name': internal_filename})
+    # For now, we don't support overwriting files, and create a new one every time.
+    # # See if we can find a pre-existing file doc.
+    # files = current_app.data.driver.db['files']
+    # file_doc = files.find_one({'project': project_id,
+    #                            'name': internal_filename})
+    file_doc = None
 
     # TODO: at some point do name-based and content-based content-type sniffing.
     new_props = {'filename': uploaded_file.filename,
@@ -548,7 +550,7 @@ def create_file_doc_for_upload(project_id, uploaded_file):
                   status, file_fields)
         raise InternalServerError()
 
-    return file_fields['_id'], uploaded_file.filename, status
+    return file_fields['_id'], internal_filename, status
 
 
 def setup_app(app, url_prefix):
