@@ -90,6 +90,9 @@ def require_login(require_roles=set()):
     Optionally only allows access to users with a certain role./
     """
 
+    if not isinstance(require_roles, set):
+        raise TypeError('require_roles param should be a set, but is a %r' % type(require_roles))
+
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):

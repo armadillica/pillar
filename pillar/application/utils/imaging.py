@@ -5,54 +5,50 @@ from PIL import Image
 from flask import current_app
 
 
-def generate_local_thumbnails(src, return_image_stats=False):
+def generate_local_thumbnails(name_base, src):
     """Given a source image, use Pillow to generate thumbnails according to the
     application settings.
 
-    args:
-    src: the path of the image to be thumbnailed
-    return_image_stats: if True, return a dict object which contains length,
-    resolution, format and path of the thumbnailed image
+    :param name_base: the thumbnail will get a field 'name': '{basename}-{thumbsize}.jpg'
+    :type name_base: str
+    :param src: the path of the image to be thumbnailed
+    :type src: str
     """
 
     thumbnail_settings = current_app.config['UPLOADS_LOCAL_STORAGE_THUMBNAILS']
-    thumbnails = {}
+    thumbnails = []
+
+    save_to_base, _ = os.path.splitext(src)
+    name_base, _ = os.path.splitext(name_base)
+
     for size, settings in thumbnail_settings.iteritems():
-        root, ext = os.path.splitext(src)
-        dst = "{0}-{1}{2}".format(root, size, '.jpg')
-        if os.path.isfile(dst):
-            # If the thumbnail already exists we require stats about it
-            if return_image_stats:
-                thumbnails[size] = dict(exists=True)
-            continue
+        dst = '{0}-{1}{2}'.format(save_to_base, size, '.jpg')
+        name = '{0}-{1}{2}'.format(name_base, size, '.jpg')
+
         if settings['crop']:
             resize_and_crop(src, dst, settings['size'])
+            width, height = settings['size']
         else:
             im = Image.open(src)
             im.thumbnail(settings['size'])
             im.save(dst, "JPEG")
+            width, height = im.size
 
-        if return_image_stats:
-            # Get file size
-            st = os.stat(dst)
-            length = st.st_size
-            # Get resolution
-            im = Image.open(dst)
-            width = im.size[0]
-            height = im.size[1]
-            format = im.format.lower()
-            # Get format
-            thumbnails[size] = dict(
-                file_path=dst,  # Full path, to be processed before storage
-                length=length,
-                width=width,
-                height=height,
-                md5='--',
-                content_type='image/' + format,
-            )
+        thumb_info = {'size': size,
+                      'file_path': name,
+                      'local_path': dst,
+                      'length': os.stat(dst).st_size,
+                      'width': width,
+                      'height': height,
+                      'md5': '',
+                      'content_type': 'image/jpeg'}
 
-    if return_image_stats:
-        return thumbnails
+        if size == 't':
+            thumb_info['is_public'] = True
+
+        thumbnails.append(thumb_info)
+
+    return thumbnails
 
 
 def resize_and_crop(img_path, modified_path, size, crop_type='middle'):

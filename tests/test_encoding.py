@@ -24,7 +24,7 @@ class ZencoderNotificationTest(AbstractPillarTest):
                                     data=json.dumps({'job': {'id': 'koro-007'}}),
                                     headers={'X-Zencoder-Notification-Secret': secret,
                                              'Content-Type': 'application/json'})
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(200, resp.status_code)
 
     def test_good_secret_existing_file(self):
         self.ensure_file_exists(file_overrides={
@@ -40,11 +40,16 @@ class ZencoderNotificationTest(AbstractPillarTest):
                                                              'state': 'done'},
                                                      'outputs': [{
                                                          'format': 'jpg',
+                                                         'height': 1080,
                                                          'width': 2048,
                                                          'file_size_in_bytes': 15,
-                                                     }]}),
+                                                         'md5_checksum': None,
+                                                     }],
+                                                     'input': {
+                                                         'duration_in_ms': 5000,
+                                                     }}),
                                     headers={'X-Zencoder-Notification-Secret': secret,
                                              'Content-Type': 'application/json'})
 
         # TODO: check that the file in MongoDB is actually updated properly.
-        self.assertEqual(200, resp.status_code)
+        self.assertEqual(204, resp.status_code)

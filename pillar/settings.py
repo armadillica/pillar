@@ -366,6 +366,7 @@ tokens_schema = {
 }
 
 files_schema = {
+    # Name of the file after processing, possibly hashed.
     'name': {
         'type': 'string',
         'required': True,
@@ -405,6 +406,8 @@ files_schema = {
         'type': 'string',
         'required': True,
     },
+
+    # Original filename as given by the user, possibly cleaned-up to make it safe.
     'filename': {
         'type': 'string',
         'required': True,
@@ -414,10 +417,14 @@ files_schema = {
         'required': True,
         'allowed': ["attract-web", "pillar", "cdnsun", "gcs", "unittest"]
     },
+
+    # Where the file is in the backend storage itself. In the case of GCS,
+    # it is relative to the /_ folder. In the other cases, it is relative
+    # to the root of that storage backend. required=False to allow creation
+    # before uploading to a storage, in case the final path is determined
+    # by that storage backend.
     'file_path': {
         'type': 'string',
-        #'required': True,
-        'unique': True,
     },
     'link': {
         'type': 'string',
@@ -497,7 +504,13 @@ files_schema = {
                     "failed", "cancelled"]
             },
         }
-    }
+    },
+    'status': {
+        'type': 'string',
+        'allowed': ['uploading', 'queued_for_processing', 'processing', 'complete', 'failed'],
+        'required': False,
+        'default': 'complete',  # default value for backward compatibility.
+    },
 }
 
 groups_schema = {

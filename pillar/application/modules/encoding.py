@@ -12,8 +12,40 @@ encoding = Blueprint('encoding', __name__)
 log = logging.getLogger(__name__)
 
 
+def size_descriptor(width, height):
+    """Returns the size descriptor (like '1080p') for the given width.
+
+    >>> size_descriptor(720, 480)
+    '576p'
+    >>> size_descriptor(1920, 1080)
+    '1080p'
+    >>> size_descriptor(1920, 751)  # 23:9
+    '1080p'
+    """
+
+    widths = {
+        720: '576p',
+        640: '480p',
+        1280: '720p',
+        1920: '1080p',
+        2048: '2k',
+        4096: '4k',
+    }
+
+    # If it is a known width, use it. Otherwise just return '{height}p'
+    if width in widths:
+        return widths[width]
+
+    return '%ip' % height
+
+
 @encoding.route('/zencoder/notifications', methods=['POST'])
 def zencoder_notifications():
+    """
+
+    See: https://app.zencoder.com/docs/guides/getting-started/notifications#api_version_2
+
+    """
     if current_app.config['ENCODING_BACKEND'] != 'zencoder':
         log.warning('Received notification from Zencoder but app not configured for Zencoder.')
         return abort(403)
@@ -34,32 +66,78 @@ def zencoder_notifications():
 
     # Cast request data into a dict
     data = request.get_json()
+
+    if log.isEnabledFor(logging.DEBUG):
+        from pprint import pformat
+        log.debug('Zencoder job JSON: %s', pformat(data))
+
     files_collection = current_app.data.driver.db['files']
     # Find the file object based on processing backend and job_id
-    lookup = {'processing.backend': 'zencoder', 'processing.job_id': str(data['job']['id'])}
-    f = files_collection.find_one(lookup)
-    if not f:
-        log.warning('Unknown Zencoder job id %r', data['job']['id'])
-        return abort(404)
+    zencoder_job_id = data['job']['id']
+    lookup = {'processing.backend': 'zencoder',
+              'processing.job_id': str(zencoder_job_id)}
+    file_doc = files_collection.find_one(lookup)
+    if not file_doc:
+        log.warning('Unknown Zencoder job id %r', zencoder_job_id)
+        # Return 200 OK when debugging, or Zencoder will keep trying and trying and trying...
+        # which is what we want in production.
+        return "Not found, but that's okay.", 200 if current_app.config['DEBUG'] else 404
 
-    file_id = f['_id']
+    file_id = ObjectId(file_doc['_id'])
     # Remove internal keys (so that we can run put internal)
-    f = utils.remove_private_keys(f)
+    file_doc = utils.remove_private_keys(file_doc)
 
     # Update processing status
-    f['processing']['status'] = data['job']['state']
+    job_state = data['job']['state']
+    file_doc['processing']['status'] = job_state
+
+    if job_state == 'failed':
+        log.warning('Zencoder job %i for file %s failed.', zencoder_job_id, file_id)
+        # Log what Zencoder told us went wrong.
+        for output in data['outputs']:
+            if not any('error' in key for key in output):
+                continue
+            log.warning('Errors for output %s:', output['url'])
+            for key in output:
+                if 'error' in key:
+                    log.info('    %s: %s', key, output[key])
+
+        file_doc['status'] = 'failed'
+        put_internal('files', file_doc, _id=file_id)
+        return "You failed, but that's okay.", 200
+
+    log.info('Zencoder job %s for file %s completed with status %s.', zencoder_job_id, file_id,
+             job_state)
+
     # For every variation encoded, try to update the file object
     for output in data['outputs']:
-        format = output['format']
+        video_format = output['format']
         # Change the zencoder 'mpeg4' format to 'mp4' used internally
-        format = 'mp4' if format == 'mpeg4' else format
-        # Find a variation matching format and resolution
-        variation = next((v for v in f['variations'] if v['format'] == format \
-                          and v['width'] == output['width']), None)
-        # If found, update with delivered file size
-        # TODO: calculate md5 on the storage
-        if variation:
-            variation['length'] = output['file_size_in_bytes']
+        video_format = 'mp4' if video_format == 'mpeg4' else video_format
 
-    put_internal('files', f, _id=ObjectId(file_id))
-    return ''
+        # Find a variation matching format and resolution
+        variation = next((v for v in file_doc['variations']
+                          if v['format'] == format and v['width'] == output['width']), None)
+        # Fall back to a variation matching just the format
+        if variation is None:
+            variation = next((v for v in file_doc['variations']
+                              if v['format'] == video_format), None)
+        if variation is None:
+            log.warning('Unable to find variation for video format %s for file %s',
+                        video_format, file_id)
+            continue
+
+        # TODO: calculate md5 on the storage
+        variation.update({
+            'height': output['height'],
+            'width': output['width'],
+            'length': output['file_size_in_bytes'],
+            'duration': data['input']['duration_in_ms'] / 1000,
+            'md5': output['md5_checksum'] or '',  # they don't do MD5 for GCS...
+            'size': size_descriptor(output['width'], output['height']),
+        })
+
+    file_doc['status'] = 'complete'
+    put_internal('files', file_doc, _id=file_id)
+
+    return '', 204

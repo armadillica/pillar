@@ -23,7 +23,8 @@ EXAMPLE_FILE = {u'_id': ObjectId('5672e2c1c379cf0007b31995'),
                 u'content_type': 'image/png', u'_etag': '044ce3aede2e123e261c0d8bd77212f264d4f7b0',
                 u'_created': datetime.datetime(2015, 12, 17, 16, 28, 49, tzinfo=tz_util.utc),
                 u'md5': '',
-                u'file_path': 'c2a5c897769ce1ef0eb10f8fa1c472bcb8e2d5a4.png', u'backend': 'gcs',
+                u'file_path': 'c2a5c897769ce1ef0eb10f8fa1c472bcb8e2d5a4.png',
+                u'backend': 'pillar',
                 u'link': 'http://localhost:8002/file',
                 u'link_expires': datetime.datetime(2016, 3, 22, 9, 28, 22, tzinfo=tz_util.utc)}
 
