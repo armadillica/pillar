@@ -560,7 +560,8 @@ projects_schema = {
         'required': True,
     },
     'is_private': {
-        'type': 'boolean'
+        'type': 'boolean',
+        'default': True,
     },
     'url': {
         'type': 'string'
