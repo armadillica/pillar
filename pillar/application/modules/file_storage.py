@@ -196,7 +196,12 @@ def process_file(gcs, file_id, local_file):
 
     # Prevent video handling for non-admins.
     if not user_has_role(u'admin') and mime_category == 'video':
-        src_file['content_type'] = 'application/x-%s' % src_file['format']
+        if src_file['format'].startswith('x-'):
+            xified = src_file['format']
+        else:
+            xified = 'x-' + src_file['format']
+
+        src_file['content_type'] = 'application/%s' % xified
         mime_category = 'application'
         log.info('Not processing video file %s for non-admin user', file_id)
 
