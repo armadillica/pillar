@@ -1,4 +1,5 @@
 import logging
+import os
 
 from bson import ObjectId
 from eve.methods.put import put_internal
@@ -7,6 +8,7 @@ from flask import abort
 from flask import request
 from flask import current_app
 from application import utils
+from application.utils.gcs import GoogleCloudStorageBucket
 
 encoding = Blueprint('encoding', __name__)
 log = logging.getLogger(__name__)
@@ -110,6 +112,8 @@ def zencoder_notifications():
              job_state)
 
     # For every variation encoded, try to update the file object
+    root, _ = os.path.splitext(file_doc['file_path'])
+
     for output in data['outputs']:
         video_format = output['format']
         # Change the zencoder 'mpeg4' format to 'mp4' used internally
@@ -127,6 +131,21 @@ def zencoder_notifications():
                         video_format, file_id)
             continue
 
+        # Rename the file to include the now-known size descriptor.
+        size = size_descriptor(output['width'], output['height'])
+        new_fname = '{}-{}.{}'.format(root, size, video_format)
+
+        # Rename on Google Cloud Storage
+        try:
+            gcs = GoogleCloudStorageBucket(str(file_doc['project']))
+            blob = gcs.bucket.blob('_/' + variation['file_path'])
+            gcs.bucket.rename_blob(blob, '_/' + new_fname)
+        except Exception:
+            log.warning('Unable to rename GCS blob %r to %r. Keeping old name.',
+                        variation['file_path'], new_fname, exc_info=True)
+        else:
+            variation['file_path'] = new_fname
+
         # TODO: calculate md5 on the storage
         variation.update({
             'height': output['height'],
@@ -134,7 +153,7 @@ def zencoder_notifications():
             'length': output['file_size_in_bytes'],
             'duration': data['input']['duration_in_ms'] / 1000,
             'md5': output['md5_checksum'] or '',  # they don't do MD5 for GCS...
-            'size': size_descriptor(output['width'], output['height']),
+            'size': size,
         })
 
     file_doc['status'] = 'complete'
