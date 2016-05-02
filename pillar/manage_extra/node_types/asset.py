@@ -12,8 +12,7 @@ node_type_asset = {
             'allowed': [
                 'published',
                 'pending',
-                'processing',
-                'deleted'
+                'processing'
             ],
         },
         # Used for sorting within the context of a group
