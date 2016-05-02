@@ -22,7 +22,13 @@ def keep_fetching(collection, db_filter, projection, sort, py_filter, batch_size
 def latest_nodes(db_filter, projection, py_filter, limit):
     nodes = current_app.data.driver.db['nodes']
 
-    latest = keep_fetching(nodes, db_filter, projection,
+    proj = {
+        '_created': 1,
+        '_updated': 1,
+    }
+    proj.update(projection)
+
+    latest = keep_fetching(nodes, db_filter, proj,
                            [('_updated', pymongo.DESCENDING)],
                            py_filter, limit)
 
@@ -56,6 +62,15 @@ def latest_assets():
                            'properties.content_type': 1,
                            'permissions.world': 1},
                           has_public_project, 12)
+
+    # Embed the user
+    users = current_app.data.driver.db['users']
+    for comment in latest:
+        user_id = comment['user']
+        comment['user'] = users.find_one(user_id, {'auth': 0, 'groups': 0, 'roles': 0,
+                                                   'settings': 0, 'email': 0,
+                                                   '_created': 0, '_updated': 0, '_etag': 0})
+
     return jsonify({'_items': latest})
 
 
