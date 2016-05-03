@@ -491,7 +491,6 @@ def override_content_type(uploaded_file):
         del uploaded_file._parsed_content_type
 
 
-
 @file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
 @require_login(require_roles={u'subscriber', u'admin', u'demo'})
 def stream_to_gcs(project_id):
