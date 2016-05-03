@@ -1,6 +1,6 @@
 import logging
 import os
-import json
+import tempfile
 from bson import ObjectId
 from datetime import datetime
 import bugsnag
@@ -101,7 +101,14 @@ if from_envvar:
     # configfile doesn't exist, it should error out (i.e. silent=False).
     app.config.from_pyfile(from_envvar, silent=False)
 
-# Set the TMP
+# Set the TMP environment variable to manage where uploads are stored.
+# These are all used by tempfile.mkstemp(), but we don't knwow in whic
+# order. As such, we remove all used variables but the one we set.
+tempfile.tempdir = app.config['STORAGE_DIR']
+os.environ['TMP'] = app.config['STORAGE_DIR']
+os.environ.pop('TEMP', None)
+os.environ.pop('TMPDIR', None)
+
 
 # Configure logging
 logging.basicConfig(
