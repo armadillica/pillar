@@ -811,5 +811,31 @@ def add_group_to_projects(group_name):
                         {'_id': project['_id']}, project)
 
 
+@manager.command
+def add_license_props():
+    """Add license fields to all node types asset for every project."""
+    projects_collections = app.data.driver.db['projects']
+    for project in projects_collections.find():
+        print("Processing {}".format(project['_id']))
+        for node_type in project['node_types']:
+            if node_type['name'] == 'asset':
+                node_type['dyn_schema']['license_notes'] = {'type': 'string'}
+                node_type['dyn_schema']['license_type'] = {
+                    'type': 'string',
+                    'allowed': [
+                        'cc-by',
+                        'cc-0',
+                        'cc-by-sa',
+                        'cc-by-nd',
+                        'cc-by-nc',
+                        'copyright'
+                    ],
+                    'default': 'cc-by'
+                }
+                node_type['form_schema']['license_notes'] = ''
+                node_type['form_schema']['license_type'] = ''
+        projects_collections.update(
+            {'_id': project['_id']}, project)
+
 if __name__ == '__main__':
     manager.run()
