@@ -456,6 +456,42 @@ def create_file_doc(name, filename, content_type, length, project, backend='gcs'
     return file_doc
 
 
+def override_content_type(uploaded_file):
+    """Overrides the content type based on file extensions.
+
+    :param uploaded_file: file from request.files['form-key']
+    :type uploaded_file: werkzeug.datastructures.FileStorage
+    """
+
+    import mimetypes
+
+    # Possibly use the browser-provided mime type
+    mimetype = uploaded_file.mimetype
+    if '/' in mimetype:
+        mimecat = mimetype.split('/')[0]
+        if mimecat in {'video', 'audio', 'image'}:
+            # The browser's mime type is probably ok, just use it.
+            return
+
+    # Add our own extensions to the mimetypes package
+    if not mimetypes.inited:
+        mimetypes.init()
+        mimetypes.add_type('application/x-blend', '.blend')
+
+    # And then use it to set the mime type.
+    (mimetype, encoding) = mimetypes.guess_type(uploaded_file.filename)
+
+    # Only override the mime type if we can detect it, otherwise just
+    # keep whatever the browser gave us.
+    if mimetype:
+        # content_type property can't be set directly
+        uploaded_file.headers['content-type'] = mimetype
+
+        # It has this, because we used uploaded_file.mimetype earlier this function.
+        del uploaded_file._parsed_content_type
+
+
+
 @file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
 @require_login(require_roles={u'subscriber', u'admin', u'demo'})
 def stream_to_gcs(project_id):
@@ -472,6 +508,8 @@ def stream_to_gcs(project_id):
     uploaded_file = request.files['file']
 
     file_id, internal_fname, status = create_file_doc_for_upload(project['_id'], uploaded_file)
+
+    override_content_type(uploaded_file)
 
     if uploaded_file.content_type.startswith('image/'):
         # We need to do local thumbnailing, so we have to write the stream
@@ -502,7 +540,8 @@ def stream_to_gcs(project_id):
     update_file_doc(file_id,
                     status='queued_for_processing',
                     file_path=internal_fname,
-                    length=blob.size)
+                    length=blob.size,
+                    content_type=uploaded_file.mimetype)
 
     process_file(gcs, file_id, local_file)
 
