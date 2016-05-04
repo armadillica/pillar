@@ -302,3 +302,53 @@ class ProjectEditTest(AbstractProjectTest):
         project = json.loads(resp.data)
 
         return project
+
+    def test_add_remove_user(self):
+        # Create test project
+        project_info = self._create_user_and_project([u'subscriber'])
+        project_id = project_info['_id']
+        project_add_user_url = '/p/users'
+
+        # Create another user we can try to share the project with
+        other_user_id = 'f00dd00df00dd00df00dd00d'
+        self._create_user_with_token(['subscriber'], 'other-token',
+                                     user_id=other_user_id)
+
+        # Make request payload
+        payload = {
+            'project_id': project_id,
+            'user_id': other_user_id,
+            'action': 'add'}
+
+        resp = self.client.post(project_add_user_url,
+                                data=payload,
+                                headers={
+                                    'Authorization': self.make_header('token'),
+                                    'If-Match': project_info['_etag']})
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        with self.app.test_request_context():
+            groups = self.app.data.driver.db['groups']
+            users = self.app.data.driver.db['users']
+
+            # Get other_user document
+            db_user = users.find_one(ObjectId(other_user_id))
+
+            # Get the admin group (has same name as project id)
+            # TODO: handle case when user has multiple groups
+            admin_group_id = db_user['groups'][0]
+            admin_group = groups.find_one({'_id': admin_group_id})
+
+            # Check if admin group name matches
+            self.assertEqual(admin_group['name'], str(project_info['_id']))
+
+        # Update payload to remove the user we just added
+        payload['action'] = 'remove'
+
+        resp = self.client.post(project_add_user_url,
+                                data=payload,
+                                headers={
+                                    'Authorization': self.make_header('token'),
+                                    'If-Match': project_info['_etag']})
+        self.assertEqual(200, resp.status_code, resp.data)
+

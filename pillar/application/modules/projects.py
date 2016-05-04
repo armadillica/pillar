@@ -2,6 +2,7 @@ import copy
 import logging
 import json
 
+from bson import ObjectId
 from eve.methods.post import post_internal
 from eve.methods.patch import patch_internal
 from flask import g, Blueprint, request, abort, current_app
@@ -214,6 +215,50 @@ def create_project(overrides=None):
 
     # Return the project in the response.
     return jsonify(project, status=201, headers={'Location': '/projects/%s' % project['_id']})
+
+
+@blueprint.route('/users', methods=['POST'])
+@authorization.require_login()
+def project_manage_users():
+    """Manage users of a project. In this initial implementation, we handle
+    addition and removal of a user to the admin group of a project.
+    No changes are done on the project itself.
+    """
+
+    project_id = request.form['project_id']
+    target_user_id = request.form['user_id']
+    action = request.form['action']
+    user_id = g.current_user['user_id']
+
+    projects_collection = current_app.data.driver.db['projects']
+    project = projects_collection.find_one({'_id': ObjectId(project_id)})
+    # Check if the current_user is owner of the project
+    # TODO: check based on permissions
+    if project['user'] != user_id:
+        return abort_with_error(403)
+    # Get admin group
+    # TODO: improve this by checking actual permissions
+    admin_group_id = project['permissions']['groups'][0]['group']
+    # Additional check for admin group (if group name is the same as project id)
+    groups_collection = current_app.data.driver.db['groups']
+    group = groups_collection.find_one({'_id': admin_group_id})
+    if group['name'] != project_id:
+        return abort_with_error(403)
+
+    # Get the user and add the admin group to it
+    if action == 'add':
+        operation = '$addToSet'
+    elif action == 'remove':
+        operation = '$pull'
+    else:
+        return abort_with_error(403)
+
+    users_collection = current_app.data.driver.db['users']
+    users_collection.update({'_id': ObjectId(target_user_id)},
+                            {operation: {'groups': admin_group_id}})
+
+    # Return the project in the response.
+    return jsonify({'status': 'success'})
 
 
 def abort_with_error(status):
