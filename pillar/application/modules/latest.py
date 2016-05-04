@@ -29,7 +29,7 @@ def latest_nodes(db_filter, projection, py_filter, limit):
     proj.update(projection)
 
     latest = keep_fetching(nodes, db_filter, proj,
-                           [('_updated', pymongo.DESCENDING)],
+                           [('_created', pymongo.DESCENDING)],
                            py_filter, limit)
 
     result = list(itertools.islice(latest, limit))
