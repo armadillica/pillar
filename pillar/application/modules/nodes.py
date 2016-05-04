@@ -76,9 +76,8 @@ def after_replacing_node(item, original):
     """
 
     projects_collection = current_app.data.driver.db['projects']
-    project = projects_collection.find_one({'_id': item['project']},
-                                           {'is_private': 1})
-    if 'is_private' in project and project['is_private']:
+    project = projects_collection.find_one({'_id': item['project']})
+    if project.get('is_private', False):
         # Skip index updating and return
         return
 
