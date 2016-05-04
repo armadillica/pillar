@@ -108,7 +108,8 @@ def validate_token(user_id, token, oauth_subclient_id):
         return None, None
 
     # Validate against BlenderID.
-    log.debug('Validating subclient token for BlenderID user %s', user_id)
+    log.debug('Validating subclient token for BlenderID user %r, subclient %r', user_id,
+              oauth_subclient_id)
     payload = {'user_id': user_id,
                'token': token}
     if oauth_subclient_id:
