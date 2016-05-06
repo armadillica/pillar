@@ -839,5 +839,36 @@ def add_license_props():
         projects_collections.update(
             {'_id': project['_id']}, project)
 
+
+@manager.command
+def refresh_file_sizes():
+    """Computes & stores the 'length_aggregate_in_bytes' fields of all files."""
+
+    from application.modules import file_storage
+
+    matched = 0
+    unmatched = 0
+    total_size = 0
+
+    files_collection = app.data.driver.db['files']
+    for file_doc in files_collection.find():
+        file_storage.compute_aggregate_length(file_doc)
+        length = file_doc['length_aggregate_in_bytes']
+        total_size += length
+
+        result = files_collection.update_one({'_id': file_doc['_id']},
+                                             {'$set': {'length_aggregate_in_bytes': length}})
+        if result.matched_count != 1:
+            log.warning('Unable to update document %s', file_doc['_id'])
+            unmatched += 1
+        else:
+            matched += 1
+
+    log.info('Updated %i file documents.', matched)
+    if unmatched:
+        log.warning('Unable to update %i documents.', unmatched)
+    log.info('%i bytes (%.3f GiB) storage used in total.',
+             total_size, total_size / 1024**3)
+
 if __name__ == '__main__':
     manager.run()
