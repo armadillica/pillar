@@ -262,13 +262,13 @@ def manage_groups():
     client = MongoClient(MONGO_HOST, 27017)
     db = client.eve
 
-    print ("")
-    print ("Add or Remove user from group")
-    print ("leave empty to cancel")
-    print ("")
+    print("")
+    print("Add or Remove user from group")
+    print("leave empty to cancel")
+    print("")
 
     # Select Action
-    print ("Do you want to Add or Remove the user from the group?")
+    print("Do you want to Add or Remove the user from the group?")
     retry = True
     while retry:
         action = raw_input('add/remove: ')
@@ -281,7 +281,7 @@ def manage_groups():
             action = 'remove'
             retry = False
         else:
-            print ("Incorrect action, press type 'add' or 'remove'")
+            print("Incorrect action, press type 'add' or 'remove'")
 
     # Select User
     retry = True
@@ -293,7 +293,7 @@ def manage_groups():
         if user:
             retry = False
         else:
-            print ("Incorrect user email, try again, or leave empty to cancel")
+            print("Incorrect user email, try again, or leave empty to cancel")
 
     # Select group
     retry = True
@@ -305,7 +305,7 @@ def manage_groups():
         if group:
             retry = False
         else:
-            print ("Incorrect group name, try again, or leave empty to cancel")
+            print("Incorrect group name, try again, or leave empty to cancel")
 
     # Do
     current_groups = user.get('groups', [])
@@ -386,6 +386,7 @@ def add_parent_to_nodes():
     sys.stdout = UTF8Writer(sys.stdout)
 
     nodes_collection = app.data.driver.db['nodes']
+
     def find_parent_project(node):
         if node and 'parent' in node:
             parent = nodes_collection.find_one({'_id': node['parent']})
@@ -394,6 +395,7 @@ def add_parent_to_nodes():
             return node
         else:
             return None
+
     nodes = nodes_collection.find()
     nodes_index = 0
     nodes_orphan = 0
@@ -405,7 +407,7 @@ def add_parent_to_nodes():
             project = find_parent_project(node)
             if project:
                 nodes_collection.update({'_id': node['_id']},
-                                {"$set": {'project': project['_id']}})
+                                        {"$set": {'project': project['_id']}})
                 print(u"{0} {1}".format(node['_id'], node['name']))
             else:
                 nodes_orphan += 1
@@ -467,7 +469,7 @@ def convert_assets_to_textures(project_id):
         return dict(variation=variation, is_tileable=is_tileable)
 
     def make_texture_node(base_node, files, parent_id=None):
-        texture_node_type = node_types_collection.find_one({'name':'texture'})
+        texture_node_type = node_types_collection.find_one({'name': 'texture'})
         files_list = []
         is_tileable = False
 
@@ -510,15 +512,14 @@ def convert_assets_to_textures(project_id):
                     is_landscape=(first_file['height'] < first_file['width']),
                     aspect_ratio=round(
                         (first_file['width'] / first_file['height']), 2)
-                    )
                 )
+            )
             print("Making {0}".format(node['name']))
             if not DRY_RUN:
                 p = post_internal('nodes', node)
                 if p[0]['_status'] == 'ERR':
                     import pprint
                     pprint.pprint(node)
-
 
     nodes_collection = app.data.driver.db['nodes']
 
@@ -535,7 +536,7 @@ def convert_assets_to_textures(project_id):
         elif n_type['name'] == 'group':
             # Change group type to texture group
             node_type_texture = node_types_collection.find_one(
-                {'name':'group_texture'})
+                {'name': 'group_texture'})
             n['node_type'] = node_type_texture['_id']
             n['properties'].pop('notes', None)
             print("Updating {0}".format(n['name']))
@@ -583,7 +584,7 @@ def files_verify_project():
                 if item['project'] != f['project']:
                     issues['conflicting'].append(item['_id'])
                 if 'status' in item['properties'] \
-                    and item['properties']['status'] == 'processing':
+                        and item['properties']['status'] == 'processing':
                     issues['processing'].append(item['_id'])
         else:
             issues['missing'].append(
@@ -613,7 +614,7 @@ def replace_node_type(project, node_type_name, new_node_type):
 
     old_node_type = next(
         (item for item in project['node_types'] if item.get('name') \
-            and item['name'] == node_type_name), None)
+         and item['name'] == node_type_name), None)
     if old_node_type:
         for i, v in enumerate(project['node_types']):
             if v['name'] == node_type_name:
@@ -689,7 +690,7 @@ def files_make_public_t():
     for f in files_collection.find({'backend': 'gcs'}):
         if 'variations' in f:
             variation_t = next((item for item in f['variations'] \
-                if item['size'] == 't'), None)
+                                if item['size'] == 't'), None)
             if variation_t:
                 try:
                     storage = GoogleCloudStorageBucket(str(f['project']))
@@ -706,6 +707,7 @@ def files_make_public_t():
                     print("Internal Server Error")
                 except Exception:
                     pass
+
 
 @manager.command
 def subscribe_node_owners():
