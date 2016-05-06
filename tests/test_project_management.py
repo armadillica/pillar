@@ -321,7 +321,8 @@ class ProjectEditTest(AbstractProjectTest):
             'action': 'add'}
 
         resp = self.client.post(project_add_user_url,
-                                data=payload,
+                                data=json.dumps(payload),
+                                content_type='application/json',
                                 headers={
                                     'Authorization': self.make_header('token'),
                                     'If-Match': project_info['_etag']})
@@ -346,7 +347,8 @@ class ProjectEditTest(AbstractProjectTest):
         payload['action'] = 'remove'
 
         resp = self.client.post(project_add_user_url,
-                                data=payload,
+                                data=json.dumps(payload),
+                                content_type='application/json',
                                 headers={
                                     'Authorization': self.make_header('token'),
                                     'If-Match': project_info['_etag']})

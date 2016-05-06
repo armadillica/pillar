@@ -217,7 +217,7 @@ def create_project(overrides=None):
     return jsonify(project, status=201, headers={'Location': '/projects/%s' % project['_id']})
 
 
-@blueprint.route('/users', methods=['POST'])
+@blueprint.route('/users', methods=['GET', 'POST'])
 @authorization.require_login()
 def project_manage_users():
     """Manage users of a project. In this initial implementation, we handle
@@ -225,9 +225,24 @@ def project_manage_users():
     No changes are done on the project itself.
     """
 
-    project_id = request.form['project_id']
-    target_user_id = request.form['user_id']
-    action = request.form['action']
+    # TODO: check if user is admin of the project before anything
+    if request.method == 'GET':
+        project_id = request.args['project_id']
+        projects_collection = current_app.data.driver.db['projects']
+        project = projects_collection.find_one({'_id': ObjectId(project_id)})
+        admin_group_id = project['permissions']['groups'][0]['group']
+        users_collection = current_app.data.driver.db['users']
+        users = users_collection.find(
+            {'groups': {'$in': [admin_group_id]}},
+            {'username': 1, 'email': 1, 'full_name': 1})
+        users_list = [user for user in users]
+        return jsonify({'_status': 'OK', '_items': users_list})
+
+    # The request is not a form, since it comes from the API sdk
+    data = json.loads(request.data)
+    project_id = data['project_id']
+    target_user_id = data['user_id']
+    action = data['action']
     user_id = g.current_user['user_id']
 
     projects_collection = current_app.data.driver.db['projects']
@@ -258,7 +273,7 @@ def project_manage_users():
                             {operation: {'groups': admin_group_id}})
 
     # Return the project in the response.
-    return jsonify({'status': 'success'})
+    return jsonify({'_status': 'OK'})
 
 
 def abort_with_error(status):
