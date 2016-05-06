@@ -164,7 +164,7 @@ def merge_permissions(*args):
         for key in maybe_sorted(keys):
             methods0 = asdict0.get(key, [])
             methods1 = asdict1.get(key, [])
-            methods = maybe_sorted(set(methods0 + methods1))
+            methods = maybe_sorted(set(methods0).union(set(methods1)))
             effective.setdefault(plural_name, []).append({field_name: key, u'methods': methods})
 
     merge(u'user')
@@ -173,7 +173,7 @@ def merge_permissions(*args):
     # Gather permissions for world
     world0 = args[0].get('world', [])
     world1 = args[1].get('world', [])
-    world_methods = set(world0 + world1)
+    world_methods = set(world0).union(set(world1))
     if world_methods:
         effective[u'world'] = maybe_sorted(world_methods)
 
