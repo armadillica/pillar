@@ -7,9 +7,10 @@ from eve.methods.post import post_internal
 from eve.methods.patch import patch_internal
 from flask import g, Blueprint, request, abort, current_app
 
+from application.modules import mongo_utils
 from application.utils import remove_private_keys, authorization, jsonify
 from application.utils.gcs import GoogleCloudStorageBucket
-from application.utils.authorization import user_has_role, check_permissions
+from application.utils.authorization import user_has_role, check_permissions, require_login
 from manage_extra.node_types.asset import node_type_asset
 from manage_extra.node_types.comment import node_type_comment
 from manage_extra.node_types.group import node_type_group
@@ -49,7 +50,6 @@ def before_inserting_override_is_private_field(projects):
 
 
 def before_edit_check_permissions(document, original):
-
     # Allow admin users to do whatever they want.
     # TODO: possibly move this into the check_permissions function.
     if user_has_role(u'admin'):
@@ -314,6 +314,40 @@ def abort_with_error(status):
     """
 
     abort(status if status // 100 >= 4 else 500)
+
+
+@blueprint.route('/<string:project_id>/quotas')
+@require_login()
+def project_quotas(project_id):
+    """Returns information about the project's limits."""
+
+    # Check that the user has GET permissions on the project itself.
+    project = mongo_utils.find_one_or_404('projects', project_id)
+    check_permissions(project, 'GET')
+
+    file_size_used = _project_total_file_size(project_id)
+
+    info = {
+        'file_size_quota': None,  # TODO: implement this later.
+        'file_size_used': file_size_used,
+    }
+
+    return jsonify(info)
+
+
+def _project_total_file_size(project_id):
+    """Returns the total number of bytes used by files of this project."""
+
+    files = current_app.data.driver.db['files']
+    file_size_used = files.aggregate([
+        {'$match': {'project': ObjectId(project_id)}},
+        {'$project': {'length_aggregate_in_bytes': 1}},
+        {'$group': {'_id': None,
+                    'all_files': {'$sum': '$length_aggregate_in_bytes'}}}
+    ])
+
+    # The aggregate function returns a cursor, not a document.
+    return next(file_size_used)['all_files']
 
 
 def setup_app(app, url_prefix):
