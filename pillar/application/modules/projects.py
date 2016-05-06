@@ -40,6 +40,10 @@ def override_is_private_field(project, original):
     :param project: the project, which will be updated
     """
 
+    if 'permissions' not in project:
+        project['is_private'] = False
+        return
+
     world_perms = project['permissions'].get('world', [])
     project['is_private'] = 'GET' not in world_perms
 
