@@ -262,18 +262,13 @@ def project_manage_users():
 
     projects_collection = current_app.data.driver.db['projects']
     project = projects_collection.find_one({'_id': ObjectId(project_id)})
+
     # Check if the current_user is owner of the project
     # TODO: check based on permissions
     if project['user'] != user_id:
         return abort_with_error(403)
-    # Get admin group
-    # TODO: improve this by checking actual permissions
-    admin_group_id = project['permissions']['groups'][0]['group']
-    # Additional check for admin group (if group name is the same as project id)
-    groups_collection = current_app.data.driver.db['groups']
-    group = groups_collection.find_one({'_id': admin_group_id})
-    if group['name'] != project_id:
-        return abort_with_error(403)
+
+    admin_group = get_admin_group(project)
 
     # Get the user and add the admin group to it
     if action == 'add':
@@ -285,13 +280,31 @@ def project_manage_users():
 
     users_collection = current_app.data.driver.db['users']
     users_collection.update({'_id': ObjectId(target_user_id)},
-                            {operation: {'groups': admin_group_id}})
+                            {operation: {'groups': admin_group['_id']}})
     user = users_collection.find_one({'_id': ObjectId(target_user_id)},
                                      {'username': 1, 'email': 1,
                                       'full_name': 1})
     user.update({'_status': 'OK'})
     # Return the user in the response.
     return jsonify(user)
+
+
+def get_admin_group(project):
+    """Returns the admin group for the project."""
+
+    groups_collection = current_app.data.driver.db['groups']
+
+    # TODO: search through all groups to find the one with the project ID as its name.
+    admin_group_id = ObjectId(project['permissions']['groups'][0]['group'])
+    group = groups_collection.find_one({'_id': admin_group_id})
+
+    if group is None:
+        raise ValueError('Unable to handle project without admin group.')
+
+    if group['name'] != str(project['_id']):
+        return abort_with_error(403)
+
+    return group
 
 
 def abort_with_error(status):

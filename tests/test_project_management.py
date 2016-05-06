@@ -433,6 +433,9 @@ class ProjectNodeAccess(AbstractProjectTest):
             self.assertTrue(db_proj['is_private'])
 
     def test_add_remove_user(self):
+        from application.modules import projects
+        from application.utils import dumps
+
         project_add_user_url = '/p/users'
 
         # Create another user we can try to share the project with
@@ -447,36 +450,36 @@ class ProjectNodeAccess(AbstractProjectTest):
             'action': 'add'}
 
         resp = self.client.post(project_add_user_url,
-                                data=json.dumps(payload),
+                                data=dumps(payload),
                                 content_type='application/json',
                                 headers={
                                     'Authorization': self.make_header('token'),
                                     'If-Match': self.project['_etag']})
         self.assertEqual(200, resp.status_code, resp.data)
 
+        # Check if the user is now actually member of the group.
         with self.app.test_request_context():
-            groups = self.app.data.driver.db['groups']
             users = self.app.data.driver.db['users']
 
-            # Get other_user document
             db_user = users.find_one(ObjectId(other_user_id))
+            admin_group = projects.get_admin_group(self.project)
 
-            # Get the admin group (has same name as project id)
-            # TODO: handle case when user has multiple groups
-            admin_group_id = db_user['groups'][0]
-            admin_group = groups.find_one({'_id': admin_group_id})
-
-            # Check if admin group name matches
-            self.assertEqual(admin_group['name'], str(self.project['_id']))
+            self.assertIn(admin_group['_id'], db_user['groups'])
 
         # Update payload to remove the user we just added
         payload['action'] = 'remove'
 
         resp = self.client.post(project_add_user_url,
-                                data=json.dumps(payload),
+                                data=dumps(payload),
                                 content_type='application/json',
                                 headers={
                                     'Authorization': self.make_header('token'),
                                     'If-Match': self.project['_etag']})
         self.assertEqual(200, resp.status_code, resp.data)
 
+        # Check if the user is now actually removed from the group.
+        with self.app.test_request_context():
+            users = self.app.data.driver.db['users']
+
+            db_user = users.find_one(ObjectId(other_user_id))
+            self.assertNotIn(admin_group['_id'], db_user['groups'])
