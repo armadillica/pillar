@@ -52,11 +52,11 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
     current_user = g.current_user
     if current_user:
         # If the user is authenticated, proceed to compare the group permissions
-        for permission in computed_permissions.get('groups', []):
+        for permission in computed_permissions.get('groups', ()):
             if permission['group'] in current_user['groups']:
                 allowed_methods.update(permission['methods'])
 
-        for permission in computed_permissions.get('users', []):
+        for permission in computed_permissions.get('users', ()):
             if current_user['user_id'] == permission['user']:
                 allowed_methods.update(permission['methods'])
 
@@ -161,9 +161,11 @@ def merge_permissions(*args):
         asdict1 = {permission[field_name]: permission['methods'] for permission in from1}
 
         keys = set(asdict0.keys() + asdict1.keys())
-        for user_id in maybe_sorted(keys):
-            methods = maybe_sorted(set(asdict0.get(user_id, []) + asdict1.get(user_id, [])))
-            effective.setdefault(plural_name, []).append({field_name: user_id, u'methods': methods})
+        for key in maybe_sorted(keys):
+            methods0 = asdict0.get(key, [])
+            methods1 = asdict1.get(key, [])
+            methods = maybe_sorted(set(methods0 + methods1))
+            effective.setdefault(plural_name, []).append({field_name: key, u'methods': methods})
 
     merge(u'user')
     merge(u'group')
