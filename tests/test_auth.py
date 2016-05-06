@@ -1,11 +1,15 @@
 # -*- encoding: utf-8 -*-
 
+import copy
 import datetime
 import responses
 import json
+
 from bson import tz_util, ObjectId
+from werkzeug.exceptions import Forbidden
 
 from common_test_class import AbstractPillarTest, TEST_EMAIL_USER, TEST_EMAIL_ADDRESS
+from common_test_data import EXAMPLE_PROJECT, EXAMPLE_NODE
 
 PUBLIC_USER_FIELDS = {'full_name', 'email'}
 
@@ -352,3 +356,117 @@ class UserListTests(AbstractPillarTest):
         resp = self.client.delete('/users/323456789abc123456789abc',
                                   headers={'Authorization': self.make_header('admin-token')})
         self.assertEqual(405, resp.status_code, resp.data)
+
+
+class PermissionComputationTest(AbstractPillarTest):
+    maxDiff = None
+
+    def test_merge_permissions(self):
+        from application.utils.authorization import merge_permissions
+
+        with self.app.test_request_context():
+            self.assertEqual({}, merge_permissions())
+            self.assertEqual({}, merge_permissions({}))
+            self.assertEqual({}, merge_permissions({}, {}, {}))
+
+            # Merge one level deep
+            self.assertEqual(
+                {},
+                merge_permissions({'users': []}, {'groups': []}, {'world': []}))
+            self.assertEqual(
+                {'users': [{'user': 'micak', 'methods': ['GET', 'POST', 'PUT']}],
+                 'groups': [{'group': 'manatees', 'methods': ['DELETE', 'GET']}],
+                 'world': ['GET']},
+                merge_permissions(
+                    {'users': [{'user': 'micak', 'methods': ['GET', 'POST', 'PUT']}]},
+                    {'groups': [{'group': 'manatees', 'methods': ['DELETE', 'GET']}]},
+                    {'world': ['GET']}))
+
+            # Merge two levels deep.
+            self.assertEqual(
+                {'users': [{'user': 'micak', 'methods': ['GET', 'POST', 'PUT']}],
+                 'groups': [{'group': 'lions', 'methods': ['GET']},
+                            {'group': 'manatees', 'methods': ['GET', 'POST', 'PUT']}],
+                 'world': ['GET']},
+                merge_permissions(
+                    {'users': [{'user': 'micak', 'methods': ['GET', 'PUT', 'POST']}],
+                     'groups': [{'group': 'lions', 'methods': ['GET']}]},
+                    {'groups': [{'group': 'manatees', 'methods': ['GET', 'PUT', 'POST']}]},
+                    {'world': ['GET']}))
+
+            # Merge three levels deep
+            self.assertEqual(
+                {'users': [{'user': 'micak', 'methods': ['DELETE', 'GET', 'POST', 'PUT']}],
+                 'groups': [{'group': 'lions', 'methods': ['GET', 'PUT', 'SCRATCH']},
+                            {'group': 'manatees', 'methods': ['GET', 'POST', 'PUT']}],
+                 'world': ['GET']},
+                merge_permissions(
+                    {'users': [{'user': 'micak', 'methods': ['GET', 'PUT', 'POST']}],
+                     'groups': [{'group': 'lions', 'methods': ['GET']},
+                                {'group': 'manatees', 'methods': ['GET', 'PUT', 'POST']}],
+                     'world': ['GET']},
+                    {'users': [{'user': 'micak', 'methods': ['DELETE']}],
+                     'groups': [{'group': 'lions', 'methods': ['GET', 'PUT', 'SCRATCH']}],
+                     }
+                ))
+
+    def sort(self, permissions):
+        """Returns a sorted copy of the permissions."""
+
+        from application.utils.authorization import merge_permissions
+        return merge_permissions(permissions, {})
+
+    def test_effective_permissions(self):
+        from application.utils.authorization import compute_aggr_permissions
+
+        with self.app.test_request_context():
+            # Test project permissions.
+            self.assertEqual(
+                {
+                    u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
+                                 u'methods': [u'GET', u'POST', u'PUT']}],
+                    u'world': [u'GET']
+                },
+                self.sort(compute_aggr_permissions('projects', EXAMPLE_PROJECT, None)))
+
+            # Test node type permissions.
+            self.assertEqual(
+                {
+                    u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
+                                 u'methods': [u'GET', u'POST', u'PUT']},
+                                {u'group': ObjectId('5596e975ea893b269af85c0f'),
+                                 u'methods': [u'GET']},
+                                {u'group': ObjectId('564733b56dcaf85da2faee8a'),
+                                 u'methods': [u'GET']}],
+                    u'world': [u'GET']
+                },
+                self.sort(compute_aggr_permissions('projects', EXAMPLE_PROJECT, 'texture')))
+
+            # Test node permissions with non-existing project.
+            node = copy.deepcopy(EXAMPLE_NODE)
+            self.assertRaises(Forbidden, compute_aggr_permissions, 'nodes', node, None)
+
+            # Test node permissions without embedded project.
+            self.ensure_project_exists()
+            self.assertEqual(
+                {u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
+                              u'methods': [u'GET', u'POST', u'PUT']},
+                             {u'group': ObjectId('5596e975ea893b269af85c0f'),
+                              u'methods': [u'DELETE', u'GET']},
+                             {u'group': ObjectId('564733b56dcaf85da2faee8a'),
+                              u'methods': [u'GET']}],
+                 u'world': [u'GET']},
+                self.sort(compute_aggr_permissions('nodes', node, None)))
+
+            # Test node permissions with embedded project.
+            node = copy.deepcopy(EXAMPLE_NODE)
+            node['project'] = EXAMPLE_PROJECT
+            self.assertEqual(
+                {u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
+                              u'methods': [u'GET', u'POST', u'PUT']},
+                             {u'group': ObjectId('5596e975ea893b269af85c0f'),
+                              u'methods': [u'DELETE', u'GET']},
+                             {u'group': ObjectId('564733b56dcaf85da2faee8a'),
+                              u'methods': [u'GET']}],
+                 u'world': [u'GET']},
+                self.sort(compute_aggr_permissions('nodes', node, None)))

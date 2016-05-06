@@ -1,54 +1,45 @@
 import logging
 import functools
+
+from bson import ObjectId
 from flask import g
 from flask import abort
 from flask import current_app
+from werkzeug.exceptions import Forbidden
+
+CHECK_PERMISSIONS_IMPLEMENTED_FOR = {'projects', 'nodes'}
 
 log = logging.getLogger(__name__)
 
 
-def check_permissions(resource, method, append_allowed_methods=False):
+def check_permissions(collection_name, resource, method, append_allowed_methods=False,
+                      check_node_type=None):
     """Check user permissions to access a node. We look up node permissions from
     world to groups to users and match them with the computed user permissions.
     If there is not match, we raise 403.
+
+    :param collection_name: name of the collection the resource comes from.
+    :param resource: resource from MongoDB
+    :type resource: dict
+    :param method: name of the requested HTTP method
+    :param append_allowed_methods: whether to return the list of allowed methods
+        in the resource. Only valid when method='GET'.
+    :param check_node_type: node type to check. Only valid when collection_name='projects'.
+    :type check_node_type: str
     """
-    if method != 'GET' and append_allowed_methods:
+
+    # Check some input values.
+    if collection_name not in CHECK_PERMISSIONS_IMPLEMENTED_FOR:
+        raise ValueError('check_permission only implemented for %s, not for %s',
+                         CHECK_PERMISSIONS_IMPLEMENTED_FOR, collection_name)
+
+    if append_allowed_methods and method != 'GET':
         raise ValueError("append_allowed_methods only allowed with 'GET' method")
 
-    current_user = g.current_user
+    if check_node_type is not None and collection_name != 'projects':
+        raise ValueError('check_node_type parameter is only valid for checking projects.')
 
-    if 'permissions' in resource:
-        # If permissions are embedded in the node (this overrides any other
-        # matching permission originally set at node_type level)
-        resource_permissions = resource['permissions']
-    else:
-        resource_permissions = {}
-    if 'node_type' in resource:
-        if type(resource['node_type']) is dict:
-            # If the node_type is embedded in the document, extract permissions
-            # from there
-            computed_permissions = resource['node_type']['permissions']
-        else:
-            # If the node_type is referenced with an ObjectID (was not embedded
-            # on request) query for if from the database and get the permissions
-
-            # node_types_collection = app.data.driver.db['node_types']
-            # node_type = node_types_collection.find_one(resource['node_type'])
-
-            if type(resource['project']) is dict:
-                project = resource['project']
-            else:
-                projects_collection = current_app.data.driver.db['projects']
-                project = projects_collection.find_one(resource['project'])
-            node_type = next(
-                (item for item in project['node_types'] if item.get('name') \
-                 and item['name'] == resource['node_type']), None)
-            computed_permissions = node_type['permissions']
-    else:
-        computed_permissions = {}
-
-    # Override computed_permissions if override is provided
-    computed_permissions.update(resource_permissions)
+    computed_permissions = compute_aggr_permissions(collection_name, resource, check_node_type)
 
     if not computed_permissions:
         log.info('No permissions available to compute for %s on resource %r',
@@ -58,13 +49,14 @@ def check_permissions(resource, method, append_allowed_methods=False):
     # Accumulate allowed methods from the user, group and world level.
     allowed_methods = set()
 
+    current_user = g.current_user
     if current_user:
         # If the user is authenticated, proceed to compare the group permissions
-        for permission in computed_permissions['groups']:
+        for permission in computed_permissions.get('groups', []):
             if permission['group'] in current_user['groups']:
                 allowed_methods.update(permission['methods'])
 
-        for permission in computed_permissions['users']:
+        for permission in computed_permissions.get('users', []):
             if current_user['user_id'] == permission['user']:
                 allowed_methods.update(permission['methods'])
 
@@ -82,6 +74,112 @@ def check_permissions(resource, method, append_allowed_methods=False):
         return
 
     abort(403)
+
+
+def compute_aggr_permissions(collection_name, resource, check_node_type):
+    """Returns a permissions dict."""
+
+    projects_collection = current_app.data.driver.db['projects']
+
+    # We always need the know the project.
+    if collection_name == 'projects':
+        project = resource
+        if check_node_type is None:
+            return project['permissions']
+        node_type_name = check_node_type
+    else:
+        # Not a project, so it's a node.
+        assert 'project' in resource
+        assert 'node_type' in resource
+
+        node_type_name = resource['node_type']
+
+        if isinstance(resource['project'], dict):
+            # embedded project
+            project = resource['project']
+        else:
+            project = projects_collection.find_one(
+                ObjectId(resource['project']),
+                {'permissions': 1,
+                 'node_types': {'$elemMatch': {'name': node_type_name}},
+                 'node_types.name': 1,
+                 'node_types.permissions': 1})
+
+    # Every node should have a project.
+    if project is None:
+        log.warning('Resource %s from "%s" refers to a project that does not exist.',
+                    resource['_id'], collection_name)
+        raise Forbidden()
+
+    project_permissions = project['permissions']
+
+    # Find the node type from the project.
+    node_type = next((node_type for node_type in project['node_types']
+                      if node_type['name'] == node_type_name), None)
+    if node_type is None:  # This node type is not known, so doesn't give permissions.
+        node_type_permissions = {}
+    else:
+        node_type_permissions = node_type.get('permissions', {})
+
+    # For projects or specific node types in projects, we're done now.
+    if collection_name == 'projects':
+        return merge_permissions(project_permissions, node_type_permissions)
+
+    node_permissions = resource.get('permissions', {})
+    return merge_permissions(project_permissions, node_type_permissions, node_permissions)
+
+
+def merge_permissions(*args):
+    """Merges all given permissions.
+
+    :param args: list of {'user': ..., 'group': ..., 'world': ...} dicts.
+    :returns: combined list of permissions.
+    """
+
+    if not args:
+        return {}
+
+    if len(args) == 1:
+        return args[0]
+
+    effective = {}
+
+    # When testing we want stable results, and not be dependent on PYTHONHASH values etc.
+    if current_app.config['TESTING']:
+        maybe_sorted = sorted
+    else:
+        def maybe_sorted(arg):
+            return arg
+
+    def merge(field_name):
+        plural_name = field_name + 's'
+
+        from0 = args[0].get(plural_name, [])
+        from1 = args[1].get(plural_name, [])
+
+        asdict0 = {permission[field_name]: permission['methods'] for permission in from0}
+        asdict1 = {permission[field_name]: permission['methods'] for permission in from1}
+
+        keys = set(asdict0.keys() + asdict1.keys())
+        for user_id in maybe_sorted(keys):
+            methods = maybe_sorted(set(asdict0.get(user_id, []) + asdict1.get(user_id, [])))
+            effective.setdefault(plural_name, []).append({field_name: user_id, u'methods': methods})
+
+    merge(u'user')
+    merge(u'group')
+
+    # Gather permissions for world
+    world0 = args[0].get('world', [])
+    world1 = args[1].get('world', [])
+    world_methods = set(world0 + world1)
+    if world_methods:
+        effective[u'world'] = maybe_sorted(world_methods)
+
+    # Recurse for longer merges
+    if len(args) > 2:
+        return merge_permissions(effective, *args[2:])
+
+    return effective
 
 
 def require_login(require_roles=set()):
@@ -108,7 +206,9 @@ def require_login(require_roles=set()):
                 abort(403)
 
             return func(*args, **kwargs)
+
         return wrapper
+
     return decorator
 
 

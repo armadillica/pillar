@@ -28,7 +28,6 @@ EXAMPLE_FILE = {u'_id': ObjectId('5672e2c1c379cf0007b31995'),
                 u'link': 'http://localhost:8002/file',
                 u'link_expires': datetime.datetime(2016, 3, 22, 9, 28, 22, tzinfo=tz_util.utc)}
 
-
 EXAMPLE_PROJECT = {
     u'_created': datetime.datetime(2015, 12, 17, 13, 22, 56, tzinfo=tz_util.utc),
     u'_etag': u'cc4643e98d3606f87bbfaaa200bfbae941b642f3',
@@ -116,7 +115,7 @@ EXAMPLE_PROJECT = {
                      u'permissions': {u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
                                                    u'methods': [u'GET', u'PUT', u'POST']},
                                                   {u'group': ObjectId('5596e975ea893b269af85c0f'),
-                                                   u'methods': [u'GET']},
+                                                   u'methods': [u'DELETE', u'GET']},
                                                   {u'group': ObjectId('564733b56dcaf85da2faee8a'),
                                                    u'methods': [u'GET']}],
                                       u'users': [],
@@ -240,9 +239,9 @@ EXAMPLE_PROJECT = {
                                      u'order': {u'type': u'integer'},
                                      u'resolution': {u'type': u'string'},
                                      u'stat_ensure_file_existsus': {u'allowed': [u'published',
-                                                              u'pending',
-                                                              u'processing'],
-                                                 u'type': u'string'},
+                                                                                 u'pending',
+                                                                                 u'processing'],
+                                                                    u'type': u'string'},
                                      u'tags': {u'schema': {u'type': u'string'}, u'type': u'list'}},
                      u'form_schema': {u'aspect_ratio': {},
                                       u'categories': {},
@@ -270,7 +269,7 @@ EXAMPLE_PROJECT = {
     u'organization': ObjectId('55a99fb43004867fb9934f01'),
     u'owners': {u'groups': [], u'users': []},
     u'permissions': {u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                                  u'methods': [u'GET', u'PUT', u'POST']}],
+                                  u'methods': [u'GET', u'POST', u'PUT']}],
                      u'users': [],
                      u'world': [u'GET']},
     u'picture_header': ObjectId('5673f260c379cf0007b31bc4'),
@@ -279,3 +278,21 @@ EXAMPLE_PROJECT = {
     u'summary': u'Texture collection from all Blender Institute open projects.',
     u'url': u'textures',
     u'user': ObjectId('552b066b41acdf5dec4436f2')}
+
+EXAMPLE_NODE = {
+    u'_id': ObjectId('572761099837730efe8e120d'),
+    u'picture': ObjectId('572761f39837730efe8e1210'),
+    u'description': u'',
+    u'node_type': u'asset',
+    u'user': ObjectId('57164ca1983773118cbaf779'),
+    u'properties': {
+        u'status': u'published',
+        u'content_type': u'image',
+        u'file': ObjectId('572761129837730efe8e120e')
+    },
+    u'_updated': datetime.datetime(2016, 5, 2, 14, 19, 58, 0, tzinfo=tz_util.utc),
+    u'name': u'Image test',
+    u'project': EXAMPLE_PROJECT_ID,
+    u'_created': datetime.datetime(2016, 5, 2, 14, 19, 37, 0, tzinfo=tz_util.utc),
+    u'_etag': u'6b8589b42c880e3626f43f3e82a5c5b946742687'
+}

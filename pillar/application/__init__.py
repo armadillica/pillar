@@ -178,36 +178,6 @@ def validate_token_at_every_request():
     validate_token()
 
 
-def before_returning_item_permissions(response):
-    # Run validation process, since GET on nodes entry point is public
-    check_permissions(response, 'GET', append_allowed_methods=True)
-
-
-def before_returning_resource_permissions(response):
-    for item in response['_items']:
-        check_permissions(item, 'GET', append_allowed_methods=True)
-
-
-def project_node_type_has_method(response):
-    """Check for a specific request arg, and check generate the allowed_methods
-    list for the required node_type.
-    """
-    try:
-        node_type_name = request.args['node_type']
-    except KeyError:
-        return
-    # Proceed only node_type has been requested
-    if node_type_name:
-        # Look up the node type in the project document
-        node_type = next(
-            (item for item in response['node_types'] if item.get('name') \
-             and item['name'] == node_type_name), None)
-        if not node_type:
-            return abort(404)
-        # Check permissions and append the allowed_methods to the node_type
-        check_permissions(node_type, 'GET', append_allowed_methods=True)
-
-
 def before_returning_item_notifications(response):
     if request.args.get('parse'):
         notification_parse(response)
@@ -221,9 +191,6 @@ def before_returning_resource_notifications(response):
 
 app.on_fetched_item_notifications += before_returning_item_notifications
 app.on_fetched_resource_notifications += before_returning_resource_notifications
-app.on_fetched_item_projects += before_returning_item_permissions
-app.on_fetched_item_projects += project_node_type_has_method
-app.on_fetched_resource_projects += before_returning_resource_permissions
 
 
 # The encoding module (receive notification and report progress)

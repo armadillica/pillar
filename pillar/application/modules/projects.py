@@ -55,7 +55,7 @@ def before_edit_check_permissions(document, original):
     if user_has_role(u'admin'):
         return
 
-    check_permissions(original, request.method)
+    check_permissions('projects', original, request.method)
 
 
 def before_delete_project(document):
@@ -66,7 +66,7 @@ def before_delete_project(document):
     if user_has_role(u'admin'):
         return
 
-    check_permissions(document, request.method)
+    check_permissions('projects', document, request.method)
 
 
 def protect_sensitive_fields(document, original):
@@ -323,9 +323,9 @@ def project_quotas(project_id):
 
     # Check that the user has GET permissions on the project itself.
     project = mongo_utils.find_one_or_404('projects', project_id)
-    check_permissions(project, 'GET')
+    check_permissions('projects', project, 'GET')
 
-    file_size_used = _project_total_file_size(project_id)
+    file_size_used = project_total_file_size(project_id)
 
     info = {
         'file_size_quota': None,  # TODO: implement this later.
@@ -335,7 +335,7 @@ def project_quotas(project_id):
     return jsonify(info)
 
 
-def _project_total_file_size(project_id):
+def project_total_file_size(project_id):
     """Returns the total number of bytes used by files of this project."""
 
     files = current_app.data.driver.db['files']
@@ -347,7 +347,42 @@ def _project_total_file_size(project_id):
     ])
 
     # The aggregate function returns a cursor, not a document.
-    return next(file_size_used)['all_files']
+    try:
+        return next(file_size_used)['all_files']
+    except StopIteration:
+        # No files used at all.
+        return 0
+
+
+def before_returning_project_permissions(response):
+    # Run validation process, since GET on nodes entry point is public
+    check_permissions('projects', response, 'GET', append_allowed_methods=True)
+
+
+def before_returning_project_resource_permissions(response):
+    for item in response['_items']:
+        check_permissions('projects', item, 'GET', append_allowed_methods=True)
+
+
+def project_node_type_has_method(response):
+    """Check for a specific request arg, and check generate the allowed_methods
+    list for the required node_type.
+    """
+
+    node_type_name = request.args.get('node_type', '')
+
+    # Proceed only node_type has been requested
+    if not node_type_name:
+        return
+
+    # Look up the node type in the project document
+    if not any(node_type.get('name') == node_type_name
+               for node_type in response['node_types']):
+        return abort(404)
+
+    # Check permissions and append the allowed_methods to the node_type
+    check_permissions('project', response, 'GET', append_allowed_methods=True,
+                      check_node_type=node_type_name)
 
 
 def setup_app(app, url_prefix):
@@ -361,4 +396,9 @@ def setup_app(app, url_prefix):
     app.on_insert_projects += before_inserting_override_is_private_field
     app.on_insert_projects += before_inserting_projects
     app.on_inserted_projects += after_inserting_projects
+
+    app.on_fetched_item_projects += before_returning_project_permissions
+    app.on_fetched_resource_projects += before_returning_project_resource_permissions
+    app.on_fetched_item_projects += project_node_type_has_method
+
     app.register_blueprint(blueprint, url_prefix=url_prefix)

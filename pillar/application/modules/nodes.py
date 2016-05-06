@@ -66,7 +66,7 @@ def resource_parse_attachments(response):
         item_parse_attachments(item)
 
 def before_replacing_node(item, original):
-    check_permissions(original, 'PUT')
+    check_permissions('nodes', original, 'PUT')
     update_file_name(item)
 
 
@@ -108,7 +108,7 @@ def before_inserting_nodes(items):
             return None
 
     for item in items:
-        check_permissions(item, 'POST')
+        check_permissions('nodes', item, 'POST')
         if 'parent' in item and 'project' not in item:
             parent = nodes_collection.find_one({'_id': item['parent']})
             project = find_parent_project(parent)
@@ -188,12 +188,20 @@ def deduct_content_type(node_doc, original):
     node_doc['properties']['content_type'] = content_type
 
 
-def setup_app(app):
-    from application import before_returning_item_permissions, before_returning_resource_permissions
+def before_returning_node_permissions(response):
+    # Run validation process, since GET on nodes entry point is public
+    check_permissions('nodes', response, 'GET', append_allowed_methods=True)
 
+
+def before_returning_node_resource_permissions(response):
+    for item in response['_items']:
+        check_permissions('nodes', item, 'GET', append_allowed_methods=True)
+
+
+def setup_app(app):
     # Permission hooks
-    app.on_fetched_item_nodes += before_returning_item_permissions
-    app.on_fetched_resource_nodes += before_returning_resource_permissions
+    app.on_fetched_item_nodes += before_returning_node_permissions
+    app.on_fetched_resource_nodes += before_returning_node_resource_permissions
 
     app.on_fetched_item_nodes += item_parse_attachments
     app.on_fetched_resource_nodes += resource_parse_attachments
