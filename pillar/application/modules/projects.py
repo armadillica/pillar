@@ -271,9 +271,12 @@ def project_manage_users():
     users_collection = current_app.data.driver.db['users']
     users_collection.update({'_id': ObjectId(target_user_id)},
                             {operation: {'groups': admin_group_id}})
-
-    # Return the project in the response.
-    return jsonify({'_status': 'OK'})
+    user = users_collection.find_one({'_id': ObjectId(target_user_id)},
+                                     {'username': 1, 'email': 1,
+                                      'full_name': 1})
+    user.update({'_status': 'OK'})
+    # Return the user in the response.
+    return jsonify(user)
 
 
 def abort_with_error(status):
