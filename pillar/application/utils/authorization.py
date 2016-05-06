@@ -112,13 +112,19 @@ def require_login(require_roles=set()):
     return decorator
 
 
-def user_has_role(role):
+def user_has_role(role, user=None):
     """Returns True iff the user is logged in and has the given role."""
 
-    current_user = g.get('current_user')
-    if current_user is None:
+    if user is None:
+        user = g.get('current_user')
+
+    if user is None:
         return False
 
-    return role in current_user['roles']
+    return role in user['roles']
 
 
+def is_admin(user):
+    """Returns True iff the given user has the admin role."""
+
+    return user_has_role(u'admin', user)

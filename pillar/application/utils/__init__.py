@@ -40,10 +40,15 @@ class PillarJSONEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+def dumps(mongo_doc, **kwargs):
+    """json.dumps() for MongoDB documents."""
+    return json.dumps(mongo_doc, cls=PillarJSONEncoder, **kwargs)
+
+
 def jsonify(mongo_doc, status=200, headers=None):
     """JSonifies a Mongo document into a Flask response object."""
     
-    return current_app.response_class(json.dumps(mongo_doc, cls=PillarJSONEncoder),
+    return current_app.response_class(dumps(mongo_doc),
                                       mimetype='application/json',
                                       status=status,
                                       headers=headers)

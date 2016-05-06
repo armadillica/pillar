@@ -11,11 +11,8 @@ from application.utils import remove_private_keys, authorization, jsonify
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.authorization import user_has_role, check_permissions
 from manage_extra.node_types.asset import node_type_asset
-from manage_extra.node_types.blog import node_type_blog
 from manage_extra.node_types.comment import node_type_comment
 from manage_extra.node_types.group import node_type_group
-from manage_extra.node_types.page import node_type_page
-from manage_extra.node_types.post import node_type_post
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('projects', __name__)
@@ -36,7 +33,23 @@ def before_inserting_projects(items):
         item.pop('url', None)
 
 
+def override_is_private_field(project, original):
+    """Override the 'is_private' property from the world permissions.
+
+    :param project: the project, which will be updated
+    """
+
+    world_perms = project['permissions'].get('world', [])
+    project['is_private'] = 'GET' not in world_perms
+
+
+def before_inserting_override_is_private_field(projects):
+    for project in projects:
+        override_is_private_field(project, None)
+
+
 def before_edit_check_permissions(document, original):
+
     # Allow admin users to do whatever they want.
     # TODO: possibly move this into the check_permissions function.
     if user_has_role(u'admin'):
@@ -108,7 +121,7 @@ def after_inserting_project(project, db_user):
         return abort_with_error(status)
 
     admin_group_id = result['_id']
-    log.info('Created admin group %s for project %s', admin_group_id, project_id)
+    log.debug('Created admin group %s for project %s', admin_group_id, project_id)
 
     # Assign the current user to the group
     db_user.setdefault('groups', []).append(admin_group_id)
@@ -121,8 +134,10 @@ def after_inserting_project(project, db_user):
     log.debug('Made user %s member of group %s', user_id, admin_group_id)
 
     # Assign the group to the project with admin rights
+    is_admin = authorization.is_admin(db_user)
+    world_permissions = ['GET'] if is_admin else []
     permissions = {
-        'world': ['GET'],
+        'world': world_permissions,
         'users': [],
         'groups': [
             {'group': admin_group_id,
@@ -143,7 +158,7 @@ def after_inserting_project(project, db_user):
         with_permissions(node_type_comment)]
 
     # Allow admin users to use whatever url they want.
-    if not user_has_role(u'admin') or not project.get('url'):
+    if not is_admin or not project.get('url'):
         project['url'] = "p-{!s}".format(project_id)
 
     # Initialize storage page (defaults to GCS)
@@ -192,10 +207,10 @@ def _create_new_project(project_name, user_id, overrides):
         return abort_with_error(status)
     project.update(result)
 
-    # Now re-fetch the etag, as both the initial document and the returned
-    # result do not contain the same etag as the database.
-    document = current_app.data.driver.db['projects'].find_one(project['_id'],
-                                                               projection={'_etag': 1})
+    # Now re-fetch the project, as both the initial document and the returned
+    # result do not contain the same etag as the database. This also updates
+    # other fields set by hooks.
+    document = current_app.data.driver.db['projects'].find_one(project['_id'])
     project.update(document)
 
     log.info('Created project %s for user %s', project['_id'], user_id)
@@ -289,11 +304,14 @@ def abort_with_error(status):
 
 
 def setup_app(app, url_prefix):
+    app.on_replace_projects += override_is_private_field
     app.on_replace_projects += before_edit_check_permissions
     app.on_replace_projects += protect_sensitive_fields
+    app.on_update_projects += override_is_private_field
     app.on_update_projects += before_edit_check_permissions
     app.on_update_projects += protect_sensitive_fields
     app.on_delete_item_projects += before_delete_project
+    app.on_insert_projects += before_inserting_override_is_private_field
     app.on_insert_projects += before_inserting_projects
     app.on_inserted_projects += after_inserting_projects
     app.register_blueprint(blueprint, url_prefix=url_prefix)

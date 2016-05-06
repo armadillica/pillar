@@ -26,6 +26,15 @@ class AbstractProjectTest(AbstractPillarTest):
                                 data={'project_name': project_name})
         return resp
 
+    def _create_user_and_project(self, roles):
+        self._create_user_with_token(roles, 'token')
+        resp = self._create_project(u'Prøject El Niño', 'token')
+
+        self.assertEqual(201, resp.status_code, resp.data)
+        project = json.loads(resp.data)
+
+        return project
+
 
 class ProjectCreationTest(AbstractProjectTest):
     def test_project_creation_wrong_role(self):
@@ -44,7 +53,8 @@ class ProjectCreationTest(AbstractProjectTest):
         resp = self._create_project(u'Prøject El Niño', 'token')
         self.assertEqual(201, resp.status_code)
 
-        # The response of a POST is not the entire document, just some _xxx fields.
+        # The response of a POST is the entire project, but we'll test a GET on
+        # the returned Location nevertheless.
         project_info = json.loads(resp.data.decode('utf-8'))
         project_id = project_info['_id']
 
@@ -52,8 +62,9 @@ class ProjectCreationTest(AbstractProjectTest):
         self.assertEqual('http://localhost/projects/%s' % project_id,
                          resp.headers['Location'])
 
-        # Actually get the project.
-        resp = self.client.get(resp.headers['Location'])
+        # GET the project from the URL in the Location header to see if that works too.
+        auth_header = {'Authorization': self.make_header('token')}
+        resp = self.client.get(resp.headers['Location'], headers=auth_header)
         project = json.loads(resp.data.decode('utf-8'))
         project_id = project['_id']
 
@@ -64,7 +75,7 @@ class ProjectCreationTest(AbstractProjectTest):
         self.assertEqual(1, len(project['permissions']['groups']))
 
         # Check the etag
-        resp = self.client.get('/projects/%s' % project_id)
+        resp = self.client.get('/projects/%s' % project_id, headers=auth_header)
         from_db = json.loads(resp.data)
         self.assertEqual(from_db['_etag'], project['_etag'])
 
@@ -81,6 +92,18 @@ class ProjectCreationTest(AbstractProjectTest):
             self.assertEqual(str(project_id), group['name'])
             self.assertIn(group_id, db_user['groups'])
 
+    def test_project_creation_access_admin(self):
+        """Admin-created projects should be public"""
+
+        proj = self._create_user_and_project(roles={u'admin'})
+        self.assertEqual(['GET'], proj['permissions']['world'])
+
+    def test_project_creation_access_subscriber(self):
+        """Subscriber-created projects should be private"""
+
+        proj = self._create_user_and_project(roles={u'subscriber'})
+        self.assertEqual([], proj['permissions']['world'])
+
 
 class ProjectEditTest(AbstractProjectTest):
     def test_editing_as_subscriber(self):
@@ -92,7 +115,8 @@ class ProjectEditTest(AbstractProjectTest):
         project_info = self._create_user_and_project([u'subscriber'])
         project_url = '/projects/%(_id)s' % project_info
 
-        resp = self.client.get(project_url)
+        resp = self.client.get(project_url,
+                               headers={'Authorization': self.make_header('token')})
         project = json.loads(resp.data.decode('utf-8'))
 
         # Create another user we can try and assign the project to.
@@ -127,7 +151,8 @@ class ProjectEditTest(AbstractProjectTest):
         # Re-fetch from database to see which fields actually made it there.
         # equal to put_project -> changed in DB
         # equal to project -> not changed in DB
-        resp = self.client.get(project_url)
+        resp = self.client.get(project_url,
+                               headers={'Authorization': self.make_header('token')})
         db_proj = json.loads(resp.data)
         self.assertEqual(project['url'], db_proj['url'])
         self.assertEqual(put_project['description'], db_proj['description'])
@@ -238,12 +263,13 @@ class ProjectEditTest(AbstractProjectTest):
         self.assertEqual(403, resp.status_code, resp.data)
 
     def test_delete_by_admin(self):
-        # Create test project.
-        project_info = self._create_user_and_project([u'subscriber'])
+        # Create public test project.
+        project_info = self._create_user_and_project([u'admin'])
         project_id = project_info['_id']
         project_url = '/projects/%s' % project_id
 
-        # Create test user.
+        # Create admin user that doesn't own the project, to check that
+        # non-owner admins can delete projects too.
         self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeef')
 
         # Admin user should be able to DELETE.
@@ -262,6 +288,7 @@ class ProjectEditTest(AbstractProjectTest):
         self.assertTrue(db_proj['_deleted'])
 
         # Querying for deleted projects should include it.
+        # TODO: limit this to admin users only.
         # Also see http://python-eve.org/features.html#soft-delete
         projection = json.dumps({'name': 1, 'permissions': 1})
         where = json.dumps({'_deleted': True})  # MUST be True, 1 does not work.
@@ -294,19 +321,118 @@ class ProjectEditTest(AbstractProjectTest):
                                            'If-Match': project_info['_etag']})
         self.assertEqual(204, resp.status_code, resp.data)
 
-    def _create_user_and_project(self, roles):
-        self._create_user_with_token(roles, 'token')
+
+class ProjectNodeAccess(AbstractProjectTest):
+    def setUp(self, **kwargs):
+        super(ProjectNodeAccess, self).setUp(**kwargs)
+
+        from application.utils import PillarJSONEncoder
+
+        # Project is created by regular subscriber, so should be private.
+        self.user_id = self._create_user_with_token([u'subscriber'], 'token')
         resp = self._create_project(u'Prøject El Niño', 'token')
+        self.assertEqual(201, resp.status_code)
+        self.assertEqual('application/json', resp.mimetype)
+        self.project = json.loads(resp.data)
+        self.project_id = ObjectId(self.project['_id'])
 
-        self.assertEqual(201, resp.status_code, resp.data)
-        project = json.loads(resp.data)
+        self._create_user_with_token([u'subscriber'], 'other-token',
+                                     user_id='deadbeefdeadbeefcafef00d')
 
-        return project
+        self.test_node = {
+            'description': '',
+            'node_type': 'asset',
+            'user': self.user_id,
+            'properties': {
+                'status': 'published',
+                'content_type': 'image',
+            },
+            'name': 'Micak is a cool cat',
+            'project': self.project_id,
+        }
+
+        # Add a node to the project
+        resp = self.client.post('/nodes',
+                                headers={'Authorization': self.make_header('token'),
+                                         'Content-Type': 'application/json'},
+                                data=json.dumps(self.test_node, cls=PillarJSONEncoder),
+                                )
+        self.assertEqual(201, resp.status_code, (resp.status_code, resp.data))
+        self.node_info = json.loads(resp.data)
+        self.node_id = self.node_info['_id']
+        self.node_url = '/nodes/%s' % self.node_id
+
+    def test_node_access(self):
+        """Getting nodes should adhere to project access rules."""
+
+        # Getting the node as the project owner should work.
+        resp = self.client.get(self.node_url,
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, (resp.status_code, resp.data))
+
+        # Getting the node as an outsider should not work.
+        resp = self.client.get(self.node_url,
+                               headers={'Authorization': self.make_header('other-token')})
+        self.assertEqual(403, resp.status_code, (resp.status_code, resp.data))
+
+    def test_node_resource_access(self):
+        # The owner of the project should get the node.
+        resp = self.client.get('/nodes',
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, (resp.status_code, resp.data))
+        listed_nodes = json.loads(resp.data)['_items']
+        self.assertEquals(self.node_id, listed_nodes[0]['_id'])
+
+        # Listing all nodes should not include nodes from private projects.
+        resp = self.client.get('/nodes',
+                               headers={'Authorization': self.make_header('other-token')})
+        self.assertEqual(403, resp.status_code, (resp.status_code, resp.data))
+
+    def test_is_private_updated_by_world_permissions(self):
+        """For backward compatibility, is_private should reflect absence of world-GET"""
+
+        from application.utils import remove_private_keys, dumps
+
+        project_url = '/projects/%s' % self.project_id
+        put_project = remove_private_keys(self.project)
+
+        # Create admin user.
+        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeef')
+
+        # Make the project public
+        put_project['permissions']['world'] = ['GET']  # make public
+        put_project['is_private'] = True  # This should be overridden.
+
+        resp = self.client.put(project_url,
+                               data=dumps(put_project),
+                               headers={'Authorization': self.make_header('admin-token'),
+                                        'Content-Type': 'application/json',
+                                        'If-Match': self.project['_etag']})
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        with self.app.test_request_context():
+            projects = self.app.data.driver.db['projects']
+            db_proj = projects.find_one(self.project_id)
+            self.assertEqual(['GET'], db_proj['permissions']['world'])
+            self.assertFalse(db_proj['is_private'])
+
+        # Make the project private
+        put_project['permissions']['world'] = []
+
+        resp = self.client.put(project_url,
+                               data=dumps(put_project),
+                               headers={'Authorization': self.make_header('admin-token'),
+                                        'Content-Type': 'application/json',
+                                        'If-Match': db_proj['_etag']})
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        with self.app.test_request_context():
+            projects = self.app.data.driver.db['projects']
+            db_proj = projects.find_one(self.project_id)
+            self.assertEqual([], db_proj['permissions']['world'])
+            self.assertTrue(db_proj['is_private'])
 
     def test_add_remove_user(self):
-        # Create test project
-        project_info = self._create_user_and_project([u'subscriber'])
-        project_id = project_info['_id']
         project_add_user_url = '/p/users'
 
         # Create another user we can try to share the project with
@@ -314,9 +440,9 @@ class ProjectEditTest(AbstractProjectTest):
         self._create_user_with_token(['subscriber'], 'other-token',
                                      user_id=other_user_id)
 
-        # Make request payload
+        # Use our API to add user to group
         payload = {
-            'project_id': project_id,
+            'project_id': self.project_id,
             'user_id': other_user_id,
             'action': 'add'}
 
@@ -325,7 +451,7 @@ class ProjectEditTest(AbstractProjectTest):
                                 content_type='application/json',
                                 headers={
                                     'Authorization': self.make_header('token'),
-                                    'If-Match': project_info['_etag']})
+                                    'If-Match': self.project['_etag']})
         self.assertEqual(200, resp.status_code, resp.data)
 
         with self.app.test_request_context():
@@ -341,7 +467,7 @@ class ProjectEditTest(AbstractProjectTest):
             admin_group = groups.find_one({'_id': admin_group_id})
 
             # Check if admin group name matches
-            self.assertEqual(admin_group['name'], str(project_info['_id']))
+            self.assertEqual(admin_group['name'], str(self.project['_id']))
 
         # Update payload to remove the user we just added
         payload['action'] = 'remove'
@@ -351,6 +477,6 @@ class ProjectEditTest(AbstractProjectTest):
                                 content_type='application/json',
                                 headers={
                                     'Authorization': self.make_header('token'),
-                                    'If-Match': project_info['_etag']})
+                                    'If-Match': self.project['_etag']})
         self.assertEqual(200, resp.status_code, resp.data)
 
