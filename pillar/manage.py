@@ -868,7 +868,73 @@ def refresh_file_sizes():
     if unmatched:
         log.warning('Unable to update %i documents.', unmatched)
     log.info('%i bytes (%.3f GiB) storage used in total.',
-             total_size, total_size / 1024**3)
+             total_size, total_size / 1024 ** 3)
+
+
+@manager.command
+def project_stats():
+    import csv
+    import sys
+    from application.modules import projects
+
+    proj_coll = app.data.driver.db['projects']
+    nodes = app.data.driver.db['nodes']
+
+    aggr_project_count = 0
+    aggr_file_size = 0
+    aggr_node_count = 0
+    aggr_top_nodes = 0
+
+    csvout = csv.writer(sys.stdout)
+    csvout.writerow(['project ID', 'owner', 'project name', 'file size',
+                     'nr of nodes', 'nr of top-level nodes', ])
+
+    for proj in proj_coll.find(projection={'user': 1,
+                                           'name': 1,
+                                           '_id': 1}):
+        project_id = proj['_id']
+        row = [str(project_id),
+               str(proj['user']),
+               str(proj['name'])]
+
+        file_size = projects.project_total_file_size(project_id)
+        row.append(file_size)
+
+        node_count_result = nodes.aggregate([
+            {'$match': {'project': project_id}},
+            {'$project': {'parent': 1,
+                          'is_top': {'$cond': [{'$gt': ['$parent', None]}, 0, 1]},
+                          }},
+            {'$group': {
+                '_id': None,
+                'all': {'$sum': 1},
+                'top': {'$sum': '$is_top'},
+            }}
+        ])
+
+        try:
+            node_counts = next(node_count_result)
+            nodes_all = node_counts['all']
+            nodes_top = node_counts['top']
+        except StopIteration:
+            # No result from the nodes means nodeless project.
+            nodes_all = 0
+            nodes_top = 0
+        row.append(nodes_all)
+        row.append(nodes_top)
+
+        aggr_project_count += 1
+        aggr_file_size += file_size
+        aggr_node_count += nodes_all
+        aggr_top_nodes += nodes_top
+
+        csvout.writerow(row)
+
+    csvout.writerow([
+        'total', '', '%i projects' % aggr_project_count, aggr_file_size, aggr_node_count,
+        aggr_top_nodes
+    ])
+
 
 if __name__ == '__main__':
     manager.run()
