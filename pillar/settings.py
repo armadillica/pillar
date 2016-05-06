@@ -402,6 +402,10 @@ files_schema = {
         'type': 'integer',
         'required': True,
     },
+    'length_aggregate_in_bytes': {  # Size of file + all variations
+        'type': 'integer',
+        'required': False,  # it's computed on the fly anyway, so clients don't need to provide it.
+    },
     'md5': {
         'type': 'string',
         'required': True,

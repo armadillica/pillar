@@ -628,6 +628,24 @@ def create_file_doc_for_upload(project_id, uploaded_file):
     return file_fields['_id'], internal_filename, status
 
 
+def compute_aggregate_length(file_doc, original=None):
+    """Computes the total length (in bytes) of the file and all variations.
+
+    Stores the result in file_doc['length_aggregate_in_bytes']
+    """
+
+    # Compute total size of all variations.
+    variations = file_doc.get('variations', ())
+    var_length = sum(var.get('length', 0) for var in variations)
+
+    file_doc['length_aggregate_in_bytes'] = file_doc.get('length', 0) + var_length
+
+
+def compute_aggregate_length_items(file_docs):
+    for file_doc in file_docs:
+        compute_aggregate_length(file_doc)
+
+
 def setup_app(app, url_prefix):
     app.on_pre_GET_files += on_pre_get_files
 
@@ -635,5 +653,9 @@ def setup_app(app, url_prefix):
     app.on_fetched_resource_files += before_returning_files
 
     app.on_delete_item_files += before_deleting_file
+
+    app.on_update_files += compute_aggregate_length
+    app.on_replace_files += compute_aggregate_length
+    app.on_insert_files += compute_aggregate_length_items
 
     app.register_blueprint(file_storage, url_prefix=url_prefix)
