@@ -886,7 +886,7 @@ def project_stats():
     aggr = defaultdict(partial(defaultdict, int))
 
     csvout = csv.writer(sys.stdout)
-    csvout.writerow(['project ID', 'owner', 'project name', 'private', 'file size',
+    csvout.writerow(['project ID', 'owner', 'private', 'file size',
                      'nr of nodes', 'nr of top-level nodes', ])
 
     for proj in proj_coll.find(projection={'user': 1,
@@ -897,7 +897,6 @@ def project_stats():
         is_private = proj.get('is_private', False)
         row = [str(project_id),
                unicode(proj['user']).encode('utf-8'),
-               unicode(proj['name']).encode('utf-8'),
                is_private]
 
         file_size = projects.project_total_file_size(project_id)
@@ -936,15 +935,15 @@ def project_stats():
         csvout.writerow(row)
 
     csvout.writerow([
-        'public', '', '%i projects' % aggr[False]['project_count'], '',
+        'public', '', '%i projects' % aggr[False]['project_count'],
         aggr[False]['file_size'], aggr[False]['node_count'], aggr[False]['top_nodes'],
     ])
     csvout.writerow([
-        'private', '', '%i projects' % aggr[True]['project_count'], '',
+        'private', '', '%i projects' % aggr[True]['project_count'],
         aggr[True]['file_size'], aggr[True]['node_count'], aggr[True]['top_nodes'],
     ])
     csvout.writerow([
-        'total', '', '%i projects' % aggr[None]['project_count'], '',
+        'total', '', '%i projects' % aggr[None]['project_count'],
         aggr[None]['file_size'], aggr[None]['node_count'], aggr[None]['top_nodes'],
     ])
 
