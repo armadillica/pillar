@@ -70,7 +70,13 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
     if permission_granted:
         if append_allowed_methods:
             # TODO: rename this field _allowed_methods
-            resource['allowed_methods'] = list(set(allowed_methods))
+            if check_node_type:
+                node_type = next((node_type for node_type in resource['node_types']
+                                  if node_type['name'] == check_node_type))
+                assign_to = node_type
+            else:
+                assign_to = resource
+            assign_to['allowed_methods'] = list(set(allowed_methods))
         return
 
     abort(403)

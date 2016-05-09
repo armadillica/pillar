@@ -392,6 +392,11 @@ def project_node_type_has_method(response):
                       check_node_type=node_type_name)
 
 
+def projects_node_type_has_method(response):
+    for project in response['_items']:
+        project_node_type_has_method(project)
+
+
 def setup_app(app, url_prefix):
     app.on_replace_projects += override_is_private_field
     app.on_replace_projects += before_edit_check_permissions
@@ -407,5 +412,6 @@ def setup_app(app, url_prefix):
     app.on_fetched_item_projects += before_returning_project_permissions
     app.on_fetched_resource_projects += before_returning_project_resource_permissions
     app.on_fetched_item_projects += project_node_type_has_method
+    app.on_fetched_resource_projects += projects_node_type_has_method
 
     app.register_blueprint(blueprint, url_prefix=url_prefix)
