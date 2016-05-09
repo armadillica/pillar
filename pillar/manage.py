@@ -894,8 +894,8 @@ def project_stats():
                                            '_id': 1}):
         project_id = proj['_id']
         row = [str(project_id),
-               str(proj['user']),
-               str(proj['name'])]
+               unicode(proj['user']).encode('utf-8'),
+               unicode(proj['name']).encode('utf-8')]
 
         file_size = projects.project_total_file_size(project_id)
         row.append(file_size)
