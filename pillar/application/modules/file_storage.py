@@ -1,5 +1,6 @@
 import datetime
 import logging
+import mimetypes
 import os
 import tempfile
 import uuid
@@ -36,6 +37,9 @@ log = logging.getLogger(__name__)
 file_storage = Blueprint('file_storage', __name__,
                          template_folder='templates',
                          static_folder='../../static/storage', )
+
+# Add our own extensions to the mimetypes package
+mimetypes.add_type('application/x-blend', '.blend')
 
 
 @file_storage.route('/gcs/<bucket_name>/<subdir>/')
@@ -463,8 +467,6 @@ def override_content_type(uploaded_file):
     :type uploaded_file: werkzeug.datastructures.FileStorage
     """
 
-    import mimetypes
-
     # Possibly use the browser-provided mime type
     mimetype = uploaded_file.mimetype
     if '/' in mimetype:
@@ -472,11 +474,6 @@ def override_content_type(uploaded_file):
         if mimecat in {'video', 'audio', 'image'}:
             # The browser's mime type is probably ok, just use it.
             return
-
-    # Add our own extensions to the mimetypes package
-    if not mimetypes.inited:
-        mimetypes.init()
-        mimetypes.add_type('application/x-blend', '.blend')
 
     # And then use it to set the mime type.
     (mimetype, encoding) = mimetypes.guess_type(uploaded_file.filename)
