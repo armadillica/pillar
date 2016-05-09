@@ -225,7 +225,10 @@ def _create_new_project(project_name, user_id, overrides):
 def create_project(overrides=None):
     """Creates a new project."""
 
-    project_name = request.form['project_name']
+    if request.mimetype == 'application/json':
+        project_name = request.json['name']
+    else:
+        project_name = request.form['project_name']
     user_id = g.current_user['user_id']
 
     project = _create_new_project(project_name, user_id, overrides)
