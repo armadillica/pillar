@@ -388,7 +388,7 @@ def project_node_type_has_method(response):
         return abort(404)
 
     # Check permissions and append the allowed_methods to the node_type
-    check_permissions('project', response, 'GET', append_allowed_methods=True,
+    check_permissions('projects', response, 'GET', append_allowed_methods=True,
                       check_node_type=node_type_name)
 
 

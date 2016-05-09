@@ -1,3 +1,5 @@
+import json
+
 from bson import ObjectId
 from eve.methods.post import post_internal
 from eve.methods.put import put_internal
@@ -68,3 +70,14 @@ class NodeContentTypeTest(AbstractPillarTest):
         perform_test(file_id_image, 'image')
         perform_test(file_id_video, 'video')
         perform_test(file_id_blend, 'file')
+
+    def test_get_project_node_type(self):
+        user_id = self.create_user()
+        self.create_valid_auth_token(user_id, 'token')
+        project_id, _ = self.ensure_project_exists()
+
+        resp = self.client.get('/projects/%s?node_type=asset' % project_id)
+        self.assertEqual(200, resp.status_code)
+
+        data = json.loads(resp.data)
+        self.assertEqual([u'GET'], data['allowed_methods'])
