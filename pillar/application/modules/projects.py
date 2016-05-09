@@ -7,8 +7,7 @@ from eve.methods.post import post_internal
 from eve.methods.patch import patch_internal
 from flask import g, Blueprint, request, abort, current_app
 
-from application.modules import mongo_utils
-from application.utils import remove_private_keys, authorization, jsonify
+from application.utils import remove_private_keys, authorization, jsonify, mongo
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.authorization import user_has_role, check_permissions, require_login
 from manage_extra.node_types.asset import node_type_asset
@@ -330,7 +329,7 @@ def project_quotas(project_id):
     """Returns information about the project's limits."""
 
     # Check that the user has GET permissions on the project itself.
-    project = mongo_utils.find_one_or_404('projects', project_id)
+    project = mongo.find_one_or_404('projects', project_id)
     check_permissions('projects', project, 'GET')
 
     file_size_used = project_total_file_size(project_id)
