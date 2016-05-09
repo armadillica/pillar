@@ -875,27 +875,30 @@ def refresh_file_sizes():
 def project_stats():
     import csv
     import sys
+    from collections import defaultdict
+    from functools import partial
+
     from application.modules import projects
 
     proj_coll = app.data.driver.db['projects']
     nodes = app.data.driver.db['nodes']
 
-    aggr_project_count = 0
-    aggr_file_size = 0
-    aggr_node_count = 0
-    aggr_top_nodes = 0
+    aggr = defaultdict(partial(defaultdict, int))
 
     csvout = csv.writer(sys.stdout)
-    csvout.writerow(['project ID', 'owner', 'project name', 'file size',
+    csvout.writerow(['project ID', 'owner', 'project name', 'private', 'file size',
                      'nr of nodes', 'nr of top-level nodes', ])
 
     for proj in proj_coll.find(projection={'user': 1,
                                            'name': 1,
+                                           'is_private': 1,
                                            '_id': 1}):
         project_id = proj['_id']
+        is_private = proj.get('is_private', False)
         row = [str(project_id),
                unicode(proj['user']).encode('utf-8'),
-               unicode(proj['name']).encode('utf-8')]
+               unicode(proj['name']).encode('utf-8'),
+               is_private]
 
         file_size = projects.project_total_file_size(project_id)
         row.append(file_size)
@@ -923,16 +926,26 @@ def project_stats():
         row.append(nodes_all)
         row.append(nodes_top)
 
-        aggr_project_count += 1
-        aggr_file_size += file_size
-        aggr_node_count += nodes_all
-        aggr_top_nodes += nodes_top
+        for collection in aggr[None], aggr[is_private]:
+            collection['project_count'] += 1
+            collection['project_count'] += 1
+            collection['file_size'] += file_size
+            collection['node_count'] += nodes_all
+            collection['top_nodes'] += nodes_top
 
         csvout.writerow(row)
 
     csvout.writerow([
-        'total', '', '%i projects' % aggr_project_count, aggr_file_size, aggr_node_count,
-        aggr_top_nodes
+        'public', '', '%i projects' % aggr[False]['project_count'], '',
+        aggr[False]['file_size'], aggr[False]['node_count'], aggr[False]['top_nodes'],
+    ])
+    csvout.writerow([
+        'private', '', '%i projects' % aggr[True]['project_count'], '',
+        aggr[True]['file_size'], aggr[True]['node_count'], aggr[True]['top_nodes'],
+    ])
+    csvout.writerow([
+        'total', '', '%i projects' % aggr[None]['project_count'], '',
+        aggr[None]['file_size'], aggr[None]['node_count'], aggr[None]['top_nodes'],
     ])
 
 
