@@ -224,7 +224,7 @@ def _create_new_project(project_name, user_id, overrides):
 
 
 @blueprint.route('/create', methods=['POST'])
-@authorization.require_login(require_roles={'admin', 'subscriber'})
+@authorization.require_login(require_roles={u'admin', u'subscriber', u'demo'})
 def create_project(overrides=None):
     """Creates a new project."""
 
