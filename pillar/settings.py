@@ -798,3 +798,4 @@ UPSET_ON_PUT = False  # do not create new document on PUT of non-existant URL.
 X_DOMAINS = '*'
 X_ALLOW_CREDENTIALS = True
 X_HEADERS = 'Authorization'
+XML = False
