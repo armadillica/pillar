@@ -701,7 +701,7 @@ def files_make_public_t():
             storage = GoogleCloudStorageBucket(str(f['project']))
             blob = storage.Get(variation_t['file_path'], to_dict=False)
             if not blob:
-                print('Unable to find blob for project %s file %s', f['project'], f['_id'])
+                print('Unable to find blob for project %s file %s' %(f['project'], f['_id']))
                 continue
 
             print('Making blob public: {0}'.format(blob.path))
