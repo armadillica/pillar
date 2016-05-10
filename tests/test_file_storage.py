@@ -69,7 +69,7 @@ class TempDirTest(AbstractPillarTest):
 
 
 class FileAccessTest(AbstractPillarTest):
-    def test_link_stripping(self):
+    def __test_link_stripping(self):
         """Subscribers should get all links, but non-subscribers only a subset."""
 
         img_file_id, _ = self.ensure_file_exists()

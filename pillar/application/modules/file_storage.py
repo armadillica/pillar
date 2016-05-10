@@ -298,6 +298,11 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
 def before_returning_file(response):
     ensure_valid_link(response)
 
+    # Enable this call later, when we have implemented the is_public field on files.
+    # strip_link_and_variations(response)
+
+
+def strip_link_and_variations(response):
     # Check the access level of the user.
     if g.current_user is None:
         has_full_access = False
@@ -313,7 +318,7 @@ def before_returning_file(response):
 
         # Image files have public variations, other files don't.
         if not response.get('content_type', '').startswith('image/'):
-            if 'variations' in response and response['variations'] is not None:
+            if response.get('variations') is not None:
                 response['variations'] = []
 
 
