@@ -64,6 +64,9 @@ FILE_LINK_VALIDITY = defaultdict(
     gcs=3600 * 23,  # 23 hours for Google Cloud Storage.
 )
 
+# Roles with full GET-access to all variations of files.
+FULL_FILE_ACCESS_ROLES = {u'admin', u'subscriber', u'demo'}
+
 # Client and Subclient IDs for Blender ID
 BLENDER_ID_CLIENT_ID = 'SPECIAL-SNOWFLAKE-57'
 BLENDER_ID_SUBCLIENT_ID = 'PILLAR'

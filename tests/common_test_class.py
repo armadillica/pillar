@@ -79,6 +79,8 @@ class AbstractPillarTest(TestMinimal):
             file = copy.deepcopy(EXAMPLE_FILE)
             if file_overrides is not None:
                 file.update(file_overrides)
+            if '_id' in file and file['_id'] is None:
+                del file['_id']
 
             result = files_collection.insert_one(file)
             file_id = result.inserted_id

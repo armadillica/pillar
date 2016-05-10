@@ -298,6 +298,24 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
 def before_returning_file(response):
     ensure_valid_link(response)
 
+    # Check the access level of the user.
+    if g.current_user is None:
+        has_full_access = False
+    else:
+        user_roles = g.current_user['roles']
+        access_roles = current_app.config['FULL_FILE_ACCESS_ROLES']
+        has_full_access = bool(user_roles.intersection(access_roles))
+
+    # Strip all file variations (unless image) and link to the actual file.
+    if not has_full_access:
+        response.pop('link', None)
+        response.pop('link_expires', None)
+
+        # Image files have public variations, other files don't.
+        if not response.get('content_type', '').startswith('image/'):
+            if 'variations' in response and response['variations'] is not None:
+                response['variations'] = []
+
 
 def before_returning_files(response):
     for item in response['_items']:
@@ -337,8 +355,10 @@ def _generate_all_links(response, now):
         response['project']) if 'project' in response else None  # TODO: add project id to all files
     backend = response['backend']
     response['link'] = generate_link(backend, response['file_path'], project_id)
-    if 'variations' in response:
-        for variation in response['variations']:
+
+    variations = response.get('variations')
+    if variations:
+        for variation in variations:
             variation['link'] = generate_link(backend, variation['file_path'], project_id)
 
     # Construct the new expiry datetime.
@@ -491,7 +511,6 @@ def override_content_type(uploaded_file):
 @file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
 @require_login(require_roles={u'subscriber', u'admin', u'demo'})
 def stream_to_gcs(project_id):
-
     projects = current_app.data.driver.db['projects']
     try:
         project = projects.find_one(ObjectId(project_id), projection={'_id': 1})
