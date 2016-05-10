@@ -90,7 +90,6 @@ def protect_sensitive_fields(document, original):
         document[name] = original[name]
 
     revert('url')
-    revert('is_private')
     revert('status')
     revert('category')
     revert('user')

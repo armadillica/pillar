@@ -103,6 +103,14 @@ class ProjectCreationTest(AbstractProjectTest):
 
         proj = self._create_user_and_project(roles={u'subscriber'})
         self.assertEqual([], proj['permissions']['world'])
+        self.assertTrue(proj['is_private'])
+
+        # Also check the database contents
+        with self.app.test_request_context():
+            project_id = ObjectId(proj['_id'])
+            db_proj = self.app.data.driver.db['projects'].find_one(project_id)
+            self.assertEqual([], db_proj['permissions']['world'])
+            self.assertTrue(db_proj['is_private'])
 
 
 class ProjectEditTest(AbstractProjectTest):
@@ -136,10 +144,12 @@ class ProjectEditTest(AbstractProjectTest):
                                      u'sadržaja pod različitim operativnim sustavima.'
         put_project['name'] = u'โครงการปั่นเมฆ'
         put_project['summary'] = u'Это переведена на Google'
-        put_project['is_private'] = False
         put_project['status'] = 'pending'
         put_project['category'] = 'software'
         put_project['user'] = other_user_id
+
+        # Try making the project public. This should update is_private as well.
+        put_project['permissions']['world'] = ['GET']
 
         resp = self.client.put(project_url,
                                data=dumps(put_project),
@@ -158,9 +168,12 @@ class ProjectEditTest(AbstractProjectTest):
         self.assertEqual(put_project['description'], db_proj['description'])
         self.assertEqual(put_project['name'], db_proj['name'])
         self.assertEqual(put_project['summary'], db_proj['summary'])
-        self.assertEqual(project['is_private'], db_proj['is_private'])
         self.assertEqual(project['status'], db_proj['status'])
         self.assertEqual(project['category'], db_proj['category'])
+
+        # Project should be consistent.
+        self.assertEqual(False, db_proj['is_private'])
+        self.assertEqual(['GET'], db_proj['permissions']['world'])
 
     def test_editing_as_admin(self):
         """Test that we can set all fields as admin."""
