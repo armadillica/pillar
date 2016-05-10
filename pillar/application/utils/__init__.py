@@ -1,13 +1,15 @@
 import copy
 import json
 import datetime
+import functools
+import logging
 
 import bson
 from eve import RFC1123_DATE_FORMAT
 from flask import current_app
 
 __all__ = ('remove_private_keys', 'PillarJSONEncoder')
-
+log = logging.getLogger(__name__)
 
 def remove_private_keys(document):
     """Removes any key that starts with an underscore, returns result as new
@@ -52,3 +54,16 @@ def jsonify(mongo_doc, status=200, headers=None):
                                       mimetype='application/json',
                                       status=status,
                                       headers=headers)
+
+
+def skip_when_testing(func):
+    """Decorator, skips the decorated function when app.config['TESTING']"""
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        if current_app.config['TESTING']:
+            log.debug('Skipping call to %s(...) due to TESTING', func.func_name)
+            return None
+
+        return func(*args, **kwargs)
+    return wrapper
