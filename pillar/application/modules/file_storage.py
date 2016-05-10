@@ -124,6 +124,9 @@ def _process_image(gcs, file_id, local_file, src_file):
         blob.upload_from_filename(variation['local_path'],
                                   content_type=variation['content_type'])
 
+        if variation.get('size') == 't':
+            blob.make_public()
+
         try:
             os.unlink(variation['local_path'])
         except OSError:
