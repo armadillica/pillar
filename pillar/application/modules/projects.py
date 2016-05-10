@@ -45,7 +45,8 @@ def override_is_private_field(project, original):
         return
 
     world_perms = project['permissions'].get('world', [])
-    project['is_private'] = 'GET' not in world_perms
+    is_private = 'GET' not in world_perms
+    project['is_private'] = is_private
 
 
 def before_inserting_override_is_private_field(projects):
