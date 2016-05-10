@@ -687,26 +687,27 @@ def files_make_public_t():
     from gcloud.exceptions import InternalServerError
     from application.utils.gcs import GoogleCloudStorageBucket
     files_collection = app.data.driver.db['files']
+
     for f in files_collection.find({'backend': 'gcs'}):
-        if 'variations' in f:
-            variation_t = next((item for item in f['variations'] \
-                                if item['size'] == 't'), None)
-            if variation_t:
-                try:
-                    storage = GoogleCloudStorageBucket(str(f['project']))
-                    blob = storage.Get(variation_t['file_path'], to_dict=False)
-                    if blob:
-                        try:
-                            print("Making blob public: {0}".format(blob.path))
-                            blob.make_public()
-                        except InternalServerError:
-                            print("Internal Server Error")
-                        except Exception:
-                            pass
-                except InternalServerError:
-                    print("Internal Server Error")
-                except Exception:
-                    pass
+        if 'variations' not in f:
+            continue
+
+        variation_t = next((item for item in f['variations']
+                            if item['size'] == 't'), None)
+        if not variation_t:
+            continue
+
+        try:
+            storage = GoogleCloudStorageBucket(str(f['project']))
+            blob = storage.Get(variation_t['file_path'], to_dict=False)
+            if not blob:
+                print('Unable to find blob for project %s file %s', f['project'], f['_id'])
+                continue
+
+            print('Making blob public: {0}'.format(blob.path))
+            blob.make_public()
+        except InternalServerError as ex:
+            print('Internal Server Error: ', ex)
 
 
 @manager.command
