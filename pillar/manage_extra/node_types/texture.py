@@ -29,10 +29,10 @@ node_type_texture = {
                     'map_type': {
                         'type': 'string',
                         'allowed': [
+                            'col',
                             'spec',
                             'bump',
                             'nor',
-                            'col',
                             'translucency',
                             'emission',
                             'alpha'
@@ -62,7 +62,7 @@ node_type_texture = {
     'form_schema': {
         'status': {},
         'content_type': {'visible': False},
-        'files': {'visible': False},
+        'files': [],
         'is_tileable': {},
         'is_landscape': {},
         'resolution': {},
