@@ -19,7 +19,7 @@ node_type_texture = {
         'order': {'type': 'integer'},
         # We point to the file variations (and use it to extract any relevant
         # variation useful for our scope).
-        'files' : {
+        'files': {
             'type': 'list',
             'schema': {
                 'type': 'dict',

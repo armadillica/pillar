@@ -33,7 +33,7 @@ node_type_asset = {
                 'type': 'dict',
                 'schema': {
                     'field': {'type': 'string'},
-                    'files' : {
+                    'files': {
                         'type': 'list',
                         'schema': {
                             'type': 'dict',
