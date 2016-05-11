@@ -28,6 +28,28 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
     :type check_node_type: str
     """
 
+    if not has_permissions(collection_name, resource, method, append_allowed_methods,
+                           check_node_type):
+        abort(403)
+
+
+def has_permissions(collection_name, resource, method, append_allowed_methods=False,
+                      check_node_type=None):
+    """Check user permissions to access a node. We look up node permissions from
+    world to groups to users and match them with the computed user permissions.
+
+    :param collection_name: name of the collection the resource comes from.
+    :param resource: resource from MongoDB
+    :type resource: dict
+    :param method: name of the requested HTTP method
+    :param append_allowed_methods: whether to return the list of allowed methods
+        in the resource. Only valid when method='GET'.
+    :param check_node_type: node type to check. Only valid when collection_name='projects'.
+    :type check_node_type: str
+    :returns: True if the user has access, False otherwise.
+    :rtype: bool
+    """
+
     # Check some input values.
     if collection_name not in CHECK_PERMISSIONS_IMPLEMENTED_FOR:
         raise ValueError('check_permission only implemented for %s, not for %s',
@@ -44,7 +66,7 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
     if not computed_permissions:
         log.info('No permissions available to compute for %s on resource %r',
                  method, resource.get('node_type', resource))
-        abort(403)
+        return False
 
     # Accumulate allowed methods from the user, group and world level.
     allowed_methods = set()
@@ -77,9 +99,9 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
             else:
                 assign_to = resource
             assign_to['allowed_methods'] = list(set(allowed_methods))
-        return
+        return True
 
-    abort(403)
+    return False
 
 
 def compute_aggr_permissions(collection_name, resource, check_node_type):

@@ -26,9 +26,10 @@ class AbstractProjectTest(AbstractPillarTest):
                                 data={'project_name': project_name})
         return resp
 
-    def _create_user_and_project(self, roles):
-        self._create_user_with_token(roles, 'token')
-        resp = self._create_project(u'Prøject El Niño', 'token')
+    def _create_user_and_project(self, roles, user_id='cafef00df00df00df00df00d', token='token',
+                                 project_name=u'Prøject El Niño'):
+        self._create_user_with_token(roles, token, user_id=user_id)
+        resp = self._create_project(project_name, token)
 
         self.assertEqual(201, resp.status_code, resp.data)
         project = json.loads(resp.data)
@@ -111,6 +112,47 @@ class ProjectCreationTest(AbstractProjectTest):
             db_proj = self.app.data.driver.db['projects'].find_one(project_id)
             self.assertEqual([], db_proj['permissions']['world'])
             self.assertTrue(db_proj['is_private'])
+
+    def test_project_list(self):
+        """Test that we get an empty list when querying for non-existing projects, instead of 403"""
+
+        proj_a = self._create_user_and_project(user_id=24 * 'a',
+                                               roles={u'subscriber'},
+                                               project_name=u'Prøject A',
+                                               token='token-a')
+        proj_b = self._create_user_and_project(user_id=24 * 'b',
+                                               roles={u'subscriber'},
+                                               project_name=u'Prøject B',
+                                               token='token-b')
+
+        # Assertion: each user must have access to their own project.
+        resp = self.client.get('/projects/%s' % proj_a['_id'],
+                               headers={'Authorization': self.make_header('token-a')})
+        self.assertEqual(200, resp.status_code, resp.data)
+        resp = self.client.get('/projects/%s' % proj_b['_id'],
+                               headers={'Authorization': self.make_header('token-b')})
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        # Getting a project list should return projects you have access to.
+        resp = self.client.get('/projects',
+                               headers={'Authorization': self.make_header('token-a')})
+        self.assertEqual(200, resp.status_code)
+        proj_list = json.loads(resp.data)
+        self.assertEqual([u'Prøject A'], [p['name'] for p in proj_list['_items']])
+
+        resp = self.client.get('/projects',
+                               headers={'Authorization': self.make_header('token-b')})
+        self.assertEqual(200, resp.status_code)
+        proj_list = json.loads(resp.data)
+        self.assertEqual([u'Prøject B'], [p['name'] for p in proj_list['_items']])
+
+        # No access to anything for user C, should result in empty list.
+        self._create_user_with_token(roles={u'subscriber'}, token='token-c', user_id=12 * 'c')
+        resp = self.client.get('/projects',
+                               headers={'Authorization': self.make_header('token-c')})
+        self.assertEqual(200, resp.status_code)
+        proj_list = json.loads(resp.data)
+        self.assertEqual([], proj_list['_items'])
 
 
 class ProjectEditTest(AbstractProjectTest):

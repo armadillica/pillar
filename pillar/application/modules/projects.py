@@ -367,8 +367,11 @@ def before_returning_project_permissions(response):
 
 
 def before_returning_project_resource_permissions(response):
-    for item in response['_items']:
-        check_permissions('projects', item, 'GET', append_allowed_methods=True)
+    # Return only those projects the user has access to.
+    allow = [project for project in response['_items']
+             if authorization.has_permissions('projects', project,
+                                              'GET', append_allowed_methods=True)]
+    response['_items'] = allow
 
 
 def project_node_type_has_method(response):
