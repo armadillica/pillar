@@ -19,8 +19,8 @@ class FileStorageTest(AbstractPillarTest):
 
         fake = self.fake_file('compressed.blend', 'jemoeder')
         override_content_type(fake)
-        self.assertEqual('application/x-blend', fake.content_type)
-        self.assertEqual('application/x-blend', fake.mimetype)
+        self.assertEqual('application/x-blender', fake.content_type)
+        self.assertEqual('application/x-blender', fake.mimetype)
 
         fake = self.fake_file('blend.mp3', 'application/octet-stream')
         override_content_type(fake)
@@ -105,7 +105,7 @@ class FileAccessTest(AbstractPillarTest):
 
         })
         blend_file_id, _ = self.ensure_file_exists({u'_id': None,
-                                                    u'content_type': u'application/x-blend',
+                                                    u'content_type': u'application/x-blender',
                                                     u'variations': None})
 
         nonsub_user_id = self.create_user(user_id='cafef00dcafef00d00000000', roles=())
