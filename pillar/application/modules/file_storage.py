@@ -550,8 +550,7 @@ def stream_to_gcs(project_id):
         gcs = GoogleCloudStorageBucket(project_id)
         blob = gcs.bucket.blob('_/' + internal_fname, chunk_size=256 * 1024 * 2)
         blob.upload_from_file(stream_for_gcs,
-                              content_type=uploaded_file.mimetype,
-                              size=uploaded_file.content_length)
+                              content_type=uploaded_file.mimetype)
     except Exception:
         log.exception('Error uploading file to Google Cloud Storage (GCS),'
                       ' aborting handling of uploaded file (id=%s).', file_id)
