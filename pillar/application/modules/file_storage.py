@@ -464,7 +464,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
     log.info('Refreshed %i links', min(chunk_size, to_refresh.count()))
 
 
-@require_login({u'subscriber', u'admin'})
+@require_login({u'subscriber', u'admin', u'demo'})
 def create_file_doc(name, filename, content_type, length, project, backend='gcs',
                     **extra_fields):
     """Creates a minimal File document for storage in MongoDB.
