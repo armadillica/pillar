@@ -546,6 +546,10 @@ def stream_to_gcs(project_id):
         stream_for_gcs = uploaded_file.stream
 
     # Upload the file to GCS.
+    from gcloud.streaming import transfer
+    # Files larger than this many bytes will be streamed directly from disk, smaller
+    # ones will be read into memory and then uploaded.
+    transfer.RESUMABLE_UPLOAD_THRESHOLD = 102400
     try:
         gcs = GoogleCloudStorageBucket(project_id)
         blob = gcs.bucket.blob('_/' + internal_fname, chunk_size=256 * 1024 * 2)
