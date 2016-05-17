@@ -123,7 +123,7 @@ if app.config['DEBUG']:
     log.info('Pillar starting, debug=%s', app.config['DEBUG'])
 
 # Configure Bugsnag
-if not app.config.get('TESTING'):
+if not app.config.get('TESTING') and app.config.get('BUGSNAG_API_KEY'):
     bugsnag.configure(
         api_key=app.config['BUGSNAG_API_KEY'],
         project_root="/data/git/pillar/pillar",
@@ -133,6 +133,8 @@ if not app.config.get('TESTING'):
     bs_handler = bugsnag.handlers.BugsnagHandler()
     bs_handler.setLevel(logging.ERROR)
     log.addHandler(bs_handler)
+else:
+    log.info('Bugsnag NOT configured.')
 
 # Google Cloud project
 try:
