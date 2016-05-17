@@ -199,6 +199,7 @@ from modules import file_storage
 from modules import users
 from modules import nodes
 from modules import latest
+from modules import blender_cloud
 
 app.register_blueprint(encoding, url_prefix='/encoding')
 app.register_blueprint(blender_id, url_prefix='/blender_id')
@@ -206,5 +207,6 @@ projects.setup_app(app, url_prefix='/p')
 local_auth.setup_app(app, url_prefix='/auth')
 file_storage.setup_app(app, url_prefix='/storage')
 latest.setup_app(app, url_prefix='/latest')
+blender_cloud.setup_app(app, url_prefix='/bcloud')
 users.setup_app(app)
 nodes.setup_app(app)
