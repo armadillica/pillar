@@ -73,7 +73,12 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
     if '_id' in db_user:
         # Update the existing user
         db_id = db_user['_id']
-        r, _, _, status = put_internal('users', remove_private_keys(db_user), _id=db_id)
+        try:
+            etag = {'_etag': db_user['_etag']}
+        except KeyError:
+            etag = {}
+        r, _, _, status = put_internal('users', remove_private_keys(db_user),
+                                       _id=db_id, **etag)
     else:
         # Create a new user
         r, _, _, status = post_internal('users', db_user)
