@@ -62,7 +62,7 @@ node_type_texture = {
     'form_schema': {
         'status': {},
         'content_type': {'visible': False},
-        'files': [],
+        'files': {},
         'is_tileable': {},
         'is_landscape': {},
         'resolution': {},
