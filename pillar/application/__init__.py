@@ -66,7 +66,7 @@ class ValidateCustomFields(Validator):
         try:
             value = self.convert_properties(value, node_type['dyn_schema'])
         except Exception, e:
-            print ("Error converting: {0}".format(e))
+            log.debug("Error converting form properties", exc_info=True)
 
         v = Validator(node_type['dyn_schema'])
         val = v.validate(value)
