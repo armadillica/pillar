@@ -18,11 +18,6 @@ from eve.io.mongo import Validator
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
 
-class NewAuth(TokenAuth):
-    def check_auth(self, token, allowed_roles, resource, method):
-        return validate_token()
-
-
 class ValidateCustomFields(Validator):
     def convert_properties(self, properties, node_schema):
         for prop in node_schema:
@@ -87,7 +82,7 @@ class ValidateCustomFields(Validator):
 # an env variable.
 settings_path = os.environ.get(
     'EVE_SETTINGS', '/data/git/pillar/pillar/settings.py')
-app = Eve(settings=settings_path, validator=ValidateCustomFields, auth=NewAuth)
+app = Eve(settings=settings_path, validator=ValidateCustomFields)
 
 # Load configuration from three different sources, to make it easy to override
 # settings with secrets, as well as for development & testing.
