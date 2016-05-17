@@ -49,6 +49,17 @@ def runserver():
             debug=app.config['DEBUG'])
 
 
+@manager.command
+def runserver_memlimit(limit_kb=1000000):
+    import resource
+
+    limit_b = int(limit_kb) * 1024
+    for rsrc in (resource.RLIMIT_AS, resource.RLIMIT_DATA, resource.RLIMIT_RSS):
+        resource.setrlimit(rsrc, (limit_b, limit_b))
+
+    runserver()
+
+
 def post_item(entry, data):
     return post_internal(entry, data)
 
