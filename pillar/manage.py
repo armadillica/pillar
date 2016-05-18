@@ -699,5 +699,46 @@ def project_stats():
     ])
 
 
+@manager.command
+def add_node_types():
+    """Add texture and group_texture node types to all projects"""
+    from manage_extra.node_types.texture import node_type_texture
+    from manage_extra.node_types.group_texture import node_type_group_texture
+    from application.utils import project_get_node_type
+    projects_collections = app.data.driver.db['projects']
+    for project in projects_collections.find():
+        print("Processing {}".format(project['_id']))
+        if not project_get_node_type(project, 'group_texture'):
+            project['node_types'].append(node_type_group_texture)
+            print("Added node type: {}".format(node_type_group_texture['name']))
+        if not project_get_node_type(project, 'texture'):
+            project['node_types'].append(node_type_texture)
+            print("Added node type: {}".format(node_type_texture['name']))
+        projects_collections.update(
+            {'_id': project['_id']}, project)
+
+
+@manager.command
+def update_texture_node_type():
+    """Update allowed values for textures node_types"""
+    projects_collections = app.data.driver.db['projects']
+    for project in projects_collections.find():
+        print("Processing {}".format(project['_id']))
+        for node_type in project['node_types']:
+            if node_type['name'] == 'texture':
+                allowed = [
+                    'color',
+                    'specular',
+                    'bump',
+                    'normal',
+                    'translucency',
+                    'emission',
+                    'alpha'
+                    ]
+                node_type['dyn_schema']['files']['schema']['schema']['map_type']['allowed'] = allowed
+        projects_collections.update(
+            {'_id': project['_id']}, project)
+
+
 if __name__ == '__main__':
     manager.run()
