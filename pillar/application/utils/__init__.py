@@ -11,6 +11,7 @@ from flask import current_app
 __all__ = ('remove_private_keys', 'PillarJSONEncoder')
 log = logging.getLogger(__name__)
 
+
 def remove_private_keys(document):
     """Removes any key that starts with an underscore, returns result as new
     dictionary.
@@ -67,3 +68,11 @@ def skip_when_testing(func):
 
         return func(*args, **kwargs)
     return wrapper
+
+
+def project_get_node_type(project_document, node_type_node_name):
+    """Return a node_type subdocument for a project. If none is found, return
+    None.
+    """
+    return next((node_type for node_type in project_document['node_types']
+                 if node_type['name'] == node_type_node_name), None)
