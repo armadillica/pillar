@@ -163,7 +163,7 @@ def after_inserting_project(project, db_user):
         with_permissions(node_type_asset),
         with_permissions(node_type_comment),
         with_permissions(node_type_texture),
-        with_permissions(node_type_group_texture)
+        with_permissions(node_type_group_texture),
     ]
 
     # Allow admin users to use whatever url they want.
