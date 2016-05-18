@@ -18,7 +18,5 @@ node_type_group_texture = {
     'form_schema': {
         'status': {},
         'order': {}
-    },
-    'permissions': {
     }
 }

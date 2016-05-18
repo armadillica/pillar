@@ -5,14 +5,13 @@ node_type_texture = {
     'description': 'Image Texture',
     # This data type does not have parent limitations (can be child
     # of any node). An empty parent declaration is required.
-    'parent': ['group',],
+    'parent': ['group', ],
     'dyn_schema': {
         'status': {
             'type': 'string',
             'allowed': [
                 'published',
                 'pending',
-                'processing',
             ],
         },
         # Used for sorting within the context of a group
@@ -29,10 +28,10 @@ node_type_texture = {
                     'map_type': {
                         'type': 'string',
                         'allowed': [
-                            'col',
-                            'spec',
+                            'color',
+                            'specular',
                             'bump',
-                            'nor',
+                            'normal',
                             'translucency',
                             'emission',
                             'alpha'
@@ -68,9 +67,7 @@ node_type_texture = {
         'resolution': {},
         'aspect_ratio': {},
         'order': {},
-        'tags' : {},
-        'categories': {}
-    },
-    'permissions': {
+        'tags': {'visible': False},
+        'categories': {'visible': False},
     }
 }
