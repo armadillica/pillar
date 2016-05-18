@@ -7,9 +7,6 @@ node_type_group_texture = {
         'order': {
             'type': 'integer'
         },
-        'url': {
-            'type': 'string',
-        },
         'status': {
             'type': 'string',
             'allowed': [
@@ -19,7 +16,6 @@ node_type_group_texture = {
         }
     },
     'form_schema': {
-        'url': {},
         'status': {},
         'order': {}
     },

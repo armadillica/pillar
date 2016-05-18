@@ -14,6 +14,7 @@ from manage_extra.node_types.asset import node_type_asset
 from manage_extra.node_types.comment import node_type_comment
 from manage_extra.node_types.group import node_type_group
 from manage_extra.node_types.texture import node_type_texture
+from manage_extra.node_types.group_texture import node_type_group_texture
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('projects', __name__)
@@ -162,6 +163,7 @@ def after_inserting_project(project, db_user):
         with_permissions(node_type_asset),
         with_permissions(node_type_comment),
         with_permissions(node_type_texture),
+        with_permissions(node_type_group_texture)
     ]
 
     # Allow admin users to use whatever url they want.
