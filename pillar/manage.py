@@ -740,5 +740,24 @@ def update_texture_node_type():
             {'_id': project['_id']}, project)
 
 
+@manager.command
+def update_texture_nodes_maps():
+    """Update abbreviated texture map types to the extended version"""
+    nodes_collection = app.data.driver.db['nodes']
+    remap = {
+        'col': 'color',
+        'spec': 'specular',
+        'nor': 'normal'}
+    for node in nodes_collection.find({'node_type': 'texture'}):
+        for v in node['properties']['files']:
+            try:
+                updated_map_types = remap[v['map_type']]
+                print("Updating {} to {}".format(v['map_type'], updated_map_types))
+                v['map_type'] = updated_map_types
+            except KeyError:
+                print("Skipping {}".format(v['map_type']))
+            nodes_collection.update({'_id': node['_id']}, node)
+
+
 if __name__ == '__main__':
     manager.run()
