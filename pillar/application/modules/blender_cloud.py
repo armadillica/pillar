@@ -32,7 +32,7 @@ def texture_libraries():
     result, _, _, status, headers = get(
         'projects',
         {'$or': [
-            {'permissions.groups': {'$in': groups}},
+            {'permissions.groups.group': {'$in': groups}},
             {'permissions.world': 'GET'}
         ]})
 
