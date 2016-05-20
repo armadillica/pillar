@@ -172,7 +172,7 @@ def update_file_name(node):
         storage.update_name(blob, name)
 
         # Assign the same name to variations
-        for v in file_doc['variations']:
+        for v in file_doc.get('variations', []):
             _, override_ext = os.path.splitext(v['file_path'])
             name = _format_name(node['name'], override_ext, v['size'], map_type=map_type)
             blob = storage.Get(v['file_path'], to_dict=False)
