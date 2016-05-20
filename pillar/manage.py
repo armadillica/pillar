@@ -585,8 +585,8 @@ def add_license_props():
                     ],
                     'default': 'cc-by'
                 }
-                node_type['form_schema']['license_notes'] = ''
-                node_type['form_schema']['license_type'] = ''
+                node_type['form_schema']['license_notes'] = {}
+                node_type['form_schema']['license_type'] = {}
         projects_collections.update(
             {'_id': project['_id']}, project)
 
