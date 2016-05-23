@@ -1,4 +1,5 @@
 import logging
+import logging.config
 import os
 import tempfile
 from bson import ObjectId
@@ -103,14 +104,8 @@ os.environ.pop('TMPDIR', None)
 
 
 # Configure logging
-logging.basicConfig(
-    level=logging.WARNING,
-    format='%(asctime)-15s %(levelname)8s %(name)s %(message)s')
-
-logging.getLogger('werkzeug').setLevel(logging.INFO)
-
+logging.config.dictConfig(app.config['LOGGING'])
 log = logging.getLogger(__name__)
-log.setLevel(logging.DEBUG if app.config['DEBUG'] else logging.INFO)
 if app.config['DEBUG']:
     log.info('Pillar starting, debug=%s', app.config['DEBUG'])
 

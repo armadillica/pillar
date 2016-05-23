@@ -70,3 +70,29 @@ FULL_FILE_ACCESS_ROLES = {u'admin', u'subscriber', u'demo'}
 # Client and Subclient IDs for Blender ID
 BLENDER_ID_CLIENT_ID = 'SPECIAL-SNOWFLAKE-57'
 BLENDER_ID_SUBCLIENT_ID = 'PILLAR'
+
+
+# See https://docs.python.org/2/library/logging.config.html#configuration-dictionary-schema
+LOGGING = {
+    'version': 1,
+    'formatters': {
+        'default': {'format': '%(asctime)-15s %(levelname)8s %(name)s %(message)s'}
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'default',
+            'stream': 'ext://sys.stderr',
+        }
+    },
+    'loggers': {
+        'application': {'level': 'INFO'},
+        'werkzeug': {'level': 'INFO'},
+    },
+    'root': {
+        'level': 'WARNING',
+        'handlers': [
+            'console',
+        ],
+    }
+}
