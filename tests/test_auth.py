@@ -159,6 +159,30 @@ class AuthenticationTests(AbstractPillarTest):
 
             self.assertEqual([u'subscriber'], db_user['roles'])
 
+    def test_token_expiry(self):
+        """Expired tokens should be deleted from the database."""
+
+        # Insert long-expired, almost-expired and not-expired token.
+        user_id = self.create_user()
+        now = datetime.datetime.now(tz_util.utc)
+
+        with self.app.test_request_context():
+            from application.utils import authentication as auth
+
+            auth.store_token(user_id, 'long-expired',
+                             now - datetime.timedelta(days=365), None)
+            auth.store_token(user_id, 'short-expired',
+                             now - datetime.timedelta(seconds=5), None)
+            auth.store_token(user_id, 'not-expired',
+                             now + datetime.timedelta(days=1), None)
+
+            # Validation should clean up old tokens.
+            auth.validate_token()
+
+            token_coll = self.app.data.driver.db['tokens']
+            self.assertEqual({'short-expired', 'not-expired'},
+                             {item['token'] for item in token_coll.find()})
+
 
 class UserListTests(AbstractPillarTest):
     """Security-related tests."""
