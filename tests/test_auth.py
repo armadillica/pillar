@@ -466,10 +466,12 @@ class PermissionComputationTest(AbstractPillarTest):
                 },
                 self.sort(compute_aggr_permissions('projects', EXAMPLE_PROJECT, 'texture')))
 
+        with self.app.test_request_context():
             # Test node permissions with non-existing project.
             node = copy.deepcopy(EXAMPLE_NODE)
             self.assertRaises(Forbidden, compute_aggr_permissions, 'nodes', node, None)
 
+        with self.app.test_request_context():
             # Test node permissions without embedded project.
             self.ensure_project_exists()
             self.assertEqual(
@@ -482,6 +484,7 @@ class PermissionComputationTest(AbstractPillarTest):
                  u'world': [u'GET']},
                 self.sort(compute_aggr_permissions('nodes', node, None)))
 
+        with self.app.test_request_context():
             # Test node permissions with embedded project.
             node = copy.deepcopy(EXAMPLE_NODE)
             node['project'] = EXAMPLE_PROJECT
