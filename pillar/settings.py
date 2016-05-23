@@ -9,7 +9,7 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 # individual items  (defaults to read-only item access).
 ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
-PAGINATION_LIMIT = 25
+PAGINATION_LIMIT = 250
 
 _file_embedded_schema = {
     'type': 'objectid',
