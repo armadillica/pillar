@@ -39,14 +39,15 @@ MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
 
 
 @manager.command
-def runserver():
+def runserver(**options):
     # Automatic creation of STORAGE_DIR path if it's missing
     if not os.path.exists(app.config['STORAGE_DIR']):
         os.makedirs(app.config['STORAGE_DIR'])
 
     app.run(host=app.config['HOST'],
             port=app.config['PORT'],
-            debug=app.config['DEBUG'])
+            debug=app.config['DEBUG'],
+            **options)
 
 
 @manager.command
@@ -58,6 +59,13 @@ def runserver_memlimit(limit_kb=1000000):
         resource.setrlimit(rsrc, (limit_b, limit_b))
 
     runserver()
+
+
+@manager.command
+def runserver_profile(pfile='profile.stats'):
+    import cProfile
+
+    cProfile.run('runserver(use_reloader=False)', pfile)
 
 
 def post_item(entry, data):
