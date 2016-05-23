@@ -3,9 +3,6 @@ import os
 import tempfile
 from bson import ObjectId
 from datetime import datetime
-import bugsnag
-import bugsnag.flask
-import bugsnag.handlers
 from zencoder import Zencoder
 from flask import g
 from flask import request
@@ -119,6 +116,10 @@ if app.config['DEBUG']:
 
 # Configure Bugsnag
 if not app.config.get('TESTING') and app.config.get('BUGSNAG_API_KEY'):
+    import bugsnag
+    import bugsnag.flask
+    import bugsnag.handlers
+
     bugsnag.configure(
         api_key=app.config['BUGSNAG_API_KEY'],
         project_root="/data/git/pillar/pillar",
