@@ -68,6 +68,20 @@ def runserver_profile(pfile='profile.stats'):
     cProfile.run('runserver(use_reloader=False)', pfile)
 
 
+def each_project_node_type(node_type_name=None):
+    """Generator, yields (project, node_type) tuples for all projects and node types.
+
+    When a node type name is given, only yields those node types.
+    """
+
+    projects_coll = app.data.driver.db['projects']
+
+    for project in projects_coll.find():
+        for node_type in project['node_types']:
+            if node_type_name is None or node_type['name'] == node_type_name:
+                yield project, node_type
+
+
 def post_item(entry, data):
     return post_internal(entry, data)
 
