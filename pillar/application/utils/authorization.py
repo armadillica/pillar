@@ -107,8 +107,6 @@ def has_permissions(collection_name, resource, method, append_allowed_methods=Fa
 def compute_aggr_permissions(collection_name, resource, check_node_type):
     """Returns a permissions dict."""
 
-    projects_collection = current_app.data.driver.db['projects']
-
     # We always need the know the project.
     if collection_name == 'projects':
         project = resource
@@ -126,12 +124,8 @@ def compute_aggr_permissions(collection_name, resource, check_node_type):
             # embedded project
             project = resource['project']
         else:
-            project = projects_collection.find_one(
-                ObjectId(resource['project']),
-                {'permissions': 1,
-                 'node_types': {'$elemMatch': {'name': node_type_name}},
-                 'node_types.name': 1,
-                 'node_types.permissions': 1})
+            project_id = resource['project']
+            project = _find_project_node_type(project_id, node_type_name)
 
     # Every node should have a project.
     if project is None:
@@ -155,6 +149,32 @@ def compute_aggr_permissions(collection_name, resource, check_node_type):
 
     node_permissions = resource.get('permissions', {})
     return merge_permissions(project_permissions, node_type_permissions, node_permissions)
+
+
+def _find_project_node_type(project_id, node_type_name):
+    """Returns the project with just the one named node type."""
+
+    # Cache result per request, as many nodes of the same project can be checked.
+    cache = g.get('_find_project_node_type_cache')
+    if cache is None:
+        cache = g._find_project_node_type_cache = {}
+
+    try:
+        return cache[(project_id, node_type_name)]
+    except KeyError:
+        pass
+
+    projects_collection = current_app.data.driver.db['projects']
+    project = projects_collection.find_one(
+        ObjectId(project_id),
+        {'permissions': 1,
+         'node_types': {'$elemMatch': {'name': node_type_name}},
+         'node_types.name': 1,
+         'node_types.permissions': 1})
+
+    cache[(project_id, node_type_name)] = project
+
+    return project
 
 
 def merge_permissions(*args):
