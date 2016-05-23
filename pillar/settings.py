@@ -10,6 +10,7 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
 
 PAGINATION_LIMIT = 250
+PAGINATION_DEFAULT = 250
 
 _file_embedded_schema = {
     'type': 'objectid',
