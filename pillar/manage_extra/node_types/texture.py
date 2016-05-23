@@ -24,7 +24,6 @@ node_type_texture = {
                 'type': 'dict',
                 'schema': {
                     'file': _file_embedded_schema,
-                    'is_tileable': {'type': 'boolean'},
                     'map_type': {
                         'type': 'string',
                         'allowed': [
