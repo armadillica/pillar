@@ -247,7 +247,10 @@ def require_login(require_roles=set()):
             current_user = g.get('current_user')
 
             if current_user is None:
-                log.warning('Unauthenticated acces to %s attempted.', func)
+                # We don't need to log at a higher level, as this is very common.
+                # Many browsers first try to see whether authentication is needed
+                # at all, before sending the password.
+                log.debug('Unauthenticated acces to %s attempted.', func)
                 abort(403)
 
             if require_roles and not require_roles.intersection(set(current_user['roles'])):
