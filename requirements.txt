@@ -34,7 +34,11 @@ pytest-cov==2.2.1
 # Secondary requirements
 Flask-PyMongo==0.4.1
 Jinja2==2.8
-Werkzeug==0.11.3
+# This particular commit fixes the memory error when handling large
+# uploads. If it's merged into a release, switch back to regular
+# releases. For more info, see
+# https://github.com/pallets/werkzeug/issues/510
+-e git+https://github.com/pallets/werkzeug.git@0ab6a7462b5fe6f15686aef3004a833a52ea5aad#egg=Werkzeug
 argparse==1.2.1
 cffi==1.6.0
 cookies==2.2.1
