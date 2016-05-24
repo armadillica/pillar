@@ -6,6 +6,7 @@ from bson import ObjectId
 from eve.methods.post import post_internal
 from eve.methods.patch import patch_internal
 from flask import g, Blueprint, request, abort, current_app
+from werkzeug import exceptions as wz_exceptions
 
 from application.utils import remove_private_keys, authorization, jsonify, mongo
 from application.utils.gcs import GoogleCloudStorageBucket
@@ -252,32 +253,32 @@ def project_manage_users():
     No changes are done on the project itself.
     """
 
+    projects_collection = current_app.data.driver.db['projects']
+    users_collection = current_app.data.driver.db['users']
+
     # TODO: check if user is admin of the project before anything
     if request.method == 'GET':
         project_id = request.args['project_id']
-        projects_collection = current_app.data.driver.db['projects']
         project = projects_collection.find_one({'_id': ObjectId(project_id)})
         admin_group_id = project['permissions']['groups'][0]['group']
-        users_collection = current_app.data.driver.db['users']
+
         users = users_collection.find(
             {'groups': {'$in': [admin_group_id]}},
             {'username': 1, 'email': 1, 'full_name': 1})
-        users_list = [user for user in users]
-        return jsonify({'_status': 'OK', '_items': users_list})
+        return jsonify({'_status': 'OK', '_items': list(users)})
 
     # The request is not a form, since it comes from the API sdk
     data = json.loads(request.data)
-    project_id = data['project_id']
-    target_user_id = data['user_id']
+    project_id = ObjectId(data['project_id'])
+    target_user_id = ObjectId(data['user_id'])
     action = data['action']
-    user_id = g.current_user['user_id']
+    current_user_id = g.current_user['user_id']
 
-    projects_collection = current_app.data.driver.db['projects']
-    project = projects_collection.find_one({'_id': ObjectId(project_id)})
+    project = projects_collection.find_one({'_id': project_id})
 
-    # Check if the current_user is owner of the project
-    # TODO: check based on permissions
-    if project['user'] != user_id:
+    # Check if the current_user is owner of the project, or removing themselves.
+    remove_self = target_user_id == current_user_id and action == 'remove'
+    if project['user'] != current_user_id and not remove_self:
         return abort_with_error(403)
 
     admin_group = get_admin_group(project)
@@ -285,19 +286,24 @@ def project_manage_users():
     # Get the user and add the admin group to it
     if action == 'add':
         operation = '$addToSet'
+        log.info('project_manage_users: Adding user %s to admin group of project %s',
+                 target_user_id, project_id)
     elif action == 'remove':
+        log.info('project_manage_users: Removing user %s from admin group of project %s',
+                 target_user_id, project_id)
         operation = '$pull'
     else:
-        return abort_with_error(403)
+        log.warning('project_manage_users: Unsupported action %r called by user %s',
+                    action, current_user_id)
+        raise wz_exceptions.UnprocessableEntity()
 
-    users_collection = current_app.data.driver.db['users']
-    users_collection.update({'_id': ObjectId(target_user_id)},
+    users_collection.update({'_id': target_user_id},
                             {operation: {'groups': admin_group['_id']}})
-    user = users_collection.find_one({'_id': ObjectId(target_user_id)},
+
+    user = users_collection.find_one({'_id': target_user_id},
                                      {'username': 1, 'email': 1,
                                       'full_name': 1})
-    user.update({'_status': 'OK'})
-    # Return the user in the response.
+    user['_status'] = 'OK'
     return jsonify(user)
 
 

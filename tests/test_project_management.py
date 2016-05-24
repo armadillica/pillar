@@ -533,4 +533,42 @@ class ProjectNodeAccess(AbstractProjectTest):
 
             db_user = users.find_one(self.other_user_id)
             self.assertNotIn(admin_group['_id'], db_user['groups'])
+
+    def test_remove_self(self):
+        """Every user should be able to remove themselves from a project,
+         regardless of permissions.
+         """
+
+        from application.modules import projects
+        from application.utils import dumps
+
+        project_mng_user_url = '/p/users'
+
+        # Use our API to add user to group
+        payload = {
+            'project_id': self.project_id,
+            'user_id': self.other_user_id,
+            'action': 'add'}
+
+        resp = self.client.post(project_mng_user_url,
+                                data=dumps(payload),
+                                content_type='application/json',
+                                headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        # Update payload to remove the user we just added, and call it as that user.
+        payload['action'] = 'remove'
+
+        resp = self.client.post(project_mng_user_url,
+                                data=dumps(payload),
+                                content_type='application/json',
+                                headers={'Authorization': self.make_header('other-token')})
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        # Check if the user is now actually removed from the group.
+        with self.app.test_request_context():
+            users = self.app.data.driver.db['users']
+
+            db_user = users.find_one(self.other_user_id)
+            admin_group = projects.get_admin_group(self.project)
             self.assertNotIn(admin_group['_id'], db_user['groups'])
