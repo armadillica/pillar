@@ -391,8 +391,8 @@ class ProjectNodeAccess(AbstractProjectTest):
         self.project = json.loads(resp.data)
         self.project_id = ObjectId(self.project['_id'])
 
-        self._create_user_with_token([u'subscriber'], 'other-token',
-                                     user_id='deadbeefdeadbeefcafef00d')
+        self.other_user_id = self._create_user_with_token([u'subscriber'], 'other-token',
+                                                          user_id='deadbeefdeadbeefcafef00d')
 
         self.test_node = {
             'description': '',
@@ -491,20 +491,15 @@ class ProjectNodeAccess(AbstractProjectTest):
         from application.modules import projects
         from application.utils import dumps
 
-        project_add_user_url = '/p/users'
-
-        # Create another user we can try to share the project with
-        other_user_id = 'f00dd00df00dd00df00dd00d'
-        self._create_user_with_token(['subscriber'], 'other-token',
-                                     user_id=other_user_id)
+        project_mng_user_url = '/p/users'
 
         # Use our API to add user to group
         payload = {
             'project_id': self.project_id,
-            'user_id': other_user_id,
+            'user_id': self.other_user_id,
             'action': 'add'}
 
-        resp = self.client.post(project_add_user_url,
+        resp = self.client.post(project_mng_user_url,
                                 data=dumps(payload),
                                 content_type='application/json',
                                 headers={
@@ -516,7 +511,7 @@ class ProjectNodeAccess(AbstractProjectTest):
         with self.app.test_request_context():
             users = self.app.data.driver.db['users']
 
-            db_user = users.find_one(ObjectId(other_user_id))
+            db_user = users.find_one(self.other_user_id)
             admin_group = projects.get_admin_group(self.project)
 
             self.assertIn(admin_group['_id'], db_user['groups'])
@@ -524,7 +519,7 @@ class ProjectNodeAccess(AbstractProjectTest):
         # Update payload to remove the user we just added
         payload['action'] = 'remove'
 
-        resp = self.client.post(project_add_user_url,
+        resp = self.client.post(project_mng_user_url,
                                 data=dumps(payload),
                                 content_type='application/json',
                                 headers={
@@ -536,5 +531,6 @@ class ProjectNodeAccess(AbstractProjectTest):
         with self.app.test_request_context():
             users = self.app.data.driver.db['users']
 
-            db_user = users.find_one(ObjectId(other_user_id))
+            db_user = users.find_one(self.other_user_id)
+            self.assertNotIn(admin_group['_id'], db_user['groups'])
             self.assertNotIn(admin_group['_id'], db_user['groups'])
