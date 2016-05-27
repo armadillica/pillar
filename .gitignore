@@ -1,5 +1,6 @@
 .DS_Store
 .project
+.coverage
 *.pyc
 *.sublime*
 *.ropeproject*
@@ -12,7 +13,6 @@
 /pillar/application/static/storage/
 /build
 /.cache
-/.coverage
 /pillar/pillar.egg-info/
 /pillar/google_app.json
 profile.stats
