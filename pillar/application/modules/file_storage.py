@@ -280,22 +280,23 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
     if backend == 'gcs':
         storage = GoogleCloudStorageBucket(project_id)
         blob = storage.Get(file_path)
-        if blob and not is_public:
-            link = blob['signed_url']
-        elif blob and is_public:
-            link = blob['public_url']
-        else:
-            link = None
-    elif backend == 'pillar':
-        link = url_for('file_storage.index', file_name=file_path, _external=True,
+        if blob is None:
+            return ''
+
+        if is_public:
+            return blob['public_url']
+        return blob['signed_url']
+
+    if backend == 'pillar':
+        return url_for('file_storage.index', file_name=file_path, _external=True,
                        _scheme=current_app.config['SCHEME'])
-    elif backend == 'cdnsun':
-        link = hash_file_path(file_path, None)
-    elif backend == 'unittest':
-        link = md5(file_path).hexdigest()
-    else:
-        link = None
-    return link
+    if backend == 'cdnsun':
+        return hash_file_path(file_path, None)
+    if backend == 'unittest':
+        return md5(file_path).hexdigest()
+
+    return ''
+
 
 
 def before_returning_file(response):
