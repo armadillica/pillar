@@ -176,7 +176,6 @@ def find_user_in_db(blender_id_user_id, user_info):
     if db_user:
         log.debug('User blender_id_user_id=%r already in our database, '
                   'updating with info from Blender ID.', blender_id_user_id)
-        db_user['full_name'] = user_info['full_name']
         db_user['email'] = user_info['email']
     else:
         log.debug('User %r not yet in our database, create a new one.', blender_id_user_id)
