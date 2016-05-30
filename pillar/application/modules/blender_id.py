@@ -80,8 +80,26 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
         r, _, _, status = put_internal('users', remove_private_keys(db_user),
                                        _id=db_id, **etag)
     else:
-        # Create a new user
-        r, _, _, status = post_internal('users', db_user)
+        # Create a new user, retry for non-unique usernames.
+        r = {}
+        for retry in range(5):
+            r, _, _, status = post_internal('users', db_user)
+
+            if status == 422:
+                # Probably non-unique username, so retry a few times with different usernames.
+                log.info('Error creating new user: %s', r)
+                username_issue = r.get('_issues', {}).get(u'username', '')
+                if u'not unique' in username_issue:
+                    # Retry
+                    db_user['username'] = authentication.make_unique_username(db_user['email'])
+                    continue
+
+            # Saving was successful.
+            break
+        else:
+            log.error('Unable to create new user %s: %s', db_user, r)
+            return abort(500)
+
         db_id = r['_id']
         db_user.update(r)  # update with database/eve-generated fields.
 
