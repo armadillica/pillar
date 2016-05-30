@@ -781,5 +781,31 @@ def update_texture_nodes_maps():
             nodes_collection.update({'_id': node['_id']}, node)
 
 
+@manager.command
+def create_badger_account(email, badges):
+    """
+    Creates a new service account that can give badges (i.e. roles).
+
+    :param email: email address associated with the account
+    :param badges: single space-separated argument containing the roles
+        this account can assign and revoke.
+    """
+
+    from application.modules import service
+    from application.utils import dumps
+
+    account, token = service.create_service_account(
+        email,
+        [u'badger'],
+        {'badger':  badges.strip().split()}
+    )
+
+    print('Account created:')
+    print(dumps(account, indent=4, sort_keys=True))
+    print()
+    print('Access token: %s' % token['token'])
+    print('  expires on: %s' % token['expire_time'])
+
+
 if __name__ == '__main__':
     manager.run()

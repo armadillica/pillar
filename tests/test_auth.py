@@ -497,3 +497,79 @@ class PermissionComputationTest(AbstractPillarTest):
                               u'methods': [u'GET']}],
                  u'world': [u'GET']},
                 self.sort(compute_aggr_permissions('nodes', node, None)))
+
+
+class RequireRolesTest(AbstractPillarTest):
+    def test_no_roles_required(self):
+        from flask import g
+        from application.utils.authorization import require_login
+
+        called = [False]
+
+        @require_login()
+        def call_me():
+            called[0] = True
+
+        with self.app.test_request_context():
+            g.current_user = {'user_id': ObjectId(24*'a'),
+                              'roles': [u'succubus']}
+            call_me()
+
+        self.assertTrue(called[0])
+
+    def test_some_roles_required(self):
+        from flask import g
+        from application.utils.authorization import require_login
+
+        called = [False]
+
+        @require_login(require_roles={u'admin'})
+        def call_me():
+            called[0] = True
+
+        with self.app.test_request_context():
+            g.current_user = {'user_id': ObjectId(24*'a'),
+                              'roles': [u'succubus']}
+            self.assertRaises(Forbidden, call_me)
+        self.assertFalse(called[0])
+
+        with self.app.test_request_context():
+            g.current_user = {'user_id': ObjectId(24*'a'),
+                              'roles': [u'admin']}
+            call_me()
+        self.assertTrue(called[0])
+
+    def test_all_roles_required(self):
+        from flask import g
+        from application.utils.authorization import require_login
+
+        called = [False]
+
+        @require_login(require_roles={u'service', u'badger'},
+                       require_all=True)
+        def call_me():
+            called[0] = True
+
+        with self.app.test_request_context():
+            g.current_user = {'user_id': ObjectId(24*'a'),
+                              'roles': [u'admin']}
+            self.assertRaises(Forbidden, call_me)
+        self.assertFalse(called[0])
+
+        with self.app.test_request_context():
+            g.current_user = {'user_id': ObjectId(24*'a'),
+                              'roles': [u'service']}
+            self.assertRaises(Forbidden, call_me)
+        self.assertFalse(called[0])
+
+        with self.app.test_request_context():
+            g.current_user = {'user_id': ObjectId(24*'a'),
+                              'roles': [u'badger']}
+            self.assertRaises(Forbidden, call_me)
+        self.assertFalse(called[0])
+
+        with self.app.test_request_context():
+            g.current_user = {'user_id': ObjectId(24*'a'),
+                              'roles': [u'service', u'badger']}
+            call_me()
+        self.assertTrue(called[0])
