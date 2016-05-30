@@ -22,7 +22,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
         with self.app.test_request_context():
             create_new_user(TEST_EMAIL_ADDRESS, 'apekoppie', BLENDER_ID_TEST_USERID)
 
-        self._common_user_test(200)
+        self._common_user_test(200, expected_full_name='apekoppie')
 
     @responses.activate
     def test_store_multiple_tokens(self):
@@ -57,7 +57,8 @@ class BlenderIdSubclientTest(AbstractPillarTest):
             self.assertIsNotNone(g.current_user)
             self.assertEqual(db_user['_id'], g.current_user['user_id'])
 
-    def _common_user_test(self, expected_status_code, scst=TEST_SUBCLIENT_TOKEN):
+    def _common_user_test(self, expected_status_code, scst=TEST_SUBCLIENT_TOKEN,
+                          expected_full_name=TEST_FULL_NAME):
         self.mock_blenderid_validate_happy()
 
         subclient_id = self.app.config['BLENDER_ID_SUBCLIENT_ID']
@@ -77,7 +78,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
             self.assertIsNotNone(db_user, 'user %r not found' % user_info['subclient_user_id'])
 
             self.assertEqual(TEST_EMAIL_ADDRESS, db_user['email'])
-            self.assertEqual(TEST_FULL_NAME, db_user['full_name'])
+            self.assertEqual(expected_full_name, db_user['full_name'])
             # self.assertEqual(TEST_SUBCLIENT_TOKEN, db_user['auth'][0]['token'])
             self.assertEqual(str(BLENDER_ID_TEST_USERID), db_user['auth'][0]['user_id'])
             self.assertEqual('blender-id', db_user['auth'][0]['provider'])
