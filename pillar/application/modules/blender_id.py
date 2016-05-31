@@ -79,6 +79,9 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
             etag = {}
         r, _, _, status = put_internal('users', remove_private_keys(db_user),
                                        _id=db_id, **etag)
+        if status == 422:
+            log.error('Status %i trying to PUT user, should not happen! %s',
+                      status, r)
     else:
         # Create a new user, retry for non-unique usernames.
         r = {}
