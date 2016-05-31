@@ -72,6 +72,7 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
 
     if '_id' in db_user:
         # Update the existing user
+        attempted_eve_method = 'PUT'
         db_id = db_user['_id']
         try:
             etag = {'_etag': db_user['_etag']}
@@ -84,6 +85,7 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
                       status, r)
     else:
         # Create a new user, retry for non-unique usernames.
+        attempted_eve_method = 'POST'
         r = {}
         for retry in range(5):
             r, _, _, status = post_internal('users', db_user)
@@ -107,7 +109,7 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
         db_user.update(r)  # update with database/eve-generated fields.
 
     if status not in (200, 201):
-        log.error('internal response: %r %r', status, r)
+        log.error('internal response from %s to Eve: %r %r', attempted_eve_method, status, r)
         return abort(500)
 
     # Store the token in MongoDB.
