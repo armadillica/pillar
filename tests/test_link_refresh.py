@@ -1,9 +1,8 @@
 """Tests chunked refreshing of links."""
-import copy
+import json
 
 from bson import ObjectId, tz_util
 from common_test_class import AbstractPillarTest
-from common_test_data import EXAMPLE_FILE
 from datetime import datetime, timedelta
 
 
@@ -96,3 +95,24 @@ class LinkRefreshTest(AbstractPillarTest):
             self.assertLess(refreshed_lower_limit, self.file[2]['link_expires'])
             self.assertLess(refreshed_lower_limit, self.file[3]['link_expires'])
             self.assertEqual(self.expiry[4], self.file[4]['link_expires'])
+
+    def test_refresh_upon_fetch(self):
+        """Test that expired links are refreshed when we fetch a file document."""
+
+        validity_seconds = self.app.config['FILE_LINK_VALIDITY']['unittest']
+        refreshed_lower_limit = self.now + timedelta(seconds=0.9 * validity_seconds)
+
+        resp = self.client.get('/files/%s' % self.file_id[0])
+        self.assertEqual(200, resp.status_code)
+
+        # Test the returned document.
+        file_doc = json.loads(resp.data)
+        expires = datetime.strptime(file_doc['link_expires'],
+                                    self.app.config['RFC1123_DATE_FORMAT'])
+        expires = expires.replace(tzinfo=tz_util.utc)
+        self.assertLess(refreshed_lower_limit, expires)
+
+        # Test the database.
+        with self.app.test_request_context():
+            self._reload_from_db()
+            self.assertLess(refreshed_lower_limit, self.file[0]['link_expires'])
