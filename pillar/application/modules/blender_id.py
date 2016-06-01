@@ -76,12 +76,8 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
             # Update the existing user
             attempted_eve_method = 'PUT'
             db_id = db_user['_id']
-            try:
-                etag = {'_etag': db_user['_etag']}
-            except KeyError:
-                etag = {}
             r, _, _, status = put_internal('users', remove_private_keys(db_user),
-                                           _id=db_id, **etag)
+                                           _id=db_id)
             if status == 422:
                 log.error('Status %i trying to PUT user %s with values %s, should not happen! %s',
                           status, db_id, remove_private_keys(db_user), r)
