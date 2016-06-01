@@ -70,43 +70,43 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
     # Store the user info in MongoDB.
     db_user = find_user_in_db(blender_id_user_id, user_info)
 
-    if '_id' in db_user:
-        # Update the existing user
-        attempted_eve_method = 'PUT'
-        db_id = db_user['_id']
-        try:
-            etag = {'_etag': db_user['_etag']}
-        except KeyError:
-            etag = {}
-        r, _, _, status = put_internal('users', remove_private_keys(db_user),
-                                       _id=db_id, **etag)
-        if status == 422:
-            log.error('Status %i trying to PUT user, should not happen! %s',
-                      status, r)
-    else:
-        # Create a new user, retry for non-unique usernames.
-        attempted_eve_method = 'POST'
-        r = {}
-        for retry in range(5):
+    r = {}
+    for retry in range(5):
+        if '_id' in db_user:
+            # Update the existing user
+            attempted_eve_method = 'PUT'
+            db_id = db_user['_id']
+            try:
+                etag = {'_etag': db_user['_etag']}
+            except KeyError:
+                etag = {}
+            r, _, _, status = put_internal('users', remove_private_keys(db_user),
+                                           _id=db_id, **etag)
+            if status == 422:
+                log.error('Status %i trying to PUT user %s with values %s, should not happen! %s',
+                          status, db_id, remove_private_keys(db_user), r)
+        else:
+            # Create a new user, retry for non-unique usernames.
+            attempted_eve_method = 'POST'
             r, _, _, status = post_internal('users', db_user)
 
-            if status == 422:
-                # Probably non-unique username, so retry a few times with different usernames.
-                log.info('Error creating new user: %s', r)
-                username_issue = r.get('_issues', {}).get(u'username', '')
-                if u'not unique' in username_issue:
-                    # Retry
-                    db_user['username'] = authentication.make_unique_username(db_user['email'])
-                    continue
+            db_id = r['_id']
+            db_user.update(r)  # update with database/eve-generated fields.
 
-            # Saving was successful.
-            break
-        else:
-            log.error('Unable to create new user %s: %s', db_user, r)
-            return abort(500)
+        if status == 422:
+            # Probably non-unique username, so retry a few times with different usernames.
+            log.info('Error creating new user: %s', r)
+            username_issue = r.get('_issues', {}).get(u'username', '')
+            if u'not unique' in username_issue:
+                # Retry
+                db_user['username'] = authentication.make_unique_username(db_user['email'])
+                continue
 
-        db_id = r['_id']
-        db_user.update(r)  # update with database/eve-generated fields.
+        # Saving was successful, or at least didn't break on a non-unique username.
+        break
+    else:
+        log.error('Unable to create new user %s: %s', db_user, r)
+        return abort(500)
 
     if status not in (200, 201):
         log.error('internal response from %s to Eve: %r %r', attempted_eve_method, status, r)
