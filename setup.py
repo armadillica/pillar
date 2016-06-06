@@ -9,6 +9,6 @@ setuptools.setup(
     version='1.0',
     packages=setuptools.find_packages('pillar', exclude=['manage']),
     package_dir={'': 'pillar'},  # tell setuptools packages are under src
-    tests_require=['pytest', 'httpretty'],
+    tests_require=['pytest'],
     zip_safe=False,
 )
