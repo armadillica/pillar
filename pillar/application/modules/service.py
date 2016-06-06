@@ -21,12 +21,18 @@ def badger():
 
     # Parse the request
     args = request.json
-    action = args['action']
-    user_email = args['user_email']
-    role = args['role']
+    action = args.get('action', '')
+    user_email = args.get('user_email', '')
+    role = args.get('role', '')
 
     if action not in {'grant', 'revoke'}:
         raise wz_exceptions.BadRequest('Action %r not supported' % action)
+
+    if not user_email:
+        raise wz_exceptions.BadRequest('User email not given')
+
+    if not role:
+        raise wz_exceptions.BadRequest('Role not given')
 
     log.info('Service account %s %ss role %r to/from user %s',
              g.current_user['user_id'], action, role, user_email)
