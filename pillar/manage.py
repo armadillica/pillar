@@ -264,6 +264,21 @@ def _update_project(project_uuid, project):
 
 
 @manager.command
+def refresh_project_permissions():
+    """Replaces the admin group permissions of each project with the defaults."""
+
+    from application.modules.projects import DEFAULT_ADMIN_GROUP_PERMISSIONS
+
+    proj_coll = app.data.driver.db['projects']
+    result = proj_coll.update_many({}, {'$set': {
+        'permissions.groups.0.methods': DEFAULT_ADMIN_GROUP_PERMISSIONS
+    }})
+
+    print('Matched %i documents' % result.matched_count)
+    print('Updated %i documents' % result.modified_count)
+
+
+@manager.command
 def clear_db():
     """Wipes the database
     """
