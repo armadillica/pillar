@@ -150,6 +150,8 @@ def _default_permissions():
     :rtype: dict
     """
 
+    from application.modules.projects import DEFAULT_ADMIN_GROUP_PERMISSIONS
+
     groups_collection = app.data.driver.db['groups']
     admin_group = groups_collection.find_one({'name': 'admin'})
 
@@ -158,7 +160,7 @@ def _default_permissions():
         'users': [],
         'groups': [
             {'group': admin_group['_id'],
-             'methods': ['GET', 'PUT', 'POST']},
+             'methods': DEFAULT_ADMIN_GROUP_PERMISSIONS[:]},
         ]
     }
 
