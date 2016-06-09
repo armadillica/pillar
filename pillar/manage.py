@@ -824,5 +824,40 @@ def create_badger_account(email, badges):
     print('  expires on: %s' % token['expire_time'])
 
 
+@manager.command
+def find_duplicate_users():
+    """Finds users that have the same BlenderID user_id."""
+
+    from collections import defaultdict
+
+    users_coll = app.data.driver.db['users']
+    nodes_coll = app.data.driver.db['nodes']
+    projects_coll = app.data.driver.db['projects']
+
+    found_users = defaultdict(list)
+
+    for user in users_coll.find():
+        blender_ids = [auth['user_id'] for auth in user['auth']
+                       if auth['provider'] == 'blender-id']
+        if not blender_ids:
+            continue
+        blender_id = blender_ids[0]
+        found_users[blender_id].append(user)
+
+    for blender_id, users in found_users.iteritems():
+        if len(users) == 1:
+            continue
+
+        usernames = ', '.join(user['username'] for user in users)
+        print('Blender ID: %5s has %i users: %s' % (
+            blender_id, len(users), usernames))
+
+        for user in users:
+            print('  %s owns %i nodes and %i projects' % (
+                user['username'],
+                nodes_coll.count({'user': user['_id']}),
+                projects_coll.count({'user': user['_id']}),
+            ))
+
 if __name__ == '__main__':
     manager.run()
