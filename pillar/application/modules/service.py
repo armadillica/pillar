@@ -60,7 +60,7 @@ def badger():
         return 'User not found', 404
 
     # Apply the action
-    roles = set(db_user['roles'] or [])
+    roles = set(db_user.get('roles', []) or [])
     if action == 'grant':
         roles.add(role)
     else:
