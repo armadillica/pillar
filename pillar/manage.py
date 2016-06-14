@@ -859,5 +859,85 @@ def find_duplicate_users():
                 projects_coll.count({'user': user['_id']}),
             ))
 
+
+@manager.command
+def sync_role_groups(do_revoke_groups):
+    """For each user, synchronizes roles and group membership.
+
+    This ensures that everybody with the 'subscriber' role is also member of the 'subscriber'
+    group, and people without the 'subscriber' role are not member of that group. Same for
+    admin and demo groups.
+
+    When do_revoke_groups=False (the default), people are only added to groups.
+    when do_revoke_groups=True, people are also removed from groups.
+    """
+
+    from application.modules import service
+
+    if do_revoke_groups not in {'true', 'false'}:
+        print('Use either "true" or "false" as first argument.')
+        print('When passing "false", people are only added to groups.')
+        print('when passing "true", people are also removed from groups.')
+        raise SystemExit()
+
+    service.fetch_role_to_group_id_map()
+
+    users_coll = app.data.driver.db['users']
+    groups_coll = app.data.driver.db['groups']
+
+    group_names = {}
+
+    def gname(gid):
+        try:
+            return group_names[gid]
+        except KeyError:
+            name = groups_coll.find_one(gid, projection={'name': 1})['name']
+            name = str(name)
+            group_names[gid] = name
+            return name
+
+    ok_users = bad_users = 0
+    for user in users_coll.find():
+        for role in service.ROLES_WITH_GROUPS:
+            action = 'grant' if role in user.get('roles', ()) else 'revoke'
+            groups = service.manage_user_group_membership(user, role, action)
+
+            if groups is None:
+                # No changes required
+                ok_users += 1
+                continue
+
+            current_groups = set(user.get('groups'))
+            if groups == current_groups:
+                ok_users += 1
+                continue
+
+            bad_users += 1
+
+            grant_groups = groups.difference(current_groups)
+            revoke_groups = current_groups.difference(groups)
+
+            print('Discrepancy for user %s/%s:' % (user['_id'], user['full_name']))
+            print('    - actual groups  :', sorted(gname(gid) for gid in user.get('groups')))
+            print('    - expected groups:', sorted(gname(gid) for gid in groups))
+            print('    - will grant     :', sorted(gname(gid) for gid in grant_groups))
+            print('    - might revoke   :', sorted(gname(gid) for gid in revoke_groups))
+
+            if grant_groups and revoke_groups:
+                print('        ------ CAREFUL this one has BOTH grant AND revoke -----')
+
+            # Determine which changes we'll apply
+            if do_revoke_groups:
+                final_groups = groups
+            else:
+                final_groups = current_groups.union(grant_groups)
+            print('    - final groups   :', sorted(gname(gid) for gid in final_groups))
+
+            # Perform the actual update
+            users_coll.update_one({'_id': user['_id']},
+                                  {'$set': {'groups': list(final_groups)}})
+
+    print('%i bad and %i ok users seen.' % (bad_users, ok_users))
+
 if __name__ == '__main__':
     manager.run()

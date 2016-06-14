@@ -14,6 +14,27 @@ log = logging.getLogger(__name__)
 
 ROLES_WITH_GROUPS = {u'admin', u'demo', u'subscriber'}
 
+# Map of role name to group ID, for the above groups.
+_role_to_group_id = {}
+
+
+@blueprint.before_app_first_request
+def fetch_role_to_group_id_map():
+    """Fills the _role_to_group_id mapping upon application startup."""
+
+    global _role_to_group_id
+
+    groups_coll = current_app.data.driver.db['groups']
+
+    for role in ROLES_WITH_GROUPS:
+        group = groups_coll.find_one({'name': role}, projection={'_id': 1})
+        if group is None:
+            log.warning('Group for role %r not found', role)
+            continue
+        _role_to_group_id[role] = group['_id']
+
+    log.debug('Group IDs for roles: %s', _role_to_group_id)
+
 
 @blueprint.route('/badger', methods=['POST'])
 @authorization.require_login(require_roles={u'service', u'badger'}, require_all=True)
@@ -89,18 +110,20 @@ def manage_user_group_membership(db_user, role, action):
     :rtype: set
     """
 
+    if action not in {'grant', 'revoke'}:
+        raise ValueError('Action %r not supported' % action)
+
     # Currently only three roles have associated groups.
     if role not in ROLES_WITH_GROUPS:
         return
 
     # Find the group
-    groups_coll = current_app.data.driver.db['groups']
-    group = groups_coll.find_one({'name': role}, projection={'_id': 1})
-    if group is None:
+    try:
+        group_id = _role_to_group_id[role]
+    except KeyError:
         log.warning('Group for role %r cannot be found, unable to %s members for user %s',
                     role, action, db_user['_id'])
         return
-    group_id = group['_id']
 
     user_groups = set(db_user.get('groups') or [])
     if action == 'grant':

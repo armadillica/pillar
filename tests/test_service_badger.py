@@ -54,29 +54,33 @@ class BadgerServiceTest(AbstractPillarTest):
     def test_group_membership(self):
         """Certain roles are linked to certain groups."""
 
-        def test_for_group(group_name, test=self.assertIn):
-            # Create the group
-            with self.app.test_request_context():
+        from application.modules import service
+
+        with self.app.test_request_context():
+            # Create the groups
+            group_ids = {}
+            for group_name in ['admin', 'demo', 'subscriber', 'succubus']:
                 groups_coll = self.app.data.driver.db['groups']
                 result = groups_coll.insert_one({'name': group_name})
-                group_id = result.inserted_id
+                group_ids[group_name] = result.inserted_id
+            service.fetch_role_to_group_id_map()
 
-            # Assign the 'subscriber' role
-            resp = self._post({'action': 'grant',
-                               'user_email': self.user_email,
-                               'role': group_name})
-            self.assertEqual(204, resp.status_code)
+            def test_for_group(group_name, test=self.assertIn):
+                # Assign the 'subscriber' role
+                resp = self._post({'action': 'grant',
+                                   'user_email': self.user_email,
+                                   'role': group_name})
+                self.assertEqual(204, resp.status_code)
 
-            # Check that the user is actually member of that group.
-            with self.app.test_request_context():
+                # Check that the user is actually member of that group.
                 user = self.app.data.driver.db['users'].find_one(self.user_id)
-                test(group_id, user['groups'])
+                test(group_ids[group_name], user['groups'])
 
-        # There are special groups for those. Also for admin, but if
-        # it works for those, it also works for admin, and another test
-        # case requires admin to be ingrantable.
-        test_for_group('demo')
-        test_for_group('subscriber')
+            # There are special groups for those. Also for admin, but if
+            # it works for those, it also works for admin, and another test
+            # case requires admin to be ingrantable.
+            test_for_group('demo')
+            test_for_group('subscriber')
 
-        # This role isn't linked to group membership.
-        test_for_group('succubus', test=self.assertNotIn)
+            # This role isn't linked to group membership.
+            test_for_group('succubus', test=self.assertNotIn)
