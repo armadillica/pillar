@@ -4,7 +4,8 @@ import json
 import logging
 import urllib
 
-from flask import g, current_app, Blueprint, make_response
+from flask import g, current_app, Blueprint
+
 from werkzeug.exceptions import Forbidden
 from eve.utils import parse_request
 from eve.methods.get import get

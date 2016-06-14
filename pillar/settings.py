@@ -569,7 +569,8 @@ projects_schema = {
             'film',
             'assets',
             'software',
-            'game'
+            'game',
+            'home',
         ],
         'required': True,
     },

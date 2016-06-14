@@ -138,13 +138,13 @@ class ProjectCreationTest(AbstractProjectTest):
                                headers={'Authorization': self.make_header('token-a')})
         self.assertEqual(200, resp.status_code)
         proj_list = json.loads(resp.data)
-        self.assertEqual([u'Prøject A'], [p['name'] for p in proj_list['_items']])
+        self.assertEqual({u'Prøject A'}, {p['name'] for p in proj_list['_items']})
 
         resp = self.client.get('/projects',
                                headers={'Authorization': self.make_header('token-b')})
         self.assertEqual(200, resp.status_code)
         proj_list = json.loads(resp.data)
-        self.assertEqual([u'Prøject B'], [p['name'] for p in proj_list['_items']])
+        self.assertEqual({u'Prøject B'}, {p['name'] for p in proj_list['_items']})
 
         # No access to anything for user C, should result in empty list.
         self._create_user_with_token(roles={u'subscriber'}, token='token-c', user_id=12 * 'c')

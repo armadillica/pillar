@@ -106,7 +106,7 @@ class AbstractPillarTest(TestMinimal):
 
             return found['_id'], found
 
-    def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber', )):
+    def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',)):
         from application.utils.authentication import make_unique_username
 
         with self.app.test_request_context():
@@ -140,6 +140,34 @@ class AbstractPillarTest(TestMinimal):
             token_data = auth.store_token(user_id, token, future, None)
 
         return token_data
+
+    def badger(self, user_email, role, action, srv_token=None):
+        """Creates a service account, and uses it to grant or revoke a role to the user.
+
+        To skip creation of the service account, pass a srv_token.
+
+        :returns: the authentication token of the created service account.
+        :rtype: str
+        """
+
+        # Create a service account if needed.
+        if srv_token is None:
+            from application.modules.service import create_service_account
+            with self.app.test_request_context():
+                _, srv_token_doc = create_service_account('service@example.com',
+                                                          {'badger'},
+                                                          {'badger': [role]})
+                srv_token = srv_token_doc['token']
+
+        resp = self.client.post('/service/badger',
+                                headers={'Authorization': self.make_header(srv_token),
+                                         'Content-Type': 'application/json'},
+                                data=json.dumps({'action': action,
+                                                 'role': role,
+                                                 'user_email': user_email}))
+        self.assertEqual(204, resp.status_code, resp.data)
+
+        return srv_token
 
     def mock_blenderid_validate_unhappy(self):
         """Sets up Responses to mock unhappy validation flow."""

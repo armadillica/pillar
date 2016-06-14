@@ -194,7 +194,7 @@ def after_inserting_project(project, db_user):
         abort_with_error(500)
 
 
-def _create_new_project(project_name, user_id, overrides):
+def create_new_project(project_name, user_id, overrides):
     """Creates a new project owned by the given user."""
 
     log.info('Creating new project "%s" for user %s', project_name, user_id)
@@ -242,7 +242,7 @@ def create_project(overrides=None):
         project_name = request.form['project_name']
     user_id = g.current_user['user_id']
 
-    project = _create_new_project(project_name, user_id, overrides)
+    project = create_new_project(project_name, user_id, overrides)
 
     # Return the project in the response.
     return jsonify(project, status=201, headers={'Location': '/projects/%s' % project['_id']})
@@ -306,6 +306,7 @@ def project_manage_users():
     user = users_collection.find_one({'_id': target_user_id},
                                      {'username': 1, 'email': 1,
                                       'full_name': 1})
+
     user['_status'] = 'OK'
     return jsonify(user)
 

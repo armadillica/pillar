@@ -7,7 +7,7 @@ from flask import Blueprint, current_app, g, request
 from werkzeug import exceptions as wz_exceptions
 
 from application.utils import authorization
-from application.modules import local_auth
+from application.modules import local_auth, users
 
 blueprint = Blueprint('service', __name__)
 log = logging.getLogger(__name__)
