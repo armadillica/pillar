@@ -12,6 +12,8 @@ from application.modules import local_auth
 blueprint = Blueprint('service', __name__)
 log = logging.getLogger(__name__)
 
+ROLES_WITH_GROUPS = {u'admin', u'demo', u'subscriber'}
+
 
 @blueprint.route('/badger', methods=['POST'])
 @authorization.require_login(require_roles={u'service', u'badger'}, require_all=True)
@@ -60,15 +62,53 @@ def badger():
         return 'User not found', 404
 
     # Apply the action
-    roles = set(db_user.get('roles', []) or [])
+    roles = set(db_user.get('roles') or [])
     if action == 'grant':
         roles.add(role)
     else:
         roles.discard(role)
+
+    groups = manage_user_group_membership(db_user, role, action)
+
+    updates = {'roles': list(roles)}
+    if groups is not None:
+        updates['groups'] = list(groups)
+
     users_coll.update_one({'_id': db_user['_id']},
-                          {'$set': {'roles': list(roles)}})
+                          {'$set': updates})
 
     return '', 204
+
+
+def manage_user_group_membership(db_user, role, action):
+    """Some roles have associated groups; this function maintains group & role membership.
+
+    Does NOT alter the given user, nor the database.
+
+    :return: the new groups of the user, or None if the groups shouldn't be changed.
+    :rtype: set
+    """
+
+    # Currently only three roles have associated groups.
+    if role not in ROLES_WITH_GROUPS:
+        return
+
+    # Find the group
+    groups_coll = current_app.data.driver.db['groups']
+    group = groups_coll.find_one({'name': role}, projection={'_id': 1})
+    if group is None:
+        log.warning('Group for role %r cannot be found, unable to %s members for user %s',
+                    role, action, db_user['_id'])
+        return
+    group_id = group['_id']
+
+    user_groups = set(db_user.get('groups') or [])
+    if action == 'grant':
+        user_groups.add(group_id)
+    else:
+        user_groups.discard(group_id)
+
+    return user_groups
 
 
 def create_service_account(email, roles, service):
