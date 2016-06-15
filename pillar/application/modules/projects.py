@@ -383,9 +383,15 @@ def before_returning_project_permissions(response):
 
 def before_returning_project_resource_permissions(response):
     # Return only those projects the user has access to.
-    allow = [project for project in response['_items']
-             if authorization.has_permissions('projects', project,
-                                              'GET', append_allowed_methods=True)]
+    allow = []
+    for project in response['_items']:
+        if authorization.has_permissions('projects', project,
+                                         'GET', append_allowed_methods=True):
+            allow.append(project)
+        else:
+            log.debug('User %s requested project %s, but has no access to it; filtered out.',
+                      g.get('current_user', {}).get('user_id'), project['_id'])
+
     response['_items'] = allow
 
 
