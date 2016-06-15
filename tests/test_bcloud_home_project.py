@@ -39,7 +39,7 @@ class HomeProjectTest(AbstractPillarTest):
 
             proj = home_project.create_home_project(user_id)
             self.assertEqual('home', proj['category'])
-            self.assertEqual({u'text', u'group', u'asset'},
+            self.assertEqual({u'text', u'group', u'asset', u'comment'},
                              set(nt['name'] for nt in proj['node_types']))
 
             endpoint = url_for('blender_cloud.home_project.home_project')
