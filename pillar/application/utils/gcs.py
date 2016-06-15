@@ -148,7 +148,7 @@ def update_file_name(node):
     """
 
     # Process only files that are not processing
-    if node['properties']['status'] == 'processing':
+    if node['properties'].get('status', '') == 'processing':
         return
 
     def _format_name(name, override_ext, size=None, map_type=u''):
