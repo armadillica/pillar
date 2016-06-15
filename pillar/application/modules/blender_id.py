@@ -9,6 +9,7 @@ import datetime
 
 from bson import tz_util
 import requests
+from requests.adapters import HTTPAdapter
 from flask import Blueprint, request, current_app, abort, jsonify
 from eve.methods.post import post_internal
 from eve.methods.put import put_internal
@@ -142,9 +143,14 @@ def validate_token(user_id, token, oauth_subclient_id):
     url = '{0}/u/validate_token'.format(blender_id_endpoint())
     log.debug('POSTing to %r', url)
 
+    # Retry a few times when POSTing to BlenderID fails.
+    # Source: http://stackoverflow.com/a/15431343/875379
+    s = requests.Session()
+    s.mount(blender_id_endpoint(), HTTPAdapter(max_retries=5))
+
     # POST to Blender ID, handling errors as negative verification results.
     try:
-        r = requests.post(url, data=payload)
+        r = s.post(url, data=payload, timeout=5)
     except requests.exceptions.ConnectionError as e:
         log.error('Connection error trying to POST to %s, handling as invalid token.', url)
         return None, None
