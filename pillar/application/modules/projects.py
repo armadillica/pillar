@@ -178,11 +178,14 @@ def after_inserting_project(project, db_user):
     if current_app.config.get('TESTING'):
         log.warning('Not creating Google Cloud Storage bucket while running unit tests!')
     else:
-        gcs_storage = GoogleCloudStorageBucket(str(project_id))
-        if gcs_storage.bucket.exists():
-            log.info('Created CGS instance for project %s', project_id)
-        else:
-            log.warning('Unable to create CGS instance for project %s', project_id)
+        try:
+            gcs_storage = GoogleCloudStorageBucket(str(project_id))
+            if gcs_storage.bucket.exists():
+                log.info('Created GCS instance for project %s', project_id)
+            else:
+                log.warning('Unable to create GCS instance for project %s', project_id)
+        except gcs_exceptions.Forbidden as ex:
+            log.warning('GCS forbids me to create CGS instance for project %s: %s', project_id, ex)
 
     # Commit the changes directly to the MongoDB; a PUT is not allowed yet,
     # as the project doesn't have a valid permission structure.
