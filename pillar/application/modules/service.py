@@ -40,6 +40,7 @@ def fetch_role_to_group_id_map():
 @authorization.require_login(require_roles={u'service', u'badger'}, require_all=True)
 def badger():
     if request.mimetype != 'application/json':
+        log.debug('Received %s instead of application/json', request.mimetype)
         raise wz_exceptions.BadRequest()
 
     # Parse the request

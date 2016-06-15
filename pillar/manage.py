@@ -814,7 +814,7 @@ def create_badger_account(email, badges):
     account, token = service.create_service_account(
         email,
         [u'badger'],
-        {'badger':  badges.strip().split()}
+        {'badger': badges.strip().split()}
     )
 
     print('Account created:')
