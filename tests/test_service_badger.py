@@ -54,17 +54,9 @@ class BadgerServiceTest(AbstractPillarTest):
     def test_group_membership(self):
         """Certain roles are linked to certain groups."""
 
-        from application.modules import service
+        group_ids = self.create_standard_groups(additional_groups=['succubus'])
 
         with self.app.test_request_context():
-            # Create the groups
-            group_ids = {}
-            for group_name in ['admin', 'demo', 'subscriber', 'succubus']:
-                groups_coll = self.app.data.driver.db['groups']
-                result = groups_coll.insert_one({'name': group_name})
-                group_ids[group_name] = result.inserted_id
-            service.fetch_role_to_group_id_map()
-
             def test_for_group(group_name, test=self.assertIn):
                 # Assign the 'subscriber' role
                 resp = self._post({'action': 'grant',

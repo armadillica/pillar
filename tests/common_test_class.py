@@ -161,3 +161,22 @@ class AbstractPillarTest(TestMinimal):
         """Returns a Basic HTTP Authentication header value."""
 
         return 'basic ' + base64.b64encode('%s:%s' % (username, subclient_id))
+
+    def create_standard_groups(self, additional_groups=()):
+        """Creates standard admin/demo/subscriber groups, plus any additional.
+
+        :returns: mapping from group name to group ID
+        """
+        from application.modules import service
+
+        with self.app.test_request_context():
+            group_ids = {}
+            groups_coll = self.app.data.driver.db['groups']
+
+            for group_name in ['admin', 'demo', 'subscriber'] + list(additional_groups):
+                result = groups_coll.insert_one({'name': group_name})
+                group_ids[group_name] = result.inserted_id
+
+            service.fetch_role_to_group_id_map()
+
+        return group_ids
