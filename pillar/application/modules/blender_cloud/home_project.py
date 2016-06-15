@@ -21,9 +21,26 @@ def create_home_project(user_id):
     """Creates a home project for the given user."""
 
     log.info('Creating home project for user %s', user_id)
-    project = projects.create_new_project(project_name='Home',
-                                          user_id=ObjectId(user_id),
-                                          overrides={'category': 'home'})
+    overrides = {
+        'category': 'home',
+        'summary': 'This is your home project. Pastebin and Blender settings sync in one!',
+        'description': '# Your home project\n\n'
+                       'This is your home project. It has functionality to act '
+                       'as a pastebin for text, images and other assets, and '
+                       'allows synchronisation of your Blender settings.'
+    }
+
+    # Maybe the user has a deleted home project.
+    proj_coll = current_app.data.driver.db['projects']
+    deleted_proj = proj_coll.find_one({'user': user_id, 'category': 'home', '_deleted': True})
+    if deleted_proj:
+        log.info('User %s has a deleted project %s, restoring', user_id, deleted_proj['_id'])
+        project = deleted_proj
+    else:
+        log.debug('User %s does not have a deleted project', user_id)
+        project = projects.create_new_project(project_name='Home',
+                                              user_id=ObjectId(user_id),
+                                              overrides=overrides)
 
     # Re-validate the authentication token, so that the put_internal call sees the
     # new group created for the project.
@@ -99,7 +116,7 @@ def has_home_project(user_id):
     """Returns True iff the user has a home project."""
 
     proj_coll = current_app.data.driver.db['projects']
-    return proj_coll.count({'user': user_id, 'category': 'home'}) > 0
+    return proj_coll.count({'user': user_id, 'category': 'home', '_deleted': False}) > 0
 
 
 def setup_app(app, url_prefix):

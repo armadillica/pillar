@@ -115,8 +115,15 @@ class HomeProjectTest(AbstractPillarTest):
             validate_token()
 
             self.assertFalse(home_project.has_home_project(user_id))
-            home_project.create_home_project(user_id)
+            proj = home_project.create_home_project(user_id)
             self.assertTrue(home_project.has_home_project(user_id))
+
+            # Delete the project.
+            resp = self.client.delete('/projects/%s' % proj['_id'],
+                                      headers={'Authorization': self.make_header('token'),
+                                               'If-Match': proj['_etag']})
+            self.assertEqual(204, resp.status_code, resp.data)
+            self.assertFalse(home_project.has_home_project(user_id))
 
     @responses.activate
     def test_home_project_projections(self):
@@ -196,3 +203,29 @@ class HomeProjectTest(AbstractPillarTest):
         self.assertEqual(json_proj2['_etag'], db_proj2['_etag'])
         self.assertNotEqual(db_proj1['_etag'], db_proj2['_etag'])
         self.assertNotEqual(db_proj1['_id'], db_proj2['_id'])
+
+    def test_delete_restore(self):
+        """Deleting and then recreating a home project should restore the deleted project."""
+
+        self._create_user_with_token(roles={u'subscriber'}, token='token')
+
+        # Create home project by getting it.
+        resp = self.client.get('/bcloud/home-project',
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp.data)
+        before_delete_json_proj = json.loads(resp.data)
+
+        # Delete the project.
+        resp = self.client.delete('/projects/%s' % before_delete_json_proj['_id'],
+                                  headers={'Authorization': self.make_header('token'),
+                                           'If-Match': before_delete_json_proj['_etag']})
+        self.assertEqual(204, resp.status_code, resp.data)
+
+        # Recreate home project by getting it.
+        resp = self.client.get('/bcloud/home-project',
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp.data)
+        after_delete_json_proj = json.loads(resp.data)
+
+        self.assertEqual(before_delete_json_proj['_id'],
+                         after_delete_json_proj['_id'])
