@@ -3,7 +3,7 @@ import logging
 from bson import ObjectId
 from eve.methods.put import put_internal
 from eve.methods.get import get
-from flask import Blueprint, g, current_app
+from flask import Blueprint, g, current_app, request
 from werkzeug import exceptions as wz_exceptions
 
 from application.modules import projects
@@ -60,13 +60,23 @@ def create_home_project(user_id):
 @blueprint.route('/home-project')
 @authorization.require_login(require_roles={u'subscriber', u'demo'})
 def home_project():
-    user_id = g.current_user['user_id']
+    """Fetches the home project, creating it if necessary.
 
+    Eve projections are supported, but at least the following fields must be present:
+        'permissions', 'category', 'user'
+    """
+    user_id = g.current_user['user_id']
     roles = g.current_user.get('roles', ())
+
     log.debug('Possibly creating home project for user %s with roles %s', user_id, roles)
     if not HOME_PROJECT_USERS.intersection(roles):
         log.debug('User %s is not a subscriber, not creating home project.', user_id)
         return 'No home project', 404
+
+    # Create the home project before we do the Eve query. This costs an extra round-trip
+    # to the database, but makes it easier to do projections correctly.
+    if not has_home_project(user_id):
+        create_home_project(user_id)
 
     resp, _, _, status, _ = get('projects', category=u'home', user=user_id)
     if status != 200:
@@ -75,8 +85,10 @@ def home_project():
     if resp['_items']:
         project = resp['_items'][0]
     else:
-        log.debug('Home project for user %s not found', user_id)
-        project = create_home_project(user_id)
+        log.warning('Home project for user %s not found, while we just created it! Could be '
+                    'due to projections and other arguments on the query string: %s',
+                    user_id, request.query_string)
+        return 'No home project', 404
 
     return utils.jsonify(project), status
 

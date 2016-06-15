@@ -58,9 +58,7 @@ class HomeProjectTest(AbstractPillarTest):
         self.assertEqual(json_proj['_etag'], db_proj['_etag'])
 
     @responses.activate
-    def test_autocreate_home_project_after_getting_subscriber_role(self):
-        from application.modules.blender_cloud import home_project
-
+    def test_autocreate_home_project_with_subscriber_role(self):
         # Implicitly create user by token validation.
         self.mock_blenderid_validate_happy()
         resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
@@ -77,13 +75,13 @@ class HomeProjectTest(AbstractPillarTest):
         self.assertEqual('home', json_proj['category'])
 
     @responses.activate
-    def test_autocreate_home_project_after_getting_demo_role(self):
+    def test_autocreate_home_project_with_demo_role(self):
         # Implicitly create user by token validation.
         self.mock_blenderid_validate_happy()
         resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
         self.assertEqual(200, resp.status_code, resp)
 
-        # Grant demo role, which should also should allow creation fo the home project.
+        # Grant demo role, which should allow creation of the home project.
         self.badger(TEST_EMAIL_ADDRESS, 'demo', 'grant')
 
         resp = self.client.get('/bcloud/home-project',
@@ -92,6 +90,20 @@ class HomeProjectTest(AbstractPillarTest):
 
         json_proj = json.loads(resp.data)
         self.assertEqual('home', json_proj['category'])
+
+    @responses.activate
+    def test_autocreate_home_project_with_succubus_role(self):
+        # Implicitly create user by token validation.
+        self.mock_blenderid_validate_happy()
+        resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp)
+
+        # Grant demo role, which should NOT allow creation fo the home project.
+        self.badger(TEST_EMAIL_ADDRESS, 'succubus', 'grant')
+
+        resp = self.client.get('/bcloud/home-project',
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(403, resp.status_code)
 
     def test_has_home_project(self):
         from application.modules.blender_cloud import home_project
@@ -106,3 +118,28 @@ class HomeProjectTest(AbstractPillarTest):
             self.assertFalse(home_project.has_home_project(user_id))
             home_project.create_home_project(user_id)
             self.assertTrue(home_project.has_home_project(user_id))
+
+    @responses.activate
+    def test_home_project_projections(self):
+        """Getting the home project should support projections."""
+
+        # Implicitly create user by token validation.
+        self.mock_blenderid_validate_happy()
+        resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp)
+
+        # Grant subscriber role, and fetch the home project.
+        self.badger(TEST_EMAIL_ADDRESS, 'subscriber', 'grant')
+
+        resp = self.client.get('/bcloud/home-project',
+                               query_string={'projection': json.dumps(
+                                   {'permissions': 1,
+                                    'category': 1,
+                                    'user': 1})},
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        json_proj = json.loads(resp.data)
+        self.assertNotIn('name', json_proj)
+        self.assertNotIn('node_types', json_proj)
+        self.assertEqual('home', json_proj['category'])
