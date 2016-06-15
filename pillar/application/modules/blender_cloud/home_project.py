@@ -39,11 +39,13 @@ def create_home_project(user_id):
     from manage_extra.node_types.group import node_type_group
     from manage_extra.node_types.asset import node_type_asset
     from manage_extra.node_types.text import node_type_text
+    from manage_extra.node_types.comment import node_type_comment
 
     project['node_types'] = [
         node_type_group,
         node_type_asset,
         node_type_text,
+        node_type_comment,
     ]
 
     result, _, _, status = put_internal('projects', utils.remove_private_keys(project),
