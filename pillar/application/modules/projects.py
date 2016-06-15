@@ -102,21 +102,21 @@ def protect_sensitive_fields(document, original):
     revert('user')
 
 
-def after_inserting_projects(items):
+def after_inserting_projects(projects):
     """After inserting a project in the collection we do some processing such as:
     - apply the right permissions
     - define basic node types
     - optionally generate a url
     - initialize storage space
 
-    :param items: List of project docs that have been inserted (normally one)
+    :param projects: List of project docs that have been inserted (normally one)
     """
-    current_user = g.current_user
-    users_collection = current_app.data.driver.db['users']
-    user = users_collection.find_one(current_user['user_id'])
 
-    for item in items:
-        after_inserting_project(item, user)
+    users_collection = current_app.data.driver.db['users']
+    for project in projects:
+        owner_id = project.get('user', None)
+        owner = users_collection.find_one(owner_id)
+        after_inserting_project(project, owner)
 
 
 def after_inserting_project(project, db_user):
