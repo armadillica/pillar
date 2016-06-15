@@ -17,7 +17,6 @@ log = logging.getLogger(__name__)
 
 
 class HomeProjectTest(AbstractPillarTest):
-
     def setUp(self, **kwargs):
         AbstractPillarTest.setUp(self, **kwargs)
         self.create_standard_groups()
@@ -143,3 +142,57 @@ class HomeProjectTest(AbstractPillarTest):
         self.assertNotIn('name', json_proj)
         self.assertNotIn('node_types', json_proj)
         self.assertEqual('home', json_proj['category'])
+
+    @responses.activate
+    def test_home_project_url(self):
+        """The home project should have 'home' as URL."""
+
+        # Implicitly create user by token validation.
+        self.mock_blenderid_validate_happy()
+        resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp)
+
+        # Grant subscriber role, and fetch the home project.
+        self.badger(TEST_EMAIL_ADDRESS, 'subscriber', 'grant')
+
+        resp = self.client.get('/bcloud/home-project',
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp.data)
+
+        json_proj = json.loads(resp.data)
+        self.assertEqual('home', json_proj['url'])
+
+    @responses.activate
+    def test_multiple_users_with_home_project(self):
+        from application.modules.blender_cloud import home_project
+        from application.utils.authentication import validate_token
+
+        uid1 = self._create_user_with_token(roles={u'subscriber'}, token='token1', user_id=24 * 'a')
+        uid2 = self._create_user_with_token(roles={u'subscriber'}, token='token2', user_id=24 * 'b')
+
+        # Create home projects
+        with self.app.test_request_context(headers={'Authorization': self.make_header('token1')}):
+            validate_token()
+            proj1 = home_project.create_home_project(uid1)
+            db_proj1 = self.app.data.driver.db['projects'].find_one(proj1['_id'])
+
+        with self.app.test_request_context(headers={'Authorization': self.make_header('token2')}):
+            validate_token()
+            proj2 = home_project.create_home_project(uid2)
+            db_proj2 = self.app.data.driver.db['projects'].find_one(proj2['_id'])
+
+        # Test availability at end-point
+        resp1 = self.client.get('/bcloud/home-project', headers={'Authorization': self.make_header('token1')})
+        resp2 = self.client.get('/bcloud/home-project', headers={'Authorization': self.make_header('token2')})
+        self.assertEqual(200, resp1.status_code)
+        self.assertEqual(200, resp2.status_code)
+
+        json_proj1 = json.loads(resp1.data)
+        json_proj2 = json.loads(resp2.data)
+
+        self.assertEqual(ObjectId(json_proj1['_id']), proj1['_id'])
+        self.assertEqual(ObjectId(json_proj2['_id']), proj2['_id'])
+        self.assertEqual(json_proj1['_etag'], db_proj1['_etag'])
+        self.assertEqual(json_proj2['_etag'], db_proj2['_etag'])
+        self.assertNotEqual(db_proj1['_etag'], db_proj2['_etag'])
+        self.assertNotEqual(db_proj1['_id'], db_proj2['_id'])

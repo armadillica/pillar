@@ -6,6 +6,7 @@ from bson import ObjectId
 from eve.methods.post import post_internal
 from eve.methods.patch import patch_internal
 from flask import g, Blueprint, request, abort, current_app
+from gcloud import exceptions as gcs_exceptions
 from werkzeug import exceptions as wz_exceptions
 
 from application.utils import remove_private_keys, authorization, jsonify, mongo
@@ -172,7 +173,10 @@ def after_inserting_project(project, db_user):
 
     # Allow admin users to use whatever url they want.
     if not is_admin or not project.get('url'):
-        project['url'] = "p-{!s}".format(project_id)
+        if project.get('category', '') == 'home':
+            project['url'] = 'home'
+        else:
+            project['url'] = "p-{!s}".format(project_id)
 
     # Initialize storage page (defaults to GCS)
     if current_app.config.get('TESTING'):
