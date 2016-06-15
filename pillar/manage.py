@@ -879,6 +879,7 @@ def sync_role_groups(do_revoke_groups):
         print('When passing "false", people are only added to groups.')
         print('when passing "true", people are also removed from groups.')
         raise SystemExit()
+    do_revoke_groups = do_revoke_groups == 'true'
 
     service.fetch_role_to_group_id_map()
 
