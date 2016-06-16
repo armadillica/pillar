@@ -189,3 +189,10 @@ def _delete_expired_tokens():
 
     result = token_coll.delete_many({'expire_time': {"$lt": expiry_date}})
     log.debug('Deleted %i expired authentication tokens', result.deleted_count)
+
+
+def current_user_id():
+    """None-safe fetching of user ID. Can return None itself, though."""
+
+    current_user = g.get('current_user') or {}
+    return current_user.get('user_id')

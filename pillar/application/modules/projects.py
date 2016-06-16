@@ -9,7 +9,8 @@ from flask import g, Blueprint, request, abort, current_app
 from gcloud import exceptions as gcs_exceptions
 from werkzeug import exceptions as wz_exceptions
 
-from application.utils import remove_private_keys, authorization, jsonify, mongo
+from application.utils import remove_private_keys, jsonify, mongo
+from application.utils import authorization, authentication
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.authorization import user_has_role, check_permissions, require_login
 from manage_extra.node_types.asset import node_type_asset
@@ -397,7 +398,7 @@ def before_returning_project_resource_permissions(response):
             allow.append(project)
         else:
             log.debug('User %s requested project %s, but has no access to it; filtered out.',
-                      g.get('current_user', {}).get('user_id'), project['_id'])
+                      authentication.current_user_id(), project['_id'])
 
     response['_items'] = allow
 
