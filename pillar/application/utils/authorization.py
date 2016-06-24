@@ -34,7 +34,7 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
 
 
 def has_permissions(collection_name, resource, method, append_allowed_methods=False,
-                      check_node_type=None):
+                    check_node_type=None):
     """Check user permissions to access a node. We look up node permissions from
     world to groups to users and match them with the computed user permissions.
 
