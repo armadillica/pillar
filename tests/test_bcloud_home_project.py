@@ -23,7 +23,7 @@ class HomeProjectTest(AbstractPillarTest):
 
     def _create_user_with_token(self, roles, token, user_id='cafef00df00df00df00df00d'):
         """Creates a user directly in MongoDB, so that it doesn't trigger any Eve hooks."""
-        user_id = self.create_user(roles=roles, user_id=user_id)
+        user_id = self.create_user(roles=roles.union({u'homeproject'}), user_id=user_id)
         self.create_valid_auth_token(user_id, token)
         return user_id
 
@@ -47,7 +47,9 @@ class HomeProjectTest(AbstractPillarTest):
 
         # Test availability at end-point
         resp = self.client.get(endpoint)
-        self.assertEqual(403, resp.status_code)
+        # While we're still AB-testing, unauthenticated users should get a 404.
+        # When that's over, it should result in a 403.
+        self.assertEqual(404, resp.status_code)
 
         resp = self.client.get(endpoint, headers={'Authorization': self.make_header('token')})
         self.assertEqual(200, resp.status_code)
@@ -63,8 +65,8 @@ class HomeProjectTest(AbstractPillarTest):
         resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
         self.assertEqual(200, resp.status_code, resp)
 
-        # Grant subscriber role, and fetch the home project.
-        self.badger(TEST_EMAIL_ADDRESS, 'subscriber', 'grant')
+        # Grant subscriber and homeproject roles, and fetch the home project.
+        self.badger(TEST_EMAIL_ADDRESS, {'subscriber', 'homeproject'}, 'grant')
 
         resp = self.client.get('/bcloud/home-project',
                                headers={'Authorization': self.make_header('token')})
@@ -74,14 +76,36 @@ class HomeProjectTest(AbstractPillarTest):
         self.assertEqual('home', json_proj['category'])
 
     @responses.activate
+    def test_home_project_ab_testing(self):
+        self.mock_blenderid_validate_happy()
+        resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp)
+
+        # Grant subscriber and but NOT homeproject role, and fetch the home project.
+        self.badger(TEST_EMAIL_ADDRESS, {'subscriber'}, 'grant')
+
+        resp = self.client.get('/bcloud/home-project',
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(404, resp.status_code)
+
+        resp = self.client.get('/users/me',
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code)
+        me = json.loads(resp.data)
+
+        with self.app.test_request_context():
+            from application.modules.blender_cloud import home_project
+            self.assertFalse(home_project.has_home_project(me['_id']))
+
+    @responses.activate
     def test_autocreate_home_project_with_demo_role(self):
         # Implicitly create user by token validation.
         self.mock_blenderid_validate_happy()
         resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
         self.assertEqual(200, resp.status_code, resp)
 
-        # Grant demo role, which should allow creation of the home project.
-        self.badger(TEST_EMAIL_ADDRESS, 'demo', 'grant')
+        # Grant demo and homeproject role, which should allow creation of the home project.
+        self.badger(TEST_EMAIL_ADDRESS, {'demo', 'homeproject'}, 'grant')
 
         resp = self.client.get('/bcloud/home-project',
                                headers={'Authorization': self.make_header('token')})
@@ -97,8 +121,8 @@ class HomeProjectTest(AbstractPillarTest):
         resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
         self.assertEqual(200, resp.status_code, resp)
 
-        # Grant demo role, which should NOT allow creation fo the home project.
-        self.badger(TEST_EMAIL_ADDRESS, 'succubus', 'grant')
+        # Grant succubus role, which should NOT allow creation fo the home project.
+        self.badger(TEST_EMAIL_ADDRESS, {'succubus', 'homeproject'}, 'grant')
 
         resp = self.client.get('/bcloud/home-project',
                                headers={'Authorization': self.make_header('token')})
@@ -135,7 +159,7 @@ class HomeProjectTest(AbstractPillarTest):
         self.assertEqual(200, resp.status_code, resp)
 
         # Grant subscriber role, and fetch the home project.
-        self.badger(TEST_EMAIL_ADDRESS, 'subscriber', 'grant')
+        self.badger(TEST_EMAIL_ADDRESS, {'subscriber', 'homeproject'}, 'grant')
 
         resp = self.client.get('/bcloud/home-project',
                                query_string={'projection': json.dumps(
@@ -160,7 +184,7 @@ class HomeProjectTest(AbstractPillarTest):
         self.assertEqual(200, resp.status_code, resp)
 
         # Grant subscriber role, and fetch the home project.
-        self.badger(TEST_EMAIL_ADDRESS, 'subscriber', 'grant')
+        self.badger(TEST_EMAIL_ADDRESS, {'subscriber', 'homeproject'}, 'grant')
 
         resp = self.client.get('/bcloud/home-project',
                                headers={'Authorization': self.make_header('token')})

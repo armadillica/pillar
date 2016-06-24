@@ -141,7 +141,7 @@ class AbstractPillarTest(TestMinimal):
 
         return token_data
 
-    def badger(self, user_email, role, action, srv_token=None):
+    def badger(self, user_email, roles, action, srv_token=None):
         """Creates a service account, and uses it to grant or revoke a role to the user.
 
         To skip creation of the service account, pass a srv_token.
@@ -150,21 +150,25 @@ class AbstractPillarTest(TestMinimal):
         :rtype: str
         """
 
+        if isinstance(roles, str):
+            roles = set(roles)
+
         # Create a service account if needed.
         if srv_token is None:
             from application.modules.service import create_service_account
             with self.app.test_request_context():
                 _, srv_token_doc = create_service_account('service@example.com',
                                                           {'badger'},
-                                                          {'badger': [role]})
+                                                          {'badger': list(roles)})
                 srv_token = srv_token_doc['token']
 
-        resp = self.client.post('/service/badger',
-                                headers={'Authorization': self.make_header(srv_token),
-                                         'Content-Type': 'application/json'},
-                                data=json.dumps({'action': action,
-                                                 'role': role,
-                                                 'user_email': user_email}))
+        for role in roles:
+            resp = self.client.post('/service/badger',
+                                    headers={'Authorization': self.make_header(srv_token),
+                                             'Content-Type': 'application/json'},
+                                    data=json.dumps({'action': action,
+                                                     'role': role,
+                                                     'user_email': user_email}))
         self.assertEqual(204, resp.status_code, resp.data)
 
         return srv_token

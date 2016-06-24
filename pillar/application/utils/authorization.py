@@ -273,6 +273,37 @@ def require_login(require_roles=set(),
     return decorator
 
 
+def ab_testing(require_roles=set(),
+               require_all=False):
+    """Decorator that raises a 404 when the user doesn't match the roles..
+
+    :param require_roles: set of roles.
+    :param require_all:
+        When False (the default): if the user's roles have a
+        non-empty intersection with the given roles, access is granted.
+        When True: require the user to have all given roles before access is
+        granted.
+    """
+
+    if not isinstance(require_roles, set):
+        raise TypeError('require_roles param should be a set, but is a %r' % type(require_roles))
+
+    if require_all and not require_roles:
+        raise ValueError('require_login(require_all=True) cannot be used with empty require_roles.')
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            if not user_matches_roles(require_roles, require_all):
+                abort(404)
+
+            return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 def user_has_role(role, user=None):
     """Returns True iff the user is logged in and has the given role."""
 

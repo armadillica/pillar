@@ -77,6 +77,7 @@ def create_home_project(user_id):
 
 
 @blueprint.route('/home-project')
+@authorization.ab_testing(require_roles={u'homeproject'})
 @authorization.require_login(require_roles={u'subscriber', u'demo'})
 def home_project():
     """Fetches the home project, creating it if necessary.
