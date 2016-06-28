@@ -41,7 +41,7 @@ def latest_nodes(db_filter, projection, py_filter, limit):
 
 
 def has_public_project(node_doc):
-    """Returns True iff the project the node belongs to is public."""
+    """Returns True if the project the node belongs to is public."""
 
     project_id = node_doc.get('project')
     return is_project_public(project_id)
@@ -49,7 +49,7 @@ def has_public_project(node_doc):
 
 # TODO: cache result, at least for a limited amt. of time, or for this HTTP request.
 def is_project_public(project_id):
-    """Returns True iff the project is public."""
+    """Returns True if the project is public."""
 
     project = current_app.data.driver.db['projects'].find_one(project_id)
     if not project:
