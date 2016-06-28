@@ -62,7 +62,7 @@ def is_project_public(project_id):
 def latest_assets():
     latest = latest_nodes({'node_type': 'asset', 'properties.status': 'published'},
                           {'name': 1, 'project': 1, 'user': 1, 'node_type': 1,
-                           'picture': 1, 'properties.status': 1,
+                           'parent': 1, 'picture': 1, 'properties.status': 1,
                            'properties.content_type': 1,
                            'permissions.world': 1},
                           has_public_project, 12)
