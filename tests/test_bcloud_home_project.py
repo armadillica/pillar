@@ -2,14 +2,12 @@
 
 """Unit tests for the Blender Cloud home project module."""
 
-import functools
 import json
 import logging
-import urllib
 
 import responses
 from bson import ObjectId
-from flask import g, url_for
+from flask import url_for
 
 from common_test_class import AbstractPillarTest, TEST_EMAIL_ADDRESS
 
@@ -22,7 +20,10 @@ class HomeProjectTest(AbstractPillarTest):
         self.create_standard_groups()
 
     def _create_user_with_token(self, roles, token, user_id='cafef00df00df00df00df00d'):
-        """Creates a user directly in MongoDB, so that it doesn't trigger any Eve hooks."""
+        """Creates a user directly in MongoDB, so that it doesn't trigger any Eve hooks.
+
+        Adds the 'homeproject' role too, which we need to get past the AB-testing.
+        """
         user_id = self.create_user(roles=roles.union({u'homeproject'}), user_id=user_id)
         self.create_valid_auth_token(user_id, token)
         return user_id
@@ -37,9 +38,9 @@ class HomeProjectTest(AbstractPillarTest):
         with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
             validate_token()
 
-            proj = home_project.create_home_project(user_id)
+            proj = home_project.create_home_project(user_id, write_access=True)
             self.assertEqual('home', proj['category'])
-            self.assertEqual({u'text', u'group', u'asset', u'comment'},
+            self.assertEqual({u'group', u'asset', u'comment'},
                              set(nt['name'] for nt in proj['node_types']))
 
             endpoint = url_for('blender_cloud.home_project.home_project')
@@ -74,6 +75,16 @@ class HomeProjectTest(AbstractPillarTest):
 
         json_proj = json.loads(resp.data)
         self.assertEqual('home', json_proj['category'])
+
+        # Check that a Blender Sync node was created automatically.
+        with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
+            nodes_coll = self.app.data.driver.db['nodes']
+            node = nodes_coll.find_one({
+                'project': ObjectId(json_proj['_id']),
+                'node_type': 'group',
+                'name': 'Blender Sync',
+            })
+            self.assertIsNotNone(node)
 
     @responses.activate
     def test_home_project_ab_testing(self):
@@ -114,19 +125,84 @@ class HomeProjectTest(AbstractPillarTest):
         json_proj = json.loads(resp.data)
         self.assertEqual('home', json_proj['category'])
 
+        # Check that a Blender Sync node was created automatically.
+        with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
+            nodes_coll = self.app.data.driver.db['nodes']
+            node = nodes_coll.find_one({
+                'project': ObjectId(json_proj['_id']),
+                'node_type': 'group',
+                'name': 'Blender Sync',
+            })
+            self.assertIsNotNone(node)
+
     @responses.activate
     def test_autocreate_home_project_with_succubus_role(self):
+        from application.utils import dumps
+
         # Implicitly create user by token validation.
         self.mock_blenderid_validate_happy()
         resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
-        self.assertEqual(200, resp.status_code, resp)
+        self.assertEqual(200, resp.status_code, resp.data)
+        user_id = ObjectId(json.loads(resp.data)['_id'])
 
-        # Grant succubus role, which should NOT allow creation fo the home project.
+        # Grant succubus role, which should allow creation of a read-only home project.
         self.badger(TEST_EMAIL_ADDRESS, {'succubus', 'homeproject'}, 'grant')
 
         resp = self.client.get('/bcloud/home-project',
                                headers={'Authorization': self.make_header('token')})
-        self.assertEqual(403, resp.status_code)
+        self.assertEqual(200, resp.status_code)
+        json_proj = json.loads(resp.data)
+        self.assertEqual('home', json_proj['category'])
+
+        # Check that the admin group of the project only has GET permissions.
+        self.assertEqual({'GET'}, set(json_proj['permissions']['groups'][0]['methods']))
+        project_id = ObjectId(json_proj['_id'])
+        admin_group_id = json_proj['permissions']['groups'][0]['group']
+
+        # Check that a Blender Sync node was created automatically.
+        expected_node_permissions = {u'users': [],
+                                     u'groups': [
+                                         {u'group': ObjectId(admin_group_id),
+                                          u'methods': [u'GET', u'PUT', u'POST', u'DELETE']}, ],
+                                     u'world': []}
+        with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
+            nodes_coll = self.app.data.driver.db['nodes']
+            node = nodes_coll.find_one({
+                'project': project_id,
+                'node_type': 'group',
+                'name': 'Blender Sync',
+            })
+            self.assertIsNotNone(node)
+
+            # Check that the node itself has write permissions for the admin group.
+            node_perms = node['permissions']
+            self.assertEqual(node_perms, expected_node_permissions)
+            sync_node_id = node['_id']
+
+        # Check that we can create a group node inside the sync node.
+        sub_sync_node = {'project': project_id,
+                         'node_type': 'group',
+                         'parent': sync_node_id,
+                         'name': '2.77',
+                         'user': user_id,
+                         'description': 'Sync folder for Blender 2.77',
+                         'properties': {'status': 'published'},
+                         }
+        resp = self.client.post('/nodes', data=dumps(sub_sync_node),
+                                headers={'Authorization': self.make_header('token'),
+                                         'Content-Type': 'application/json'}
+                                )
+        self.assertEqual(201, resp.status_code, resp.data)
+        sub_node_info = json.loads(resp.data)
+
+        # Check the explicit node-level permissions are copied.
+        # These aren't returned by the POST to Eve, so we have to check them in the DB manually.
+        with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
+            nodes_coll = self.app.data.driver.db['nodes']
+            sub_node = nodes_coll.find_one(ObjectId(sub_node_info['_id']))
+
+            node_perms = sub_node['permissions']
+            self.assertEqual(node_perms, expected_node_permissions)
 
     def test_has_home_project(self):
         from application.modules.blender_cloud import home_project
@@ -139,7 +215,7 @@ class HomeProjectTest(AbstractPillarTest):
             validate_token()
 
             self.assertFalse(home_project.has_home_project(user_id))
-            proj = home_project.create_home_project(user_id)
+            proj = home_project.create_home_project(user_id, write_access=True)
             self.assertTrue(home_project.has_home_project(user_id))
 
             # Delete the project.
@@ -204,17 +280,19 @@ class HomeProjectTest(AbstractPillarTest):
         # Create home projects
         with self.app.test_request_context(headers={'Authorization': self.make_header('token1')}):
             validate_token()
-            proj1 = home_project.create_home_project(uid1)
+            proj1 = home_project.create_home_project(uid1, write_access=True)
             db_proj1 = self.app.data.driver.db['projects'].find_one(proj1['_id'])
 
         with self.app.test_request_context(headers={'Authorization': self.make_header('token2')}):
             validate_token()
-            proj2 = home_project.create_home_project(uid2)
+            proj2 = home_project.create_home_project(uid2, write_access=True)
             db_proj2 = self.app.data.driver.db['projects'].find_one(proj2['_id'])
 
         # Test availability at end-point
-        resp1 = self.client.get('/bcloud/home-project', headers={'Authorization': self.make_header('token1')})
-        resp2 = self.client.get('/bcloud/home-project', headers={'Authorization': self.make_header('token2')})
+        resp1 = self.client.get('/bcloud/home-project',
+                                headers={'Authorization': self.make_header('token1')})
+        resp2 = self.client.get('/bcloud/home-project',
+                                headers={'Authorization': self.make_header('token2')})
         self.assertEqual(200, resp1.status_code)
         self.assertEqual(200, resp2.status_code)
 
