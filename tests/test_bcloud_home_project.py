@@ -75,6 +75,7 @@ class HomeProjectTest(AbstractPillarTest):
 
         json_proj = json.loads(resp.data)
         self.assertEqual('home', json_proj['category'])
+        self.assertEqual('home', json_proj['url'])
 
         # Check that a Blender Sync node was created automatically.
         with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
@@ -124,6 +125,7 @@ class HomeProjectTest(AbstractPillarTest):
 
         json_proj = json.loads(resp.data)
         self.assertEqual('home', json_proj['category'])
+        self.assertEqual('home', json_proj['url'])
 
         # Check that a Blender Sync node was created automatically.
         with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
@@ -153,6 +155,7 @@ class HomeProjectTest(AbstractPillarTest):
         self.assertEqual(200, resp.status_code)
         json_proj = json.loads(resp.data)
         self.assertEqual('home', json_proj['category'])
+        self.assertEqual('home', json_proj['url'])
 
         # Check that the admin group of the project only has GET permissions.
         self.assertEqual({'GET'}, set(json_proj['permissions']['groups'][0]['methods']))

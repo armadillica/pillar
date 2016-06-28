@@ -98,10 +98,12 @@ def protect_sensitive_fields(document, original):
             return
         document[name] = original[name]
 
-    revert('url')
     revert('status')
     revert('category')
     revert('user')
+
+    if 'url' in original:
+        revert('url')
 
 
 def after_inserting_projects(projects):
