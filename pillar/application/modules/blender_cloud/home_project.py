@@ -20,9 +20,20 @@ HOME_PROJECT_USERS = set()
 
 # Users with any of these roles will get full write access to their home project.
 HOME_PROJECT_WRITABLE_USERS = {u'subscriber', u'demo'}
+
+HOME_PROJECT_DESCRIPTION = ('# Your home project\n\n'
+                            'This is your home project. It allows synchronisation '
+                            'of your Blender settings using the [Blender Cloud addon]'
+                            '(https://cloud.blender.org/services#blender-addon).')
+HOME_PROJECT_SUMMARY = 'This is your home project. Here you can sync your Blender settings!'
+# HOME_PROJECT_DESCRIPTION = ('# Your home project\n\n'
+#                             'This is your home project. It has functionality to act '
+#                             'as a pastebin for text, images and other assets, and '
+#                             'allows synchronisation of your Blender settings.')
+# HOME_PROJECT_SUMMARY = 'This is your home project. Pastebin and Blender settings sync in one!'
 SYNC_GROUP_NODE_NAME = u'Blender Sync'
-SYNC_GROUP_NODE_DESC = 'The [Blender Cloud Addon](https://cloud.blender.org/services' \
-                       '#blender-addon) will synchronize your Blender settings here.'
+SYNC_GROUP_NODE_DESC = ('The [Blender Cloud Addon](https://cloud.blender.org/services'
+                        '#blender-addon) will synchronize your Blender settings here.')
 
 
 def create_blender_sync_node(project_id, admin_group_id, user_id):
@@ -82,11 +93,9 @@ def create_home_project(user_id, write_access):
     log.info('Creating home project for user %s', user_id)
     overrides = {
         'category': 'home',
-        'summary': 'This is your home project. Pastebin and Blender settings sync in one!',
-        'description': '# Your home project\n\n'
-                       'This is your home project. It has functionality to act '
-                       'as a pastebin for text, images and other assets, and '
-                       'allows synchronisation of your Blender settings.'
+        'url': 'home',
+        'summary': HOME_PROJECT_SUMMARY,
+        'description': HOME_PROJECT_DESCRIPTION
     }
 
     # Maybe the user has a deleted home project.
