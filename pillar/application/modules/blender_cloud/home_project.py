@@ -1,7 +1,8 @@
 import copy
 import logging
+import datetime
 
-from bson import ObjectId
+from bson import ObjectId, tz_util
 from eve.methods.post import post_internal
 from eve.methods.put import put_internal
 from eve.methods.get import get
@@ -209,6 +210,55 @@ def is_home_project(project_id, user_id):
                             '_deleted': False}) > 0
 
 
+def mark_node_updated(node_id):
+    """Uses pymongo to set the node's _updated to "now"."""
+
+    now = datetime.datetime.now(tz=tz_util.utc)
+    nodes_coll = current_app.data.driver.db['nodes']
+
+    return nodes_coll.update_one({'_id': node_id},
+                                 {'$set': {'_updated': now}})
+
+
+def get_home_project_parent_node(node, projection, name_for_log):
+    """Returns a partial parent node document, but only if the node is a home project node."""
+
+    user_id = authentication.current_user_id()
+    if not user_id:
+        log.debug('%s: user not logged in.', name_for_log)
+        return None
+
+    parent_id = node.get('parent')
+    if not parent_id:
+        log.debug('%s: ignoring top-level node.', name_for_log)
+        return None
+
+    project_id = node.get('project')
+    if not project_id:
+        log.debug('%s: ignoring node without project ID', name_for_log)
+        return None
+
+    project_id = ObjectId(project_id)
+    if not is_home_project(project_id, user_id):
+        log.debug('%s: node not part of home project.', name_for_log)
+        return None
+
+    # Get the parent node for permission checking.
+    parent_id = ObjectId(parent_id)
+
+    nodes_coll = current_app.data.driver.db['nodes']
+    projection['project'] = 1
+    parent_node = nodes_coll.find_one(parent_id, projection=projection)
+
+    if parent_node['project'] != project_id:
+        log.warning('%s: User %s is trying to reference '
+                    'parent node %s from different project %s, expected project %s.',
+                    name_for_log, user_id, parent_id, parent_node['project'], project_id)
+        raise wz_exceptions.BadRequest('Trying to create cross-project links.')
+
+    return parent_node
+
+
 def check_home_project_nodes_permissions(nodes):
     for node in nodes:
         check_home_project_node_permissions(node)
@@ -217,38 +267,15 @@ def check_home_project_nodes_permissions(nodes):
 def check_home_project_node_permissions(node):
     """Grants POST access to the node when the user has POST access on its parent."""
 
-    user_id = authentication.current_user_id()
-    if not user_id:
-        log.debug('check_home_project_node_permissions: user not logged in.')
+    parent_node = get_home_project_parent_node(node,
+                                               {'permissions': 1,
+                                                'project': 1,
+                                                'node_type': 1},
+                                               'check_home_project_node_permissions')
+    if parent_node is None:
         return
 
-    parent_id = node.get('parent')
-    if not parent_id:
-        log.debug('check_home_project_node_permissions: not checking for top-level node.')
-        return
-
-    project_id = node.get('project')
-    if not project_id:
-        log.debug('check_home_project_node_permissions: ignoring node without project ID')
-        return
-
-    project_id = ObjectId(project_id)
-    if not is_home_project(project_id, user_id):
-        log.debug('check_home_project_node_permissions: node not part of home project.')
-        return
-
-    # Get the parent node for permission checking.
-    parent_id = ObjectId(parent_id)
-    nodes_coll = current_app.data.driver.db['nodes']
-    parent_node = nodes_coll.find_one(parent_id,
-                                      projection={'permissions': 1,
-                                                  'project': 1,
-                                                  'node_type': 1})
-    if parent_node['project'] != project_id:
-        log.warning('check_home_project_node_permissions: User %s is trying to reference '
-                    'parent node %s from different project %s, expected project %s.',
-                    user_id, parent_id, parent_node['project'], project_id)
-        raise wz_exceptions.BadRequest('Trying to create cross-project links.')
+    parent_id = parent_node['_id']
 
     has_access = authorization.has_permissions('nodes', parent_node, 'POST')
     if not has_access:
@@ -264,7 +291,30 @@ def check_home_project_node_permissions(node):
     node['permissions'] = copy.deepcopy(parent_node['permissions'])
 
 
+def mark_parents_as_updated(nodes):
+    for node in nodes:
+        mark_parent_as_updated(node)
+
+
+def mark_parent_as_updated(node, original=None):
+    parent_node = get_home_project_parent_node(node,
+                                               {'permissions': 1,
+                                                'node_type': 1},
+                                               'mark_parent_as_updated')
+    if parent_node is None:
+        return
+
+    # Mark the parent node as 'updated' if this is an asset and the parent is a group.
+    if node.get('node_type') == 'asset' and parent_node['node_type'] == 'group':
+        log.debug('Node %s updated, marking parent=%s as updated too',
+                  node['_id'], parent_node['_id'])
+        mark_node_updated(parent_node['_id'])
+
+
 def setup_app(app, url_prefix):
     app.register_blueprint(blueprint, url_prefix=url_prefix)
 
     app.on_insert_nodes += check_home_project_nodes_permissions
+    app.on_inserted_nodes += mark_parents_as_updated
+    app.on_updated_nodes += mark_parent_as_updated
+    app.on_replaced_nodes += mark_parent_as_updated
