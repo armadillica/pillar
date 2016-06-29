@@ -50,7 +50,7 @@ class HomeProjectTest(AbstractPillarTest):
         resp = self.client.get(endpoint)
         # While we're still AB-testing, unauthenticated users should get a 404.
         # When that's over, it should result in a 403.
-        self.assertEqual(404, resp.status_code)
+        self.assertEqual(403, resp.status_code)
 
         resp = self.client.get(endpoint, headers={'Authorization': self.make_header('token')})
         self.assertEqual(200, resp.status_code)
@@ -87,27 +87,27 @@ class HomeProjectTest(AbstractPillarTest):
             })
             self.assertIsNotNone(node)
 
-    @responses.activate
-    def test_home_project_ab_testing(self):
-        self.mock_blenderid_validate_happy()
-        resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
-        self.assertEqual(200, resp.status_code, resp)
-
-        # Grant subscriber and but NOT homeproject role, and fetch the home project.
-        self.badger(TEST_EMAIL_ADDRESS, {'subscriber'}, 'grant')
-
-        resp = self.client.get('/bcloud/home-project',
-                               headers={'Authorization': self.make_header('token')})
-        self.assertEqual(404, resp.status_code)
-
-        resp = self.client.get('/users/me',
-                               headers={'Authorization': self.make_header('token')})
-        self.assertEqual(200, resp.status_code)
-        me = json.loads(resp.data)
-
-        with self.app.test_request_context():
-            from application.modules.blender_cloud import home_project
-            self.assertFalse(home_project.has_home_project(me['_id']))
+    # @responses.activate
+    # def test_home_project_ab_testing(self):
+    #     self.mock_blenderid_validate_happy()
+    #     resp = self.client.get('/users/me', headers={'Authorization': self.make_header('token')})
+    #     self.assertEqual(200, resp.status_code, resp)
+    #
+    #     # Grant subscriber and but NOT homeproject role, and fetch the home project.
+    #     self.badger(TEST_EMAIL_ADDRESS, {'subscriber'}, 'grant')
+    #
+    #     resp = self.client.get('/bcloud/home-project',
+    #                            headers={'Authorization': self.make_header('token')})
+    #     self.assertEqual(404, resp.status_code)
+    #
+    #     resp = self.client.get('/users/me',
+    #                            headers={'Authorization': self.make_header('token')})
+    #     self.assertEqual(200, resp.status_code)
+    #     me = json.loads(resp.data)
+    #
+    #     with self.app.test_request_context():
+    #         from application.modules.blender_cloud import home_project
+    #         self.assertFalse(home_project.has_home_project(me['_id']))
 
     @responses.activate
     def test_autocreate_home_project_with_demo_role(self):
