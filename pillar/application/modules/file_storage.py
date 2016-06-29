@@ -26,7 +26,7 @@ from flask import make_response
 from werkzeug.exceptions import NotFound, InternalServerError
 
 from application import utils
-from application.utils import remove_private_keys
+from application.utils import remove_private_keys, authentication
 from application.utils.authorization import require_login, user_has_role
 from application.utils.cdn import hash_file_path
 from application.utils.encoding import Encoder
@@ -466,7 +466,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
     log.info('Refreshed %i links', min(chunk_size, to_refresh.count()))
 
 
-@require_login({u'subscriber', u'admin', u'demo'})
+@require_login()
 def create_file_doc(name, filename, content_type, length, project, backend='gcs',
                     **extra_fields):
     """Creates a minimal File document for storage in MongoDB.
@@ -519,7 +519,7 @@ def override_content_type(uploaded_file):
 
 
 @file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
-@require_login(require_roles={u'subscriber', u'admin', u'demo'})
+@require_login()
 def stream_to_gcs(project_id):
     projects = current_app.data.driver.db['projects']
     try:
@@ -529,7 +529,8 @@ def stream_to_gcs(project_id):
     if not project:
         raise NotFound('Project %s does not exist' % project_id)
 
-    log.info('Streaming file to bucket for project %s', project_id)
+    log.info('Streaming file to bucket for project=%s user_id=%s', project_id,
+             authentication.current_user_id())
     uploaded_file = request.files['file']
 
     file_id, internal_fname, status = create_file_doc_for_upload(project['_id'], uploaded_file)
