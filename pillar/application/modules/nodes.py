@@ -155,17 +155,20 @@ def after_inserting_nodes(items):
         )
 
 
-def deduct_content_type(node_doc, original):
+def deduct_content_type(node_doc, original=None):
     """Deduct the content type from the attached file, if any."""
 
     if node_doc['node_type'] != 'asset':
         log.debug('deduct_content_type: called on node type %r, ignoring', node_doc['node_type'])
         return
 
-    node_id = node_doc['_id']
+    node_id = node_doc.get('_id')
     try:
         file_id = ObjectId(node_doc['properties']['file'])
     except KeyError:
+        if node_id is None:
+            # Creation of a file-less node is allowed, but updates aren't.
+            return
         log.warning('deduct_content_type: Asset without properties.file, rejecting.')
         raise UnprocessableEntity('Missing file property for asset node')
 
@@ -189,6 +192,11 @@ def deduct_content_type(node_doc, original):
     node_doc['properties']['content_type'] = content_type
 
 
+def nodes_deduct_content_type(nodes):
+    for node in nodes:
+        deduct_content_type(node)
+
+
 def before_returning_node_permissions(response):
     # Run validation process, since GET on nodes entry point is public
     check_permissions('nodes', response, 'GET', append_allowed_methods=True)
@@ -207,8 +215,8 @@ def setup_app(app):
     app.on_fetched_item_nodes += item_parse_attachments
     app.on_fetched_resource_nodes += resource_parse_attachments
     app.on_replace_nodes += before_replacing_node
+    app.on_replace_nodes += deduct_content_type
     app.on_replaced_nodes += after_replacing_node
     app.on_insert_nodes += before_inserting_nodes
+    app.on_insert_nodes += nodes_deduct_content_type
     app.on_inserted_nodes += after_inserting_nodes
-
-    app.on_replace_nodes += deduct_content_type
