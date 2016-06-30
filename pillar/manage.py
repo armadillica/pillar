@@ -918,7 +918,7 @@ def sync_role_groups(do_revoke_groups):
             grant_groups = groups.difference(current_groups)
             revoke_groups = current_groups.difference(groups)
 
-            print('Discrepancy for user %s/%s:' % (user['_id'], user['full_name']))
+            print('Discrepancy for user %s/%s:' % (user['_id'], user['full_name'].encode('utf8')))
             print('    - actual groups  :', sorted(gname(gid) for gid in user.get('groups')))
             print('    - expected groups:', sorted(gname(gid) for gid in groups))
             print('    - will grant     :', sorted(gname(gid) for gid in grant_groups))
