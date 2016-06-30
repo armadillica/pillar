@@ -66,7 +66,7 @@ class ValidateCustomFields(Validator):
         if val:
             return True
 
-        log.debug('Error validating properties for node %s: %s', self.document, v.errors)
+        log.warning('Error validating properties for node %s: %s', self.document, v.errors)
         self._error(field, "Error validating properties")
 
 
