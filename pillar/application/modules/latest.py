@@ -68,6 +68,7 @@ def latest_assets():
                           has_public_project, 12)
 
     embed_user(latest)
+    embed_project(latest)
 
     return jsonify({'_items': latest})
 
@@ -80,6 +81,7 @@ def embed_user(latest):
         comment['user'] = users.find_one(user_id, {'auth': 0, 'groups': 0, 'roles': 0,
                                                    'settings': 0, 'email': 0,
                                                    '_created': 0, '_updated': 0, '_etag': 0})
+
 
 def embed_project(latest):
     projects = current_app.data.driver.db['projects']
