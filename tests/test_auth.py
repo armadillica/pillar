@@ -573,3 +573,14 @@ class RequireRolesTest(AbstractPillarTest):
                               'roles': [u'service', u'badger']}
             call_me()
         self.assertTrue(called[0])
+
+    def test_user_has_role(self):
+        from application.utils.authorization import user_has_role
+
+        with self.app.test_request_context():
+            self.assertTrue(user_has_role('subscriber', {'roles': ['aap', 'noot', 'subscriber']}))
+            self.assertTrue(user_has_role('subscriber', {'roles': [u'aap', u'subscriber']}))
+            self.assertFalse(user_has_role('admin', {'roles': [u'aap', u'noot', u'subscriber']}))
+            self.assertFalse(user_has_role('admin', {'roles': []}))
+            self.assertFalse(user_has_role('admin', {'roles': None}))
+            self.assertFalse(user_has_role('admin', {}))

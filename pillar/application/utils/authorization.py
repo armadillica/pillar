@@ -313,7 +313,8 @@ def user_has_role(role, user=None):
     if user is None:
         return False
 
-    return role in user['roles']
+    roles = user.get('roles') or ()
+    return role in roles
 
 
 def user_matches_roles(require_roles=set(),
