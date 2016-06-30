@@ -207,6 +207,43 @@ def before_returning_node_resource_permissions(response):
         check_permissions('nodes', item, 'GET', append_allowed_methods=True)
 
 
+def node_set_default_picture(node, original=None):
+    """Uses the image of an image asset or colour map of texture node as picture."""
+
+    if node.get('picture'):
+        log.debug('Node %s already has a picture, not overriding', node.get('_id'))
+        return
+
+    node_type = node.get('node_type')
+    props = node.get('properties', {})
+    content = props.get('content_type')
+
+    if node_type == 'asset' and content == 'image':
+        image_file_id = props.get('file')
+    elif node_type == 'texture':
+        # Find the colour map, defaulting to the first image map available.
+        image_file_id = None
+        for image in props.get('files', []):
+            if image_file_id is None or image.get('map_type') == u'color':
+                image_file_id = image.get('file')
+    else:
+        log.debug('Not setting default picture on node type %s content type %s',
+                  node_type, content)
+        return
+
+    if image_file_id is None:
+        log.debug('Nothing to set the picture to.')
+        return
+
+    log.debug('Setting default picture for node %s to %s', node.get('_id'), image_file_id)
+    node['picture'] = image_file_id
+
+
+def nodes_set_default_picture(nodes):
+    for node in nodes:
+        node_set_default_picture(node)
+
+
 def setup_app(app):
     # Permission hooks
     app.on_fetched_item_nodes += before_returning_node_permissions
@@ -214,9 +251,13 @@ def setup_app(app):
 
     app.on_fetched_item_nodes += item_parse_attachments
     app.on_fetched_resource_nodes += resource_parse_attachments
+
     app.on_replace_nodes += before_replacing_node
     app.on_replace_nodes += deduct_content_type
+    app.on_replace_nodes += node_set_default_picture
     app.on_replaced_nodes += after_replacing_node
+
     app.on_insert_nodes += before_inserting_nodes
     app.on_insert_nodes += nodes_deduct_content_type
+    app.on_insert_nodes += nodes_set_default_picture
     app.on_inserted_nodes += after_inserting_nodes
