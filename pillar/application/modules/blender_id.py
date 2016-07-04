@@ -87,6 +87,11 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
             attempted_eve_method = 'POST'
             r, _, _, status = post_internal('users', db_user)
 
+            if status not in {200, 201}:
+                log.error('Status %i trying to create user for BlenderID %s with values %s: %s',
+                          status, blender_id_user_id, db_user, r)
+                return abort(500)
+
             db_id = r['_id']
             db_user.update(r)  # update with database/eve-generated fields.
 
