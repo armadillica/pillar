@@ -53,8 +53,22 @@ class ValidateCustomFields(Validator):
     def _validate_valid_properties(self, valid_properties, field, value):
         projects_collection = app.data.driver.db['projects']
         lookup = {'_id': ObjectId(self.document['project'])}
+
         project = projects_collection.find_one(lookup)
-        node_type = project_get_node_type(project, self.document['node_type'])
+        if project is None:
+            log.warning('Unknown project %s, declared by node %s',
+                        project, self.document.get('_id'))
+            self._error(field, 'Unknown project')
+            return False
+
+        node_type_name = self.document['node_type']
+        node_type = project_get_node_type(project, node_type_name)
+        if node_type is None:
+            log.warning('Project %s has no node type %s, declared by node %s',
+                        project, node_type_name, self.document.get('_id'))
+            self._error(field, 'Unknown node type')
+            return False
+
         try:
             value = self.convert_properties(value, node_type['dyn_schema'])
         except Exception as e:

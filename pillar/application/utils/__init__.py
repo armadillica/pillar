@@ -74,5 +74,9 @@ def project_get_node_type(project_document, node_type_node_name):
     """Return a node_type subdocument for a project. If none is found, return
     None.
     """
+
+    if project_document is None:
+        return None
+
     return next((node_type for node_type in project_document['node_types']
                  if node_type['name'] == node_type_node_name), None)
