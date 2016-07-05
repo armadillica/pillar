@@ -7,13 +7,29 @@ from bson import ObjectId
 from flask import g
 
 from common_test_class import (AbstractPillarTest, TEST_EMAIL_ADDRESS, BLENDER_ID_TEST_USERID,
-                               TEST_SUBCLIENT_TOKEN, BLENDER_ID_USER_RESPONSE, TEST_FULL_NAME)
+                               TEST_SUBCLIENT_TOKEN, TEST_EMAIL_USER, TEST_FULL_NAME)
 
 
 class BlenderIdSubclientTest(AbstractPillarTest):
     @responses.activate
     def test_store_scst_new_user(self):
         self._common_user_test(201)
+
+    @responses.activate
+    def test_store_scst_new_user_without_full_name(self):
+
+        responses.add(responses.POST,
+                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      json={'status': 'success',
+                            'user': {'email': TEST_EMAIL_ADDRESS,
+                                     'full_name': None,
+                                     'id': BLENDER_ID_TEST_USERID},
+                            'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'},
+                      status=200)
+
+        self._common_user_test(201,
+                               expected_full_name=TEST_EMAIL_USER,
+                               mock_happy_blender_id=False)
 
     @responses.activate
     def test_store_scst_existing_user(self):
@@ -58,15 +74,17 @@ class BlenderIdSubclientTest(AbstractPillarTest):
             self.assertEqual(db_user['_id'], g.current_user['user_id'])
 
     def _common_user_test(self, expected_status_code, scst=TEST_SUBCLIENT_TOKEN,
-                          expected_full_name=TEST_FULL_NAME):
-        self.mock_blenderid_validate_happy()
+                          expected_full_name=TEST_FULL_NAME,
+                          mock_happy_blender_id=True):
+        if mock_happy_blender_id:
+            self.mock_blenderid_validate_happy()
 
         subclient_id = self.app.config['BLENDER_ID_SUBCLIENT_ID']
         resp = self.client.post('/blender_id/store_scst',
                                 data={'user_id': BLENDER_ID_TEST_USERID,
                                       'subclient_id': subclient_id,
                                       'token': scst})
-        self.assertEqual(expected_status_code, resp.status_code)
+        self.assertEqual(expected_status_code, resp.status_code, resp.data)
 
         user_info = json.loads(resp.data)  # {'status': 'success', 'subclient_user_id': '...'}
         self.assertEqual('success', user_info['status'])

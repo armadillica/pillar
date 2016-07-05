@@ -209,8 +209,12 @@ def find_user_in_db(blender_id_user_id, user_info):
         db_user['email'] = user_info['email']
     else:
         log.debug('User %r not yet in our database, create a new one.', blender_id_user_id)
-        db_user = authentication.create_new_user_document(user_info['email'], blender_id_user_id,
-                                                          user_info['full_name'])
+        db_user = authentication.create_new_user_document(
+            email=user_info['email'],
+            user_id=blender_id_user_id,
+            username=user_info['full_name'])
         db_user['username'] = authentication.make_unique_username(user_info['email'])
+        if not db_user['full_name']:
+            db_user['full_name'] = db_user['username']
 
     return db_user

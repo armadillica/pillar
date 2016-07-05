@@ -44,7 +44,7 @@ _activity_object_type = {
 users_schema = {
     'full_name': {
         'type': 'string',
-        'minlength': 3,
+        'minlength': 1,
         'maxlength': 128,
         'required': True,
     },
