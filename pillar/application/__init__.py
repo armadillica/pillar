@@ -1,6 +1,6 @@
-import logging
 import logging.config
 import os
+import subprocess
 import tempfile
 from bson import ObjectId
 from datetime import datetime
@@ -118,6 +118,16 @@ log = logging.getLogger(__name__)
 if app.config['DEBUG']:
     log.info('Pillar starting, debug=%s', app.config['DEBUG'])
 
+# Get the Git hash
+try:
+    git_cmd = ['git', 'describe', '--always']
+    description = subprocess.check_output(git_cmd)
+    app.config['GIT_REVISION'] = description.strip()
+except (subprocess.CalledProcessError, OSError) as ex:
+    log.warning('Unable to run "git describe" to get git revision: %s', ex)
+    app.config['GIT_REVISION'] = 'unknown'
+log.info('Git revision %r', app.config['GIT_REVISION'])
+
 # Configure Bugsnag
 if not app.config.get('TESTING') and app.config.get('BUGSNAG_API_KEY'):
     import bugsnag
@@ -127,6 +137,7 @@ if not app.config.get('TESTING') and app.config.get('BUGSNAG_API_KEY'):
     bugsnag.configure(
         api_key=app.config['BUGSNAG_API_KEY'],
         project_root="/data/git/pillar/pillar",
+        revision=app.config['GIT_REVISION'],
     )
     bugsnag.flask.handle_exceptions(app)
 
