@@ -490,7 +490,7 @@ def files_make_public_t():
             storage = GoogleCloudStorageBucket(str(f['project']))
             blob = storage.Get(variation_t['file_path'], to_dict=False)
             if not blob:
-                print('Unable to find blob for project %s file %s' %(f['project'], f['_id']))
+                print('Unable to find blob for project %s file %s' % (f['project'], f['_id']))
                 continue
 
             print('Making blob public: {0}'.format(blob.path))
@@ -773,8 +773,9 @@ def update_texture_node_type():
                     'translucency',
                     'emission',
                     'alpha'
-                    ]
-                node_type['dyn_schema']['files']['schema']['schema']['map_type']['allowed'] = allowed
+                ]
+                node_type['dyn_schema']['files']['schema']['schema']['map_type'][
+                    'allowed'] = allowed
         projects_collections.update(
             {'_id': project['_id']}, project)
 
@@ -990,6 +991,7 @@ def sync_project_groups(user_email, fix):
         result = users_coll.update_one({'_id': user_id},
                                        {'$set': {'groups': list(user_groups)}})
         log.info('Updated %i user.', result.modified_count)
+
 
 if __name__ == '__main__':
     manager.run()
