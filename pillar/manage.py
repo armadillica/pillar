@@ -992,8 +992,8 @@ def sync_project_groups(user_email, fix):
         else:
             ok_groups += 1
 
-    log.info('User was missing %i group memberships; %i projects were ok.',
-             missing_groups, ok_groups)
+    log.info('User %s was missing %i group memberships; %i projects were ok.',
+             user_id, missing_groups, ok_groups)
 
     if missing_groups > 0 and fix:
         log.info('Updating database.')
