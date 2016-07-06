@@ -100,7 +100,9 @@ def has_permissions(collection_name, resource, method, append_allowed_methods=Fa
                 assign_to = resource
             assign_to['allowed_methods'] = list(set(allowed_methods))
         return True
-
+    else:
+        log.debug('Permission denied, method %s not in allowed methods %s',
+                  method, allowed_methods)
     return False
 
 

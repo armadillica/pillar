@@ -2,6 +2,7 @@
 
 import logging
 
+import blinker
 from bson import ObjectId
 from flask import Blueprint, current_app, g, request
 from werkzeug import exceptions as wz_exceptions
@@ -11,6 +12,7 @@ from application.modules import local_auth, users
 
 blueprint = Blueprint('service', __name__)
 log = logging.getLogger(__name__)
+signal_user_changed_role = blinker.NamedSignal('badger:user_changed_role')
 
 ROLES_WITH_GROUPS = {u'admin', u'demo', u'subscriber'}
 
@@ -98,6 +100,10 @@ def badger():
 
     users_coll.update_one({'_id': db_user['_id']},
                           {'$set': updates})
+
+    # Let the rest of the world know this user was updated.
+    db_user.update(updates)
+    signal_user_changed_role.send(current_app, user=db_user)
 
     return '', 204
 

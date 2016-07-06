@@ -89,6 +89,8 @@ def create_home_project(user_id, write_access):
     :param user_id: the user ID of the owner
     :param write_access: whether the user has full write access to the home project.
     :type write_access: bool
+    :returns: the project
+    :rtype: dict
     """
 
     log.info('Creating home project for user %s', user_id)
@@ -127,10 +129,9 @@ def create_home_project(user_id, write_access):
     # from manage_extra.node_types.text import node_type_text
     from manage_extra.node_types.comment import node_type_comment
 
-    if not write_access:
-        # Take away write access from the admin group, and grant it to
-        # certain node types.
-        project['permissions']['groups'][0]['methods'] = ['GET']
+    # For non-subscribers: take away write access from the admin group,
+    # and grant it to certain node types.
+    project['permissions']['groups'][0]['methods'] = home_project_permissions(write_access)
 
     project['node_types'] = [
         node_type_group,
@@ -174,8 +175,7 @@ def home_project():
     # Create the home project before we do the Eve query. This costs an extra round-trip
     # to the database, but makes it easier to do projections correctly.
     if not has_home_project(user_id):
-        write_access = bool(not HOME_PROJECT_WRITABLE_USERS or
-                            HOME_PROJECT_WRITABLE_USERS.intersection(roles))
+        write_access = write_access_with_roles(roles)
         create_home_project(user_id, write_access)
 
     resp, _, _, status, _ = get('projects', category=u'home', user=user_id)
@@ -193,11 +193,41 @@ def home_project():
     return utils.jsonify(project), status
 
 
+def write_access_with_roles(roles):
+    """Returns whether or not one of these roles grants write access to the home project.
+
+    :rtype: bool
+    """
+
+    write_access = bool(not HOME_PROJECT_WRITABLE_USERS or
+                        HOME_PROJECT_WRITABLE_USERS.intersection(roles))
+    return write_access
+
+
+def home_project_permissions(write_access):
+    """Returns the project permissions, given the write access of the user.
+
+    :rtype: list
+    """
+
+    if write_access:
+        return [u'GET', u'PUT', u'POST', u'DELETE']
+    return [u'GET']
+
+
 def has_home_project(user_id):
     """Returns True iff the user has a home project."""
 
     proj_coll = current_app.data.driver.db['projects']
     return proj_coll.count({'user': user_id, 'category': 'home', '_deleted': False}) > 0
+
+
+def get_home_project(user_id, projection=None):
+    """Returns the home project"""
+
+    proj_coll = current_app.data.driver.db['projects']
+    return proj_coll.find_one({'user': user_id, 'category': 'home', '_deleted': False},
+                              projection=projection)
 
 
 def is_home_project(project_id, user_id):
@@ -311,6 +341,39 @@ def mark_parent_as_updated(node, original=None):
         mark_node_updated(parent_node['_id'])
 
 
+def user_changed_role(sender, user):
+    """Responds to the 'user changed' signal from the Badger service.
+
+    Changes the permissions on the home project based on the 'subscriber' role.
+
+    :returns: whether this function actually made changes.
+    :rtype: bool
+    """
+
+    user_id = user['_id']
+    if not has_home_project(user_id):
+        log.debug('User %s does not have a home project', user_id)
+        return
+
+    proj_coll = current_app.data.driver.db['projects']
+    proj = get_home_project(user_id, projection={'permissions': 1, '_id': 1})
+
+    write_access = write_access_with_roles(user['roles'])
+    target_permissions = home_project_permissions(write_access)
+
+    current_perms = proj['permissions']['groups'][0]['methods']
+    if set(current_perms) == set(target_permissions):
+        return False
+
+    project_id = proj['_id']
+    log.info('Updating permissions on user %s home project %s from %s to %s',
+             user_id, project_id, current_perms, target_permissions)
+    proj_coll.update_one({'_id': project_id},
+                         {'$set': {'permissions.groups.0.methods': list(target_permissions)}})
+
+    return True
+
+
 def setup_app(app, url_prefix):
     app.register_blueprint(blueprint, url_prefix=url_prefix)
 
@@ -318,3 +381,6 @@ def setup_app(app, url_prefix):
     app.on_inserted_nodes += mark_parents_as_updated
     app.on_updated_nodes += mark_parent_as_updated
     app.on_replaced_nodes += mark_parent_as_updated
+
+    from application.modules import service
+    service.signal_user_changed_role.connect(user_changed_role)
