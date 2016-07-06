@@ -302,7 +302,7 @@ def check_home_project_node_permissions(node):
                                                 'project': 1,
                                                 'node_type': 1},
                                                'check_home_project_node_permissions')
-    if parent_node is None:
+    if parent_node is None or 'permissions' not in parent_node:
         return
 
     parent_id = parent_node['_id']
