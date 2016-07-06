@@ -183,3 +183,52 @@ class NodeContentTypeTest(AbstractPillarTest):
                                  },
                   'name': 'Texture node'},
                  file_id_image_bump)
+
+
+class NodeOwnerTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        AbstractPillarTest.setUp(self, **kwargs)
+
+        self.user_id = self.create_user()
+        self.create_valid_auth_token(self.user_id, 'token')
+        self.project_id, _ = self.ensure_project_exists(
+            project_overrides={'permissions': {
+                'users': [
+                    {'user': self.user_id,
+                     'methods': ['GET', 'PUT', 'POST', 'DELETE']}
+                ]
+            }}
+        )
+
+    def test_create_with_explicit_owner(self):
+        test_node = {
+            'project': self.project_id,
+            'node_type': 'asset',
+            'name': 'test with user',
+            'user': self.user_id,
+            'properties': {},
+        }
+        self._test_user(test_node)
+
+    def test_create_with_implicit_owner(self):
+        test_node = {
+            'project': self.project_id,
+            'node_type': 'asset',
+            'name': 'test with user',
+            'properties': {},
+        }
+        self._test_user(test_node)
+
+    def _test_user(self, test_node):
+        from application.utils import dumps
+
+        resp = self.client.post('/nodes', data=dumps(test_node),
+                                headers={'Authorization': self.make_header('token'),
+                                         'Content-Type': 'application/json'})
+        self.assertEqual(201, resp.status_code, resp.data)
+        created = json.loads(resp.data)
+        resp = self.client.get('/nodes/%s' % created['_id'],
+                               headers={'Authorization': self.make_header('token')})
+        self.assertEqual(200, resp.status_code, resp.data)
+        json_node = json.loads(resp.data)
+        self.assertEqual(str(self.user_id), json_node['user'])

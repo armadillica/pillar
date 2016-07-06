@@ -1,7 +1,7 @@
 import logging
 
 from bson import ObjectId
-from flask import current_app
+from flask import current_app, g
 from werkzeug.exceptions import UnprocessableEntity
 
 from application.modules import file_storage
@@ -115,6 +115,9 @@ def before_inserting_nodes(items):
             project = find_parent_project(parent)
             if project:
                 item['project'] = project['_id']
+
+        # Default the 'user' property to the current user.
+        item.setdefault('user', g.current_user['user_id'])
 
 
 def after_inserting_nodes(items):
