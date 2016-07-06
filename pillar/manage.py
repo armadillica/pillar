@@ -957,8 +957,17 @@ def sync_project_groups(user_email, fix):
     proj_coll = app.data.driver.db['projects']
     groups_coll = app.data.driver.db['groups']
 
-    user = users_coll.find_one({'email': user_email}, projection={'_id': 1,
-                                                                  'groups': 1})
+    # Find by email or by user ID
+    if '@' in user_email:
+        where = {'email': user_email}
+    else:
+        where = {'_id': ObjectId(user_email)}
+
+    user = users_coll.find_one(where, projection={'_id': 1, 'groups': 1})
+    if user is None:
+        log.error('User %s not found', where)
+        raise SystemExit()
+
     user_groups = set(user['groups'])
     user_id = user['_id']
     log.info('Updating projects for user %s', user_id)
