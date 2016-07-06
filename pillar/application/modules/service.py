@@ -80,7 +80,7 @@ def badger():
         return 'Role not allowed', 403
 
     # Fetch the user
-    db_user = users_coll.find_one({'email': user_email}, projection={'roles': 1})
+    db_user = users_coll.find_one({'email': user_email}, projection={'roles': 1, 'groups': 1})
     if db_user is None:
         log.warning('badger(%s, %s, %s): user not found', action, user_email, role)
         return 'User not found', 404

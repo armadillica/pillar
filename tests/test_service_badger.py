@@ -76,3 +76,30 @@ class BadgerServiceTest(AbstractPillarTest):
 
             # This role isn't linked to group membership.
             test_for_group('succubus', test=self.assertNotIn)
+
+    def test_project_groups(self):
+        """Projects groups should be maintained."""
+
+        group_ids = self.create_standard_groups()
+
+        with self.app.test_request_context():
+            user_coll = self.app.data.driver.db['users']
+
+            def test_group_membership(expected_groups):
+                user = user_coll.find_one(self.user_id)
+                self.assertEqual(expected_groups, set(user['groups']))
+
+            # Fresh user, no roles.
+            test_group_membership(set())
+
+            # Add some groups
+            user_coll.update_one({'_id': self.user_id},
+                                 {'$set': {'groups': ['project1', 'project2']}})
+            test_group_membership({'project1', 'project2'})
+
+            # Grant subscriber role.
+            resp = self._post({'action': 'grant',
+                               'user_email': self.user_email,
+                               'role': 'subscriber'})
+            self.assertEqual(204, resp.status_code)
+            test_group_membership({'project1', 'project2', group_ids['subscriber']})
