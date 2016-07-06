@@ -940,5 +940,56 @@ def sync_role_groups(do_revoke_groups):
 
     print('%i bad and %i ok users seen.' % (bad_users, ok_users))
 
+
+@manager.command
+def sync_project_groups(user_email, fix):
+    """Gives the user access to their self-created projects."""
+
+    if fix.lower() not in {'true', 'false'}:
+        print('Use either "true" or "false" as second argument.')
+        print('When passing "false", only a report is produced.')
+        print('when passing "true", group membership is fixed.')
+        raise SystemExit()
+    fix = fix.lower() == 'true'
+
+    users_coll = app.data.driver.db['users']
+    proj_coll = app.data.driver.db['projects']
+    groups_coll = app.data.driver.db['groups']
+
+    user = users_coll.find_one({'email': user_email}, projection={'_id': 1,
+                                                                  'groups': 1})
+    user_groups = set(user['groups'])
+    user_id = user['_id']
+    log.info('Updating projects for user %s', user_id)
+
+    ok_groups = missing_groups = 0
+    for proj in proj_coll.find({'user': user_id}):
+        project_id = proj['_id']
+        log.info('Investigating project %s (%s)', project_id, proj['name'])
+
+        # Find the admin group
+        admin_group = groups_coll.find_one({'name': str(project_id)}, projection={'_id': 1})
+        if admin_group is None:
+            log.warning('No admin group for project %s', project_id)
+            continue
+        group_id = admin_group['_id']
+
+        # Check membership
+        if group_id not in user_groups:
+            log.info('Missing group membership')
+            missing_groups += 1
+            user_groups.add(group_id)
+        else:
+            ok_groups += 1
+
+    log.info('User was missing %i group memberships; %i projects were ok.',
+             missing_groups, ok_groups)
+
+    if missing_groups > 0 and fix:
+        log.info('Updating database.')
+        result = users_coll.update_one({'_id': user_id},
+                                       {'$set': {'groups': list(user_groups)}})
+        log.info('Updated %i user.', result.modified_count)
+
 if __name__ == '__main__':
     manager.run()
