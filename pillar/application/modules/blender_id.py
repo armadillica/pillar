@@ -13,6 +13,7 @@ from requests.adapters import HTTPAdapter
 from flask import Blueprint, request, current_app, abort, jsonify
 from eve.methods.post import post_internal
 from eve.methods.put import put_internal
+from werkzeug import exceptions as wz_exceptions
 
 from application.utils import authentication, remove_private_keys
 
@@ -70,6 +71,23 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
 
     # Store the user info in MongoDB.
     db_user = find_user_in_db(blender_id_user_id, user_info)
+    db_id, status = upsert_user(db_user, blender_id_user_id)
+
+    # Store the token in MongoDB.
+    authentication.store_token(db_id, token, token_expiry, oauth_subclient_id)
+
+    return db_user, status
+
+
+def upsert_user(db_user, blender_id_user_id):
+    """Inserts/updates the user in MongoDB.
+
+    Retries a few times when there are uniqueness issues in the username.
+
+    :returns: the user's database ID and the status of the PUT/POST.
+        The status is 201 on insert, and 200 on update.
+    :type: (ObjectId, int)
+    """
 
     r = {}
     for retry in range(5):
@@ -90,7 +108,7 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
             if status not in {200, 201}:
                 log.error('Status %i trying to create user for BlenderID %s with values %s: %s',
                           status, blender_id_user_id, db_user, r)
-                return abort(500)
+                raise wz_exceptions.InternalServerError()
 
             db_id = r['_id']
             db_user.update(r)  # update with database/eve-generated fields.
@@ -108,16 +126,13 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
         break
     else:
         log.error('Unable to create new user %s: %s', db_user, r)
-        return abort(500)
+        raise wz_exceptions.InternalServerError()
 
     if status not in (200, 201):
         log.error('internal response from %s to Eve: %r %r', attempted_eve_method, status, r)
-        return abort(500)
+        raise wz_exceptions.InternalServerError()
 
-    # Store the token in MongoDB.
-    authentication.store_token(db_id, token, token_expiry, oauth_subclient_id)
-
-    return db_user, status
+    return db_id, status
 
 
 def validate_token(user_id, token, oauth_subclient_id):
