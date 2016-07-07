@@ -325,36 +325,6 @@ nodes_schema = {
     }
 }
 
-node_types_schema = {
-    'name': {
-        'type': 'string',
-        'minlength': 1,
-        'maxlength': 128,
-        'required': True,
-    },
-    'description': {
-        'type': 'string',
-        'maxlength': 256,
-    },
-    'dyn_schema': {
-        'type': 'dict',
-        'required': True,
-    },
-    'form_schema': {
-        'type': 'dict',
-        'required': True,
-    },
-    'parent': {
-        'type': 'dict',
-        'required': True,
-    },
-    'permissions': {
-        'type': 'dict',
-        'required': True,
-        'schema': permissions_embedded_schema
-    }
-}
-
 tokens_schema = {
     'user': {
         'type': 'objectid',
