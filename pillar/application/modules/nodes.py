@@ -107,7 +107,6 @@ def short_link_info(short_code):
     return {
         'short_code': short_code,
         'short_link': short_link,
-        'theatre_link': urlparse.urljoin(short_link, '?t')
     }
 
 
