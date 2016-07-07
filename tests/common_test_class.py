@@ -69,6 +69,10 @@ class AbstractPillarTest(TestMinimal):
         # Not only delete self.app (like the superclass does),
         # but also un-import the application.
         del sys.modules['application']
+        remove = [modname for modname in sys.modules
+                  if modname.startswith('application.')]
+        for modname in remove:
+            del sys.modules[modname]
 
     def ensure_file_exists(self, file_overrides=None):
         self.ensure_project_exists()
