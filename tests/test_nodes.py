@@ -314,7 +314,7 @@ class NodeSharingTest(AbstractPillarTest):
             'node_type': 'asset',
             'name': 'collider',
             'properties': {},
-            'short_codes': ['takenX'],
+            'short_code': 'takenX',
         })
 
         # Mock create_short_code so that it returns predictable short codes.

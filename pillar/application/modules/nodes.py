@@ -31,25 +31,22 @@ def share_node(node_id):
                                projection={
                                    'project': 1,
                                    'node_type': 1,
-                                   'short_codes': 1
+                                   'short_code': 1
                                })
 
     check_permissions('nodes', node, request.method)
 
     log.info('Sharing node %s', node_id)
 
-    # We support storing multiple short links in the database, but
-    # for now we just always store one and the same.
-    short_codes = node.get('short_codes', [])
-    if not short_codes and request.method == 'POST':
-        short_code = generate_and_store_short_code(node)
-        status = 201
-    else:
-        try:
-            short_code = short_codes[0]
-        except IndexError:
+    short_code = node.get('short_code')
+    status = 200
+
+    if not short_code:
+        if request.method == 'POST':
+            short_code = generate_and_store_short_code(node)
+            status = 201
+        else:
             return '', 204
-        status = 200
 
     return jsonify(short_link_info(short_code), status=status)
 
@@ -67,16 +64,14 @@ def generate_and_store_short_code(node):
         short_code = create_short_code(node)
         log.debug('Created short code for node %s: %s', node_id, short_code)
 
-        node.setdefault('short_codes', []).append(short_code)
+        node['short_code'] = short_code
 
         # Store it in MongoDB
         try:
             result = nodes_coll.update_one({'_id': node_id},
-                                           {'$set': {'short_codes': node['short_codes']}})
+                                           {'$set': {'short_code': short_code}})
             break
         except pymongo.errors.DuplicateKeyError:
-            node['short_codes'].remove(short_code)
-
             log.info('Duplicate key while creating short code, retrying (attempt %i/%i)',
                      attempt, max_attempts)
             pass
@@ -87,8 +82,7 @@ def generate_and_store_short_code(node):
 
     # We were able to store a short code, now let's verify the result.
     if result.matched_count != 1:
-        log.warning('Unable to update node %s with new short_links=%r',
-                    node_id, node['short_codes'])
+        log.warning('Unable to update node %s with new short_links=%r', node_id, node['short_code'])
         raise InternalServerError('Unable to update node %s with new short links' % node_id)
 
     return short_code

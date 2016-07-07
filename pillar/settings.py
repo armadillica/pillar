@@ -323,11 +323,8 @@ nodes_schema = {
         'type': 'dict',
         'schema': permissions_embedded_schema
     },
-    'short_codes': {
-        'type': 'list',
-        'schema': {
-            'type': 'string',
-        },
+    'short_code': {
+        'type': 'string',
     },
 }
 

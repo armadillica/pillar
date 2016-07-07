@@ -238,7 +238,7 @@ def setup_db_indices():
     coll.create_index([('project', pymongo.ASCENDING),
                        ('node_type', pymongo.ASCENDING)])
     coll.create_index([('parent', pymongo.ASCENDING)])
-    coll.create_index([('short_codes', pymongo.ASCENDING)],
+    coll.create_index([('short_code', pymongo.ASCENDING)],
                       sparse=True, unique=True)
 
 
