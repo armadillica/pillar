@@ -23,7 +23,7 @@ from flask import url_for, helpers
 from flask import current_app
 from flask import g
 from flask import make_response
-from werkzeug.exceptions import NotFound, InternalServerError
+from werkzeug.exceptions import NotFound, InternalServerError, BadRequest
 
 from application import utils
 from application.utils import remove_private_keys, authentication
@@ -300,7 +300,6 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
     return ''
 
 
-
 def before_returning_file(response):
     ensure_valid_link(response)
 
@@ -522,11 +521,14 @@ def override_content_type(uploaded_file):
 @file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
 @require_login()
 def stream_to_gcs(project_id):
-    projects = current_app.data.driver.db['projects']
     try:
-        project = projects.find_one(ObjectId(project_id), projection={'_id': 1})
+        project_oid = ObjectId(project_id)
     except InvalidId:
-        project = None
+        raise BadRequest('Invalid ObjectID')
+
+    projects = current_app.data.driver.db['projects']
+    project = projects.find_one(project_oid, projection={'_id': 1})
+
     if not project:
         raise NotFound('Project %s does not exist' % project_id)
 
@@ -534,9 +536,13 @@ def stream_to_gcs(project_id):
              authentication.current_user_id())
     uploaded_file = request.files['file']
 
-    file_id, internal_fname, status = create_file_doc_for_upload(project['_id'], uploaded_file)
+    file_id, internal_fname, status = create_file_doc_for_upload(project_oid, uploaded_file)
 
     override_content_type(uploaded_file)
+
+    if not uploaded_file.content_type:
+        log.warning('File uploaded to project %s without content type.', project_oid)
+        raise BadRequest('Missing content type.')
 
     if uploaded_file.content_type.startswith('image/'):
         # We need to do local thumbnailing, so we have to write the stream
