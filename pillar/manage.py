@@ -146,29 +146,16 @@ def setup_db(admin_email):
 def setup_db_indices():
     """Adds missing database indices."""
 
+    from application import setup_db_indices
+
     import pymongo
 
     log.info('Adding missing database indices.')
     log.warning('This does NOT drop and recreate existing indices, '
                 'nor does it reconfigure existing indices. '
                 'If you want that, drop them manually first.')
-    db = app.data.driver.db
-    coll = db['tokens']
-    coll.create_index([('user', pymongo.ASCENDING)])
-    coll.create_index([('token', pymongo.ASCENDING)])
 
-    coll = db['notifications']
-    coll.create_index([('user', pymongo.ASCENDING)])
-
-    coll = db['activities-subscriptions']
-    coll.create_index([('context_object', pymongo.ASCENDING)])
-
-    coll = db['nodes']
-    # This index is used for queries on project, and for queries on
-    # the combination (project, node type).
-    coll.create_index([('project', pymongo.ASCENDING),
-                       ('node_type', pymongo.ASCENDING)])
-    coll.create_index([('parent', pymongo.ASCENDING)])
+    setup_db_indices()
 
     coll_names = db.collection_names(include_system_collections=False)
     for coll_name in sorted(coll_names):
