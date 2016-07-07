@@ -149,21 +149,22 @@ def _process_video(gcs, file_id, local_file, src_file):
     root, _ = os.path.splitext(src_file['file_path'])
     src_file['variations'] = []
 
-    for v in ('mp4', 'webm'):
-        # Most of these properties will be available after encode.
-        file_variation = dict(
-            format=v,
-            content_type='video/{}'.format(v),
-            file_path='{}-{}.{}'.format(root, v, v),
-            size='',
-            duration=0,
-            width=0,
-            height=0,
-            length=0,
-            md5='',
-        )
-        # Append file variation
-        src_file['variations'].append(file_variation)
+    # Most of these properties will be available after encode.
+    v = 'mp4'
+    file_variation = dict(
+        format=v,
+        content_type='video/{}'.format(v),
+        file_path='{}-{}.{}'.format(root, v, v),
+        size='',
+        duration=0,
+        width=0,
+        height=0,
+        length=0,
+        md5='',
+    )
+    # Append file variation. Originally mp4 and webm were the available options,
+    # that's why we build a list.
+    src_file['variations'].append(file_variation)
 
     j = Encoder.job_create(src_file)
     if j is None:
