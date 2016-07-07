@@ -213,3 +213,45 @@ class AbstractPillarTest(TestMinimal):
             service.fetch_role_to_group_id_map()
 
         return group_ids
+
+    def client_request(self, method, url, expected_status=200, auth_token=None, json=None,
+                       data=None):
+        """Performs a HTTP request to the server."""
+
+        from application.utils import dumps
+        import json as mod_json
+
+        headers = {}
+        if auth_token is not None:
+            headers['Authorization'] = self.make_header(auth_token)
+
+        if json is not None:
+            data = dumps(json)
+            headers['Content-Type'] = 'application/json'
+
+        resp = self.client.open(url, method=method, data=data, headers=headers)
+        self.assertEqual(expected_status, resp.status_code, resp.data)
+
+        def json():
+            if resp.mimetype != 'application/json':
+                raise TypeError('Unable to load JSON from mimetype %r' % resp.mimetype)
+            return mod_json.loads(resp.data)
+
+        resp.json = json
+
+        return resp
+
+    def get(self, *args, **kwargs):
+        return self.client_request('GET', *args, **kwargs)
+
+    def post(self, *args, **kwargs):
+        return self.client_request('POST', *args, **kwargs)
+
+    def put(self, *args, **kwargs):
+        return self.client_request('PUT', *args, **kwargs)
+
+    def delete(self, *args, **kwargs):
+        return self.client_request('DELETE', *args, **kwargs)
+
+    def patch(self, *args, **kwargs):
+        return self.client_request('PATCH', *args, **kwargs)
