@@ -4,9 +4,11 @@ import datetime
 import functools
 import logging
 
-import bson
+import bson.objectid
 from eve import RFC1123_DATE_FORMAT
 from flask import current_app
+from werkzeug import exceptions as wz_exceptions
+
 
 __all__ = ('remove_private_keys', 'PillarJSONEncoder')
 log = logging.getLogger(__name__)
@@ -80,3 +82,20 @@ def project_get_node_type(project_document, node_type_node_name):
 
     return next((node_type for node_type in project_document['node_types']
                  if node_type['name'] == node_type_node_name), None)
+
+
+def str2id(document_id):
+    """Returns the document ID as ObjectID, or raises a BadRequest exception.
+
+    :type document_id: str
+    :rtype: bson.ObjectId
+    :raises: wz_exceptions.BadRequest
+    """
+
+    if not document_id:
+        raise wz_exceptions.BadRequest('Invalid object ID %r', document_id)
+
+    try:
+        return bson.ObjectId(document_id)
+    except bson.objectid.InvalidId:
+        raise wz_exceptions.BadRequest('Invalid object ID %r', document_id)
