@@ -257,7 +257,6 @@ class NodeSharingTest(AbstractPillarTest):
 
         self.assertEqual(6, len(share_data['short_code']))
         self.assertTrue(share_data['short_link'].startswith(base_url))
-        self.assertTrue(share_data['theatre_link'].startswith(base_url))
 
     def test_share_node(self):
         # Share the node
