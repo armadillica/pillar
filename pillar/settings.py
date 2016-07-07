@@ -151,9 +151,9 @@ organizations_schema = {
         'type': 'objectid',
         'nullable': True,
         'data_relation': {
-           'resource': 'files',
-           'field': '_id',
-           'embeddable': True
+            'resource': 'files',
+            'field': '_id',
+            'embeddable': True
         },
     },
     'users': {
@@ -239,7 +239,7 @@ permissions_embedded_schema = {
         'schema': {
             'type': 'dict',
             'schema': {
-                'user' : {
+                'user': {
                     'type': 'objectid',
                     'required': True,
                 },
@@ -253,8 +253,8 @@ permissions_embedded_schema = {
     },
     'world': {
         'type': 'list',
-        #'required': True,
-        'allowed': ['GET',]
+        # 'required': True,
+        'allowed': ['GET', ]
     },
     'is_free': {
         'type': 'boolean',
@@ -274,9 +274,9 @@ nodes_schema = {
     'picture': {
         'type': 'objectid',
         'data_relation': {
-           'resource': 'files',
-           'field': '_id',
-           'embeddable': True
+            'resource': 'files',
+            'field': '_id',
+            'embeddable': True
         },
     },
     'order': {
@@ -288,19 +288,19 @@ nodes_schema = {
     },
     'parent': {
         'type': 'objectid',
-         'data_relation': {
+        'data_relation': {
             'resource': 'nodes',
             'field': '_id',
             'embeddable': True
-         },
+        },
     },
     'project': {
         'type': 'objectid',
-         'data_relation': {
+        'data_relation': {
             'resource': 'projects',
             'field': '_id',
             'embeddable': True
-         },
+        },
     },
     'user': {
         'type': 'objectid',
@@ -315,10 +315,10 @@ nodes_schema = {
         'required': True
     },
     'properties': {
-        'type' : 'dict',
-        'valid_properties' : True,
+        'type': 'dict',
+        'valid_properties': True,
         'required': True,
-     },
+    },
     'permissions': {
         'type': 'dict',
         'schema': permissions_embedded_schema
@@ -383,7 +383,7 @@ files_schema = {
     'description': {
         'type': 'string',
     },
-    'content_type': { # MIME type image/png video/mp4
+    'content_type': {  # MIME type image/png video/mp4
         'type': 'string',
         'required': True,
     },
@@ -391,13 +391,13 @@ files_schema = {
     'duration': {
         'type': 'integer',
     },
-    'size': { # xs, s, b, 720p, 2K
+    'size': {  # xs, s, b, 720p, 2K
         'type': 'string'
     },
-    'format': { # human readable format, like mp4, HLS, webm, mov
+    'format': {  # human readable format, like mp4, HLS, webm, mov
         'type': 'string'
     },
-    'width': { # valid for images and video content_type
+    'width': {  # valid for images and video content_type
         'type': 'integer'
     },
     'height': {
@@ -407,7 +407,7 @@ files_schema = {
         'type': 'objectid',
         'required': True,
     },
-    'length': { # Size in bytes
+    'length': {  # Size in bytes
         'type': 'integer',
         'required': True,
     },
@@ -457,34 +457,34 @@ files_schema = {
             'embeddable': True
         },
     },
-    'variations': { # File variations (used to be children, see above)
+    'variations': {  # File variations (used to be children, see above)
         'type': 'list',
         'schema': {
             'type': 'dict',
             'schema': {
-                'is_public': { # If True, the link will not be hashed or signed
+                'is_public': {  # If True, the link will not be hashed or signed
                     'type': 'boolean'
                 },
-                'content_type': { # MIME type image/png video/mp4
+                'content_type': {  # MIME type image/png video/mp4
                     'type': 'string',
                     'required': True,
                 },
                 'duration': {
                     'type': 'integer',
                 },
-                'size': { # xs, s, b, 720p, 2K
+                'size': {  # xs, s, b, 720p, 2K
                     'type': 'string'
                 },
-                'format': { # human readable format, like mp4, HLS, webm, mov
+                'format': {  # human readable format, like mp4, HLS, webm, mov
                     'type': 'string'
                 },
-                'width': { # valid for images and video content_type
+                'width': {  # valid for images and video content_type
                     'type': 'integer'
                 },
                 'height': {
                     'type': 'integer'
                 },
-                'length': { # Size in bytes
+                'length': {  # Size in bytes
                     'type': 'integer',
                     'required': True,
                 },
@@ -505,7 +505,7 @@ files_schema = {
         'type': 'dict',
         'schema': {
             'job_id': {
-                'type': 'string' # can be int, depending on the backend
+                'type': 'string'  # can be int, depending on the backend
             },
             'backend': {
                 'type': 'string',
@@ -514,7 +514,7 @@ files_schema = {
             'status': {
                 'type': 'string',
                 'allowed': ["pending", "waiting", "processing", "finished",
-                    "failed", "cancelled"]
+                            "failed", "cancelled"]
             },
         }
     },
@@ -584,9 +584,9 @@ projects_schema = {
         'type': 'objectid',
         'nullable': True,
         'data_relation': {
-           'resource': 'organizations',
-           'field': '_id',
-           'embeddable': True
+            'resource': 'organizations',
+            'field': '_id',
+            'embeddable': True
         },
     },
     'status': {
@@ -740,9 +740,9 @@ tokens = {
     'resource_methods': ['GET', 'POST'],
 
     # Allow 'token' to be returned with POST responses
-    #'extra_response_fields': ['token'],
+    # 'extra_response_fields': ['token'],
 
-    'schema' : tokens_schema
+    'schema': tokens_schema
 }
 
 files = {
@@ -784,7 +784,6 @@ notifications = {
     'schema': notifications_schema,
 }
 
-
 DOMAIN = {
     'users': users,
     'nodes': nodes,
@@ -797,7 +796,6 @@ DOMAIN = {
     'activities-subscriptions': activities_subscriptions,
     'notifications': notifications
 }
-
 
 MONGO_HOST = os.environ.get('MONGO_HOST', 'localhost')
 MONGO_PORT = os.environ.get('MONGO_PORT', 27017)
