@@ -1,15 +1,120 @@
+import base64
 import logging
+import urlparse
 
+import pymongo.errors
+import rsa.randnum
 from bson import ObjectId
-from flask import current_app, g
-from werkzeug.exceptions import UnprocessableEntity
+from flask import current_app, g, Blueprint, request
+from werkzeug.exceptions import UnprocessableEntity, InternalServerError
 
 from application.modules import file_storage
-from application.utils.authorization import check_permissions
+from application.utils import str2id, jsonify
+from application.utils.authorization import check_permissions, require_login
 from application.utils.gcs import update_file_name
 from application.utils.activities import activity_subscribe, activity_object_add
 
 log = logging.getLogger(__name__)
+blueprint = Blueprint('nodes', __name__)
+ROLES_FOR_SHARING = {u'subscriber', u'demo'}
+
+
+@blueprint.route('/<node_id>/share', methods=['GET', 'POST'])
+@require_login(require_roles=ROLES_FOR_SHARING)
+def share_node(node_id):
+    """Shares a node, or returns sharing information."""
+
+    node_id = str2id(node_id)
+    nodes_coll = current_app.data.driver.db['nodes']
+
+    node = nodes_coll.find_one({'_id': node_id},
+                               projection={
+                                   'project': 1,
+                                   'node_type': 1,
+                                   'short_codes': 1
+                               })
+
+    check_permissions('nodes', node, request.method)
+
+    log.info('Sharing node %s', node_id)
+
+    # We support storing multiple short links in the database, but
+    # for now we just always store one and the same.
+    short_codes = node.get('short_codes', [])
+    if not short_codes and request.method == 'POST':
+        short_code = generate_and_store_short_code(node)
+        status = 201
+    else:
+        try:
+            short_code = short_codes[0]
+        except IndexError:
+            return '', 204
+        status = 200
+
+    return jsonify(short_link_info(short_code), status=status)
+
+
+def generate_and_store_short_code(node):
+    nodes_coll = current_app.data.driver.db['nodes']
+    node_id = node['_id']
+
+    log.debug('Creating new short link for node %s', node_id)
+
+    max_attempts = 10
+    for attempt in range(1, max_attempts):
+
+        # Generate a new short code
+        short_code = create_short_code(node)
+        log.debug('Created short code for node %s: %s', node_id, short_code)
+
+        node.setdefault('short_codes', []).append(short_code)
+
+        # Store it in MongoDB
+        try:
+            result = nodes_coll.update_one({'_id': node_id},
+                                           {'$set': {'short_codes': node['short_codes']}})
+            break
+        except pymongo.errors.DuplicateKeyError:
+            node['short_codes'].remove(short_code)
+
+            log.info('Duplicate key while creating short code, retrying (attempt %i/%i)',
+                     attempt, max_attempts)
+            pass
+    else:
+        log.error('Unable to find unique short code for node %s after %i attempts, failing!',
+                  node_id, max_attempts)
+        raise InternalServerError('Unable to create unique short code for node %s' % node_id)
+
+    # We were able to store a short code, now let's verify the result.
+    if result.matched_count != 1:
+        log.warning('Unable to update node %s with new short_links=%r',
+                    node_id, node['short_codes'])
+        raise InternalServerError('Unable to update node %s with new short links' % node_id)
+
+    return short_code
+
+
+def create_short_code(node):
+    """Generates a new 'short code' for the node."""
+
+    length = current_app.config['SHORT_CODE_LENGTH']
+    bits = rsa.randnum.read_random_bits(32)
+    short_code = base64.b64encode(bits, altchars='xy').rstrip('=')
+    short_code = short_code[:length]
+
+    return short_code
+
+
+def short_link_info(short_code):
+    """Returns the short link info in a dict."""
+
+    short_link = urlparse.urljoin(current_app.config['SHORT_LINK_BASE_URL'], short_code)
+
+    return {
+        'short_code': short_code,
+        'short_link': short_link,
+        'theatre_link': urlparse.urljoin(short_link, '?t')
+    }
 
 
 def item_parse_attachments(response):
@@ -247,7 +352,7 @@ def nodes_set_default_picture(nodes):
         node_set_default_picture(node)
 
 
-def setup_app(app):
+def setup_app(app, url_prefix):
     # Permission hooks
     app.on_fetched_item_nodes += before_returning_node_permissions
     app.on_fetched_resource_nodes += before_returning_node_resource_permissions
@@ -264,3 +369,5 @@ def setup_app(app):
     app.on_insert_nodes += nodes_deduct_content_type
     app.on_insert_nodes += nodes_set_default_picture
     app.on_inserted_nodes += after_inserting_nodes
+
+    app.register_blueprint(blueprint, url_prefix=url_prefix)

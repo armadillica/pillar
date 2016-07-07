@@ -1,5 +1,6 @@
 import json
 
+from mock import mock
 from bson import ObjectId
 from eve.methods.post import post_internal
 from eve.methods.put import put_internal
@@ -232,3 +233,98 @@ class NodeOwnerTest(AbstractPillarTest):
         self.assertEqual(200, resp.status_code, resp.data)
         json_node = json.loads(resp.data)
         self.assertEqual(str(self.user_id), json_node['user'])
+
+
+class NodeSharingTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        AbstractPillarTest.setUp(self, **kwargs)
+
+        self.project_id, _ = self.ensure_project_exists()
+        self.user_id = self.create_user(groups=[ctd.EXAMPLE_ADMIN_GROUP_ID])
+        self.create_valid_auth_token(self.user_id, 'token')
+
+        # Create a node to share
+        resp = self.post('/nodes', 201, auth_token='token', json={
+            'project': self.project_id,
+            'node_type': 'asset',
+            'name': str(self),
+            'properties': {},
+        })
+        self.node_id = resp.json()['_id']
+
+    def _check_share_data(self, share_data):
+        base_url = self.app.config['SHORT_LINK_BASE_URL']
+
+        self.assertEqual(6, len(share_data['short_code']))
+        self.assertTrue(share_data['short_link'].startswith(base_url))
+        self.assertTrue(share_data['theatre_link'].startswith(base_url))
+
+    def test_share_node(self):
+        # Share the node
+        resp = self.post('/nodes/%s/share' % self.node_id, auth_token='token',
+                         expected_status=201)
+        share_data = resp.json()
+
+        self._check_share_data(share_data)
+
+    def test_get_share_data__unshared_node(self):
+        self.get('/nodes/%s/share' % self.node_id,
+                 expected_status=204,
+                 auth_token='token')
+
+    def test_get_share_data__shared_node(self):
+        # Share the node first.
+        self.post('/nodes/%s/share' % self.node_id, auth_token='token',
+                  expected_status=201)
+
+        # Then get its share info.
+        resp = self.get('/nodes/%s/share' % self.node_id, auth_token='token')
+        share_data = resp.json()
+
+        self._check_share_data(share_data)
+
+    def test_unauthenticated(self):
+        self.post('/nodes/%s/share' % self.node_id,
+                  expected_status=403)
+
+    def test_other_user(self):
+        other_user_id = self.create_user(user_id=24 * 'a')
+        self.create_valid_auth_token(other_user_id, 'other-token')
+
+        self.post('/nodes/%s/share' % self.node_id,
+                  auth_token='other-token',
+                  expected_status=403)
+
+    def test_create_short_link(self):
+        from application.modules.nodes import create_short_code
+
+        with self.app.test_request_context():
+            length = self.app.config['SHORT_CODE_LENGTH']
+
+            # We're testing a random process, so we have to repeat it
+            # a few times to see if it really works.
+            for _ in range(10000):
+                short_code = create_short_code({})
+                self.assertEqual(length, len(short_code))
+
+    def test_short_code_collision(self):
+        # Create a second node that has already been shared.
+        self.post('/nodes', 201, auth_token='token', json={
+            'project': self.project_id,
+            'node_type': 'asset',
+            'name': 'collider',
+            'properties': {},
+            'short_codes': ['takenX'],
+        })
+
+        # Mock create_short_code so that it returns predictable short codes.
+        codes = ['takenX', 'takenX', 'freeXX']
+        with mock.patch('application.modules.nodes.create_short_code',
+                        side_effect=codes) as create_short_link:
+            resp = self.post('/nodes/%s/share' % self.node_id, auth_token='token',
+                             expected_status=201)
+
+        share_data = resp.json()
+
+        self._check_share_data(share_data)
+        self.assertEqual(3, create_short_link.call_count)

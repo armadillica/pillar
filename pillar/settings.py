@@ -322,7 +322,13 @@ nodes_schema = {
     'permissions': {
         'type': 'dict',
         'schema': permissions_embedded_schema
-    }
+    },
+    'short_codes': {
+        'type': 'list',
+        'schema': {
+            'type': 'string',
+        },
+    },
 }
 
 tokens_schema = {
