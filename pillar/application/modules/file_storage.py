@@ -536,13 +536,12 @@ def stream_to_gcs(project_id):
              authentication.current_user_id())
     uploaded_file = request.files['file']
 
-    file_id, internal_fname, status = create_file_doc_for_upload(project_oid, uploaded_file)
-
     override_content_type(uploaded_file)
-
     if not uploaded_file.content_type:
         log.warning('File uploaded to project %s without content type.', project_oid)
         raise BadRequest('Missing content type.')
+
+    file_id, internal_fname, status = create_file_doc_for_upload(project_oid, uploaded_file)
 
     if uploaded_file.content_type.startswith('image/'):
         # We need to do local thumbnailing, so we have to write the stream
