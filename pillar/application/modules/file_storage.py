@@ -27,7 +27,7 @@ import werkzeug.exceptions as wz_exceptions
 
 from application import utils
 from application.utils import remove_private_keys, authentication
-from application.utils.authorization import require_login, user_has_role
+from application.utils.authorization import require_login, user_has_role, user_matches_roles
 from application.utils.cdn import hash_file_path
 from application.utils.encoding import Encoder
 from application.utils.gcs import GoogleCloudStorageBucket
@@ -529,6 +529,27 @@ def override_content_type(uploaded_file):
         del uploaded_file._parsed_content_type
 
 
+def assert_file_size_allowed(file_size):
+    """Asserts that the current user is allowed to upload a file of the given size.
+
+    :raises
+    """
+
+    roles = current_app.config['ROLES_FOR_UNLIMITED_UPLOADS']
+    if user_matches_roles(require_roles=roles):
+        return
+
+    filesize_limit = current_app.config['FILESIZE_LIMIT_BYTES_NONSUBS']
+    if file_size < filesize_limit:
+        return
+
+    filesize_limit_mb = filesize_limit / 2.0 ** 20
+    log.info('User %s tried to upload a %.3f MiB file, but is only allowed %.3f MiB.',
+             authentication.current_user_id(), file_size / 2.0 ** 20, filesize_limit_mb)
+    raise wz_exceptions.RequestEntityTooLarge(
+        'To upload files larger than %i MiB, subscribe to Blender Cloud' % filesize_limit_mb)
+
+
 @file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
 @require_login()
 def stream_to_gcs(project_id):
@@ -544,12 +565,17 @@ def stream_to_gcs(project_id):
              authentication.current_user_id())
     uploaded_file = request.files['file']
 
+    # Not every upload has a Content-Length header. If it was passed, we might as
+    # well check for its value before we require the user to upload the entire file.
+    # (At least I hope that this part of the code is processed before the body is
+    # read in its entirety)
+    if uploaded_file.content_length:
+        assert_file_size_allowed(uploaded_file.content_length)
+
     override_content_type(uploaded_file)
     if not uploaded_file.content_type:
         log.warning('File uploaded to project %s without content type.', project_oid)
         raise wz_exceptions.BadRequest('Missing content type.')
-
-    file_id, internal_fname, status = create_file_doc_for_upload(project_oid, uploaded_file)
 
     if uploaded_file.content_type.startswith('image/'):
         # We need to do local thumbnailing, so we have to write the stream
@@ -569,6 +595,12 @@ def stream_to_gcs(project_id):
         file_size = len(stream_for_gcs.getvalue())
     else:
         file_size = os.fstat(stream_for_gcs.fileno()).st_size
+
+    # Check the file size again, now that we know its size for sure.
+    assert_file_size_allowed(file_size)
+
+    # Create file document in MongoDB.
+    file_id, internal_fname, status = create_file_doc_for_upload(project_oid, uploaded_file)
 
     if current_app.config['TESTING']:
         log.warning('NOT streaming to GCS because TESTING=%r', current_app.config['TESTING'])

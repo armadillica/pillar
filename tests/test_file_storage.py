@@ -1,11 +1,13 @@
 import json
-
+import io
 import os
 import tempfile
 
+import rsa.randnum
 from werkzeug.datastructures import FileStorage
 
-from common_test_class import AbstractPillarTest
+from common_test_class import AbstractPillarTest, TEST_EMAIL_ADDRESS
+import common_test_data as ctd
 
 
 class FileStorageTest(AbstractPillarTest):
@@ -172,3 +174,63 @@ class FileAccessTest(AbstractPillarTest):
         self.assertIsNone(file_info['variations'])
         file_info = assert_variations(blend_file_id, True, 'admin-token')
         self.assertIsNone(file_info['variations'])
+
+
+class FileMaxSizeTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        AbstractPillarTest.setUp(self, **kwargs)
+
+        self.project_id, _ = self.ensure_project_exists()
+        self.user_id = self.create_user(groups=[ctd.EXAMPLE_ADMIN_GROUP_ID],
+                                        roles=set())
+        self.create_valid_auth_token(self.user_id, 'token')
+
+    def test_upload_small_file(self):
+        file_size = 10 * 2 ** 10
+        test_file = self.create_test_file(file_size)
+
+        resp = self.post('/storage/stream/%s' % self.project_id,
+                         expected_status=201,
+                         auth_token='token',
+                         files={'file': (test_file, 'test_file.bin')})
+        stream_info = resp.json()
+        file_id = stream_info['file_id']
+
+        self.assert_file_doc_ok(file_id, file_size)
+
+    def test_upload_too_large_file(self):
+        file_size = 30 * 2 ** 10
+        test_file = self.create_test_file(file_size)
+
+        self.post('/storage/stream/%s' % self.project_id,
+                  expected_status=413,
+                  auth_token='token',
+                  files={'file': (test_file, 'test_file.bin')})
+
+    def test_upload_large_file_subscriber(self):
+        self.badger(TEST_EMAIL_ADDRESS, 'subscriber', 'grant')
+
+        file_size = 30 * 2 ** 10
+        test_file = self.create_test_file(file_size)
+
+        resp = self.post('/storage/stream/%s' % self.project_id,
+                         expected_status=201,
+                         auth_token='token',
+                         files={'file': (test_file, 'test_file.bin')})
+        stream_info = resp.json()
+        file_id = stream_info['file_id']
+
+        self.assert_file_doc_ok(file_id, file_size)
+
+    def assert_file_doc_ok(self, file_id, file_size):
+        with self.app.test_request_context():
+            from application.utils import str2id
+
+            # Check that the file exists in MongoDB
+            files_coll = self.app.data.driver.db['files']
+            db_file = files_coll.find_one({'_id': str2id(file_id)})
+            self.assertEqual(file_size, db_file['length'])
+
+    def create_test_file(self, file_size_bytes):
+        fileob = io.BytesIO(rsa.randnum.read_random_bits(file_size_bytes * 8))
+        return fileob

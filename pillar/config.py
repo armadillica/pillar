@@ -101,3 +101,8 @@ LOGGING = {
 
 SHORT_LINK_BASE_URL = 'https://blender.cloud/r/'
 SHORT_CODE_LENGTH = 6  # characters
+
+# People are allowed this many bytes per uploaded file.
+FILESIZE_LIMIT_BYTES_NONSUBS = 32 * 2 ** 20
+# Unless they have one of those roles.
+ROLES_FOR_UNLIMITED_UPLOADS = {u'subscriber', u'demo', u'admin'}
