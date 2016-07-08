@@ -156,7 +156,7 @@ class AbstractPillarTest(TestMinimal):
         """
 
         if isinstance(roles, str):
-            roles = set(roles)
+            roles = {roles}
 
         # Create a service account if needed.
         if srv_token is None:
