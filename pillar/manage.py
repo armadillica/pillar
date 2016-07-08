@@ -7,7 +7,7 @@ import copy
 import os
 import logging
 
-from bson.objectid import ObjectId
+from bson.objectid import ObjectId, InvalidId
 from eve.methods.put import put_internal
 from eve.methods.post import post_internal
 from flask.ext.script import Manager
@@ -983,7 +983,11 @@ def sync_project_groups(user_email, fix):
     if '@' in user_email:
         where = {'email': user_email}
     else:
-        where = {'_id': ObjectId(user_email)}
+        try:
+            where = {'_id': ObjectId(user_email)}
+        except InvalidId:
+            log.warning('Invalid ObjectID: %s', user_email)
+            return
 
     user = users_coll.find_one(where, projection={'_id': 1, 'groups': 1})
     if user is None:
