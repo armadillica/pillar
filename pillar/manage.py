@@ -922,46 +922,57 @@ def sync_role_groups(do_revoke_groups):
 
     ok_users = bad_users = 0
     for user in users_coll.find():
+        grant_groups = set()
+        revoke_groups = set()
+        current_groups = set(user.get('groups', []))
+        user_roles = user.get('roles', set())
+
         for role in service.ROLES_WITH_GROUPS:
-            action = 'grant' if role in user.get('roles', ()) else 'revoke'
+            action = 'grant' if role in user_roles else 'revoke'
             groups = service.manage_user_group_membership(user, role, action)
 
             if groups is None:
                 # No changes required
-                ok_users += 1
                 continue
 
-            current_groups = set(user.get('groups'))
             if groups == current_groups:
-                ok_users += 1
                 continue
 
+            grant_groups.update(groups.difference(current_groups))
+            revoke_groups.update(current_groups.difference(groups))
+
+        if grant_groups or revoke_groups:
             bad_users += 1
 
-            grant_groups = groups.difference(current_groups)
-            revoke_groups = current_groups.difference(groups)
+            expected_groups = current_groups.union(grant_groups).difference(revoke_groups)
 
             print('Discrepancy for user %s/%s:' % (user['_id'], user['full_name'].encode('utf8')))
             print('    - actual groups  :', sorted(gname(gid) for gid in user.get('groups')))
-            print('    - expected groups:', sorted(gname(gid) for gid in groups))
+            print('    - expected groups:', sorted(gname(gid) for gid in expected_groups))
             print('    - will grant     :', sorted(gname(gid) for gid in grant_groups))
-            print('    - might revoke   :', sorted(gname(gid) for gid in revoke_groups))
+
+            if do_revoke_groups:
+                label = 'WILL REVOKE '
+            else:
+                label = 'could revoke'
+            print('    - %s   :' % label, sorted(gname(gid) for gid in revoke_groups))
 
             if grant_groups and revoke_groups:
                 print('        ------ CAREFUL this one has BOTH grant AND revoke -----')
 
             # Determine which changes we'll apply
+            final_groups = current_groups.union(grant_groups)
             if do_revoke_groups:
-                final_groups = groups
-            else:
-                final_groups = current_groups.union(grant_groups)
+                final_groups.difference_update(revoke_groups)
             print('    - final groups   :', sorted(gname(gid) for gid in final_groups))
 
             # Perform the actual update
             users_coll.update_one({'_id': user['_id']},
                                   {'$set': {'groups': list(final_groups)}})
+        else:
+            ok_users += 1
 
-    print('%i bad and %i ok user/role combos seen.' % (bad_users, ok_users))
+    print('%i bad and %i ok users seen.' % (bad_users, ok_users))
 
 
 @manager.command
