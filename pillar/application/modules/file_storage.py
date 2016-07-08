@@ -23,7 +23,7 @@ from flask import url_for, helpers
 from flask import current_app
 from flask import g
 from flask import make_response
-from werkzeug.exceptions import NotFound, InternalServerError, BadRequest
+import werkzeug.exceptions as wz_exceptions
 
 from application import utils
 from application.utils import remove_private_keys, authentication
@@ -523,16 +523,13 @@ def override_content_type(uploaded_file):
 @file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
 @require_login()
 def stream_to_gcs(project_id):
-    try:
-        project_oid = ObjectId(project_id)
-    except InvalidId:
-        raise BadRequest('Invalid ObjectID')
+    project_oid = utils.str2id(project_id)
 
     projects = current_app.data.driver.db['projects']
     project = projects.find_one(project_oid, projection={'_id': 1})
 
     if not project:
-        raise NotFound('Project %s does not exist' % project_id)
+        raise wz_exceptions.NotFound('Project %s does not exist' % project_id)
 
     log.info('Streaming file to bucket for project=%s user_id=%s', project_id,
              authentication.current_user_id())
@@ -541,7 +538,7 @@ def stream_to_gcs(project_id):
     override_content_type(uploaded_file)
     if not uploaded_file.content_type:
         log.warning('File uploaded to project %s without content type.', project_oid)
-        raise BadRequest('Missing content type.')
+        raise wz_exceptions.BadRequest('Missing content type.')
 
     file_id, internal_fname, status = create_file_doc_for_upload(project_oid, uploaded_file)
 
@@ -578,7 +575,7 @@ def stream_to_gcs(project_id):
         log.exception('Error uploading file to Google Cloud Storage (GCS),'
                       ' aborting handling of uploaded file (id=%s).', file_id)
         update_file_doc(file_id, status='failed')
-        raise InternalServerError('Unable to stream file to Google Cloud Storage')
+        raise wz_exceptions.InternalServerError('Unable to stream file to Google Cloud Storage')
 
     # Reload the blob to get the file size according to Google.
     blob.reload()
@@ -669,7 +666,7 @@ def create_file_doc_for_upload(project_id, uploaded_file):
     if status not in (200, 201):
         log.error('Unable to create new file document in MongoDB, status=%i: %s',
                   status, file_fields)
-        raise InternalServerError()
+        raise wz_exceptions.InternalServerError()
 
     return file_fields['_id'], internal_filename, status
 
