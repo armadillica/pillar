@@ -1028,5 +1028,19 @@ def sync_project_groups(user_email, fix):
         log.info('Updated %i user.', result.modified_count)
 
 
+@manager.command
+def badger(action, user_email, role):
+    from application.modules import service
+
+    with app.app_context():
+        service.fetch_role_to_group_id_map()
+        response, status = service.do_badger(action, user_email, role)
+
+    if status == 204:
+        log.info('Done.')
+    else:
+        log.info('Response: %s', response)
+        log.info('Status  : %i', status)
+
 if __name__ == '__main__':
     manager.run()

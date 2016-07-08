@@ -7,7 +7,7 @@ from bson import ObjectId
 from flask import Blueprint, current_app, g, request
 from werkzeug import exceptions as wz_exceptions
 
-from application.utils import authorization
+from application.utils import authorization, authentication
 from application.modules import local_auth, users
 
 blueprint = Blueprint('service', __name__)
@@ -51,6 +51,32 @@ def badger():
     user_email = args.get('user_email', '')
     role = args.get('role', '')
 
+    current_user_id = authentication.current_user_id()
+    log.info('Service account %s %ss role %r to/from user %s',
+             current_user_id, action, role, user_email)
+
+    users_coll = current_app.data.driver.db['users']
+
+    # Check that the user is allowed to grant this role.
+    srv_user = users_coll.find_one(current_user_id,
+                                   projection={'service.badger': 1})
+    if srv_user is None:
+        log.error('badger(%s, %s, %s): current user %s not found -- how did they log in?',
+                  action, user_email, role, current_user_id)
+        return 'User not found', 403
+
+    allowed_roles = set(srv_user.get('service', {}).get('badger', []))
+    if role not in allowed_roles:
+        log.warning('badger(%s, %s, %s): service account not authorized to %s role %s',
+                    action, user_email, role, action, role)
+        return 'Role not allowed', 403
+
+    return do_badger(action, user_email, role)
+
+
+def do_badger(action, user_email, role):
+    """Performs a badger action, returning a HTTP response."""
+
     if action not in {'grant', 'revoke'}:
         raise wz_exceptions.BadRequest('Action %r not supported' % action)
 
@@ -60,24 +86,7 @@ def badger():
     if not role:
         raise wz_exceptions.BadRequest('Role not given')
 
-    log.info('Service account %s %ss role %r to/from user %s',
-             g.current_user['user_id'], action, role, user_email)
-
     users_coll = current_app.data.driver.db['users']
-
-    # Check that the user is allowed to grant this role.
-    srv_user = users_coll.find_one(g.current_user['user_id'],
-                                   projection={'service.badger': 1})
-    if srv_user is None:
-        log.error('badger(%s, %s, %s): current user %s not found -- how did they log in?',
-                  action, user_email, role, g.current_user['user_id'])
-        return 'User not found', 403
-
-    allowed_roles = set(srv_user.get('service', {}).get('badger', []))
-    if role not in allowed_roles:
-        log.warning('badger(%s, %s, %s): service account not authorized to %s role %s',
-                    action, user_email, role, action, role)
-        return 'Role not allowed', 403
 
     # Fetch the user
     db_user = users_coll.find_one({'email': user_email}, projection={'roles': 1, 'groups': 1})
@@ -128,7 +137,7 @@ def manage_user_group_membership(db_user, role, action):
     try:
         group_id = _role_to_group_id[role]
     except KeyError:
-        log.warning('Group for role %r cannot be found, unable to %s members for user %s',
+        log.warning('Group for role %r cannot be found, unable to %s membership for user %s',
                     role, action, db_user['_id'])
         return
 
