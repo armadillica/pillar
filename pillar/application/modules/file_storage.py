@@ -408,7 +408,7 @@ def on_pre_get_files(_, lookup):
 
     cursor = current_app.data.find('files', parsed_req, lookup_expired)
     for file_doc in cursor:
-        log.debug('Updating expired links for file %r.', file_doc['_id'])
+        # log.debug('Updating expired links for file %r.', file_doc['_id'])
         _generate_all_links(file_doc, now)
 
 
