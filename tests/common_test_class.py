@@ -218,14 +218,14 @@ class AbstractPillarTest(TestMinimal):
 
         return group_ids
 
-    def client_request(self, method, url, expected_status=200, auth_token=None, json=None,
-                       data=None):
+    def client_request(self, method, path, expected_status=200, auth_token=None, json=None,
+                       data=None, headers=None, files=None, content_type=None):
         """Performs a HTTP request to the server."""
 
         from application.utils import dumps
         import json as mod_json
 
-        headers = {}
+        headers = headers or {}
         if auth_token is not None:
             headers['Authorization'] = self.make_header(auth_token)
 
@@ -233,8 +233,17 @@ class AbstractPillarTest(TestMinimal):
             data = dumps(json)
             headers['Content-Type'] = 'application/json'
 
-        resp = self.client.open(url, method=method, data=data, headers=headers)
-        self.assertEqual(expected_status, resp.status_code, resp.data)
+        if files:
+            data = data or {}
+            content_type = 'multipart/form-data'
+            data.update(files)
+
+        resp = self.client.open(path=path, method=method, data=data, headers=headers,
+                                content_type=content_type)
+        self.assertEqual(expected_status, resp.status_code,
+                         'Expected status %i but got %i. Response: %s' % (
+                             expected_status, resp.status_code, resp.data
+                         ))
 
         def json():
             if resp.mimetype != 'application/json':
