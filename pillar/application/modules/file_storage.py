@@ -120,13 +120,16 @@ def _process_image(gcs, file_id, local_file, src_file):
     # TODO: parallelize this at some point.
     for variation in src_file['variations']:
         fname = variation['file_path']
-        log.debug('  - Sending thumbnail %s to GCS', fname)
-        blob = gcs.bucket.blob('_/' + fname, chunk_size=256 * 1024 * 2)
-        blob.upload_from_filename(variation['local_path'],
-                                  content_type=variation['content_type'])
+        if current_app.config['TESTING']:
+            log.warning('  - NOT sending thumbnail %s to GCS', fname)
+        else:
+            log.debug('  - Sending thumbnail %s to GCS', fname)
+            blob = gcs.bucket.blob('_/' + fname, chunk_size=256 * 1024 * 2)
+            blob.upload_from_filename(variation['local_path'],
+                                      content_type=variation['content_type'])
 
-        if variation.get('size') == 't':
-            blob.make_public()
+            if variation.get('size') == 't':
+                blob.make_public()
 
         try:
             os.unlink(variation['local_path'])
@@ -166,10 +169,16 @@ def _process_video(gcs, file_id, local_file, src_file):
     # that's why we build a list.
     src_file['variations'].append(file_variation)
 
-    j = Encoder.job_create(src_file)
-    if j is None:
-        log.warning('_process_video: unable to create encoder job for file %s.', file_id)
-        return
+    if current_app.config['TESTING']:
+        log.warning('_process_video: NOT sending out encoding job due to TESTING=%r',
+                    current_app.config['TESTING'])
+        j = type('EncoderJob', (), {'process_id': 'fake-process-id',
+                                    'backend': 'fake'})
+    else:
+        j = Encoder.job_create(src_file)
+        if j is None:
+            log.warning('_process_video: unable to create encoder job for file %s.', file_id)
+            return
 
     log.info('Created asynchronous Zencoder job %s for file %s', j['process_id'], file_id)
 
@@ -561,24 +570,30 @@ def stream_to_gcs(project_id):
     else:
         file_size = os.fstat(stream_for_gcs.fileno()).st_size
 
-    # Upload the file to GCS.
-    from gcloud.streaming import transfer
-    # Files larger than this many bytes will be streamed directly from disk, smaller
-    # ones will be read into memory and then uploaded.
-    transfer.RESUMABLE_UPLOAD_THRESHOLD = 102400
-    try:
-        gcs = GoogleCloudStorageBucket(project_id)
-        blob = gcs.bucket.blob('_/' + internal_fname, chunk_size=256 * 1024 * 2)
-        blob.upload_from_file(stream_for_gcs, size=file_size,
-                              content_type=uploaded_file.mimetype)
-    except Exception:
-        log.exception('Error uploading file to Google Cloud Storage (GCS),'
-                      ' aborting handling of uploaded file (id=%s).', file_id)
-        update_file_doc(file_id, status='failed')
-        raise wz_exceptions.InternalServerError('Unable to stream file to Google Cloud Storage')
+    if current_app.config['TESTING']:
+        log.warning('NOT streaming to GCS because TESTING=%r', current_app.config['TESTING'])
+        # Fake a Blob object.
+        gcs = None
+        blob = type('Blob', (), {'size': file_size})
+    else:
+        # Upload the file to GCS.
+        from gcloud.streaming import transfer
+        # Files larger than this many bytes will be streamed directly from disk, smaller
+        # ones will be read into memory and then uploaded.
+        transfer.RESUMABLE_UPLOAD_THRESHOLD = 102400
+        try:
+            gcs = GoogleCloudStorageBucket(project_id)
+            blob = gcs.bucket.blob('_/' + internal_fname, chunk_size=256 * 1024 * 2)
+            blob.upload_from_file(stream_for_gcs, size=file_size,
+                                  content_type=uploaded_file.mimetype)
+        except Exception:
+            log.exception('Error uploading file to Google Cloud Storage (GCS),'
+                          ' aborting handling of uploaded file (id=%s).', file_id)
+            update_file_doc(file_id, status='failed')
+            raise wz_exceptions.InternalServerError('Unable to stream file to Google Cloud Storage')
 
-    # Reload the blob to get the file size according to Google.
-    blob.reload()
+        # Reload the blob to get the file size according to Google.
+        blob.reload()
     update_file_doc(file_id,
                     status='queued_for_processing',
                     file_path=internal_fname,
