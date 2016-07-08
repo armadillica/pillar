@@ -961,7 +961,7 @@ def sync_role_groups(do_revoke_groups):
             users_coll.update_one({'_id': user['_id']},
                                   {'$set': {'groups': list(final_groups)}})
 
-    print('%i bad and %i ok users seen.' % (bad_users, ok_users))
+    print('%i bad and %i ok user/role combos seen.' % (bad_users, ok_users))
 
 
 @manager.command
