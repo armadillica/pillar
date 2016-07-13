@@ -9,9 +9,25 @@ from bson import tz_util, ObjectId
 from werkzeug.exceptions import Forbidden
 
 from common_test_class import AbstractPillarTest, TEST_EMAIL_USER, TEST_EMAIL_ADDRESS
-from common_test_data import EXAMPLE_PROJECT, EXAMPLE_NODE
+from common_test_data import EXAMPLE_NODE
+import common_test_data as ctd
 
 PUBLIC_USER_FIELDS = {'full_name', 'email'}
+
+# Use the example project with some additional permissions for these tests.
+EXAMPLE_PROJECT = copy.deepcopy(ctd.EXAMPLE_PROJECT)
+
+_texture_nt = next(nt for nt in EXAMPLE_PROJECT['node_types']
+                   if nt['name'] == 'texture')
+_texture_nt['permissions']['groups'] = [
+    {u'group': ObjectId('5596e975ea893b269af85c0f'), u'methods': [u'GET']},
+    {u'group': ObjectId('564733b56dcaf85da2faee8a'), u'methods': [u'GET']}, ]
+
+_asset_nt = next(nt for nt in EXAMPLE_PROJECT['node_types']
+                 if nt['name'] == 'asset')
+_asset_nt['permissions']['groups'] = [
+    {u'group': ObjectId('5596e975ea893b269af85c0f'), u'methods': [u'DELETE', u'GET']},
+    {u'group': ObjectId('564733b56dcaf85da2faee8a'), u'methods': [u'GET']}]
 
 
 class AuthenticationTests(AbstractPillarTest):
@@ -448,7 +464,7 @@ class PermissionComputationTest(AbstractPillarTest):
             self.assertEqual(
                 {
                     u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                                 u'methods': [u'GET', u'POST', u'PUT']}],
+                                 u'methods': [u'DELETE', u'GET', u'POST', u'PUT']}],
                     u'world': [u'GET']
                 },
                 self.sort(compute_aggr_permissions('projects', EXAMPLE_PROJECT, None)))
@@ -457,7 +473,7 @@ class PermissionComputationTest(AbstractPillarTest):
             self.assertEqual(
                 {
                     u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                                 u'methods': [u'GET', u'POST', u'PUT']},
+                                 u'methods': [u'DELETE', u'GET', u'POST', u'PUT']},
                                 {u'group': ObjectId('5596e975ea893b269af85c0f'),
                                  u'methods': [u'GET']},
                                 {u'group': ObjectId('564733b56dcaf85da2faee8a'),
@@ -473,10 +489,10 @@ class PermissionComputationTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             # Test node permissions without embedded project.
-            self.ensure_project_exists()
+            self.ensure_project_exists(project_overrides=EXAMPLE_PROJECT)
             self.assertEqual(
                 {u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                              u'methods': [u'GET', u'POST', u'PUT']},
+                              u'methods': [u'DELETE', u'GET', u'POST', u'PUT']},
                              {u'group': ObjectId('5596e975ea893b269af85c0f'),
                               u'methods': [u'DELETE', u'GET']},
                              {u'group': ObjectId('564733b56dcaf85da2faee8a'),
@@ -490,7 +506,7 @@ class PermissionComputationTest(AbstractPillarTest):
             node['project'] = EXAMPLE_PROJECT
             self.assertEqual(
                 {u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                              u'methods': [u'GET', u'POST', u'PUT']},
+                              u'methods': [u'DELETE', u'GET', u'POST', u'PUT']},
                              {u'group': ObjectId('5596e975ea893b269af85c0f'),
                               u'methods': [u'DELETE', u'GET']},
                              {u'group': ObjectId('564733b56dcaf85da2faee8a'),
