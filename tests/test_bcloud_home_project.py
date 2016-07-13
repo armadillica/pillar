@@ -337,6 +337,10 @@ class HomeProjectTest(AbstractPillarTest):
 
 
 class HomeProjectUserChangedRoleTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        AbstractPillarTest.setUp(self, **kwargs)
+        self.create_standard_groups()
+
     def test_without_home_project(self):
         from application.modules.blender_cloud import home_project
 

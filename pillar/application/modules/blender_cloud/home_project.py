@@ -133,6 +133,13 @@ def create_home_project(user_id, write_access):
     # and grant it to certain node types.
     project['permissions']['groups'][0]['methods'] = home_project_permissions(write_access)
 
+    # Everybody should be able to comment on anything in this project.
+    # This allows people to comment on shared images and see comments.
+    node_type_comment = assign_permissions(
+        node_type_comment,
+        subscriber_methods=[u'GET', u'POST'],
+        world_methods=[u'GET'])
+
     project['node_types'] = [
         node_type_group,
         node_type_asset,
@@ -154,6 +161,38 @@ def create_home_project(user_id, write_access):
                              user_id)
 
     return project
+
+
+def assign_permissions(node_type, subscriber_methods, world_methods):
+    """Assigns permissions to the node type object.
+
+    :param node_type: a node type from manage_extra.node_types.
+    :type node_type: dict
+    :param subscriber_methods: allowed HTTP methods for users of role 'subscriber',
+        'demo' and 'admin'.
+    :type subscriber_methods: list
+    :param subscriber_methods: allowed HTTP methods for world
+    :type subscriber_methods: list
+    :returns: a copy of the node type, with embedded permissions
+    :rtype: dict
+    """
+
+    from application.modules import service
+
+    nt_with_perms = copy.deepcopy(node_type)
+
+    perms = nt_with_perms.setdefault('permissions', {})
+    perms['groups'] = [
+        {'group': service.role_to_group_id['subscriber'],
+         'methods': subscriber_methods[:]},
+        {'group': service.role_to_group_id['demo'],
+         'methods': subscriber_methods[:]},
+        {'group': service.role_to_group_id['admin'],
+         'methods': subscriber_methods[:]},
+    ]
+    perms['world'] = world_methods[:]
+
+    return nt_with_perms
 
 
 @blueprint.route('/home-project')

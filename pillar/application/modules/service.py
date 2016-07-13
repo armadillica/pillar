@@ -17,14 +17,14 @@ signal_user_changed_role = blinker.NamedSignal('badger:user_changed_role')
 ROLES_WITH_GROUPS = {u'admin', u'demo', u'subscriber'}
 
 # Map of role name to group ID, for the above groups.
-_role_to_group_id = {}
+role_to_group_id = {}
 
 
 @blueprint.before_app_first_request
 def fetch_role_to_group_id_map():
     """Fills the _role_to_group_id mapping upon application startup."""
 
-    global _role_to_group_id
+    global role_to_group_id
 
     groups_coll = current_app.data.driver.db['groups']
 
@@ -33,9 +33,9 @@ def fetch_role_to_group_id_map():
         if group is None:
             log.warning('Group for role %r not found', role)
             continue
-        _role_to_group_id[role] = group['_id']
+        role_to_group_id[role] = group['_id']
 
-    log.debug('Group IDs for roles: %s', _role_to_group_id)
+    log.debug('Group IDs for roles: %s', role_to_group_id)
 
 
 @blueprint.route('/badger', methods=['POST'])
@@ -135,7 +135,7 @@ def manage_user_group_membership(db_user, role, action):
 
     # Find the group
     try:
-        group_id = _role_to_group_id[role]
+        group_id = role_to_group_id[role]
     except KeyError:
         log.warning('Group for role %r cannot be found, unable to %s membership for user %s',
                     role, action, db_user['_id'])
