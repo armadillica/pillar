@@ -33,6 +33,55 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
         abort(403)
 
 
+def compute_allowed_methods(collection_name, resource, check_node_type=None):
+    """Computes the HTTP methods that are allowed on a given resource.
+
+    :param collection_name: name of the collection the resource comes from.
+    :param resource: resource from MongoDB
+    :type resource: dict
+    :param check_node_type: node type to check. Only valid when collection_name='projects'.
+    :type check_node_type: str
+    :returns: Set of allowed methods
+    :rtype: set
+    """
+
+    # Check some input values.
+    if collection_name not in CHECK_PERMISSIONS_IMPLEMENTED_FOR:
+        raise ValueError('compute_allowed_methods only implemented for %s, not for %s',
+                         CHECK_PERMISSIONS_IMPLEMENTED_FOR, collection_name)
+
+    if check_node_type is not None and collection_name != 'projects':
+        raise ValueError('check_node_type parameter is only valid for checking projects.')
+
+    computed_permissions = compute_aggr_permissions(collection_name, resource, check_node_type)
+
+    if not computed_permissions:
+        log.info('No permissions available to compute for resource %r',
+                 resource.get('node_type', resource))
+        return set()
+
+    # Accumulate allowed methods from the user, group and world level.
+    allowed_methods = set()
+    current_user = g.current_user
+    if current_user:
+        # If the user is authenticated, proceed to compare the group permissions
+        for permission in computed_permissions.get('groups', ()):
+            if permission['group'] in current_user['groups']:
+                allowed_methods.update(permission['methods'])
+
+        for permission in computed_permissions.get('users', ()):
+            if current_user['user_id'] == permission['user']:
+                allowed_methods.update(permission['methods'])
+
+    # Check if the node is public or private. This must be set for non logged
+    # in users to see the content. For most BI projects this is on by default,
+    # while for private project this will not be set at all.
+    if 'world' in computed_permissions:
+        allowed_methods.update(computed_permissions['world'])
+
+    return allowed_methods
+
+
 def has_permissions(collection_name, resource, method, append_allowed_methods=False,
                     check_node_type=None):
     """Check user permissions to access a node. We look up node permissions from
@@ -51,42 +100,10 @@ def has_permissions(collection_name, resource, method, append_allowed_methods=Fa
     """
 
     # Check some input values.
-    if collection_name not in CHECK_PERMISSIONS_IMPLEMENTED_FOR:
-        raise ValueError('check_permission only implemented for %s, not for %s',
-                         CHECK_PERMISSIONS_IMPLEMENTED_FOR, collection_name)
-
     if append_allowed_methods and method != 'GET':
         raise ValueError("append_allowed_methods only allowed with 'GET' method")
 
-    if check_node_type is not None and collection_name != 'projects':
-        raise ValueError('check_node_type parameter is only valid for checking projects.')
-
-    computed_permissions = compute_aggr_permissions(collection_name, resource, check_node_type)
-
-    if not computed_permissions:
-        log.info('No permissions available to compute for %s on resource %r',
-                 method, resource.get('node_type', resource))
-        return False
-
-    # Accumulate allowed methods from the user, group and world level.
-    allowed_methods = set()
-
-    current_user = g.current_user
-    if current_user:
-        # If the user is authenticated, proceed to compare the group permissions
-        for permission in computed_permissions.get('groups', ()):
-            if permission['group'] in current_user['groups']:
-                allowed_methods.update(permission['methods'])
-
-        for permission in computed_permissions.get('users', ()):
-            if current_user['user_id'] == permission['user']:
-                allowed_methods.update(permission['methods'])
-
-    # Check if the node is public or private. This must be set for non logged
-    # in users to see the content. For most BI projects this is on by default,
-    # while for private project this will not be set at all.
-    if 'world' in computed_permissions:
-        allowed_methods.update(computed_permissions['world'])
+    allowed_methods = compute_allowed_methods(collection_name, resource, check_node_type)
 
     permission_granted = method in allowed_methods
     if permission_granted:
