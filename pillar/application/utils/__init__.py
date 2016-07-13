@@ -93,9 +93,11 @@ def str2id(document_id):
     """
 
     if not document_id:
-        raise wz_exceptions.BadRequest('Invalid object ID %r', document_id)
+        log.debug('str2id(%r): Invalid Object ID', document_id)
+        raise wz_exceptions.BadRequest('Invalid object ID %r' % document_id)
 
     try:
         return bson.ObjectId(document_id)
     except bson.objectid.InvalidId:
-        raise wz_exceptions.BadRequest('Invalid object ID %r', document_id)
+        log.debug('str2id(%r): Invalid Object ID', document_id)
+        raise wz_exceptions.BadRequest('Invalid object ID %r' % document_id)
