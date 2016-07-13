@@ -301,6 +301,30 @@ def refresh_project_permissions():
 
 
 @manager.command
+def refresh_home_project_permissions():
+    """Replaces the home project comment node type permissions with proper ones."""
+
+    proj_coll = app.data.driver.db['projects']
+
+    from application.modules.blender_cloud import home_project
+    from application.modules import service
+
+    service.fetch_role_to_group_id_map()
+
+    fake_node_type = home_project.assign_permissions(node_type_comment,
+                                                     subscriber_methods=[u'GET', u'POST'],
+                                                     world_methods=[u'GET'])
+    perms = fake_node_type['permissions']
+
+    result = proj_coll.update_many(
+        {'category': 'home', 'node_types.name': 'comment'},
+        {'$set': {'node_types.$.permissions': perms}})
+
+    print('Matched %i documents' % result.matched_count)
+    print('Updated %i documents' % result.modified_count)
+
+
+@manager.command
 def clear_db():
     """Wipes the database
     """
