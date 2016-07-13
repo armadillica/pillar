@@ -527,7 +527,7 @@ class RequireRolesTest(AbstractPillarTest):
             called[0] = True
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24*'a'),
+            g.current_user = {'user_id': ObjectId(24 * 'a'),
                               'roles': [u'succubus']}
             call_me()
 
@@ -544,13 +544,13 @@ class RequireRolesTest(AbstractPillarTest):
             called[0] = True
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24*'a'),
+            g.current_user = {'user_id': ObjectId(24 * 'a'),
                               'roles': [u'succubus']}
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24*'a'),
+            g.current_user = {'user_id': ObjectId(24 * 'a'),
                               'roles': [u'admin']}
             call_me()
         self.assertTrue(called[0])
@@ -567,25 +567,25 @@ class RequireRolesTest(AbstractPillarTest):
             called[0] = True
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24*'a'),
+            g.current_user = {'user_id': ObjectId(24 * 'a'),
                               'roles': [u'admin']}
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24*'a'),
+            g.current_user = {'user_id': ObjectId(24 * 'a'),
                               'roles': [u'service']}
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24*'a'),
+            g.current_user = {'user_id': ObjectId(24 * 'a'),
                               'roles': [u'badger']}
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24*'a'),
+            g.current_user = {'user_id': ObjectId(24 * 'a'),
                               'roles': [u'service', u'badger']}
             call_me()
         self.assertTrue(called[0])
