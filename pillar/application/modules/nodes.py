@@ -44,6 +44,7 @@ def share_node(node_id):
     if not short_code:
         if request.method == 'POST':
             short_code = generate_and_store_short_code(node)
+            make_world_gettable(node)
             status = 201
         else:
             return '', 204
@@ -86,6 +87,24 @@ def generate_and_store_short_code(node):
         raise InternalServerError('Unable to update node %s with new short links' % node_id)
 
     return short_code
+
+
+def make_world_gettable(node):
+    nodes_coll = current_app.data.driver.db['nodes']
+    node_id = node['_id']
+
+    log.debug('Ensuring the world can read node %s', node_id)
+
+    world_perms = set(node.get('permissions', {}).get('world', []))
+    world_perms.add(u'GET')
+    world_perms = list(world_perms)
+
+    result = nodes_coll.update_one({'_id': node_id},
+                                   {'$set': {'permissions.world': world_perms}})
+
+    if result.matched_count != 1:
+        log.warning('Unable to update node %s with new permissions.world=%r', node_id, world_perms)
+        raise InternalServerError('Unable to update node %s with new permissions' % node_id)
 
 
 def create_short_code(node):

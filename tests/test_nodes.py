@@ -239,7 +239,15 @@ class NodeSharingTest(AbstractPillarTest):
     def setUp(self, **kwargs):
         AbstractPillarTest.setUp(self, **kwargs)
 
-        self.project_id, _ = self.ensure_project_exists()
+        self.project_id, _ = self.ensure_project_exists(
+            project_overrides={
+                u'category': 'home',
+                u'permissions':
+                    {u'groups': [{u'group': ctd.EXAMPLE_ADMIN_GROUP_ID,
+                                  u'methods': [u'GET', u'POST', u'PUT', u'DELETE']}],
+                     u'users': [],
+                     u'world': []}}
+        )
         self.user_id = self.create_user(groups=[ctd.EXAMPLE_ADMIN_GROUP_ID])
         self.create_valid_auth_token(self.user_id, 'token')
 
@@ -265,6 +273,29 @@ class NodeSharingTest(AbstractPillarTest):
         share_data = resp.json()
 
         self._check_share_data(share_data)
+
+    def test_anonymous_access_shared_node(self):
+        # Anonymous user should not have access
+        self.get('/nodes/%s' % self.node_id, expected_status=403)
+
+        # Share the node
+        self.post('/nodes/%s/share' % self.node_id, auth_token='token',
+                  expected_status=201)
+
+        # Check that an anonymous user has acces.
+        resp = self.get('/nodes/%s' % self.node_id)
+        self.assertEqual(str(self.node_id), resp.json()['_id'])
+
+    def test_other_user_access_shared_node(self):
+        # Share the node
+        self.post('/nodes/%s/share' % self.node_id, auth_token='token',
+                  expected_status=201)
+
+        # Check that another user has access
+        other_user_id = self.create_user(user_id=24 * 'a')
+        self.create_valid_auth_token(other_user_id, 'other-token')
+        resp = self.get('/nodes/%s' % self.node_id, auth_token='other-token')
+        self.assertEqual(str(self.node_id), resp.json()['_id'])
 
     def test_get_share_data__unshared_node(self):
         self.get('/nodes/%s/share' % self.node_id,
