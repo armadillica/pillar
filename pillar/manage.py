@@ -845,6 +845,23 @@ def update_texture_nodes_maps():
             nodes_collection.update({'_id': node['_id']}, node)
 
 
+def _create_service_account(email, service_roles, service_definition):
+    from application.modules import service
+    from application.utils import dumps
+
+    account, token = service.create_service_account(
+        email,
+        service_roles,
+        service_definition
+    )
+
+    print('Account created:')
+    print(dumps(account, indent=4, sort_keys=True))
+    print()
+    print('Access token: %s' % token['token'])
+    print('  expires on: %s' % token['expire_time'])
+
+
 @manager.command
 def create_badger_account(email, badges):
     """
@@ -855,20 +872,14 @@ def create_badger_account(email, badges):
         this account can assign and revoke.
     """
 
-    from application.modules import service
-    from application.utils import dumps
+    _create_service_account(email, [u'badger'], {'badger': badges.strip().split()})
 
-    account, token = service.create_service_account(
-        email,
-        [u'badger'],
-        {'badger': badges.strip().split()}
-    )
 
-    print('Account created:')
-    print(dumps(account, indent=4, sort_keys=True))
-    print()
-    print('Access token: %s' % token['token'])
-    print('  expires on: %s' % token['expire_time'])
+@manager.command
+def create_urler_account(email):
+    """Creates a new service account that can fetch all project URLs."""
+
+    _create_service_account(email, [u'urler'], {})
 
 
 @manager.command

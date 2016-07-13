@@ -5,7 +5,8 @@ from flask import current_app
 from werkzeug.exceptions import NotFound
 
 
-def find_one_or_404(collection_name, object_id):
+def find_one_or_404(collection_name, object_id,
+                    projection=None):
     """Returns the found object from the collection, or raises a NotFound exception.
 
     :param collection_name: name of the collection, such as 'users' or 'files'
@@ -19,7 +20,8 @@ def find_one_or_404(collection_name, object_id):
     """
 
     collection = current_app.data.driver.db[collection_name]
-    found = collection.find_one(ObjectId(object_id))
+    found = collection.find_one(ObjectId(object_id),
+                                projection=projection)
 
     if found is None:
         raise NotFound()
