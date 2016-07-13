@@ -439,14 +439,11 @@ def get_allowed_methods(project_id=None, node_type=None):
     the former is deducted from it.
     """
 
-    log.debug('OPTIONS call on project_id=%s / node_type=%s', project_id, node_type)
-
     project = mongo.find_one_or_404('projects', str2id(project_id))
     proj_methods = authorization.compute_allowed_methods('projects', project, node_type)
 
     resp = make_response()
     resp.headers['Allowed'] = ', '.join(sorted(proj_methods))
-    log.debug('  -> Allowed: %s', resp.headers['Allowed'])
     resp.status_code = 204
 
     return resp
