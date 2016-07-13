@@ -5,11 +5,11 @@ import json
 from bson import ObjectId
 from eve.methods.post import post_internal
 from eve.methods.patch import patch_internal
-from flask import g, Blueprint, request, abort, current_app
+from flask import g, Blueprint, request, abort, current_app, make_response
 from gcloud import exceptions as gcs_exceptions
 from werkzeug import exceptions as wz_exceptions
 
-from application.utils import remove_private_keys, jsonify, mongo
+from application.utils import remove_private_keys, jsonify, mongo, str2id
 from application.utils import authorization, authentication
 from application.utils.gcs import GoogleCloudStorageBucket
 from application.utils.authorization import user_has_role, check_permissions, require_login
@@ -429,6 +429,27 @@ def project_node_type_has_method(response):
 def projects_node_type_has_method(response):
     for project in response['_items']:
         project_node_type_has_method(project)
+
+
+@blueprint.route('/<project_id>/<node_type>', methods=['OPTIONS', 'GET'])
+def get_allowed_methods(project_id=None, node_type=None):
+    """Returns allowed methods to create a node of a certain type.
+
+    Either project_id or parent_node_id must be given. If the latter is given,
+    the former is deducted from it.
+    """
+
+    log.debug('OPTIONS call on project_id=%s / node_type=%s', project_id, node_type)
+
+    project = mongo.find_one_or_404('projects', str2id(project_id))
+    proj_methods = authorization.compute_allowed_methods('projects', project, node_type)
+
+    resp = make_response()
+    resp.headers['Allowed'] = ', '.join(sorted(proj_methods))
+    log.debug('  -> Allowed: %s', resp.headers['Allowed'])
+    resp.status_code = 204
+
+    return resp
 
 
 def setup_app(app, url_prefix):
