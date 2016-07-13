@@ -30,7 +30,7 @@ zencoder==0.6.5
 pytest==2.9.1
 responses==0.5.1
 pytest-cov==2.2.1
-mock=2.0.0
+mock==2.0.0
 
 # Secondary requirements
 Flask-PyMongo==0.4.1
