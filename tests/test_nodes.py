@@ -252,7 +252,7 @@ class NodeSharingTest(AbstractPillarTest):
         self.create_valid_auth_token(self.user_id, 'token')
 
         # Create a node to share
-        resp = self.post('/nodes', 201, auth_token='token', json={
+        resp = self.post('/nodes', expected_status=201, auth_token='token', json={
             'project': self.project_id,
             'node_type': 'asset',
             'name': str(self),
@@ -339,7 +339,7 @@ class NodeSharingTest(AbstractPillarTest):
 
     def test_short_code_collision(self):
         # Create a second node that has already been shared.
-        self.post('/nodes', 201, auth_token='token', json={
+        self.post('/nodes', expected_status=201, auth_token='token', json={
             'project': self.project_id,
             'node_type': 'asset',
             'name': 'collider',

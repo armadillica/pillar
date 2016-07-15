@@ -8,6 +8,11 @@ import datetime
 import os
 import base64
 
+try:
+    from urllib.parse import urlencode
+except ImportError:
+    from urllib import urlencode
+
 from bson import ObjectId, tz_util
 
 # Override Eve settings before importing eve.tests.
@@ -21,6 +26,15 @@ from flask.testing import FlaskClient
 import responses
 
 from common_test_data import EXAMPLE_PROJECT, EXAMPLE_FILE
+
+# from six:
+PY3 = sys.version_info[0] == 3
+if PY3:
+    string_type = str
+    text_type = str
+else:
+    string_type = basestring
+    text_type = unicode
 
 MY_PATH = os.path.dirname(os.path.abspath(__file__))
 
@@ -218,7 +232,37 @@ class AbstractPillarTest(TestMinimal):
 
         return group_ids
 
-    def client_request(self, method, path, expected_status=200, auth_token=None, json=None,
+    @staticmethod
+    def join_url_params(params):
+        """Constructs a query string from a dictionary and appends it to a url.
+
+        Usage::
+
+            >>> AbstractPillarTest.join_url_params("pillar:5000/shots",
+                    {"page-id": 2, "NodeType": "Shot Group"})
+            'pillar:5000/shots?page-id=2&NodeType=Shot+Group'
+        """
+
+        if params is None:
+            return None
+
+        if not isinstance(params, dict):
+            return params
+
+        def convert_to_string(param):
+            if isinstance(param, dict):
+                return json.dumps(param, sort_keys=True)
+            if isinstance(param, text_type):
+                return param.encode('utf-8')
+            return param
+
+        # Pass as (key, value) pairs, so that the sorted order is maintained.
+        jsonified_params = [
+            (key, convert_to_string(params[key]))
+            for key in sorted(params.keys())]
+        return urlencode(jsonified_params)
+
+    def client_request(self, method, path, qs=None, expected_status=200, auth_token=None, json=None,
                        data=None, headers=None, files=None, content_type=None):
         """Performs a HTTP request to the server."""
 
@@ -239,7 +283,8 @@ class AbstractPillarTest(TestMinimal):
             data.update(files)
 
         resp = self.client.open(path=path, method=method, data=data, headers=headers,
-                                content_type=content_type)
+                                content_type=content_type,
+                                query_string=self.join_url_params(qs))
         self.assertEqual(expected_status, resp.status_code,
                          'Expected status %i but got %i. Response: %s' % (
                              expected_status, resp.status_code, resp.data
