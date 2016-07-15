@@ -317,14 +317,15 @@ def nodes_deduct_content_type(nodes):
         deduct_content_type(node)
 
 
-def before_returning_node_permissions(response):
+def before_returning_node(node):
     # Run validation process, since GET on nodes entry point is public
-    check_permissions('nodes', response, 'GET', append_allowed_methods=True)
+    check_permissions('nodes', node, 'GET', append_allowed_methods=True)
 
 
-def before_returning_node_resource_permissions(response):
-    for item in response['_items']:
-        check_permissions('nodes', item, 'GET', append_allowed_methods=True)
+
+def before_returning_nodes(nodes):
+    for node in nodes['_items']:
+        before_returning_node(node)
 
 
 def node_set_default_picture(node, original=None):
@@ -365,9 +366,8 @@ def nodes_set_default_picture(nodes):
 
 
 def setup_app(app, url_prefix):
-    # Permission hooks
-    app.on_fetched_item_nodes += before_returning_node_permissions
-    app.on_fetched_resource_nodes += before_returning_node_resource_permissions
+    app.on_fetched_item_nodes += before_returning_node
+    app.on_fetched_resource_nodes += before_returning_nodes
 
     app.on_fetched_item_nodes += item_parse_attachments
     app.on_fetched_resource_nodes += resource_parse_attachments
