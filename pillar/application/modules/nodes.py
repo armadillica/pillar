@@ -321,6 +321,10 @@ def before_returning_node(node):
     # Run validation process, since GET on nodes entry point is public
     check_permissions('nodes', node, 'GET', append_allowed_methods=True)
 
+    # Embed short_link_info if the node has a short_code.
+    short_code = node.get('short_code')
+    if short_code:
+        node['short_link'] = short_link_info(short_code)['short_link']
 
 
 def before_returning_nodes(nodes):

@@ -358,3 +358,25 @@ class NodeSharingTest(AbstractPillarTest):
 
         self._check_share_data(share_data)
         self.assertEqual(3, create_short_link.call_count)
+
+    def test_projections(self):
+        """Projecting short_code should get us short_link as well."""
+
+        # Share the node
+        resp = self.post('/nodes/%s/share' % self.node_id, auth_token='token',
+                         expected_status=201)
+        share_data = resp.json()
+
+        # Get the node with short_code
+        resp = self.get('/nodes/%s' % self.node_id,
+                        json={'projection': {'short_code': 1}})
+        node = resp.json()
+        self.assertEqual(node['short_code'], share_data['short_code'])
+        self.assertTrue(node['short_link'].endswith(share_data['short_code']))
+
+        # Get the node without short_code
+        resp = self.get('/nodes/%s' % self.node_id,
+                        qs={'projection': {'short_code': 0}})
+        node = resp.json()
+        self.assertNotIn('short_code', node)
+        self.assertNotIn('short_link', node)
