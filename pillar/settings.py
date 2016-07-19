@@ -21,6 +21,15 @@ _file_embedded_schema = {
     }
 }
 
+_node_embedded_schema = {
+    'type': 'objectid',
+    'data_relation': {
+        'resource': 'nodes',
+        'field': '_id',
+        'embeddable': True
+    }
+}
+
 _required_user_embedded_schema = {
     'type': 'objectid',
     'required': True,
@@ -147,15 +156,9 @@ organizations_schema = {
         'type': 'string',
         'maxlength': 256,
     },
-    'picture': {
-        'type': 'objectid',
-        'nullable': True,
-        'data_relation': {
-            'resource': 'files',
-            'field': '_id',
-            'embeddable': True
-        },
-    },
+    'picture': dict(
+        nullable=True,
+        **_file_embedded_schema),
     'users': {
         'type': 'list',
         'default': [],
@@ -271,14 +274,7 @@ nodes_schema = {
     'description': {
         'type': 'string',
     },
-    'picture': {
-        'type': 'objectid',
-        'data_relation': {
-            'resource': 'files',
-            'field': '_id',
-            'embeddable': True
-        },
-    },
+    'picture': _file_embedded_schema,
     'order': {
         'type': 'integer',
         'minlength': 0,
@@ -286,14 +282,7 @@ nodes_schema = {
     'revision': {
         'type': 'integer',
     },
-    'parent': {
-        'type': 'objectid',
-        'data_relation': {
-            'resource': 'nodes',
-            'field': '_id',
-            'embeddable': True
-        },
-    },
+    'parent': _node_embedded_schema,
     'project': {
         'type': 'objectid',
         'data_relation': {
