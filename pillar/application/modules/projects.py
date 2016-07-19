@@ -317,6 +317,9 @@ def project_manage_users():
                                      {'username': 1, 'email': 1,
                                       'full_name': 1})
 
+    if not user:
+        return jsonify({'_status': 'ERROR'}), 404
+
     user['_status'] = 'OK'
     return jsonify(user)
 
