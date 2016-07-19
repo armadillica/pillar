@@ -35,10 +35,18 @@ class GoogleCloudStorageBucket(object):
             self.bucket = gcs.bucket(bucket_name)
             # Hardcode the bucket location to EU
             self.bucket.location = 'EU'
+            # Optionally enable CORS from * (currently only used for vrview)
+            # self.bucket.cors = [
+            #     {
+            #       "origin": ["*"],
+            #       "responseHeader": ["Content-Type"],
+            #       "method": ["GET", "HEAD", "DELETE"],
+            #       "maxAgeSeconds": 3600
+            #     }
+            # ]
             self.bucket.create()
 
         self.subdir = subdir
-
 
     def List(self, path=None):
         """Display the content of a subdir in the project bucket. If the path
