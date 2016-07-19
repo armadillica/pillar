@@ -514,6 +514,10 @@ projects_schema = {
     'picture_square': _file_embedded_schema,
     # Header
     'picture_header': _file_embedded_schema,
+    'header_node': dict(
+        nullable=True,
+        **_node_embedded_schema
+    ),
     'user': {
         'type': 'objectid',
         'required': True,
