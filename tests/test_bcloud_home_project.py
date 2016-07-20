@@ -506,5 +506,5 @@ class TextureLibraryTest(AbstractHomeProjectTest):
                         headers={'Blender-Cloud-Addon': '1.4.0'})
         libs = resp.json()['_items']
         library_project_ids = {proj['_id'] for proj in libs}
-        self.assertNotIn(unicode(self.hdri_proj_id), library_project_ids)
+        self.assertIn(unicode(self.hdri_proj_id), library_project_ids)
         self.assertIn(unicode(self.tex_proj_id), library_project_ids)

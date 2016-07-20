@@ -8,6 +8,7 @@ from werkzeug.datastructures import MultiDict
 from werkzeug.exceptions import InternalServerError
 
 from application import utils
+from application.utils.authentication import current_user_id
 from application.utils.authorization import require_login
 
 FIRST_ADDON_VERSION_WITH_HDRI = (1, 4, 0)
@@ -73,7 +74,11 @@ def texture_libraries():
     # Determine whether to return HDRi projects too, based on the version
     # of the Blender Cloud Addon. If the addon version is None, we're dealing
     # with a version of the BCA that's so old it doesn't send its version along.
-    return_hdri = blender_cloud_addon_version() > FIRST_ADDON_VERSION_WITH_HDRI
+    addon_version = blender_cloud_addon_version()
+    return_hdri = addon_version >= FIRST_ADDON_VERSION_WITH_HDRI
+    log.debug('User %s has Blender Cloud Addon version %s; return_hdri=%s',
+              current_user_id(), addon_version, return_hdri)
+
     accept_as_library = functools.partial(has_texture_node, return_hdri=return_hdri)
 
     # Construct eve-like response.
