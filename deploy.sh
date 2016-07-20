@@ -30,6 +30,9 @@ ${SSH} git -C ${REMOTE_ROOT} fetch origin production
 ${SSH} git -C ${REMOTE_ROOT} log origin/production..production --oneline
 ${SSH} git -C ${REMOTE_ROOT} merge --ff-only origin/production
 
+# Update the virtualenv
+${SSH} -t docker exec ${DOCKER_NAME} /data/venv/bin/pip install -U -r ${REMOTE_ROOT}/requirements.txt --exists-action w
+
 # Wait for [ENTER] to restart the server
 echo
 echo "==================================================================="
