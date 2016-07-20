@@ -137,7 +137,6 @@ if not app.config.get('TESTING') and app.config.get('BUGSNAG_API_KEY'):
     bugsnag.configure(
         api_key=app.config['BUGSNAG_API_KEY'],
         project_root="/data/git/pillar/pillar",
-        revision=app.config['GIT_REVISION'],
     )
     bugsnag.flask.handle_exceptions(app)
 
