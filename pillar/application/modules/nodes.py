@@ -13,6 +13,8 @@ from application.utils import str2id, jsonify
 from application.utils.authorization import check_permissions, require_login
 from application.utils.gcs import update_file_name
 from application.utils.activities import activity_subscribe, activity_object_add
+from application.utils.algolia import algolia_index_node_delete
+from application.utils.algolia import algolia_index_node_save
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('nodes', __name__)
@@ -200,13 +202,20 @@ def after_replacing_node(item, original):
         return
 
     from algoliasearch.client import AlgoliaException
-    from application.utils.algolia import algolia_index_node_save
+    status = item['properties'].get('status', 'unpublished')
 
-    try:
-        algolia_index_node_save(item)
-    except AlgoliaException as ex:
-        log.warning('Unable to push node info to Algolia for node %s; %s',
-                    item.get('_id'), ex)
+    if status == 'published':
+        try:
+            algolia_index_node_save(item)
+        except AlgoliaException as ex:
+            log.warning('Unable to push node info to Algolia for node %s; %s',
+                        item.get('_id'), ex)
+    else:
+        try:
+            algolia_index_node_delete(item)
+        except AlgoliaException as ex:
+            log.warning('Unable to delete node info to Algolia for node %s; %s',
+                        item.get('_id'), ex)
 
 
 def before_inserting_nodes(items):
@@ -369,6 +378,15 @@ def nodes_set_default_picture(nodes):
         node_set_default_picture(node)
 
 
+def after_deleting_node(item):
+    from algoliasearch.client import AlgoliaException
+    try:
+        algolia_index_node_delete(item)
+    except AlgoliaException as ex:
+        log.warning('Unable to delete node info to Algolia for node %s; %s',
+                    item.get('_id'), ex)
+
+
 def setup_app(app, url_prefix):
     app.on_fetched_item_nodes += before_returning_node
     app.on_fetched_resource_nodes += before_returning_nodes
@@ -385,5 +403,7 @@ def setup_app(app, url_prefix):
     app.on_insert_nodes += nodes_deduct_content_type
     app.on_insert_nodes += nodes_set_default_picture
     app.on_inserted_nodes += after_inserting_nodes
+
+    app.on_deleted_item_nodes += after_deleting_node
 
     app.register_blueprint(blueprint, url_prefix=url_prefix)
