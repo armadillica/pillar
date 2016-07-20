@@ -5,9 +5,7 @@ node_type_hdri = {
     # bucket (https://cloud.google.com/storage/docs/cross-origin)
     'name': 'hdri',
     'description': 'HDR Image',
-    # This data type does not have parent limitations (can be child
-    # of any node). An empty parent declaration is required.
-    'parent': ['group', ],
+    'parent': ['group_hdri'],
     'dyn_schema': {
         'status': {
             'type': 'string',

@@ -101,7 +101,7 @@ def has_texture_node(proj, return_hdri=True):
     # See which types of nodes we support.
     node_types = ['group_texture']
     if return_hdri:
-        node_types.append('hdri')
+        node_types.append('group_hdri')
 
     count = nodes_collection.count(
         {'node_type': {'$in': node_types},

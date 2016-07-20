@@ -442,7 +442,7 @@ class TextureLibraryTest(AbstractHomeProjectTest):
 
         self.create_node({'description': '',
                           'project': self.hdri_proj_id,
-                          'node_type': 'hdri',
+                          'node_type': 'group_hdri',
                           'user': user_id,
                           'properties': {'status': 'published',
                                          'tags': [],
