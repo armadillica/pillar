@@ -8,13 +8,14 @@ import logging
 import responses
 from bson import ObjectId
 from flask import url_for
+from werkzeug import exceptions as wz_exceptions
 
 from common_test_class import AbstractPillarTest, TEST_EMAIL_ADDRESS
 
 log = logging.getLogger(__name__)
 
 
-class HomeProjectTest(AbstractPillarTest):
+class AbstractHomeProjectTest(AbstractPillarTest):
     def setUp(self, **kwargs):
         AbstractPillarTest.setUp(self, **kwargs)
         self.create_standard_groups()
@@ -28,6 +29,8 @@ class HomeProjectTest(AbstractPillarTest):
         self.create_valid_auth_token(user_id, token)
         return user_id
 
+
+class HomeProjectTest(AbstractHomeProjectTest):
     def test_create_home_project(self):
         from application.modules.blender_cloud import home_project
         from application.utils.authentication import validate_token
@@ -421,3 +424,87 @@ class HomeProjectUserChangedRoleTest(AbstractPillarTest):
                                 headers={'Authorization': self.make_header('token'),
                                          'Content-Type': 'application/json'})
         self.assertEqual(status_code, resp.status_code, resp.data)
+
+
+class TextureLibraryTest(AbstractHomeProjectTest):
+    def create_node(self, node_doc):
+        with self.app.test_request_context():
+            nodes_coll = self.app.data.driver.db['nodes']
+            result = nodes_coll.insert_one(node_doc)
+        return result.inserted_id
+
+    def setUp(self, **kwargs):
+        AbstractHomeProjectTest.setUp(self, **kwargs)
+
+        user_id = self._create_user_with_token(set(), 'token')
+        self.hdri_proj_id, proj = self.ensure_project_exists(project_overrides={'_id': 24 * 'a'})
+        self.tex_proj_id, proj2 = self.ensure_project_exists(project_overrides={'_id': 24 * 'b'})
+
+        self.create_node({'description': '',
+                          'project': self.hdri_proj_id,
+                          'node_type': 'hdri',
+                          'user': user_id,
+                          'properties': {'status': 'published',
+                                         'tags': [],
+                                         'order': 0,
+                                         'categories': '',
+                                         'files': ''},
+                          'name': 'HDRi test node'}
+                         )
+
+        self.create_node({'description': '',
+                          'project': self.tex_proj_id,
+                          'node_type': 'group_texture',
+                          'user': user_id,
+                          'properties': {'status': 'published',
+                                         'tags': [],
+                                         'order': 0,
+                                         'categories': '',
+                                         'files': ''},
+                          'name': 'Group texture test node'}
+                         )
+
+    def test_blender_cloud_addon_version(self):
+        from application.modules.blender_cloud import blender_cloud_addon_version
+
+        # Three-digit version
+        with self.app.test_request_context(headers={'Blender-Cloud-Addon': '1.3.3'}):
+            self.assertEqual((1, 3, 3), blender_cloud_addon_version())
+
+        # Two-digit version
+        with self.app.test_request_context(headers={'Blender-Cloud-Addon': '1.5'}):
+            self.assertEqual((1, 5), blender_cloud_addon_version())
+
+        # No version
+        with self.app.test_request_context():
+            self.assertEqual(None, blender_cloud_addon_version())
+
+        # Malformed version
+        with self.app.test_request_context(headers={'Blender-Cloud-Addon': 'je moeder'}):
+            self.assertRaises(wz_exceptions.BadRequest, blender_cloud_addon_version)
+
+    def test_hdri_library__no_bcloud_version(self):
+        resp = self.get('/bcloud/texture-libraries', auth_token='token')
+        libs = resp.json()['_items']
+        library_project_ids = {proj['_id'] for proj in libs}
+
+        self.assertNotIn(unicode(self.hdri_proj_id), library_project_ids)
+        self.assertIn(unicode(self.tex_proj_id), library_project_ids)
+
+    def test_hdri_library__old_bcloud_addon(self):
+        resp = self.get('/bcloud/texture-libraries',
+                        auth_token='token',
+                        headers={'Blender-Cloud-Addon': '1.3.3'})
+        libs = resp.json()['_items']
+        library_project_ids = {proj['_id'] for proj in libs}
+        self.assertNotIn(unicode(self.hdri_proj_id), library_project_ids)
+        self.assertIn(unicode(self.tex_proj_id), library_project_ids)
+
+    def test_hdri_library__new_bcloud_addon(self):
+        resp = self.get('/bcloud/texture-libraries',
+                        auth_token='token',
+                        headers={'Blender-Cloud-Addon': '1.4.0'})
+        libs = resp.json()['_items']
+        library_project_ids = {proj['_id'] for proj in libs}
+        self.assertNotIn(unicode(self.hdri_proj_id), library_project_ids)
+        self.assertIn(unicode(self.tex_proj_id), library_project_ids)
