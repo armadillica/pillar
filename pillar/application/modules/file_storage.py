@@ -1,4 +1,5 @@
 import datetime
+import functools
 import logging
 import mimetypes
 import os
@@ -6,6 +7,7 @@ import tempfile
 import uuid
 import io
 from hashlib import md5
+import threading
 
 import bson.tz_util
 import eve.utils
@@ -376,12 +378,28 @@ def _generate_all_links(response, now):
     project_id = str(
         response['project']) if 'project' in response else None  # TODO: add project id to all files
     backend = response['backend']
-    response['link'] = generate_link(backend, response['file_path'], project_id)
 
-    variations = response.get('variations')
-    if variations:
-        for variation in variations:
-            variation['link'] = generate_link(backend, variation['file_path'], project_id)
+    def generate_link_for(store_in):
+        log.debug('    generating link for %s', store_in['file_path'])
+        store_in['link'] = generate_link(backend, store_in['file_path'], project_id)
+
+    # Generate links in parallel using the thread pool.
+    # TODO: use asyncio for this, once we're on Python 3.5, to limit the total number
+    # of concurrent threads.
+    threads = []
+    thread = threading.Thread(target=functools.partial(generate_link_for, response))
+    threads.append(thread)
+
+    variations = response.get('variations', ())
+    for variation in variations:
+        thread = threading.Thread(target=functools.partial(generate_link_for, variation))
+        threads.append(thread)
+
+    # Start & wait for all the parallel tasks.
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(120)
 
     # Construct the new expiry datetime.
     validity_secs = current_app.config['FILE_LINK_VALIDITY'][backend]

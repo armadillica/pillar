@@ -1,7 +1,9 @@
+import functools
 import os
 import time
 import datetime
 import logging
+import threading
 
 from bson import ObjectId
 from gcloud.storage.client import Client
@@ -159,6 +161,8 @@ def update_file_name(node):
     if node['properties'].get('status', '') == 'processing':
         return
 
+    files_collection = current_app.data.driver.db['files']
+
     def _format_name(name, override_ext, size=None, map_type=u''):
         root, _ = os.path.splitext(name)
         size = u'-{}'.format(size) if size else u''
@@ -166,7 +170,6 @@ def update_file_name(node):
         return u'{}{}{}{}'.format(root, size, map_type, override_ext)
 
     def _update_name(file_id, file_props):
-        files_collection = current_app.data.driver.db['files']
         file_doc = files_collection.find_one({'_id': ObjectId(file_id)})
 
         if file_doc is None or file_doc['backend'] != 'gcs':
@@ -193,12 +196,26 @@ def update_file_name(node):
                 continue
             storage.update_name(blob, name)
 
+    # Generate links in parallel using the thread pool.
+    threads = []
+    log.debug('Creating _update_name tasks')
+
     # Currently we search for 'file' and 'files' keys in the object properties.
     # This could become a bit more flexible and realy on a true reference of the
     # file object type from the schema.
     if 'file' in node['properties']:
-        _update_name(node['properties']['file'], {})
+        thread = threading.Thread(target=functools.partial(
+            _update_name, node['properties']['file'], {}))
+        threads.append(thread)
 
     if 'files' in node['properties']:
         for file_props in node['properties']['files']:
-            _update_name(file_props['file'], file_props)
+            thread = threading.Thread(target=functools.partial(
+                _update_name, file_props['file'], file_props))
+            threads.append(thread)
+
+    # Start & wait for all the parallel tasks.
+    for thread in threads:
+        thread.start()
+    for thread in threads:
+        thread.join(120)
