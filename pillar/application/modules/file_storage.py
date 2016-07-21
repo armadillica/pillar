@@ -41,6 +41,7 @@ file_storage = Blueprint('file_storage', __name__,
 
 # Add our own extensions to the mimetypes package
 mimetypes.add_type('application/x-blender', '.blend')
+mimetypes.add_type('application/x-radiance-hdr', '.hdr')
 
 
 @file_storage.route('/gcs/<bucket_name>/<subdir>/')
