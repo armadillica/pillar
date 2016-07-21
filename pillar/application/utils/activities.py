@@ -12,7 +12,7 @@ def notification_parse(notification):
     nodes_collection = current_app.data.driver.db['nodes']
     activity = activities_collection.find_one({'_id': notification['activity']})
 
-    if activity['object_type'] != 'node':
+    if activity is None or activity['object_type'] != 'node':
         return
     node = nodes_collection.find_one({'_id': activity['object']})
     # Initial support only for node_type comments
