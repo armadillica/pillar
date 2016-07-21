@@ -564,6 +564,8 @@ def stream_to_gcs(project_id):
 
     log.info('Streaming file to bucket for project=%s user_id=%s', project_id,
              authentication.current_user_id())
+    log.info('request.headers[Origin] = %r', request.headers.get('Origin'))
+
     uploaded_file = request.files['file']
 
     # Not every upload has a Content-Length header. If it was passed, we might as
@@ -624,6 +626,9 @@ def stream_to_gcs(project_id):
                           ' aborting handling of uploaded file (id=%s).', file_id)
             update_file_doc(file_id, status='failed')
             raise wz_exceptions.InternalServerError('Unable to stream file to Google Cloud Storage')
+
+        if stream_for_gcs.closed:
+            log.error('Eek, GCS closed its stream, Andy is not going to like this.')
 
         # Reload the blob to get the file size according to Google.
         blob.reload()
