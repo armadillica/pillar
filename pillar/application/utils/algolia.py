@@ -22,7 +22,7 @@ def algolia_index_user_save(user):
     if 'roles' in user:
         roles = set(user['roles']).intersection(INDEX_ALLOWED_USER_ROLES)
     else:
-        roles = None
+        roles = set()
     if algolia_index_users:
         # Create or update Algolia index for the user
         algolia_index_users.save_object({
