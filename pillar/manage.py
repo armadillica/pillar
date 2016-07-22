@@ -1088,5 +1088,47 @@ def badger(action, user_email, role):
         log.info('Response: %s', response)
         log.info('Status  : %i', status)
 
+
+@manager.command
+def hdri_sort(project_url):
+    """Sorts HDRi images by image resolution."""
+
+    proj_coll = app.data.driver.db['projects']
+    nodes_coll = app.data.driver.db['nodes']
+    files_coll = app.data.driver.db['files']
+
+    proj = proj_coll.find_one({'url': project_url})
+    if not proj:
+        log.warning('Project url=%r not found.' % project_url)
+        return
+
+    proj_id = proj['_id']
+    log.info('Processing project %r', proj_id)
+
+    nodes = nodes_coll.find({'project': proj_id, 'node_type': 'hdri'})
+    if nodes.count() == 0:
+        log.warning('Project has no hdri nodes')
+        return
+
+    for node in nodes:
+        log.info('Processing node %s', node['name'])
+
+        def width(file_ref):
+            file_doc = files_coll.find_one(file_ref['file'], projection={'width': 1})
+            return file_doc['width']
+
+        files = sorted(node['properties']['files'], key=width)
+
+        log.info('Files  pre-sort: %s',
+                 [file['resolution'] for file in node['properties']['files']])
+        log.info('Files post-sort: %s',
+                 [file['resolution'] for file in files])
+
+        result = nodes_coll.update_one({'_id': node['_id']},
+                                       {'$set': {'properties.files': files}})
+        if result.matched_count != 1:
+            log.warning('Matched count = %i, expected 1, aborting', result.matched_count)
+            return
+
 if __name__ == '__main__':
     manager.run()
