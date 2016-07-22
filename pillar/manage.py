@@ -161,7 +161,7 @@ def setup_db_indices():
     for coll_name in sorted(coll_names):
         stats = db.command('collStats', coll_name)
         log.info('Collection %25s takes up %.3f MiB index space',
-                 coll_name, stats['totalIndexSize'] / 2**20)
+                 coll_name, stats['totalIndexSize'] / 2 ** 20)
 
 
 def _default_permissions():
