@@ -139,11 +139,12 @@ def item_parse_attachments(response):
     generated link.
     """
 
-    if 'properties' not in response or 'attachments' not in response['properties']:
+    attachments = response.get('properties', {}).get('attachments', None)
+    if not attachments:
         return
 
     files_collection = current_app.data.driver.db['files']
-    for attachment in response['properties']['attachments']:
+    for attachment in attachments:
         # Make a list from the property path
         field_name_path = attachment['field'].split('.')
         # This currently allow to access only properties inside of
