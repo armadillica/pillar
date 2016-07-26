@@ -6,9 +6,28 @@ import logging
 from bson import ObjectId
 from gcloud.storage.client import Client
 from gcloud.exceptions import NotFound
-from flask import current_app
+from flask import current_app, g
+from werkzeug.local import LocalProxy
 
 log = logging.getLogger(__name__)
+
+
+def get_client():
+    """Stores the GCS client on the global Flask object.
+
+    The GCS client is not user-specific anyway.
+    """
+
+    _gcs = getattr(g, '_gcs_client', None)
+    if _gcs is None:
+        _gcs = g._gcs_client = Client()
+    return _gcs
+
+
+# This hides the specifics of how/where we store the GCS client,
+# and allows the rest of the code to use 'gcs' as a simple variable
+# that does the right thing.
+gcs = LocalProxy(get_client)
 
 
 class GoogleCloudStorageBucket(object):
@@ -28,7 +47,6 @@ class GoogleCloudStorageBucket(object):
     """
 
     def __init__(self, bucket_name, subdir='_/'):
-        gcs = Client()
         try:
             self.bucket = gcs.get_bucket(bucket_name)
         except NotFound:
