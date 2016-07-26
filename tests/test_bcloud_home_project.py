@@ -508,3 +508,111 @@ class TextureLibraryTest(AbstractHomeProjectTest):
         library_project_ids = {proj['_id'] for proj in libs}
         self.assertIn(unicode(self.hdri_proj_id), library_project_ids)
         self.assertIn(unicode(self.tex_proj_id), library_project_ids)
+
+
+class HdriSortingTest(AbstractHomeProjectTest):
+    def setUp(self, **kwargs):
+        from manage_extra.node_types.hdri import node_type_hdri
+
+        AbstractHomeProjectTest.setUp(self, **kwargs)
+
+        self.user_id = self._create_user_with_token({u'subscriber'}, 'token')
+        self.hdri_proj_id, proj = self.ensure_project_exists(project_overrides={
+            'user': self.user_id,
+            'permissions': {'world': ['DELETE', 'GET', 'POST', 'PUT']},
+            'node_types': [node_type_hdri],
+        })
+        self.hdri_proj_id = ObjectId(self.hdri_proj_id)
+        self.assertIsNotNone(self.hdri_proj_id)
+
+        # Add some test files.
+        with self.app.test_request_context():
+            files_coll = self.app.data.driver.db['files']
+            self.file_256p = files_coll.insert_one({
+                'name': '96f1adf5330a4cadbf73c13d718ac163.hdr',
+                'format': 'radiance-hdr',
+                'filename': 'symmetrical_garden_256p.hdr',
+                'project': self.hdri_proj_id,
+                'length': 106435,
+                'user': self.user_id,
+                'content_type': 'application/octet-stream',
+                'file_path': '96f1adf5330a4cadbf73c13d718ac163.hdr'}).inserted_id
+            self.file_1k = files_coll.insert_one({
+                'name': '96f1adf5330a4cadbf73qweqwecqwev142v.hdr',
+                'format': 'radiance-hdr',
+                'filename': 'symmetrical_garden_1k.hdr',
+                'project': self.hdri_proj_id,
+                'length': 1431435,
+                'user': self.user_id,
+                'content_type': 'application/octet-stream',
+                'file_path': 'd13rfc13r1evadbf73c13d718ac163.hdr'}).inserted_id
+            self.file_2k = files_coll.insert_one({
+                'name': '34134df5330a4cadbf73qweqwecqwev142v.hdr',
+                'format': 'radiance-hdr',
+                'filename': 'symmetrical_garden_2k.hdr',
+                'project': self.hdri_proj_id,
+                'length': 2431435,
+                'user': self.user_id,
+                'content_type': 'application/octet-stream',
+                'file_path': 'd13rfc13r1evadbf73c13d718ac163.hdr'}).inserted_id
+
+    def test_hdri_sorting_on_create(self):
+        # Create node with files in wrong order
+        node = {'project': self.hdri_proj_id,
+                'node_type': 'hdri',
+                'user': self.user_id,
+                'properties': {
+                    'files': [
+                        {'resolution': '2k', 'file': self.file_2k},
+                        {'resolution': '256p', 'file': self.file_256p},
+                        {'resolution': '1k', 'file': self.file_1k},
+                    ],
+                    'status': 'published',
+                },
+                'name': 'Symmetrical Garden'
+                }
+        resp = self.post('/nodes', json=node, expected_status=201, auth_token='token')
+        node_info = resp.json()
+
+        # Check that the node's files are in the right order
+        resp = self.get('/nodes/%s' % node_info['_id'], auth_token='token')
+        get_node = resp.json()
+
+        self.assertEqual(['256p', '1k', '2k'],
+                         [file_info['resolution']
+                          for file_info in get_node['properties']['files']])
+
+    def test_hdri_sorting_on_update(self):
+        # Create node with files in correct order
+        node = {'project': self.hdri_proj_id,
+                'node_type': 'hdri',
+                'user': self.user_id,
+                'properties': {
+                    'files': [
+                        {'resolution': '256p', 'file': self.file_256p},
+                        {'resolution': '1k', 'file': self.file_1k},
+                        {'resolution': '2k', 'file': self.file_2k},
+                    ],
+                    'status': 'published',
+                },
+                'name': 'Symmetrical Garden'
+                }
+        resp = self.post('/nodes', json=node, expected_status=201, auth_token='token')
+        node_info = resp.json()
+
+        # Mess up the node's order
+        node['properties']['files'] = [
+            {'resolution': '2k', 'file': self.file_2k},
+            {'resolution': '1k', 'file': self.file_1k},
+            {'resolution': '256p', 'file': self.file_256p},
+        ]
+        self.put('/nodes/%s' % node_info['_id'], json=node, auth_token='token',
+                 headers={'If-Match': node_info['_etag']})
+
+        # Check that the node's files are in the right order
+        resp = self.get('/nodes/%s' % node_info['_id'], auth_token='token')
+        get_node = resp.json()
+
+        self.assertEqual(['256p', '1k', '2k'],
+                         [file_info['resolution']
+                          for file_info in get_node['properties']['files']])

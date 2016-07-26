@@ -110,5 +110,38 @@ def has_texture_node(proj, return_hdri=True):
     return count > 0
 
 
+def sort_by_image_width(node, original=None):
+    """Sort the files in an HDRi node by image file size."""
+
+    if node.get('node_type') != 'hdri':
+        return
+
+    if not node.get('properties', {}).get('files'):
+        return
+
+    # TODO: re-enable this once all current HDRis have been saved in correct order.
+    # # Don't bother sorting when the files haven't changed.
+    # if original is not None and \
+    #                 original.get('properties', {}).get('files') == node['properties']['files']:
+    #     return
+
+    log.info('Sorting HDRi node %s', node.get('_id', 'NO-ID'))
+    files_coll = current_app.data.driver.db['files']
+
+    def sort_key(file_ref):
+        file_doc = files_coll.find_one(file_ref['file'], projection={'length': 1})
+        return file_doc['length']
+
+    node['properties']['files'].sort(key=sort_key)
+
+
+def sort_nodes_by_image_width(nodes):
+    for node in nodes:
+        sort_by_image_width(node)
+
+
 def setup_app(app, url_prefix):
+    app.on_replace_nodes += sort_by_image_width
+    app.on_insert_nodes += sort_nodes_by_image_width
+
     app.register_blueprint(blueprint, url_prefix=url_prefix)

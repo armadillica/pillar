@@ -1113,11 +1113,11 @@ def hdri_sort(project_url):
     for node in nodes:
         log.info('Processing node %s', node['name'])
 
-        def width(file_ref):
-            file_doc = files_coll.find_one(file_ref['file'], projection={'width': 1})
-            return file_doc['width']
+        def sort_key(file_ref):
+            file_doc = files_coll.find_one(file_ref['file'], projection={'length': 1})
+            return file_doc['length']
 
-        files = sorted(node['properties']['files'], key=width)
+        files = sorted(node['properties']['files'], key=sort_key)
 
         log.info('Files  pre-sort: %s',
                  [file['resolution'] for file in node['properties']['files']])
