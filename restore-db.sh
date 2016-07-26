@@ -5,4 +5,8 @@ if [ -z "$1" ]; then
     exit 1
 fi
 
-mongorestore -h localhost:27017 -d eve --maintainInsertionOrder --stopOnError "$1/eve"
+echo "THIS WILL DROP EXISTING CONNECTIONS"
+echo "Press [ENTER] to continue, [CTRL]+[C] to abort."
+read dummy
+
+mongorestore -h localhost:27017 -d eve --drop --maintainInsertionOrder --stopOnError "$1/eve"
