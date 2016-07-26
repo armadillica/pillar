@@ -162,13 +162,14 @@ def item_parse_attachments(response):
                 af['file'] = None
                 continue
             size = f['size'] if 'size' in f else 'l'
+
             # Get the correct variation from the file
+            file_storage.ensure_valid_link(f)
             thumbnail = next((item for item in f['variations'] if
                               item['size'] == size), None)
-            l = file_storage.generate_link(f['backend'], thumbnail['file_path'],
-                                           str(f['project']))
+
             # Build Markdown img string
-            l = '![{0}]({1} "{2}")'.format(slug, l, f['name'])
+            l = '![{0}]({1} "{2}")'.format(slug, thumbnail['link'], f['name'])
             # Parse the content of the file and replace the attachment
             # tag with the actual image link
             field_content = field_content.replace(slug_tag, l)
