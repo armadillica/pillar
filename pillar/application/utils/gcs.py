@@ -187,7 +187,7 @@ def update_file_name(node):
         files_collection = current_app.data.driver.db['files']
         file_doc = files_collection.find_one({'_id': ObjectId(file_id)})
 
-        if file_doc is None or file_doc['backend'] != 'gcs':
+        if file_doc is None or file_doc.get('backend') != 'gcs':
             return
 
         # For textures -- the map type should be part of the name.
