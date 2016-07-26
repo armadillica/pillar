@@ -54,10 +54,13 @@ class ValidateCustomFields(Validator):
         projects_collection = app.data.driver.db['projects']
         lookup = {'_id': ObjectId(self.document['project'])}
 
-        project = projects_collection.find_one(lookup)
+        project = projects_collection.find_one(lookup, {
+            'node_types.name': 1,
+            'node_types.dyn_schema': 1,
+        })
         if project is None:
             log.warning('Unknown project %s, declared by node %s',
-                        project, self.document.get('_id'))
+                        lookup, self.document.get('_id'))
             self._error(field, 'Unknown project')
             return False
 
