@@ -456,6 +456,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
 
     # Retrieve expired links.
     files_collection = current_app.data.driver.db['files']
+    proj_coll = current_app.data.driver.db['projects']
 
     now = datetime.datetime.now(tz=bson.tz_util.utc)
     expire_before = now + datetime.timedelta(seconds=expiry_seconds)
@@ -471,11 +472,18 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
         log.info('No links to refresh.')
         return
 
+    refreshed = 0
     for file_doc in to_refresh:
+        count = proj_coll.count({'_id': file_doc['project']})
+        if count == 0:
+            log.debug('Skipping file %s, project does not exist.', file_doc['_id'])
+            continue
+
         log.debug('Refreshing links for file %s', file_doc['_id'])
         _generate_all_links(file_doc, now)
+        refreshed += 1
 
-    log.info('Refreshed %i links', min(chunk_size, to_refresh.count()))
+    log.info('Refreshed %i links', refreshed)
 
 
 @require_login()
