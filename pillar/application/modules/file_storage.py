@@ -490,7 +490,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
             continue
 
         if 'file_path' not in file_doc:
-            log.warning("File %s malformed: missing 'file_path' property.", file_id)
+            log.warning("Skipping file %s, missing 'file_path' property.", file_id)
             continue
 
         log.debug('Refreshing links for file %s', file_id)
@@ -498,8 +498,8 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
         try:
             _generate_all_links(file_doc, now)
         except gcloud.exceptions.Forbidden:
-            log.warning('GCS forbids us access to project %s bucket for file %s.',
-                        project_id, file_id)
+            log.warning('Skipping file %s, GCS forbids us access to project %s bucket.',
+                        file_id, project_id)
             continue
 
         refreshed += 1
