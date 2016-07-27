@@ -6,7 +6,7 @@ import pymongo.errors
 import rsa.randnum
 from bson import ObjectId
 from flask import current_app, g, Blueprint, request
-from werkzeug.exceptions import UnprocessableEntity, InternalServerError
+import werkzeug.exceptions as wz_exceptions
 
 from application.modules import file_storage
 from application.utils import str2id, jsonify
@@ -81,12 +81,14 @@ def generate_and_store_short_code(node):
     else:
         log.error('Unable to find unique short code for node %s after %i attempts, failing!',
                   node_id, max_attempts)
-        raise InternalServerError('Unable to create unique short code for node %s' % node_id)
+        raise wz_exceptions.InternalServerError('Unable to create unique short code for node %s' %
+                                                node_id)
 
     # We were able to store a short code, now let's verify the result.
     if result.matched_count != 1:
         log.warning('Unable to update node %s with new short_links=%r', node_id, node['short_code'])
-        raise InternalServerError('Unable to update node %s with new short links' % node_id)
+        raise wz_exceptions.InternalServerError('Unable to update node %s with new short links' %
+                                                node_id)
 
     return short_code
 
@@ -106,7 +108,8 @@ def make_world_gettable(node):
 
     if result.matched_count != 1:
         log.warning('Unable to update node %s with new permissions.world=%r', node_id, world_perms)
-        raise InternalServerError('Unable to update node %s with new permissions' % node_id)
+        raise wz_exceptions.InternalServerError('Unable to update node %s with new permissions' %
+                                                node_id)
 
 
 def create_short_code(node):
@@ -301,7 +304,7 @@ def deduct_content_type(node_doc, original=None):
             # Creation of a file-less node is allowed, but updates aren't.
             return
         log.warning('deduct_content_type: Asset without properties.file, rejecting.')
-        raise UnprocessableEntity('Missing file property for asset node')
+        raise wz_exceptions.UnprocessableEntity('Missing file property for asset node')
 
     files = current_app.data.driver.db['files']
     file_doc = files.find_one({'_id': file_id},
@@ -309,7 +312,7 @@ def deduct_content_type(node_doc, original=None):
     if not file_doc:
         log.warning('deduct_content_type: Node %s refers to non-existing file %s, rejecting.',
                     node_id, file_id)
-        raise UnprocessableEntity('File property refers to non-existing file')
+        raise wz_exceptions.UnprocessableEntity('File property refers to non-existing file')
 
     # Guess the node content type from the file content type
     file_type = file_doc['content_type']
