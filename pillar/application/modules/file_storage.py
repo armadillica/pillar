@@ -466,7 +466,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
         {'$or': [{'backend': backend_name, 'link_expires': None},
                  {'backend': backend_name, 'link_expires': {'$lt': expire_before}},
                  {'backend': backend_name, 'link': None}]
-         }).sort([('link_expires', pymongo.ASCENDING)]).limit(chunk_size)
+         }).sort([('link_expires', pymongo.ASCENDING)]).limit(chunk_size).batch_size(5)
 
     if to_refresh.count() == 0:
         log.info('No links to refresh.')
