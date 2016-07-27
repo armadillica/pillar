@@ -7,7 +7,7 @@ RESOURCE_METHODS = ['GET', 'POST', 'DELETE']
 
 # Enable reads (GET), edits (PATCH), replacements (PUT) and deletes of
 # individual items  (defaults to read-only item access).
-ITEM_METHODS = ['GET', 'PUT', 'DELETE', 'PATCH']
+ITEM_METHODS = ['GET', 'PUT', 'DELETE']
 
 PAGINATION_LIMIT = 250
 PAGINATION_DEFAULT = 250

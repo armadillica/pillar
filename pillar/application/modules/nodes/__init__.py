@@ -393,6 +393,10 @@ def after_deleting_node(item):
 
 
 def setup_app(app, url_prefix):
+
+    from . import patch
+    patch.setup_app(app, url_prefix=url_prefix)
+
     app.on_fetched_item_nodes += before_returning_node
     app.on_fetched_resource_nodes += before_returning_nodes
 
