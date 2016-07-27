@@ -123,7 +123,7 @@ def has_permissions(collection_name, resource, method, append_allowed_methods=Fa
     return False
 
 
-def compute_aggr_permissions(collection_name, resource, check_node_type):
+def compute_aggr_permissions(collection_name, resource, check_node_type=None):
     """Returns a permissions dict."""
 
     # We always need the know the project.

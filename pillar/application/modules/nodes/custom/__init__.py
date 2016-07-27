@@ -18,3 +18,7 @@ def register_patch_handler(node_type):
         return func
 
     return wrapper
+
+
+# Import sub-modules so they can register themselves.
+from . import comment

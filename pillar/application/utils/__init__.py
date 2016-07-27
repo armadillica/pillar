@@ -8,7 +8,7 @@ import bson.objectid
 from eve import RFC1123_DATE_FORMAT
 from flask import current_app
 from werkzeug import exceptions as wz_exceptions
-
+import pymongo.results
 
 __all__ = ('remove_private_keys', 'PillarJSONEncoder')
 log = logging.getLogger(__name__)
@@ -40,6 +40,9 @@ class PillarJSONEncoder(json.JSONEncoder):
 
         if isinstance(obj, bson.ObjectId):
             return str(obj)
+
+        if isinstance(obj, pymongo.results.UpdateResult):
+            return obj.raw_result
 
         # Let the base class default method raise the TypeError
         return json.JSONEncoder.default(self, obj)
