@@ -33,6 +33,15 @@ ${SSH} git -C ${REMOTE_ROOT} merge --ff-only origin/production
 # Update the virtualenv
 ${SSH} -t docker exec ${DOCKER_NAME} /data/venv/bin/pip install -U -r ${REMOTE_ROOT}/requirements.txt --exists-action w
 
+# Notify Bugsnag of this new deploy.
+echo
+echo "==================================================================="
+GIT_REVISION=$(${SSH} git -C ${REMOTE_ROOT} describe --always)
+echo "Notifying Bugsnag of this new deploy of revision ${GIT_REVISION}."
+BUGSNAG_API_KEY=$(${SSH} python -c "\"import sys; sys.path.append('${REMOTE_ROOT}/${PROJECT_NAME}'); import config_local; print(config_local.BUGSNAG_API_KEY)\"")
+curl --data "apiKey=${BUGSNAG_API_KEY}&revision=${GIT_REVISION}" https://notify.bugsnag.com/deploy
+echo
+
 # Wait for [ENTER] to restart the server
 echo
 echo "==================================================================="
@@ -41,14 +50,6 @@ echo "NOTE: Press [ENTER] to continue and restart the server process."
 read dummy
 ${SSH} docker exec ${DOCKER_NAME} kill -HUP 1
 echo "Server process restarted"
-
-# Notify Bugsnag of this new deploy.
-echo
-echo "==================================================================="
-GIT_REVISION=$(${SSH} git -C ${REMOTE_ROOT} describe --always)
-echo "Notifying Bugsnag of this new deploy of revision ${GIT_REVISION}."
-BUGSNAG_API_KEY=$(${SSH} python -c "\"import sys; sys.path.append('${REMOTE_ROOT}/${PROJECT_NAME}'); import config_local; print(config_local.BUGSNAG_API_KEY)\"")
-curl --data "apiKey=${BUGSNAG_API_KEY}&revision=${GIT_REVISION}" https://notify.bugsnag.com/deploy
 
 echo
 echo "==================================================================="
