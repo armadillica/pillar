@@ -89,6 +89,10 @@ def upsert_user(db_user, blender_id_user_id):
     :type: (ObjectId, int)
     """
 
+    if u'subscriber' in db_user.get('groups', []):
+        log.error('Non-ObjectID string found in user.groups: %s', db_user)
+        raise wz_exceptions.InternalServerError('Non-ObjectID string found in user.groups: %s' % db_user)
+
     r = {}
     for retry in range(5):
         if '_id' in db_user:
