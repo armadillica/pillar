@@ -574,8 +574,14 @@ def refresh_project_links(project, chunk_size=50, quiet=False):
 
 
 @manager.command
-def refresh_backend_links(backend_name, chunk_size=50, quiet=False):
+@manager.option('-c', '--chunk', dest='chunk_size', default=50)
+@manager.option('-q', '--quiet', dest='quiet', action='store_true', default=False)
+@manager.option('-w', '--window', dest='window', default=12)
+def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
     """Refreshes all file links that are using a certain storage backend."""
+
+    chunk_size = int(chunk_size)
+    window = int(window)
 
     if quiet:
         import logging
@@ -586,7 +592,7 @@ def refresh_backend_links(backend_name, chunk_size=50, quiet=False):
 
     chunk_size = int(chunk_size)  # CLI parameters are passed as strings
     from application.modules import file_storage
-    file_storage.refresh_links_for_backend(backend_name, chunk_size, 2 * 3600)
+    file_storage.refresh_links_for_backend(backend_name, chunk_size, window * 3600)
 
 
 @manager.command
