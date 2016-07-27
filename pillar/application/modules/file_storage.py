@@ -474,7 +474,12 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
 
     refreshed = 0
     for file_doc in to_refresh:
-        count = proj_coll.count({'_id': file_doc['project']})
+        project_id = file_doc.get('project')
+        if project_id is None:
+            log.debug('Skipping file %s, it has no project.', file_doc['_id'])
+            continue
+
+        count = proj_coll.count({'_id': project_id})
         if count == 0:
             log.debug('Skipping file %s, project does not exist.', file_doc['_id'])
             continue
