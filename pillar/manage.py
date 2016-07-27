@@ -593,10 +593,7 @@ def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
     chunk_size = int(chunk_size)  # CLI parameters are passed as strings
     from application.modules import file_storage
 
-    try:
-        file_storage.refresh_links_for_backend(backend_name, chunk_size, window * 3600)
-    except KeyboardInterrupt:
-        print('Aborted due to keyboard interrupt.')
+    file_storage.refresh_links_for_backend(backend_name, chunk_size, window * 3600)
 
 
 @manager.command

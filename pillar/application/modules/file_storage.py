@@ -474,35 +474,39 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
 
     refreshed = 0
     for file_doc in to_refresh:
-        file_id = file_doc['_id']
-        project_id = file_doc.get('project')
-        if project_id is None:
-            log.debug('Skipping file %s, it has no project.', file_id)
-            continue
-
-        count = proj_coll.count({'_id': project_id, '$or': [
-            {'_deleted': {'$exists': False}},
-            {'_deleted': False},
-        ]})
-
-        if count == 0:
-            log.debug('Skipping file %s, project %s does not exist.', file_id, project_id)
-            continue
-
-        if 'file_path' not in file_doc:
-            log.warning("Skipping file %s, missing 'file_path' property.", file_id)
-            continue
-
-        log.debug('Refreshing links for file %s', file_id)
-
         try:
-            _generate_all_links(file_doc, now)
-        except gcloud.exceptions.Forbidden:
-            log.warning('Skipping file %s, GCS forbids us access to project %s bucket.',
-                        file_id, project_id)
-            continue
+            file_id = file_doc['_id']
+            project_id = file_doc.get('project')
+            if project_id is None:
+                log.debug('Skipping file %s, it has no project.', file_id)
+                continue
 
-        refreshed += 1
+            count = proj_coll.count({'_id': project_id, '$or': [
+                {'_deleted': {'$exists': False}},
+                {'_deleted': False},
+            ]})
+
+            if count == 0:
+                log.debug('Skipping file %s, project %s does not exist.', file_id, project_id)
+                continue
+
+            if 'file_path' not in file_doc:
+                log.warning("Skipping file %s, missing 'file_path' property.", file_id)
+                continue
+
+            log.debug('Refreshing links for file %s', file_id)
+
+            try:
+                _generate_all_links(file_doc, now)
+            except gcloud.exceptions.Forbidden:
+                log.warning('Skipping file %s, GCS forbids us access to project %s bucket.',
+                            file_id, project_id)
+                continue
+            refreshed += 1
+        except KeyboardInterrupt:
+            log.warning('Aborting due to KeyboardInterrupt after refreshing %i links',
+                        refreshed)
+            return
 
     log.info('Refreshed %i links', refreshed)
 
