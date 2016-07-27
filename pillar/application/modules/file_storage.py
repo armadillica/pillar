@@ -452,7 +452,7 @@ def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
 
 
 def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
-    from flask import current_app
+    import gcloud.exceptions
 
     # Retrieve expired links.
     files_collection = current_app.data.driver.db['files']
@@ -474,18 +474,30 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
 
     refreshed = 0
     for file_doc in to_refresh:
+        file_id = file_doc['_id']
         project_id = file_doc.get('project')
         if project_id is None:
-            log.debug('Skipping file %s, it has no project.', file_doc['_id'])
+            log.debug('Skipping file %s, it has no project.', file_id)
             continue
 
         count = proj_coll.count({'_id': project_id})
         if count == 0:
-            log.debug('Skipping file %s, project does not exist.', file_doc['_id'])
+            log.debug('Skipping file %s, project does not exist.', file_id)
             continue
 
-        log.debug('Refreshing links for file %s', file_doc['_id'])
-        _generate_all_links(file_doc, now)
+        if 'file_path' not in file_doc:
+            log.warning("File %s malformed: missing 'file_path' property.", file_id)
+            continue
+
+        log.debug('Refreshing links for file %s', file_id)
+
+        try:
+            _generate_all_links(file_doc, now)
+        except gcloud.exceptions.Forbidden:
+            log.warning('GCS forbids us access to project %s bucket for file %s.',
+                        project_id, file_id)
+            continue
+
         refreshed += 1
 
     log.info('Refreshed %i links', refreshed)
