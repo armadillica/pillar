@@ -92,7 +92,15 @@ def patch_comment(node_id, patch):
     else:
         result = nodes_coll.update_one({'_id': node_id}, mongo_update)
 
-    return jsonify({'_status': 'OK', 'result': result})
+    # Fetch the new ratings, so the client can show these without querying again.
+    node = nodes_coll.find_one(node_id,
+                               projection={'properties.rating_positive': 1,
+                                           'properties.rating_negative': 1})
+
+    return jsonify({'_status': 'OK',
+                    'result': result,
+                    'properties': node['properties']
+                    })
 
 
 def assert_is_valid_patch(node_id, patch):
