@@ -82,15 +82,15 @@ def patch_comment(node_id, patch):
     action = actions[patch['op']]
     mongo_update = action()
 
-    if not mongo_update:
-        return jsonify({'_status': 'OK', 'result': 'no-op'})
-
-    log.info('Running %s', mongo_update)
-    if rating:
-        result = nodes_coll.update_one({'_id': node_id, 'properties.ratings.user': user_id},
-                                       mongo_update)
+    if mongo_update:
+        log.info('Running %s', mongo_update)
+        if rating:
+            result = nodes_coll.update_one({'_id': node_id, 'properties.ratings.user': user_id},
+                                           mongo_update)
+        else:
+            result = nodes_coll.update_one({'_id': node_id}, mongo_update)
     else:
-        result = nodes_coll.update_one({'_id': node_id}, mongo_update)
+        result = 'no-op'
 
     # Fetch the new ratings, so the client can show these without querying again.
     node = nodes_coll.find_one(node_id,

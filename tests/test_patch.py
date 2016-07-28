@@ -36,9 +36,11 @@ class PatchCommentTest(AbstractPillarTest):
 
     def test_upvote_other_comment(self):
         # Patch the node
-        self.patch(self.node_url,
-                   json={'op': 'upvote'},
-                   auth_token='token')
+        res = self.patch(self.node_url,
+                         json={'op': 'upvote'},
+                         auth_token='token').json()
+        self.assertEqual(1, res['properties']['rating_positive'])
+        self.assertEqual(0, res['properties']['rating_negative'])
 
         # Get the node again, to inspect its changed state.
         patched_node = self.get(self.node_url, auth_token='token').json()
@@ -55,9 +57,11 @@ class PatchCommentTest(AbstractPillarTest):
 
     def test_downvote_other_comment(self):
         # Patch the node
-        self.patch(self.node_url,
-                   json={'op': 'downvote'},
-                   auth_token='token').json()
+        res = self.patch(self.node_url,
+                         json={'op': 'downvote'},
+                         auth_token='token').json()
+        self.assertEqual(0, res['properties']['rating_positive'])
+        self.assertEqual(1, res['properties']['rating_negative'])
 
         # Get the node again, to inspect its changed state.
         patched_node = self.get(self.node_url, auth_token='token').json()
