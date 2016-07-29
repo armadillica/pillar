@@ -346,7 +346,7 @@ def ensure_valid_link(response):
     """Ensures the file item has valid file links using generate_link(...)."""
 
     # Log to function-specific logger, so we can easily turn it off.
-    log = logging.getLogger('%s.ensure_valid_link')
+    log = logging.getLogger('%s.ensure_valid_link' % __name__)
     # log.debug('Inspecting link for file %s', response['_id'])
 
     # Check link expiry.
