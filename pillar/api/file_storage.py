@@ -34,9 +34,15 @@ file_storage = Blueprint('file_storage', __name__,
                          template_folder='templates',
                          static_folder='../../static/storage', )
 
+# Overrides for browser-specified mimetypes
+OVERRIDE_MIMETYPES = {
+    # We don't want to thumbnail EXR files right now, so don't handle as image/...
+    'image/x-exr': 'application/x-exr',
+}
 # Add our own extensions to the mimetypes package
 mimetypes.add_type('application/x-blender', '.blend')
 mimetypes.add_type('application/x-radiance-hdr', '.hdr')
+mimetypes.add_type('application/x-exr', '.exr')
 
 
 @file_storage.route('/gcs/<bucket_name>/<subdir>/')
@@ -565,6 +571,12 @@ def override_content_type(uploaded_file):
 
     # Possibly use the browser-provided mime type
     mimetype = uploaded_file.mimetype
+
+    try:
+        mimetype = OVERRIDE_MIMETYPES[mimetype]
+    except KeyError:
+        pass
+
     if '/' in mimetype:
         mimecat = mimetype.split('/')[0]
         if mimecat in {'video', 'audio', 'image'}:
