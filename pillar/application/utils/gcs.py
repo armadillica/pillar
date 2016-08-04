@@ -16,6 +16,8 @@ def get_client():
     """Stores the GCS client on the global Flask object.
 
     The GCS client is not user-specific anyway.
+
+    :rtype: Client
     """
 
     _gcs = getattr(g, '_gcs_client', None)
