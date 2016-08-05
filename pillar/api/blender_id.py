@@ -167,12 +167,12 @@ def validate_token(user_id, token, oauth_subclient_id):
     # Retry a few times when POSTing to BlenderID fails.
     # Source: http://stackoverflow.com/a/15431343/875379
     s = requests.Session()
-    s.verify = current_app.config['TLS_CERT_FILE']
     s.mount(blender_id_endpoint(), HTTPAdapter(max_retries=5))
 
     # POST to Blender ID, handling errors as negative verification results.
     try:
-        r = s.post(url, data=payload, timeout=5)
+        r = s.post(url, data=payload, timeout=5,
+                   verify=current_app.config['TLS_CERT_FILE'])
     except requests.exceptions.ConnectionError as e:
         log.error('Connection error trying to POST to %s, handling as invalid token.', url)
         return None, None
