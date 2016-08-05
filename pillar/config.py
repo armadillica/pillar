@@ -1,5 +1,10 @@
 import os.path
 from collections import defaultdict
+import requests.certs
+
+# Certificate file for communication with other systems.
+TLS_CERT_FILE = requests.certs.where()
+print('Loading TLS certificates from %s' % TLS_CERT_FILE)
 
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 
