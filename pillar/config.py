@@ -1,6 +1,11 @@
 import os.path
 from os import getenv
 from collections import defaultdict
+import requests.certs
+
+# Certificate file for communication with other systems.
+TLS_CERT_FILE = requests.certs.where()
+print('Loading TLS certificates from %s' % TLS_CERT_FILE)
 
 import requests.certs
 
