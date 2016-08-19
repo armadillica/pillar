@@ -1,0 +1,78 @@
+| {% block body %}
+
+#user-edit-container
+
+	#user-edit-header
+		.user-edit-name {{user.full_name}}
+		.user-edit-username {{user.username}}
+		.user-edit-email {{user.email}}
+
+	form(
+		id="user-edit-form",
+		method="POST",
+		enctype="multipart/form-data",
+		action="{{url_for('users.users_edit', user_id=user._id)}}")
+
+		| {% for field in form %}
+
+		| {% if field.name == 'csrf_token' %}
+		| {{ field }}
+
+		| {% else %}
+
+		| {% if field.type == 'HiddenField' %}
+		| {{ field }}
+
+		| {% else %}
+
+		.form-group(class="{{field.name}}{% if field.errors %} error{% endif %}")
+			| {{ field.label }}
+			| {{ field(class='form-control') }}
+
+			| {% if field.errors %}
+			ul.error
+				| {% for error in field.errors %}
+				li {{ error }}
+				| {% endfor %}
+			| {% endif %}
+
+
+		| {% endif %}
+
+		| {% endif %}
+
+		| {% endfor %}
+
+
+		a#button-cancel.btn.btn-default(href="#", data-user-id='{{user._id}}') Cancel
+
+		input#submit_edit_user.btn.btn-default(
+			data-user-id="{{user._id}}",
+			type="submit" value="Submit")
+
+		#user-edit-notification
+
+
+script(type="text/javascript").
+	$('#roles').select2();
+
+	$('#user-edit-form').submit(function(e){
+		e.preventDefault();
+		//- console.log($(this).serialize());
+		$.post($(this).attr('action'), $(this).serialize())
+		.done(function(data){
+			$('#user-edit-notification').addClass('success').html('Success!');
+		})
+		.fail(function(data){
+			$('#user-edit-notification').addClass('fail').html('Houston!');
+		});
+		//- $("#user-edit-form").submit();
+	});
+
+	$('#button-cancel').click(function(e){
+		$('#user-container').html('')
+	});
+
+
+
+| {% endblock %}

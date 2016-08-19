@@ -1,0 +1,18 @@
+| {% macro render_file_uploader() %}
+
+#fileUploaderModal.modal.fade(
+	tabindex="-1", role="dialog", aria-labelledby="fileUploaderModalLabel", aria-hidden="true")
+	.modal-dialog
+		.modal-content
+			.modal-header
+				button.close(type="button", data-dismiss="modal", aria-label="Close")
+					span(aria-hidden="true") &times;
+				h4.modal-title Upload file
+
+			.modal-body
+				| {% include '_macros/include _file_uploader_form.html' %}
+
+			.modal-footer
+				button.btn.btn-default(type="button", data-dismiss="modal") Close
+
+| {% endmacro %}

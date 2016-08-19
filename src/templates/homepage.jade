@@ -1,0 +1,378 @@
+| {% extends 'layout.html' %}
+| {% from '_macros/_navigation.html' import navigation_tabs %}
+
+| {% set title = 'homepage' %}
+
+| {% block og %}
+meta(property="og:title", content="Blender Cloud")
+meta(property="og:url", content="https://cloud.blender.org/")
+meta(property="og:image", content="{% if main_project.picture_header %}{{ main_project.picture_header.thumbnail('l', api=api) }}{% else %}{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_02.jpg')}}{% endif %}")
+| {% endblock %}
+
+| {% block tw %}
+meta(name="twitter:title", content="Blender Cloud")
+meta(name="twitter:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
+meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_project.picture_header.thumbnail('l', api=api) }}{% else %}{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_02.jpg')}}{% endif %}")
+| {% endblock %}
+
+| {% block body %}
+.dashboard-container
+	section#main
+		| {{ navigation_tabs(title) }}
+
+		section#stream
+
+			h3#activity-stream__title
+				| Activity Stream
+
+			ul#activity-stream__filters
+				li Filter
+				li.filter.active(
+					data-filter='image',
+					title="List images")
+					i.pi-picture
+				li.filter.active(
+					data-filter='video',
+					title="List videos")
+					i.pi-film-thick
+				li.filter.active(
+					data-filter='file',
+					title="List files")
+					i.pi-file-archive
+				li.filter.active(
+					data-filter='post',
+					title="List blog posts")
+					i.pi-newspaper
+				li.filter(
+					data-filter='comment',
+					title="List comments")
+					i.pi-comment
+
+			ul#activity-stream__list
+				| {% for n in activity_stream %}
+				| {% if n.node_type == 'comment' %}
+				li.activity-stream__list-item.hidden(
+					class="{{ n.node_type }}",
+					data-url="{{ url_for_node(node=n) }}")
+					a.activity-stream__list-thumbnail(href="{{ url_for_node(node=n) }}")
+						i.pi-comment
+					.activity-stream__list-details
+						a.title(href="{{ url_for_node(node=n) }}") {{ n.properties.content }}
+						ul.meta
+							li.who {{ n.user.full_name }}
+							li.where-project
+								a.project(href="{{ url_for('projects.view', project_url=n.project.url) }}") {{ n.project.name }}
+							li.where-parent
+								a(href="{{ url_for_node(node_id=n.attached_to._id) }}") {{ n.attached_to.name }}
+							li.when
+								a(href="{{ url_for_node(node=n) }}", title="{{ n._created }}") {{ n._created | pretty_date_time }}
+				| {% elif n.node_type == 'asset' %}
+				li.activity-stream__list-item(
+					class="{{ n.node_type }} {{ n.properties.content_type }}",
+					data-url="{{ url_for_node(node=n) }}")
+					a.activity-stream__list-thumbnail(
+						class="{{ n.properties.content_type }}",
+						href="{{ url_for_node(node=n) }}")
+						| {% if n.properties.content_type == 'video' %}
+						i.pi-film-thick
+						| {% elif n.properties.content_type == 'image' %}
+						i.pi-picture
+						| {% elif n.properties.content_type == 'file' %}
+						i.pi-file-archive
+						| {% else %}
+						i.pi-folder
+						| {% endif %}
+
+					.activity-stream__list-details
+						| {% if n.picture %}
+						a.image(href="{{ url_for_node(node=n) }}")
+							| {% if n.properties.content_type == 'video' %}
+							i.pi-play
+							| {% endif %}
+							img(src="{{ n.picture.thumbnail('l', api=api) }}")
+						| {% endif %}
+						a.date(href="{{ url_for_node(node=n) }}", title="{{ n._created }}") {{ n._created | pretty_date_time }}
+						a.title(href="{{ url_for_node(node=n) }}")
+							| {{ n.name }}
+						| {% if n.permissions.world %}
+						.ribbon
+							span free
+						| {% endif %}
+						ul.meta
+							li.what {{ n.properties.content_type }}
+							li.who {{ n.user.full_name }}
+							li.where-project
+								a.project(href="{{ url_for('projects.view', project_url=n.project.url) }}") {{ n.project.name }}
+				| {% elif n.node_type == 'post' %}
+				li.activity-stream__list-item(
+					class="{{ n.node_type }}",
+					data-url="{{ url_for_node(node=n) }}")
+					a.activity-stream__list-thumbnail(href="{{ url_for_node(node=n) }}")
+						i.pi-newspaper
+					.activity-stream__list-details
+						| {% if n.picture %}
+						a.image(href="{{ url_for_node(node=n) }}")
+							img(src="{{ n.picture.thumbnail('l', api=api) }}")
+						| {% endif %}
+						a.date(href="{{ url_for_node(node=n) }}", title="{{ n._created }}") {{ n._created | pretty_date_time }}
+						a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
+						ul.meta
+							li.what Blog Post
+							li.where-project
+								a.project(href="{{ url_for('projects.view', project_url=n.project.url) }}")
+									| {{ n.project.name }}
+				| {% endif %}
+				| {% endfor %}
+				li.activity-stream__list-item.empty#activity-stream__empty
+					| No items to list.
+
+
+	section#side
+		section#announcement
+			| {% if main_project.picture_header %}
+			a(href="https://cloud.blender.org/blog/introducing-blender-sync")
+				img.header(
+					src="{{ main_project.picture_header.thumbnail('l', api=api) }}")
+			| {% endif %}
+			.text
+				.title
+					a(href="https://cloud.blender.org/blog/introducing-blender-sync") Blender Sync
+
+				.lead
+					span.
+						Save your settings once. Use them anywhere.
+						Carry your Blender configuration with you, use our free add-on to sync your keymaps and preferences.
+						<hr/>
+						Syncing is free for everyone. No subscription required.
+
+				.buttons
+					a.btn.btn-default.btn-outline.orange(
+						href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
+						i.pi-download
+						| Download <small>v</small> {{ config.BLENDER_CLOUD_ADDON_VERSION }}
+					a.btn.btn-default.btn-outline.blue(
+						href="https://cloud.blender.org/blog/introducing-blender-sync")
+						| Learn More
+
+
+		section#random-asset
+			h3
+				a(href="/search") Explore the Cloud
+			span.section-lead Random selection of the best assets &amp; tutorials
+
+			ul.random-asset__list
+				| {% for n in random_featured %}
+				| {% if n.picture and loop.first %}
+				li.random-asset__list-item.featured
+					| {% if n.permissions.world %}
+					.ribbon
+						span free
+					| {% endif %}
+					a.random-asset__thumbnail(
+						href="{{ url_for_node(node=n) }}",
+						class="{{ n.properties.content_type }}")
+						| {% if n.picture %}
+						img(src="{{ n.picture.thumbnail('l', api=api) }}")
+
+						| {% if n.properties.content_type == 'video' %}
+						i.pi-play
+						| {% endif %}
+
+						| {% endif %}
+
+					a.title(href="{{ url_for_node(node=n) }}")
+						| {{ n.name }}
+					ul.meta
+						li.what
+							a(href="{{ url_for_node(node=n) }}")
+								| {% if n.properties.content_type %}{{ n.properties.content_type }}{% else %}Folder{% endif %}
+						li.where
+							a(href="{{ url_for('projects.view', project_url=n.project.url) }}")
+								| {{ n.project.name }}
+				| {% else %}
+
+				li.random-asset__list-item
+					| {% if n.permissions.world %}
+					.ribbon
+						span free
+					| {% endif %}
+					a.random-asset__list-thumbnail(
+						href="{{ url_for_node(node=n) }}",
+						class="{{ n.properties.content_type }}")
+						| {% if n.picture %}
+						img.image(src="{{ n.picture.thumbnail('s', api=api) }}")
+						| {% else %}
+						| {% if n.properties.content_type == 'video' %}
+						i.pi-film-thick
+						| {% elif n.properties.content_type == 'image' %}
+						i.pi-picture
+						| {% elif n.properties.content_type == 'file' %}
+						i.pi-file-archive
+						| {% else %}
+						i.pi-folder
+						| {% endif %}
+						| {% endif %}
+					.random-asset__list-details
+						a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
+						ul.meta
+							li.what
+								a(href="{{ url_for_node(node=n) }}")
+									| {% if n.properties.content_type %}{{ n.properties.content_type }}{% else %}Folder{% endif %}
+							li.where
+								a(href="{{ url_for('projects.view', project_url=n.project.url) }}") {{ n.project.name }}
+
+				| {% endif %}
+				| {% endfor %}
+
+		section#blog-stream
+			a.feed(
+				href="{{ url_for('main.feeds_blogs') }}",
+				title="Blender Cloud & Projects Blog Feed",
+				data-toggle="tooltip",
+				data-placement="left")
+				i.pi-rss
+
+			h3
+				a(href="{{ url_for('main.main_blog') }}") Blog
+
+			ul#blog-stream__list
+				| {% if latest_posts %}
+				| {% for n in latest_posts %}
+				| {% if n.picture and loop.first %}
+				li.blog-stream__list-item.featured
+					a.blog-stream__thumbnail(
+						href="{{ url_for_node(node=n) }}")
+						img(src="{{ n.picture.thumbnail('l', api=api) }}")
+					a.title(href="{{ url_for_node(node=n) }}")
+						| {{ n.name }}
+
+					ul.meta
+						li.when
+							a(href="{{ url_for_node(node=n) }}",
+								title="Updated {{ n._updated | pretty_date }}")
+								| {{ n._created | pretty_date }}
+						li.where-project
+							a.project(href="{{ url_for('projects.view', project_url=n.project.url) }}") {{ n.project.name }}
+				| {% else %}
+				li.blog-stream__list-item
+					a.blog-stream__list-thumbnail(href="{{ url_for_node(node=n) }}")
+						| {% if n.picture %}
+						img.image(src="{{ n.picture.thumbnail('s', api=api) }}")
+						| {% else %}
+						i.pi-newspaper
+						| {% endif %}
+					.blog-stream__list-details
+						a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
+						ul.meta
+							li.when
+								a(href="{{ url_for_node(node=n) }}",
+									title="Updated {{ n._updated | pretty_date }}")
+									| {{ n._created | pretty_date }}
+							li.where-project
+								a.project(href="{{ url_for('projects.view', project_url=n.project.url) }}") {{ n.project.name }}
+				| {% endif %}
+				| {% endfor %}
+				| {% else %}
+				li.blog-stream__list-item
+					.blog-stream__list-details
+						ul.meta
+							li.when No updates yet
+				| {% endif %}
+				li.blog-stream__list-item.more
+					a(href="{{ url_for('main.main_blog') }}") See All Blog Posts
+
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+	$(function () {
+
+	/* cleanup mentions in comments  */
+	$('.activity-stream__list-details a.title').each(function(){
+		$(this).text($(this).text().replace(/\*|\@|\<(.*?)\>/g, ''));
+	});
+
+	function saveFilters(){
+		var filtersEnabled = [];
+
+		$('ul#activity-stream__filters li.filter.active').each(function(){
+			filtersEnabled.push($(this).attr('data-filter'));
+		});
+
+		setJSONCookie('bcloud_ui', 'homepage_activity_filters', filtersEnabled);
+	}
+
+	function loadFilters(){
+
+		var filters = Cookies.getJSON('bcloud_ui');
+
+		if (filters) {
+			if (filters.homepage_activity_filters && filters.homepage_activity_filters.length){
+				/* Clear style on filters/items */
+				$('ul#activity-stream__filters li.filter').removeClass('active');
+				$('ul#activity-stream__list li.activity-stream__list-item').addClass('hidden');
+
+				for (var f in filters.homepage_activity_filters){
+
+					var savedFilter = filters.homepage_activity_filters[f];
+
+					/* Style each filter type */
+					$('ul#activity-stream__filters li.filter').each(function(){
+						if ($(this).attr('data-filter') == savedFilter){
+							$(this).addClass('active');
+						}
+					});
+
+					/* Show items that are on the cookie */
+					$('ul#activity-stream__list li.activity-stream__list-item').each(function(){
+						if ($(this).hasClass(savedFilter)) {
+							$(this).removeClass('hidden');
+						}
+					});
+				}
+			}
+		}
+	}
+
+	/* Toggle filters */
+	$('ul#activity-stream__filters li.filter').click(function(){
+
+		// Style the filter button
+		$(this).toggleClass('active');
+
+		var filterType = $(this).attr('data-filter');
+
+		saveFilters();
+
+		// Toggle hidden class on list item if it has class matching the filter
+		$('ul#activity-stream__list li.activity-stream__list-item').each(function(){
+			if ($(this).hasClass(filterType)) {
+				$(this).toggleClass('hidden');
+			}
+		});
+
+		var hiddenItems = $('ul#activity-stream__list li.activity-stream__list-item.hidden').length;
+
+		if (hiddenItems == '{{ activity_stream|length }}'){
+			$('#activity-stream__empty').show();
+		}
+
+	});
+
+	loadFilters();
+
+	/* Click on the whole asset/comment row to go */
+	$('li.activity-stream__list-item.asset, li.activity-stream__list-item.comment').click(function(e){
+
+		window.location.href = $(this).data('url');
+
+		$(this).addClass('active');
+		$(this).find('.activity-stream__list-thumbnail i')
+			.removeAttr('class')
+			.addClass('pi-spin spin');
+	});
+
+	hopToTop(); // Display jump to top button
+	});
+| {% endblock %}

@@ -1,0 +1,323 @@
+
+.dashboard-container
+	section#home,
+	section#projects
+		background-color: $color-background
+		border-bottom-left-radius: 3px
+		border-bottom-right-radius: 3px
+
+		section#sub-nav-tabs.home,
+		section#sub-nav-tabs.projects
+			background-color: $color-background-light
+			border-bottom: thin solid $color-background-dark
+
+			li.nav-tabs__list-tab
+				padding: 15px 20px 10px 20px
+
+				&:hover
+					border-color: rgba($color-primary, .4)
+				&.active
+					border-color: $color-primary
+					color: $color-primary-dark
+					a, i
+						color: $color-primary-dark
+
+				span
+					color: $color-text-dark-secondary
+
+	section#home
+		background-color: $color-background-dark
+
+	section.nav-tabs__tab
+		display: none
+
+		&.active
+			display: block
+
+	#home-images__list
+		padding: 15px 20px
+
+		.home-images__list-item
+			display: block
+			break-inside: avoid
+			padding: 0
+			margin: 10px auto
+			background-color: white
+			border: thin solid darken($color-background-dark, 5%)
+			border-bottom: 2px solid darken($color-background-dark, 5%)
+			border-right: 2px solid darken($color-background-dark, 5%)
+			border-radius: 3px
+
+			&:first-child
+				margin-top: 0
+			&:last-child
+				margin-bottom: 0
+
+			a.home-images__list-thumbnail
+				position: relative
+				display: block
+				width: 100%
+				min-height: 100px
+
+				img
+					width: 100%
+				i
+					font-size: 1.2em
+					color: $color-text-dark-hint
+					+position-center-translate
+
+			.home-images__list-details
+				a.title
+					display: inline-block
+					width: 100%
+					padding: 10px
+					color: $color-text-dark-primary
+					font-weight: 500
+					border-bottom: 2px solid $color-background
+					font-size: larger
+
+				ul.meta
+					+list-meta
+					width: 100%
+					font-size: .85em
+					background-color: $color-background-light
+					color: $color-text-dark-secondary
+					padding: 10px
+					border-bottom-left-radius: 3px
+					border-bottom-right-radius: 3px
+
+					li.delete-image
+						a
+							&.delete-prompt:hover,
+							&.delete-confirm:hover
+								color: $color-danger
+
+							&.delete-cancel:hover
+								color: $color-success
+
+							&.delete-confirm,
+							&.delete-cancel
+								padding-left: 10px
+
+						span.delete-confirm
+							display: none
+
+	.tab_header-container
+		background-color: $color-background
+		padding: 10px 0
+
+		.tab_header-intro_text
+			width: 75%
+		.tab_header-intro_icons
+			width: 25%
+
+		.tab_header-intro
+			display: flex
+			position: relative
+			z-index: 1
+			padding: 15px 35px
+			margin: 10px -10px
+			color: white
+			border-top-left-radius: 3px
+			border-top-right-radius: 3px
+			box-shadow: 0 3px 0 rgba(black, .2)
+			background-position: 50%
+
+			h2
+				font-size: 1.6em
+				margin: 10px 0
+			p
+				line-height: 1.6em
+			a
+				color: white
+				text-decoration: underline
+
+			&:before, &:after
+				content: ""
+				bottom: -.7em
+				position: absolute
+				display: block
+				border:
+					style: solid
+					color: rgba(black, .5) transparent transparent transparent
+				z-index: -1
+
+			&:before
+				left: 0
+				border-width: .75em 0 0 .75em
+			&:after
+				right: 0
+				border-width: .75em .75em 0 0
+
+
+		.tab_header-intro_icons
+			display: flex
+			align-items: center
+			justify-content: center
+			font-size: 2.5em
+			color: white
+
+			.pi-heart-filled
+				font-size: .6em
+				padding: 0 15px
+				color: $color-danger
+
+			.pi-blender-cloud,
+			.pi-picture-album
+				position: relative
+				left: -15px
+
+		.blender_sync-main
+			background-color: white
+			border: thin solid $color-background-dark
+			border-radius: 3px
+			margin: 30px 20px 10px 20px
+
+			&.empty
+				color: $color-text-dark-secondary
+				text-align: center
+
+			i.pi-blender
+				padding-right: 10px
+
+			.blender_sync-main-header
+				padding: 10px 20px
+				display: flex
+				align-items: center
+
+				.blender_sync-main-title
+					margin:
+						top: 10px
+						bottom: 10px
+					flex: 1
+					a.download
+						display: block
+						margin: 15px auto 0 auto
+						width: 200px
+						@include button-rounded($color-success, 3px)
+						padding: 5px 10px
+				.blender_sync-main-last
+					text-align: right
+					color: $color-text-dark-secondary
+
+	#tab-images
+		.tab_header-intro
+			background-position-x: 0
+
+	ul#home-text__list
+		margin: 0
+		padding: 10px 10px
+		list-style: none
+		background-color: $color-background-dark
+
+		li.home-text__list-item
+			display: block
+			break-inside: avoid
+			padding: 0
+			margin: 10px 5px
+			background-color: white
+			border: thin solid darken($color-background-dark, 5%)
+			border-bottom: 2px solid darken($color-background-dark, 5%)
+			border-right: 2px solid darken($color-background-dark, 5%)
+			border-radius: 3px
+
+			.home-text__list-details
+				display: flex
+				flex-direction: column
+
+				a.title
+					padding: 10px
+					color: $color-text-dark-primary
+					font-weight: 500
+					border-bottom: 2px solid $color-background
+
+				ul.meta
+					+list-meta
+					width: 100%
+					font-size: .85em
+					background-color: $color-background-light
+					color: $color-text-dark-secondary
+					padding: 10px
+					border-bottom-left-radius: 3px
+					border-bottom-right-radius: 3px
+
+
+	ul.projects__list
+		margin: 0
+		padding: 5px 0 10px 0
+		list-style: none
+
+		li.projects__list-item
+			display: flex
+			align-items: center
+			padding: 10px 0
+			margin: 10px 20px
+			background-color: white
+			border: thin solid $color-background-dark
+			border-radius: 3px
+			box-shadow: 1px 1px 0 rgba(black, .1)
+
+			&:hover
+				cursor: pointer
+				.projects__list-details a.title
+					color: $color-text-dark-primary
+
+			&.active
+				border-color: $color-primary
+				.spin
+					animation-duration: 5s
+				.projects__list-details a.title
+					color: $color-primary
+
+			a.projects__list-thumbnail
+				position: relative
+				margin: 0 15px
+				width: 50px
+				height: 50px
+				border-radius: 3px
+				background-color: $color-background-light
+				display: flex
+				align-items: center
+				justify-content: center
+
+				img
+					width: 100%
+				i
+					transform: scale(1.2)
+					color: $color-text-dark-hint
+
+			.projects__list-details
+				display: flex
+				flex-direction: column
+
+				a.title
+					font-size: 1.2em
+					padding-bottom: 2px
+					color: $color-text-dark-primary
+
+				ul.meta
+					font-size: .9em
+					+list-meta
+					width: 100%
+					color: $color-text-dark-primary
+
+					li.leave
+						span
+							&.user-remove-prompt:hover,
+							&.user-remove-confirm:hover
+								color: $color-danger
+
+							&.user-remove-cancel:hover
+								color: $color-success
+
+							&.user-remove-prompt,
+							&.user-remove-confirm,
+							&.user-remove-cancel
+								cursor: pointer
+
+							&.user-remove
+								display: none
+
+							&.user-remove-confirm,
+							&.user-remove-cancel
+								padding-left: 10px

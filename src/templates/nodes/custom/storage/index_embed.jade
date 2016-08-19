@@ -1,0 +1,53 @@
+| {% block body %}
+
+#node-container
+
+	section.node-details-container.storage
+
+		.node-details-header
+			.node-title
+				| {{node.name}}
+
+
+	section.node-children.storage
+
+		| {% if node.children %}
+		| 	{% for child in node.children %}
+
+		a(href="#", data-node_id="{{ node._id }}" data-path="{{ child['path'] }}", title="{{ child['name'] }}", class="item_icon")
+			.list-node-children-item
+				.list-node-children-item-thumbnail
+
+					.list-node-children-item-thumbnail-icon
+						| {% if child['content_type'] == 'video' %}
+						i.pi-film
+						| {% elif child['content_type'] == 'image' %}
+						i.pi-image
+						| {% elif child['content_type'] == 'file' %}
+						i.pi-document
+						| {% elif child['content_type'] == 'binary' %}
+						i.pi-file-archive
+						| {% else %}
+						i.pi-folder
+						| {% endif %}
+
+				.list-node-children-item-name
+
+					span {{ child['name'] }}
+
+		| 	{% endfor %}
+		| {% endif %}
+
+	script.
+		$('a.item_icon').click(function(e){
+			// When clicking on a node preview, we load its content
+			e.preventDefault;
+			var nodeId = $(this).data('node_id');
+			var path = $(this).data('path');
+			displayStorage(nodeId, path);
+			// Update tree with current selection
+			//$('#project_tree').jstree('select_node', 'n_' + nodeId);
+		});
+
+| {% endblock %}
+

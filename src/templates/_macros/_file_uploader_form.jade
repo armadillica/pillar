@@ -1,0 +1,70 @@
+
+#node-add-container
+	#node-add-header
+		.node-add-title Upload Assets
+
+	#node-add-form
+		p.
+			This is the first step in the asset creation process. Once files are uploaded,
+			they are stored in a temp location until further actions are taken.
+			You can upload multiple assets simultaneously, but you can only edit one at a time.
+
+		hr
+
+		// The file upload form used as target for the file upload widget
+		form#fileupload(action="{{url_for('files.upload')}}", method='POST', enctype='multipart/form-data')
+
+			// Redirect browsers with JavaScript disabled to the origin page
+			noscript
+				input(type='hidden', name='redirect', value="{{url_for('files.upload')}}")
+
+			// The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload
+			.row.fileupload-buttonbar
+				.col-lg-7
+
+					// The fileinput-button span is used to style the file input field as button
+					span.btn.btn-success.fileinput-button
+						i.pi-plus
+						span Add files...
+						input(type='file', name='file', multiple='')
+
+					button.btn.btn-primary.start(type='submit')
+						i.pi-upload
+						span Start upload
+
+					button.btn.btn-warning.cancel(type='reset')
+						i.pi-cancel
+						span Cancel upload
+
+					button.btn.btn-danger.delete(type='button')
+						i.pi-trash
+						span Delete
+
+					input.toggle(type='checkbox')
+					// The global file processing state
+					span.fileupload-process
+				// The global progress state
+				.col-lg-5.fileupload-progress.fade
+					// The global progress bar
+					.progress.progress-striped.active(role='progressbar', aria-valuemin='0', aria-valuemax='100')
+						.progress-bar.progress-bar-success(style='width:0%;')
+					// The extended global progress state
+					.progress-extended  
+			// The table listing the files available for upload/download
+			table.table(role='presentation')
+				tbody.files
+		br
+
+		h3 Notes
+		ul
+			li
+				| The maximum file size for this interface is
+				strong  {{ config.MAX_CONTENT_LENGTH | filesizeformat }}
+				| .
+			li
+				| Only the following formats are allowed:
+				br
+				strong.text-uppercase
+					| {% for f in config.ALLOWED_EXTENSIONS %}
+					|	{{f}}
+					| {% endfor %}

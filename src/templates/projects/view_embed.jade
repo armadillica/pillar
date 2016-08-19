@@ -1,0 +1,188 @@
+| {% block head %}
+| {% if header_video_file %}
+script(src="//releases.flowplayer.org/6.0.5/flowplayer.min.js")
+script.
+	$(function() {
+		$('#flowplayer_container').flowplayer({
+			key: "{{config.FLOWPLAYER_KEY}}",
+			embed: false,
+			splash: true,
+			clip: { sources: [
+			{% for var in header_video_file.variations %}
+				{type: "{{ var.content_type }}", src: "{{ var.link|safe }}"},
+			{% endfor %}
+			]}
+		});
+	});
+| {% endif %}
+| {% endblock %}
+
+| {% block body %}
+
+#node-container
+	section.node-preview.project
+		| {% if project.url == 'caminandes-3' %}
+		iframe(
+			style="height: 490px",
+			src="https://www.youtube.com/embed/SkVqJ1SGeL0?rel=0&amp;controls=0&amp;showinfo=0",
+			frameborder="0",
+			allowfullscreen)
+		| {% elif header_video_file %}
+		#flowplayer_container.is-splash.play-button(
+			style="{% if header_video_node.picture %}background-image:url({{header_video_node.picture.thumbnail('l', api=api)}}); background-repeat:no-repeat; {% endif %}")
+			.fp-startscreen.fp-toggle
+				a.big-play-button
+					i.pi-play
+			.fp-endscreen
+				a.watch-again.fp-toggle
+					i.pi-replay
+					| Watch again
+			.fp-waiting
+				i.pi-spin.spin
+		| {% elif project.picture_header %}
+		a(href="{{ url_for( 'projects.about', project_url=project.url) }}")
+			img.header(src="{{ project.picture_header.thumbnail('l', api=api) }}")
+		| {% endif %}
+
+	section.node-details-container.project
+
+		| {# Hide for now
+		.node-details-header
+			.node-title-details
+				.date(title="Last updated {{ project._updated | pretty_date }}") {{ project._created | pretty_date }}
+
+				| {% if project.status %}
+				.status {{project.status}}
+				| {% endif %}
+		| #}
+
+		.node-details-title
+			h1
+				a(href="{{ url_for( 'projects.about', project_url=project.url) }}") {{ project.name }}
+
+		| {% if title != 'about' or not project.description %}
+		| {% set description = project.summary %}
+		| {% else %}
+		| {% set description = project.description %}
+		| {% endif %}
+
+		.node-details-description
+			| {{ description }}
+
+		| {% if title != 'about' %}
+		.node-extra
+			a.learn-more(href="{{ url_for( 'projects.about', project_url=project.url) }}") LEARN MORE
+		| {% endif %}
+
+		| {% if project.nodes_featured %}
+		.project-featured-container
+			h3 Featured Content
+			.featured-list#featured-list
+				| {% for n in project.nodes_featured %}
+				| {% if n.picture %}
+				a.featured-item.hidden(href="{{ url_for_node(node=n) }}")
+					.featured-item-info
+						span.type {{ n.properties.content_type }} - {{ n.user.full_name }}
+						span.title {{ n.name }}
+					img(src="{{ n.picture.thumbnail('l', api=api) }}")
+				| {% endif %}
+				| {% endfor %}
+		| {% endif %}
+
+		.node-extra
+			| {% if project.nodes_blog %}
+			.node-blog
+				h3 Blog
+				ul.node-blog-list
+					| {% for n in project.nodes_blog %}
+					li.node-blog-list-item(data-node_id="{{ n._id }}")
+						a.image(href="{{ url_for_node(node=n) }}")
+							| {% if n.picture %}
+							img(src="{{ n.picture.thumbnail('s', api=api) }}")
+							| {% else %}
+							i.pi-chatbubble-working
+							| {% endif %}
+						.info
+							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
+							span.details
+								span.when {{ n._updated | pretty_date }} by
+								span.who {{ n.user.full_name }}
+					| {% endfor %}
+			| {% endif %}
+
+			| {% if project.nodes_latest %}
+			.node-updates
+				h3 Latest Updates
+				ul.node-updates-list
+					| {% for n in project.nodes_latest %}
+					| {% if n.node_type not in ['comment'] %}
+					li.node-updates-list-item(data-node_id="{{ n._id }}")
+						a.image(href="{{ url_for_node(node=n) }}")
+							| {% if n.picture %}
+							img(src="{{ n.picture.thumbnail('s', api=api) }}")
+							| {% else %}
+							| {% if n.properties.content_type == 'video' %}
+							i.pi-film-thick
+							| {% elif n.properties.content_type == 'image' %}
+							i.pi-picture
+							| {% elif n.properties.content_type == 'file' %}
+							i.pi-file-archive
+							| {% else %}
+							i.pi-folder
+							| {% endif %}
+							| {% endif %}
+						.info
+							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
+							span.details
+								span.what {% if n.properties.content_type %}{{ n.properties.content_type }}{% else %}folder{% endif %} ·
+								span.when  {{ n._updated | pretty_date }} by
+								span.who {{ n.user.full_name }}
+					| {% endif %}
+					| {% endfor %}
+			| {% endif %}
+
+
+include _scripts
+
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.montage.min.js') }}")
+script.
+	function montage(){
+		var $container 	= $('#featured-list'),
+			$imgs		= $container.find('img').hide(),
+			totalImgs	= $imgs.length,
+			cnt			= 0;
+
+		$imgs.each(function(i) {
+			var $img	= $(this);
+			$('<img/>').load(function() {
+				++cnt;
+				if( cnt === totalImgs ) {
+					$imgs.show();
+					$container.montage({
+						fillLastRow	: true,
+							alternateHeight	: true,
+							alternateHeightRange : {
+								min	: 180,
+								max	: 240
+							},
+							margin : 3
+					});
+				}
+			}).attr('src',$img.attr('src'));
+			$img.parent().removeClass('hidden');
+		});
+	}
+
+	$(function() {
+		montage();
+
+		$(".node-updates-list-item, .node-blog-list-item")
+				.unbind('click')
+				.click(function(e) {
+			e.preventDefault();
+			displayNode($(this).data('node_id'));
+		});
+	});
+
+
+| {% endblock %}

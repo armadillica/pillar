@@ -1,0 +1,250 @@
+| {% extends 'layout.html' %}
+
+| {% set title = 'edit' %}
+
+| {% block page_title %}Edit {{ project.name }}{% endblock %}
+
+| {% block body %}
+#project-container
+	#project-side-container
+		#project_sidebar
+			ul.project-tabs
+				li.tabs-thumbnail(
+					title="About",
+					data-toggle="tooltip",
+					data-placement="left",
+					class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
+					a(href="{{url_for('projects.about', project_url=project.url, _external=True)}}")
+						#project-loading
+							i.pi-spin
+						| {% if project.picture_square %}
+						img(src="{{ project.picture_square.thumbnail('b', api=api) }}")
+						| {% else %}
+						i.pi-home
+						| {% endif %}
+				li.tabs-browse(
+					title="Browse",
+					data-toggle="tooltip",
+					data-placement="left")
+					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+						i.pi-tree-flow
+				| {% if not project.is_private %}
+				li.tabs-search(
+					title="Search",
+					data-toggle="tooltip",
+					data-placement="left")
+					a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
+						i.pi-search
+				| {% endif %}
+
+				.project_nav-toggle-btn(
+					title="Expand Navigation [T]",
+					data-toggle="tooltip",
+					data-placement="right")
+					i.pi-angle-double-left
+
+		#project_nav
+			#project_nav-container
+				#project_nav-header
+					.project-title
+						a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+							| {{ project.name }}
+
+				// TODO - make list a macro
+				#project_tree
+					ul.project_nav-edit-list
+						li(class="{% if title == 'edit' %}active{% endif %}")
+							a(href="{{ url_for('projects.edit', project_url=project.url) }}")
+								i.pi-list
+								| Overview
+						li(class="{% if title == 'sharing' %}active{% endif %}")
+							a(href="{{ url_for('projects.sharing', project_url=project.url) }}")
+								i.pi-share
+								| Sharing
+						li(class="{% if title == 'edit_node_types' %}active{% endif %}")
+							a(href="{{ url_for('projects.edit_node_types', project_url=project.url) }}")
+								i.pi-puzzle
+								| Node Types
+
+				.project_split(title="Toggle Navigation [T]")
+
+	#project_context-container
+		#project_context-header
+			span#project-statusbar
+
+			span#project-edit-title
+				| Edit Project
+
+			ul.project-edit-tools
+
+				// Edit Mode
+				li.button-cancel
+					a#item_cancel.project-mode-edit(
+						href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
+						title="Cancel changes")
+						i.button-cancel-icon.pi-back
+						| Go to Project
+
+				li.button-save
+					a#item_save.project-mode-edit(
+						href="#",
+						title="Save changes")
+						i.button-save-icon.pi-check
+						| Save Changes
+		#project_context
+			#node-edit-container
+				form(
+					id="node-edit-form"
+					method='POST',
+					action="{{url_for('projects.edit', project_url=project.url)}}")
+
+					| {% with errors = errors %}
+					| {% if errors %}
+					| {% for field in errors %}
+					.alert.alert-danger(role='alert')
+						strong {{field}}
+						| {% for message in errors[field] %}
+						| {{message}}|
+						| {% endfor %}
+					| {% endfor %}
+					| {% endif %}
+					| {% endwith %}
+
+					| {% for field in form %}
+
+					| {% if field.name == 'csrf_token' %}
+					| {{ field }}
+					| {% else %}
+					| {% if field.type == 'HiddenField' %}
+					| {{ field }}
+					| {% else %}
+
+					| {% if field.name not in hidden_fields %}
+
+					.form-group(class="{{field.name}}{% if field.errors %} error{% endif %}")
+						| {{ field.label }}
+						| {% if field.name == 'picture' %}
+						| {% if post.picture %}
+						img.node-preview-thumbnail(src="{{ post.picture.thumbnail('m', api=api) }}")
+						a(href="#", class="file_delete", data-field-name="picture", data-file_id="{{post.picture._id}}") Delete
+						| {% endif %}
+						| {% endif %}
+						| {{ field(class='form-control') }}
+
+						| {% if field.errors %}
+						ul.error
+							| {% for error in field.errors %}
+							li {{ error }}
+							| {% endfor %}
+						| {% endif %}
+
+					| {% else %}
+					| {{ field(class='hidden') }}
+					| {% endif %}
+
+					| {% endif %}
+					| {% endif %}
+
+					| {% endfor %}
+
+
+				ul.project-edit-tools.bottom
+					li.button-cancel
+						a#item_cancel.project-mode-edit(
+							href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
+							title="Cancel changes")
+							i.button-cancel-icon.pi-back
+							| Go to Project
+
+					li.button-save
+						a#item_save.project-mode-edit(
+							href="#",
+							title="Save changes")
+							i.button-save-icon.pi-check
+							| Save Changes
+
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.ui.widget.min.js') }}")
+script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.iframe-transport.min.js') }}")
+script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.fileupload.min.js') }}")
+script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/file_upload.min.js') }}")
+
+script(type="text/javascript").
+
+	/* UI Stuff */
+	$(window).on("load resize",function(){
+		containerResizeY($(window).height());
+	});
+
+	/* Initialize scrollbars */
+	if ((typeof Ps !== 'undefined') && window.innerWidth > 768){
+		Ps.initialize(document.getElementById('project_tree'), {suppressScrollX: true});
+	}
+
+	$('.project-mode-edit').show();
+
+	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: true, nodeId: ''});
+	var convert = new Markdown.getSanitizingConverter().makeHtml;
+
+	$('.button-save').on('click', function(e){
+		e.preventDefault();
+		// Disable beforeunolad when submitting a form
+		$(window).off('beforeunload');
+
+		$(this).children('a').html('<i class="pi-spin spin"></i> Saving');
+		$('#node-edit-form').submit();
+	});
+
+	/* Build the markdown preview when typing in textarea */
+	$(function() {
+
+		var $textarea = $('.form-group.description textarea'),
+				$loader = $('<div class="md-preview-loading"><i class="pi-spin spin"></i></div>').insertAfter($textarea),
+				$preview = $('<div class="node-edit-form-md-preview" />').insertAfter($loader);
+
+		$loader.hide();
+
+		// Delay function to not start converting heavy posts immediately
+		var delay = (function(){
+			var timer = 0;
+			return function(callback, ms){
+				clearTimeout (timer);
+				timer = setTimeout(callback, ms);
+			};
+		})();
+
+		$textarea.keyup(function() {
+			/* If there's an iframe (YouTube embed), delay markdown convert 1.5s */
+			if (/iframe/i.test($textarea.val())) {
+				$loader.show();
+
+				delay(function(){
+					// Convert markdown
+					$preview.html(convert($textarea.val()));
+					$loader.hide();
+				}, 1500 );
+			} else {
+				// Convert markdown
+				$preview.html(convert($textarea.val()));
+			};
+		}).trigger('keyup');
+
+		$('input, textarea').keypress(function () {
+			// Unused: save status of the page as 'edited'
+			ProjectUtils.setProjectAttributes({isModified: true});
+			// Set the beforeunload to warn the user of unsaved changes
+			$(window).on('beforeunload', function () {
+				return 'You have unsaved changes in your project.';
+			});
+		});
+	});
+
+| {% endblock %}
+
+| {% block footer_navigation %}
+| {% endblock %}
+| {% block footer %}
+| {% endblock %}

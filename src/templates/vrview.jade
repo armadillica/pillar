@@ -1,0 +1,16 @@
+doctype html
+html(lang='en')
+  head
+    title VR view
+    meta(charset='utf-8')
+    meta(name='viewport', content='width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0')
+    meta(name='mobile-web-app-capable', content='yes')
+    meta(name='apple-mobile-web-app-capable', content='yes')
+    meta(name='apple-mobile-web-app-status-bar-style', content='black-translucent')
+    link(rel="stylesheet", href="{{url_for('static_pillar', filename='assets/css/vrview.css')}}")
+  body
+    #error.dialog
+      .wrap
+        h1.title Error
+        p.message An unknown error occurred.
+    script(src="{{url_for('static_pillar', filename='assets/js/vrview-analytics.min.js')}}")

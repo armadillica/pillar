@@ -1,0 +1,120 @@
+| {% extends 'layout.html' %}
+| {% block page_title %}Users{% endblock %}
+
+| {% block body %}
+
+#search-container
+	#search-sidebar
+		input.search-field(
+				type="text",
+				name="q",
+				id="q",
+				autocomplete="off",
+				spellcheck="false",
+				autocorrect="false",
+				placeholder="Search by Full Name, Username...")
+
+		.search-list-filters
+			#accordion.panel-group.accordion(role="tablist", aria-multiselectable="true")
+				#facets
+
+		#pagination
+
+		.search-list-stats
+			#stats
+
+	#search-list
+		#hits
+
+	#search-details
+		#search-hit-container
+
+
+| {% raw %}
+// Facet template
+script(type="text/template", id="facet-template")
+	.panel.panel-default
+		a(data-toggle='collapse', data-parent='#accordion', href='#filter_{{ facet }}', aria-expanded='true', aria-controls='filter_{{ facet }}')
+			.panel-heading(role='tab')
+				.panel-title {{ title }}
+		.panel-collapse.collapse.in(id='filter_{{ facet }}', role='tabpanel', aria-labelledby='headingOne')
+			.panel-body
+				| {{#values}}
+				a.facet_link.toggleRefine(
+					class='{{#refined}}refined{{/refined}}',
+					data-facet='{{ facet }}',
+					data-value='{{ value }}',
+					href='#')
+					span
+						| {{ label }}
+						small.facet_count.text-muted.pull-right {{ count }}
+				| {{/values}}
+
+
+// Hit template
+script(type="text/template", id="hit-template")
+	.search-hit.users(data-user-id='{{ objectID }}')
+		.search-hit-name
+			| {{{ _highlightResult.full_name.value }}}
+			small ({{{ username }}})
+		.search-hit-roles
+			| {{{ roles }}}
+
+
+// Pagination template
+script(type="text/template", id="pagination-template")
+	ul.search-pagination.
+		<li {{^prev_page}}class="disabled"{{/prev_page}}><a href="#" {{#prev_page}} class="gotoPage" data-page="{{ prev_page }}" {{/prev_page}}><i class="pi-angle-left"></i></a></li>
+		{{#pages}}
+		<li class="{{#current}}active{{/current}}{{#disabled}}disabled{{/disabled}}"><a href="#" {{^disabled}} class="gotoPage" data-page="{{ number }}" {{/disabled}}>{{ number }}</a></li>
+		{{/pages}}
+		<li {{^next_page}}class="disabled"{{/next_page}}><a href="#" {{#next_page}} class="gotoPage" data-page="{{ next_page }}" {{/next_page}}><i class="pi-angle-right"></i></a></li>
+
+// Stats template
+script(type="text/template", id="stats-template")
+	h5 {{ nbHits }} result{{#nbHits_plural}}s{{/nbHits_plural}}
+		span  ({{ processingTimeMS }}ms)
+| {% endraw %}
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script().
+	var APPLICATION_ID = '{{config.ALGOLIA_USER}}';
+	var SEARCH_ONLY_API_KEY = '{{config.ALGOLIA_PUBLIC_KEY}}';
+	var INDEX_NAME = '{{config.ALGOLIA_INDEX_USERS}}';
+	var sortByCountDesc = null;
+	var FACET_CONFIG = [
+	{ name: 'roles', title: 'Roles', disjunctive: false, sortFunction: sortByCountDesc },
+	];
+
+script(src="//cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js")
+script(src="//cdn.jsdelivr.net/algoliasearch.helper/2/algoliasearch.helper.min.js")
+script(src="//cdn.jsdelivr.net/hogan.js/3.0.0/hogan.common.js")
+script(src="{{ url_for('static_pillar', filename='assets/js/algolia_search.min.js') }}")
+script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.select2.min.js') }}")
+
+script(type="text/javascript").
+
+	if (typeof Ps !== 'undefined'){
+		Ps.initialize(document.getElementById('hits'), {suppressScrollX: true});
+	}
+
+	function displayUser(userId) {
+		var url = '/u/' + userId + '/edit?embed=1';
+		$.get(url, function(dataHtml){
+			$('#search-hit-container').html(dataHtml);
+		});
+	}
+
+	$('body').on('click', '.search-hit', function(){
+		displayUser($(this).data('user-id'));
+	});
+
+	// Remove focus from search input so that the click event bound to .user-hit
+	// can be fired on the first click.
+	$('#search-list').hover(function(){
+		$('#q').blur();
+	});
+
+| {% endblock %}

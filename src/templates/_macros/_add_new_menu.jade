@@ -1,0 +1,27 @@
+| {% macro add_new_menu(node_types) %}
+
+| {% for node_type in node_types %}
+| {% if node_type['name'] in ['group', 'group_texture', 'group_hdri', 'asset', 'texture', 'page', 'hdri'] %}
+| {% set node_type_name = node_type['name'] %}
+| {% if node_type_name == 'group' %}
+| {% set node_type_name = 'folder' %}
+| {% endif %}
+li(class="button-{{ node_type['name'] }}")
+	a.item_add_node(
+	href="#",
+	title="{{ node_type['description'] }}",
+	data-node-type-name="{{ node_type['name'] }}",
+	data-toggle="tooltip",
+	data-placement="left")
+		i.pi(class="icon-{{ node_type['name'] }}")
+		| {% if node_type_name == 'group_texture' %}
+		| Texture Folder
+		| {% elif node_type_name == 'group_hdri' %}
+		| HDRi Folder
+		| {% else %}
+		| {{ node_type_name }}
+		| {% endif %}
+| {% endif %}
+| {% endfor %}
+
+| {% endmacro %}

@@ -1,0 +1,15 @@
+| {% macro navigation_tabs(title) %}
+
+section#nav-tabs
+	ul#nav-tabs__list
+		li.nav-tabs__list-tab(
+			class="{% if title == 'homepage' %}active{% endif %}")
+			a(href="{{ url_for('main.homepage') }}") Activity
+		li.nav-tabs__list-tab(
+			class="{% if title == 'dashboard' %}active{% endif %}")
+			a(href="{{ url_for('projects.index') }}") My Projects
+		li.nav-tabs__list-tab(
+			class="{% if title == 'home' %}active{% endif %}")
+			a(href="{{ url_for('projects.home_project') }}") Home
+
+| {% endmacro %}

@@ -1,0 +1,175 @@
+| {% extends 'layout.html' %}
+
+| {% set title = 'blog' %}
+
+| {% block page_title %}New {{ node_type.name }}{% endblock %}
+
+| {% block body %}
+.container.box
+	form(
+		method='POST',
+		action="{{url_for('nodes.posts_create', project_id=project._id)}}")
+
+		#blog_container.post-create
+
+			| {% with errors = errors %}
+			| {% if errors %}
+			| {% for field in errors %}
+			.alert.alert-danger(role='alert')
+				strong {{field}}
+				| 						{% for message in errors[field] %}
+				| 								{{message}}|
+				| 						{% endfor %}
+			| 				{% endfor %}
+			| 		{% endif %}
+			| 		{% endwith %}
+
+			#blog_index-sidebar
+				| {% if project._id != config.MAIN_PROJECT_ID %}
+				.blog_project-card
+					a.item-header(
+						href="{{ url_for('projects.view', project_url=project.url) }}")
+
+						.overlay
+						| {% if project.picture_header %}
+						img.background(src="{{ project.picture_header.thumbnail('m', api=api) }}")
+						| {% endif %}
+
+					a.card-thumbnail(
+						href="{{ url_for('projects.view', project_url=project.url) }}")
+						| {% if project.picture_square %}
+						img.thumb(src="{{ project.picture_square.thumbnail('m', api=api) }}")
+						| {% endif %}
+
+					.item-info
+
+						a.item-title(
+							href="{{ url_for('projects.view', project_url=project.url) }}")
+							| {{ project.name }}
+
+				| {% endif %}
+
+				.blog_project-sidebar
+					#blog_post-edit-form
+						| {% for field in form %}
+						| {% if field.name in ['picture', 'status'] %}
+
+						.form-group(class="{{field.name}}{% if field.errors %} error{% endif %}")
+							| {{ field.label }}
+							| {{ field(class='form-control') }}
+
+							| {% if field.errors %}
+							ul.error
+								| {% for error in field.errors %}
+								li {{ error }}
+								| {% endfor %}
+							| {% endif %}
+
+						| {% endif %}
+						| {% endfor %}
+
+					input.btn.btn-default.button-create(type='submit', value='Create {{ node_type.name }}')
+
+					a.btn.btn-default.button-back(href="{{ url_for('projects.view', project_url=project.url) }}blog")
+						| Back to Blog
+
+			#blog_post-create-container
+				#blog_post-edit-title
+					| Create {{ node_type.name }} on {{ project.name }}
+
+				#blog_post-edit-form
+					| {% for field in form %}
+					| {% if field.name == 'csrf_token' %}
+					| {{ field }}
+					| {% else %}
+					| {% if field.type == 'HiddenField' %}
+					| {{ field }}
+					| {% else %}
+
+					| {% if field.name not in ['description', 'picture', 'category', 'status'] %}
+
+					.form-group(class="{{field.name}}{% if field.errors %} error{% endif %}")
+						| {{ field.label }}
+						| {{ field(class='form-control') }}
+
+						| {% if field.errors %}
+						ul.error
+							| {% for error in field.errors %}
+							li {{ error }}
+							| {% endfor %}
+						| {% endif %}
+
+					| {% endif %}
+					| {% endif %}
+					| {% endif %}
+					| {% endfor %}
+
+
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script(type="text/javascript").
+
+	function FormatForUrl(str) {
+			return str.replace(/_/g, '-')
+					.replace(/ /g, '-')
+					.replace(/:/g, '-')
+					.replace(/\\/g, '-')
+					.replace(/\//g, '-')
+					.replace(/[^a-zA-Z0-9\-]+/g, '')
+					.replace(/-{2,}/g, '-')
+					.toLowerCase();
+	};
+
+	var convert = new Markdown.getSanitizingConverter().makeHtml;
+
+	/* Build the markdown preview when typing in textarea */
+	$(function() {
+
+		var $textarea = $('.form-group.content textarea'),
+				$loader = $('<div class="md-preview-loading"><i class="pi-spin spin"></i></div>').insertAfter($textarea),
+				$preview = $('<div class="node-edit-form-md-preview" />').insertAfter($loader);
+
+		$loader.hide();
+
+		// Delay function to not start converting heavy posts immediately
+		var delay = (function(){
+			var timer = 0;
+			return function(callback, ms){
+				clearTimeout (timer);
+				timer = setTimeout(callback, ms);
+			};
+		})();
+
+		$textarea.keyup(function() {
+			/* If there's an iframe (YouTube embed), delay markdown convert 1.5s */
+			if (/iframe/i.test($textarea.val())) {
+				$loader.show();
+
+				delay(function(){
+					// Convert markdown
+					$preview.html(convert($textarea.val()));
+					$loader.hide();
+				}, 1500 );
+			} else {
+				// Convert markdown
+				$preview.html(convert($textarea.val()));
+			};
+		}).trigger('keyup');
+	});
+
+	$(function() {
+		var $name_input = $('.form-group.name input');
+		$name_input.keyup(function() {
+			$('#url').val(FormatForUrl($name_input.val()));
+		}).trigger('keyup');
+	});
+
+
+| {% endblock %}
+
+| {% block footer_navigation %}
+| {% endblock %}
+| {% block footer %}
+| {% endblock %}

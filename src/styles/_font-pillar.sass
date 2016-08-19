@@ -1,0 +1,609 @@
+@font-face
+  font-family: 'pillar-font'
+  src: url('../font/pillar-font.woff2?89968090') format('woff2')
+  src: url('../font/pillar-font.woff?89968090') format('woff')
+  font-weight: normal
+  font-style: normal
+
+
+/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it.
+/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be
+/*
+ *@media screen and (-webkit-min-device-pixel-ratio:0) {
+ *  @font-face {
+ *    font-family: 'pillar-font';
+ *    src: url('../font/pillar-font.svg?89968090#pillar-font') format('svg');
+ *  }
+ *}
+
+[class^="pi-"]:before, [class*=" pi-"]:before
+  font-family: "pillar-font"
+  font-style: normal
+  font-weight: normal
+  speak: none
+  display: inline-block
+  text-decoration: inherit
+  width: 1em
+  margin-right: .2em
+  text-align: center
+  /* opacity: .8;
+  /* For safety - reset parent styles, that can break glyph codes
+  font-variant: normal
+  text-transform: none
+  /* fix buttons height, for twitter bootstrap
+  line-height: 1em
+  /* Animation center compensation - margins should be symmetric
+  /* remove if not needed
+  margin-left: .2em
+  /* you can be more comfortable with increased icons size
+  /* font-size: 120%;
+  /* Font smoothing. That was taken from TWBS
+  -webkit-font-smoothing: antialiased
+  -moz-osx-font-smoothing: grayscale
+  /* Uncomment for 3D effect
+  /* text-shadow: 1px 1px 1px rgba(127, 127, 127, 0.3);
+
+.pi-collection-plus:before
+  content: '\e800'
+
+/* ''
+
+.pi-log-in:before
+  content: '\e801'
+
+/* ''
+
+.pi-log-out:before
+  content: '\e802'
+
+/* ''
+
+.pi-home:before
+  content: '\e803'
+
+/* ''
+
+.pi-social-twitter:before
+  content: '\e804'
+
+/* ''
+
+.pi-folder-create:before
+  content: '\e805'
+
+/* ''
+
+.pi-social-facebook:before
+  content: '\e806'
+
+/* ''
+
+.pi-license-cc-by:before
+  content: '\e807'
+
+/* ''
+
+.pi-license-cc:before
+  content: '\e808'
+
+/* ''
+
+.pi-blender-cloud:before
+  content: '\e809'
+
+/* ''
+
+.pi-texture:before
+  content: '\e80a'
+
+/* ''
+
+.pi-folder-texture:before
+  content: '\e80b'
+
+/* ''
+
+.pi-markdown:before
+  content: '\e80c'
+
+/* ''
+
+.pi-folder:before
+  content: '\e80d'
+
+/* ''
+
+.pi-more-vertical:before
+  content: '\e80e'
+
+/* ''
+
+.pi-blender-network:before
+  content: '\e810'
+
+/* ''
+
+.pi-blender-logo:before
+  content: '\e811'
+
+/* ''
+
+.pi-blender-cloud-logo:before
+  content: '\e812'
+
+/* ''
+
+.pi-notifications-active:before
+  content: '\e813'
+
+/* ''
+
+.pi-notifications-off:before
+  content: '\e814'
+
+/* ''
+
+.pi-notifications-none:before
+  content: '\e815'
+
+/* ''
+
+.pi-happy:before
+  content: '\e816'
+
+/* ''
+
+.pi-unhappy:before
+  content: '\e817'
+
+/* ''
+
+.pi-displeased:before
+  content: '\e818'
+
+/* ''
+
+.pi-grin:before
+  content: '\e819'
+
+/* ''
+
+.pi-laugh:before
+  content: '\e81a'
+
+/* ''
+
+.pi-spin:before
+  content: '\e81b'
+
+/* ''
+
+.pi-search:before
+  content: '\e81c'
+
+/* ''
+
+.pi-film-thick:before
+  content: '\e81d'
+
+/* ''
+
+.pi-image:before
+  content: '\e81e'
+
+/* ''
+
+.pi-cancel-circle:before
+  content: '\e81f'
+
+/* ''
+
+.pi-thumbs-up:before
+  content: '\e820'
+
+/* ''
+
+.pi-thumbs-down:before
+  content: '\e821'
+
+/* ''
+
+.pi-download-cloud:before
+  content: '\e822'
+
+/* ''
+
+.pi-edit:before
+  content: '\e823'
+
+/* ''
+
+.pi-document:before
+  content: '\e824'
+
+/* ''
+
+.pi-file-archive:before
+  content: '\e825'
+
+/* ''
+
+.pi-angle-double-left:before
+  content: '\e826'
+
+/* ''
+
+.pi-angle-double-right:before
+  content: '\e827'
+
+/* ''
+
+.pi-whoosh:before
+  content: '\e828'
+
+/* ''
+
+.pi-toggle-off:before
+  content: '\e829'
+
+/* ''
+
+.pi-toggle-on:before
+  content: '\e82a'
+
+/* ''
+
+.pi-circle-filled:before
+  content: '\e82b'
+
+/* ''
+
+.pi-circle-empty:before
+  content: '\e82c'
+
+/* ''
+
+.pi-circle:before
+  content: '\e82d'
+
+/* ''
+
+.pi-circle-notch:before
+  content: '\e82e'
+
+/* ''
+
+.pi-circle-dot:before
+  content: '\e82f'
+
+/* ''
+
+.pi-email:before
+  content: '\e830'
+
+/* ''
+
+.pi-layout:before
+  content: '\e831'
+
+/* ''
+
+.pi-plus:before
+  content: '\e832'
+
+/* ''
+
+.pi-back:before
+  content: '\e833'
+
+/* ''
+
+.pi-upload-cloud:before
+  content: '\e834'
+
+/* ''
+
+.pi-vcard:before
+  content: '\e835'
+
+/* ''
+
+.pi-rss:before
+  content: '\e836'
+
+/* ''
+
+.pi-share:before
+  content: '\e837'
+
+/* ''
+
+.pi-angle-down:before
+  content: '\e838'
+
+/* ''
+
+.pi-angle-left:before
+  content: '\e839'
+
+/* ''
+
+.pi-angle-right:before
+  content: '\e83a'
+
+/* ''
+
+.pi-angle-up:before
+  content: '\e83b'
+
+/* ''
+
+.pi-list:before
+  content: '\e83c'
+
+/* ''
+
+.pi-credit-card:before
+  content: '\e83d'
+
+/* ''
+
+.pi-heart:before
+  content: '\e83e'
+
+/* ''
+
+.pi-heart-filled:before
+  content: '\e83f'
+
+/* ''
+
+.pi-star:before
+  content: '\e840'
+
+/* ''
+
+.pi-star-filled:before
+  content: '\e841'
+
+/* ''
+
+.pi-resize-full:before
+  content: '\e842'
+
+/* ''
+
+.pi-resize-normal:before
+  content: '\e843'
+
+/* ''
+
+.pi-comment:before
+  content: '\e844'
+
+/* ''
+
+.pi-picture:before
+  content: '\e845'
+
+/* ''
+
+.pi-picture-album:before
+  content: '\e846'
+
+/* ''
+
+.pi-filter:before
+  content: '\e847'
+
+/* ''
+
+.pi-filter-remove:before
+  content: '\e848'
+
+/* ''
+
+.pi-menu:before
+  content: '\e849'
+
+/* ''
+
+.pi-check:before
+  content: '\e84a'
+
+/* ''
+
+.pi-cancel:before
+  content: '\e84b'
+
+/* ''
+
+.pi-info:before
+  content: '\e84c'
+
+/* ''
+
+.pi-lock:before
+  content: '\e84d'
+
+/* ''
+
+.pi-lock-open:before
+  content: '\e84e'
+
+/* ''
+
+.pi-download:before
+  content: '\e84f'
+
+/* ''
+
+.pi-attention:before
+  content: '\e850'
+
+/* ''
+
+.pi-play:before
+  content: '\e851'
+
+/* ''
+
+.pi-trash:before
+  content: '\e852'
+
+/* ''
+
+.pi-zoom-in:before
+  content: '\e853'
+
+/* ''
+
+.pi-zoom-out:before
+  content: '\e854'
+
+/* ''
+
+.pi-paper-plane:before
+  content: '\e855'
+
+/* ''
+
+.pi-mic-outline:before
+  content: '\e856'
+
+/* ''
+
+.pi-license-cc-nc:before
+  content: '\e857'
+
+/* ''
+
+.pi-license-cc-sa:before
+  content: '\e858'
+
+/* ''
+
+.pi-license-cc-nd:before
+  content: '\e859'
+
+/* ''
+
+.pi-license-cc-zero:before
+  content: '\e85a'
+
+/* ''
+
+.pi-folder-special:before
+  content: '\e85b'
+
+/* ''
+
+.pi-refresh:before
+  content: '\e85c'
+
+/* ''
+
+.pi-license-publicdomain:before
+  content: '\e85d'
+
+/* ''
+
+.pi-fire:before
+  content: '\e85e'
+
+/* ''
+
+.pi-audio:before
+  content: '\e85f'
+
+/* ''
+
+.pi-link-ext:before
+  content: '\e860'
+
+/* ''
+
+.pi-document-text:before
+  content: '\e861'
+
+/* ''
+
+.pi-license-copyright:before
+  content: '\e862'
+
+/* ''
+
+.pi-blender:before
+  content: '\e863'
+
+/* ''
+
+.pi-replay:before
+  content: '\e864'
+
+/* ''
+
+.pi-puzzle:before
+  content: '\e865'
+
+/* ''
+
+.pi-cog:before
+  content: '\e866'
+
+/* ''
+
+.pi-move:before
+  content: '\e867'
+
+/* ''
+
+.pi-warning:before
+  content: '\e868'
+
+/* ''
+
+.pi-sort:before
+  content: '\e869'
+
+/* ''
+
+.pi-character:before
+  content: '\e86a'
+
+/* ''
+
+.pi-tree-flow:before
+  content: '\e86b'
+
+/* ''
+
+.pi-volume-on:before
+  content: '\e86c'
+
+/* ''
+
+.pi-volume-off:before
+  content: '\e86d'
+
+/* ''
+
+.pi-pause:before
+  content: '\f00e'
+
+/* ''
+
+.pi-globe:before
+  content: '\f019'
+
+/* ''
+
+.pi-heart-broken:before
+  content: '\f028'
+
+/* ''
+
+.pi-newspaper:before
+  content: '\f1ea'
+
+/* ''

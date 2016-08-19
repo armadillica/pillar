@@ -1,0 +1,190 @@
+| {% block body %}
+#node-container.texture
+
+	.texture-title#node-title
+		| {{node.name}}
+
+	| {% if node.picture %}
+	.texture-backdrop(
+		style="background-image: url({{ node.picture.thumbnail('m', api=api) }})")
+	| {% endif %}
+
+	| {% if children %}
+	section.node-row.texture-info
+		span.texture-info-files {{ children|length }} item{% if children|length != 1 %}s{% endif %}
+	| {% endif %}
+
+	section.node-children.group.texture
+
+		| {% if children %}
+		| 	{% for child in children %}
+		| 	{% if child.properties.status == 'published' %}
+
+		a.list-node-children-container(
+			href="#",
+			data-node_id="{{ child._id }}",
+			class="item_icon {{child.node_type}} {% if child.picture %}thumbnail{% endif %}")
+			.list-node-children-item-preview
+				span.texture-name {{child.name}}
+				| {% if child.picture %}
+				img.texture-preview(
+					src="",
+					data-preview="{{ child.picture.thumbnail('m', api=api)}}",
+					alt='{{child.name}}')
+				| {% endif %}
+			.list-node-children-item(class="{{child.node_type}}")
+				.list-node-children-item-thumbnail
+					| {% if child.picture %}
+					img.texture-thumbnail(src="{{ child.picture.thumbnail('b', api=api)}}")
+					| {% else %}
+					.list-node-children-item-thumbnail-icon
+						| {% if child.node_type == 'group_texture' %}
+						i.pi-folder-texture
+						| {% else %}
+						i.pi-texture
+						| {% endif %}
+					| {% endif %}
+
+					| {% if child.properties.status != 'published' %}
+					.list-node-children-item-status {{ child.properties.status }}
+					| {% endif %}
+
+					| {% if child.permissions.world %}
+					.list-node-children-item-ribbon
+						span free
+					| {% endif %}
+
+					| {% if child.node_type == 'texture' %}
+					.list-node-children-item-name
+						| {% if child.picture.width %}
+						span.sizes
+							| {{ child.picture.width }}
+							small x
+							| {{ child.picture.height }}
+						| {% else %}
+						span.sizes {{ child.name }}
+						| {% endif %}
+						span.icons
+							| {% if child.properties.is_tileable %}
+							i.pi-puzzle(title="Tileable", data-toggle="tooltip", data-placement="bottom", data-delay=0)
+							| {% endif %}
+						| {% if child.properties.files %}
+						span.variations
+							| {% for f in child.properties.files %}
+
+							| {% if loop.last and loop.index > 5 %}
+							span.more +{{ loop.length - 5 }} more
+							| {% elif loop.index <= 5 %}
+
+							| {% if f.map_type == 'color' %}
+							span Color
+							| {% elif f.map_type == 'bump' %}
+							span Bump
+							| {% elif f.map_type == 'specular' %}
+							span Specular
+							| {% elif f.map_type == 'normal' %}
+							span Normal Map
+							| {% elif f.map_type == 'translucency' %}
+							span Translucency
+							| {% elif f.map_type == 'emission' %}
+							span Emission
+							| {% elif f.map_type == 'alpha' %}
+							span Alpha
+							| {% elif f.map_type == 'id' %}
+							span ID Map
+							| {% else %}
+							span {{ f.map_type }}
+							| {% endif %}
+
+							| {% endif %}
+
+							| {% endfor %}
+						| {% endif %}
+					| {% endif %}
+
+				| {% if child.node_type == 'group_texture' %}
+				.list-node-children-item-name
+					i.pi-folder-texture
+					span {{ child.name }}
+				| {% endif %}
+
+		| 	{% endif %}
+		| 	{% endfor %}
+		| {% else %}
+		.list-node-children-container
+			.list-node-children-empty No textures... yet!
+		| {% endif %}
+
+script.
+	// Generate GA pageview
+	ga('send', 'pageview', location.href);
+
+	// Display texture preview on mouse hover
+	$('a.list-node-children-container.texture.thumbnail').hover(
+		function(){
+
+			var thumbnail = $(this);
+
+			var src = thumbnail.find('.texture-thumbnail').attr('src');
+			var src_xl = thumbnail.find('.texture-preview').data('preview');
+
+			// Load the bigger preview
+			var preview_img = thumbnail.find('.texture-preview');
+			preview_img.attr('src', src_xl);
+
+
+			if (preview_img) {
+
+				preview_img.load(function() {
+
+					var preview = thumbnail.find('.list-node-children-item-preview');
+
+					// Positioning stuff
+					var offset = thumbnail.offset();
+					var offset_min_x = $('.node-children').width() - preview.width();
+					var offset_min_y = $('.node-children').height() - preview.height();
+
+					if (preview && offset.top > 300) {
+						$(preview).css({'top': (preview.height() * (-1))});
+					};
+
+					if (offset.left > offset_min_x) {
+						$(preview).css({'right': 0});
+					};
+
+					$(preview).addClass('active');
+				});
+			}
+
+
+		},
+		function(){
+			$('.list-node-children-item-preview').removeClass('active');
+	});
+
+	// hide preview on mouse hover itself
+	$('.list-node-children-item-preview').hover(function(){
+		$(this).removeClass('active');
+	});
+
+
+	$('a.item_icon')
+		.unbind("click")
+		.click(function(e){
+			e.preventDefault();
+			// When clicking on a node preview, we load its content
+			var nodeId = $(this).data('node_id');
+			// displayNode will run asynchronously and set the bcloud_current_node_id
+			// as well, but we set it manually in the next line as well, to make sure
+			// that select_node on jstree works as expected, preventing the node to be
+			// loaded twice.
+			Cookies.set('bcloud_current_node_id', nodeId);
+			displayNode(nodeId);
+			// Update tree with current selection
+			$('#project_tree').jstree('select_node', 'n_' + nodeId);
+		});
+
+include ../_scripts
+
+| {% endblock %}
+

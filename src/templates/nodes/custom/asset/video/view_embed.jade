@@ -1,0 +1,158 @@
+| {% block body %}
+
+#node-container
+	#node-overlay
+
+	section.node-preview.video
+		#flowplayer_container.is-splash.play-button(
+			style="{% if node.picture %}background-image:url({{node.picture.thumbnail('l', api=api)}}); background-repeat:no-repeat; {% endif %}")
+			.fp-startscreen.fp-toggle
+				a.big-play-button
+					i.pi-play
+			.fp-endscreen
+				a.watch-again.fp-toggle
+					i.pi-replay
+					| Watch again
+			.fp-waiting
+				i.pi-spin.spin
+
+
+	section.node-details-container.video
+
+		.node-details-header
+			.node-title#node-title
+				| {{node.name}}
+
+		.node-details-meta.header
+			ul.node-details-meta-list
+				| {% if node.permissions.world %}
+				li.node-details-meta-list-item.access.public(
+					data-toggle="tooltip",
+					data-placement="bottom",
+					title="Anybody can download. Share it!")
+					i.pi-lock-open
+					span Public
+				| {% endif %}
+
+				| {% if node.properties.license_type %}
+				| {% if node.properties.license_notes %}
+				li.node-details-meta-list-item.video.license(
+					id="asset-license",
+					data-toggle="popover",
+					data-placement="left",
+					data-trigger="hover",
+					data-content="{{ node.properties.license_notes }}",
+					title="{{ node.properties.license_type }}")
+
+					i(class="pi-license-{{ node.properties.license_type }}")
+				| {% else %}
+				li.node-details-meta-list-item.video.license(
+					id="asset-license",
+					data-toggle="tooltip",
+					data-placement="bottom",
+					title="{{ node.properties.license_type }}")
+
+					i(class="pi-license-{{ node.properties.license_type }}")
+				| {% endif %}
+				| {% endif %}
+
+				| {% if node.file %}
+				| {% if node.file_variations %}
+				li.btn-group.node-details-meta-list-item.video.download(
+					title="Download Video")
+					button.btn.btn-default.dropdown-toggle(
+						type="button",
+						data-toggle="dropdown",
+						aria-haspopup="true",
+						aria-expanded="false")
+						i.pi-download
+						i.pi-angle-down.icon-dropdown-menu
+
+					ul.dropdown-menu
+						| {% for child in node.file_variations %}
+						li
+							a(href="{{ child.link }}",
+								title="Download this video format",
+								download)
+								span.length {{ child.length | filesizeformat }}
+
+								span.format {{ child.format }}
+								span.size {{ child.size }}
+
+						| {% endfor %}
+				| {% else %}
+				li.btn-group.node-details-meta-list-item.video.download.disabled(
+					title="Download Video")
+					button.btn.btn-default.sorry(type="button")
+						i.pi-download
+						i.pi-angle-down.icon-dropdown-menu
+				| {% endif %}
+				| {% endif %}
+
+		| {% if node.description %}
+		.node-details-description#node-description
+			| {{node.description}}
+		| {% endif %}
+
+		| {% if node.properties.license_notes %}
+		.node-details-meta.license
+			| {{ node.properties.license_notes }}
+		| {% endif %}
+
+		.node-details-meta.footer
+			ul.node-details-meta-list
+				li.node-details-meta-list-item.status
+						| {{node.properties.status}}
+
+				li.node-details-meta-list-item.author
+					| {{ node.user.full_name }}
+
+				li.node-details-meta-list-item.date(title="Created {{ node._created }}")
+					| {{ node._created | pretty_date }}
+					| {% if (node._created | pretty_date) != (node._updated | pretty_date) %}
+					span(title="Updated {{ node._updated }}") (updated {{ node._updated | pretty_date }})
+					| {% endif %}
+
+
+		#comments-container
+			#comments-list-items-loading
+				i.pi-spin
+
+include ../../_scripts
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script(type="text/javascript").
+	$(function(){
+		// Generate GA pageview
+		ga('send', 'pageview', location.pathname);
+
+		var content_type = $("li.node-details-meta-list-item.type").text();
+		$("li.node-details-meta-list-item.type").text(content_type.substring(content_type.indexOf("/") + 1));
+
+		var container = document.getElementById("flowplayer_container");
+
+		flowplayer(container, {
+			key: "{{config.FLOWPLAYER_KEY}}",
+			embed: false,
+			splash: true,
+			{% if node.video_sources %}
+			clip: {
+				sources: {{ node.video_sources | safe }}
+			}
+			{% else %}
+			disabled: true
+			{% endif %}
+		});
+
+		{% if not node.video_sources %}
+		$('#flowplayer_container, .sorry').click(function() {
+			$.get('/403', function(data) {
+				$('#node-overlay').html(data).addClass('active');
+			})
+		});
+		{% endif %}
+	});
+
+| {% endblock %}

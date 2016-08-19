@@ -1,0 +1,650 @@
+@import _normalize
+@import _config
+@import _utils
+
+@import _comments
+
+@import _error
+
+@import _base
+@import _notifications
+
+
+/* CSS comes from fontello.com using static/assets/font/config.json */
+@import _font-pillar
+
+@import plugins/js_perfectscrollbar
+
+
+#blog_container
+	margin: 0
+	padding:
+		top: 0
+		bottom: 15px
+	display: flex
+	justify-content: center
+
+	+media-xs
+		flex-direction: column
+		padding-top: 0
+
+	#blog_post-edit-form
+		padding: 20px
+
+		.form-group
+			position: relative
+			margin: 0 auto 30px auto
+			font-family: $font-body
+
+			input, textarea, select
+				+input-generic
+
+				&#fileupload
+					color: $color-info
+
+			&.tags .select2-container
+				.select2-selection
+					+input-generic
+
+			select
+				text-transform: capitalize
+
+			label
+				+label-generic
+				text-transform: capitalize
+
+			&.error
+				color: $color-danger
+				background-color: $color-background-light
+				padding: 10px 15px
+				border: thin solid lighten($color-danger, 10%)
+				border-top: 2px solid $color-danger
+				border-bottom-left-radius: 3px
+				border-bottom-right-radius: 3px
+				label
+					color: $color-danger
+					font-weight: 500
+
+			&.file
+				background-color: $color-background-light
+				padding: 10px 15px
+				border: thin solid $color-background
+				border-top: 2px solid $color-info
+				border-bottom-left-radius: 3px
+				border-bottom-right-radius: 3px
+
+		.form-upload-progress
+			.form-upload-progress-bar
+				margin-top: 5px
+				background-color: $color-success
+				height: 5px
+				min-width: 0
+				border-radius: 3px
+
+		.form-group
+			.node-preview-thumbnail
+				display: block
+
+			&.attachments
+				+clearfix
+
+				.form-control
+					padding: 0
+					margin: 0
+					border: none
+					list-style-type: none
+					+clearfix
+
+					label[for^='attachments-']
+						margin-top: 15px
+						font-weight: 400
+
+					div[id^='attachments-']
+						margin-bottom: 15px
+						border-top: thin solid $color-text-dark-hint
+
+
+		.form-group.description,
+		.form-group.summary,
+		.form-group.content
+			position: relative
+
+			textarea
+				width: 100%
+				min-height: 220px
+
+				line-height: 1.5em
+				border: 1px solid $color-background-dark
+				border-radius: 3px
+				margin: 0 auto 10px auto
+				padding: 10px
+				color: $color-text-dark
+
+				transition: all 300ms ease-in-out
+				resize: vertical
+
+
+				&:focus
+					border: 1px solid $color-info
+					outline: none
+
+				&.field-error
+					border-color: $color-danger
+
+			.md-preview-loading
+				position: absolute
+				left: 85px
+				padding-top: 5px
+				font-size: .9em
+				color: $color-text-dark-secondary
+				display: none
+
+			.node-edit-form-md-preview
+
+				+markdown-preview-container
+
+				margin:
+					left: -20px
+					right: -20px
+
+				padding:
+					top: 20px
+					left: 0
+					right: 0
+
+				&:before
+					content: 'Live Preview'
+					position: absolute
+					top: -25px
+					left: 20px
+					font-size: .7em
+					color: $color-text-dark-secondary
+					transition: color 150ms ease-in-out
+
+				&:after
+					content: 'Markdown Supported'
+					position: absolute
+					top: -25px
+					right: 20px
+					font-size: .7em
+					color: $color-text-dark-hint
+					transition: color 150ms ease-in-out
+
+
+			.node-edit-form-md-preview:empty
+				color: transparent
+				margin: 0 auto
+				padding: 0 10px
+
+				&:before, &:after
+					content: ''
+					color: transparent
+
+
+		#node-edit-form-md-preview
+			padding: 20px
+
+	&.post-create
+		flex-direction: row-reverse
+
+	#blog_post-create-container,
+	#blog_post-edit-container
+		padding: 25px
+
+	#blog_index-container,
+	#blog_post-container,
+	#blog_post-create-container,
+	#blog_post-edit-container
+		+container-box
+		width: 75%
+
+		+media-xs
+			border-radius: 0
+			width: 100%
+			clear: both
+			display: block
+		+media-sm
+			width: 60%
+		+media-md
+			width: 70%
+		+media-lg
+			width: 75%
+
+		.blog_index-header
+			width: 100%
+			height: 300px
+			max-height: 300px
+			overflow: hidden
+			position: relative
+			display: block
+			border-top-left-radius: 3px
+			border-top-right-radius: 3px
+
+			img
+				+position-center-translate
+				width: 100%
+
+		.blog_index-item
+			margin: 0 auto 15px auto
+
+			&:hover
+				.item-info a
+					color: $color-primary
+
+
+			.item-picture
+				position: relative
+				width: 100%
+				max-height: 350px
+				min-height: 200px
+				height: auto
+				overflow: hidden
+				border-top-left-radius: 3px
+				border-top-right-radius: 3px
+				+clearfix
+
+				img
+					+position-center-translate
+					width: 100%
+					border-top-left-radius: 3px
+					border-top-right-radius: 3px
+
+				+media-xs
+					min-height: 150px
+				+media-sm
+					min-height: 150px
+				+media-md
+					min-height: 250px
+				+media-lg
+					min-height: 250px
+
+			.item-title
+				display: block
+				font:
+					family: $font-body
+					size: 2em
+					weight: 400
+				padding: 25px 25px 10px 25px
+
+			.item-info
+				color: $color-text-dark-secondary
+				font-size: 1em
+				padding:
+					left: 25px
+					right: 25px
+
+				a
+					color: $color-text-dark-secondary
+					&:hover
+						color: $color-primary
+
+			.item-content
+				+node-details-description
+				padding: 35px 5px 35px 5px
+				font-size: 1.3em
+
+				+media-xs
+					padding:
+						left: 0
+						right: 0
+
+			.item-meta
+				color: $color-text-dark-secondary
+				padding:
+					left: 25px
+					right: 25px
+
+				+media-xs
+					padding:
+						left: 10px
+						right: 10px
+
+		.button-create, .button-edit
+			position: absolute
+			z-index: 2
+			top: 20px
+			right: 20px
+			+button-rounded-filled($color-success, 6px)
+
+		.button-edit
+			right: 170px
+			top: 15px
+
+		.item-picture+.button-back+.button-edit
+			right: 20px
+			top: 20px
+
+		#comments-container
+			padding:
+				left: 20px
+				right: 20px
+			max-width: 680px
+			margin: 0 auto
+
+			+media-lg
+				padding:
+					left: 0
+					right: 0
+
+			.comment-reply-form
+				+media-xs
+					padding:
+						left: 0
+
+	#blog_post-edit-form
+		padding: 0
+
+		.form-group
+			label
+				text-transform: capitalize
+
+		.form-group.content
+			.form-control
+				min-height: 350px
+
+		.form-group.url
+			label
+				text-transform: uppercase
+
+		.form-group.picture
+			+text-overflow-ellipsis
+
+			img
+				display: block
+				max-width: 100%
+
+			a
+				display: block
+				padding: 10px 0
+				text-align: right
+
+			.original a
+				color: $color-info
+			.delete a
+				color: $color-danger
+
+		.form-upload-file-meta
+			width: initial
+
+#blog_post-edit-title
+	padding: 0
+	color: $color-text
+	font:
+		family: $font-headings
+		size: 1.8em
+		weight: 300
+	margin: 0 20px 15px 0
+
+
+
+#blog_index-sidebar
+	width: 25%
+	padding: 0 15px
+
+	+media-xs
+		width: 100%
+		clear: both
+		display: block
+		margin-top: 25px
+	+media-sm
+		width: 40%
+	+media-md
+		width: 30%
+	+media-lg
+		width: 25%
+
+	.button-create
+		display: block
+		width: 100%
+		+button-rounded($color-success, 6px)
+		margin: 0
+
+	.button-back
+		display: block
+		width: 100%
+		+button-rounded($color-info, 6px)
+		margin: 15px 0 0 0
+
+	#blog_post-edit-form
+		.form-group
+			.form-control
+				background-color: white
+
+	.blog_index-sidebar,
+	.blog_project-sidebar
+		+container-box
+		background-color: lighten($color-background, 5%)
+		padding: 20px
+
+	.blog_project-card
+		position: relative
+		width: 100%
+		border-radius: 3px
+		overflow: hidden
+		background-color: white
+		color: lighten($color-text, 10%)
+		box-shadow: 0 0 30px rgba(black, .2)
+
+		margin:
+			top: 0
+			bottom: 15px
+			left: auto
+			right: auto
+
+
+		a.item-header
+			position: relative
+			width: 100%
+			height: 100px
+			display: block
+			background-size: 100% 100%
+
+			overflow: hidden
+
+			.overlay
+				z-index: 1
+				width: 100%
+				height: 100px
+				@include overlay(transparent, 0%, white, 100%)
+
+
+			img.background
+				width: 100%
+				// We can't have nice things because of Edge
+				// filter: blur(5px)
+				transform: scale(1.4)
+
+		.card-thumbnail
+			position: absolute
+			z-index: 2
+			height: 90px
+			width: 90px
+			display: block
+			top: 35px
+			left: 50%
+			transform: translateX(-50%)
+			background-color: white
+			border-radius: 3px
+			overflow: hidden
+
+			&:hover
+				img.thumb
+					opacity: .9
+
+			img.thumb
+				width: 100%
+				border-radius: 3px
+				transition: opacity 150ms ease-in-out
+				+position-center-translate
+
+
+		.item-info
+			padding: 10px 20px
+			background-color: white
+			border-bottom-left-radius: 3px
+			border-bottom-right-radius: 3px
+
+			a.item-title
+				display: inline-block
+				width: 100%
+				padding: 30px 0 15px 0
+				color: $color-text-dark
+				text-align: center
+				font:
+					size: 1.6em
+					family: $font-headings
+					weight: 300
+
+				transition: color 150ms ease-in-out
+
+				&:hover
+					text-decoration: none
+					color: $color-primary
+
+#blog_post-container
+	.button-create
+		+button-rounded($color-success, 6px)
+	.button-back
+		position: absolute
+		top: 15px
+		right: 15px
+		z-index: 2
+		+button-rounded-filled($color-info, 6px)
+	.button-create, .button-edit
+		position: absolute
+		z-index: 2
+		top: 15px
+		right: 15px
+		+button-rounded-filled($color-success, 6px)
+
+	.button-edit
+		right: 170px
+		top: 15px
+
+	.button-back+.button-edit
+		right: 15px
+		top: 15px
+
+
+#blog_container
+	&.cloud-blog
+		#blog_index-container,
+		#blog_post-container,
+		#blog_post-create-container,
+		#blog_post-edit-container
+			width: 90%
+			padding: 25px 30px 20px 30px
+
+		#blog_index-container+#blog_index-sidebar,
+		#blog_post-container+#blog_index-sidebar
+			display: none
+
+	&.cloud-blog #blog_index-container,
+	&.cloud-blog #blog_post-container,
+	#blog_index-container, #blog_post-container
+		padding: 0 0 50px 0
+
+		+media-sm
+			width: 100%
+			padding: 25px 20px 20px 20px
+		+media-xs
+			width: 100%
+			padding: 0 0 20px 0
+
+		.blog_index-item
+			padding: 25px 80px 20px 80px
+			position: relative
+
+			+media-xs
+				width: 100%
+				padding: 25px 0 20px 0
+
+			&.list
+				margin: 0 auto
+				padding: 15px 0
+				margin: 0 80px
+				border-bottom: thin solid $color-background
+
+				&:last-child
+					border-bottom: none
+
+				+media-xs
+					width: 100%
+					padding: 15px 10px
+					margin: 0
+
+				a.item-title
+					padding:
+						top: 0
+						bottom: 5px
+					font:
+						size: 1.6em
+						weight: 400
+						family: $font-body
+
+				.item-info
+					color: $color-text-dark-secondary
+					font-size: .9em
+					padding:
+						left: 25px
+						right: 25px
+
+
+				.item-header
+					width: 50px
+					height: 50px
+					position: absolute
+					top: 20px
+					border-radius: 3px
+					background-color: $color-background
+					overflow: hidden
+
+					img
+						+position-center-translate
+						width: 100%
+
+					i
+						+position-center-translate
+						font-size: 1.2em
+						color: $color-text-dark-hint
+
+					&.nothumb
+						border-radius: 50%
+
+				a.item-title, .item-info
+					padding-left: 70px
+
+		h4.blog_index-title
+			margin-left: 80px
+			padding-top: 25px
+			font:
+				family: $font-body
+			color: $color-text-dark-secondary
+
+
+	#blog_index-container,
+	#blog_post-container
+		.blog_index-item
+			padding: 25px 10px 20px 10px
+			position: relative
+
+			+media-xs
+				padding: 25px 0 20px 0
+
+			&.list
+				padding: 15px 10px
+				margin: 0 25px
+
+				+media-xs
+					width: 100%
+					padding: 15px 10px
+					margin: 0
+
+		h4.blog_index-title
+			margin-left: 35px
+
+	&.cloud-blog #blog_post-container,
+	#blog_post-container
+		.blog_index-item
+			padding-top: 55px
+			font-size: .9em

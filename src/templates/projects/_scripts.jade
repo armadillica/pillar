@@ -1,0 +1,22 @@
+script(type="text/javascript").
+
+	/* Convert Markdown */
+	var convert = new Markdown.getSanitizingConverter().makeHtml;
+	var convert_fields = '.node-details-description, .blog_index-item .item-content';
+
+	/* Parse description/content fields to convert markdown */
+	$(convert_fields).each(function(i){
+		$(convert_fields).eq(i).html(convert($(convert_fields).eq(i).text()));
+	});
+
+	ProjectUtils.setProjectAttributes({isProject: true, nodeId: '', parentNodeId: ''});
+	var movingMode = Cookies.getJSON('bcloud_moving_node');
+
+	if (movingMode){
+		$('#item_move_accept').removeClass('disabled').html('<i class="pi-check"></i> Move to Root');
+
+		if (movingMode.node_type === 'texture'){
+			$('#item_move_accept').addClass('disabled').html('Select a Texture Folder');
+		}
+
+	};

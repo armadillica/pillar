@@ -1,0 +1,506 @@
+/* Pages (services, about, etc) */
+
+#page-header
+	display: flex
+	align-items: center
+	justify-content: center
+	flex-direction: column
+	min-height: 350px
+	color: white
+	border-bottom: 2px solid $color-background-light
+
+	.page-title-icons
+		font-size: 3em
+		display: flex
+		align-items: center
+		justify-content: center
+		margin-top: 15px
+		text-shadow: 2px 2px 1px rgba(black, .2)
+
+		.pi-blender-cloud
+			position: relative
+			left: -10px
+
+		.pi-heart-filled
+			font-size: .6em
+			padding: 0 15px
+			color: $color-danger
+			animation:
+				name: grow-bounce-heartbeat
+				duration: 2.5s
+				iteration-count: infinite
+
+	.page-title
+		text-align: center
+		font:
+			family: $font-headings
+			size: 2.8em
+			weight: 300
+
+		padding: 15px
+		text-shadow: 0 0 30px black, 0 0 50px black, 2px 2px 1px rgba(black, .2)
+
+		+media-xs
+			font-size: 2.5em
+
+		i.pi-blender-cloud-logo
+			width: 230px
+			display: inline-block
+		em
+			padding-left: 10px
+			font-size: .7em
+
+
+	.page-title-summary
+		text-align: center
+		padding: 10px 15px
+		font-size: 1.2em
+
+	.page-header-cta-container
+		display: flex
+		flex-direction: row
+		justify-content: center
+		align-items: center
+		margin: 30px auto
+
+	a.page-header-cta
+		+button-rounded-filled($color-info, 3px)
+		font:
+			size: 1.3em
+			weight: 500
+		padding: 4px 50px
+		display: inline-block
+		opacity: 1
+
+	a.page-header-cta-extra
+		display: inline-block
+		font-size: 1.2em
+		padding: 5px 25px
+		color: white
+
+#page-content
+	background-color: white
+	width: 100%
+
+.page-triplet-container
+	+container-behavior
+	padding: 25px 30px
+
+	.row, div[class^="col-md"]
+		+media-md
+			display: flex
+		+media-lg
+			display: flex
+
+	.triplet-card
+		width: 100%
+		+container-box
+		display: flex
+		flex-direction: column
+
+		.triplet-card-thumbnail
+			img
+				border-top-left-radius: 3px
+				border-top-right-radius: 3px
+				width: 100%
+				border-bottom: 3px solid $color-primary
+				+img-responsive
+
+		.triplet-card-info
+			padding: 15px
+			text-align: center
+			flex: 1
+			display: flex
+			flex-direction: column
+
+			h3
+				margin-top: 10px
+				color: $color-danger
+				padding-bottom: 20px
+				position: relative
+
+				&:after
+					content: ''
+					border-bottom: 2px solid rgba($color-danger, .8)
+					width: 35px
+					position: absolute
+					left: 50%
+					bottom: 10px
+					transform: translateX(-50%)
+			p
+				display: block
+				font-size: 1.1em
+				line-height: 1.5em
+				color: $color-text-dark-primary
+				flex: 1
+
+		.triplet-cta
+			display: block
+			font-size: .9em
+			padding: 10px 0
+			color: $color-primary-dark
+			cursor: pointer
+			&:hover
+				text-decoration: underline
+
+
+$page-card-icon-size: 75px
+.page-card-header
+	position: relative
+	width: 100%
+	text-align: center
+	color: $color-info
+	display: block
+	padding: 40px 0 25px 0
+	margin-bottom: -50px
+	font:
+		size: 2.4em
+		weight: 300
+
+	&:after
+		content: '';
+		border-bottom: 2px solid rgba(104,179,200,0.8);
+		width: 120px;
+		position: absolute;
+		left: 50%;
+		-webkit-transform: translateX(-50%);
+		transform: translateX(-50%);
+		bottom: 7px;
+
+	span
+		display: block
+		padding: 10px 0
+		font-size: .6em
+		color: $color-text-light-secondary
+
+	a.page-card-cta
+		font-size: .5em
+		min-width: 250px
+		margin:
+			right: 0
+			top: 10px
+			bottom: 10px
+
+	&.dark
+		color: white
+
+		&:after
+			border-bottom-color: rgba(white, .6)
+
+.page-card
+	display: flex
+	align-items: center
+	justify-content: center
+	min-height: 200px
+	margin: 0 auto
+	background:
+		color: white
+		size: cover
+		position: 50% 50%
+
+	+clearfix
+
+	+media-sm
+		min-height: 150px
+	+media-xs
+		min-height: 150px
+		flex-direction: column-reverse
+
+
+	&:nth-child(even)
+		background-color: $color-background-light
+
+	hr
+		width: 100%
+		height: 1px
+		display: block
+		margin: 10px auto
+		padding: 0
+		border: none
+		background-color: $color-background
+
+	&.right
+		flex-direction: row-reverse
+
+		+media-xs
+			flex-direction: column-reverse
+
+	&.dark
+		background-color: #2b2b2b
+
+		&:nth-child(even)
+			background-color: darken(#2b2b2b, 5%)
+
+		a
+			color: $color-info
+
+		hr
+			background-color: rgba(white, .1)
+
+		.page-card-summary
+			color: #ccc
+
+	.page-card-side
+		width: 50%
+		padding: 60px 0
+		max-width: 450px
+		position: relative
+		align-self: stretch
+
+		+list-bullets
+
+		+media-sm
+			padding: 40px 0
+		+media-xs
+			width: 90%
+			max-width: 90%
+			padding: 40px 0
+
+	.page-card-title
+		font:
+			size: 2em
+			weight: 300
+		color: $color-danger
+		padding-bottom: 15px
+		position: relative
+		margin-top: 0
+
+		&:after
+			content: ''
+			border-bottom: 2px solid rgba($color-danger, .8)
+			width: 35px
+			position: absolute
+			left: 0
+			bottom: 7px
+
+		small
+			color: $color-text-dark-hint
+			font-size: .8em
+			padding-left: 5px
+
+	.page-card-summary
+		font-size: 1.4em
+		color: $color-text-dark-primary
+		padding: 15px 0 25px 0
+
+	.page-card-image
+		width: 100%
+		text-align: center
+
+		img
+			max-width: 100%
+		span
+			display: block
+			text-align: center
+			padding: 20px 0
+			color: $color-text-dark-primary
+
+	.page-card-icon
+		display: block
+		position: relative
+		+position-center-translate
+		margin: 0 auto
+		width: $page-card-icon-size * 2
+		height: $page-card-icon-size * 2
+		border: 2px solid rgba($color-text-dark-hint, .5)
+		border-radius: 50%
+		background:
+			position: 50% 50%
+			repeat: no-repeat
+			size: $page-card-icon-size
+
+		+media-sm
+			width: $page-card-icon-size * 1.5
+			height: $page-card-icon-size * 1.5
+			background-size: $page-card-icon-size * 0.75
+
+		+media-xs
+			width: $page-card-icon-size * 1.5
+			height: $page-card-icon-size * 1.5
+			background-size: $page-card-icon-size * 0.75
+
+			margin: 40px auto
+
+		svg
+			+position-center-translate
+
+
+	/* Subscribe specifics */
+	&.subscribe
+		background-color: $color-background-nav
+		text-align: center
+		padding: 60px 0
+
+		.page-card-side
+			width: 100%
+			max-width: 100%
+
+		.page-card-title
+			color: $color-info
+			text-align: center
+			padding-bottom: 0
+
+			&:after
+				border: none
+
+		.page-card-summary
+			color: $color-text-light-primary
+
+		.page-card-cta
+			text-align: center
+			font-size: 1.5em
+			padding: 10px 40px
+			margin-right: initial
+
+a.page-card-cta
+	+button-rounded-filled($color-primary, 3px)
+	padding: 5px 30px
+	margin-right: 25px
+	font-size: 1em
+	font-weight: 500
+	display: inline-block
+	opacity: 1
+	color: white !important
+
+	i
+		position: relative
+		left: -10px
+		margin-right: 0
+
+	&.download
+		+button-rounded-filled($color-success, 3px)
+		opacity: 1
+
+		i
+			position: relative
+			left: 0
+
+.page-section-container
+	background:
+		color: transparent
+		size: cover
+		position: 50% 50%
+	.page-card, .page-card.dark,
+	.page-card-header, .page-card-header.dark,
+		background-color: transparent
+
+	.page-card.dark:nth-child(even)
+			background-color: rgba(black, .1)
+			border-top: 2px solid rgba(black, .35)
+
+	.page-card-side
+		max-width: 500px
+		padding: 90px 25px
+
+/* Page specific changes */
+.page-triplet-container.homepage
+	.triplet-card
+		cursor: pointer
+		transition: box-shadow 150ms ease-in-out
+		&:hover
+			box-shadow: 0 0 25px rgba(black, .2)
+
+.join.navbar-backdrop
+	position: relative
+	video
+		display: block
+		+position-center-translate
+
+
+		+media-xs
+			display: none
+		+media-sm
+			display: none
+		+media-md
+			width: 100%
+		+media-lg
+			width: 100%
+
+.services.navbar-backdrop-overlay
+	background: rgba(black, .5)
+
+.services
+	.page-card-side
+		max-width: 500px
+		padding: 75px 25px
+
+	.page-card-header.dark
+		&:after
+			border: none
+
+.join.navbar-backdrop-overlay
+	background: linear-gradient(rgba(white, .3) 0%, transparent 60%)
+
+.join
+	#page-header
+		.page-title
+			font:
+				size: 2.8em
+		.page-title-summary
+			font:
+				style: normal
+				size: 1.4em
+				weight: 400
+
+	.page-card
+		&:nth-child(even)
+			background-color: white
+		&.right
+			background-color: $color-background-light
+
+			.page-card-title,
+			.page-card-summary
+				padding-left: 25px
+
+			.page-card-title:after
+				left: 25px
+
+		&.dark.right
+			.page-card-title,
+			.page-card-summary
+				padding-left: 0
+
+			.page-card-title:after
+				left: 0
+
+		&.oneofus
+			display: block
+			text-align: center
+			min-height: initial
+			padding: 25px
+			color: transparent
+			background-color: $color-background-light
+			border-top: thin solid $color-background
+			font:
+				size: 1.4em
+
+			transition: color 350ms ease-in-out
+
+			a, strong
+				color: transparent
+				transition: color 350ms ease-in-out
+
+			&.active
+				color: $color-text-dark-primary
+				a
+					color: $color-primary
+				strong
+					color: $color-danger
+
+	.page-card-header
+		margin-bottom: 0
+
+	.page-card-header.dark
+		margin-bottom: -50px
+
+		&:after
+			border: none
+
+	.page-card-side
+		+media-xs
+			width: 100%
+			max-width: 100%
+
+		.page-card-image
+			img
+				border-radius: 3px

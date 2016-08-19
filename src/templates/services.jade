@@ -1,0 +1,218 @@
+| {% extends 'layout.html' %}
+| {% block page_title %}Services{% endblock %}
+
+| {% set title = 'services' %}
+
+| {% block og %}
+meta(property="og:title", content="Services - Blender Cloud")
+meta(property="og:url", content="https://cloud.blender.org/services")
+meta(property="og:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_services.jpg')}}")
+| {% endblock %}
+
+| {% block header_backdrop %}
+.navbar-backdrop(
+	style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/services_projects.jpg')}})")
+.navbar-backdrop-overlay.services
+| {% endblock %}
+
+| {% block page_overlay %}
+#page-overlay.video
+	.video-embed
+| {% endblock %}
+
+| {% block body %}
+#page-container
+	#page-header
+		.page-title(style="text-align: left")
+			i.pi-blender-cloud-logo
+			em SERVICES
+		.page-title-summary
+			| Personal Projects · Blender Integration · Texture Browsing · Production Management
+
+	#page-content
+		section.page-card
+
+			.page-card-side
+				h2.page-card-title Private Projects
+				.page-card-summary.
+					Create and manage your own personal projects.
+					Upload assets and collaborate with other Blender Cloud members.
+
+				a.page-card-cta(
+					href="https://cloud.blender.org/blog/introducing-private-projects")
+					| Learn More
+
+			.page-card-side
+				.page-card-icon
+					svg(xmlns='http://www.w3.org/2000/svg', width='56', height='64', viewbox='0 0 56 64')
+						g(fill='#555')
+							path(d='M42 38H14V26h28v12zm-26-2h24v-8H16v8zm-4-5H8c-1.654 0-3-1.346-3-3V15h2v13c0 .55.45 1 1 1h4v2z')
+							path(d='M9.293 19.707L6 16.414l-3.293 3.293-1.414-1.414 4-4c.39-.39 1.023-.39 1.414 0l4 4-1.414 1.414zM48 31h-4v-2h4c.55 0 1-.45 1-1V15h2v13c0 1.654-1.346 3-3 3z')
+							path(d='M53.293 19.707L50 16.414l-3.293 3.293-1.414-1.414L50 13.586l4.707 4.707M27 15h2v9h-2z')
+							path(d='M31.293 19.707L28 16.414l-3.293 3.293-1.414-1.414L28 13.586l4.707 4.707M7 49H5V36c0-1.654 1.346-3 3-3h4v2H8c-.55 0-1 .45-1 1v13z')
+							path(d='M6 50c-.256 0-.512-.098-.707-.293l-4-4 1.414-1.414L6 47.586l3.293-3.293 1.414 1.414-4 4c-.195.195-.45.293-.707.293zm45-1h-2V36c0-.55-.45-1-1-1h-4v-2h4c1.654 0 3 1.346 3 3v13z')
+							path(d='M50 50.414l-4.707-4.707 1.414-1.414L50 47.586l3.293-3.293 1.414 1.414M27 40h2v9h-2z')
+							path(d='M28 50.414l-4.707-4.707 1.414-1.414L28 47.586l3.293-3.293 1.414 1.414M6 12c-3.31 0-6-2.692-6-6s2.69-6 6-6 6 2.692 6 6-2.69 6-6 6zM6 2C3.794 2 2 3.794 2 6s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4zm22 10c-3.31 0-6-2.692-6-6s2.69-6 6-6 6 2.692 6 6-2.69 6-6 6zm0-10c-2.206 0-4 1.794-4 4s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4zm22 10c-3.31 0-6-2.692-6-6s2.69-6 6-6 6 2.692 6 6-2.69 6-6 6zm0-10c-2.206 0-4 1.794-4 4s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4zM6 64c-3.31 0-6-2.692-6-6s2.69-6 6-6 6 2.692 6 6-2.69 6-6 6zm0-10c-2.206 0-4 1.794-4 4s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4zm22 10c-3.31 0-6-2.692-6-6s2.69-6 6-6 6 2.692 6 6-2.69 6-6 6zm0-10c-2.206 0-4 1.794-4 4s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4zm22 10c-3.31 0-6-2.692-6-6s2.69-6 6-6 6 2.692 6 6-2.69 6-6 6zm0-10c-2.206 0-4 1.794-4 4s1.794 4 4 4 4-1.794 4-4-1.794-4-4-4zM27 31h2v2h-2zm-4 0h2v2h-2zm8 0h2v2h-2z')
+
+		#blender-addon.page-section-container(
+			style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/pattern_bw_01.jpg')}})")
+			section.page-card-header.dark Blender Cloud Add-on
+				span.page-card-header_lead.dark Connect Blender with the Cloud
+
+				a.page-card-cta.download(
+							href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
+							i.pi-download
+							| Download <small>v</small>1.3
+
+			section.page-card.dark.right
+
+				.page-card-side
+					h2.page-card-title Blender Sync
+					.page-card-summary.
+						Save your settings once. Use them anywhere.
+						Carry your Blender configuration with you,
+						use our free add-on to sync your keymaps and preferences.
+						<hr/>
+						<small>Syncing settings is free for everyone! No subscription required.</small>
+
+					a.page-card-cta(
+						href="https://cloud.blender.org/blog/introducing-blender-sync")
+						| Learn More
+
+				.page-card-side
+					.page-card-icon
+						svg(xmlns="http://www.w3.org/2000/svg",
+								width="64", height="54", viewBox="0 0 64 54")
+								g(fill="none", stroke="#aaa", stroke-width="2", stroke-miterlimit="10")
+									path(d="M29 47H5l-4-4v-2h24l2 2h2M29 3H10C8.344 3 7 4.343 7 6v32M35 51h24l4-4v-2H39l-2 2h-2M35 7h19c1.656 0 3 1.343 3 3v32M32 34v20M32 20v8M32 0v14")
+									g
+										path(d="M32 31c-3.866 0-7-3.134-7-7M32 17c3.866 0 7 3.134 7 7M32 31h8M24 17h8M36 35l4-4-4-4M28 21l-4-4 4-4")
+									path(d="M29 37H11V7h18M35 11h18v30H35")
+
+
+			section.page-card.dark
+
+				.page-card-side
+					h2.page-card-title Texture Browser
+					.page-card-summary
+						p.
+							Access the <a href="https://cloud.blender.org/p/textures/">Blender Cloud Textures</a>
+							library from within Blender using our exclusive add-on.
+							Create, manage and share <em>your own</em> texture libraries!
+
+					a.page-card-cta.watch-video(
+						href="https://www.youtube.com/watch?v=-srXYv2Osjw",
+						data-youtube-id="-srXYv2Osjw")
+						i.pi-play
+						| Watch Video
+
+				.page-card-side
+					.page-card-icon
+						svg(xmlns="http://www.w3.org/2000/svg",
+								width="64", height="60",
+								viewBox="0 0 64 60")
+								g(fill="#aaa")
+									path(d="M32 60c-.188 0-.377-.053-.542-.16l-31-20C.173 39.656 0 39.34 0 39s.173-.656.458-.84l31-20c.33-.213.754-.213 1.084 0l31 20c.285.184.458.5.458.84s-.173.656-.458.84l-31 20c-.165.107-.354.16-.542.16zM2.845 39L32 57.81 61.155 39 32 20.19 2.845 39z")
+									path(d="M32 51c-.188 0-.377-.053-.542-.16l-31-20C.173 30.656 0 30.34 0 30s.173-.656.458-.84l31-20c.33-.213.754-.213 1.084 0l31 20c.285.184.458.5.458.84s-.173.656-.458.84l-31 20c-.165.107-.354.16-.542.16zM2.845 30L32 48.81 61.155 30 32 11.19 2.845 30z")
+									path(d="M32 42c-.188 0-.377-.053-.542-.16l-31-20C.173 21.656 0 21.34 0 21s.173-.656.458-.84l31-20c.33-.213.754-.213 1.084 0l31 20c.285.184.458.5.458.84s-.173.656-.458.84l-31 20c-.165.107-.354.16-.542.16zM2.845 21L32 39.81 61.155 21 32 2.19 2.845 21z")
+									path(d="M31 27h2v2h-2zm0-4h2v2h-2zm0 8h2v2h-2zm4-4h2v2h-2zm4 2h2v2h-2zm-16 0h2v2h-2zm12 2h2v2h-2zm-8-4h2v2h-2zm0 4h2v2h-2zm4 4h2v2h-2zm31 15h2v2h-2zm0-4h2v2h-2zm0 8h2v2h-2zm0 4h2v2h-2zm0-54h2v2h-2zm0-4h2v2h-2zm0 8h2v2h-2zm0 4h2v2h-2zM0 50h2v2H0zm0-4h2v2H0zm0 8h2v2H0zm0 4h2v2H0zM0 4h2v2H0zm0-4h2v2H0zm4 0h2v2H4zm4 0h2v2H8zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zm22 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zM4 58h2v2H4zm4 0h2v2H8zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zm22 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zm4 0h2v2h-2zM0 8h2v2H0zm0 4h2v2H0z")
+
+
+			section.page-card.dark.right
+
+				.page-card-side
+					h2.page-card-title Image Sharing
+					.page-card-summary.
+						Got a nice render, a Blender oddity, a cool screenshot?
+						Share it instantly from within Blender to the Cloud, to the world!
+
+					a.page-card-cta(
+					href="https://cloud.blender.org/blog/introducing-image-sharing")
+						| Learn More
+
+				.page-card-side
+					.page-card-icon
+						svg(xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64")
+							g(fill="none",
+								stroke="#aaa",
+								stroke-width="2",
+								stroke-linejoin="round",
+								stroke-miterlimit="10")
+								path(d="M1 1h62v62H1zM4 59h2M8 59h2M12 59h2M60 49H48M46 49H27M60 53H40")
+								path(d="M5 5h54v40H5z")
+								path(d="M9 45v-3c0-1.656 1.344-3 3-3h6c1.656 0 3 1.344 3 3v3M29 45v-3c0-1.656 1.344-3 3-3h6c1.656 0 3 1.344 3 3v3M13 45v-3M17 45v-3M33 45v-3M37 45v-3M22 31h-5c-2.762 0-5 2.238-5 5v3M38 39v-3c0-2.762-2.238-5-5-5h-5M31 20c0 3.313-1 9-6 9s-6-5.687-6-9c0-1 0-5 6-5s6 4 6 5z")
+								path(d="M29 27l-2 8h-4l-2-8M18 31c-4-3-5-9-5-9l6-3M32 31c4-3 5-9 5-9l-6-3M59 24L44 9l-8 8M44 9l8 36")
+								circle(cx="12", cy="12", r="3")
+
+
+		section.page-card.services-attract
+
+			.page-card-side
+				h2.page-card-title
+					| Attract
+					small (soon)
+				.page-card-summary.
+					Production-management software for your film, game, or commercial projects.
+
+			.page-card-side
+				.page-card-icon
+					svg(xmlns='http://www.w3.org/2000/svg', width='56', height='64', viewbox='0 0 56 64')
+						path(fill='#aaa', d='M16 32C7.178 32 0 24.822 0 16S7.178 0 16 0s16 7.178 16 16-7.178 16-16 16zm0-30C8.28 2 2 8.28 2 16s6.28 14 14 14 14-6.28 14-14S23.72 2 16 2z')
+						path(fill='#aaa', d='M16 56c-2.757 0-5-2.243-5-5V31h2v20c0 1.654 1.346 3 3 3s3-1.346 3-3V31h2v20c0 2.757-2.243 5-5 5z')
+						path(fill='#aaa', d='M15 40h2v2h-2zM15 44h2v2h-2zM15 48h2v2h-2zM46.414 64H15v-6h2v4h28.586L54 53.586V8H32V6h24v48.414')
+						path(fill='#aaa', d='M47 63h-2V53h10v2h-8M24 24H8V8h12v2H10v12h12v-6h2')
+						path(fill='#aaa', d='M16 19.414l-3.707-3.707 1.414-1.414L16 16.586l6.293-6.293 1.414 1.414M29 39h-6v-6h6v6zm-4-2h2v-2h-2v2zM29 47h-6v-6h6v6zm-4-2h2v-2h-2v2zM29 55h-6v-6h6v6zm-4-2h2v-2h-2v2zM31 33h19v2H31zM31 37h19v2H31zM31 41h19v2H31zM31 45h19v2H31zM31 53h10v2H31zM31 49h19v2H31z')
+						g
+							path(fill='#aaa', d='M50 29H31v-2h17v-8H34v-2h16')
+						g
+							path(fill='#aaa', d='M48 13h2v2h-2z')
+						g
+							path(fill='#aaa', d='M44 13h2v2h-2z')
+						g
+							path(fill='#aaa', d='M40 13h2v2h-2z')
+
+
+		| {% if not current_user.has_role('subscriber') %}
+		section.page-card.subscribe(
+			style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/background_services.jpg')}});background-size: cover")
+			.page-card-side
+				h2.page-card-title
+					| All of this, plus hours of training and production assets.
+				.page-card-summary
+					| Join us for only $9.90/month!
+				a.page-card-cta(
+					href="https://store.blender.org/product/membership/")
+					| Subscribe Now
+		| {% endif %}
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+	// Click anywhere in the page to hide the overlay
+	function hideOverlay() {
+		$('#page-overlay.video').removeClass('active');
+		$('#page-overlay.video .video-embed').html('');
+	}
+
+	$(document).click(function() {
+		hideOverlay();
+	});
+
+	$(document).keyup(function(e) {
+		if (e.keyCode == 27) {
+			hideOverlay();
+		}
+	});
+
+	$('a.watch-video').click(function(e){
+		e.preventDefault();
+		e.stopPropagation();
+
+		$('#page-overlay.video').addClass('active');
+
+		var videoId = $(this).attr('data-youtube-id');
+		$('#page-overlay .video-embed').html('<iframe src="https://www.youtube.com/embed/' + videoId +'?rel=0&amp;showinfo=0;autoplay=1" frameborder="0" allowfullscreen></iframe>')
+	});
+
+| {% endblock %}

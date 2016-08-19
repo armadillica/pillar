@@ -1,0 +1,284 @@
+/* Notifications */
+#notifications
+	display: none
+
+	& #notifications-refresh,
+	& #notifications-markallread
+		float: right
+		color: $color-primary
+		cursor: pointer
+		padding: 8px 10px 0 10px
+		margin: 0
+		height: initial
+		font:
+			family: $font-body
+
+		text:
+			shadow: none
+			transform: initial
+
+		&:hover, &:focus
+			color: lighten($color-primary, 10%)
+		&:active
+			color: $color-secondary
+
+#notifications-toggle
+	font-size: 1.5em
+	cursor: pointer
+	position: relative
+	user-select: none
+
+	& .flyout-hat
+		width: 0
+		height: 0
+		position: absolute
+		border-style: solid
+		border-width: 0 8px 8px 8px
+		border-color: transparent transparent white transparent
+		bottom: -15px
+		right: 22px
+		visibility: hidden
+
+	&.active
+		& .flyout-hat
+			visibility: visible
+
+	#notifications-count
+		opacity: 0
+		position: absolute
+		top: 10px
+		right: 14px
+		width: 18px
+		height: 18px
+		background-color: $color-secondary
+		border-radius: 50%
+		text-align: center
+		color: white
+		font-size: .5em
+		font:
+			weight: bolder
+			family: sans-serif
+		padding: 0
+		user-select: none
+		transform: scale(0)
+		transition: transform 250ms ease-in-out
+
+		span
+			position: relative
+			top: -2px
+
+
+		&.bloom
+			opacity: 1
+			transform: scale(1) !important
+			-webkit-transform: scale(1) !important
+
+#notifications-list
+	list-style-type: none
+	padding: 0 5px
+	margin: 0
+
+	& .nc-item, & .nc-loading
+		position: relative
+		padding: 10px 0
+		border-top: thin solid lighten($color-text, 62%)
+		margin: 0
+		width: 100%
+		display: block
+		clear: both
+
+		&:hover
+			& .nc-read_toggle,
+			& .nc-subscription_toggle
+				visibility: visible
+
+		&.is_read
+			opacity: 0.6
+			color: lighten($color-text, 20%)
+
+		&.nc-item-empty
+			color: lighten($color-text, 20%)
+			text-align: center
+			padding: 24px 0
+			user-select: none
+
+	& .nc-link
+		position: absolute
+		top: 0
+		right: 0
+		bottom: 0
+		background-color: rgba(0,0,0,.1)
+
+	& .nc-avatar
+		float: left
+		width: 10%
+		text-align: center
+
+		& img
+			border-radius: 50%
+			width: 24px
+			height: 24px
+
+	& .nc-text
+		width: 90%
+
+	& .nc-date
+		display: block
+		padding-top: 5px
+		margin-left: 40px
+		font-size: .85em
+		color: lighten($color-text, 20%)
+		& a
+			color: lighten($color-text, 20%)
+			&:hover
+				color: lighten($color-text, 30%)
+
+	& .nc-loading
+		text-align: center
+		font-size: 1.5em
+		color: lighten($color-text, 50%)
+
+	& .nc-button
+		color: $color-text-dark-secondary
+		text-shadow: none
+		visibility: hidden
+		cursor: pointer
+		display: block
+		float: right
+		position: absolute
+		top: 5px
+		right: 3px
+		padding: 5px
+
+		&.active
+			color: $color-primary
+
+		i.spin
+			&:before
+				content: '\e800'
+
+	& .nc-subscription_toggle
+		top: 25px
+		right: 4px
+
+	#notifications-loader
+		margin: 5px auto
+		text-align: center
+		color: $color-text-dark-hint
+		font-size: 1.2em
+
+#notification-pop
+	visibility: hidden
+	display: none
+	opacity: 0
+	background-color: #327588
+	color: $color-text-light-primary
+	border-radius: 3px
+	overflow: hidden
+	width: 300px
+	position: fixed
+	z-index: 9998
+	bottom: 20px
+	left: 20px
+	cursor: pointer
+	box-shadow: 1px 1px 0 rgba(black, .1), 0 0 25px rgba(black, .2)
+	transition: opacity 250ms ease-in-out
+
+	&:hover
+		#pop-close
+			opacity: 1
+
+	&.in
+		opacity: 1
+		visibility: visible
+		display: block
+		animation:
+			name: grow-bounce-in
+			duration: 500ms
+			delay: 0
+			fill-mode: forwards
+			iteration-count: 1
+			timing-function: ease-out
+
+		.nc-progress
+			animation:
+				name: background-fill-left-right
+				duration: 10s
+				delay: 0
+				fill-mode: forwards
+				iteration-count: 1
+				timing-function: linear
+
+
+	&.in.out
+		animation:
+			name: grow-bounce-out
+			duration: 500ms
+			delay: 0
+			fill-mode: forwards
+			iteration-count: 1
+			timing-function: ease-out
+
+
+	.nc-progress
+		position: absolute
+		top: 0
+		left: 0
+		width: 100%
+		height: 2px
+		background: linear-gradient(to left, transparent 50%, lighten($color-primary, 10%) 50%)
+		background-size: 200% 100%
+		color: white
+
+
+	#pop-close
+		opacity: 0
+		position: absolute
+		z-index: 9999
+		top: 5px
+		right: 5px
+		font-size: .8em
+		color: $color-text-light-hint
+		cursor: pointer
+		padding: 3px
+
+		&:hover
+			color: $color-text-light-secondary
+
+	.nc-item
+		padding: 10px
+		display: flex
+		align-items: center
+
+		a
+			color: white
+
+		.nc-text
+			width: 90%
+			padding: 0 10px
+			font-size: .9em
+
+		.nc-author
+			font-weight: 500
+			color: white
+
+		.nc-avatar
+			width: 10%
+			text-align: center
+			align-self: flex-start
+
+			& img
+				border-radius: 50%
+				width: 24px
+				height: 24px
+				margin: 0 auto
+
+		.nc-date
+			display: block
+			padding-top: 5px
+			font-size: .85em
+			color: $color-text-light-secondary
+			& a
+				color: $color-text-light-secondary
+				&:hover
+					color: $color-text-light-primary

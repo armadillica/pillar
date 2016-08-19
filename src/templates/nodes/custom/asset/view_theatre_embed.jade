@@ -1,0 +1,127 @@
+#theatre-media
+	img(src="{{ node.picture.thumbnail('h', api=api) }}", onmousedown="return false")
+
+	ul#theatre-tools
+		li.theatre-tool-resize(title="Toggle Normal Size")
+			span
+				i.pi-resize-full
+		| {% if node.file and node.file.link %}
+		li.download
+			a(href="{{ node.file.link }}",
+				title="Download the original file",
+				download="{{ node.file.filename }}")
+				i.pi-download
+		| {% else %}
+		li.download.disabled
+			a(href="{{ url_for('users.login') }}",
+				title="Sign in to download the original file")
+				i.pi-download
+		| {% endif %}
+
+#theatre-info
+	.theatre-info-header
+		.theatre-info-title {{ node.name }}
+		.theatre-info-user {{ node.user.full_name }}
+		.theatre-info-date {{ node._created | pretty_date_time }}
+
+	ul.theatre-info-details
+		li
+			span Type
+			span {{ node.file.content_type }}
+		li
+			span Dimensions
+			span {{ node.file.width }} <small>x</small> {{ node.file.height }}
+		li
+			span Size
+			span {{ node.file.length | filesizeformat }}
+		| {% if node.short_link %}
+		li
+			span Share link
+			a(href="{{ node.short_link }}") {{ node.short_link }}
+		| {% endif %}
+
+	#comments-container
+		#comments-list-items-loading
+			i.pi-spin
+
+include ../_scripts
+
+script.
+	$(function () {
+
+		// Load scrollbar for sidebar
+		Ps.initialize(document.getElementById('theatre-info'), {suppressScrollX: true});
+
+		var file_width = {{ node.file.width }};
+		var file_height = {{ node.file.height }};
+		var theatre_media = document.getElementById('theatre-media');
+		var $theatre_media = $(theatre_media);
+
+		function canZoom() {
+			return theatre_media.scrollWidth < file_width ||
+					theatre_media.scrollHeight < file_height;
+		}
+
+		// TODO: update this whenever the screen resizes.
+		if (canZoom()) $theatre_media.addClass('zoomed-out');
+
+		function theatreZoom() {
+			var started_zoomed_in = $theatre_media.hasClass('zoomed-in');
+
+			// See if we need to zoom in at all. Zooming out is always allowed.
+			if (!started_zoomed_in && !canZoom()) {
+				$theatre_media.removeClass('zoomed-out');
+				return;
+			}
+
+			// Use add/removeClass to ensure there is always exactly one of zoomed-{in,out}.
+			// If we were to use toggleClass() they could both be applied when we started
+			// without zoomed-out class.
+			if (started_zoomed_in) {
+				$theatre_media.removeClass('zoomed-in');
+				$theatre_media.addClass('zoomed-out');
+				Ps.destroy(theatre_media);
+			} else {
+				$theatre_media.addClass('zoomed-in');
+				$theatre_media.removeClass('zoomed-out');
+				Ps.initialize(theatre_media);
+			}
+
+			// Style toolbar button
+			$('ul#theatre-tools li.theatre-tool-resize').toggleClass('active');
+		}
+
+		$('ul#theatre-tools li.theatre-tool-resize').on('click', function (e) {
+			theatreZoom();
+		});
+
+		$('ul.nav.navbar-nav a.navbar-item.info').on('click', function (e) {
+			e.preventDefault();
+			$('#theatre-container').toggleClass('with-info');
+		});
+
+		$("#theatre-media img").on('click', function (e) {
+			var $parent = $(this).parent();
+			var mouse_x = e.pageX;
+			var mouse_y = e.pageY;
+
+			// Compute relative position before zooming in.
+			var pre_width = e.target.clientWidth;
+			var rel_x = e.offsetX / pre_width;
+			var rel_y = e.offsetY / e.target.clientHeight;
+
+			theatreZoom();
+
+			var post_width = e.target.clientWidth;
+
+			if (post_width > pre_width) {
+				// We zoomed in, scroll such that the target position is under the mouse.
+				var target_x = Math.round(rel_x * post_width);
+				var target_y = Math.round(rel_y * e.target.clientHeight);
+
+				$parent
+					.scrollLeft(target_x - mouse_x + e.target.parentElement.parentElement.offsetLeft)
+					.scrollTop(target_y - mouse_y + e.target.parentElement.parentElement.offsetTop);
+			}
+		});
+	});

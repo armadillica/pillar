@@ -1,0 +1,347 @@
+| {% from '_macros/_node_edit_form.html' import render_field %}
+
+| {% block body %}
+
+| {% with errors = errors %}
+| {% if errors %}
+
+| {% for field in errors %}
+.alert.alert-danger(role="alert")
+	strong {{field}}
+	| {% for message in errors[field] %}
+	| {{message}}|
+	| {% endfor %}
+
+| {% endfor %}
+
+| {% endif %}
+| {% endwith %}
+
+| {% if error!="" %}
+.alert.alert-danger(role="alert")
+	| {{error}}
+| {% endif %}
+
+#node-edit-container
+
+	form(
+		id="node-edit-form",
+		class="{{ node.node_type }}",
+		method="POST",
+		enctype="multipart/form-data",
+		action="{{url_for('nodes.edit', node_id=node._id)}}")
+
+		| {% for field in form %}
+
+		| {% if field.name == 'csrf_token' %}
+		| {{ field }}
+
+		| {% elif field.type == 'HiddenField' %}
+		| {{ field }}
+
+		| {% elif field.name == 'attachments' %}
+		#attachments-actions
+			.btn.btn-info#attachments-action-add
+				i.pi-plus
+				| Add New Attachment
+
+		| {{ render_field(field) }}
+
+		| {% elif field.name == 'files' %}
+		.files-header
+			#files-actions
+				#files-action-add
+					i.pi-plus
+					| Add New File
+		| {{ render_field(field) }}
+
+		| {% else %}
+		| {{ render_field(field) }}
+
+		| {% endif %}
+
+		| {% endfor %}
+
+		ul.project-edit-tools.bottom
+			li.button-cancel
+				a#item_cancel.item-cancel.project-mode-edit(
+					href="javascript:void(0);",
+					title="Cancel changes")
+					i.button-cancel-icon.pi-cancel
+					| Cancel
+
+			li.button-save
+				a#item_save.item-save.project-mode-edit(
+					href="javascript:void(0);",
+					title="Save changes")
+					i.button-save-icon.pi-check
+					| Save Changes
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.ui.widget.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.iframe-transport.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.fileupload.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.select2.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/file_upload.min.js') }}")
+
+script(type="text/javascript").
+
+	$(function () {
+		$('#tags').select2();
+	});
+
+	var convert = new Markdown.getSanitizingConverter();
+	Markdown.Extra.init(convert);
+	convert = convert.makeHtml;
+
+	/* Build the markdown preview when typing in textarea */
+	$(function() {
+
+		var $textarea = $('.form-group.description textarea'),
+				$loader = $('<div class="md-preview-loading"><i class="pi-spin spin"></i></div>').insertAfter($textarea),
+				$preview = $('<div class="node-edit-form-md-preview" />').insertAfter($loader);
+
+		$loader.hide();
+
+		// Delay function to not start converting heavy posts immediately
+		var delay = (function(){
+			var timer = 0;
+			return function(callback, ms){
+				clearTimeout (timer);
+				timer = setTimeout(callback, ms);
+			};
+		})();
+
+		$textarea.keyup(function() {
+			/* If there's an iframe (YouTube embed), delay markdown convert 1.5s */
+			if (/iframe/i.test($textarea.val())) {
+				$loader.show();
+
+				delay(function(){
+					// Convert markdown
+					$preview.html(convert($textarea.val()));
+					$loader.hide();
+				}, 1500 );
+			} else {
+				// Convert markdown
+				$preview.html(convert($textarea.val()));
+			}
+		}).trigger('keyup');
+	});
+
+	$(function() {
+		$('input, textarea').keypress(function () {
+			// Unused: save status of the page as 'edited'
+			ProjectUtils.setProjectAttributes({isModified: true});
+			// Set the beforeunload to warn the user of unsaved changes
+			$(window).on('beforeunload', function () {
+				return 'You have unsaved changes in your asset.';
+			});
+		});
+	});
+
+	$("#item_save").unbind( "click" );
+	$("#item_cancel").unbind( "click" );
+	$(".file_delete").unbind( "click" );
+
+	/* Reset Save Changes button status */
+	$("li.button-save").removeClass('field-error saving');
+	$("li.button-save a#item_save").html('<i class="pi-check"></i> Save Changes');
+
+
+	/* Submit changes */
+	$("#node-edit-form").unbind( "submit" )
+						.submit(function(e) {
+		e.preventDefault();
+
+		/* Let us know started saving */
+		$("li.button-save").addClass('saving');
+		$("li.button-save a#item_save").html('<i class="pi-spin spin"></i> Saving...');
+
+		$.ajax({
+			url: "{{url_for('nodes.edit', node_id=node._id)}}",
+			data: $(this).serialize(),
+			type: 'POST'
+		})
+		.fail(function(data){
+			/* Something went wrong, print it */
+			if (data.status == 422) {
+				statusBarSet('error', 'The submitted data could not be validated.', 8000);
+			} else {
+				statusBarSet('error', 'Error! We\'ve been notified and are working on it - '
+						+ data.status + ' ' + data.statusText, 8000);
+			}
+
+			$("li.button-save").addClass('field-error');
+			$("li.button-save a#item_save").html('<i class="pi-warning"></i> Houston!');
+
+			/* Back to normal */
+			setTimeout(function(){
+				$("li.button-save").removeClass('saving field-error');
+				$("li.button-save a#item_save").html('<i class="pi-check"></i> Save Changes');
+			}, 8000);
+		})
+		.done(function(dataHtml){
+			/* Success! */
+
+			/* Load content*/
+			$('#project_context').html(dataHtml);
+			statusBarSet('success', 'Saved Successfully', 'pi-check');
+
+			/* Style button */
+			$("li.button-save").removeClass('saving field-error');
+			$("li.button-save a#item_save").html('<i class="pi-check"></i> Save Changes');
+
+			// XXX TODO - Keeps displaying 'loading', needs further investigation
+			//- $('#project_tree').jstree("refresh");
+
+			updateUi(ProjectUtils.nodeId(), 'view');
+		});
+
+	});
+
+	$('#item_save, .item-save').click(function(e){
+		e.preventDefault();
+
+		// Assets always need a file
+		if ($('.form-group.file #file').val() == ''){
+			$('.form-group.file').addClass('error');
+			statusBarSet('error', 'No File Selected', 'pi-warning', 5000);
+		} else {
+			$('.form-group.file').removeClass('error');
+			$("#node-edit-form").submit();
+
+			// Disable beforeunolad when submitting a form
+			$(window).off('beforeunload');
+		}
+	});
+
+	$('#item_cancel, .item-cancel').click(function(e){
+		displayNode('{{node._id}}');
+	});
+
+	var attrs = ['for', 'id', 'name', 'data-field-name'];
+	function resetAttributeNames(section) {
+		var tags = section.find('input, select, label, div, a');
+		var idx = section.index();
+		tags.each(function () {
+			var $this = $(this);
+
+			// Renumber certain attributes.
+			$.each(attrs, function (i, attr) {
+				var attr_val = $this.attr(attr);
+				if (attr_val) {
+					$this.attr(attr, attr_val.replace(/-\d+/, '-' + idx))
+				}
+			});
+
+			// Clear input field values
+			var tagname = $this.prop('tagName');
+			if (tagname == 'INPUT') {
+				if ($this.attr('type') == 'checkbox') {
+					$this.prop('checked', false);
+				} else {
+					$this.val('');
+				}
+			} else if (tagname == 'SELECT') {
+				$this.find(':nth-child(1)').prop('selected', true);
+			}
+		});
+
+		// Click on all file delete buttons to clear all file widgets.
+		section.find('a.file_delete').click();
+		section.find('div.form-upload-progress-bar').hide();
+	}
+
+	var initUploadFields = function(selector_string) {
+		// console.log($(selector_string));
+		$(selector_string).fileupload({
+			dataType: 'json',
+			acceptFileTypes: /(\.|\/)(gif|jpe?g|png)$/i,
+			replaceFileInput: false,
+			dropZone: $(this),
+			formData: {},
+			progressall: function (e, data) {
+				// Update progressbar during upload
+				var progress = parseInt(data.loaded / data.total * 100, 10);
+				$(this).next().find('.form-upload-progress-bar').css(
+								{'width': progress + '%', 'display': 'block'}
+				).removeClass('progress-error').addClass('progress-active');
+				fieldUpload = $(this);
+			},
+			done: function (e, data) {
+				// Get the first file upload result (we only need one)
+				var fileData = data.result.files[0];
+				// Create a file object on the server and retrieve its id
+				statusBarSet('info', 'Uploading File...', 'pi-upload-cloud');
+
+				$('.button-save').addClass('disabled');
+				$('li.button-save a#item_save').html('<i class="pi-spin spin"></i> Uploading Preview...');
+
+				var payload = {
+					name: fileData.name,
+					size: fileData.size,
+					type: fileData.type,
+					field_name: $(this).data('field-name'),
+					project_id: ProjectUtils.projectId()
+				}
+				$.post("/files/create", payload)
+					.done(function (data) {
+						if (data.status === 'success') {
+							// If successful, add id to the picture hidden field
+							var field_name = '#' + data.data.field_name;
+							if ($(field_name).val()) {
+								$('.node-preview-thumbnail').hide();
+								deleteFile($(field_name), data.data.id);
+							} else {
+								$(field_name).val(data.data.id);
+							}
+
+							var previewThumbnail = fieldUpload.prev().prev();
+
+							$(previewThumbnail).attr('src', data.data.link);
+							$('.node-preview-thumbnail').show();
+							statusBarSet('success', 'File Uploaded Successfully', 'pi-check');
+
+							$('.button-save').removeClass('disabled');
+							$('li.button-save a#item_save').html('<i class="pi-check"></i> Save Changes');
+							$('.progress-active').removeClass('progress-active progress-error');
+						}
+					})
+					.fail(function(data) {
+						$('.button-save').removeClass('disabled');
+						$('li.button-save a#item_save').html('<i class="pi-check"></i> Save Changes');
+
+						statusBarSet(data.textStatus, 'Upload error: ' + data.errorThrown, 'pi-attention', 8000);
+					});
+			},
+			fail: function (e, data) {
+				$('.button-save').removeClass('disabled');
+				$('li.button-save a#item_save').html('<i class="pi-check"></i> Save Changes');
+
+				statusBarSet(data.textStatus, 'Upload error: ' + data.errorThrown, 'pi-attention', 8000);
+				$('.progress-active').addClass('progress-error').removeClass('progress-active');
+			}
+		});
+	}
+
+	if (document.getElementById("attachments") !== null) {
+		$("#attachments-action-add").on('click', function(){
+			var lastRepeatingGroup = $('#attachments > li').last();
+			var cloned = lastRepeatingGroup.clone(true);
+			cloned.insertAfter(lastRepeatingGroup);
+			resetAttributeNames(cloned);
+		});
+	}
+
+	if (document.getElementById("files") !== null) {
+		$("#files-action-add").on('click', function () {
+			var lastRepeatingGroup = $('#files > li').last();
+			var cloned = lastRepeatingGroup.clone(false);
+			cloned.insertAfter(lastRepeatingGroup);
+			resetAttributeNames(cloned);
+			cloned.find('.fileupload').each(setup_file_uploader)
+		});
+	}
+	//- console.log($._data($(elementSelector)[0], "events"));
+
+
+| {% endblock %}

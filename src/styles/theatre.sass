@@ -1,0 +1,213 @@
+@import _normalize
+@import _config
+@import _utils
+
+@import _font-pillar
+@import _base
+@import _comments
+@import _notifications
+@import plugins/js_perfectscrollbar
+
+$color-theatre-background: #222
+$color-theatre-background-light: lighten($color-theatre-background, 5%)
+$color-theatre-background-dark: darken($color-theatre-background, 5%)
+
+$theatre-width: 350px
+
+body.theatre,
+body.theatre .container-page
+	background-color: $color-theatre-background
+	.navbar-transparent
+		+media-lg
+			background-color: $color-background-nav
+			background-image: none
+		a.navbar-item.info
+			font-size: 1.4em
+
+	.page-content
+		position: absolute
+		top: 0
+		left: 0
+		right: 0
+		bottom: 0
+		display: flex
+		align-items: center
+		justify-content: center
+		.page-body
+			height: 100%
+			width: 100%
+
+
+#theatre-container
+	display: flex
+	position: relative
+	height: 100%
+	overflow: hidden
+
+	#theatre-media
+		display: flex
+		align-items: center
+		justify-content: center
+		height: 100%
+		width: 100%
+		padding: 25px
+		position: relative
+
+		&:hover
+			ul#theatre-tools
+				display: block
+
+		img
+			display: block
+			border: thin solid $color-theatre-background-light
+			box-shadow: 1px 1px 10px rgba(black, .2)
+			max-width: 100%
+			max-height: 100%
+			height: auto
+			margin: 0 auto
+			+position-center-translate
+
+		&.zoomed-out
+			cursor: zoom-in
+
+		&.zoomed-in
+			display: block
+			padding: 0
+			img
+				cursor: zoom-out
+				position: initial
+				top: initial
+				left: initial
+				transform: initial
+				height: initial
+				width: initial
+				max-width: initial
+				max-height: initial
+
+		ul#theatre-tools
+			display: none
+			position: fixed
+			z-index: 9
+			bottom: 15px
+			right: 15px
+			margin: 0
+			padding: 0
+			list-style: none
+			color: white
+			background-color: rgba(black, .5)
+			border-radius: 3px
+			box-shadow: 0 0 15px rgba(black, .2)
+
+			li
+				display: inline-block
+				a, span
+					display: block
+					padding: 10px
+					cursor: default
+					color: white
+
+				&:hover a, &:hover span
+					color: $color-primary
+
+				&.download
+					a
+						cursor: pointer
+						&:hover
+							color: $color-primary
+
+					&.disabled
+						a
+							cursor: not-allowed
+							color: $color-text-dark-hint
+
+				&.active
+					background-color: rgba(black, .8)
+					a, span
+						color: $color-primary
+
+				&.theatre-tool-resize.active span i:before
+					content: '\e843'
+
+	&.with-info
+		#theatre-media ul#theatre-tools
+			right: $theatre-width + 15
+		#theatre-info
+			right: 0
+			visibility: visible
+			position: relative
+
+			#comments-container #comments-list .comment-reply-container
+				.comment-reply-form .comment-reply-field textarea
+					display: block
+
+	#theatre-info
+		visibility: hidden
+		width: $theatre-width
+		min-width: $theatre-width
+		height: 100%
+		position: relative
+		top: 0
+		right: -$theatre-width
+		background-color: white
+		border-left: 2px solid $color-background-nav
+		transition: right 200ms ease-in-out
+		position: absolute
+
+		.theatre-info-header
+			border-bottom: thin solid $color-background
+			padding-bottom: 10px
+
+			.theatre-info-title
+				padding: 20px 10px 5px 20px
+				font:
+					size: 1.2em
+					weight: 500
+			.theatre-info-user,
+			.theatre-info-date
+				display: inline-block
+				padding: 0 0 0 20px
+				font-size: .9em
+				color: $color-text-dark-secondary
+
+
+		ul.theatre-info-details
+			padding: 10px 20px 0 20px
+			margin: 0
+			list-style: none
+			color: $color-text-dark-primary
+
+			li
+				display: flex
+				padding: 2px 0
+				span
+					display: inline-block
+					flex: 2
+					&:first-child
+						flex: 1
+
+		#comments-container
+			height: 100%
+			padding: 0 15px
+
+			#comments-list
+				#comments-list-header
+					#comments-list-title
+						font-size: 1.2em
+				.comment-container,
+				.comment-reply-container
+					padding-top: 10px
+					padding-bottom: 10px
+
+					.comment-reply-form
+						.comment-reply-field textarea
+							display: none
+						.comment-reply-preview
+							padding-top: 25px
+						.comment-reply-meta
+							.comment-author,
+							.comment-rules
+								display: none
+							button.comment-action-submit
+								min-width: auto
+								font-size: .9em
+

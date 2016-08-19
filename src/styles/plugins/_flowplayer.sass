@@ -1,0 +1,1046 @@
+$flowplayer-skin-main: $color-background-nav
+$flowplayer-skin-highlight: $color-primary
+$flowplayer-skin-background: $color-background-nav
+$flowplayer-controls-height: 30px
+
+.flowplayer .fp-ui
+	z-index: $z-index-base + 1 !important
+
+.flowplayer .fp-progress.animated
+	&:after
+		width: 16px
+		height: 16px
+		border-radius: 50%
+		background-color: white
+
+.flowplayer .fp-remaining, .flowplayer .fp-duration
+	right: 117px !important
+
+.flowplayer .fp-time
+	text-shadow: none !important
+	font-family: $font-body !important
+
+.flowplayer .fp-fullscreen
+	border-radius: 999em !important
+	top: 15px !important
+	right: 15px !important
+	background-color: $flowplayer-skin-main !important
+	color: white !important
+
+.flowplayer .fp-endscreen
+	position: absolute
+	top: 0
+	bottom: 0
+	left: 0
+	right: 0
+	background-color: rgba($flowplayer-skin-background, .5)
+	display: flex
+	justify-content: center
+	align-items: center
+	opacity: 0
+	transition: opacity 350ms ease-in-out
+
+.flowplayer.is-finished .fp-endscreen
+	z-index: 12
+	opacity: 1
+
+
+.flowplayer .fp-endscreen
+	.watch-again
+		font:
+			size: 2em
+			family: $font-body
+			weight: 300
+		color: white
+		cursor: pointer
+		transition: color 150ms ease-in-out
+
+		i
+			margin-right: 5px
+
+		&:hover
+			text-decoration: none
+			color: $color-primary
+
+
+.flowplayer .fp-startscreen
+	z-index: 12
+	position: absolute
+	top: 0
+	bottom: 0
+	left: 0
+	right: 0
+	background-color: transparent
+	display: flex
+	justify-content: center
+	align-items: center
+	transition: opacity 350ms ease-in-out
+
+.flowplayer.is-ready .fp-startscreen
+	opacity: 1
+
+.flowplayer.is-playing .fp-startscreen,
+.flowplayer.is-finished .fp-startscreen
+	opacity: 0
+	z-index: 0
+
+.is-splash.flowplayer .fp-ui, .is-paused.flowplayer .fp-ui
+	background: none !important
+
+.flowplayer.is-paused .fp-startscreen
+	.big-play-button
+		display: none
+		font-size: 5em !important
+		color: white
+		transition: transform 150ms ease-in-out
+		cursor: pointer
+
+		&:hover
+			text-decoration: none
+
+.flowplayer.is-splash .fp-startscreen,
+.flowplayer .fp-endscreen
+	.big-play-button
+		display: block
+
+.flowplayer .fp-startscreen
+	&:hover
+		.big-play-button
+			transform: scale(1.2)
+
+/* Loading */
+.flowplayer .fp-ui .fp-waiting
+	display: none !important
+
+.flowplayer .fp-waiting
+	color: white
+	position: absolute
+	top: 0
+	bottom: 0
+	left: 0
+	right: 0
+	margin: 0 !important
+	background-color: rgba($flowplayer-skin-background, .5)
+
+	i
+		font-size: 3em
+		opacity: .3
+		+position-center-translate
+		top: 43%
+		left: 46%
+
+	*
+		box-shadow: none !important
+
+.flowplayer .fp-loading
+	opacity: 0
+	position: absolute
+	top: 0
+	bottom: 0
+	left: 0
+	right: 0
+	background-color: rgba($flowplayer-skin-background, .5)
+	display: flex
+	justify-content: center
+	align-items: center
+	transition: opacity 350ms ease-in-out
+	font-size: 5em
+	color: white
+	pointer-events: none
+
+	i
+		position: relative
+		padding-top: 4px
+
+.flowplayer.is-loading .fp-loading
+	opacity: 1
+	z-index: 12
+
+.flowplayer.is-loading .fp-startscreen
+	display: none
+
+
+.flowplayer
+	position: relative
+	width: 100%
+	counter-increment: flowplayer
+	background-size: contain
+	background-repeat: no-repeat
+	background-position: center center
+	display: inline-block
+	*
+		font-weight: inherit
+		font-family: inherit
+		font-style: inherit
+		text-decoration: inherit
+		font-size: 100%
+		padding: 0
+		border: 0
+		margin: 0
+		list-style-type: none
+	a:focus
+		outline: 0
+	video
+		width: 100%
+	&.is-ipad video
+		-webkit-transform: translateX(-2048px)
+
+.is-ready.flowplayer.is-ipad video
+	-webkit-transform: translateX(0)
+
+.flowplayer
+	.fp-player
+		position: absolute
+		top: 0
+		left: 0
+		width: 100%
+		height: 100%
+	.fp-engine, .fp-ui, .fp-message
+		position: absolute
+		top: 0
+		left: 0
+		width: 100%
+		height: 100%
+		cursor: pointer
+		z-index: 1
+	.fp-ui
+		z-index: 11
+	.fp-message
+		display: none
+		text-align: center
+		padding-top: 5%
+		cursor: default
+		h2
+			font-size: 120%
+			margin-bottom: 1em
+		p
+			color: #666
+			font-size: 95%
+	.fp-title
+		line-height: $flowplayer-controls-height
+		font-weight: normal
+		font-family: 'myriad pro',Helvetica,Arial,sans-serif
+		font-size: 11px
+		cursor: default
+		color: white
+		width: auto
+		max-width: 50%
+		white-space: nowrap
+		text-overflow: ellipsis
+		overflow: hidden
+		float: left
+		padding: 0 20px
+
+.aside-time.flowplayer .fp-title
+	display: none !important
+
+.flowplayer .fp-controls
+	position: absolute
+	bottom: 0
+	width: 100%
+	height: 0
+
+.is-fullscreen.flowplayer .fp-controls
+	bottom: 3px
+
+.is-mouseover.flowplayer .fp-controls
+	bottom: 0
+
+.flowplayer
+	.fp-controls, .fp-title, .fp-fullscreen, .fp-unload, .fp-close, .fp-embed, &.aside-time .fp-time
+		background-color: $flowplayer-skin-main
+
+.flowplayer
+	background-color: black
+	&.fixed-controls .fp-controls
+		background-color: black
+	.fp-timeline
+		background-color: rgba(lighten($flowplayer-skin-main, 10%), .15)
+	.fp-buffer
+		background-color: rgba($flowplayer-skin-highlight, .3)
+	.fp-progress
+		border-radius: 999em
+		background-color: $flowplayer-skin-highlight
+	.fp-volumeslider
+		border-radius: 999em
+		background-color: rgba($flowplayer-skin-highlight, 0.15)
+	.fp-volumelevel
+		border-radius: 999em
+		background-color: $flowplayer-skin-highlight
+	.fp-waiting
+		display: none
+		margin: 19% auto
+		text-align: center
+		*
+			box-shadow: 0 0 5px #333
+		em
+			width: 1em
+			height: 1em
+			border-radius: 1em
+			background-color: rgba(255, 255, 255, 0.8)
+			display: inline-block
+			margin: .3em
+			opacity: .5
+			filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=50)
+		p
+			color: #ccc
+			font-weight: bold
+	.fp-speed
+		font-size: 30px
+		background-color: #333
+		background-color: rgba(51, 51, 51, 0.8)
+		color: #eee
+		margin: 0 auto
+		text-align: center
+		width: 120px
+		padding: .1em 0 0
+		opacity: 0
+		filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0)
+		transition: opacity .5s
+		&.fp-hilite
+			opacity: 1
+			filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100)
+	.fp-help
+		position: absolute
+		top: 0
+		left: -9999em
+		z-index: 100
+		background-color: #333
+		background-color: rgba(51, 51, 51, 0.9)
+		width: 100%
+		height: 100%
+		opacity: 0
+		filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0)
+		transition: opacity .2s
+		text-align: center
+
+.is-help.flowplayer .fp-help
+	left: 0
+	opacity: 1
+	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100)
+
+.flowplayer
+	.fp-help
+		.fp-help-section
+			margin: 3%
+			direction: ltr
+		.fp-help-basics
+			margin-top: 6%
+		p
+			color: #eee
+			margin: .5em 0
+			font-size: 14px
+			line-height: 1.5
+			display: inline-block
+			margin: 1% 2%
+		em
+			background: #eee
+			border-radius: .3em
+			margin-right: .4em
+			padding: .3em .6em
+			color: #333
+		small
+			font-size: 90%
+			color: #aaa
+		.fp-close
+			display: block
+	.fp-dropdown
+		position: absolute
+		top: 5px
+		width: 100px
+		background-color: black !important
+		border-radius: 3px
+		box-sizing: border-box
+		margin: 0 !important
+		list-style-type: none !important
+		&:before
+			content: ''
+			display: block
+			position: absolute
+			top: -5px
+			left: calc(50% - 5px)
+			width: 0
+			height: 0
+			border-left: 5px solid transparent
+			border-right: 5px solid transparent
+			border-bottom: 5px solid rgba(51, 51, 51, 0.9)
+		li
+			padding: 10px !important
+			margin: 0 !important
+			color: white !important
+			font-size: 11px !important
+			list-style-type: none !important
+			&.active
+				background-color: #00a7c8 !important
+				cursor: default !important
+		&.fp-dropup
+			bottom: 20px
+			top: auto
+			&:before
+				top: auto
+				bottom: -5px
+				border-bottom: none
+				border-top: 5px solid rgba(51, 51, 51, 0.9)
+	.fp-tooltip
+		background-color: black
+		color: white
+		display: none
+		position: absolute
+		padding: 5px
+		&:before
+			content: ''
+			display: block
+			position: absolute
+			bottom: -5px
+			width: 0
+			height: 0
+			left: calc(50% - 5px)
+			border-left: 5px solid transparent
+			border-right: 5px solid transparent
+			border-top: 5px solid black
+	.fp-timeline-tooltip
+		bottom: 35px
+	.fp-timeline:hover + .fp-timeline-tooltip
+		display: block
+
+@media (max-width: 600px)
+	.flowplayer .fp-help p
+		font-size: 9px
+
+.is-touch.flowplayer .fp-timeline:hover + .fp-timeline-tooltip
+	display: none
+
+.flowplayer
+	.fp-subtitle
+		position: absolute
+		bottom: 40px
+		left: -99999em
+		z-index: 10
+		text-align: center
+		width: 100%
+		opacity: 0
+		filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0)
+		transition: opacity .3s
+		p
+			display: inline
+			background-color: #333
+			background-color: rgba(51, 51, 51, 0.9)
+			color: #eee
+			padding: .1em .4em
+			font-size: 16px
+			line-height: 1.6
+			&:after
+				content: ''
+				clear: both
+			b
+				font-weight: bold
+			i
+				font-style: italic
+			u
+				text-decoration: underline
+		&.fp-active
+			left: 0
+			opacity: 1
+			filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100)
+	.fp-fullscreen, .fp-unload, .fp-mute, .fp-embed, .fp-close, .fp-play, .fp-menu
+		font-family: 'pillar-font' !important
+		color: white !important
+		font-size: 15px !important
+		text-align: center !important
+		line-height: 30px !important
+		text-decoration: none !important
+
+.flowplayer
+	.fp-fullscreen:before
+		content: "\e842"
+	.fp-unload:before, .fp-close:before
+		content: "\e600"
+	.fp-mute:before
+		content: "\e86c"
+	.fp-embed:before
+		content: "\e603"
+	.fp-play:before
+		content: "\e851"
+	.fp-menu:before
+		content: "\e604"
+	.fp-flash-disabled
+		background: #333
+		width: 390px
+		margin: 0 auto
+		position: absolute
+		bottom: 0
+		color: white
+
+.is-fullscreen.flowplayer .fp-ui
+	background-size: auto
+
+.is-seeking.flowplayer .fp-ui, .is-loading.flowplayer .fp-ui
+	background-image: none
+
+.flowplayer
+	.fp-fullscreen, .fp-unload, .fp-close
+		position: absolute
+		top: 10px
+		left: auto
+		right: 10px
+		display: block
+		width: 30px
+		height: 23px
+		text-align: center
+		cursor: pointer
+		height: 30px
+		width: 30px
+
+.flowplayer
+	.fp-unload, .fp-close
+		display: none
+	.fp-play
+		display: none
+		height: 30px !important
+		position: absolute
+		bottom: 0
+		left: 0
+		text-align: center
+
+.is-playing.flowplayer .fp-play:before
+	content: "\f00e"
+
+.flowplayer .fp-menu
+	display: none
+	position: absolute
+	bottom: 0
+	z-index: 11
+	right: 10px
+
+.has-menu.flowplayer .fp-menu
+	display: block
+
+.flowplayer .fp-menu .fp-dropdown
+	z-index: 12
+	display: none
+	left: -42.5px
+	line-height: auto
+	width: 149px
+	transform: none
+
+.flowplayer
+	.fp-menu.dropdown-open .fp-dropdown
+		display: block
+	&.is-ready.is-closeable
+		.fp-unload
+			display: block
+		.fp-embed
+			right: 90px
+		.fp-fullscreen
+			right: 50px
+	&.is-fullscreen .fp-fullscreen
+		display: block !important
+		&:before
+			content: "\e601"
+	.fp-timeline
+		height: 8px
+		position: relative
+		overflow: hidden
+		top: 11px
+		height: 10px
+		margin: 0 160px 0 55px
+		border-radius: 999em
+
+.no-brand.flowplayer .fp-timeline
+	margin-right: 160px
+
+.has-menu.no-brand.flowplayer .fp-timeline
+	margin-right: 187px
+
+.no-volume.no-brand.flowplayer .fp-timeline
+	margin-right: 95px
+
+.no-mute
+	&.no-brand.flowplayer .fp-timeline
+		margin-right: 130px
+	&.no-volume.no-brand.flowplayer .fp-timeline
+		margin-right: 55px
+
+.has-menu.flowplayer .fp-timeline
+	margin-right: 252px
+
+.no-volume.flowplayer .fp-timeline
+	margin-right: 160px
+
+.no-mute
+	&.flowplayer .fp-timeline
+		margin-right: 195px
+	&.no-volume.flowplayer .fp-timeline
+		margin-right: 120px
+
+.has-menu.no-mute.no-volume.flowplayer .fp-timeline
+	margin-right: 157px
+
+
+.is-long.flowplayer .fp-timeline
+	margin: 0 255px 0 85px
+
+.no-volume.is-long.flowplayer .fp-timeline
+	margin-right: 180px
+
+.no-mute.is-long.flowplayer .fp-timeline
+	margin-right: 140px
+
+.has-menu.is-long.flowplayer .fp-timeline
+	margin-right: 292px
+
+.no-brand.is-long.flowplayer .fp-timeline
+	margin-right: 190px
+
+.no-volume.no-brand.is-long.flowplayer .fp-timeline
+	margin-right: 125px
+
+.no-mute.no-brand.is-long.flowplayer .fp-timeline
+	margin-right: 85px
+
+.has-menu.no-brand.is-long.flowplayer .fp-timeline
+	margin-right: 227px
+
+.aside-time.flowplayer .fp-timeline, .no-time.flowplayer .fp-timeline
+	margin: 0 190px 0 10px
+
+.has-menu
+	&.aside-time.flowplayer .fp-timeline, &.no-time.flowplayer .fp-timeline
+		margin-right: 227px
+
+.aside-time
+	&.no-brand.flowplayer .fp-timeline, &.no-volume.flowplayer .fp-timeline
+		margin-right: 115px
+
+.no-time.no-volume.flowplayer .fp-timeline
+	margin-right: 115px
+
+.aside-time.no-mute.flowplayer .fp-timeline, .no-time.no-mute.flowplayer .fp-timeline
+	margin-right: 75px
+
+.flowplayer
+	.fp-buffer, .fp-progress
+		position: absolute
+		top: 0
+		left: auto
+		height: 100%
+		cursor: col-resize
+	.fp-buffer
+		transition: width .25s linear
+	.fp-timeline.no-animation .fp-buffer
+		transition: none
+	.fp-progress.animated
+		transition-timing-function: linear
+		transition-property: width,height
+	&.is-touch
+		.fp-timeline
+			overflow: visible
+		.fp-progress
+			transition: width .2s linear
+			box-sizing: border-box
+		.fp-timeline.is-dragging .fp-progress
+			transition: right .1s linear,border .1s linear,top .1s linear,left .1s linear
+		&.is-mouseover .fp-progress
+			&:after, &:before
+				content: ''
+				box-sizing: border-box
+				display: block
+				border-radius: 10px
+				position: absolute
+				right: -5px
+		&.is-mouseover
+			.fp-progress
+				&:before
+					width: 10px
+					height: 10px
+				&:after
+					height: 18px
+					width: 18px
+					top: -4px
+					right: -10px
+					border: 5px solid rgba(255, 255, 255, 0.65)
+					box-shadow: 1px 0 4px rgba(0, 0, 0, 0.5)
+			.fp-timeline.is-dragging .fp-progress:after
+				border: 10px solid white
+				border-radius: 20px
+				transition: inherit
+				top: -5px
+				right: -10px
+	.fp-volume
+		position: absolute
+		height: 6px
+		bottom: 12px
+		right: 10px
+
+.has-menu.flowplayer .fp-volume
+	right: 37px
+
+.flowplayer .fp-mute
+	position: relative
+	width: 30px
+	height: 30px
+	float: left
+	top: -12px
+	cursor: pointer
+
+.no-mute.flowplayer .fp-mute
+	display: none
+
+.flowplayer .fp-volumeslider
+	width: 75px
+	height: 6px
+	cursor: col-resize
+	float: left
+
+.no-volume.flowplayer .fp-volumeslider
+	display: none
+
+.flowplayer
+	.fp-volumelevel
+		height: 100%
+	.fp-time
+		text-shadow: 0 0 1px black
+		font-size: 11px
+		font-weight: normal
+		font-family: 'myriad pro',Helvetica,Arial,sans-serif !important
+		color: white
+		width: 100%
+		&.is-inverted
+			.fp-duration
+				display: none
+			.fp-remaining
+				display: inline
+		em
+			width: 35px
+			height: 10px
+			line-height: 10px
+			text-align: center
+			position: absolute
+			bottom: 9px
+
+.no-time.flowplayer .fp-time
+	display: none
+
+.is-long.flowplayer .fp-time em
+	width: 65px
+
+.flowplayer .fp-elapsed
+	left: 10px
+
+.flowplayer
+	.fp-remaining, .fp-duration
+		right: 180px
+		color: #eee
+
+.no-brand.flowplayer
+	.fp-remaining, .fp-duration
+		right: 125px
+
+.has-menu.no-brand.flowplayer
+	.fp-remaining, .fp-duration
+		right: 152px
+
+.no-volume.no-brand.flowplayer
+	.fp-remaining, .fp-duration
+		right: 50px
+
+.no-mute
+	&.no-brand.flowplayer
+		.fp-remaining, .fp-duration
+			right: 95px
+	&.no-volume.no-brand.flowplayer
+		.fp-remaining, .fp-duration
+			right: 10px
+
+.has-menu.flowplayer
+	.fp-remaining, .fp-duration
+		right: 217px
+
+.no-volume.flowplayer
+	.fp-remaining, .fp-duration
+		right: 115px
+
+.no-mute
+	&.flowplayer
+		.fp-remaining, .fp-duration
+			right: 160px
+	&.no-volume.flowplayer
+		.fp-remaining, .fp-duration
+			right: 75px
+
+.has-menu.no-mute.no-volume.flowplayer
+	.fp-remaining, .fp-duration
+		right: 112px
+
+.flowplayer
+	.fp-remaining
+		display: none
+	&.aside-time .fp-time
+		position: absolute
+		top: 10px
+		left: 10px
+		bottom: auto !important
+		width: auto
+		background-color: black
+		background-color: rgba(0, 0, 0, 0.65)
+		height: 30px
+		padding: 0 5px
+		border-radius: control_border_radius
+		line-height: 30px
+		text-align: center
+		font-size: 15px
+
+.no-background.flowplayer.aside-time .fp-time
+	background-color: transparent !important
+
+.flowplayer
+	&.aside-time .fp-time
+		strong, em
+			position: static
+		.fp-elapsed::after
+			content: ' / '
+	&.is-splash, &.is-poster
+		cursor: pointer
+	&.is-poster .fp-controls, &.is-splash .fp-fullscreen, &.is-poster .fp-fullscreen, &.is-splash .fp-unload, &.is-poster .fp-unload, &.is-splash .fp-time, &.is-poster .fp-time, &.is-splash .fp-embed, &.is-poster .fp-embed, &.is-splash .fp-title, &.is-poster .fp-title, &.is-splash .fp-brand
+		display: none !important
+	&.is-poster
+		.fp-brand
+			display: none !important
+		.fp-engine
+			top: -9999em
+	&.is-loading
+		.fp-waiting
+			display: block
+		.fp-controls, .fp-time
+			display: none
+		.fp-ui
+			background-position: -9999em
+		video.fp-engine
+			position: absolute
+			top: -9999em
+	&.is-seeking .fp-waiting
+		display: block
+	&.is-playing
+		background-image: none !important
+		background-color: black !important
+
+		&.hls-fix.is-finished .fp-engine
+			position: absolute
+			top: -9999em
+	&.is-fullscreen
+		top: 0 !important
+		left: 0 !important
+		border: 0 !important
+		margin: 0 !important
+		width: 100% !important
+		height: 100% !important
+		max-width: 100% !important
+		z-index: 99999 !important
+		box-shadow: 0 !important
+		background-image: none !important
+
+
+.flowplayer
+	&.is-error
+		border: 1px solid #909090
+		background: #fdfdfd !important
+		h2
+			font-weight: bold
+			font-size: large
+			margin-top: 10%
+		.fp-message
+			display: block
+		object, video, .fp-controls, .fp-time, .fp-subtitle
+			display: none
+	&.is-ready.is-muted .fp-mute
+		opacity: .7
+		filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=70)
+		&:before
+			content: "\e86d"
+			font-family: 'pillar-font'
+
+	&.is-mouseout .fp-controls
+		opacity: 0
+		filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0)
+		transition: opacity .15s .3s
+
+// .is-fullscreen.flowplayer.is-mouseout .fp-controls
+// 	height: 3px
+// 	bottom: 0
+
+.flowplayer
+	&.is-mouseout
+		.fp-title
+			// overflow: hidden
+		.fp-timeline
+			margin: 0 !important
+			height: 0
+			top: 0
+			border-radius: 0
+		.fp-fullscreen, .fp-unload, .fp-elapsed, .fp-remaining, .fp-duration, .fp-embed, .fp-title, .fp-volume, .fp-play, .fp-menu, .fp-brand, .fp-timeline-tooltip, &.aside-time .fp-time
+			opacity: 0
+			filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=0)
+			transition: opacity .5s .3s
+	&.is-mouseover .fp-controls, &.fixed-controls .fp-controls, &.is-mouseover .fp-title, &.fixed-controls .fp-title
+		height: $flowplayer-controls-height
+	&.is-mouseover .fp-fullscreen, &.fixed-controls .fp-fullscreen, &.is-mouseover .fp-unload, &.fixed-controls .fp-unload, &.is-mouseover .fp-elapsed, &.fixed-controls .fp-elapsed, &.is-mouseover .fp-remaining, &.fixed-controls .fp-remaining, &.is-mouseover .fp-duration, &.fixed-controls .fp-duration, &.is-mouseover .fp-embed, &.fixed-controls .fp-embed, &.is-mouseover .fp-logo, &.fixed-controls .fp-logo, &.is-mouseover .fp-volume, &.fixed-controls .fp-volume, &.is-mouseover .fp-play, &.fixed-controls .fp-play, &.is-mouseover .fp-menu
+		opacity: 1
+		filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100)
+	&.fixed-controls
+		.fp-menu
+			opacity: 1
+			filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100)
+		.fp-volume
+			display: block
+		.fp-controls
+			bottom: ($flowplayer-controls-height * -1)
+
+.is-splash.flowplayer.is-mouseout.is-paused
+	.fp-controls
+		height: $flowplayer-controls-height
+
+	.fp-fullscreen, .fp-unload, .fp-elapsed, .fp-remaining, .fp-duration, .fp-embed, .fp-title, .fp-volume, .fp-play, .fp-menu, .fp-brand, .fp-timeline-tooltip, &.aside-time .fp-time
+		opacity: 1
+
+.is-fullscreen.flowplayer.fixed-controls .fp-controls
+	bottom: 0
+
+.flowplayer.fixed-controls .fp-time em
+	bottom: -20px
+	opacity: 1
+	filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100)
+
+.is-fullscreen.flowplayer.fixed-controls .fp-time em
+	bottom: 10px
+
+.flowplayer
+	&.is-disabled .fp-progress
+		background-color: #999
+	&.is-flash-disabled
+		background-color: #333
+		object.fp-engine
+			z-index: 100
+		.fp-flash-disabled
+			display: block
+			z-index: 101
+	.fp-embed
+		position: absolute
+		top: 10px
+		left: auto
+		right: 50px
+		display: block
+		width: 30px
+		height: 30px
+		text-align: center
+
+
+.flowplayer .fp-embed-code
+	position: absolute
+	display: none
+	top: 10px
+	right: 67px
+	background-color: #333
+	padding: 3px 5px
+	border-radius: 3px
+	box-shadow: 0 0 3px #ccc
+	font-size: 12px
+
+.is-closeable.flowplayer .fp-embed-code
+	right: 99px
+
+.flowplayer .fp-embed-code:before
+	content: ''
+	width: 0
+	height: 0
+	position: absolute
+	top: 2px
+	right: -10px
+	border: 5px solid transparent
+	border-left-color: #333
+
+
+.flowplayer
+	.fp-embed-code
+		textarea
+			width: 400px
+			height: 16px
+			font-family: monaco,"courier new",verdana
+			color: #777
+			white-space: nowrap
+			resize: none
+			overflow: hidden
+			border: 0
+			outline: 0
+			background-color: transparent
+			color: #ccc
+		label
+			display: block
+			color: #999
+	&.is-embedding
+		.fp-embed, .fp-embed-code
+			display: block
+			opacity: 1
+			filter: progid:DXImageTransform.Microsoft.Alpha(Opacity=100)
+	&.no-time .fp-embed
+		left: 10px !important
+
+.flowplayer
+	&.is-live
+		.fp-timeline, .fp-duration, .fp-remaining
+			display: none
+	&.is-touch.is-mouseover .fp-progress:before
+		background-color: #00a7c8
+	.fp-menu .fp-dropdown
+		right: -10px
+		left: auto
+		bottom: 30px
+		border-radius: 0
+		&:before
+			display: none
+
+.flowplayer
+	.fp-play
+		width: 30px
+	&.aside-time .fp-time
+		top: 0
+		left: 0
+
+.no-brand.flowplayer
+	.fp-remaining, .fp-duration
+		right: 115px
+
+.flowplayer
+	.fp-fullscreen, .fp-unload, .fp-close, .fp-embed
+		right: 0
+		top: 0
+
+.flowplayer .fp-embed
+	right: 32px
+
+.flowplayer.is-closeable.is-ready
+	.fp-fullscreen
+		right: 32px
+	.fp-embed
+		right: 64px
+
+.flowplayer.play-button
+	.fp-play
+		display: block
+	.fp-elapsed
+		left: 27px
+
+.flowplayer.play-button .fp-timeline
+	margin-left: 72px
+
+.is-long.flowplayer.play-button .fp-timeline
+	margin-left: 102px
+
+.no-time.flowplayer.play-button .fp-timeline, .aside-time.flowplayer.play-button .fp-timeline
+	margin-left: 27px
+
+/* This get removed by using the key, but adding this to develop the theme under localhost */
+.flowplayer .fp-context-menu,
+.flowplayer .fp-logo, .flowplayer .fp-brand
+	display: none !important
+	opacity: 0 !important
+	visibility: hidden !important

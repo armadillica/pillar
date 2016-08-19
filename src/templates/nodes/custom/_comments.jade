@@ -1,0 +1,445 @@
+
+#comments-container
+	a(name="comments")
+
+	section#comments-list
+		.comment-reply-container
+			| {% if current_user.is_authenticated %}
+
+			| {% if has_method_POST %}
+			.comment-reply-avatar
+				img(src="{{ current_user.gravatar }}")
+
+			.comment-reply-form
+
+				.comment-reply-field
+					textarea(
+						id="comment_field",
+						data-parent_id="{{ parent_id }}",
+						placeholder="Join the conversation...",)
+
+					.comment-reply-meta
+						.comment-details
+							.comment-rules
+								a(
+									title="Markdown Supported"
+									href="https://guides.github.com/features/mastering-markdown/")
+									i.pi-markdown
+
+							.comment-author
+								span.commenting-as commenting as
+								span.author-name {{ current_user.full_name }}
+
+						button.comment-action-cancel.btn.btn-outline(
+							type="button",
+							title="Cancel")
+							i.pi-cancel
+						button.comment-action-submit.btn.btn-outline(
+							id="comment_submit",
+							type="button",
+							title="Post Comment")
+							| Post Comment
+							span.hint (Ctrl+Enter)
+
+					.comment-reply-preview
+
+			| {% else %}
+
+			| {# * It's authenticated, but has no 'POST' permission #}
+			.comment-reply-form
+				.comment-reply-field.sign-in
+					textarea(
+						disabled,
+						id="comment_field",
+						data-parent_id="{{ parent_id }}",
+						placeholder="")
+					.sign-in
+						| Join the conversation!&nbsp;<a href="https://store.blender.org/product/membership/">Subscribe to Blender Cloud now.</a>
+			| {% endif %}
+
+			| {% else %}
+			| {# * It's not autenticated #}
+			.comment-reply-form
+				.comment-reply-field.sign-in
+					textarea(
+						disabled,
+						id="comment_field",
+						data-parent_id="{{ parent_id }}",
+						placeholder="")
+					.sign-in
+						a(href="{{ url_for('users.login') }}") Log in
+						| to comment.
+
+			| {% endif %}
+
+		section#comments-list-header
+			#comments-list-title
+			#comments-list-items
+				#comments-list-items-loading
+					i.pi-spin
+
+			script#comment-template(type="text/x-handlebars-template")
+				| {% raw %}
+
+				| {{#list items }}
+
+				.comment-container(
+					id="{{ _id }}",
+					data-node_id="{{ _id }}",
+					class="{{#if is_team}}is-team{{/if}}{{#if is_reply}}is-reply{{else}}is-first{{/if}}")
+
+					.comment-header
+						.comment-avatar
+							img(src="{{ gravatar }}")
+
+						.comment-author(class="{{#if is_own}}own{{/if}}")
+							| {{ author }}
+							span.username ({{ author_username }})
+
+						| {{#if is_team}}
+						.comment-badge.badge-team(title="Project Member") team
+						| {{/if}}
+
+						.comment-time {{ time_published }} {{#if time_edited }} (edited {{ time_edited }}){{/if}}
+
+					.comment-content {{{ content }}}
+					| {{#if is_own}}
+					.comment-content-preview
+					| {{/if}}
+
+					.comment-meta
+						.comment-rating(
+							class="{{#if is_rated}}rated{{/if}}{{#if is_rated_positive}} positive{{/if}}")
+							.comment-rating-value(title="Number of likes") {{ rating }}
+							.comment-action-rating.up(title="Like comment")
+
+						.comment-action-reply(title="Reply to this comment")
+							span reply
+						| {{#if is_own}}
+						.comment-action-edit
+							span.edit_mode(title="Edit comment") edit
+							span.edit_save(title="Save comment")
+								i.pi-check
+								| save changes
+							span.edit_cancel(title="Cancel changes")
+								i.pi-cancel
+								| cancel
+						| {{/if}}
+
+				| {{/list}}
+				| {% endraw %}
+
+
+| {% block comment_scripts %}
+
+script.
+	// Markdown initialization
+	var convert = new Markdown.getSanitizingConverter();
+	Markdown.Extra.init(convert);
+	convert = convert.makeHtml;
+
+	// Define the template for handlebars
+	var source = $("#comment-template").html();
+	var template = Handlebars.compile(source);
+
+
+	// Register the helper for generating the comments list
+	Handlebars.registerHelper('list', function(context, options) {
+		var ret = "";
+		var comments_count = 0
+
+		// Loop through all first-level comments
+		for(var i=0, j=context.length; i<j; i++) {
+
+			comments_count++
+
+			// Convert Markdown for each comment
+			context[i]['content'] = convert(context[i]['content']);
+
+			// Append compiled comment to return string
+			ret = ret + options.fn(context[i]);
+
+			// Search for replies to the current comment
+			if (context[i]['replies']) {
+
+				var replies = context[i]['replies'];
+				var compiled_replies = "";
+
+				// Loop through replies
+				for(var r=0, t=replies.length; r<t; r++) {
+
+					// Convert Markdown for each comment
+					replies[r]['content'] = convert(replies[r]['content']);
+
+					// Append compiled replies
+					compiled_replies = compiled_replies + options.fn(replies[r]);
+					comments_count++
+				}
+
+				// Append replies list to the return string
+				ret = ret + compiled_replies;
+
+			}
+		}
+
+		$("#comments-list-title").html(((comments_count > 0) ? comments_count : 'No') + ((comments_count == 1) ? ' comment' : ' comments'));
+
+		return ret;
+	});
+
+	// Helper for the if/else statement
+	Handlebars.registerHelper('if', function(conditional, options) {
+		if(conditional) {
+			return options.fn(this);
+		} else {
+			return options.inverse(this);
+		}
+	});
+
+
+	/* Build the markdown preview when typing in textarea */
+	$(function() {
+		var $textarea = $('.comment-reply-field textarea'),
+				$container = $('.comment-reply-form'),
+				$preview = $('.comment-reply-preview');
+
+		// As we type in the textarea
+		$textarea.keyup(function(e) {
+
+			// Convert markdown
+			$preview.html(convert($textarea.val()));
+
+			// While we are at it, style when empty
+			if ($textarea.val()) {
+				$container.addClass('filled');
+			} else {
+				$container.removeClass('filled');
+			};
+
+			// Send on ctrl+enter
+			if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey){
+				$( ".comment-action-submit" ).trigger( "click" );
+			};
+
+		}).trigger('keyup');
+	});
+
+
+	// Get the comments list in JSON
+	$.getJSON( "{{url_for('nodes.comments_index')}}?parent_id={{ parent_id }}&format=json", function( data ) {
+		// Format using handlebars template
+		var comments = template(data);
+
+		if (comments && comments.trim() !="") {
+			$('#comments-list-items').html(comments);
+		} else {
+			$('#comments-list-items').html('');
+		}
+	})
+	.done(function(){
+		var scrollToId = location.hash;
+		if (scrollToId.length <= 1) return;
+
+		document.getElementById(scrollToId.substr(1)).scrollIntoView(true);
+		$(scrollToId).addClass('comment-linked');
+	});
+
+	/* Submit comment */
+	$('.comment-action-submit').click(function(e){
+
+		var $this = $(this);
+		var $textarea = $('.comment-reply-field textarea');
+		var commentField = document.getElementById('comment_field');
+		var comment = commentField.value;
+
+		function error(msg) {
+			// No content in the textarea
+			$this.addClass('button-field-error');
+			$textarea.addClass('field-error')
+			$this.html(msg);
+
+			setTimeout(function(){
+				$this.html('Post Comment');
+				$this.removeClass('button-field-error');
+				$textarea.removeClass('field-error');
+			}, 2500);
+		}
+
+		if (comment.length < 5) {
+			if (comment.length == 0) error("Say something...");
+			else error("Minimum 5 characters.");
+			return;
+		}
+
+		$this.addClass('submitting');
+		$this.html('<i class="pi-spin spin"></i> Posting...');
+
+		// Collect parent_id
+		parent_id = commentField.getAttribute('data-parent_id');
+
+		$.post("{{url_for('nodes.comments_create')}}",
+			// Submit content and parent_id for comment creation
+			{'content': comment, 'parent_id': parent_id}
+		)
+		.fail(function(){
+			$this.addClass('button-field-error');
+			$textarea.addClass('field-error')
+			$this.html("Houston! Try again?");
+
+			setTimeout(function(){
+				$this.html('Post Comment');
+				$this.removeClass('button-field-error');
+				$textarea.removeClass('field-error');
+			}, 2500);
+		})
+		.done(function(){
+			// Load the comments
+			var url = "{{url_for('nodes.comments_index')}}?parent_id={{ parent_id }}";
+			$.get(url, function(dataHtml) {
+				// Update the DOM injecting the generate HTML into the page
+				$('#comments-container').replaceWith(dataHtml);
+			})
+		});
+	});
+
+
+	/* Edit comment */
+
+	// Markdown convert as we type in the textarea
+	$(document).on('keyup','body .comment-content textarea',function(e){
+
+		var $textarea = $(this),
+				$container = $(this).parent(),
+				$preview = $container.next();
+
+		// Convert markdown
+		$preview.html(convert($textarea.val()));
+
+		// While we are at it, style if empty
+		if (!$textarea.val()) {
+			$container.addClass('empty');
+		} else {
+			$container.removeClass('empty');
+		};
+	}).trigger('keyup');
+
+
+	/* Enter edit mode */
+	$(document).on('click','body .comment-action-edit span.edit_mode',function(){
+
+		$(this).hide();
+		$(this).siblings('span.edit_cancel').show();
+		$(this).siblings('span.edit_save').show();
+
+		var comment_content = $(this).parent().parent().siblings('.comment-content');
+		var comment_id = comment_content.parent().attr('data-node_id');
+		var height = comment_content.height();
+		var url = '/nodes/' + comment_id + '/view?format=json';
+
+		$.get(url, function(data) {
+			var comment_raw = data['node']['properties']['content'];
+			comment_content.html('<textarea>' + comment_raw + '</textarea>');
+
+			comment_content.addClass('editing')
+										 .find('textarea')
+										 .height(height)
+										 .focus();
+			comment_content.siblings('.comment-content-preview').show();
+		})
+		.fail(function(data){
+			statusBarSet('error', 'Error entering edit mode.', 'pi-warning');
+		});
+	});
+
+	/* Return UI to normal, when cancelling or saving */
+	function commentEditCancel(comment_container) {
+		var comment_id = comment_container.parent().attr('id');
+		var url = '/nodes/' + comment_id + '/view?format=json';
+
+		$.get(url, function(data) {
+			var comment_raw = data['node']['properties']['content'];
+
+			comment_container.html(convert(comment_raw))
+											 .removeClass('editing');
+			comment_container.siblings('.comment-content-preview').html('').hide();
+		})
+		.fail(function(data){
+			statusBarSet('error', 'Error canceling.', 'pi-warning');
+		});
+	}
+
+	$(document).on('click','body .comment-action-edit span.edit_cancel',function(e){
+
+		$(this).hide();
+		$(this).siblings('span.edit_save').hide();
+		$(this).siblings('span.edit_mode').show();
+
+		var commentContainer = $(this).parent().parent().siblings('.comment-content');
+		commentEditCancel(commentContainer);
+	});
+
+	/* Save edited comment */
+	$(document).on('click','body .comment-action-edit span.edit_save',function(e){
+
+		var $this = $(this);
+		var commentContainer = $(this).parent().parent().siblings('.comment-content');
+		var commentField = commentContainer.find('textarea');
+		var comment = commentField.val();
+		var commentId = commentContainer.parent().attr('id');
+
+		function error(msg) {
+			// No content in the textarea
+			$this.addClass('error')
+					 .html(msg);
+			commentField.addClass('field-error')
+
+			setTimeout(function(){
+				$this.html('<i class="pi-check"></i> save changes')
+						 .removeClass('error');
+				commentField.removeClass('field-error');
+			}, 2500);
+		}
+
+		if (comment.length < 5) {
+			if (comment.length == 0) error("Say something...");
+			else error("Minimum 5 characters.");
+			return;
+		}
+
+		$this.addClass('saving')
+				 .html('<i class="pi-spin spin"></i> Saving...');
+
+		$.post('/nodes/comments/' + commentId,
+			{'content': comment}
+		)
+		.fail(function(){
+			$this.addClass('error')
+					 .html("Houston! Try again?");
+			commentField.addClass('field-error')
+
+			setTimeout(function(){
+				$this.html('Save changes')
+						 .removeClass('error');
+				commentField.removeClass('field-error');
+			}, 2500);
+		})
+		.done(function(){
+
+			commentEditCancel(commentContainer);
+			commentContainer
+				.html(convert(comment));
+			commentContainer.next().text(comment);
+
+			$this.html('<i class="pi-grin"></i> saved!')
+					 .removeClass('saving')
+					 .siblings('span.edit_cancel').hide();
+
+			setTimeout(function(){
+				$this.html('<i class="pi-check"></i> save changes')
+						 .hide()
+						 .siblings('span.edit_mode').show();
+			}, 2500);
+		});
+	});
+
+| {% endblock %}

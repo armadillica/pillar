@@ -1,0 +1,599 @@
+$comments-width-max: 710px
+
+#comments-container
+	margin-top: 15px
+	padding: 5px 20px 20px 20px
+	position: relative
+	border-top: 1px solid $color-background
+
+	min-height: 170px
+
+	&.texture
+		border-top: none
+
+	#comments-reload
+		text-align: center
+		cursor: pointer
+		padding: 15px 0
+		display: block
+
+	#comments-list-header
+		#comments-list-title
+			padding: 15px 0 10px 0
+			margin: 0
+			font:
+				size: 1.5em
+				weight: 300
+				family: $font-body
+			color: $color-text-dark-primary
+
+	#comments-list-items-loading
+		font-size: 2em
+		color: $color-background
+		text-align: center
+		position: relative
+		top: 25px
+		margin-bottom: 10px
+		+spin
+
+	#comments-list-items,
+	.comment-reply-container
+		position: relative
+
+		+media-xs
+			max-width: 100%
+		+media-sm
+			max-width: 100%
+		+media-md
+			max-width: $comments-width-max
+		+media-lg
+			max-width: $comments-width-max
+
+		.nocomments
+			color: $color-text-dark-hint
+			text-align: center
+			cursor: default
+			padding: 8px 0
+
+	#comments-list
+
+		/* Each comment on the list*/
+		.comment-container,
+		.comment-reply-container
+			display: flex
+			flex-direction: column
+
+			position: relative
+			padding: 15px 0 25px 0
+			transition: background-color 150ms ease-in-out, padding 150ms ease-in-out, margin 150ms ease-in-out
+
+			&.comment-linked
+				background-color: $color-background-light !important
+				border-top: 3px solid $color-info !important
+				border-bottom: 2px solid $color-background-dark
+				border-bottom-left-radius: 3px
+				border-bottom-right-radius: 3px
+
+				&:before
+					content: 'Linked Comment'
+					position: absolute
+					right: 20px
+					color: $color-info
+					text-transform: uppercase
+					font-size: .8em
+
+				&.is-replying
+					margin-bottom: 15px !important
+
+				.comment-header .comment-avatar
+					padding-right: 5px
+					padding-left: 5px
+
+			&.comment-linked+.comment-container.is-first
+				border-top: none
+
+			/* Header containing author, time, and badges if any*/
+			.comment-header
+				display: flex
+				align-items: center
+
+				.comment-avatar
+					padding-right: 10px
+
+					img
+						border-radius: 50%
+						width: 20px
+						height: 20px
+
+				.comment-author
+					position: relative
+					color: $color-background-nav
+					font:
+						weight: 500
+
+					&.own
+						color: $color-success
+					&.op
+						color: $color-primary-dark
+
+					.username
+						padding-left: 5px
+						color: $color-text-dark-secondary
+
+				.comment-time
+					padding-left: 10px
+					margin-left: 10px
+					color: $color-text-dark-hint
+
+					&:before
+						content: '·'
+						position: relative
+						left: -10px
+						font-weight: 600
+
+			/* The actual comment body. */
+			/* Here we style both the preview comment and posted comments */
+			.comment-content,
+			.comment-reply-form
+				+node-details-description
+
+				padding: 10px 0 0 10px
+				color: darken($color-text-dark, 10%)
+				font:
+					size: 1em
+					weight: normal
+				transition: background-color 200ms ease-in-out, margin 200ms ease-in-out
+				margin: 0
+				border: thin solid transparent
+
+				+media-xs
+					padding:
+						left: 0
+						top: 15px
+
+				p
+					line-height: 1.5em
+
+					+media-xs
+						padding:
+							left: 0
+							right: 0
+
+				strong, b
+					font-weight: 500
+					color: $color-info
+
+				textarea
+					+node-details-description
+					background-color: transparent
+					padding: 0 0 0 5px
+					margin-left: 15px
+					width: 100%
+					color: $color-text-dark-primary
+					border: none
+					border-radius: 3px
+					font:
+						size: 1em
+						weight: normal
+
+					&:focus
+						outline: none
+						border: none
+						color: $color-text-dark
+
+				&.editing
+					background-color: $color-background-light
+					margin: 10px 0
+					border-color: $color-background-dark
+					border-radius: 3px
+
+					&.empty
+						border-color: $color-danger
+
+			.comment-content-preview
+				display: none
+				+node-details-description
+				padding: 10px 0 0 10px
+				font:
+					size: 1em
+					weight: normal
+
+				position: relative
+				margin-top: 15px
+
+				&:empty
+					margin: 0
+					padding: 0
+					&:before, &:after
+						display: none
+
+				&:before
+					content: 'Live Preview'
+					position: absolute
+					top: -20px
+					left: 30px
+					font-size: .9em
+					color: $color-text-dark-hint
+					transition: color 150ms ease-in-out
+
+					+media-md
+						visibility: visible
+					+media-sm
+						visibility: hidden
+
+				&:after
+					content: 'Markdown Supported'
+					position: absolute
+					top: -20px
+					right: 20px
+					font-size: .9em
+					color: $color-text-dark-hint
+					transition: color 150ms ease-in-out
+
+			/* Rating, and actions such as reply */
+			.comment-meta
+				display: flex
+				align-items: center
+				padding: 5px 0 0 30px
+				color: $color-text-dark-secondary
+
+				/* Small container for rating buttons and value */
+				.comment-rating
+					display: flex
+					align-items: center
+
+
+					&.rated
+						color: $color-text-dark-secondary
+						.down
+							color: $color-downvote
+
+					&.rated.positive
+						color: $color-upvote
+						.down
+							color: $color-text-dark-secondary
+
+						.comment-action-rating.up:before
+							content: '\e83f'
+
+
+					.comment-rating-value
+						padding-right: 15px
+						color: $color-text-dark-secondary
+						cursor: default
+
+					.comment-action-rating
+						font-family: 'pillar-font'
+						height: 25px
+						width: 16px
+						cursor: pointer
+
+					.comment-action-rating.up
+						&:hover
+							color: $color-upvote
+						&:before
+							content: '\e83e'
+							top: 2px
+							position: relative
+
+					.comment-action-rating.down
+						&:hover
+							color: $color-downvote
+						&:before
+							content: '\e838'
+
+				/* Reply button */
+				.comment-action-reply,
+				.comment-action-edit
+					padding-left: 10px
+					margin-left: 10px
+					color: $color-text-dark-secondary
+
+					&:before
+						content: '·'
+						position: relative
+						left: -10px
+						font-weight: 600
+
+					span
+						cursor: pointer
+						&:hover
+							color: $color-primary
+
+					span.edit_save,
+						color: $color-success
+						display: none
+						&:hover
+							color: lighten($color-success, 10%)
+
+						&.error
+							color: $color-danger
+
+						&.saving
+							user-select: none
+							pointer-events: none
+							cursor: default
+
+							i
+								font-size: .8em
+								margin-right: 5px
+
+					span.edit_cancel
+						display: none
+						margin-left: 15px
+
+			&.is-reply
+				padding:
+					top: 20px
+					left: 15px
+				margin-left: 30px
+				border-left: 3px solid $color-background-dark
+
+				+media-xs
+					padding-left: 15px
+
+				&.comment-linked
+					border-left: 3px solid $color-info
+					border-top: thin solid $color-background-dark !important
+					border-bottom: thin solid $color-background-dark !important
+
+			&.is-first
+				border-top: 1px solid lighten($color-text-dark-hint, 15%)
+
+			&.is-team
+				.comment-author
+					color: $color-success
+
+			&.is-replying
+				border-left: 3px solid $color-primary
+				padding-left: 10px
+
+			// &.is-replying.is-first+.comment-reply-container
+			&.is-replying+.comment-reply-container
+				border-left: 3px solid $color-primary
+				margin-left: 0
+				padding-left: 30px
+
+			.comment-badge
+				display: inline-block
+				border: 1px solid $color-text-dark-hint
+				color: $color-text-dark-hint
+				padding: 1px 4px
+				margin: 0 5px 0 10px
+				border-radius: 3px
+				font:
+					size: .7em
+					weight: 400
+				text-transform: uppercase
+
+				&.badge-team
+					border-color: $color-info
+					color: $color-info
+				&.badge-op
+					border-color: $color-primary
+					color: $color-primary
+				&.badge-own
+					border-color: $color-success
+					color: $color-success
+
+		.comment-reply-container
+			// It's flex, like the others, but different direction
+			flex-direction: row
+
+			/* Little gravatar icon on the left */
+			.comment-reply-avatar
+				img
+					border-radius: 50%
+					width: 25px
+					height: 25px
+
+			/* textarea field, submit button and reply details */
+			.comment-reply-form
+				width: 100%
+				padding:
+					top: 0
+					left: 10px
+
+				.comment-reply-field
+					position: relative
+
+					textarea
+						width: 100%
+						height: 45px
+
+						line-height: 1.5em
+						border: 1px solid $color-background-dark
+						border-radius: 3px
+						margin: 0 auto 5px auto
+						padding: 10px
+						color: $color-text-dark
+						resize: none
+
+						transition: all 300ms ease-in-out
+
+
+						&:focus
+							border: 1px solid $color-success
+							outline: none
+
+						&.field-error
+							border-color: $color-danger
+
+					&.sign-in
+						textarea
+							margin: 0
+
+						.sign-in
+							position: absolute
+							top: 0
+							left: 0
+							right: 0
+							bottom: 0
+							background-color: rgba(white, .5)
+							display: flex
+							align-items: center
+							padding-left: 15px
+
+							a
+								margin-right: 4px
+
+
+					.comment-reply-preview
+						position: relative
+						margin: 0 auto 5px auto
+						padding: 10px
+						color: $color-text-dark-primary
+						transition: all 150ms ease-in-out
+
+						&:before
+							content: 'Live Preview'
+							position: absolute
+							top: -28px
+							font-size: .9em
+							color: $color-text-dark-hint
+							transition: color 150ms ease-in-out
+
+							+media-md
+								visibility: visible
+							+media-sm
+								visibility: hidden
+
+						p
+							padding-left: 0
+							padding-right: 0
+
+					.comment-reply-preview:empty
+						color: transparent
+						margin: 0 auto
+						padding: 0 10px
+
+						&:before
+							content: ''
+							color: transparent
+
+				.comment-reply-meta
+					display: flex
+					align-items: center
+
+					.comment-details
+						opacity: 0
+						font-size: .9em
+
+						display: flex
+						align-items: center
+						justify-content: flex-end
+						width: 100%
+
+						transition: opacity 300ms ease-in-out
+
+						.comment-author
+							padding:
+								right: 15px
+							color: $color-text-dark
+							font:
+								weight: 300
+
+							.author-name
+								padding-left: 3px
+								font:
+									weight: 500
+
+						.comment-rules
+							padding-right: 8px
+							margin-right: 8px
+							&:after
+								content: "·"
+								position: relative
+								right: -8px
+
+							a
+								color: $color-text-dark-hint
+
+								&:hover
+									color: $color-primary
+
+								i
+									font-size: 1.5em
+									position: relative
+									top: 2px
+
+
+					button.comment-action-submit
+						margin-left: auto
+						min-width: 180px
+						min-height: 30px
+						transition: all 200ms ease-in-out
+
+						@include button-rounded($color-success, 6px)
+						position: relative
+
+						span.hint
+							position: absolute
+							top: 35px
+							left: 50%
+							transform: translateX(-50%)
+							font-size: .7em
+							text-transform: initial
+							display: block
+							color: $color-text-dark-hint
+
+						&.submitting
+							background: linear-gradient(to left, transparent 50%, #7AC29A 50%)
+							background-size: 200% 100%
+							color: white
+							animation:
+								name: background-fill-left-right
+								duration: .5s
+								delay: 0
+								fill-mode: forwards
+								iteration-count: 1
+								timing-function: ease-out
+
+							i
+								+spin
+
+
+						&.button-field-error
+							@include button-rounded($color-danger, 6px)
+							background: transparent
+
+							pointer-events: none
+
+							i
+								position: relative
+								right: 2px
+
+					button.comment-action-cancel
+						display: none
+						margin-left: auto
+						margin-right: 5px
+						padding:
+							left: 15px
+							right: 15px
+
+						@include button-rounded($color-text-dark-secondary, 6px)
+						border-color: transparent
+
+						i
+							margin-right: 0
+
+				&.filled
+					.comment-reply-field
+						textarea
+							height: 120px
+					.comment-reply-meta
+						.comment-details
+							opacity: 1
+
+
+		/* Style the comment container when we're replying */
+		.comment-container + .comment-reply-container
+			margin-left: 30px
+			padding-top: 0
+
+			.comment-reply-form
+				.comment-reply-meta
+					button.comment-action-cancel
+						display: inline-block
+
+// @import plugins/_ckeditor

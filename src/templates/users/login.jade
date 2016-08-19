@@ -1,0 +1,45 @@
+| {% extends 'layout.html' %}
+
+| {% block body %}
+.container
+	#login-container
+		.login-title Welcome back!
+
+		.login-info
+			| Log in using your shared username and password.
+
+		.login-form
+			form#login-form(method="POST", action="{{url_for('users.login_local')}}")
+				.form-group
+					| {{ form.username.label }}
+					| {{ form.username(class='form-control') }}
+
+				.form-group
+					| {{ form.password.label }}
+					| {{ form.password(class='form-control') }}
+
+				.buttons
+					.login-button-container
+						//a.forgot(href="https://blender.org/id/reset") forgot your password?
+						button.btn.btn-default.button-login(type="submit")
+							i.pi-log-in
+							| Login
+
+					//a.btn.btn-default.button-register(href="https://blender.org/id/register", target="_blank")
+					//	i.pi-star-outline
+					//	| Create Account
+
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+	$('.button-login').on('click', function(e){
+		e.preventDefault();
+		$(this).html('<i class="pi-spin spin"></i> Hold on...');
+
+		$('#login-form').submit();
+	});
+| {% endblock %}
+
+| {% block footer_container %}{% endblock %}

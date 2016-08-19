@@ -1,0 +1,139 @@
+| {% extends 'projects/home_layout.html' %}
+| {% set subtab = 'images' %}
+| {% set learn_more_btn_url = '/blog/introducing-image-sharing' %}
+| {% block currenttab %}
+section.nav-tabs__tab.active#tab-images
+	.tab_header-container
+		| {% if not shared_images %}
+		.tab_header-intro(
+			style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/pattern_01.jpg')}})")
+			.tab_header-intro_text
+				h2 Share what you see.
+				p.
+					Got a nice render, a Blender oddity, or a cool screenshot?
+					<br/>
+					Share it instantly from within Blender to the world!
+			.tab_header-intro_icons
+				i.pi-blender
+				i.pi-heart-filled
+				i.pi-picture-album
+		| {% endif %}
+
+		| {% if shared_images %}
+		div#home-images__list
+			| {% for node in shared_images %}
+			div.home-images__list-item
+				.home-images__list-details
+					a.title(href="{{ url_for_node(node=node) }}?t")
+						| {{ node.name }}
+				| {% if node.picture %}
+				a.home-images__list-thumbnail(
+					href="{{ url_for_node(node=node) }}?t")
+					img(src="{{ node.picture.thumbnail('l', api=api) }}")
+				| {% endif %}
+				.home-images__list-details
+					ul.meta
+						li.when(title="{{ node._created }}") {{ node._created | pretty_date_time }}
+						li.delete-image
+							a.delete-prompt(href='javascript:void(0);')
+								| Delete
+							span.delete-confirm
+								| Are you sure?
+								a.delete-confirm(href='javascript:void(0);',
+										data-image-id="{{ node._id }}")
+									i.pi-check
+									| Yes, delete
+								a.delete-cancel(href='javascript:void(0);')
+									i.pi-cancel
+									| No, cancel
+						| {% if node.short_link %}
+						li
+							a(href="{{ node.short_link }}") {{ node.short_link }}
+						| {% endif %}
+			| {% endfor %}
+		| {% else %}
+		.blender_sync-main.empty
+			.blender_sync-main-header
+				span.blender_sync-main-title
+					| Share some images using the
+					a(
+						href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
+						|  Blender Cloud add-on.
+
+		| {% endif %}
+| {% endblock %}
+
+| {% block side_announcement %}
+.title
+	a(href="https://cloud.blender.org/blog/introducing-image-sharing") Image Sharing
+
+.lead
+	p.
+		Share your renders, painted textures, and other images, straight from Blender
+		to the cloud.
+	hr
+	| {% if show_addon_download_buttons %}
+	p.
+		Image Sharing requires a Blender Cloud subscription, which you have!
+	| {% else %}
+	p.
+		Image Sharing requires a Blender Cloud subscription.
+
+	.buttons
+		a.btn.btn-default.btn-outline.green(href="https://store.blender.org/product/membership/")
+			| Join Now
+	| {% endif %}
+| {% endblock %}
+
+| {% block footer_scripts %}
+| {{ super() }}
+script.
+	var urlNodeDelete = "{{url_for('projects.delete_node')}}";
+
+	$(document).ready(function() {
+		// 'Delete' link on images
+		var $home_image_list = $('#home-images__list');
+		$home_image_list.find('a.delete-prompt').on('click', function(e){
+			$(this)
+				.hide()
+				.next().show();
+		});
+
+		// 'Cancel delete' link on images
+		$home_image_list.find('a.delete-cancel').on('click', function(e){
+			$(this).parent()
+				.hide()
+				.prev().show();
+		});
+
+		// 'Confirm delete' link on images
+		$home_image_list.find('a.delete-confirm').on('click', function (e) {
+			var image_id = this.dataset.imageId;
+
+			var $this = $(this);
+			var parent = $this.closest('.home-images__list-item');
+			console.log('My parent is', parent);
+			var error_elt = $this.parent();
+
+			$.ajax({
+				type: 'POST',
+				url: urlNodeDelete,
+				data: {node_id: image_id},
+				success: function () {
+					if (parent.siblings().length == 0) {
+						// This was the last shared image. Reload the page,
+						// so that we can show the correct "no images shared"
+						// content with Jinja2.
+						window.location = window.location;
+					}
+					parent.hide('slow', function() { parent.remove(); });
+				},
+				error: function (jqxhr, textStatus, errorThrown) {
+					error_elt.text('Unable to delete image; ' + textStatus + ': ' + errorThrown);
+				}
+			});
+		});
+
+		hopToTop(); // Display jump to top button
+	});
+| {% endblock %}

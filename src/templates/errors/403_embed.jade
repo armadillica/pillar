@@ -1,0 +1,25 @@
+#error_container.403
+	#error_box
+		.error-top-container
+			.error-title Sorry to bother you, but...
+
+			.error-lead.
+				This content is only available to Cloud subscribers.<br/>
+				Get full access to the Blender Cloud for only $9.90 per month.
+
+			.buttons
+				a.sign-up.btn.btn-outline(href="https://store.blender.org/product/membership/")
+					i.pi-check
+					| Subscribe Now
+
+				| {% if not current_user.is_authenticated %}
+				a.sign-in.btn.btn-empty(href="{{ url_for('users.login') }}")
+					i.pi-log-in
+					| Log in
+				| {% endif %}
+
+		hr
+
+		.error-lead.extra.
+			If you have just subscribed, please <a href="{{ url_for('users.logout') }}">log out</a> and in again.<br/>
+			For any other issue get in touch with <a href="mailto:cloudsupport@blender.org">cloudsupport@blender.org</a>

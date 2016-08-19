@@ -1,0 +1,170 @@
+| {% extends 'layout.html' %}
+
+| {% block header_items %}
+link(href='//cdn.datatables.net/plug-ins/1.10.7/integration/bootstrap/3/dataTables.bootstrap.css', rel='stylesheet')
+| {% endblock %}
+
+| {% block body %}
+#shots-main.col-md-8
+	table#user_tasks.table.table-striped.table-hover(
+		cellpadding='0', cellspacing='0', border='0')
+		thead
+			tr
+				th {# 0 #}
+				th {# 1 #}
+				th {# 2 #}
+				th {# 3 #}
+				th {# 4 #} Shot
+				th {# 5 #} Name
+				th {# 6 #} Description
+				th {# 7 #} Duration
+				th {# 8 #} Status
+| {% endblock %}
+| {% block sidebar %}
+#shots-sidebar.col-md-4
+	#shot_details_container
+	#task_details_container
+| {% endblock %}
+
+| {% block footer_scripts %}
+script(type='text/javascript', src='//cdn.datatables.net/1.10.7/js/jquery.dataTables.min.js')
+script().
+	$(document).ready(function(){
+
+		function render_timing(timing) {
+			var timing_text = '';
+			if (timing['cut_in'] && timing['cut_out']) {
+				timing_frames = timing['cut_out'] - timing['cut_in'];
+
+				timing_text += '<span title="';
+				timing_text += timing_frames;
+				timing_text += 'f">';
+				timing_text += Math.round(timing_frames / 24);
+				timing_text += 's</span>';
+			}
+			return timing_text;
+		}
+
+		function render_status_options(status) {
+			var selected = false;
+			var options = []
+
+			statuses = ['todo', 'in_progress', 'on_hold', 'review', 'approved', 'final']
+			$.each(statuses, function(key, value) {
+				selected = false;
+				if (status === value) {
+					selected = true;
+				};
+				option = $("<option />", {
+					value: value,
+					text: value,
+					selected: selected
+				});
+				options.push(option);
+			});
+			return options;
+		}
+
+		function render_status_label(task, task_name) {
+			switch(task.status) {
+				case 'todo':
+					label_text = 'ToDo';
+					break;
+				case 'in_progress':
+					label_text = 'In progress';
+					break;
+				case 'on_hold':
+					label_text = 'On Hold';
+					break;
+				case 'cbb':
+					label_text = 'Could Be Better';
+					break;
+				case 'review':
+					label_text = 'Review';
+					break;
+				case 'approved':
+					label_text = 'Approved';
+					break;
+				case 'final':
+					label_text = 'Final';
+					break;
+				case 'conflict':
+					label_text = 'Conflict';
+					break;
+				default:
+					label_text = task.status;
+					break
+			}
+
+			if (task.is_conflicting) {
+				label_text = 'Conflict';
+				task.status = 'conflict';
+			}
+
+			return tag = '<span task-edit-url="' + task.url_edit + '" class="load-task-view label label-' + task.status + '">' + label_text + '</span>'
+		}
+
+		var shots_table = $('#user_tasks').DataTable({
+			"paging": false,
+			"order": [[ 7, "desc" ]],
+			"data": {{tasks_data | safe}},
+			"columns": [
+				/*    */ {"data": "_id"},
+				/*    */ {"data": "order"},
+				/*  0 */ {"data": "picture", "width": "80px", "className": "shots-shot_thumbnail"},
+				/*  1 */ {"data": "parent.name"},
+				/*  2 */ {"data": "name", "className": "shots-shot_name"},
+				/*  3 */ {"data": "description", "className": "shots-shot_description"},
+				/*  4 */ {"data": null,},
+				/*  5 */ {"data": "status"},
+				/*  6 */ {"data": null}
+			],
+			"columnDefs": [
+				{
+					"targets": [0, 1],
+					"visible": false,
+					"searchable": false
+				},
+			],
+
+			"rowCallback": function ( row, data, index ) {
+				if ( data.picture) {
+					var img_tag = '<img alt="' + data.name + '" src="' + data.picture_thumbnail + '" class="table-thumbnail">';
+					$('td', row).eq(0).html('<a href="' + data.url_view + '">' + img_tag + '</a>');
+				}
+
+				$('td', row).eq(2).html('<a class="load-shot-view" shot-view-url="' + data.url_edit + '" href="' + data.url_view + '">' + data.name + '</a>');
+				$('td', row).eq(4).html(render_timing(data.timing));
+				$('td', row).eq(5).html(render_status_label(data, data.name));
+
+				var view_tag = '<span class="btn btn-default btn-xs load-shot-view" shot-view-url="' + data.url_edit + '"><i class="glyphicon glyphicon-edit"></i> View</span>';
+				$('td', row).eq(6).html(view_tag);
+			}
+		});
+
+
+	$(document).on("click", ".load-task-view", function() {
+		$(".task-update").off( "click" );
+		task_view_url = $(this).attr('task-edit-url');
+		$.get(task_view_url, function(data) {
+			$('#shot_details_container').hide();
+			$('#task_details_container').html(data);
+			$('#task_details_container').show();
+		});
+
+		$('.load-task-view').removeClass('active');
+		$(this).addClass('active');
+
+		var shots_table = $('#user_tasks').DataTable();
+		var row = shots_table.row($(this).closest('tr'))
+
+		// Remove class 'active' from rows, and add to current one
+		shots_table.rows('.active').nodes().to$().removeClass('active updated');
+		shots_table.row(row).nodes().to$().addClass('active');
+
+		shots_table.draw();
+
+	});
+
+	});
+| {% endblock %}

@@ -1,0 +1,55 @@
+| {% extends 'layout.html' %}
+| {% block body %}
+.container
+	#settings
+		include _sidebar
+		#settings-container
+			.settings-header
+				.settings-title Subscription
+
+			.settings-content
+
+				| {% if store_user['cloud_access'] %}
+				h3.subscription-active
+					i.pi-check
+					|  Your subscription is active
+				h4 Thank you for supporting us!
+
+				hr
+
+				p Subscription expires on: <strong>{{ store_user['expiration_date'][:10] }}</strong>
+				a(href="https://store.blender.org/my-account/") Manage your subscription on Blender Store
+
+				hr
+
+				| {# This text is confusing (refers to the total payments ever made by the user)
+				.settings-billing-info.
+					Paid balance: {{ store_user['paid_balance'] }} {{ store_user['balance_currency'] }}
+				| #}
+
+				| {% else %}
+
+				| {% if 'demo' in groups %}
+				h3.subscription-demo
+					i.pi-heart-filled
+					| You have a free account
+
+				hr
+
+				p You have full access to the Blender Cloud, provided by the Blender Institute. This account is meant for free evaluation of the service. Get in touch with #[a(href="mailto:cloudsupport@blender.org") cloudsupport@blender.org] if you have any questions.
+
+				| {% else %}
+				h3.subscription-missing
+					i.pi-info
+					| You do not have an active subscription.
+				h3
+					a(href="https://store.blender.org/product/membership/") Get full access to Blender Cloud now!
+				| {% endif %}
+
+				| {% endif %}
+
+
+
+
+
+| {% endblock %}

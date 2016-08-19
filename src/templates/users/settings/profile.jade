@@ -1,0 +1,45 @@
+| {% extends 'layout.html' %}
+| {% block body %}
+.container
+	#settings
+		include _sidebar
+		#settings-container
+			.settings-header
+				.settings-title Profile
+
+			.settings-content
+				.settings-form
+					form#settings-form(method='POST', action="{{url_for('users.settings_profile')}}")
+						.left
+							.form-group
+								| {{ form.full_name.label }}
+								| {{ form.full_name(size=20, class='form-control') }}
+								| {% if form.full_name.errors %}
+								| {% for error in form.full_name.errors %}{{ error|e }}{% endfor %}
+								| {% endif %}
+
+							.form-group
+								| {{ form.username.label }}
+								| {{ form.username(size=20, class='form-control') }}
+								| {% if form.username.errors %}
+								| {% for error in form.username.errors %}{{ error|e }}{% endfor %}
+								| {% endif %}
+
+
+							.form-group.settings-password
+								| Change your password at the
+								a(href="https://blender.org/id/change")  Blender ID
+
+						.right
+							.settings-avatar
+								a(href="https://gravatar.com/")
+									img(src="{{ current_user.gravatar }}")
+									span Change Gravatar
+
+						.buttons
+							button.btn.btn-default.button-submit(type='submit')
+								i.pi-check
+								| Save Changes
+
+
+| {% endblock %}

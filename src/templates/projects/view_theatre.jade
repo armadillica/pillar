@@ -1,0 +1,57 @@
+| {% extends 'layout.html' %}
+
+| {% set title = 'theatre' %}
+
+| {% block og %}
+meta(property="og:title", content="{{ node.name }}")
+meta(property="og:url", content="{{ url_for('projects.view_node', project_url=project.url, node_id=node._id, t=1, _external=True) }}")
+meta(property="og:type", content="website")
+meta(property="og:description", content="Created on {{ node._created.strftime('%d %b %Y') }}")
+| {% if og_picture %}
+meta(property="og:image", content="{{ og_picture.thumbnail('l', api=api) }}")
+meta(property="og:image:secure_url", content="{{ og_picture.thumbnail('l', api=api) }}")
+meta(property="og:image:type", content="{{ og_picture.content_type }}")
+meta(property="og:image:witdh", content="{{ og_picture.width }}")
+meta(property="og:image:height", content="{{ og_picture.height }}")
+| {% endif %}
+| {% endblock %}
+
+| {% block tw %}
+| {% if og_picture %}
+meta(property="twitter:image", content="{{ og_picture.thumbnail('l', api=api) }}")
+| {% endif %}
+meta(name="twitter:title", content="{{node.name}}")
+meta(name="twitter:description", content="Created on {{ node._created.strftime('%d %b %Y') }}")
+| {% endblock %}
+
+| {% block header_backdrop %}{% endblock %}
+| {% block navigation_search %}{% endblock %}
+| {% block navigation_sections %}
+li
+	a.navbar-item.info(
+		href="",
+		title="Toggle info & sidebar")
+		i.pi-info
+| {% endblock %}
+
+| {% block css %}
+link(href="{{ url_for('static_pillar', filename='assets/css/theatre.css', v=2016) }}", rel="stylesheet")
+| {% endblock %}
+
+| {% block body %}
+#theatre-container(class="{% if current_user.is_authenticated %}with-info{% endif %}")
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+
+	$(function(){
+		$.get("{{url_for('nodes.view', node_id=node._id, t=True)}}", function(dataHtml) {
+			$("#theatre-container").html(dataHtml);
+		});
+	});
+| {% endblock %}
+
+| {% block footer %}{% endblock %}
+| {% block footer_navigation %}{% endblock %}

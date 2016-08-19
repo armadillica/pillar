@@ -1,0 +1,2580 @@
+#project-container
+	display: flex
+	flex-direction: row
+	min-height: 800px
+	z-index: $z-index-base
+	position: relative
+	+container-behavior
+
+	+media-xs
+		flex-direction: column-reverse
+		min-height: auto
+
+#project-side-container
+	display: flex
+
+	+media-xs
+		flex-direction: column-reverse
+
+#project-side-container+#project_context-header
+	width: 100%
+	left: 0
+
+#project-side-container.collapsed+#project_context-header
+	span#project-statusbar
+		left: $project-sidebar-width
+
+
+#project_nav-container
+	position: fixed
+	z-index: $z-index-base + 5
+	width: $project_nav-width
+	overflow: hidden
+
+	+media-xs
+		display: block
+		width: 100%
+		position: relative
+		height: initial !important
+
+#project_sidebar
+	width: $project-sidebar-width
+	background-color: $color-background-nav-dark
+	z-index: $z-index-base + 4
+
+	+media-xs
+		width: 100%
+
+	ul.project-tabs
+		margin: 0
+		padding: 0
+		list-style: none
+
+		position: fixed
+		width: $project-sidebar-width
+		top: $project_header-height
+		bottom: 0
+
+		+media-xs
+			display: flex
+			position: relative
+			top: 0
+			width: 100%
+
+		li
+			display: flex
+			align-items: center
+			justify-content: center
+			width: $project-sidebar-width
+			height: $project-sidebar-width
+			position: relative
+			color: white
+			background-color: $color-background-nav-dark
+			border-left: 2px solid transparent
+			transition: all 100ms ease-in-out
+
+			+media-xs
+				border-bottom: 2px solid transparent
+			+media-sm
+				border-bottom: 2px solid transparent
+			+media-md
+				border-left: 2px solid transparent
+			+media-lg
+				border-left: 2px solid transparent
+
+			&:first-child
+				border-top: thin solid transparent
+
+			&:hover
+				background-color: $color-background-nav-light
+				cursor: pointer
+
+				+media-xs
+					border-bottom: 2px solid $color-background-nav-light
+				+media-sm
+					border-bottom: 2px solid $color-background-nav-light
+				+media-md
+					border-left: 2px solid $color-background-nav-light
+				+media-lg
+					border-left: 2px solid $color-background-nav-light
+
+			a
+				width: $project-sidebar-width
+				height: $project-sidebar-width
+				display: flex
+				align-items: center
+				justify-content: center
+				color: $color-text-light-primary
+
+			i
+				font-size: 1.1em
+
+			&.active
+				background-color: $color-background-nav
+
+				+media-xs
+					border-bottom: 2px solid $color-primary
+				+media-sm
+					border-bottom: 2px solid $color-primary
+				+media-md
+					border-left: 2px solid $color-primary
+				+media-lg
+					border-left: 2px solid $color-primary
+
+				a
+					color: white
+
+			&.tabs-thumbnail
+				height: $project-sidebar-width
+				border-bottom: 2px solid $color-background-nav-light
+
+				img
+					width: $project-sidebar-width
+					height: $project-sidebar-width
+
+				&.image
+					border-left: none
+
+				#project-loading
+					position: absolute
+					width: $project-sidebar-width
+					height: $project-sidebar-width
+					display: flex
+					align-items: center
+					justify-content: center
+					i
+						position: relative
+						top: -1px
+						font-size: 1em
+						color: white
+
+#search-container #project_sidebar ul.project-tabs li.tabs-thumbnail
+	background-color: $color-background-nav-dark
+	&:hover
+		background-color: $color-background-nav-light
+
+#project-nav,
+#project_context-container
+	flex: 1
+
+
+/* Container for navigation on the left */
+#project_nav
+	display: block
+	visibility: visible
+	width: $project_nav-width
+	position: relative
+	background-color: $color-background-nav
+
+	color: white
+	left: 0
+
+	&.about
+		display: none
+		visibility: hidden
+
+	+media-xs
+		width: initial
+
+/* Header with name, breadcrumbs and node edit tools */
+#project_nav-header,
+#project_context-header
+	display: flex
+	align-items: center
+
+	position: relative
+	color: white
+
+#project_context-header
+	z-index: $z-index-base + 3
+	position: fixed
+	top: $project_header-height
+	height: $project_header-height
+	min-height: $project_header-height
+	width: auto
+	color: $color-text-dark-secondary
+	border-bottom: thin solid lighten($color-text-dark-hint, 10%)
+	background-color: $color-background-light
+	box-shadow: none
+	transition: box-shadow 250ms ease-in-out
+
+	&.is-offset
+		box-shadow: 0 0 25px rgba(black, .2)
+
+#project_nav-header
+	z-index: $z-index-base + 3
+	position: absolute
+	top: 0
+	left: 0
+	height: $project_header-height
+	min-height: $project_header-height
+	width: 100%
+	border-bottom: 2px solid $color-background-nav-light
+	background-color: $color-background-nav-dark
+
+	/* Name of the project */
+	.project-title
+		width: 100%
+		max-width: 100%
+		height: 100%
+		transition: background-color 150ms ease-in-out
+
+		a
+			display: block
+			width: 100%
+			color: white
+			padding: 15px
+			font-size: 1.1em
+			+text-overflow-ellipsis
+
+			&:hover, &:active, &:focus
+				text-decoration: none
+				outline: none
+
+span#project-statusbar
+	position: absolute
+	// left: $project_nav-width + $project-sidebar-width
+	left: 0
+	top: 10px
+	min-width: 33%
+	padding: 5px 15px
+	color: $color-text-dark
+	opacity: 0
+	z-index: 1
+	background-color: $color-background-light
+	font-weight: 400
+	transition: all 250ms ease-in-out
+
+	+media-xs
+		left: 0
+		min-width: 100%
+
+	i
+		margin-right: 5px
+
+	&.info
+		color: $color-info
+	&.error
+		color: $color-danger
+	&.warning
+		color: $color-warning
+	&.success
+		color: $color-success
+	&.default
+		color: $color-text-light
+
+	&.active
+		opacity: 1
+
+span#project-edit-title
+	position: absolute
+	padding: 15px 20px
+	font:
+		size: 1.1em
+		weight: 400
+	white-space: nowrap
+
+.project_split.collapsed+#project_context-header
+	span#project-edit-title
+		left: 0
+
+/* Breadcrumbs */
+ul.breadcrumb
+	position: relative
+	padding: 0
+	margin: 0 0 0 15px
+	background-color: transparent
+	display: inline-block
+	font-weight: 300
+
+	&.context
+		visibility: hidden
+		opacity: 0
+		transition: opacity 250ms ease-in-out
+
+		+media-xs
+			display: none
+
+		&.active
+			visibility: visible
+			opacity: 1
+
+	li
+		margin: 0
+		padding: 2px
+		float: left
+
+		a
+			color: $color-text-dark-hint
+
+	/* The > separating each breadcrumb */
+	li+li:before
+		color: lighten($color-text, 15%)
+		content: '\e83a'
+		font:
+			family: 'pillar-font'
+
+	&:before
+		position: absolute
+		left: -13px
+		top: 2px
+
+/* // Breadcrumbs */
+
+
+/* Edit Asset buttons */
+.project-mode-view,
+.project-mode-edit,
+.project-mode-add
+	display: none
+
+ul.project-edit-tools
+	display: flex
+	align-items: center
+	height: 100%
+	padding: 0
+	margin:
+		top: 0
+		left: auto
+		right: 5px
+		bottom: 0
+	color: $color-text-dark-hint
+
+	list-style-type: none
+	font-size: .9em
+
+	+media-xs
+		width: 100%
+		margin: 0 auto
+		justify-content: space-around
+
+	/* Bottons at the end of a form, like Save Changes */
+	&.bottom
+		+clearfix
+		padding: 20px 0 25px 0
+		border-top: thin solid $color-text-dark-hint
+		justify-content: flex-end
+		width: 100%
+		height: initial
+
+	li
+		margin: 0
+		padding: 0
+		position: relative
+		float: left
+		user-select: none
+
+		a
+			min-width: 110px
+			user-select: none
+
+			&:focus, &:active
+				text-decoration: none
+				outline: none
+
+		&.button-save
+
+			&.disabled
+				border-bottom: none
+
+				a
+					color: white
+					border-color: darken($color-success, 10%)
+
+			a
+				border-color: $color-success
+				background-color: $color-success
+				color: white
+				margin-right: 10px
+
+				&:hover
+					background-color: lighten($color-success, 5%)
+
+			&.field-error
+				a
+					background-color: $color-danger
+					border-color: $color-danger
+					color: white
+
+			&.saving
+				a
+					pointer-events: none
+					cursor: default
+					+pulse-75
+
+			&.disabled
+				cursor: not-allowed
+				a
+					pointer-events: none
+					background: repeating-linear-gradient(-45deg, darken($color-success, 15%), darken($color-success, 15%) 10px, darken($color-success, 20%) 10px, darken($color-success, 20%) 20px)
+
+		&.button-move
+			&.moving
+				background-color: $color-success
+				border-color: $color-success
+				pointer-events: none
+				cursor: default
+				+pulse-75
+
+		&.button-add,
+		&.button-edit
+			min-width: 80px
+
+
+		&.button-dropdown
+			min-width: 50px
+			cursor: pointer
+			i
+				margin: auto
+				padding: 0
+
+				&.button-add-icon
+					margin-right: 5px
+
+			a.dropdown-toggle
+				display: inline-block
+				min-width: auto
+
+			&.open
+				a.dropdown-toggle
+					color: $color-text-light
+					background-color: $color-primary
+					border-color: darken($color-primary, 5%)
+
+				li.button-delete:hover
+					a
+						color: $color-danger
+
+		&.featured
+			a
+				color: $color-warning
+				border-color: $color-warning
+
+				&:hover
+					background-color: rgba($color-warning, .1)
+
+		&.disabled
+			cursor: not-allowed
+			border-bottom: thin solid $color-text-dark-hint
+
+			a
+				pointer-events: none
+				background: repeating-linear-gradient(-45deg, lighten($color-text-dark-hint, 15%), lighten($color-text-dark-hint, 15%) 10px, lighten($color-text-dark-hint, 5%) 10px, lighten($color-text-dark-hint, 5%) 20px)
+				border-color: darken($color-text-dark-hint, 5%)
+				opacity: .6
+				color: $color-text-dark
+
+		&.button-dropdown.disabled
+			border-bottom: none
+
+	a
+		margin: 5px
+		padding: 5px 15px
+		color: $color-text-dark-primary
+		border-radius: 3px
+		border: thin solid $color-text-dark-primary
+		text-align: center
+		text-transform: uppercase
+		transition: background-color 150ms ease-in-out
+		background-color: $color-background-light
+
+		i
+			margin-right: 5px
+
+		&:hover
+			background-color: $color-primary
+			border-color: darken($color-primary, 5%)
+			color: $color-text-light
+			text-decoration: none
+
+		&:focus, &:active
+			text-decoration: none
+			outline: none
+
+
+		&#item_save,
+		&#item_cancel
+			i
+				font-size: 1em
+
+		&#item_add,
+		&#item_edit,
+		&#item_move,
+		&#item_featured
+			li
+				i
+					margin-right: 10px
+
+		&#item_delete
+			li i
+				margin-right: 0
+		// &:not(:last-of-type)
+			// border-right: thin solid darken($color-background, 50%)
+
+	/* ul.project-edit-tools */
+
+	/* Extra asset tools in dropdown */
+	ul.dropdown-menu
+		width: auto
+		min-width: 180px
+		padding: 0
+		margin: 0
+		top: 44px
+		left: initial
+		right: 10px
+		bottom: initial
+		border: thin solid $color-text-dark-hint
+		border-bottom-left-radius: 3px
+		border-bottom-right-radius: 3px
+		border-top-left-radius: 0
+		border-top-right-radius: 0
+		background-color: white
+		color: $color-text-dark-primary
+		box-shadow: 1px 1px 25px rgba(black, .2)
+
+		li
+			padding: 0
+			clear: both
+			display: flex
+			align-items: center
+			width: 100%
+
+			a
+				margin: 0
+				padding: 10px 15px
+				width: 100%
+				border: 0
+				font-size: .9em
+				width: 100%
+				text-align: left
+
+				&:hover
+					color: $color-primary
+					background-color: transparent
+				&:active, &:focus
+					color: $color-primary
+					background-color: transparent
+
+				i
+					display: inline-block
+					margin: 0 15px 0 0
+
+					&.icon-group:after
+						content: '\e80d'
+					&.icon-group_texture:after,
+					&.icon-group_hdri:after
+						content: '\e80b'
+						font-size: 1.1em
+					&.icon-asset:after
+						content: '\e825'
+					&.icon-page:after
+						content: '\e824'
+					&.icon-texture:after
+						content: '\e80a'
+					&.icon-hdri:after
+						content: '\f019'
+
+	/* // Extra asset tools in dropdown */
+
+	&.open
+		button
+			box-shadow: none
+
+/* // Edit Asset buttons */
+
+#project-loading
+	color: $color-text-light-primary
+	margin-left: auto
+	display: inline-block
+	background-color: transparent
+	opacity: 0
+	transition: opacity 150ms ease-in-out
+	+position-center-translate
+
+	i
+		position: relative
+		top: 2px
+
+	&.active
+		background-color: rgba($color-background-nav-dark, .7)
+		opacity: 1
+
+		i
+			+spin
+			animation-duration: .5s
+
+#project-header+#project_tree,
+#project-header+#project_context-container
+	margin-top: $project_header-height
+
+
+ul.project_nav-edit-list
+	list-style: none
+	padding: 0
+	margin: $project_header-height 0 0 0
+
+	li
+		font:
+			size: .9em
+			weight: 400
+			family: $font-body
+		text-transform: uppercase
+		border-bottom: thin solid lighten($color-background-nav, 8%)
+		color: $color-text-light-primary
+		background-color: $color-background-nav-light
+
+		&:hover
+			color: $color-text-light
+			cursor: pointer
+			background-color: lighten($color-background-nav, 5%)
+
+		a
+			padding: 10px 15px
+			display: inline-block
+			width: 100%
+			text-decoration: none
+			color: $color-text-light-primary
+
+		i
+			padding-right: 15px
+
+		&.active
+			border-left: 5px solid $color-primary
+			background-color: lighten($color-background-nav, 5%)
+
+.project_nav-toggle-btn
+	position: absolute
+	bottom: 0
+	width: 100%
+	padding: 10px
+	text-align: center
+	color: $color-text-light-hint
+	cursor: pointer
+
+	&:hover
+		color: $color-text-light
+
+	i
+		font-size: 1.3em
+
+	+media-xs
+		visibility: hidden
+		display: none
+
+#project_context
+	position: relative
+	display: flex
+	flex-direction: column
+	flex: 1
+	height: 100%
+	color: $color-text-light
+	background-color: white
+
+#project_context-header+#project_context
+	padding-top: $project_header-height
+
+#node-container
+	flex: 1
+	color: $color-text-dark
+
+	/* For error messages (403) and other overlaid text*/
+	#node-overlay
+		z-index: $z-index-base + 2
+		position: relative
+		opacity: 0
+		transition: opacity 250ms ease-in-out
+		&.active
+			opacity: 1
+
+
+/* Project context on the right of the navigation */
+/* Contains #project_context */
+#project_context-container
+	background-color: $color-background-nav
+
+	iframe#server_error
+		width: 100%
+		min-height: 800px
+		border: none
+
+#project-side-container
+	&.collapsed
+		.project_nav-toggle-btn i:before
+			content: '\e827'
+
+		.project_split
+			background-color: $color-background-nav
+			cursor: e-resize
+
+		#project_nav
+			width: 5px
+			+media-xs
+				width: initial
+
+			#project_nav-container
+				width: 5px
+				+media-xs
+					display: block
+					width: initial
+					position: relative
+
+			#project_nav-header,
+			#project_context-header,
+			#project_tree
+				display: none
+				visibility: hidden
+
+				+media-xs
+					display: block
+					visibility: visible
+					position: relative
+
+
+/* The actual navigation tree container */
+#project_tree
+	padding-bottom: 5px // some padding on bottom of jstree
+	position: relative // for scrollbar alignment
+	margin-top: $project_header-height
+
+	&.edit
+		margin-top: 0
+
+/* Clickable bar between navtree and context view, to collapse tree */
+.project_split
+	float: right
+	position: absolute
+	width: 15px
+	margin-left: -8px
+	top: 0
+	right: 0
+	bottom: 0
+	z-index: $z-index-base + 4
+	cursor: w-resize
+	user-select: none
+
+	+media-xs
+		display: none
+
+
+/* Node Context */
+=project-node-title
+	font:
+		family: $font-body
+		size: 2em
+		weight: 300
+	color: lighten($color-background-nav, 15%)
+
+$node-preview-max-height-sm: 300px
+$node-preview-max-height-md: 500px
+$node-preview-max-height-lg: 700px
+
+#node-container.texture
+
+	.texture-title
+		padding: 20px 20px 0 20px
+		margin: 0
+		float: left
+		text-transform: capitalize
+		+project-node-title
+		text-shadow: 1px 1px 0 rgba(white, .5)
+
+		position: relative
+		z-index: 1
+
+	.texture-license
+		float: right
+		padding: 20px 20px 0 0
+		i
+			font-size: 1.3em
+		position: relative
+		z-index: 1
+
+	.texture-backdrop
+		background:
+			size: cover
+			position: 50% 50%
+		position: absolute
+		z-index: 0
+		opacity: .3
+		width: 100%
+		height: 250px
+		top: -10px
+		left: -10px
+		// We can't have nice things because of Edge
+		// filter: blur(10px)
+
+		&:after
+			content: ''
+			display: block
+			position: absolute
+			width: 100%
+			height: 250px
+			background: linear-gradient(transparent, white)
+			top: 0
+			left: 0
+			z-index: 0
+			filter: none
+
+
+section.node-row
+	display: flex
+	width: 100%
+	flex: row
+	clear: both
+
+	padding: 20px
+	margin-bottom: 0
+	border-bottom: thin solid rgba($color-text-dark, .2)
+
+	&.texture-map
+		width: 50%
+		float: left
+		clear: none
+		border-right: thin solid rgba($color-text-dark, .2)
+		background-color: white
+		position: relative
+
+		&:nth-child(even), &:last-child
+			border-right: none
+
+		&:last-child
+			border-bottom: none
+
+	&.texture-info
+		padding: 10px 20px
+		color: $color-text-dark-secondary
+		position: relative
+		z-index: 1
+
+		span
+			&:not(:first-child)
+				padding-left: 15px
+
+			i
+				position: relative
+				top: -1px
+				right: 2px
+
+
+	section.node-preview.texture
+		overflow: hidden
+		width: 50%
+		max-height: 200px
+		max-width: 200px
+		float: left
+		position: relative
+		background-color: $color-background
+		border-radius: 3px
+		user-select: none
+
+		img.node-preview-thumbnail
+			+position-center-translate
+			width: 100%
+			border-radius: 3px
+			user-select: none
+			cursor: grabbing
+			cursor: -webkit-grabbing
+
+		.loading
+			position: absolute
+			top: 0
+			bottom: 0
+			left: 0
+			right: 0
+			color: rgba(white, .5)
+			opacity: 0
+			visibility: hidden
+			background-color: rgba(black, .5)
+			width: 100%
+			height: 100%
+			pointer-events: none
+
+			transition: opacity 250ms ease-in-out
+
+			i
+				font-size: 1.5em
+				position: absolute
+				top: 45%
+				left: 45%
+
+			&.active
+				opacity: 1
+				visibility: visible
+
+	section.node-details-container.texture
+		width: 100%
+		flex: 1
+		position: relative
+		min-height: 200px
+
+		.node-details-header
+			width: 100%
+			max-width: 100%
+			display: block
+			float: none
+			padding: 5px 20px 0 20px
+			min-height: initial
+
+			&.nofiles
+				padding: 0
+				.node-title
+					color: $color-text-dark-secondary
+					font:
+						weight: 400
+						size: 1.2em
+
+			.node-title
+				color: $color-text-dark-primary
+				text-transform: capitalize
+				font:
+					family: $font-body
+					weight: 500
+					size: 1.5em
+				+text-overflow-ellipsis
+
+
+		.node-details-attributes
+			padding: 0 20px 10px
+
+			span
+				display: block
+
+				&.sizes, &.extra, &.length, &.content_type
+					color: $color-text-dark-secondary
+					padding: 5px 0
+					font:
+						size: 1.1em
+						weight: 400
+
+					strong
+						padding-left: 5px
+
+				&.content_type
+					color: $color-text-dark-hint
+					font-size: .9em
+					text-transform: uppercase
+
+		.node-details-meta
+			display: block
+			width: 100%
+			max-width: 100%
+			position: absolute
+			bottom: 0
+			padding: 0 0 0 10px
+
+			.node-details-meta-list button
+				width: 100%
+
+			.node-details-meta-list-item.type
+				text-transform: uppercase
+
+section.node-preview
+	overflow: hidden
+
+	iframe
+		width: 100%
+
+	&.image,
+	&.file,
+		min-height: 200px
+		flex: 1
+		max-height: 500px
+		background-color: black
+		display: flex
+		justify-content: center
+		align-items: center
+
+		cursor: zoom-in
+
+		+media-sm
+			max-height: $node-preview-max-height-sm
+		+media-md
+			max-height: $node-preview-max-height-md
+		+media-lg
+			max-height: $node-preview-max-height-lg
+
+		img
+			display: block
+			max-height: $node-preview-max-height-lg
+			margin: 0 auto
+
+			+media-xs
+				width: 100%
+
+			+media-sm
+				max-height: $node-preview-max-height-sm
+			+media-md
+				max-height: $node-preview-max-height-md
+			+media-lg
+				max-height: $node-preview-max-height-lg
+
+	&.video
+		background-color: black
+
+	&.group, &.project
+		background-color: $color-background
+		@include overlay(rgba($color-background, .3), 0%, transparent, 100%)
+		position: relative
+		overflow: hidden
+
+		.header
+			max-width: 100%
+			width: 100%
+
+		.backdrop
+			width: 105%
+			left: -5px
+			position: relative
+			z-index: 0
+			// We can't have nice things because of Edge
+			// filter: blur(10px)
+
+		.overlay
+			@include overlay(rgba($color-background-nav, .1), 0%, rgba(white, .6), 100%)
+			width: 100%
+			height: 100%
+			z-index: 1
+
+
+		.node-title
+			position: absolute
+			z-index: 2
+			color: lighten($color-background-nav, 15%)
+			text-shadow: 1px 1px 0 rgba(white, .2)
+			left: 20px
+			padding: 20px 20px 20px 0
+			font:
+				size: 2em
+				weight: 300
+
+		.author
+			color: $color-text-dark-secondary
+
+	&.group
+		height: 80px
+
+		.node-title
+			max-width: 80%
+
+		.backdrop
+			opacity: .25
+			position: absolute
+			top: 50%
+			left: 50%
+			transform: translate(-50%, -50%)
+
+
+section.node-details-container
+	background-color: white
+
+	&.project
+		padding-bottom: 15px
+
+/* Narrower details for about page (since it doesn't have navtree) */
+body.about
+	section.node-details-container.project
+		+media-lg
+			max-width: $screen-lg / 1.4
+			margin: 0 auto
+
+
+section.node-details-container,
+section.node-preview.group
+	position: relative
+
+	.node-details-header
+		width: 55%
+		max-width: 55%
+		float: left
+		display: flex
+		align-items: baseline
+		min-height: 50px
+		padding: 20px 20px 5px 20px
+
+		+media-xs
+			font-size: .7em
+			width: 100%
+			max-width: 100%
+
+		.node-title
+			+project-node-title
+			color: $color-text-dark-primary
+
+		.node-title-details
+			margin-left: auto
+			line-height: 1em
+
+			& .date
+				display: inline-block
+				margin-right: 10px
+				color: $color-text-dark-secondary
+
+			& .status
+				display: inline-block
+				font-size: .9em
+				text-transform: capitalize
+				color: $color-text-dark-primary
+				padding: 5px 15px
+				border: thin solid $color-text-dark-hint
+				border-radius: 3px
+				cursor: default
+
+
+	.node-details-description
+		+node-details-description
+
+	&.group, &.project
+		.node-details-header
+			max-width: 35%
+			float: right
+		.node-details-description
+			max-width: 75%
+			padding: 0
+
+
+	&.group
+		.node-details-description
+			padding-top: 15px
+
+		.node-details-meta.preview
+			top: -45px
+			bottom: initial
+
+			.node-details-meta-list
+				display: inline-block
+
+			.node-details-meta-actions
+				display: inline-block
+
+				.btn-browsetoggle
+					+button-rounded(lighten($color-background-nav, 20%), 3px)
+					width: 48px
+					text-align: center
+					padding: 2px 4px
+					i
+						font-size: 1.3em
+						padding: 0
+						margin: 0
+
+	&.project
+		.node-details-title
+			padding: 10px 20px 0 20px
+
+	.node-details-meta
+		font-weight: 400
+		padding: 15px 20px 25px 20px
+
+		&.preview
+			padding: 0
+			color: $color-text-light-primary
+			position: absolute
+			right: 10px
+			bottom: 20px
+			z-index: 1
+
+			ul.node-details-meta-list
+				li.node-details-meta-list-item
+					&.date
+						&:before
+							content: ''
+					&.author
+						color: lighten($color-background-nav, 25%)
+
+					&.status
+						color: $color-text-dark
+
+		&.footer
+			+clearfix
+
+		&.header
+			float: left
+			width: 45%
+			max-width: 45%
+			padding:
+				top: 25px
+				left: 0
+
+			+media-xs
+				width: 100%
+				max-width: 100%
+				padding-top: 15px
+
+		&.license
+			+clearfix
+			padding-bottom: 5px
+			color: $color-text-dark-secondary
+
+		ul.node-details-meta-list
+			display: flex
+			align-items: center
+
+			list-style-type: none
+			margin: 0
+			padding: 0
+
+			+media-xs
+				font-size: .9em
+				width: 100%
+				max-width: 100%
+
+			li.node-details-meta-list-item
+				margin: 0
+				padding: 0 10px 0 0
+				line-height: 1em
+				float: left
+
+				&.date
+					color: $color-text-dark-secondary
+					padding-left: 5px
+					margin-left: 5px
+
+					&:before
+						color: $color-text-dark-secondary
+						position: relative
+						content: '·'
+						left: -10px
+						font-weight: 500
+
+					span /* (updated x mins ago) */
+						color: $color-text-dark-hint
+						margin-left: 3px
+						font-size: .9em
+						text-transform: lowercase
+
+				&.author
+					color: $color-text-dark-primary
+
+				&.status
+					margin-right: 10px
+					font-size: .9em
+					text-transform: capitalize
+					color: $color-text-dark-secondary
+					font-weight: 300
+					padding: 5px 15px
+					border: thin solid $color-text-dark-hint
+					border-radius: 3px
+					cursor: default
+
+				&.access
+					margin: 0 0 0 auto
+					color: $color-text-dark-primary
+					cursor: default
+					opacity: .5
+					white-space: nowrap
+
+					&:hover
+						opacity: 1
+
+					&.public
+						border-color: $color-success
+						color: $color-success
+						padding: 0
+						i
+							font-size: 1.2em
+							position: relative
+							top: 1px
+
+						span
+							display: inline-block
+
+
+				&.type
+					margin-left: auto
+					text-transform: uppercase
+					padding: 0 5px 0 15px
+					cursor: default
+					font-weight: 400
+					color: $color-text-dark-hint
+
+					+media-xs
+						display: none
+
+					/* .blend files are special snowflakes */
+					span.blend
+						display: inline-block
+						padding: 0 35px 0 0
+						font-size: 1.2em
+						color: $color-text-dark-secondary
+
+				&.access+li.node-details-meta-list-item.type,
+				&.access+.tooltip+li.node-details-meta-list-item.type
+					margin-left: 0
+
+				&.access+li.node-details-meta-list-item.video.download,
+				&.access+.tooltip+li.node-details-meta-list-item.video.download
+					margin-left: 10px
+
+				&.length
+					padding: 0 5px 0 15px
+					cursor: default
+					font-weight: 400
+					color: $color-text-dark-hint
+					white-space: nowrap
+
+				&.license
+					margin-left: 15px
+					color: $color-text-dark-secondary
+
+					i
+						color: $color-text-dark-primary
+						font-size: 1.4em
+						position: relative
+						bottom: -2px
+						left: -5px
+
+				&.video.license
+					margin-left: auto
+
+				&.video.license+li.node-details-meta-list-item.video.download,
+				&.video.license+.popover+li.node-details-meta-list-item.video.download
+					margin-left: 0
+
+				/* Download button */
+				&.download
+					align-self: flex-end
+					padding: 0 0 0 10px
+
+					/* Actual button */
+					button
+						@include button-rounded($color-primary, 3px)
+						position: relative
+
+						padding:
+							left: 20px
+							right: 20px
+
+						font-size: .9em
+
+						i
+							margin-right: 0
+
+						/* Tweaks for specific icons */
+						i.icon-dropdown-menu
+							padding-left: 10px
+
+					/* Videos have dropdown caret, so paddit 5px less */
+					&.video.download
+						margin-left: auto
+
+						button
+							padding-right: 10px
+
+					&.file.download
+						button
+							@include button-rounded-filled($color-primary, 3px)
+							padding:
+								left: 15px
+								right: 15px
+
+							i
+								margin-right: 0
+
+					&.texture.download
+						width: 100%
+
+					/* Download dropdown options */
+					ul.dropdown-menu
+						width: auto
+						min-width: 240px
+						padding: 0
+						margin: 0
+						top: initial
+						left: initial
+						right: 0
+						bottom: 35px
+						border: thin solid rgba(darken($color-background, 5%), .3)
+						border-top-left-radius: 3px
+						border-top-right-radius: 3px
+						border-bottom-left-radius: 0
+						border-bottom-right-radius: 0
+
+						li
+							padding: 0
+							text-align: right
+							clear: both
+							display: flex
+							align-items: center
+
+							a
+								padding: 10px 15px
+								width: 100%
+
+								&:hover
+									color: $color-primary
+									background-color: transparent
+
+									span
+										&.length
+											color: lighten($color-primary, 10%)
+
+								span
+									&.length
+										float: left
+										color: $color-text-dark-hint
+										padding-right: 15px
+									&.format
+										text-transform: uppercase
+										align-self: flex-end
+										margin-left: auto
+									&.size
+										display: inline-block
+										padding-left: 15px
+					&.open
+						button
+							box-shadow: none
+
+section.node-details-container
+	&.storage
+		.node-details-meta
+			ul.node-details-meta-list
+				li.node-details-meta-list-item
+					&.length
+						margin-left: auto
+
+
+.project-featured-container
+	border-top: thin solid $color-background
+	padding-top: 20px
+	margin-top: 20px
+	padding-left: 20px
+
+	h3
+		margin-top: 0
+
+	.featured-list
+		width: 100%
+		max-width: 800px
+		+clearfix
+
+		.am-wrapper
+			float: left
+			position: relative
+			overflow: hidden
+
+		.am-wrapper img
+			position: absolute
+			outline: none
+
+		.featured-item
+			.featured-item-info
+				display: flex
+				flex-direction: column-reverse
+				position: absolute
+				z-index: 1
+				opacity: 0
+				color: white
+				top: 0
+				left: 0
+				right: 0
+				bottom: 0
+				padding: 5px 10px
+				border-top-right-radius: 3px
+				transition: opacity 150ms ease-in-out
+				background-image: linear-gradient(10deg, rgba(0,0,0,0.85) 15%, transparent 50%)
+
+				+media-xs
+					opacity: 1
+
+				span
+					padding: 3px 0
+
+					&.title
+						line-height: 1.2em
+						font-weight: 500
+						word-break: break-word
+					&.type
+						font-size: .8em
+						text-transform: capitalize
+						color: $color-text-light-secondary
+						+text-overflow-ellipsis
+
+			&:hover
+				.featured-item-info
+					opacity: 1
+
+
+.node-extra
+	display: flex
+	flex-direction: row
+	align-items: stretch
+
+	padding: 0 20px
+	width: 100%
+	max-width: 800px
+
+	a.learn-more
+		font-size: .9em
+
+	.node-updates,
+	.node-blog
+		flex: 1
+
+		ul
+			padding: 0
+			margin: 0 0 25px 0
+			display: flex
+			flex-direction: row
+			flex-wrap: wrap
+			justify-content: space-between
+
+			li
+				display: flex
+				list-style: none
+				padding: 10px 0
+				border-top: thin solid $color-background
+				cursor: pointer
+				width: 50%
+
+				&:hover
+					img
+						opacity: .9
+					a.title
+						color: $color-primary
+						text-decoration: underline
+
+				.image
+					width: 60px
+					height: 60px
+					min-width: 60px
+					min-height: 60px
+					max-width: 60px
+					max-height: 60px
+					border-radius: 3px
+					background-color: $color-background
+					float: left
+					margin: 0 15px 0 0
+					position: relative
+
+					img
+						width: 100%
+						border-radius: 3px
+
+					i
+						color: $color-text-dark-hint
+						font-size: 1.6em
+						+position-center-translate
+
+				.info
+					width: 100%
+					float: left
+
+					.title
+						display: block
+						+text-overflow-ellipsis
+						+clearfix
+
+					span.details
+						width: 100%
+						display: block
+						font-size: .9em
+						padding: 5px 0
+						color: $color-text-dark-secondary
+						+clearfix
+
+						.who
+							margin-left: 3px
+							font-weight: 500
+						.what
+							text-transform: capitalize
+
+	.node-blog
+		flex-direction: column
+		ul li
+			width: 100%
+
+	.node-blog+.node-updates
+		flex-direction: column
+		padding-left: 25px
+		ul li
+			width: 100%
+
+section.node-children
+	background-color: white
+
+	&.group, &.storage
+		flex: 1
+		padding: 10px 0 25px 20px
+		+clearfix
+
+.list-node-children-container
+	position: relative
+	width: $list-node-children-item-width
+	height: $list-node-children-item-width
+	float: left
+	margin: 10px 15px 10px 0
+
+	&.group_texture
+		.list-node-children-item.group_texture
+			height: $list-node-children-item-width
+			margin-top: 5px
+			.list-node-children-item-thumbnail
+				.list-node-children-item-thumbnail-icon i
+					position: relative
+					bottom: 10px
+			.list-node-children-item-name
+				bottom: 26px
+
+	.list-node-children-empty
+		color: $color-text-dark-secondary
+		font-size: 1.2em
+
+	.list-node-children-item-preview
+		margin: 0
+		position: absolute
+		top: $list-node-children-item-width + 10px
+		width: auto
+		height: auto
+		background: black
+		box-shadow: 1px 1px 1px rgba(black, .5), 2px 2px 15px rgba(black, .5)
+
+		visibility: hidden
+		display: none
+		opacity: 0
+
+		z-index: 2
+		max-height: 260px
+		min-height: 50px
+		min-width: 100px
+		max-width: 320px
+		border-radius: 3px
+
+		transition: opacity .1s ease-in-out
+
+		img.texture-preview
+			width: auto
+			margin: 0 auto
+			max-height: 260px
+			max-width: 320px
+
+		span.texture-name
+			display: block
+			width: 100%
+			padding: 8px 10px 0 10px
+			color: white
+			font:
+				size: 1.1em
+				family: $font-headings
+			border-top-left-radius: 3px
+			border-top-right-radius: 3px
+			text-shadow: 1px 1px 1px rgba(black, .5)
+
+			position: absolute
+			top: 0
+			left: 0
+			right: 0
+			@include overlay(rgba($color-background-nav, .9), 0%, transparent, 25%)
+
+			+text-overflow-ellipsis
+
+		&:hover
+			display: none
+
+		&.active
+			opacity: 1
+			visibility: visible
+			display: block
+
+.list-node-children-item
+	float: left
+	margin: 10px 15px 10px 0
+	border-radius: 3px
+
+	color: $color-background-nav
+	background-color: darken(white, 6%)
+
+	box-shadow: 2px 2px 0 rgba(darken($color-background, 60%), .1)
+	width: $list-node-children-item-width
+	overflow: hidden
+	text-overflow: ellipsis
+
+	&:hover
+		color: darken($color-primary, 20%)
+
+		& .list-node-children-item-name i
+			color: darken($color-primary, 20%)
+
+		& .list-node-children-item-thumbnail
+			& .list-node-children-item-thumbnail-icon
+				transform: translate(-50%, -50%) scale(1.1)
+
+	&:active
+		opacity: .8
+		color: $color-primary
+		& .list-node-children-item-name i
+			color: $color-primary
+
+	/* Browse group as list */
+	&.browse-list
+		display: none
+		width: 50%
+		position: relative
+		background-color: initial
+		box-shadow: none
+		border: thin solid transparent
+		border-top-color: darken(white, 8%)
+
+		margin: 0
+		padding:
+			top: 7px
+			bottom: 7px
+
+		+clearfix
+		clear: none
+
+		&:hover
+			opacity: 1
+			text-decoration: none
+			cursor: default
+
+			.list-node-children-item-name
+				text-decoration: none
+				color: darken($color-primary, 10%)
+
+			.list-node-children-item-thumbnail
+				cursor: pointer
+
+				.list-node-children-item-thumbnail-icon
+					transform: translate(-50%, -50%) scale(1)
+
+		&:active
+			background-color: rgba($color-background, .5)
+		&:focus
+			background-color: thin solid rgba($color-primary, .2)
+
+		.list-node-children-item-thumbnail
+			float: left
+			min-width: $list-node-children-item-width_list * 1.69
+			max-width: $list-node-children-item-width_list * 1.69
+			height: $list-node-children-item-width_list
+			border-radius: 3px
+			background: $color-background
+			img
+				height: $list-node-children-item-width_list
+				width: auto
+
+			.list-node-children-item-thumbnail-icon
+				font-size: 1.2em
+				transition: none
+
+				.dark
+					text-shadow: none
+					color: $color-text-dark-secondary
+					font-size: 1.3em
+
+			.list-node-children-item-ribbon
+				+ribbon
+				right: -30px
+				top: 5px
+
+				span
+					font-size: 60%
+					margin: 1px 0
+					padding: 2px 35px
+
+		.list-node-children-item-name
+			position: relative
+			padding:
+				top: 0
+				left: 15px
+			font:
+				size: 1.2em
+			color: darken($color-primary, 15%)
+
+			background-color: initial
+			width: initial
+			max-width: initial
+
+			&:hover
+				cursor: pointer
+				text-decoration: underline
+
+		.list-node-children-item-meta
+			position: relative
+			left: 15px
+			font-size: .9em
+			color: $color-text-dark-secondary
+			background-color: initial
+			padding: 0
+			text-decoration: none
+			span
+				width: 100%
+
+				&.updated
+					color: $color-text-dark-hint
+
+				&.status
+					font-size: .8em
+					color: $color-text-dark-secondary
+					border: thin solid $color-text-dark-hint
+					padding: 3px 8px
+					text-transform: uppercase
+					border-radius: 3px
+					margin-right: 5px
+
+
+	& .list-node-children-item-thumbnail
+		display: flex
+		align-items: center
+		justify-content: center
+
+		width: $list-node-children-item-width
+		height: $list-node-children-item-width
+		background-color: darken($color-background, 5%)
+		position: relative
+		overflow: hidden
+
+		img
+			width: $list-node-children-item-width
+
+		& .list-node-children-item-thumbnail-icon
+			position: absolute
+			top: 50%
+			left: 50%
+			transform: translate(-50%, -50%)
+			font-size: 4em
+			color: white
+			text-shadow: 1px 1px 1px rgba(black, .2), 0 0 50px rgba(black, .3)
+			transition: transform .1s ease-in-out
+
+		& .list-node-children-item-status
+			color: $color-text-light-primary
+			background-color: rgba($color-background-nav, .2)
+			padding: 2px 6px
+			border-radius: 3px
+			font-size: .8em
+
+			position: absolute
+			top: 10px
+			right: 10px
+
+		& .list-node-children-item-ribbon
+			+ribbon
+
+
+	& .list-node-children-item-name
+		z-index: 1
+		position: relative
+
+		display: flex
+		align-items: center
+
+		background-color: darken(white, 6%)
+
+		padding:
+			top: 5px
+			bottom: 5px
+		font-size: .9em
+		width: $list-node-children-item-width
+		max-width: $list-node-children-item-width
+
+		i
+			color: $color-text-dark-secondary
+			padding:
+				left: 7px
+				right: 3px
+			font-size: .9em
+
+		span
+			padding:
+				left: 0
+				right: 3px
+			+text-overflow-ellipsis
+	&.texture, &.hdri
+		margin: 5px 10px 5px 0
+		position: relative
+		height: $list-node-children-item-width
+
+		.list-node-children-item-thumbnail
+			background-color: $color-background-nav
+
+		&:hover
+			opacity: 1
+
+			img
+				opacity: .15
+
+			.list-node-children-item-name
+				opacity: 1
+
+		img
+			transition: opacity 100ms ease-out
+
+		.list-node-children-item-name
+			text-shadow: 1px 1px 2px rgba(black, .5)
+			display: block
+			opacity: 0
+			background-color: transparent
+			position: absolute
+			z-index: 2
+			top: 5px
+			left: 10px
+			color: white
+			font-size: 1em
+			height: 100%
+
+			span
+				padding: 0
+				display: block
+
+				&.sizes
+					font-weight: bold
+					small
+						padding: 0 5px
+						font-size: .8em
+						color: $color-text-light-primary
+
+				&.variations
+					padding-top: 5px
+					margin:
+						top: 5px
+						right: 20px
+					font-size: .9em
+					color: $color-text-light-primary
+					text-transform: capitalize
+
+					.more
+						font-size: .9em
+						text-transform: none
+
+				&.icons
+					position: absolute
+					top: 0
+					right: 12px
+					font-size: 1.2em
+
+					i
+						color: white
+
+
+
+#node_index-container
+	background-color: $color-background-light
+	width: 100%
+
+	+media-lg
+		border-radius: 3px
+
+	#node_index-header
+		position: relative
+		width: 100%
+		color: white
+
+		img.background-header
+			position: absolute
+			z-index: 0
+			width: 100%
+			top: 0
+			left: 0
+
+			+media-lg
+				border-top-left-radius: 3px
+				border-top-right-radius: 3px
+
+		#node_index-collection-info
+			position: relative
+			z-index: 1
+			width: 100%
+			text-shadow: 1px 1px 1px rgba(black, .5), 0 0 25px rgba(black, .6)
+			padding: 40px 30px
+
+			.node_index-collection-name
+				font:
+					family: $font-body
+					size: 4em
+					weight: 600
+				margin-bottom: -5px
+				text-transform: uppercase
+
+			.node_index-collection-description
+				font-size: 1.4em
+
+	#node_index-list-container
+		background-color: white
+		width: 100%
+		height: 100%
+		padding: 0
+		margin: 0
+		position: relative
+
+		+clearfix
+
+		.node_index-list,
+		.node_index-collection
+			padding: 15px 0 0 0
+			margin: 0
+			clear: both
+
+			/* Block for each project item */
+			& .node_index-list-item
+				display: flex
+				max-width: 70%
+				padding: 0
+				margin:
+					left: 15px
+					bottom: 30px
+
+				+clearfix
+
+				& .item-info
+					width: 100%
+					padding: 0 15px
+
+				& .item-title
+					padding-bottom: 15px
+					font:
+						family: $font-headings
+						size: 1.8em
+						weight: 400
+
+				& .item-image
+					padding-top: 5px
+					img
+						width: 90px
+						height: 90px
+						border-radius: 3px
+
+.node_index-collection
+	display: flex
+	align-items: stretch
+	flex-wrap: wrap
+	margin: 0 auto
+	padding: 15px
+	position: relative
+	z-index: 1
+
+	+media-xs
+		flex-direction: column
+
+	.node_index-collection-card
+		position: relative
+		border-radius: 3px
+		width: 31%
+		overflow: hidden
+		background-color: white
+		color: $color-text-dark-primary
+		box-shadow: 1px 1px 2px rgba(black, .1), 0 0 0 1px rgba(black, .1)
+		margin: 12px
+		top: 0
+		transition: box-shadow 150ms ease-in-out
+		cursor: pointer
+
+		+media-md
+			width: 30%
+
+		+media-sm
+			width: 45%
+			margin: 15px
+		+media-xs
+			width: 100%
+			margin-left: auto
+			margin-right: auto
+
+		&:hover
+			box-shadow: 1px 1px 15px rgba(black, .25)
+
+		&:active, &:focus
+			box-shadow: 1px 1px 15px rgba(black, .25), 0 0 0 2px $color-primary
+
+		&.empty
+			padding: 20px 15px
+			color: $color-text-dark-secondary
+
+			&:hover
+				cursor: default
+
+
+		a.item-header
+			display: block
+			width: 100%
+			overflow: hidden
+
+			img
+				width: 100%
+				border-bottom: 3px solid $color-primary
+
+		.item-info
+			position: relative
+			padding: 15px 20px 25px 20px
+
+			a.item-title
+				display: inline-block
+				width: 100%
+				padding: 0 0 10px 0
+				color: $color-text-dark
+				font:
+					size: 1.5em
+					family: $font-body
+					weight: 500
+				text-decoration: none
+
+			p.item-description
+				font:
+					size: 1.15em
+
+		a.learn-more
+			position: absolute
+			padding: 15px 20px
+			bottom: 0
+			right: 0
+			visibility: hidden
+			font-size: .9em
+		&:hover
+			a.learn-more
+				visibility: visible
+
+
+#node-add-container,
+#node-edit-container,
+#blog_container
+
+	#node-add-header,
+	#node-edit-header
+		background-color: white
+		padding: 20px 20px 10px 20px
+		height: 80px
+		position: relative
+
+		.node-add-title,
+		.node-edit-title
+			position: absolute
+			bottom: 10px
+			left: 20px
+			+project-node-title
+			font-size: 2em
+			color: $color-text-dark-secondary
+
+	#node-add-form,
+	#node-edit-form
+		flex: 1
+		background-color: white
+
+	#node-add-form,
+	#node-edit-form,
+	#blog_post-edit-form
+		padding: 20px
+
+		.form-group
+			position: relative
+			margin: 0 auto 30px auto
+			font-family: $font-body
+
+			input, textarea, select
+				+input-generic
+
+				&#fileupload
+					color: $color-info
+
+			&.tags .select2-container
+				.select2-selection
+					+input-generic
+
+			select
+				text-transform: capitalize
+
+			label
+				+label-generic
+				text-transform: capitalize
+
+			&.error
+				color: $color-danger
+				background-color: $color-background-light
+				padding: 10px 15px
+				border: thin solid lighten($color-danger, 10%)
+				border-top: 2px solid $color-danger
+				border-bottom-left-radius: 3px
+				border-bottom-right-radius: 3px
+				label
+					color: $color-danger
+					font-weight: 500
+
+			&.file
+				background-color: $color-background-light
+				padding: 10px 15px
+				border: thin solid $color-background
+				border-top: 2px solid $color-info
+				border-bottom-left-radius: 3px
+				border-bottom-right-radius: 3px
+
+		.form-upload-progress
+			.form-upload-progress-bar
+				margin-top: 5px
+				background-color: $color-success
+				height: 5px
+				min-width: 0
+				border-radius: 3px
+
+		.form-group
+			.node-preview-thumbnail
+				display: block
+
+			&.attachments
+				+clearfix
+
+				.form-control
+					padding: 0
+					margin: 0
+					border: none
+					list-style-type: none
+					+clearfix
+
+					label[for^='attachments-']
+						margin-top: 15px
+						font-weight: 400
+
+					div[id^='attachments-']
+						margin-bottom: 15px
+						border-top: thin solid $color-text-dark-hint
+
+
+		.form-group.description,
+		.form-group.summary,
+		.form-group.content
+			position: relative
+
+			textarea
+				width: 100%
+				min-height: 220px
+
+				line-height: 1.5em
+				border: 1px solid $color-background-dark
+				border-radius: 3px
+				margin: 0 auto 10px auto
+				padding: 10px
+				color: $color-text-dark
+
+				transition: all 300ms ease-in-out
+				resize: vertical
+
+
+				&:focus
+					border: 1px solid $color-info
+					outline: none
+
+				&.field-error
+					border-color: $color-danger
+
+			.md-preview-loading
+				position: absolute
+				left: 85px
+				padding-top: 5px
+				font-size: .9em
+				color: $color-text-dark-secondary
+				display: none
+
+			.node-edit-form-md-preview
+
+				+markdown-preview-container
+
+				margin:
+					left: -20px
+					right: -20px
+
+				padding:
+					top: 20px
+					left: 0
+					right: 0
+
+				&:before
+					content: 'Live Preview'
+					position: absolute
+					top: -25px
+					left: 20px
+					font-size: .7em
+					color: $color-text-dark-secondary
+					transition: color 150ms ease-in-out
+
+				&:after
+					content: 'Markdown Supported'
+					position: absolute
+					top: -25px
+					right: 20px
+					font-size: .7em
+					color: $color-text-dark-hint
+					transition: color 150ms ease-in-out
+
+
+			.node-edit-form-md-preview:empty
+				color: transparent
+				margin: 0 auto
+				padding: 0 10px
+
+				&:before, &:after
+					content: ''
+					color: transparent
+
+
+		#node-edit-form-md-preview
+			padding: 20px
+
+
+#node-add-container,
+#node-edit-container
+	display: flex
+	flex-direction: column
+	flex: 1
+	color: $color-text-dark
+
+	form#node-edit-form
+
+		&.group_texture
+			.form-group.status,
+			.form-group.description
+				display: none
+
+		&.texture
+			.form-group.status,
+			.form-group.description,
+			.form-group.categories,
+			.form-group.tags,
+			.form-group.order,
+			.form-group.resolution,
+			.form-group.aspect_ratio,
+			.form-group.is_landscape
+				display: none
+
+			.form-group
+				input.fileupload
+					&.notallowed
+						opacity: 0.2
+						pointer-events: none
+						cursor: progress
+
+		.files-header
+			width: 100%
+
+		#files-action-add
+			+button-rounded-filled($color-success, 3px)
+			width: 200px
+			padding: 5px 10px
+			margin-bottom: 10px
+			opacity: 1
+
+			&.notallowed
+				opacity: .2
+				pointer-events: none
+				cursor: progress
+
+	.fieldlist
+		list-style: none
+		padding: 0
+		margin: 0
+
+		li.fieldlist-item
+			background-color: $color-background-light
+			border: thin solid $color-background
+			border-bottom: 2px solid $color-background
+			border-radius: 3px
+			margin-bottom: 10px
+			padding: 0 15px
+			display: flex
+			flex-direction: row-reverse
+			align-items: center
+
+			.form-group
+				margin-bottom: 0 !important
+
+			.form-upload-file
+				margin-bottom: 0 !important
+
+			div[class*="map_type"],
+			div[class*="is_tileable"]
+				padding: 10px 15px
+				width: 25%
+				border-left: thin solid $color-background
+
+			div[class*="map_type"]
+				select.form-control
+					background: white !important
+				label
+					display: none
+
+			div[class*="is_tileable"]
+				label label
+					font-weight: 400 !important
+					padding-left: 0
+
+			div[class$="file"]
+				flex: 1
+				label
+					display: none
+
+
+#overlay-mode-move-container
+	visibility: hidden
+	background-color: lighten($color-background, 5%)
+	box-shadow: 0 5px 35px rgba(black, .2)
+	color: $color-text-dark-primary
+	position: absolute
+	top: 0
+	left: 0
+	right: 0
+	width: 80%
+	height: 60px
+	z-index: $z-index-base + 1
+	opacity: 0
+	margin: 0 auto
+	border-bottom-left-radius: 3px
+	border-bottom-right-radius: 3px
+	transition: all 150ms ease-in-out
+	border: thin solid lighten($color-text-dark-hint, 10%)
+	border-top: none
+
+	+media-xs
+		width: 98%
+		height: 100px
+	+media-sm
+		width: 98%
+		height: 100px
+	+media-md
+		width: 90%
+	+media-lg
+		width: 80%
+
+	&.visible
+		visibility: visible
+		opacity: 1
+		top: $project_header-height
+
+		.overlay-container
+			.title
+				i
+					animation:
+						name: overlay-mode-move-icon
+						duration: 1.5s
+						delay: 0
+						fill-mode: forwards
+						iteration-count: infinite
+
+
+	.overlay-container
+		width: 100%
+		position: absolute
+		top: 50%
+		left: 50%
+		transform: translate(-50%, -50%)
+		transition: top 350ms ease-in-out
+		display: flex
+		flex-direction: row
+		align-items: center
+		justify-content: center
+
+
+		.title
+			text-align: center
+			position: relative
+
+			font:
+				family: $font-headings
+				size: 1.2em
+				weight: 300
+
+			i
+				position: relative
+				right: 0
+				padding-right: 15px
+
+			strong
+				font-weight: 400
+
+		.buttons
+			font-size: .9em
+			float: left
+			text-align: center
+			padding: 15px 0 15px 15px
+
+			button
+				padding: 5px
+				margin: 0 5px
+
+				+media-sm
+					margin: 5px
+
+
+			button.cancel
+				+button-rounded($color-text-dark-primary, 3px)
+
+			button.move
+				+button-rounded-filled($color-success, 3px)
+
+				&.disabled
+					pointer-events: none
+					cursor: not-allowed
+					background: repeating-linear-gradient(-45deg, darken($color-success, 15%), darken($color-success, 15%) 10px, darken($color-success, 20%) 10px, darken($color-success, 20%) 20px)
+
+
+@keyframes overlay-mode-move-icon
+	0
+		right: 0
+	50%
+		right: 5px
+	100%
+		right: 0
+
+#node-add-form
+	.btn
+		margin-right: 10px
+	.fileupload-buttonbar
+		padding: 10px 0
+		.fileinput-button
+			@include button-rounded($color-success, 3px)
+		.start
+			@include button-rounded($color-info, 3px)
+		.cancel
+			@include button-rounded($color-warning, 3px)
+		.delete
+			@include button-rounded($color-danger, 3px)
+		.toggle
+			margin: 0 20px
+
+	.files
+		.btn
+			&.start
+				@include button-rounded($color-info, 3px)
+			&.cancel
+				@include button-rounded($color-warning, 3px)
+			&.delete
+				@include button-rounded($color-danger, 3px)
+
+			&.create
+				@include button-rounded($color-success, 3px)
+
+	.template-upload,
+	.template-download
+
+		td
+			border: none
+		.preview
+			img
+				border-radius: 3px
+		.progress
+			height: 10px
+			box-shadow: none
+		.size
+			color: $color-text-dark-secondary
+
+		.toggle
+			margin: 0 20px
+
+@import plugins/_flowplayer
+
+
+/* Edit Project specific classes*/
+.ace_editor.ace-tm
+	min-height: 300px
+	margin: 60px auto 30px auto
+	font-size: 1em
+	resize: vertical !important
+	overflow: auto !important
+	color: $color-text
+
+	&+.form-group.dyn_schema,
+	&+.form-group.form_schema,
+	&+.form-group.permissions
+		label
+			position: absolute
+			top: -355px
+		.form-control
+			display: none
+
+.file_delete, .file_original
+	display: block

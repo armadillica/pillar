@@ -1,0 +1,254 @@
+| {% block body %}
+#node-container
+
+	section.node-preview.group
+		| {% if node.picture %}
+		img.backdrop(src="{{ node.picture.thumbnail('l', api=api) }}")
+		.overlay
+		| {% endif %}
+		.node-title#node-title
+			| {{node.name}}
+
+	section.node-details-container.group
+		.node-details-meta.preview
+			ul.node-details-meta-list
+				li.node-details-meta-list-item.date(title="Created {{ node._created | pretty_date }}")
+					| {{ node._updated | pretty_date }}
+
+				li.node-details-meta-list-item.author
+					| {{ node.user.full_name }}
+
+				| {% if node.properties.status != 'published' %}
+				li.node-details-meta-list-item.status
+					| {{node.properties.status}}
+				| {% endif %}
+
+			.node-details-meta-actions
+				.btn-browsetoggle(
+					title="Toggle between list/grid view",
+					data-toggle="tooltip",
+					data-placement="top")
+					i.pi-list
+
+
+		| {% if node.description %}
+		.node-details-description
+			| {{node.description}}
+		| {% endif %}
+
+	section.node-children.group
+
+		| {% if children %}
+		| 	{% for child in children %}
+
+		| {# Browse type: List #}
+		a(
+			href="#",
+			data-node_id="{{ child._id }}",
+			class="item_icon list-node-children-item browse-list")
+			.list-node-children-item-thumbnail
+
+				| {% if child.picture %}
+				img(
+					src="{{ child.picture.thumbnail('t', api=api)}} ")
+				| {% endif %}
+
+				.list-node-children-item-thumbnail-icon
+					| {# If there's a type available, otherwise show a folder icon #}
+					| {% if child.properties.content_type %}
+
+					| {# Show an icon if there's no thumbnail #}
+					| {% if not child.picture %}
+					| {% if child.properties.content_type == 'image' %}
+					i.dark.pi-image
+					| {% elif child.properties.content_type == 'video' %}
+					i.dark.pi-film-thick
+					| {% elif child.properties.content_type == 'file' %}
+					i.dark.pi-document
+					| {% endif %}
+
+					| {% else %}
+					| {% if child.properties.content_type == 'video' %}
+					i.pi-play
+					| {% endif %}
+					| {% endif %}
+
+					| {% else %}
+					| {% if not child.picture %}
+					i.dark.pi-folder
+					| {% endif %}
+					| {% endif %}
+
+				| {% if child.permissions.world %}
+				.list-node-children-item-ribbon
+					span free
+				| {% endif %}
+
+			.list-node-children-item-name {{ child.name }}
+
+			.list-node-children-item-meta
+				| {% if child.properties.status != 'published' %}
+				span.status {{ child.properties.status }}
+				| {% endif %}
+
+				| {% if child.properties.content_type == 'video' %}
+				span Video ·
+				| {% elif child.properties.content_type == 'image' %}
+				span Image ·
+				| {% elif child.properties.content_type == 'file' %}
+				span File ·
+				| {% else %}
+				| {% if child.picture %}
+				span Folder ·
+				| {% endif %}
+				| {% endif %}
+
+				| {% if child._updated %}
+				span(title="Updated on {{ child._created }}")  {{ child._updated | pretty_date }}
+				span.updated(title="Created on {{ child._updated }}") *
+				| {% else %}
+				span(title="Created on {{ child._created }}")  {{ child._created | pretty_date }}
+				| {% endif %}
+
+
+		| {# Browse type: Icon #}
+		a(href="#", data-node_id="{{ child._id }}", title="{{ child.name }}", class="item_icon list-node-children-item browse-icon")
+			.list-node-children-item-thumbnail
+
+				| {% if child.picture %}
+				img(
+					src="{{ child.picture.thumbnail('b', api=api)}} ")
+				| {% endif %}
+
+				.list-node-children-item-thumbnail-icon
+					| {% if child.properties.content_type %}
+
+					| {% if child.properties.content_type == 'video' %}
+					i.pi-play
+					| {% endif %}
+
+					| {% else %}
+					i.pi-folder
+					| {% endif %}
+
+				| {% if child.properties.status != 'published' %}
+				.list-node-children-item-status {{ child.properties.status }}
+				| {% endif %}
+
+				| {% if child.permissions.world %}
+				.list-node-children-item-ribbon
+					span free
+				| {% endif %}
+
+			.list-node-children-item-name
+
+				| {% if child.properties.content_type == 'video' %}
+				i.pi-film-thick
+				| {% elif child.properties.content_type == 'image' %}
+				i.pi-image
+				| {% elif child.properties.content_type == 'file' %}
+				i.pi-document
+				| {% else %}
+				i.pi-folder
+				| {% endif %}
+
+				span {{ child.name }}
+
+		| 	{% endfor %}
+		| {% else %}
+		.list-node-children-container
+			.list-node-children-empty No items... yet!
+		| {% endif %}
+
+	script.
+		// Generate GA pageview
+		ga('send', 'pageview', location.pathname);
+
+		$('a.item_icon').unbind("click")
+						.click(function(e){
+			e.preventDefault();
+
+			var nodeId = $(this).data('node_id');
+
+			if (ProjectUtils.projectId()) {
+				// When clicking on a node preview, we load its content
+				// displayNode will run asynchronously and set the bcloud_current_node_id
+				// as well, but we set it manually in the next line as well, to make sure
+				// that select_node on jstree works as expected, preventing the node to be
+				// loaded twice.
+				Cookies.set('bcloud_current_node_id', nodeId);
+				displayNode(nodeId);
+
+				// Update tree with current selection
+				var jstree = $('#project_tree').jstree(true);
+				jstree.deselect_all();
+				jstree.open_node('n_' + ProjectUtils.nodeId(), function() {
+					jstree.select_node('n_' + nodeId);
+				});
+			} else {
+				// If there's project_id defined, we use the full link (for search)
+				window.location.replace('/nodes/' + nodeId + '/redir');
+			};
+		});
+
+		// Browse type: icon or list
+		function projectBrowseTypeIcon() {
+			$(".list-node-children-item.browse-list").hide();
+			$(".list-node-children-item.browse-icon").show();
+			$(".btn-browsetoggle").html('<i class="pi-list"></i>');
+		};
+
+		function projectBrowseTypeList() {
+			$(".list-node-children-item.browse-list").show();
+			$(".list-node-children-item.browse-icon").hide();
+			$(".btn-browsetoggle").html('<i class="pi-layout"></i>');
+		};
+
+		function projectBrowseTypeCheck(){
+			/* Only run if we're in a project, or search */
+			if(document.getElementById("project-container") !== null || document.getElementById("search-container") !== null) {
+
+				var browse_type = Cookies.getJSON('bcloud_ui');
+
+				if (browse_type && browse_type.group_browse_type) {
+					if (browse_type.group_browse_type == 'icon') {
+						projectBrowseTypeIcon();
+
+					} else if ( browse_type.group_browse_type == 'list' ) {
+						projectBrowseTypeList();
+					}
+				} else {
+					projectBrowseTypeIcon();
+				};
+			};
+		}
+
+		function projectBrowseToggle(){
+
+			var browse_type = Cookies.getJSON('bcloud_ui');
+
+			if (browse_type && browse_type.group_browse_type) {
+				if (browse_type.group_browse_type == 'icon') {
+					projectBrowseTypeList();
+					setJSONCookie('bcloud_ui', 'group_browse_type', 'list');
+				} else if ( browse_type.group_browse_type == 'list' ) {
+					projectBrowseTypeIcon();
+					setJSONCookie('bcloud_ui', 'group_browse_type', 'icon');
+				}
+			} else {
+				projectBrowseTypeList();
+				setJSONCookie('bcloud_ui', 'group_browse_type', 'list');
+			}
+		}
+
+		$('.btn-browsetoggle').on('click', function (e) {
+			e.preventDefault();
+			projectBrowseToggle();
+		});
+
+		projectBrowseTypeCheck();
+
+
+include ../_scripts
+
+| {% endblock %}

@@ -1,22 +1,22 @@
 import os.path
+from os import getenv
 from collections import defaultdict
-import requests.certs
-
-# Certificate file for communication with other systems.
-TLS_CERT_FILE = requests.certs.where()
-print('Loading TLS certificates from %s' % TLS_CERT_FILE)
 
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
+PILLAR_SERVER_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SCHEME = 'https'
-STORAGE_DIR = '/data/storage/pillar'
-SHARED_DIR = '/data/storage/shared'
+STORAGE_DIR = getenv('PILLAR_STORAGE_DIR', '/data/storage/pillar')
 PORT = 5000
 HOST = '0.0.0.0'
 DEBUG = False
 
+SECRET_KEY = '123'
+
 # Authentication settings
 BLENDER_ID_ENDPOINT = 'http://blender_id:8000/'
+
+PILLAR_SERVER_ENDPOINT = 'http://pillar:5001/api/'
 
 CDN_USE_URL_SIGNING = True
 CDN_SERVICE_DOMAIN_PROTOCOL = 'https'
@@ -44,7 +44,7 @@ BIN_FFMPEG = '/usr/bin/ffmpeg'
 BIN_SSH = '/usr/bin/ssh'
 BIN_RSYNC = '/usr/bin/rsync'
 
-GCLOUD_APP_CREDENTIALS = os.path.join(os.path.dirname(__file__), 'google_app.json')
+GCLOUD_APP_CREDENTIALS = 'google_app.json'
 GCLOUD_PROJECT = '-SECRET-'
 
 ADMIN_USER_GROUP = '5596e975ea893b269af85c0e'
@@ -93,7 +93,7 @@ LOGGING = {
         }
     },
     'loggers': {
-        'application': {'level': 'INFO'},
+        'pillar': {'level': 'INFO'},
         'werkzeug': {'level': 'INFO'},
     },
     'root': {
@@ -111,3 +111,29 @@ SHORT_CODE_LENGTH = 6  # characters
 FILESIZE_LIMIT_BYTES_NONSUBS = 32 * 2 ** 20
 # Unless they have one of those roles.
 ROLES_FOR_UNLIMITED_UPLOADS = {u'subscriber', u'demo', u'admin'}
+
+
+#############################################
+# Old pillar-web config:
+
+# Mapping from /{path} to URL to redirect to.
+REDIRECTS = {}
+
+GIT = 'git'
+
+# Setting this to True can be useful for development.
+# Note that it doesn't add the /p/home/{node-id} endpoint, so you will have to
+# change the URL of the home project if you want to have direct access to nodes.
+RENDER_HOME_AS_REGULAR_PROJECT = False
+
+
+# Authentication token for the Urler service. If None, defaults
+# to the authentication token of the current user.
+URLER_SERVICE_AUTH_TOKEN = None
+
+
+# Blender Cloud add-on version. This updates the value in all places in the
+# front-end.
+BLENDER_CLOUD_ADDON_VERSION = '1.4'
+
+EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER = 'https://store.blender.org/api/'

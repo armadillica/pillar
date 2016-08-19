@@ -1,0 +1,135 @@
+import hashlib
+import urllib
+import logging
+import traceback
+import sys
+
+from flask import current_app
+from flask import request
+from flask.ext.login import current_user
+from pillarsdk import File
+from pillarsdk import Project
+from pillarsdk.exceptions import ResourceNotFound
+import pillarsdk.utils
+from pillar.web import system_util
+from pillar.web.utils.exceptions import ConfigError
+
+log = logging.getLogger(__name__)
+
+
+def get_file(file_id, api=None):
+    # TODO: remove this function and just use the Pillar SDK directly.
+    if file_id is None:
+        return None
+
+    if api is None:
+        api = system_util.pillar_api()
+
+    try:
+        return File.find(file_id, api=api)
+    except ResourceNotFound:
+        f = sys.exc_info()[2].tb_frame.f_back
+        tb = traceback.format_stack(f=f, limit=2)
+        log.warning('File %s not found, but requested from %s\n%s',
+                    file_id, request.url, ''.join(tb))
+        return None
+
+
+def attach_project_pictures(project, api):
+    """Utility function that queries for file objects referenced in picture
+    header and square. In eve we currently can't embed objects in nested
+    properties, this is the reason why this exists.
+    This function should be moved in the API, attached to a new Project object.
+    """
+
+    project.picture_square = get_file(project.picture_square, api=api)
+    project.picture_header = get_file(project.picture_header, api=api)
+
+
+def gravatar(email, size=64):
+    parameters = {'s': str(size), 'd': 'mm'}
+    return "https://www.gravatar.com/avatar/" + \
+        hashlib.md5(str(email)).hexdigest() + \
+        "?" + urllib.urlencode(parameters)
+
+
+def pretty_date(time=None, detail=False, now=None):
+    """Get a datetime object or a int() Epoch timestamp and return a
+    pretty string like 'an hour ago', 'Yesterday', '3 months ago',
+    'just now', etc
+    """
+
+    from datetime import datetime
+
+    # Normalize the 'time' parameter so it's always a datetime.
+    if type(time) is int:
+        time = datetime.fromtimestamp(time, tz=pillarsdk.utils.utc)
+    elif time is None:
+        time = now
+
+    now = now or datetime.now(tz=time.tzinfo)
+    diff = now - time
+
+    second_diff = diff.seconds
+    day_diff = diff.days
+
+    if day_diff < 0:
+        return ''
+
+    if day_diff == 0:
+        if second_diff < 10:
+            return "just now"
+        if second_diff < 60:
+            return str(second_diff) + "s ago"
+        if second_diff < 120:
+            return "a minute ago"
+        if second_diff < 3600:
+            return str(second_diff / 60 ) + "m ago"
+        if second_diff < 7200:
+            return "an hour ago"
+        if second_diff < 86400:
+            return str(second_diff / 3600) + "h ago"
+
+    if day_diff == 1:
+        pretty = "yesterday"
+
+    elif day_diff <= 7:
+        # "Tuesday"
+        pretty = time.strftime("%A")
+
+    elif day_diff <= 22:
+        week_count = day_diff/7
+        if week_count == 1:
+            pretty = "%s week ago" % week_count
+        else:
+            pretty = "%s weeks ago" % week_count
+
+    elif time.year == now.year:
+        # "16 Jul"
+        pretty = time.strftime("%d %b")
+
+    else:
+        # "16 Jul 2009"
+        pretty = time.strftime("%d %b %Y")
+
+    if detail:
+        # "Tuesday at 14:20"
+        return '%s at %s' % (pretty, time.strftime('%H:%M'))
+
+    return pretty
+
+
+def current_user_is_authenticated():
+    return current_user.is_authenticated
+
+
+def get_main_project():
+    api = system_util.pillar_api()
+    try:
+        main_project = Project.find(
+            current_app.config['MAIN_PROJECT_ID'], api=api)
+    except ResourceNotFound:
+        raise ConfigError('MAIN_PROJECT_ID was not found. Check config.py.')
+    except KeyError:
+        raise ConfigError('MAIN_PROJECT_ID missing from config.py')
+    return main_project

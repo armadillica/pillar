@@ -1,0 +1,133 @@
+| {% raw %}
+
+// The template to display files available for upload
+script#template-upload(type="text/x-tmpl").
+	| {% for (var i=0, file; file=o.files[i]; i++) { %}
+	<tr class="template-upload fade">
+		<td>
+			<span class="preview"></span>
+		</td>
+		<td>
+			<span class="name">{%=file.name%}</span>
+			<strong class="error text-danger"></strong>
+		</td>
+		<td>
+			<p class="size">Processing...</p>
+			<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+		</td>
+		<td>
+			{% if (!i && !o.options.autoUpload) { %}
+				<button class="btn btn-primary start" disabled>
+					<i class="ion-upload"></i>
+					<span>Start</span>
+				</button>
+			{% } %}
+			{% if (!i) { %}
+				<button class="btn btn-warning cancel">
+					<i class="ion-close-round"></i>
+					<span>Cancel</span>
+				</button>
+			{% } %}
+		</td>
+	</tr>
+	| {% } %}
+
+
+// The template to display files available for download
+script#template-download(type="text/x-tmpl").
+	| {% for (var i=0, file; file=o.files[i]; i++) { %}
+	<tr class="template-download fade">
+		<td>
+			<span class="preview">
+				{% if (file.thumbnailUrl) { %}
+					<a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+				{% } %}
+			</span>
+		</td>
+		<td>
+			<span class="name">
+				{% if (file.url) { %}
+					<a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+				{% } else { %}
+					<span>{%=file.name%}</span>
+				{% } %}
+			</span>
+			{% if (file.error) { %}
+				<div><span class="label label-danger">Error</span> {%=file.error%}</div>
+			{% } %}
+		</td>
+		<td>
+			<span class="size">{%=o.formatFileSize(file.size)%}</span>
+		</td>
+		<td>
+			{% if (file.deleteUrl) { %}
+				<button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+					<i class="ion-trash-b"></i>
+					<span>Delete</span>
+				</button>
+				<input type="checkbox" name="delete" value="1" class="toggle">
+				<div class="btn btn-success create" data-name="{%=file.name%}" data-type="{%=file.type%}">
+					<i class="ion-upload"></i>
+					Create
+				</div>
+			{% } else { %}
+				<button class="btn btn-warning cancel">
+					<i class="ion-close-round"></i>
+					<span>Cancel</span>
+				</button>
+			{% } %}
+		</td>
+	</tr>
+	| {% } %}
+
+| {% endraw %}
+
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.iframe-transport.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='javascript-templates/js/tmpl.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='javascript-load-image/js/load-image.all.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='javascript-canvas-to-blob/js/canvas-to-blob.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='gallery/js/jquery.blueimp-gallery.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.iframe-transport.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.fileupload.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='jquery-file-upload/js/jquery.fileupload-process.js') }}")
+script(src="{{ url_for('static_pillar', filename='jquery-file-upload/js/jquery.fileupload-image.js') }}")
+script(src="{{ url_for('static_pillar', filename='jquery-file-upload/js/jquery.fileupload-audio.js') }}")
+script(src="{{ url_for('static_pillar', filename='jquery-file-upload/js/jquery.fileupload-video.js') }}")
+script(src="{{ url_for('static_pillar', filename='jquery-file-upload/js/jquery.fileupload-validate.js') }}")
+script(src="{{ url_for('static_pillar', filename='jquery-file-upload/js/jquery.fileupload-ui.js') }}")
+script(src="{{ url_for('static_pillar', filename='jquery-file-upload/js/main.js') }}")
+
+script().
+	$('body').unbind('click');
+	$('body').on('click', '.create', function(event) {
+		// Start the asset creation process
+		event.preventDefault();
+		var parent_id = ProjectUtils.nodeId();
+		$('#node-add-form').text('Please wait...');
+		$.post('{{url_for('nodes.assets_create')}}', {
+			name: $(this).attr('data-name'),
+			project_id: ProjectUtils.projectId(),
+			type: $(this).attr('data-type'),
+			parent_id: parent_id})
+			.done(function(data) {
+				if (parent_id) {
+					// We are in embedded mode and try to call the editNode function
+					editNode(data.asset_id);
+				} else {
+					window.location.replace("/nodes/" + data.asset_id + "/edit");
+				}
+				//alert( "Data Loaded: " + data.message );
+		});
+	});
+
+	// Temporary list of CSS to style the upload form
+	var cssLinks = ['/static/assets/css/blueimp/blueimp-gallery.min.css',
+		'/static/jquery-file-upload/css/jquery.fileupload.css',
+		'/static/jquery-file-upload/css/jquery.fileupload-ui.css']
+
+	$.each(cssLinks, function(index, value) {
+		// Check if the CSS is needed
+		if (!$("link[href='" + value + "']").length) {
+			$('<link href="' + value + '" rel="stylesheet">').appendTo("head");
+		}
+	});

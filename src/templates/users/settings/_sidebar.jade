@@ -1,0 +1,20 @@
+#settings-sidebar
+	.settings-header
+		.settings-title Settings
+	.settings-content
+		ul
+			a(class="{% if title == 'profile' %}active{% endif %}",
+				href="{{ url_for('users.settings_profile') }}")
+				li
+					i.pi-vcard
+					| Profile
+			a(class="{% if title == 'emails' %}active{% endif %}",
+					href="{{ url_for('users.settings_emails') }}")
+				li
+					i.pi-email
+					| Emails
+			a(class="{% if title == 'billing' %}active{% endif %}",
+					href="{{ url_for('users.settings_billing') }}")
+				li
+					i.pi-credit-card
+					| Subscription

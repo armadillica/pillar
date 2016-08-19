@@ -1,0 +1,128 @@
+| {% block body %}
+
+#node-container
+	#node-overlay
+
+	| {% if node.picture %}
+	section#node-preview.node-preview.file
+		img.node-preview-thumbnail#node-preview-thumbnail(
+			src="{{ node.picture.thumbnail('l', api=api) }}")
+	| {% endif %}
+
+
+	section.node-details-container.file
+
+		.node-details-header
+			.node-title#node-title
+				| {{node.name}}
+
+		.node-details-meta.header
+			ul.node-details-meta-list
+				| {% if node.permissions.world %}
+				li.node-details-meta-list-item.access.public(
+					data-toggle="tooltip",
+					data-placement="left",
+					title="Anybody can download. Share it!")
+					i.pi-lock-open
+					span Public
+				| {% endif %}
+
+				| {% if node.file %}
+				li.node-details-meta-list-item.type
+					| {{ node.file.content_type }}
+
+				li.node-details-meta-list-item.file.length
+					| {{ node.file.length | filesizeformat }}
+				| {% endif %}
+
+				| {% if node.properties.license_type %}
+				| {% if node.properties.license_notes %}
+				li.node-details-meta-list-item.license(
+					id="asset-license",
+					data-toggle="popover",
+					data-placement="left",
+					data-trigger="hover",
+					data-content="{{ node.properties.license_notes }}",
+					title="{{ node.properties.license_type }}")
+
+					i(class="pi-license-{{ node.properties.license_type }}")
+				| {% else %}
+				li.node-details-meta-list-item.license(
+					id="asset-license",
+					data-toggle="tooltip",
+					data-placement="bottom",
+					title="{{ node.properties.license_type }}")
+
+					i(class="pi-license-{{ node.properties.license_type }}")
+				| {% endif %}
+				| {% endif %}
+
+				| {% if node.file %}
+				li.node-details-meta-list-item.file.download(title="Download File")
+					| {% if node.file.link %}
+					a(href="{{ node.file.link }}",
+						title="Download file",
+						download="{{ node.file.filename }}")
+						button.btn.btn-default(type="button")
+							i.pi-download
+					| {% else %}
+					button.btn.btn-default.disabled.sorry(type="button")
+						i.pi-download
+					| {% endif %}
+				| {% endif %}
+
+
+		| {% if node.description %}
+		.node-details-description#node-description
+			| {{node.description}}
+		| {% endif %}
+
+		| {% if node.properties.license_notes %}
+		.node-details-meta.license
+			| {{ node.properties.license_notes }}
+		| {% endif %}
+
+		.node-details-meta.footer
+			ul.node-details-meta-list
+				li.node-details-meta-list-item.status
+					| {{node.properties.status}}
+
+				li.node-details-meta-list-item.author
+					| {{ node.user.full_name }}
+
+				li.node-details-meta-list-item.date(title="Created {{ node._created }}")
+					| {{ node._created | pretty_date }}
+					| {% if (node._created | pretty_date) != (node._updated | pretty_date) %}
+					span(title="Updated {{ node._updated }}") (updated {{ node._updated | pretty_date }})
+					| {% endif %}
+
+
+		#comments-container
+			#comments-list-items-loading
+				i.pi-spin
+
+include ../../_scripts
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+	// Generate GA pageview
+	ga('send', 'pageview', location.pathname);
+
+	var content_type = $("li.node-details-meta-list-item.type").text();
+	var type_trimmed = content_type.substring(content_type.indexOf("/") + 1);
+
+	if (type_trimmed == 'x-blender' || type_trimmed == 'blend'){
+		type_trimmed = '<span class="blend"><i class="pi-blender-logo"></i></span>';
+	};
+
+	$("li.node-details-meta-list-item.type").html(type_trimmed);
+
+	$('.sorry').click(function() {
+		$.get('/403', function(data) {
+			$('#node-overlay').html(data).addClass('active');
+		})
+	});
+
+| {% endblock %}

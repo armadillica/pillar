@@ -6,14 +6,24 @@
 *.ropeproject*
 *.swp
 
-/pillar/config_local.py
+config_local.py
 
 .ropeproject/*
 
-/pillar/application/static/storage/
 /build
 /.cache
-/pillar/pillar.egg-info/
-/pillar/google_app.json
+/*.egg-info/
 profile.stats
 /dump/
+/.eggs
+
+/node_modules
+/.sass-cache
+*.css.map
+*.js.map
+
+pillar/web/static/assets/css/*.css
+pillar/web/static/assets/js/*.min.js
+pillar/web/static/storage/
+pillar/web/static/uploads/
+pillar/web/templates/

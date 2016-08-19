@@ -1,0 +1,11 @@
+| {% extends 'layout.html' %}
+
+| {% block body %}
+div.container
+	div.page-content
+		| {% include 'nodes/edit_embed.html' %}
+| {% endblock %}
+
+| {% block footer_scripts %}
+| {% include '_macros/_file_uploader_javascript.html' %}
+| {% endblock %}

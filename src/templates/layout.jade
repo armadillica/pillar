@@ -1,0 +1,436 @@
+doctype
+html(lang="en")
+	head
+		meta(charset="utf-8")
+		title {% if self.page_title() %}{% block page_title %}{% endblock %} — {% endif %}Blender Cloud
+		meta(name="viewport", content="width=device-width, initial-scale=1.0")
+		meta(name="description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
+		meta(name="author", content="Blender Institute")
+		meta(name="theme-color", content="#3e92aa")
+
+		meta(property="og:site_name", content="Blender Cloud")
+		| {% block og %}
+		meta(property="og:title", content="Blender Cloud")
+		meta(property="og:url", content="https://cloud.blender.org")
+		meta(property="og:type", content="website")
+		meta(property="og:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_gleb_locomotive.jpg')}}")
+		| {% endblock %}
+
+		meta(name="twitter:card", content="summary_large_image")
+		meta(name="twitter:site", content="@Blender_Cloud")
+		| {% block tw %}
+		meta(name="twitter:title", content="Blender Cloud")
+		meta(name="twitter:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
+		meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_gleb_locomotive.jpg')}}")
+		| {% endblock %}
+
+		script(src="//code.jquery.com/jquery-2.2.1.min.js")
+		script(src="//cdn.jsdelivr.net/typeahead.js/0.11.1/typeahead.jquery.min.js")
+		script(src="//cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js")
+		script(src="//cdnjs.cloudflare.com/ajax/libs/js-cookie/2.0.3/js.cookie.min.js",)
+
+		script.
+			var algolia = algoliasearch("{{config['ALGOLIA_USER']}}", "{{config['ALGOLIA_PUBLIC_KEY']}}");
+			var index = algolia.initIndex("{{config['ALGOLIA_INDEX_NODES']}}");
+
+			!function(e){"use strict";e.loadCSS=function(t,n,o){var r,i=e.document,l=i.createElement("link");if(n)r=n;else{var d=(i.body||i.getElementsByTagName("head")[0]).childNodes;r=d[d.length-1]}var a=i.styleSheets;l.rel="stylesheet",l.href=t,l.media="only x",r.parentNode.insertBefore(l,n?r:r.nextSibling);var f=function(e){for(var t=l.href,n=a.length;n--;)if(a[n].href===t)return e();setTimeout(function(){f(e)})};return l.onloadcssdefined=f,f(function(){l.media=o||"all"}),l},"undefined"!=typeof module&&(module.exports=e.loadCSS)}(this);
+
+			loadCSS( "//fonts.googleapis.com/css?family=Roboto:300,400,500" );
+			loadCSS( "//fonts.googleapis.com/css?family=Lato:300,400" );
+
+		script(src="{{ url_for('static_pillar', filename='assets/js/markdown.min.js', v=040820161) }}")
+		script(src="{{ url_for('static_pillar', filename='assets/js/tutti.min.js', v=040820161) }}")
+
+		link(href="{{ url_for('static_pillar', filename='assets/ico/favicon.png') }}", rel="shortcut icon")
+		link(href="{{ url_for('static_pillar', filename='assets/ico/apple-touch-icon-precomposed.png') }}", rel="icon apple-touch-icon-precomposed", sizes="192x192")
+
+		link(href="{{ url_for('static_pillar', filename='assets/css/vendor/bootstrap.min.css') }}", rel="stylesheet")
+
+		| {% block head %}{% endblock %}
+
+		| {% block css %}
+		| {% if title == 'blog' %}
+		link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=040820161) }}", rel="stylesheet")
+		| {% else %}
+		link(href="{{ url_for('static_pillar', filename='assets/css/main.css', v=040820161) }}", rel="stylesheet")
+		| {% endif %}
+		| {% endblock %}
+
+
+		| {% if not title %}{% set title="default" %}{% endif %}
+
+	body(class="{{ title }}")
+		.container-page
+			header.navbar-backdrop-container
+				| {% block header_backdrop %}
+				img(src="{{ url_for('static', filename='assets/img/backgrounds/pattern_02_blur.jpg')}}")
+				| {% endblock %}
+
+			| {% with messages = get_flashed_messages(with_categories=True) %}
+			|		{% if messages %}
+
+			|	{% for (category, message) in messages %}
+			.alert(role="alert", class="alert-{{ category }}")
+				i.alert-icon(class="{{ category }}")
+				span {{ message }}
+				button.close(type="button", data-dismiss="alert")
+					i.pi-cancel
+			|	{% endfor %}
+
+			|		{% endif %}
+			| {% endwith %}
+
+			nav.navbar.navbar-transparent.navbar-fixed-top
+				.navbar-overlay
+
+				.navbar-container
+					header.navbar-header
+						button.navbar-toggle(data-target=".navbar-collapse", data-toggle="collapse", type="button")
+							span.sr-only Toggle navigation
+							i.pi-menu
+						a.navbar-brand(
+							href="/",
+							title="Blender Cloud")
+							span.app-logo
+								i.pi-blender-cloud
+
+					| {% block navigation_search %}
+					.search-input
+						input#cloud-search(
+							type="text",
+							placeholder="Search assets, tutorials...")
+						i.search-icon.pi-search
+					| {% endblock %}
+
+					nav.collapse.navbar-collapse
+						ul.nav.navbar-nav.navbar-right
+							| {% if node and node.properties and node.properties.category %}
+							| {% set category = node.properties.category %}
+							| {% else %}
+							| {% set category = title %}
+							| {% endif %}
+
+							| {% block navigation_sections %}
+							li
+								a.navbar-item(
+									href="{{ url_for('main.main_blog') }}",
+									title="Blender Cloud Blog",
+									data-toggle="tooltip",
+									data-placement="bottom",
+									class="{% if category == 'blog' %}active{% endif %}")
+									span Blog
+
+							li(class="dropdown libraries")
+								a.navbar-item.dropdown-toggle(
+									href="#",
+									data-toggle="dropdown",
+									title="Libraries")
+									span Libraries
+									i.pi-angle-down
+
+								ul.dropdown-menu
+									li
+										a.navbar-item(
+											href="{{ url_for('main.redir_hdri') }}",
+											title="HDRI Library",
+											data-toggle="tooltip",
+											data-placement="left")
+											i.pi-globe
+											| HDRI
+									li
+										a.navbar-item(
+											href="{{ url_for('main.redir_textures') }}",
+											title="Textures Library",
+											data-toggle="tooltip",
+											data-placement="left")
+											i.pi-folder-texture
+											| Textures
+									li
+										a.navbar-item(
+											href="{{ url_for('main.redir_characters') }}",
+											title="Character Library",
+											data-toggle="tooltip",
+											data-placement="left")
+											i.pi-character
+											| Characters
+									li
+										a.navbar-item(
+											href="{{ url_for('main.gallery') }}",
+											title="Curated artwork collection",
+											data-toggle="tooltip",
+											data-placement="left")
+											i.pi-image
+											| Art Gallery
+
+							li
+								a.navbar-item(
+									href="{{ url_for('main.training') }}",
+									title="Training & Tutorials",
+									data-toggle="tooltip",
+									data-placement="bottom",
+									class="{% if category == 'training' %}active{% endif %}")
+									span Training
+							li
+								a.navbar-item(
+									href="{{ url_for('main.open_projects') }}",
+									title="Browse all the Open Projects",
+									data-toggle="tooltip",
+									data-placement="bottom",
+									class="{% if category in ['open-projects', 'film'] %}active{% endif %}")
+									span Open Projects
+							li
+								a.navbar-item(
+									href="{{ url_for('main.services') }}",
+									title="Blender Cloud Services",
+									data-toggle="tooltip",
+									data-placement="bottom",
+									class="{% if category == 'services' %}active{% endif %}")
+									span Services
+							| {% endblock %}
+
+							| {% if current_user.is_anonymous %}
+							li
+								a.navbar-item(
+									href="https://store.blender.org/product/membership/",
+									title="Sign up") Sign up
+							| {% endif %}
+
+							| {% if current_user.is_authenticated %}
+
+							| {% if current_user.has_role('demo') %}
+							| {% set subscription = 'demo' %}
+							| {% elif current_user.has_role('subscriber') %}
+							| {% set subscription = 'subscriber' %}
+							| {% else %}
+							| {% set subscription = 'none' %}
+							| {% endif %}
+
+							li.nav-notifications
+								a.navbar-item#notifications-toggle(
+									title="Notifications",
+									data-toggle="tooltip",
+									data-placement="bottom")
+									i.pi-notifications-none.nav-notifications-icon
+									span#notifications-count
+										span
+									.flyout-hat
+
+								#notifications.flyout.notifications
+									.flyout-content
+										span.flyout-title Notifications
+										a#notifications-markallread(
+											title="Mark All as Read",
+											href="/notifications/read-all")
+											| Mark All as Read
+
+										| {% include '_notifications.html' %}
+
+
+							li(class="dropdown{% if title in ['profile', 'billing-address', 'pledges', 'manage-collection']: %} active{% endif %}")
+								a.navbar-item.dropdown-toggle(href="#", data-toggle="dropdown", title="{{ current_user.email }}")
+									img.gravatar(
+										src="{{ current_user.gravatar }}",
+										class="{{ subscription }}",
+										alt="Avatar")
+									.special(class="{{ subscription }}")
+										| {% if subscription == 'subscriber' %}
+										i.pi-check
+										| {% elif subscription == 'demo' %}
+										i.pi-heart-filled
+										| {% else %}
+										i.pi-attention
+										| {% endif %}
+
+								ul.dropdown-menu
+									| {% if not current_user.has_role('protected') %}
+									li.subscription-status(class="{{ subscription }}")
+										| {% if subscription == 'subscriber' %}
+										a.navbar-item(
+											href="{{url_for('users.settings_billing')}}"
+											title="View subscription info")
+											i.pi-grin
+											span Your subscription is active!
+										| {% elif subscription == 'demo' %}
+										a.navbar-item(
+											href="{{url_for('users.settings_billing')}}"
+											title="View subscription info")
+											i.pi-heart-filled
+											span You have a free account.
+										| {% else %}
+										a.navbar-item(
+											href="https://store.blender.org/product/membership/"
+											title="Renew subscription")
+											i.pi-unhappy
+											span.info Your subscription is not active.
+												span.renew Click here to renew.
+										| {% endif %}
+
+									li
+										a.navbar-item(
+											href="{{ url_for('projects.home_project') }}"
+											title="Home")
+											i.pi-home
+											| Home
+
+									li
+										home_project
+										a.navbar-item(
+											href="{{ url_for('projects.index') }}"
+											title="My Projects")
+											i.pi-star
+											| My Projects
+
+									li
+										a.navbar-item(
+											href="{{ url_for('users.settings_profile') }}"
+											title="Settings")
+											i.pi-cog
+											| Settings
+									li
+										a.navbar-item(
+											href="{{ url_for('users.settings_billing') }}"
+											title="Billing")
+											i.pi-credit-card
+											| Subscription
+									li.divider(role="separator")
+									| {% endif %}
+									li
+										a.navbar-item(
+											href="{{ url_for('users.logout') }}")
+											i.pi-log-out(title="Log Out")
+											| Log out
+
+							| {% else %}
+
+							li.nav-item-sign-in
+								a.navbar-item(href="{{ url_for('users.login') }}")
+									| Log in
+							| {% endif %}
+
+			.page-content
+				#search-overlay
+				| {% block page_overlay %}
+				#page-overlay
+				| {% endblock %}
+				.page-body
+					| {% block body %}{% endblock %}
+
+		| {% block footer_container %}
+		#footer-container
+			| {% block footer_navigation %}
+			#footer-navigation
+				.container
+					.row
+						.col-md-4.col-xs-6
+							.footer-support
+								h4 Support & Feedback
+								p.
+									Let us know what you think or if you have any issues
+									just write to cloudsupport at blender dot org
+
+						.col-md-2.col-xs-6
+							ul.footer-social
+								li
+									a(href="https://twitter.com/Blender_Cloud",
+										title="Follow us on Twitter")
+										i.pi-social-twitter
+								li
+									a(href="mailto:cloudsupport@blender.org"
+										title="Support Email")
+										i.pi-email
+
+						.col-md-2.col-xs-6
+							h4
+								a(href="{{ url_for('main.homepage') }}")
+									| Blender Cloud
+							ul.footer-links
+								li
+									a(href="{{ url_for('main.main_blog') }}",
+										title="Blender Cloud Blog")
+										| Blog
+
+								li
+									a(href="{{ url_for('main.services') }}",
+										title="Blender Cloud Services")
+										| Services
+
+								li
+									a(href="https://cloud.blender.org/blog/blender-cloud-v3",
+										title="About Blender Cloud")
+										| About
+
+						.col-md-2.col-xs-6
+							h4
+								a(href="https://www.blender.org",
+									title="Blender official Website")
+									| Blender
+							ul.footer-links
+								li
+									a(href="https://www.blender.org",
+										title="Blender official Website")
+										| Blender.org
+								li
+									a(href="https://www.blender.org/store",
+										title="The official Blender Store")
+										| Blender Store
+
+						.col-md-2.col-xs-6.special
+							| With the support of the <br/> MEDIA Programme of the European Union<br/><br/>
+							img(alt="MEDIA Programme of the European Union",
+									src="https://gooseberry.blender.org/wp-content/uploads/2014/01/media_programme.png")
+			| {% endblock %}
+
+			| {% block footer %}
+			footer.container
+				ul.links
+					li
+						a(href="{{ url_for('main.homepage') }}")
+							| Blender Cloud
+
+				#hop(title="Be awesome in space")
+					i.pi-angle-up
+
+			| {% endblock %}
+		| {% endblock %}
+
+		#notification-pop(data-url="", data-read-toggle="")
+			.nc-progress
+			a#pop-close(href="#", title="Dismiss")
+				i.pi-cancel
+			.nc-item
+				.nc-avatar
+				.nc-text
+					span.nc-date
+						a(href="")
+
+		noscript
+			link(href='//fonts.googleapis.com/css?family=Roboto:300,400,500', rel='stylesheet', type='text/css')
+			link(href='//fonts.googleapis.com/css?family=Lato:300,400', rel='stylesheet', type='text/css')
+
+		script(type="text/javascript", src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
+		script(type="text/javascript", src="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.10/js/min/perfect-scrollbar.min.js")
+		script(type="text/javascript", src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js")
+
+		script.
+			$(document).ready(function() {
+				{% if current_user.is_authenticated %}
+					getNotificationsLoop(); // Check for new notifications in the background
+
+					// Resize #notifications and change overflow for scrollbars
+					$(window).on("resize", function() { notificationsResize(); });
+
+					// Load perfectScrollbar
+					Ps.initialize(document.getElementById('notifications'), {suppressScrollX: true});
+
+				{% endif %}
+			});
+
+		| {% block footer_scripts %}{% endblock %}
+
+		script.
+			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+			(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+			m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+			})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+			ga('create', '{{ config.GOOGLE_ANALYTICS_TRACKING_ID }} ', 'auto', {'allowAnchor': true});
+			ga('send', 'pageview');

@@ -1,0 +1,267 @@
+/* jsTree overrides */
+
+$tree-color-text: $color-text-light-primary
+$tree-color-highlight: white
+$tree-color-highlight-background: $color-primary
+
+.jstree-default
+	font-weight: 400
+
+.jstree-loading
+	padding: 5px
+	color: $color-text-light-secondary
+
+.jstree-default-responsive .jstree-anchor
+	+media-sm
+		font-weight: normal !important
+		text-shadow: none !important
+
+.jstree-default .jstree-node
+	max-width: 100% // Needed for ellipsis on long names
+	padding: 0 !important
+	margin: 0 !important
+	font-weight: 400 !important
+	color: $tree-color-text
+	min-height: 12px !important
+	line-height: 12px !important
+	+media-xs
+		width: 100%
+
+.ps-active-y
+	.jstree-default .jstree-node
+		max-width: 97%
+
+.jstree-node.jstree-open
+	background-color: darken($color-background-nav, 2%) !important
+
+.jstree-node.jstree-open > .jstree-anchor:first-of-type
+	color: white !important
+	background-color: darken($color-background-nav, 2%) !important
+
+.jstree-default .jstree-node.jstree-open,
+.jstree-default .jstree-node.jstree-leaf
+	// border-left: 2px solid lighten($color-background-nav, 15%) /* Whatever after the top level */
+
+.jstree-default .jstree-node.jstree-closed
+	// border-left: 2px solid lighten($color-background-nav, 20%) /* Closed Folder */
+
+.jstree-default .jstree-node.jstree-closed .jstree-icon.jstree-ocl,
+.jstree-default .jstree-node.jstree-open .jstree-icon.jstree-ocl
+	position: absolute
+	z-index: 1
+	opacity: 0
+	min-width: 30px
+	float: left
+
+.jstree-default .jstree-ocl:before
+	+media-xs
+		font-weight: bold
+		font-size: 100%
+		top: 10%
+		left: 46%
+
+
+.jstree-anchor
+	padding-right: 5px
+
+	+media-xs
+		width: 98%
+		padding: 0 !important
+
+.jstree-default .jstree-node.jstree-closed .jstree-icon.jstree-ocl + .jstree-anchor,
+.jstree-default .jstree-node.jstree-open .jstree-icon.jstree-ocl + .jstree-anchor
+	padding-left: 28px !important
+
+.jstree .jstree-open > .jstree-children
+	padding-top: 0 !important
+
+.jstree-default .jstree-anchor  /* The text of the last level item */
+	width: 100%
+	padding-left: 28px !important
+	height: inherit !important
+	line-height: 26px !important
+	white-space: nowrap
+	text-overflow: ellipsis
+	overflow: hidden
+	border-bottom: thin solid transparent
+	transition: none
+
+.jstree-default li
+	transition: none
+
+/* expanded item, like a folder */
+.jstree-default .jstree-open > .jstree-ocl,
+.jstree-default .jstree-open > .jstree-anchor,
+.jstree-default .jstree-open > .jstree-ocl .jstree-icon.jstree-themeicon,
+.jstree-default .jstree-open > .jstree-anchor .jstree-icon.jstree-themeicon
+	color: $tree-color-text !important
+
+/* active item text */
+.jstree-default .jstree-clicked,
+.jstree-default .jstree-clicked > .jstree-ocl
+	background-color: transparent !important
+	border-radius: 0
+	box-shadow: none
+
+	border-bottom: thin solid transparent
+	// max-width: 95%
+
+.jstree-default .jstree-leaf .jstree-clicked
+	width: 100% !important
+
+/* hovered text */
+.jstree-default .jstree-hovered,
+.jstree-default .jstree-open .jstree-hovered,
+.jstree-default .jstree-hovered .jstree-icon.jstree-themeicon
+	color: $tree-color-highlight !important
+
+.jstree-default .jstree-hovered
+	background-color: rgba($tree-color-highlight, .1) !important
+
+
+/* active item text + icon */
+.jstree-default .jstree-clicked,
+.jstree-default .jstree-clicked > .jstree-ocl,
+.jstree-default .jstree-clicked .jstree-icon.jstree-themeicon
+	color: $tree-color-highlight !important
+
+.jstree-leaf[aria-selected='true']
+	a.jstree-anchor.jstree-clicked
+		background-color: rgba($tree-color-highlight-background, .5) !important
+		padding-left: 28px !important
+
+.jstree-default li[aria-selected='true']
+
+	a.jstree-anchor
+		padding-right: 15px
+		&:after
+			content: '\e83a'
+			font-family: 'pillar-font'
+			color: $tree-color-highlight
+			position: absolute
+			right: 7px
+			top: 1px
+
+	li
+		a.jstree-anchor:after
+			content: ''
+
+.jstree-default li[aria-expanded='true']
+	background-color: transparent
+
+	a.jstree-anchor.jstree-clicked
+		background-color: rgba($tree-color-highlight-background, .5) !important
+
+a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked
+	background-color: rgba($tree-color-highlight-background, .7) !important
+
+a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked
+	background-color: rgba($tree-color-highlight-background, .8) !important
+
+a.jstree-anchor+ul
+	border:
+		top: none !important
+		bottom: none !important
+	a.jstree-anchor
+		color: darken($color-text-light-primary, 10%) !important
+
+		&.jstree-hovered,
+		&.jstree-clicked
+			color: white !important
+
+		&+ul
+			a.jstree-anchor
+				color: darken($color-text-light-primary, 10%) !important
+
+				&.jstree-hovered,
+				&.jstree-clicked
+					color: white !important
+
+/* hover an active item */
+.jstree-default .jstree-clicked.jstree-hovered,
+.jstree-default .jstree-clicked.jstree-hovered .jstree-icon.jstree-themeicon
+	color: lighten($tree-color-highlight, 5%) !important
+	box-shadow: none
+
+.jstree-anchor > .jstree-themeicon
+	margin-right: 10px !important
+	margin-left: 20px !important
+
+.jstree-default .jstree-hovered,
+.jstree-default .jstree-hovered .jstree-ocl
+	background-color: transparent !important
+	box-shadow: none
+	color: white !important
+
+.jstree-default .jstree-hovered
+	box-shadow: none
+
+.jstree-default .jstree-node,
+.jstree-default .jstree-icon
+	background-image: none !important
+	position: relative
+
+.jstree-default .jstree-icon  /* Folder that you click to collapse/expand */
+	width: 20px !important
+	text-align: left !important
+	background-color: transparent !important
+	position: absolute
+
+i.jstree-icon.jstree-ocl
+	height: 26px !important
+	color: rgba($tree-color-text, .5) !important
+	+media-xs
+		height: 40px !important
+
+.jstree-default .jstree-icon:empty
+	line-height: 26px
+	left: 5px
+
+.jstree-children .jstree-open i.jstree-icon.jstree-ocl
+	height: 26px !important
+
+.jstree-anchor > .jstree-themeicon
+	margin-right: 3px !important
+	margin-left: 0 !important
+	color: rgba($tree-color-text, .7) !important
+	font-size: 95% !important
+
+.jstree-open > .jstree-anchor > .jstree-themeicon
+	color: $color-primary !important
+
+.jstree-leaf > .jstree-clicked > .jstree-themeicon
+	color: $color-secondary !important
+
+.jstree-leaf .jstree-icon  /* Icon of the files (not nodes) */
+	opacity: 0
+	width: 0px !important
+
+.jstree-leaf .jstree-icon.jstree-themeicon
+	opacity: 1
+	width: 24px !important
+	color: lighten($color-text, 30%) !important
+
+	&.pi-image
+		font-size: .85em !important
+
+.jstree .jstree-open > .jstree-children > .jstree-node
+	padding-left: 15px !important
+
+	.jstree-icon:empty
+		left: 20px !important
+
+		// Tweaks for specific icons
+		&.pi-file-archive
+			left: 22px !important
+		&.pi-folder
+			left: 21px !important
+			font-size: .9em !important
+		&.pi-film-thick
+			left: 22px !important
+			font-size: .85em !important
+
+	.jstree-anchor
+		border-left: thin solid lighten($color-background-nav, 5%)
+
+
+/* /jsTree overrides */

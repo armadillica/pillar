@@ -1,0 +1,34 @@
+| {% macro render_field(field) %}
+
+.form-group(class="{{field.name}}{% if field.errors %} error{% endif %}")
+
+	| {% if field.type == 'BooleanField' %}
+	.checkbox
+		label
+			| {{ field(class='checkbox') }}
+			| {{ field.label }}
+	| {% elif field.type == 'FieldList' %}
+
+	ul.fieldlist#files
+		| {% for file in field %}
+		li.fieldlist-item
+
+			| {% for subfield in file %}
+			| {{ render_field(subfield) }}
+			| {% endfor %}
+
+		| {% endfor %}
+
+	| {% else %}
+	| {{ field.label }}
+	| {{ field(class='form-control') }}
+	| {% endif %}
+
+	| {% if field.errors %}
+	ul.error
+		| {% for error in field.errors %}
+		li {{ error }}
+		| {% endfor %}
+	| {% endif %}
+
+| {% endmacro %}

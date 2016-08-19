@@ -1,0 +1,33 @@
+| {% block body %}
+
+#node-container
+
+	section.node-details-container.storage
+
+		.node-details-header
+			.node-title
+				| {{node.name}}
+
+		//- .node-details-description
+		//- 	| {{node.description}}
+
+		.node-details-meta
+
+			ul.node-details-meta-list
+				li.node-details-meta-list-item.status
+						| {{node.status}}
+
+				li.node-details-meta-list-item.date(title="Created {{ node._created | pretty_date }}")
+					| {{ node._updated | pretty_date }}
+
+				li.node-details-meta-list-item.file.length
+					| {{ node.length | filesizeformat }}
+
+				li.node-details-meta-list-item.file.download
+					a(href="{% if node.has_method('GET') %}{{ node.download_link }}{% else %}{{ url_for('users.login') }}{% endif %}")
+						button.btn.btn-default(type="button")
+							| Download
+
+
+| {% endblock %}
+

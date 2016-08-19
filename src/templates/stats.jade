@@ -1,0 +1,120 @@
+| {% extends 'layout.html' %}
+| {% block page_title %}Stats{% endblock %}
+
+| {% block body %}
+.container
+	#stats-container.page-content
+		.row
+			.col-md-6
+				.box
+					span.stats__graph-title.income
+						span.stats__graph-title-amount
+							small &dollar;
+							| 20307
+						span.stats__graph-title-label Monthly Income
+
+					#site-stats.stats__graph
+
+			.col-md-6
+				.box
+					span.stats__graph-title subscribers
+						span.stats__graph-title-amount 1807
+						span.stats__graph-title-label Active Subscribers
+
+					#site-stats2.stats__graph
+
+		hr
+
+		.row
+			.col-md-12
+				.box
+					.row
+						.col-md-6.text-left
+							p.
+								The Blender Cloud is our Open Production platform - a hub for creating and sharing open content and training online. The Blender Institute projects - developers and artists who work on compelling technical creative targets - are made possible thanks to the support of subscribers to the Cloud.
+
+							p.
+								We created this page to share with you the numbers that make the Cloud.
+
+							p.
+								Thank you very much for your support.
+								<br/>
+								The Blender Institute team
+
+						.col-md-6 stats__join
+							a(href="https://cloud.blender.org/join")
+								h3.
+									Get a subscription
+
+								h3.
+									Now only &dollar;10 per month
+
+								.btn.btn-default
+									| Join the Cloud
+
+		hr
+
+		.row.stats__data
+			.col-md-12
+
+					.row
+
+						.col-md-3 stats__data-type_money
+							.box
+								h2.
+									<small>&dollar;</small> 20307
+
+								h3.
+									<small>Monthly Income</small>
+
+								i.fa.fa-money backicon
+							</div>
+						</div>
+
+						.col-md-2 stats__data-type_money
+							.box
+								i.fa.fa-users backicon
+								h2.
+									1807
+
+								h3.
+									<small>Active Subscribers</small>
+
+							</div>
+						</div>
+
+						.col-md-2 stats__data-type_quantity
+							.box
+								i.fa.fa-film backicon
+								h2.
+									245
+
+								h3.
+									<small>Hours of Video</small>
+
+							</div>
+						</div>
+
+						.col-md-2 stats__data-type_quantity
+							.box
+								i.fa.fa-database backicon
+								h2.
+									94
+
+								h3.
+									<small>Gigabytes of Data</small>
+
+							</div>
+						</div>
+
+						.col-md-3 stats__data-type_quantity
+							.box
+								i.fa.fa-cloud-download backicon
+								h2.
+									3641
+
+								h3.
+									<small>Downloadable Assets</small>
+
+
+| {% endblock %}

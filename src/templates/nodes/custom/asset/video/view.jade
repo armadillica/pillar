@@ -1,0 +1,6 @@
+| {% extends 'layout.html' %}
+| {% from '_macros/_file_uploader_javascript.html' import render_file_uploader_javascript %}
+
+| {% block footer_scripts %}
+| {{render_file_uploader_javascript()}}
+| {% endblock %}

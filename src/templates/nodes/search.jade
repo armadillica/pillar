@@ -1,0 +1,301 @@
+| {% extends 'layout.html' %}
+| {% block page_title %}Search{% if project %} {{ project.name }}{% endif %}{% endblock %}
+
+| {% block og %}
+meta(property="og:type", content="website")
+| {% if og_picture %}
+meta(property="og:image", content="{{ og_picture.thumbnail('l', api=api) }}")
+| {% endif %}
+| {% if project %}
+meta(property="og:title", content="{{project.name}} - Blender Cloud")
+meta(property="og:url", content="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+meta(property="og:description", content="{{project.summary}}")
+| {% endif %}
+| {% endblock %}
+
+| {% block tw %}
+| {% if og_picture %}
+meta(property="twitter:image", content="{{ og_picture.thumbnail('l', api=api) }}")
+| {% endif %}
+| {% if project %}
+meta(name="twitter:title", content="{{project.name}} on Blender Cloud")
+meta(name="twitter:description", content="{{project.summary}}")
+| {% endif %}
+| {% endblock %}
+
+| {% block body %}
+
+#search-container
+
+	| {% if project %}
+	#project_sidebar
+		ul.project-tabs
+			li.tabs-thumbnail(
+				title="About",
+				data-toggle="tooltip",
+				data-placement="left",
+				class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
+				a(href="{{url_for('projects.about', project_url=project.url, _external=True)}}")
+					#project-loading
+						i.pi-spin
+					| {% if project.picture_square %}
+					img(src="{{ project.picture_square.thumbnail('b', api=api) }}")
+					| {% else %}
+					i.pi-home
+					| {% endif %}
+			li.tabs-browse(
+				title="Browse",
+				data-toggle="tooltip",
+				data-placement="left")
+				a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+					i.pi-tree-flow
+			li.tabs-search.active(
+				title="Search",
+				data-toggle="tooltip",
+				data-placement="left")
+				a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
+					i.pi-search
+	| {% endif %}
+
+	#search-sidebar
+		input.search-field(
+				type="text",
+				name="q",
+				id="q",
+				autocomplete="off",
+				spellcheck="false",
+				autocorrect="false",
+				placeholder="Search by Title, Type...")
+
+		.search-list-filters
+			.filter-list
+				| View as:
+				ul.filter-list
+					li.filter-list-type.grid(
+						title="Browse as grid",
+						data-list-type="grid")
+						i.pi-layout
+					li.filter-list-type.list(
+						title="Browse as list",
+						data-list-type="list")
+						i.pi-list
+
+			#accordion.panel-group.accordion(role="tablist", aria-multiselectable="true")
+				#facets
+
+		#pagination
+
+		.search-list-stats
+			#stats
+
+	#search-list
+		#hits
+
+	#search-details
+		#search-error
+		#search-hit-container
+
+
+| {% raw %}
+// Facet template
+script(type="text/template", id="facet-template")
+	.panel.panel-default
+		a(data-toggle='collapse', data-parent='#accordion', href='#filter_{{ facet }}', aria-expanded='true', aria-controls='filter_{{ facet }}')
+			.panel-heading(role='tab')
+				.panel-title {{ title }}
+		.panel-collapse.collapse.in(id='filter_{{ facet }}', role='tabpanel', aria-labelledby='headingOne')
+			.panel-body
+				| {{#values}}
+				a.facet_link.toggleRefine(
+					class='{{#refined}}refined{{/refined}}',
+					data-facet='{{ facet }}',
+					data-value='{{ value }}',
+					href='#')
+					span
+						| {{ label }}
+						small.facet_count.pull-right {{ count }}
+				| {{/values}}
+
+
+// Hit template
+script(type="text/template", id="hit-template")
+	.search-hit(data-hit-id='{{ objectID }}')
+		#search-loading.search-loading
+			.spinner
+				span.spin ·
+		.search-hit-thumbnail
+			| {{#picture}}
+			img(src="{{{ picture }}}")
+			| {{/picture}}
+			| {{^picture}}
+			.search-hit-thumbnail-icon
+				| {{#media}}
+				i(class="pi-{{{ media }}}")
+				| {{/media}}
+				| {{^media}}
+				i.dark(class="pi-{{{ node_type }}}")
+				| {{/media}}
+			| {{/picture}}
+			| {{#is_free}}
+			.search-hit-ribbon
+				span free
+			| {{/is_free}}
+		.search-hit-name
+			| {{{ _highlightResult.name.value }}}
+		.search-hit-meta
+			span.project {{{ project.name }}} ·
+			span.node_type {{{ node_type }}}
+			| {{#media}}
+			span.media · {{{ media }}}
+			| {{/media}}
+			span.when {{{ created }}}
+			span.context
+				a(href="/nodes/{{ objectID }}/redir") view in context
+
+
+// Pagination template
+script(type="text/template", id="pagination-template")
+	ul.search-pagination.
+		<li {{^prev_page}}class="disabled"{{/prev_page}}><a href="#" {{#prev_page}} class="gotoPage" data-page="{{ prev_page }}" {{/prev_page}}><i class="pi-angle-left"></i></a></li>
+		{{#pages}}
+		<li class="{{#current}}active{{/current}}{{#disabled}}disabled{{/disabled}}"><a href="#" {{^disabled}} class="gotoPage" data-page="{{ number }}" {{/disabled}}>{{ number }}</a></li>
+		{{/pages}}
+		<li {{^next_page}}class="disabled"{{/next_page}}><a href="#" {{#next_page}} class="gotoPage" data-page="{{ next_page }}" {{/next_page}}><i class="pi-angle-right"></i></a></li>
+
+// Stats template
+script(type="text/template", id="stats-template")
+	span {{ nbHits }} result{{#nbHits_plural}}s{{/nbHits_plural}}
+		small  ({{ processingTimeMS }}ms)
+| {% endraw %}
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script(src="//releases.flowplayer.org/6.0.5/flowplayer.min.js", async)
+script().
+	var APPLICATION_ID = '{{config.ALGOLIA_USER}}';
+	var SEARCH_ONLY_API_KEY = '{{config.ALGOLIA_PUBLIC_KEY}}';
+	var INDEX_NAME = '{{config.ALGOLIA_INDEX_NODES}}';
+	var sortByCountDesc = null;
+	var FACET_CONFIG = [
+	{ name: 'node_type', title: 'Type', disjunctive: false, sortFunction: sortByCountDesc },
+	{ name: 'media', title: 'Media', disjunctive: false, sortFunction: sortByCountDesc },
+	{ name: 'tags', title: 'Tags', disjunctive: false, sortFunction: sortByCountDesc },
+	{ name: 'is_free', title: 'Free Access', disjunctive: false, sortFunction: sortByCountDesc },
+	];
+	{% if project %}
+	FACET_CONFIG.push({ name: 'project._id', title: 'Project', disjunctive: false, hidden: true, value: '{{project._id}}' })
+	{% endif %}
+
+script(src="//cdn.jsdelivr.net/algoliasearch.helper/2/algoliasearch.helper.min.js")
+script(src="//cdn.jsdelivr.net/hogan.js/3.0.0/hogan.common.js")
+script(src="{{ url_for('static_pillar', filename='assets/js/algolia_search.min.js') }}")
+
+script(type="text/javascript").
+
+	function displayUser(userId) {
+		var url = '/nodes/' + userId + '/view';
+
+		$.get(url, function(dataHtml){
+			$('#search-hit-container').html(dataHtml);
+		})
+		.done(function(){
+			$('.search-loading').removeClass('active');
+			$('#search-error').hide();
+			$('#search-hit-container').show();
+		})
+		.fail(function(data){
+			$('.search-loading').removeClass('active');
+			$('#search-hit-container').hide();
+			$('#search-error').show().html('Houston!\n\n' + data.status + ' ' + data.statusText);
+		});
+	}
+
+	$('body').on('click', '.search-hit', function(){
+		if ($('.search-loading').hasClass('active')){
+			$(this).removeClass('active');
+		}
+		$(this).find('#search-loading').addClass('active');
+
+		displayUser($(this).data('hit-id'));
+		$('.search-hit').removeClass('active');
+		$(this).addClass('active');
+	});
+
+	// Remove focus from search input so that the click event bound to .search-hit
+	// can be fired on the first click.
+	$(searchList).hover(function(){
+		$('#q').blur();
+	});
+	$('#search-sidebar').hover(function(){
+		$('#q').focus();
+	});
+
+	/* UI Stuff */
+
+	/* List types, grid or list (default)*/
+	var uiListType = Cookies.getJSON('bcloud_ui');
+	var searchList = document.getElementById('search-list');
+
+	function uiSetListType(type){
+		$('.filter-list-type').removeClass('active');
+
+		if (type == 'grid'){
+			$(searchList).addClass('view-grid');
+			$('.filter-list-type.grid').addClass('active');
+		} else {
+			$(searchList).removeClass('view-grid');
+			$('.filter-list-type.list').addClass('active');
+		}
+	}
+
+	if (uiListType && uiListType.search_browse_type == 'grid'){
+		uiSetListType('grid');
+	} else {
+		uiSetListType('list');
+	}
+
+	$('.filter-list-type').on('click', function(){
+		if ($(this).attr('data-list-type') == 'grid'){
+			uiSetListType('grid');
+			setJSONCookie('bcloud_ui', 'search_browse_type', 'grid');
+		} else {
+			uiSetListType('list');
+			setJSONCookie('bcloud_ui', 'search_browse_type', 'list');
+		}
+	});
+
+	/* Scrollbars */
+	if (typeof Ps !== 'undefined'){
+		Ps.initialize(searchList, {suppressScrollX: true});
+		Ps.initialize(document.getElementById('search-hit-container'), {suppressScrollX: true});
+	}
+
+	/* Hide site-wide search, kinda confusing */
+	$('.search-input').hide();
+
+	/* Resize container so we can have custom scrollbars */
+	container_offset = $('#search-container').offset();
+
+	function containerResizeY(window_height){
+
+		var container_height = window_height - container_offset.top;
+
+			if (container_height > parseInt($('#search-container').css("min-height"))) {
+				$('#search-container').css(
+					{'max-height': container_height + 'px', 'height': container_height + 'px'}
+				);
+				$('#search-list, #search-hit-container').css(
+					{'max-height': container_height + 'px', 'height': container_height + 'px'}
+				);
+			};
+	};
+
+	$(window).on("load resize",function(){
+		containerResizeY($(window).height());
+	});
+
+| {% endblock %}
+
+| {% block footer_navigation %}{% endblock %}
+| {% block footer %}{% endblock %}

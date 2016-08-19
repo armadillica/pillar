@@ -1,0 +1,189 @@
+script(type="text/javascript").
+
+	/* Convert Markdown */
+	var convert_fields = '.node-details-description, .blog_index-item .item-content';
+	var convert = new Markdown.getSanitizingConverter();
+	Markdown.Extra.init(convert);
+	convert = convert.makeHtml;
+
+
+	/* Parse description/content fields to convert markdown */
+	$(convert_fields).each(function(i){
+		$(convert_fields).eq(i).html(convert($(convert_fields).eq(i).text()));
+	});
+
+	ProjectUtils.setProjectAttributes({isProject: false});
+
+	{% if node %}
+		ProjectUtils.setProjectAttributes({
+			nodeId: '{{node._id}}',
+			nodeType: '{{node.node_type}}'});
+
+		var node_type = ProjectUtils.nodeType();
+		var node_type_str = node_type;
+
+		if (node_type === 'group'){
+			node_type_str = 'Folder';
+		} else if (node_type === 'group_texture') {
+			node_type_str = 'Texture Folder';
+		} else if (node_type === 'group_hdri') {
+			node_type_str = 'HDRi Folder';
+		}
+		$('a', '.button-edit').html('<i class="pi-edit button-edit-icon"></i> Edit ' + node_type_str);
+		$('a', '.button-delete').html('<i class="pi-trash button-delete-icon"></i>Delete ' + node_type_str);
+
+		{% if parent %}
+		ProjectUtils.setProjectAttributes({parentNodeId: '{{parent._id}}'});
+		{% endif %}
+
+
+		// If we are im preview mode, update the image source
+		var page_overlay = document.getElementById('page-overlay');
+
+		if (page_overlay.classList.contains('active')) {
+			var node_preview = document.getElementById('node-preview');
+
+			if (node_preview){
+				if ($(node_preview).hasClass('image') || $(node_preview).hasClass('file')){
+					var src = $(node_preview).find('img').attr('src');
+					showOverlayPreviewImage(src);
+				}
+			} else {
+				$(page_overlay).html('<div class="nav-prev"></div><div class="no-preview">No Preview Available</div><div class="nav-next"></div>');
+			}
+		}
+
+		function loadComments(){
+			var commentsUrl = "{{ url_for('nodes.comments_index', parent_id=node._id) }}";
+
+			$.get(commentsUrl, function(dataHtml) {
+			})
+			.done(function(dataHtml){
+				// Update the DOM injecting the generate HTML into the page
+				$('#comments-container').replaceWith(dataHtml);
+			})
+			.fail(function(e, data){
+				statusBarSet('error', 'Couldn\'t load comments. Error: ' + data.errorThrown, 'pi-attention', 5000);
+				$('#comments-container').html('<a id="comments-reload"><i class="pi-refresh"></i> Reload comments</a>');
+			});
+		}
+
+		loadComments();
+
+		$('body').on('click', '#comments-reload', function(){
+			loadComments();
+		});
+
+		{% if node.has_method('PUT') %}
+			$('.project-mode-view').show();
+		{% else %}
+			$('.project-mode-view').hide();
+		{% endif %}
+
+		{% if node.picture %}
+			function showOverlayPreviewImage(src) {
+				$(page_overlay)
+					.addClass('active')
+					.html('<div class="nav-prev"></div><img src="' + src + '"/><div class="nav-next"></div>');
+			}
+
+			$('#node-preview.image, #node-preview.file').click(function(e){
+				e.preventDefault();
+				e.stopPropagation();
+
+				showOverlayPreviewImage("{{ node.picture.thumbnail('l', api=api) }}");
+			});
+
+		{% endif %}
+
+		// Click anywhere in the page to hide the overlay
+		function hidePageOverlay() {
+			$(page_overlay)
+				.removeAttr('class')
+				.html('');
+		}
+
+		$(page_overlay).click(function(e) {
+			e.stopPropagation();
+			e.preventDefault();
+
+			hidePageOverlay();
+		});
+
+		function navigateTree(prev){
+			var tree = $('#project_tree').jstree(true);
+			var curr = tree.get_selected(false);
+
+			if (prev === undefined){
+				var n = tree.get_next_dom(curr);
+			} else {
+				var n = tree.get_prev_dom(curr);
+			}
+
+			if (n && n.length > 0) {
+				tree.deselect_all();
+				tree.select_node(n);
+			}
+		}
+
+		document.onkeydown = function(e) {
+			var event = document.all ? window.event : e;
+			switch (e.target.tagName.toLowerCase()) {
+				case "input":
+				case "textarea":
+				case "select":
+				case "button":
+					break
+				default:
+					if (event.keyCode==27) hidePageOverlay();
+					if (event.keyCode==37) navigateTree(true);
+					if (event.keyCode==39) navigateTree();
+					break;
+			}
+		}
+
+
+		$(page_overlay).find('.nav-prev').click(function(e){
+			e.stopPropagation();
+			e.preventDefault();
+
+			navigateTree(true);
+		});
+
+		$(page_overlay).find('.nav-next').click(function(e){
+			e.stopPropagation();
+			e.preventDefault();
+
+			navigateTree();
+		});
+
+		// Auto-scale the image preview to the right aspect ratio
+		var node_preview = document.getElementById("node-preview-thumbnail");
+
+		if (node_preview) {
+			node_preview.addEventListener('load', function() {
+				var preview_aspect = this.naturalWidth / this.naturalHeight
+
+				if (preview_aspect > 1.0){
+					$('.node-preview, .node-preview-thumbnail').css({'max-height': 'auto', 'width': '100%'});
+					$('.node-preview img').css({'max-height': '100%'});
+				}
+
+			});
+		}
+
+		$('#node-overlay').click(function(){
+			$(this).removeClass('active').hide().html();
+		});
+
+		if (typeof $().popover != 'undefined'){
+			$('#asset-license').popover();
+		}
+
+	{% endif %}
+
+
+	if (typeof $().tooltip != 'undefined'){
+		$('[data-toggle="tooltip"]').tooltip({'delay' : {'show': 1250, 'hide': 250}});
+	}
+

@@ -1,0 +1,1078 @@
+
+
+html
+	-webkit-font-smoothing: antialiased
+	-moz-osx-font-smoothing: grayscale
+
+body
+	font:
+		family: $font-body, sans-serif
+		size: $font-size
+	color: $color-text-dark
+	background-color: $color-background
+
+	+media-sm
+		width: 100%
+		max-width: 100%
+		min-width: auto
+
+	+media-xs
+		width: 100%
+		max-width: 100%
+		min-width: auto
+
+h1, h2, h3, h4, h5
+	font:
+		family: $font-body
+		weight: 300
+
+a
+	color: $color-primary-dark
+	&:hover
+		color: $color-primary
+
+strong, b
+	font-weight: 500
+
+$navbar-height: 50px
+$navbar-backdrop-height: 600px
+
+.container
+	+media-xs
+		max-width: 100%
+		min-width: auto
+		padding:
+			left: 0
+			right: 0
+
+.container-page
+	background-color: $color-background
+
+.page-content
+	position: relative
+	.container-box
+		+container-box
+
+
+.navbar-fixed-top+.page-content
+	padding-top: $navbar-height
+
+.alert+.navbar-fixed-top+.page-content
+	padding-top: 0
+
+.alert
+	display: block
+	position: relative
+	z-index: 16
+	width: 100%
+	margin-bottom: 0
+	text-align: center
+	padding: 15px 20px
+	border-radius: 0
+	border-bottom: thin solid rgba(black, .1)
+
+	// overriden by alert types
+	color: $color-text-dark
+	background-color: $color-background
+
+	+clearfix
+
+	&.alert-danger,
+	&.alert-error
+		background-color: lighten($color-danger, 35%)
+		color: $color-danger
+		.alert-icon, .close
+			color: $color-danger
+
+	&.alert-warning
+		background-color: lighten($color-warning, 20%)
+		color: darken($color-warning, 20%)
+		.alert-icon, .close
+			color: darken($color-warning, 20%)
+
+	&.alert-success
+		background-color: lighten($color-success, 45%)
+		color: $color-success
+
+		.alert-icon, .close
+			color: $color-success
+
+	&.alert-info
+		background-color: lighten($color-info, 30%)
+		color: darken($color-info, 10%)
+		.alert-icon, .close
+			color: darken($color-info, 10%)
+
+	button.close
+		background: none
+		border: none
+		opacity: .5
+		position: absolute
+		top: 5px
+		right: 10px
+		padding: 10px
+
+		&:hover
+			opacity: 1
+
+		i
+			font-size: .8em
+
+	i.alert-icon
+		&:before
+			font-family: "pillar-font"
+			padding-right: 10px
+
+		&.success:before
+			content: '\e801'
+		&.info:before
+			content: "\e80c"
+		&.warning:before
+			content: "\e80b"
+		&.danger:before,
+		&.error:before
+			content: "\e83d"
+
+
+/* When there's an alert, disable the fixed top */
+.alert+.navbar-fixed-top
+	position: relative
+	margin-bottom: 0
+
+	&+.container
+		padding-top: 0
+
+
+/* Navigation */
+header.navbar-header
+	position: relative
+	margin: 0
+	z-index: 1 // to be on top of the overlay
+	height: 100%
+
+	.navbar-toggle
+		color: white
+
+.navbar-overlay
+	display: none
+	position: absolute
+	top: 0
+	left: 0
+	right: 0
+	bottom: 0
+	z-index: 0
+	width: 100%
+	height: 100%
+	background-color: rgba($color-background-nav,0)
+
+	transition: background-color 350ms ease-in-out
+
+	&+.navbar-container
+		.search-input
+			margin: 8px 0
+			border-radius: 3px
+			border: thin solid transparent
+
+			+media-sm
+				background-color: darken($color-background-nav, 6%)
+			+media-md
+				background-color: darken($color-background-nav, 6%)
+			+media-lg
+				border: thin solid rgba(white, .2)
+				background-color: transparent
+
+				#cloud-search, .tt-hint
+					&::placeholder
+						color: rgba(white, .8)
+
+
+	&.is-active
+		background-color: $color-background-nav
+		text-shadow: none
+
+		&+.navbar-container
+			.search-input
+				+media-sm
+					background-color: darken($color-background-nav, 6%)
+				+media-md
+					background-color: darken($color-background-nav, 6%)
+				+media-lg
+					border: thin solid transparent
+					background-color: darken($color-background-nav, 6%)
+
+				#cloud-search, .tt-hint
+					&::placeholder
+						color: rgba(white, .5)
+
+	+media-lg
+		display: block
+
+.navbar-transparent
+	a
+		height: 75px
+		transition: height 150ms ease-in-out
+
+	&.is-active a
+		height: 50px
+		text-shadow: none
+
+.navbar-container
+	+container-behavior
+
+	.navbar-collapse
+		+media-xs
+			padding: 0
+			width: 100%
+			max-height: initial // overrides bs, we don't have many items
+
+		&.show-notifications
+			display: block
+
+			li
+				display: none
+				&.nav-notifications
+					display: block
+					position: absolute
+					top: 7px
+					left: 0
+					width: 100%
+					z-index: $z-index-base
+
+					#notifications
+						padding: 0 10px
+
+
+.navbar-transparent
+	z-index: $z-index-base + 5 /* Flowplayer seems to take up to 11, project container is 12 */
+	border: none
+	border-width: 0
+	display: flex
+	align-items: center
+
+	width: 100%
+	background-color: $color-background-nav
+
+	+media-lg
+		background:
+			color: transparent
+			repeat: repeat-x
+			size: 100% 100% // 'contain' gives a black-line appearing for a few seconds in webkit when scrolling
+		background: linear-gradient(to bottom, rgba(darken($color-background-nav, 10%), .8) 0%, transparent 100%)
+
+	nav
+		margin-left: auto
+		margin-right: 0
+
+		.navbar-nav
+			margin-right: 0
+			+media-xs
+				margin: 0
+				width: 100%
+
+	li
+		user-select: none
+		a.navbar-item
+			user-select: none
+			color: white
+			height: $navbar-height
+			display: flex
+			align-items: center
+
+			font:
+				family: $font-headings
+				size: 1em
+				weight: 400
+			text-transform: uppercase
+			border-bottom: 3px solid transparent
+			text-shadow: 1px 1px 0 rgba(black, .2), 1px 1px 10px rgba(black, .5)
+
+			padding:
+				top: 3px
+				bottom: 0
+				left: 20px
+				right: 20px
+
+			+media-md
+				padding-left: 15px
+				padding-right: 15px
+			+media-sm
+				padding-left: 10px
+				padding-right: 10px
+
+			&:hover, &:focus
+				background-color: rgba($color-background-nav, .4)
+				border-bottom: 3px solid $color-primary
+
+			&:focus
+				border-bottom: 3px solid $color-primary
+
+			&.active
+				background-color: $color-background-nav
+				border-bottom: 3px solid lighten($color-secondary, 10%)
+
+				&:hover
+					border-color: lighten($color-secondary, 20%)
+
+			.pi-angle-down
+				position: relative
+				left: 5px
+
+		&.nav-item-sign-in
+			i
+				padding-right: 6px
+				font-size: 1.1em
+
+		img.gravatar
+			border-radius: 999em
+			height: 32px
+			width: 32px
+			box-shadow: 1px 1px 0 rgba(black, .2)
+			position: relative
+
+
+		.special
+			width: 18px
+			height: 18px
+			border-radius: 999em
+			position: absolute
+			background-color: white
+			z-index: 2
+			display: inline-block
+			top: 10px
+			left: 38px
+			font-size: 1.2em
+			box-shadow: 1px 1px 1px rgba(black, .2)
+
+			&.subscriber
+				background-color: $color-success
+				color: white
+				font-size: .6em
+
+			&.demo
+				background-color: $color-info
+				color: white
+				font-size: .6em
+
+			&.none
+				color: $color-danger
+
+			i
+				+position-center-translate
+
+	.navbar-brand
+		height: $navbar-height
+		display: flex
+		align-items: center
+		margin-left: 0 !important
+		color: white
+		padding:
+			top: 8px
+			left: 5px
+			right: 20px // overrides bs
+
+		&:hover
+			span.app-logo
+				transform: scale(1.1)
+
+		span.app-logo
+			font-size: 1.2em
+			position: relative
+			top: 3px
+			transition: transform 150ms ease-in-out
+
+	.dropdown
+		position: relative
+		min-width: 60px
+
+		&:hover
+			background-color: rgba($color-background-nav, .4)
+
+		&.open a
+			background-color: $color-background-nav
+
+		span.fa-stack
+			position: absolute
+			top: 50%
+			left: 50%
+			transform: translate(-50%, -50%)
+
+		ul.dropdown-menu
+			padding-top: 0
+
+			li
+				a
+					background-color: rgba(white, .3)
+					text-shadow: none
+					height: initial
+					border-bottom: none
+					font:
+						family: $font-body
+						size: .9em
+					padding: 5px 15px 5px 5px
+					color: rgba($color-text, .8)
+
+					&:hover
+						color: $color-primary
+
+				i
+					width: 35px
+					text-align: center
+
+				&.subscription-status
+					padding:
+						top: 10px
+						bottom: 10px
+
+					transition: opacity 150ms ease-in-out
+					opacity: 1
+
+					&:hover
+						opacity: .8
+
+					a
+						text-transform: initial
+
+					&.none a
+						color: $color-danger
+					&.subscriber a
+						color: $color-success
+
+					&.demo a
+						color: $color-info
+
+					span.info
+						display: block
+
+						span.renew
+							display: block
+							color: $color-text-dark-primary
+							font-size: .9em
+
+
+		&.libraries
+			ul.dropdown-menu
+				background-color: lighten($color-background-nav, 5%)
+				color: white
+				padding-top: 5px
+				left: 0
+				right: auto
+
+				small
+					padding-left: 5px
+				li
+					a
+						background-color: transparent
+						color: $color-text-light-primary
+
+						&:hover
+							color: $color-primary
+					&.disabled a
+						color: $color-text-dark-primary
+						cursor: default
+
+.navbar-backdrop-container
+	width: 100%
+	height: 100%
+	position: absolute
+	top: 0
+	left: 0
+	right: 0
+	bottom: 0
+
+	img
+		display: none
+		position: fixed
+		width: 100%
+		align-self: flex-start
+		+media-lg
+			display: block
+
+.navbar-backdrop
+	z-index: 0
+	position: absolute
+	top: 0
+	left: 0
+	right: 0
+	bottom: 0
+
+	width: 100%
+	height: 100%
+	background:
+		size: 100%
+		position: 0 0
+		repeat: no-repeat
+		color: transparent
+		image: url(https://cloud.blender.org/static/assets/img/backgrounds/pattern_02_blur.jpg)
+
+	filter: none
+
+	&.project
+		display: none
+		+media-lg
+			display: block
+			// We can't have nice things because of Edge
+			// filter: blur(10px)
+			left: -10px
+			width: 105%
+	&.blog
+		display: none
+		+media-lg
+			display: block
+			// We can't have nice things because of Edge
+			// filter: blur(10px)
+			left: -10px
+			width: 105%
+		+media-md
+			display: block
+			// We can't have nice things because of Edge
+			// filter: blur(10px)
+			left: -10px
+			width: 105%
+
+
+
+.navbar-backdrop-overlay
+	position: absolute
+	top: 0
+	left: 0
+	width: 100%
+	height: $navbar-backdrop-height
+	background: linear-gradient(to bottom, rgba($color-background, 0) 25%, rgba($color-background,0.5) 50%, rgba($color-background,1) 100%)
+
+
+/* Global, we want all menus to look like this */
+ul.dropdown-menu
+	background-color: white
+	border: none
+	box-shadow: 0 10px 25px rgba(black, .1)
+	user-select: none
+
+	.divider
+		background-color: rgba(black, .1)
+
+.dropdown:hover ul.dropdown-menu
+	display: block
+
+.nav-tabs .dropdown-menu, .nav-pills .dropdown-menu
+	margin-top: 0
+
+
+/* FOOTER */
+#footer-container
+	position: relative
+	background-color: $color-background
+
+	.row
+		+media-xs
+			margin: 0
+
+/* Footer Navigation */
+footer
+	font-size: .75em
+	padding: 0 0 10px 0
+	a
+		color: $color-text-dark-primary
+
+		&:hover
+			color: $color-primary
+
+	ul.links
+		float: left
+		padding: 0
+		margin: 0
+		list-style-type: none
+
+		li
+			padding: 0 15px 0 0
+			margin: 0
+			float: left
+
+	#hop
+		display: flex
+		align-items: center
+		justify-content: center
+		visibility: hidden
+		position: fixed
+		right: 25px
+		bottom: 25px
+		z-index: 999
+		cursor: pointer
+		opacity: 0
+		background: $color-background-light
+		width: 32px
+		height: 32px
+		border-radius: 50%
+		color: $color-text-dark-secondary
+		font-size: 2em
+		box-shadow: 0 0 15px rgba(black, .2)
+		transform: scale(0.5)
+		transition: all 150ms ease-in-out
+
+		&:hover
+			transform: scale(1.2)
+			background-color: $color-background-nav
+
+		&.active
+			visibility: visible
+			opacity: 1
+			transform: scale(1)
+
+
+#footer-navigation
+	font-size: .85em
+	margin-bottom: 5px
+	color: lighten($color-text, 30%)
+	border-top: thick solid lighten($color-text, 60%)
+	padding:
+		top: 15px
+		bottom: 15px
+
+	h4
+		color: lighten($color-text, 8%)
+		margin-bottom: 10px
+
+		a
+			color: $color-text-dark-primary
+
+	ul
+		position: relative
+		margin: 0
+		padding: 0 0 10px 0
+		list-style-type: none
+
+		li
+			position: relative
+			padding: 0
+			margin: 0
+
+	a
+		color: lighten($color-text, 35%)
+
+		&:hover
+			color: $color-primary
+
+	.footer-links
+		i
+			font-size: 80%
+			position: absolute
+			left: -14px
+			top: 20%
+
+	.special
+		padding:
+			top: 10px
+			bottom: 15px
+		font-size: .9em
+		border-left: thin solid darken($color-background, 20%)
+
+
+		img
+			max-width: 100%
+			opacity: .6
+
+	ul.footer-social
+		width: 100%
+		text-align:center
+		margin: 0 auto
+		display: flex
+		align-items: center
+		justify-content: space-around
+
+		li
+			display: inline-block
+			padding: 30px 0
+
+			i
+				font-size: 3em
+
+
+.btn-outline
+	background-color: transparent
+	border-width: 1px
+	transition: background-color .1s
+
+	&:focus, &:active
+		box-shadow: none
+
+.btn-empty
+	background-color: transparent
+	border-color: transparent
+
+	&:focus, &:active
+		box-shadow: none
+
+
+.tooltip
+	&.in
+		opacity: 1
+
+	.tooltip-inner
+		max-width: auto
+		white-space: nowrap
+		background-color: $color-background-nav
+		color: $color-text-light-primary
+		border-radius: 3px
+
+	&.top .tooltip-arrow
+		border-top-color: $color-background-nav
+	&.bottom .tooltip-arrow
+		border-bottom-color: $color-background-nav
+	&.left .tooltip-arrow
+		border-left-color: $color-background-nav
+	&.right .tooltip-arrow
+		border-right-color: $color-background-nav
+
+.popover
+	background-color: lighten($color-background-nav, 5%)
+	border-radius: 3px
+	box-shadow: 1px 1px 2px rgba(black, .2)
+	border: thin solid lighten($color-background-nav, 10%)
+
+	&.in
+		opacity: 1
+
+	.popover-title
+		background-color: lighten($color-background-nav, 10%)
+		border-bottom: thin solid lighten($color-background-nav, 3%)
+		color: $color-text-light-primary
+		font-family: $font-body
+
+	.popover-content
+		color: $color-text-light
+		font-size: .9em
+
+	&.top .arrow:after
+		border-top-color: lighten($color-background-nav, 5%)
+	&.bottom .arrow:after
+		border-bottom-color: lighten($color-background-nav, 5%)
+	&.left .arrow:after
+		border-left-color: lighten($color-background-nav, 5%)
+	&.right .arrow:after
+		border-right-color: lighten($color-background-nav, 5%)
+
+input, input.form-control
+	+input-generic
+label, label.control-label
+	+label-generic
+
+
+.form-upload-file
+	width: 100%
+	margin: 10px 0
+	+clearfix
+
+	.form-upload-progress
+		margin-top: 10px
+
+		.form-upload-progress-bar
+			&.progress-processing
+				+stripes($color-success, lighten($color-success, 15%), -45deg, 25px)
+				+stripes-animate
+				animation-duration: 1s
+
+			&.progress-error
+				background-color: $color-danger !important
+
+	.preview-thumbnail
+		width: 50px
+		height: 50px
+		border-radius: 3px
+		background-color: $color-background
+		margin-right: 10px
+		float: left
+
+	.form-upload-file-meta
+		float: left
+		width: 80%
+		list-style: none
+		font-size: .9em
+		padding: 0
+		margin: 0
+
+		li
+			float: left
+			padding: 5px
+
+			&.dimensions, &.size
+				color: $color-text-dark-secondary
+
+			&.delete, &.original
+				float: right
+
+			&.name
+				width: 75px
+				max-width: 75px
+				+text-overflow-ellipsis
+
+		.file_delete
+			color: $color-danger
+
+.form-group
+	&.error
+		.form-control, input
+			border-color: $color-danger !important
+
+	ul.error
+		padding: 5px 0 0 0
+		margin: 0
+		color: $color-danger
+		list-style-type: none
+
+.checkbox label label
+	padding-left: 0
+
+.checkbox label input[type=checkbox] + label
+	transition: color 100ms ease-in-out
+
+.checkbox label input[type=checkbox]:checked + label
+	color: $color-success !important
+
+
+
+/* Flyouts (only used on notifications for now) */
+.flyout
+	display: block
+	font-size: .9em
+	background-color: white
+	border-radius: 3px
+	border: thin solid darken($color-background, 3%)
+	box-shadow: 1px 2px 2px rgba(black, .2)
+
+	& .flyout-title
+		font-weight: 600
+		display: block
+		padding: 8px 10px 5px 10px
+		font-size: 1.1em
+		float: left
+		cursor: default
+
+	&.notifications
+		position: absolute
+		right: 0
+		top: 60px
+		z-index: 9999
+		width: 420px
+		max-height: 1000%
+		border-top-color: white
+
+
+/* Font aliases */
+.pi /* blank item with the right spacing */
+	&:after
+		content: ''
+		font-family: "pillar-font"
+		font-style: normal
+		font-weight: normal
+		speak: none
+		display: inline-block
+		text-decoration: inherit
+		width: 1em
+		margin-right: .2em
+		text-align: center
+		font-variant: normal
+		text-transform: none
+		line-height: 1em
+		margin-left: .2em
+		-webkit-font-smoothing: antialiased
+		-moz-osx-font-smoothing: grayscale
+		position: relative
+
+	&:before
+		position: relative
+
+.pi-license-cc-0
+	@extend .pi-license-cc-zero
+	position: relative
+	top: 1px
+.pi-license-cc-by-sa
+	@extend .pi-license-cc-sa
+.pi-license-cc-by-nd
+	@extend .pi-license-cc-nd
+.pi-license-cc-by-nc
+	@extend .pi-license-cc-nc
+
+.pi-license-cc-by-sa,
+.pi-license-cc-by-nd,
+.pi-license-cc-by-nc
+	@extend .pi
+
+	&:after
+		content: '\e807'
+		left: -27px
+
+	&:before
+		left: 27px
+
+#search-overlay
+	position: absolute
+	top: 0
+	left: 0
+	right: 0
+	bottom: 0
+	width: 100%
+	height: 100%
+	pointer-events: none
+	visibility: hidden
+	opacity: 0
+	z-index: $z-index-base + 4
+	transition: opacity 150ms ease-in-out
+
+	&.active
+		opacity: 1
+		visibility: visible
+		background-color: rgba($color-background-nav, .7)
+
+.search-input
+	position: relative
+	float: left
+	padding: 0
+	margin: 0
+	transition: background-color 350ms ease-in-out
+
+	+media-lg
+		max-width: 350px
+	+media-md
+		max-width: 350px
+	+media-sm
+		max-width: 120px
+	+media-xs
+		display: block
+		margin: 0 10px
+		width: 75%
+		position: absolute
+		z-index: $z-index-base
+		top: 2px
+		left: 40px
+
+	.search-icon
+		position: absolute
+		color: white
+		top: 4px
+		left: 10px
+		cursor: pointer
+
+		&:after
+			opacity: 0
+			content: 'Use advanced search...'
+			font-style: normal
+			background: darken($color-background-nav, 5%)
+			color: $color-text-light-primary
+			box-shadow: 1px 1px 3px rgba(black, .4)
+			padding: 3px 10px
+			font-size: .85em
+			border-radius: 3px
+			top: 30px
+			left: -10px
+			width: 150px
+			position: absolute
+			transition: top 150ms ease-in-out, opacity 150ms ease-in-out
+			pointer-events: none
+
+		&:hover
+			&:after
+				opacity: 1
+				top: 35px
+
+
+	#cloud-search, .tt-hint
+		background-color: transparent
+		width: 100%
+		outline: none
+		border: thin solid transparent
+		border-bottom: 3px solid transparent
+		font:
+			size: 1em
+			weight: 400
+			family: $font-body
+		margin: 0
+		padding: 0 20px 0 40px
+		min-height: 32px
+		color: white
+		+text-overflow-ellipsis
+		transition: border 100ms ease-in-out
+
+		&:focus
+			border: thin solid transparent
+			border-bottom: 3px solid lighten($color-primary, 5%)
+			outline: none
+
+		&::placeholder
+			color: rgba(white, .5)
+			transition: color 150ms ease-in-out
+
+		&:hover
+			&::placeholder
+				color: rgba(white, .6)
+
+#page-overlay
+	background-color: rgba(black, .8)
+	position: fixed
+	top: 0
+	bottom: 0
+	right: 0
+	left: 0
+	z-index: $z-index-base + 15
+	visibility: hidden
+	opacity: 0
+	transition: opacity 150ms ease-in-out
+
+	display: flex
+	align-items: center
+	justify-content: center
+
+	img
+		user-select: none
+		display: block
+		max-height: 96%
+		max-width: 96%
+		z-index: 0
+
+		box-shadow: 0 0 15px rgba(black, .2), 0 0 100px rgba(black, .5)
+
+	&.active
+		visibility: visible
+		opacity: 1
+
+	.no-preview
+		user-select: none
+		z-index: 0
+		color: $color-text-light-secondary
+
+	.nav-prev, .nav-next
+		display: block
+		font:
+			family: 'pillar-font'
+			size: 2em
+		height: 80%
+		width: 50px
+		cursor: pointer
+		color: $color-text-light-secondary
+		z-index: 1
+		+position-center-translate
+
+		&:hover
+			color: $color-text-light
+
+		&:before, &:after
+			+position-center-translate
+
+	.nav-prev
+		left: 50px
+		&:before
+			content: '\e839'
+
+	.nav-next
+		left: initial
+		right: 0
+		&:before
+			content: '\e83a'
+
+
+	&.video
+		.video-embed
+			+position-center-translate
+			position: fixed
+
+			iframe
+				width: 853px
+				height: 480px

@@ -1,0 +1,195 @@
+| {% block body %}
+
+#node-container.texture
+	#node-overlay
+
+	.texture-title#node-title
+		| {{node.name}}
+
+	| {% if node.properties.license_type %}
+	| {% if node.properties.license_notes %}
+	.texture-license(
+		id="asset-license",
+		data-toggle="popover",
+		data-placement="left",
+		data-trigger="hover",
+		data-content="{{ node.properties.license_notes }}",
+		title="{{ node.properties.license_type }}")
+
+		i(class="pi-license-{{ node.properties.license_type }}")
+	| {% else %}
+	.texture-license(
+		id="asset-license",
+		data-toggle="tooltip",
+		data-placement="bottom",
+		title="{{ node.properties.license_type }}")
+
+		i(class="pi-license-{{ node.properties.license_type }}")
+	| {% endif %}
+	| {% endif %}
+
+
+	section.node-row.texture-info
+		| {% if node.properties.files %}
+		span.texture-info-files
+			i.pi-texture
+			| {{ node.properties.files|length }} map{% if node.properties.files|length != 1 %}s{% endif %}
+		| {% endif %}
+		span.texture-info-seamless
+			i.pi-puzzle
+			| {% if not node.properties.is_tileable %}Not {% endif %}Seamless
+
+	| {% if node.properties.files %}
+	| {% for f in node.properties.files %}
+	section.node-row.texture-map
+		section.node-preview.texture
+			img.node-preview-thumbnail(
+				src="{{ f.file.thumbnail('m', api=api) }}",
+				data-preview="{{ f.file.thumbnail('l', api=api) }}",
+				data-aspect_ratio="{{ node.properties.aspect_ratio }}")
+
+		| {% if f.map_type == 'color' %}
+		| {% set map_type = 'Color Map' %}
+		| {% elif f.map_type == 'bump' %}
+		| {% set map_type = 'Bump Map' %}
+		| {% elif f.map_type == 'specular' %}
+		| {% set map_type = 'Specular Map' %}
+		| {% elif f.map_type == 'normal' %}
+		| {% set map_type = 'Normal Map' %}
+		| {% elif f.map_type == 'translucency' %}
+		| {% set map_type = 'Translucency' %}
+		| {% elif f.map_type == 'emission' %}
+		| {% set map_type = 'Emission' %}
+		| {% elif f.map_type == 'alpha' %}
+		| {% set map_type = 'Alpha' %}
+		| {% elif f.map_type == 'id' %}
+		| {% set map_type = 'ID Map' %}
+		| {% else %}
+		| {% set map_type = f.map_type %}
+		| {% endif %}
+
+		section.node-details-container.texture
+
+			.node-details-header
+				.node-title {{map_type}}
+
+			.node-details-attributes
+				span.sizes
+					span.x
+						| Width:
+						strong {{ f.file.width }}
+					span.y
+						| Height:
+						strong {{ f.file.height }}
+				span.length
+					| {{ f.file.length | filesizeformat }}
+				span.content_type
+					| {{ f.file.content_type }}
+
+			.node-details-meta
+				ul.node-details-meta-list
+					li.node-details-meta-list-item.texture.download
+						| {% if f.file.link %}
+						a(href="{{ f.file.link }}",,
+							title="Download texture",
+							download="{{ f.file.filename }}")
+							button.btn.btn-default(type="button")
+								i.pi-download
+								|  Download
+						| {% else %}
+						button.btn.btn-default.disabled.sorry(type="button")
+							| Download
+						| {% endif %}
+	| {% endfor %}
+	| {% else %}
+	section.node-row
+		section.node-details-container.texture
+			.node-details-header.nofiles
+				.node-title No texture maps... yet!
+
+	| {% endif %}
+
+
+include ../_scripts
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+	$('#asset-license').popover();
+	// Generate GA pageview
+	ga('send', 'pageview', location.pathname);
+
+	var str = $('.texture-title').text();
+	var to_replace = /_color|_bump|_specular|_normal|_translucency|_emission|_alpha|_tileable|.jpg|.png/g;
+	$('.texture-title').text(str.replace(to_replace,'').replace(/_/g,' '));
+
+	$('.node-preview-thumbnail').each(function(i){
+		$(this).closest('.node-preview').css({'height' : $(this).width() / $(this).data('aspect_ratio')});
+
+		var thumbnail = $(this);
+		var src = $(this).attr('src');
+		var src_xl = $(thumbnail).data('preview');
+		var src_xl_width, src_xl_height;
+
+		/* Make dummy img in memory otherwise we have css issues */
+		$("<img/>")
+			.attr('src', src_xl)
+			.load(function(){
+				src_xl_width = this.width;
+				src_xl_height = this.height;
+		});
+
+		$(this).on('click', function(e){
+			e.preventDefault();
+		});
+
+		$(this).hover(
+			function(){
+				var preview = $(this);
+
+				/* Replace image src with larger one */
+				if (src_xl_width > 350 || src_xl_height > 250) {
+					$(thumbnail).attr('src', src_xl);
+					$(preview).css({width: src_xl_width + 'px', height: src_xl_height + 'px'});
+				}
+
+				var parent = $(preview).parent();
+				var parentOffset = parent.offset();
+
+				if (src_xl_width > 600 || src_xl_height > 300) {
+
+					$(document).on('mousemove', function(e){
+						$(preview).css({
+							left:  e.pageX - parentOffset.left - (src_xl_width / 2),
+							top:   e.pageY - parentOffset.top - (src_xl_height / 2),
+							transform: 'initial',
+							cursor: 'grabbing',
+						});
+					});
+				};
+
+			},
+			function(){
+				$(document).off('mousemove');
+				$(this).attr('src', src);
+
+				$(this).css({left: '50%', top: "50%", width: '100%', height: 'auto', transform: 'translate(-50%, -50%)'});
+
+			}
+		);
+
+	});
+
+	$('.sorry').click(function() {
+		$.get('/403', function(data) {
+			$('#node-overlay').html(data).show().addClass('active');
+		})
+	});
+
+	$('#node-overlay').click(function(){
+		$(this).removeClass('active').hide().html();
+	});
+
+| {% endblock %}
+
