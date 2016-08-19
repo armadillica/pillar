@@ -116,10 +116,10 @@
 | {% endblock %}
 
 | {% block footer_scripts %}
-script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.iframe-transport.min.js') }}")
-script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.iframe-transport.min.js') }}")
-script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.fileupload.min.js') }}")
-script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/file_upload.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.ui.widget.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.iframe-transport.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.fileupload.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/file_upload.min.js') }}")
 
 script(type="text/javascript").
 	var convert = new Markdown.getSanitizingConverter().makeHtml;
