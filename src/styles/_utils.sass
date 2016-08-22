@@ -21,31 +21,44 @@
 
 		+clearfix
 
-@mixin button-rounded($mixin-color, $roundness)
+@mixin button-rounded($mixin-color, $roundness, $filled: false)
+	font-family: $font-body
+	text-transform: uppercase
 	opacity: .9
 	padding:
 		left: 20px
 		right: 20px
-
-	text-transform: uppercase
-
-	color: $mixin-color
-	border: 1px solid $mixin-color
 	border-radius: $roundness
-	background-color: transparent
+
+	@if $filled
+		background: linear-gradient(lighten($mixin-color, 2%), $mixin-color)
+		color: white
+		border: thin solid darken($mixin-color, 5%)
+		text-shadow: 1px 1px 0 rgba(black, .15)
+	@else
+		background-color: transparent
+		color: $mixin-color
+		border: thin solid $mixin-color
+		text-shadow: none
+
 	transition: color 350ms ease-out, border 150ms ease-in-out, opacity 150ms ease-in-out, background-color 150ms ease-in-out
-	text-shadow: none
 
 	&:hover
 		opacity: 1
 		cursor: pointer
-		color: $mixin-color
-		border-color: $mixin-color
-		background-color: rgba($mixin-color, .1)
+		text-decoration: none
+
+		@if $filled
+			background: linear-gradient(lighten($mixin-color, 5%), lighten($mixin-color, 5%))
+			color: white
+			border-color: lighten($mixin-color, 5%)
+		@else
+			background-color: rgba($mixin-color, .1)
+			color: $mixin-color
+			border-color: $mixin-color
 
 	&:active, &:focus
 		outline: none
-		box-shadow: none
 		border-color: $mixin-color
 		background-color: $mixin-color
 		color: white
