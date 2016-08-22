@@ -51,7 +51,7 @@
 							| {{ project.name }}
 
 				// TODO - make list a macro
-				#project_tree
+				#project_tree.edit
 					ul.project_nav-edit-list
 						li(class="{% if title == 'edit' %}active{% endif %}")
 							a(href="{{ url_for('projects.edit', project_url=project.url) }}")
@@ -173,11 +173,6 @@ script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets
 script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/file_upload.min.js') }}")
 
 script(type="text/javascript").
-
-	/* UI Stuff */
-	$(window).on("load resize",function(){
-		containerResizeY($(window).height());
-	});
 
 	/* Initialize scrollbars */
 	if ((typeof Ps !== 'undefined') && window.innerWidth > 768){

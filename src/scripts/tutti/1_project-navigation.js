@@ -157,16 +157,16 @@ function containerResizeY(window_height){
 	var container_offset = $('#project-container').offset();
 	var container_height = window_height - container_offset.top;
 	var container_height_wheader = window_height - container_offset.top - $('#project_nav-header').height();
-	var window_height_minus_nav = $('#project_nav').height() - $('#project_nav-header').height();
+	var window_height_minus_nav = window_height - $('#project_nav-header').height();
 
 	$('#project_context-header').width($('#project_context-container').width());
 
-	$('#project_nav-container, .project_split').css(
-		{'max-height': window_height_minus_nav + 'px',
-		 'height': window_height_minus_nav + 'px'}
-	);
-
 	if ($(window).width() > 768) {
+		$('#project_nav-container, #project_tree, .project_split').css(
+			{'max-height': window_height_minus_nav + 'px',
+			 'height': window_height_minus_nav + 'px'}
+		);
+
 		if (container_height > parseInt($('#project-container').css("min-height"))) {
 			if (projectTree){
 				$(projectTree).css(
@@ -174,7 +174,8 @@ function containerResizeY(window_height){
 					 'height': container_height_wheader + 'px'}
 				);
 			}
-		};
+		}
+
 	};
 
 	if (projectTree){ Ps.update(projectTree) }

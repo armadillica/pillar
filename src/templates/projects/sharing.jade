@@ -51,7 +51,7 @@
 							| {{ project.name }}
 
 				// TODO - make list a macro
-				#project_tree
+				#project_tree.edit
 					ul.project_nav-edit-list
 						li(class="{% if title == 'edit' %}active{% endif %}")
 							a(href="{{ url_for('projects.edit', project_url=project.url) }}")
@@ -140,10 +140,6 @@
 | {% endblock %}
 
 | {% block footer_scripts %}
-script(type="text/javascript").
-	$(window).on("load resize",function(){
-		containerResizeY($(window).height());
-	});
 | {% if (project.user == current_user.objectid or current_user.has_role('admin')) %}
 script(src='//cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js')
 script.
