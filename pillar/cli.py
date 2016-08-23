@@ -318,12 +318,8 @@ def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
     chunk_size = int(chunk_size)
     window = int(window)
 
-    if quiet:
-        import logging
-        from pillar import log
-
-        logging.getLogger().setLevel(logging.WARNING)
-        log.setLevel(logging.WARNING)
+    loglevel = logging.WARNING if quiet else logging.DEBUG
+    logging.getLogger('pillar.api.file_storage').setLevel(loglevel)
 
     chunk_size = int(chunk_size)  # CLI parameters are passed as strings
     from pillar.api import file_storage
