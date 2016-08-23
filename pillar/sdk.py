@@ -21,11 +21,12 @@ class FlaskInternalApi(pillarsdk.Api):
         """Fakes a http call through Flask/Werkzeug."""
         client = current_app.test_client()
         self.requests_to_flask_kwargs(kwargs)
-        url = urlparse.urlsplit(url)
-        path = url.scheme + "://" + url.netloc + url.path
-        query = url.query
+
+        # Leave out the query string and fragment from the URL.
+        split_url = urlparse.urlsplit(url)
+        path = urlparse.urlunsplit(split_url[:-2] + (None, None))
         try:
-            response = client.open(path=path, query_string=query, method=method,
+            response = client.open(path=path, query_string=split_url.query, method=method,
                                    **kwargs)
         except Exception as ex:
             log.warning('Error performing HTTP %s request to %s: %s', method,
