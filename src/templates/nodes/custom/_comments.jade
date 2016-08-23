@@ -111,7 +111,9 @@
 						.comment-rating(
 							class="{{#if is_rated}}rated{{/if}}{{#if is_rated_positive}} positive{{/if}}")
 							.comment-rating-value(title="Number of likes") {{ rating }}
+							| {{#unless is_own}}
 							.comment-action-rating.up(title="Like comment")
+							| {{/unless}}
 
 						.comment-action-reply(title="Reply to this comment")
 							span reply
