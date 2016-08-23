@@ -309,11 +309,16 @@ def create_local_user_account(email, password):
 
 
 @manager.command
-@manager.option('-c', '--chunk', dest='chunk_size', default=50)
+@manager.option('-c', '--chunk', dest='chunk_size', default=50,
+                help='Number of links to update, use 0 to update all.')
 @manager.option('-q', '--quiet', dest='quiet', action='store_true', default=False)
-@manager.option('-w', '--window', dest='window', default=12)
+@manager.option('-w', '--window', dest='window', default=12,
+                help='Refresh links that expire in this many hours.')
 def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
-    """Refreshes all file links that are using a certain storage backend."""
+    """Refreshes all file links that are using a certain storage backend.
+
+    Use `--chunk 0` to refresh all links.
+    """
 
     chunk_size = int(chunk_size)
     window = int(window)
