@@ -6,7 +6,7 @@ from flask import (abort, Blueprint, current_app, flash, redirect,
                    render_template, request, session, url_for)
 from flask_login import login_required, login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
-from pillar.auth import UserClass
+from pillar.auth import UserClass, subscriptions
 from pillar.web import system_util
 from .forms import UserProfileForm
 from .forms import UserSettingsEmailsForm
@@ -55,13 +55,12 @@ def blender_id_authorized():
 
     user = UserClass(oauth_resp['access_token'])
     login_user(user)
-    # user = load_user(current_user.id)
+    current_app.login_manager.reload_user()  # This ensures that flask_login.current_user is set.
 
-    if user is not None:
-        pass
+    if current_user is not None:
         # Check with the store for user roles. If the user has an active
         # subscription, we apply the 'subscriber' role
-        # user_roles_update(user.objectid)
+        user_roles_update(current_user.objectid)
 
     next_after_login = session.get('next_after_login')
     if next_after_login:
@@ -179,9 +178,9 @@ def settings_billing():
         for group_id in user.groups:
             group = Group.find(group_id, api=api)
             groups.append(group.name)
-    external_subscriptions_server = current_app.config['EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER']
-    r = requests.get(external_subscriptions_server, params={'blenderid': user.email})
-    store_user = r.json()
+
+    store_user = subscriptions.fetch_user(user.email)
+
     return render_template(
         'users/settings/billing.html',
         store_user=store_user, groups=groups, title='billing')
@@ -237,3 +236,52 @@ def users_index():
     if not current_user.has_role('admin'):
         return abort(403)
     return render_template('users/index.html')
+
+
+def user_roles_update(user_id):
+    api = system_util.pillar_api()
+    group_subscriber = Group.find_one({'where': {'name': 'subscriber'}}, api=api)
+
+    # Fetch the user once outside the loop, because we only need to get the
+    # subscription status once.
+    user = User.me(api=api)
+
+    store_user = subscriptions.fetch_user(user.email)
+    if store_user is None:
+        return
+
+    max_retry = 5
+    for retry_count in range(max_retry):
+        # Update the user's role & groups for their subscription status.
+        roles = set(user.roles or [])
+        groups = set(user.groups or [])
+
+        if store_user['cloud_access'] == 1:
+            roles.add(u'subscriber')
+            groups.add(group_subscriber._id)
+
+        elif u'admin' not in roles:
+            roles.discard(u'subscriber')
+            groups.discard(group_subscriber._id)
+
+        # Only send an API request when the user has actually changed
+        if set(user.roles or []) == roles and set(user.groups or []) == groups:
+            break
+
+        user.roles = list(roles)
+        user.groups = list(groups)
+
+        try:
+            user.update(api=api)
+        except sdk_exceptions.PreconditionFailed:
+            log.warning('User etag changed while updating roles, retrying.')
+        else:
+            # Successful update, so we can stop the loop.
+            break
+
+        # Fetch the user for the next iteration.
+        if retry_count < max_retry - 1:
+            user = User.me(api=api)
+    else:
+        log.warning('Tried %i times to update user %s, and failed each time. Giving up.',
+                    max_retry, user_id)

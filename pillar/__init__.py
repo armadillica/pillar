@@ -64,7 +64,7 @@ class PillarServer(Eve):
         self.load_config()
 
         # Configure authentication
-        self._login_manager = auth.config_login_manager(self)
+        self.login_manager = auth.config_login_manager(self)
         self.oauth_blender_id = auth.config_oauth_login(self)
 
         self._config_caching()

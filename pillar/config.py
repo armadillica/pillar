@@ -2,6 +2,8 @@ import os.path
 from os import getenv
 from collections import defaultdict
 
+import requests.certs
+
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 PILLAR_SERVER_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -137,3 +139,6 @@ URLER_SERVICE_AUTH_TOKEN = None
 BLENDER_CLOUD_ADDON_VERSION = '1.4'
 
 EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER = 'https://store.blender.org/api/'
+
+# Certificate file for communication with other systems.
+TLS_CERT_FILE = requests.certs.where()
