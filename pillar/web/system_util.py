@@ -37,7 +37,7 @@ def pillar_server_endpoint_static():
 def pillar_api(token=None):
     # Check if current_user is initialized (in order to support manage.py
     # scripts and non authenticated server requests).
-    if token is None and current_user and current_user.is_authenticated():
+    if token is None and current_user and current_user.is_authenticated:
         token = current_user.id
 
     api = FlaskInternalApi(
