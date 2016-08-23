@@ -54,7 +54,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							p.
 								The iconic Blender Institute Open Movies,
 								featuring all the production files, assets, artwork, and never-seen-before content.
-							span.triplet-cta
+							a.triplet-cta(href="{{ url_for('main.open_projects') }}")
 								| LEARN MORE
 
 				.col-md-4
@@ -68,7 +68,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							p.
 								Character modeling, 3D printing, VFX, rigging and more. We offer
 								12 complete training series with +100 hours of training.
-							span.triplet-cta
+							a.triplet-cta(href="{{ url_for('main.training') }}")
 								| LEARN MORE
 
 				.col-md-4
@@ -82,7 +82,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							p.
 								Create your personal projects, collaborate with other members, store
 								and sync your Blender settings across multiple workstations.
-							span.triplet-cta
+							a.triplet-cta(href="{{ url_for('main.services') }}")
 								| LEARN MORE
 
 
@@ -102,7 +102,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							h3 HDRI
 							p.
 								Up to 8K and 18 EVs (extremely high) HDR images to light your renders.
-							span.triplet-cta
+							a.triplet-cta(href="{{ url_for('main.redir_hdri') }}")
 								| LEARN MORE
 
 				.col-md-4
@@ -116,7 +116,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							p.
 								More than 1500 texture maps.
 								Browse online or from Blender with our awesome  add-on.
-							span.triplet-cta
+							a.triplet-cta(href="{{ url_for('main.redir_textures') }}")
 								| LEARN MORE
 
 				.col-md-4
@@ -129,7 +129,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							h3 Characters
 							p.
 								Production quality, fully rigged and shaded characters ready to animate.
-							span.triplet-cta
+							a.triplet-cta(href="{{ url_for('main.redir_characters') }}")
 								| LEARN MORE
 
 
@@ -475,7 +475,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 script.
 
 	$('.triplet-card').click(function(){
-		window.location.replace($(this).attr('data-url'));
+		window.location.href = $(this).attr('data-url');
 	});
 
 	$(window).on('load scroll', function() {
