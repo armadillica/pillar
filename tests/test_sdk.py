@@ -1,10 +1,15 @@
 """Tests for the FlaskInternal SDK."""
 
+from os.path import join, dirname, abspath, exists
+
 from flask import url_for
 import pillarsdk
 
 from pillar.tests import AbstractPillarTest
 from pillar.sdk import FlaskInternalApi
+
+blender_desktop_logo_path = join(dirname(abspath(__file__)), 'BlenderDesktopLogo.png')
+assert exists(blender_desktop_logo_path)
 
 
 class FlaskInternalApiTest(AbstractPillarTest):
@@ -48,16 +53,11 @@ class FlaskInternalApiTest(AbstractPillarTest):
             asset.delete(api=self.sdk_api)
 
     def test_upload_file_to_project(self):
-        import test_api
-        from os.path import join, dirname, abspath
-
-        file_path = join(dirname(abspath(test_api.__file__)), 'BlenderDesktopLogo.png')
-
         with self.app.test_request_context():
             resp = pillarsdk.File.upload_to_project(
                 self.project_id,
                 'image/png',
-                file_path,
+                blender_desktop_logo_path,
                 api=self.sdk_api
             )
             file_id = resp['file_id']
@@ -70,11 +70,6 @@ class FlaskInternalApiTest(AbstractPillarTest):
             self.assertEqual('BlenderDesktopLogo.png', file_doc['filename'])
 
     def test_create_asset_from_file(self):
-        import test_api
-        from os.path import join, dirname, abspath
-
-        file_path = join(dirname(abspath(test_api.__file__)), 'BlenderDesktopLogo.png')
-
         # Create a group node to serve as parent.
         with self.app.test_request_context():
             resp = self.post(url_for('nodes|resource'), auth_token='token',
@@ -87,12 +82,12 @@ class FlaskInternalApiTest(AbstractPillarTest):
                              expected_status=201)
             parent_id = resp.json()['_id']
 
-        with self.app.test_request_context(), open(file_path, 'rb') as fileobj:
+        with self.app.test_request_context(), open(blender_desktop_logo_path, 'rb') as fileobj:
             resp = pillarsdk.Node.create_asset_from_file(
                 unicode(self.project_id),
                 unicode(parent_id),
                 'image',
-                file_path,
+                blender_desktop_logo_path,
                 mimetype='image/jpeg',
                 always_create_new_node=False,
                 fileobj=fileobj,
