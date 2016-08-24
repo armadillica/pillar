@@ -683,6 +683,10 @@ def stream_to_gcs(project_id):
     else:
         # Upload the file to GCS.
         from gcloud.streaming import transfer
+
+        log.debug('Streaming file to GCS bucket; id=%s, fname=%s, size=%i',
+                  file_id, internal_fname, file_size)
+
         # Files larger than this many bytes will be streamed directly from disk, smaller
         # ones will be read into memory and then uploaded.
         transfer.RESUMABLE_UPLOAD_THRESHOLD = 102400
@@ -702,19 +706,24 @@ def stream_to_gcs(project_id):
 
         # Reload the blob to get the file size according to Google.
         blob.reload()
+
+    log.debug('Marking uploaded file id=%s, fname=%s, size=%i as "queued_for_processing"',
+              file_id, internal_fname, blob.size)
     update_file_doc(file_id,
                     status='queued_for_processing',
                     file_path=internal_fname,
                     length=blob.size,
                     content_type=uploaded_file.mimetype)
 
+    log.debug('Processing uploaded file id=%s, fname=%s, size=%i', file_id, internal_fname, blob.size)
     process_file(gcs, file_id, local_file)
 
     # Local processing is done, we can close the local file so it is removed.
     if local_file is not None:
         local_file.close()
 
-    log.debug('Handled uploaded file id=%s, fname=%s, size=%i', file_id, internal_fname, blob.size)
+    log.debug('Handled uploaded file id=%s, fname=%s, size=%i, status=%i',
+              file_id, internal_fname, blob.size, status)
 
     # Status is 200 if the file already existed, and 201 if it was newly created.
     # TODO: add a link to a thumbnail in the response.
@@ -790,6 +799,9 @@ def create_file_doc_for_upload(project_id, uploaded_file):
         log.error('Unable to create new file document in MongoDB, status=%i: %s',
                   status, file_fields)
         raise wz_exceptions.InternalServerError()
+
+    log.debug('Created file document %s for uploaded file %s; internal name %s',
+              file_fields['_id'], uploaded_file.filename, internal_filename)
 
     return file_fields['_id'], internal_filename, status
 
