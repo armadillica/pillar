@@ -18,10 +18,8 @@ from flask.ext.login import current_user
 import werkzeug.exceptions as wz_exceptions
 
 from pillar.web import system_util
-from pillar.web.utils import get_file
-from pillar.web.utils import attach_project_pictures
+from pillar.web import utils
 from pillar.web.utils.jstree import jstree_get_children
-from pillar.web.utils import gravatar
 from .forms import ProjectForm
 from .forms import NodeTypeForm
 
@@ -53,14 +51,14 @@ def index():
 
     # Attach project images
     for project in projects_user['_items']:
-        attach_project_pictures(project, api)
+        utils.attach_project_pictures(project, api)
 
     for project in projects_shared['_items']:
-        attach_project_pictures(project, api)
+        utils.attach_project_pictures(project, api)
 
     return render_template(
         'projects/index_dashboard.html',
-        gravatar=gravatar(current_user.email, size=128),
+        gravatar=utils.gravatar(current_user.email, size=128),
         projects_user=projects_user['_items'],
         projects_shared=projects_shared['_items'],
         api=api)
@@ -196,7 +194,7 @@ def shared_image_nodes(home_project_id, api):
 
     nodes = nodes._items or []
     for node in nodes:
-        node.picture = get_file(node.picture)
+        node.picture = utils.get_file(node.picture)
 
     return nodes
 
@@ -241,8 +239,8 @@ def view(project_url):
     if project.header_node and project.header_node.node_type == 'asset' and \
                     project.header_node.properties.content_type == 'video':
             header_video_node = project.header_node
-            header_video_file = get_file(project.header_node.properties.file)
-            header_video_node.picture = get_file(header_video_node.picture)
+            header_video_file = utils.get_file(project.header_node.properties.file)
+            header_video_node.picture = utils.get_file(header_video_node.picture)
 
     return render_project(project, api,
                           extra_context={'header_video_file': header_video_file,
@@ -250,8 +248,8 @@ def view(project_url):
 
 
 def render_project(project, api, extra_context=None, template_name=None):
-    project.picture_square = get_file(project.picture_square, api=api)
-    project.picture_header = get_file(project.picture_header, api=api)
+    project.picture_square = utils.get_file(project.picture_square, api=api)
+    project.picture_header = utils.get_file(project.picture_header, api=api)
 
     def load_latest(list_of_ids, get_picture=False):
         """Loads a list of IDs in reversed order."""
@@ -270,7 +268,7 @@ def render_project(project, api, extra_context=None, template_name=None):
             try:
                 node_item = Node.find(node_id, params, api=api)
 
-                node_item.picture = get_file(node_item.picture, api=api)
+                node_item.picture = utils.get_file(node_item.picture, api=api)
                 list_latest.append(node_item)
             except ForbiddenAccess:
                 pass
@@ -291,7 +289,7 @@ def render_project(project, api, extra_context=None, template_name=None):
         template_name = template_name or 'projects/home_index.html'
         return render_template(
             template_name,
-            gravatar=gravatar(current_user.email, size=128),
+            gravatar=utils.gravatar(current_user.email, size=128),
             project=project,
             api=system_util.pillar_api(),
             **extra_context)
@@ -345,11 +343,11 @@ def view_node(project_url, node_id):
         else:
             raise wz_exceptions.NotFound('No such project')
 
-    og_picture = node.picture = get_file(node.picture, api=api)
+    og_picture = node.picture = utils.get_file(node.picture, api=api)
     if project:
         if not node.picture:
-            og_picture = get_file(project.picture_header, api=api)
-        project.picture_square = get_file(project.picture_square, api=api)
+            og_picture = utils.get_file(project.picture_header, api=api)
+        project.picture_square = utils.get_file(project.picture_square, api=api)
 
     # Append _theatre to load the proper template
     theatre = '_theatre' if theatre_mode else ''
@@ -383,8 +381,8 @@ def search(project_url):
     """Search into a project"""
     api = system_util.pillar_api()
     project = find_project_or_404(project_url, api=api)
-    project.picture_square = get_file(project.picture_square, api=api)
-    project.picture_header = get_file(project.picture_header, api=api)
+    project.picture_square = utils.get_file(project.picture_square, api=api)
+    project.picture_header = utils.get_file(project.picture_header, api=api)
 
     return render_template('nodes/search.html',
                            project=project,
@@ -408,8 +406,8 @@ def about(project_url):
     if project.header_node and project.header_node.node_type == 'asset' and \
                     project.header_node.properties.content_type == 'video':
             header_video_node = project.header_node
-            header_video_file = get_file(project.header_node.properties.file)
-            header_video_node.picture = get_file(header_video_node.picture)
+            header_video_file = utils.get_file(project.header_node.properties.file)
+            header_video_node.picture = utils.get_file(header_video_node.picture)
 
     return render_project(project, api,
                           extra_context={'title': 'about',
@@ -427,7 +425,7 @@ def edit(project_url):
         # project = Project.find(project_url, api=api)
     except ResourceNotFound:
         abort(404)
-    attach_project_pictures(project, api)
+    utils.attach_project_pictures(project, api)
     form = ProjectForm(
         project_id=project._id,
         name=project.name,
@@ -460,7 +458,7 @@ def edit(project_url):
 
         project.update(api=api)
         # Reattach the pictures
-        attach_project_pictures(project, api)
+        utils.attach_project_pictures(project, api)
     else:
         if project.picture_square:
             form.picture_square.data = project.picture_square._id
@@ -491,7 +489,7 @@ def edit_node_types(project_url):
     except ResourceNotFound:
         return abort(404)
 
-    attach_project_pictures(project, api)
+    utils.attach_project_pictures(project, api)
 
     return render_template('projects/edit_node_types.html',
                            api=api,
@@ -508,7 +506,7 @@ def edit_node_type(project_url, node_type_name):
             'where': '{"url" : "%s"}' % (project_url)}, api=api)
     except ResourceNotFound:
         return abort(404)
-    attach_project_pictures(project, api)
+    utils.attach_project_pictures(project, api)
     node_type = project.get_node_type(node_type_name)
     form = NodeTypeForm()
     if form.validate_on_submit():
@@ -561,7 +559,7 @@ def sharing(project_url):
     # Fetch users that are part of the admin group
     users = project.get_users(api=api)
     for user in users['_items']:
-        user['avatar'] = gravatar(user['email'])
+        user['avatar'] = utils.gravatar(user['email'])
 
     if request.method == 'POST':
         user_id = request.form['user_id']
@@ -577,10 +575,10 @@ def sharing(project_url):
                             'message': 'User %s not found' % user_id}), 404
 
         # Add gravatar to user
-        user['avatar'] = gravatar(user['email'])
+        user['avatar'] = utils.gravatar(user['email'])
         return jsonify(user)
 
-    attach_project_pictures(project, api)
+    utils.attach_project_pictures(project, api)
 
     return render_template('projects/sharing.html',
                            api=api,
