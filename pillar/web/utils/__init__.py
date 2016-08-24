@@ -133,3 +133,36 @@ def get_main_project():
     except KeyError:
         raise ConfigError('MAIN_PROJECT_ID missing from config.py')
     return main_project
+
+
+def is_valid_id(some_id):
+    """Returns True iff the given string is a valid ObjectId.
+
+    Only use this if you do NOT need an ObjectId object. If you do need that,
+    use pillar.api.utils.str2id() instead.
+
+    :type some_id: unicode
+    :rtype: bool
+    """
+
+    if not isinstance(some_id, basestring):
+        return False
+
+    if isinstance(some_id, unicode):
+        try:
+            some_id = some_id.encode('ascii')
+        except UnicodeEncodeError:
+            return False
+
+    if len(some_id) == 12:
+        return True
+    elif len(some_id) == 24:
+        # This is more than 5x faster than checking character by
+        # character in a loop.
+        try:
+            int(some_id, 16)
+        except ValueError:
+            return False
+        return True
+
+    return False

@@ -322,6 +322,9 @@ def view_node(project_url, node_id):
                                 node_id=node_id[1:]),
                         code=301)  # permanent redirect
 
+    if not utils.is_valid_id(node_id):
+        raise wz_exceptions.NotFound('No such node')
+
     api = system_util.pillar_api()
     theatre_mode = 't' in request.args
 
