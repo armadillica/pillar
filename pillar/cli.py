@@ -353,3 +353,39 @@ def expire_all_project_links(project_uuid):
     )
 
     print('Expired %i links' % result.matched_count)
+
+
+@manager.command
+def check_cdnsun():
+    import requests
+
+    files_collection = current_app.data.driver.db['files']
+
+    s = requests.session()
+
+    missing_main = 0
+    missing_variation = 0
+    fdocs = files_collection.find({'backend': 'cdnsun'})
+    for idx, fdoc in enumerate(fdocs):
+        if idx % 100 == 0:
+            print('Handling file %i/~1800' % (idx+1))
+
+        variations = fdoc.get('variations', ())
+        resp = s.head(fdoc['link'])
+        if resp.status_code == 404:
+            missing_main += 1
+            if variations:
+                # print('File %(_id)s (%(filename)s): link not found, checking variations' % fdoc)
+                pass
+            else:
+                print('File %(_id)s (%(filename)s): link not found, and no variations' % fdoc)
+
+        for var in variations:
+            resp = s.head(var['link'])
+            if resp.status_code != 200:
+                missing_variation += 1
+                print('File %s (%s): error %i for variation %s' % (
+                    fdoc['_id'], fdoc['filename'], resp.status_code, var['link']))
+
+    print('Missing main: %i' % missing_main)
+    print('Missing vars: %i' % missing_variation)
