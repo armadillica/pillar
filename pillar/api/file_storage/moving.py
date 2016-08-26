@@ -126,7 +126,7 @@ def fetch_file_from_link(link):
 
     file_dict = {
         'file_size': os.fstat(local_file.fileno()).st_size,
-        'content_type': r.headers['content-type'],
+        'content_type': r.headers.get('content-type', 'application/octet-stream'),
         'local_file': local_file
     }
     return file_dict
