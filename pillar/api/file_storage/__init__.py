@@ -383,10 +383,10 @@ def ensure_valid_link(response):
     else:
         log_link.debug('No expiry date for link; generating new link')
 
-    _generate_all_links(response, now)
+    generate_all_links(response, now)
 
 
-def _generate_all_links(response, now):
+def generate_all_links(response, now):
     """Generate a new link for the file and all its variations.
 
     :param response: the file document that should be updated.
@@ -445,7 +445,7 @@ def on_pre_get_files(_, lookup):
     cursor = current_app.data.find('files', parsed_req, lookup_expired)
     for file_doc in cursor:
         # log.debug('Updating expired links for file %r.', file_doc['_id'])
-        _generate_all_links(file_doc, now)
+        generate_all_links(file_doc, now)
 
 
 def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
@@ -473,7 +473,7 @@ def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
 
     for file_doc in to_refresh:
         log.debug('Refreshing links for file %s', file_doc['_id'])
-        _generate_all_links(file_doc, now)
+        generate_all_links(file_doc, now)
 
     log.info('Refreshed %i links', min(chunk_size, to_refresh.count()))
 
@@ -528,7 +528,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
             log.debug('Refreshing links for file %s', file_id)
 
             try:
-                _generate_all_links(file_doc, now)
+                generate_all_links(file_doc, now)
             except gcloud.exceptions.Forbidden:
                 log.warning('Skipping file %s, GCS forbids us access to '
                             'project %s bucket.', file_id, project_id)

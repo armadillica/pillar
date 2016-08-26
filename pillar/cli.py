@@ -400,3 +400,41 @@ def file_change_backend(file_id, dest_backend='gcs'):
 
     from pillar.api.file_storage.moving import change_file_storage_backend
     change_file_storage_backend(file_id, dest_backend)
+
+
+@manager.command
+def mass_copy_between_backends(src_backend='cdnsun', dest_backend='gcs'):
+    """Copies all files from one backend to the other, updating them in Mongo.
+
+    Files on the original backend are not deleted.
+    """
+
+    import requests.exceptions
+
+    from pillar.api.file_storage import moving
+
+    logging.getLogger('pillar').setLevel(logging.INFO)
+    log.info('Mass-moving all files from backend %r to %r',
+             src_backend, dest_backend)
+
+    files_coll = current_app.data.driver.db['files']
+
+    fdocs = files_coll.find({'backend': src_backend},
+                            projection={'_id': True})
+    copied_ok = 0
+    copy_errs = 0
+    for fdoc in fdocs:
+        try:
+            moving.change_file_storage_backend(fdoc['_id'], dest_backend)
+        except moving.PrerequisiteNotMetError as ex:
+            log.error('Error copying %s: %s', fdoc['_id'], ex)
+            copy_errs += 1
+        except requests.exceptions.HTTPError as ex:
+            log.error('Error copying %s (%s): %s',
+                      fdoc['_id'], ex.response.url, ex)
+            copy_errs += 1
+        else:
+            copied_ok += 1
+
+    log.info('%i files copied ok', copied_ok)
+    log.info('%i files we did not copy', copy_errs)
