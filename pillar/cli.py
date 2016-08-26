@@ -389,3 +389,14 @@ def check_cdnsun():
 
     print('Missing main: %i' % missing_main)
     print('Missing vars: %i' % missing_variation)
+
+
+@manager.command
+def file_change_backend(file_id, dest_backend='gcs'):
+    """Given a file document, move it to the specified backend (if not already
+    there) and update the document to reflect that.
+    Files on the original backend are not deleted automatically.
+    """
+
+    from pillar.api.file_storage import change_file_storage_backend
+    change_file_storage_backend(file_id, dest_backend)
