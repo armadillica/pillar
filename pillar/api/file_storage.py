@@ -307,6 +307,8 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
         storage = GoogleCloudStorageBucket(project_id)
         blob = storage.Get(file_path)
         if blob is None:
+            log.warning('generate_link(%r, %r): unable to find blob for file path,'
+                        ' returning empty link.', backend, file_path)
             return ''
 
         if is_public:
