@@ -398,5 +398,5 @@ def file_change_backend(file_id, dest_backend='gcs'):
     Files on the original backend are not deleted automatically.
     """
 
-    from pillar.api.file_storage import change_file_storage_backend
+    from pillar.api.file_storage.moving import change_file_storage_backend
     change_file_storage_backend(file_id, dest_backend)
