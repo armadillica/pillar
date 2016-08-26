@@ -423,18 +423,24 @@ def mass_copy_between_backends(src_backend='cdnsun', dest_backend='gcs'):
                             projection={'_id': True})
     copied_ok = 0
     copy_errs = 0
-    for fdoc in fdocs:
-        try:
-            moving.change_file_storage_backend(fdoc['_id'], dest_backend)
-        except moving.PrerequisiteNotMetError as ex:
-            log.error('Error copying %s: %s', fdoc['_id'], ex)
-            copy_errs += 1
-        except requests.exceptions.HTTPError as ex:
-            log.error('Error copying %s (%s): %s',
-                      fdoc['_id'], ex.response.url, ex)
-            copy_errs += 1
-        else:
-            copied_ok += 1
+    try:
+        for fdoc in fdocs:
+            try:
+                moving.change_file_storage_backend(fdoc['_id'], dest_backend)
+            except moving.PrerequisiteNotMetError as ex:
+                log.error('Error copying %s: %s', fdoc['_id'], ex)
+                copy_errs += 1
+            except requests.exceptions.HTTPError as ex:
+                log.error('Error copying %s (%s): %s',
+                          fdoc['_id'], ex.response.url, ex)
+                copy_errs += 1
+            except Exception:
+                log.exception('Unexpected exception handling file %s', fdoc['_id'])
+                copy_errs += 1
+            else:
+                copied_ok += 1
+    except KeyboardInterrupt:
+        log.error('Stopping due to keyboard interrupt')
 
     log.info('%i files copied ok', copied_ok)
     log.info('%i files we did not copy', copy_errs)
