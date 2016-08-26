@@ -321,8 +321,10 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
     if backend == 'cdnsun':
         return hash_file_path(file_path, None)
     if backend == 'unittest':
-        return md5(file_path).hexdigest()
+        return 'https://unit.test/%s' % md5(file_path).hexdigest()
 
+    log.warning('generate_link(): Unknown backend %r, returning empty string as new link.',
+                backend)
     return ''
 
 
