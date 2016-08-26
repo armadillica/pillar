@@ -2,124 +2,101 @@
 // Store the title, to later append notifications count
 var page_title = document.title;
 
-var unread_on_load = 0;
-var unread_new = 0;
-var first_load = false;
+/**
+ * Adds a new notification to the top of the notification list.
+ */
+function addNotification(no) {
+	var $notifications_list = $('#notifications-list');
 
-// getNotifications by fetching json every X seconds
-function getNotifications(){
-	$.getJSON( "/notifications/", function( data ) {
+	// There is a notification to be shown, so remove any "no notifications yet" message.
+	$notifications_list.find('li.nc-item-empty').remove();
 
-		if (!first_load) {
-			unread_on_load = data['items'].length;
-			first_load = true;
-		}
-
-		var items = [];
-		unread_new = 0;
-
-		// Only if there's actual data
-		if (data['items'][0]){
-
-			// Loop through each item
-			$.each(data['items'], function(i, no){
-
-				// Increase the unread_new counter
-				if (!no['is_read']){ unread_new++ };
-
-				// Check if the current item has been read, to style it
-				var is_read = no['is_read'] ? 'is_read' : '';
-
-				var read_info = 'data-id="'+ no['_id'] + '" data-read="' + no['is_read'] + '"';
-
-				// Notification list item
-				var content = '<li class="nc-item ' + is_read +'" data-id="'+ no['_id'] + '">';
-
-					// User's avatar
-					content += '<div class="nc-avatar">';
-						content += '<img ' + read_info + ' src="' + no['username_avatar'] + '"/> ';
-					content += '</div>';
-
-					// Text of the notification
-					content += '<div class="nc-text">';
-
-					// Username and action
-					content += no['username'] + ' ' + no['action'] + ' ';
-
-					// Object
-					content += '<a '+read_info+'" href="'+no['object_url']+'" class="nc-a">';
-					content += no['context_object_name'] + ' ';
-					content += '</a> ';
-
-					// Date
-					content += '<span class="nc-date">';
-					content += '<a '+read_info+'" href="'+no['object_url']+'" class="nc-a">';
-					content += no['date'];
-					content += '</a>';
-					content += '</span>';
-
-					// Read Toggle
-					content += '<a id="'+no['_id']+'" href="/notifications/' + no['_id'] + '/read-toggle" class="nc-button nc-read_toggle">';
-						if (no['is_read']){
-							content += '<i title="Mark as Unread" class="pi pi-circle-dot"></i>';
-						} else {
-							content += '<i title="Mark as Read" class="pi pi-circle"></i>';
-						};
-					content += '</a>';
-
-					// Subscription Toggle
-					content += '<a href="/notifications/' + no['_id'] + '/subscription-toggle" class="nc-button nc-subscription_toggle">';
-						if (no['is_subscribed']){
-							content += '<i title="Turn Off Notifications" class="pi-toggle-on"></i>';
-						} else {
-							content += '<i title="Turn On Notifications" class="pi-toggle-off"></i>';
-						};
-					content += '</a>';
-
-					content += '</div>';
-				content += '</li>';
-
-				items.push(content);
-			}); // each
-
-			if (unread_new > 0) {
-				// Set page title, display notifications and set counter
-				document.title = '(' + unread_new + ') ' + page_title;
-				$('#notifications-count').addClass('bloom');
-				$('#notifications-count').html('<span>' + unread_new + '</span>');
-				$('#notifications-toggle i').removeClass('pi-notifications-none').addClass('pi-notifications-active');
-			} else {
-				document.title = page_title;
-				$('#notifications-count').removeAttr('class');
-				$('#notifications-toggle i').removeClass('pi-notifications-active').addClass('pi-notifications-none');
-			};
-
-			checkPopNotification(
-				data['items'][0]['_id'],
-				data['items'][0]['username'],
-				data['items'][0]['username_avatar'],
-				data['items'][0]['action'],
-				data['items'][0]['date'],
-				data['items'][0]['context_object_name'],
-				data['items'][0]['object_url']);
-
-		} else {
-			var content = '<li class="nc-item nc-item-empty">';
-			content += 'No notifications... yet.';
-			content += '</li>';
-
-			items.push(content);
-		}; // if items
-
-		// Populate the list
-		$('ul#notifications-list').html( items.join(''));
-	})
-	.done(function(){
-		// clear the counter
-		unread_on_load = unread_new;
-	});
+	console.log('New notification:', no);
+	return;
+	//
+	// // Increase the unread_new counter
+	// if (!no['is_read']){ unread_new++ };
+	//
+	// // Check if the current item has been read, to style it
+	// var is_read = no['is_read'] ? 'is_read' : '';
+	//
+	// var read_info = 'data-id="'+ no['_id'] + '" data-read="' + no['is_read'] + '"';
+	//
+	// // Notification list item
+	// var content = '<li class="nc-item ' + is_read +'" data-id="'+ no['_id'] + '">';
+	//
+	// // User's avatar
+	// content += '<div class="nc-avatar">';
+	// 	content += '<img ' + read_info + ' src="' + no['username_avatar'] + '"/> ';
+	// content += '</div>';
+	//
+	// // Text of the notification
+	// content += '<div class="nc-text">';
+	//
+	// // Username and action
+	// content += no['username'] + ' ' + no['action'] + ' ';
+	//
+	// // Object
+	// content += '<a '+read_info+'" href="'+no['object_url']+'" class="nc-a">';
+	// content += no['context_object_name'] + ' ';
+	// content += '</a> ';
+	//
+	// // Date
+	// content += '<span class="nc-date">';
+	// content += '<a '+read_info+'" href="'+no['object_url']+'" class="nc-a">';
+	// content += no['date'];
+	// content += '</a>';
+	// content += '</span>';
+	//
+	// // Read Toggle
+	// content += '<a id="'+no['_id']+'" href="/notifications/' + no['_id'] + '/read-toggle" class="nc-button nc-read_toggle">';
+	// 	if (no['is_read']){
+	// 		content += '<i title="Mark as Unread" class="pi pi-circle-dot"></i>';
+	// 	} else {
+	// 		content += '<i title="Mark as Read" class="pi pi-circle"></i>';
+	// 	};
+	// content += '</a>';
+	//
+	// // Subscription Toggle
+	// content += '<a href="/notifications/' + no['_id'] + '/subscription-toggle" class="nc-button nc-subscription_toggle">';
+	// 	if (no['is_subscribed']){
+	// 		content += '<i title="Turn Off Notifications" class="pi-toggle-on"></i>';
+	// 	} else {
+	// 		content += '<i title="Turn On Notifications" class="pi-toggle-off"></i>';
+	// 	};
+	// content += '</a>';
+	//
+	// content += '</div>';
+	// content += '</li>';
+	//
+	// 		items.push(content);
+	// 	}); // each
+	//
+	// 	if (unread_new > 0) {
+	// 		// Set page title, display notifications and set counter
+	// 		document.title = '(' + unread_new + ') ' + page_title;
+	// 		$('#notifications-count').addClass('bloom');
+	// 		$('#notifications-count').html('<span>' + unread_new + '</span>');
+	// 		$('#notifications-toggle i').removeClass('pi-notifications-none').addClass('pi-notifications-active');
+	// 	} else {
+	// 		document.title = page_title;
+	// 		$('#notifications-count').removeAttr('class');
+	// 		$('#notifications-toggle i').removeClass('pi-notifications-active').addClass('pi-notifications-none');
+	// 	};
+	//
+	// 	checkPopNotification(
+	// 		data['items'][0]['_id'],
+	// 		data['items'][0]['username'],
+	// 		data['items'][0]['username_avatar'],
+	// 		data['items'][0]['action'],
+	// 		data['items'][0]['date'],
+	// 		data['items'][0]['context_object_name'],
+	// 		data['items'][0]['object_url']);
+	//
+	// 	// Populate the list
+	// 	$('#notifications-list').html( items.join(''));
+	// })
 };
-
 
 // Used when we click somewhere in the page
 function hideNotifications(){
@@ -319,11 +296,13 @@ $(function() {
 	});
 });
 
-
-function getNotificationsLoop() {
-	getNotifications();
-
-	var getLoop = setTimeout(function () {
-		getNotificationsLoop();
-	}, 30000);
+/**
+ * Uses ServerSide Events (SSE) to fetch notifications from Pillar-Notifserv.
+ */
+function setupNotifications() {
+	var source = new EventSource('/notifications', {withCredentials: true});
+    source.addEventListener('notification', function (event) {
+        var notif = JSON.parse(event.data);
+		addNotification(notif);
+    }, false);
 }
