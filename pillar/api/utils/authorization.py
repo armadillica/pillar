@@ -62,7 +62,7 @@ def compute_allowed_methods(collection_name, resource, check_node_type=None):
 
     # Accumulate allowed methods from the user, group and world level.
     allowed_methods = set()
-    current_user = g.current_user
+    current_user = getattr(g, 'current_user', None)
     if current_user:
         # If the user is authenticated, proceed to compare the group permissions
         for permission in computed_permissions.get('groups', ()):
