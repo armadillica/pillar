@@ -204,13 +204,6 @@ def view(node_id):
         template_action = 'view_theatre'
 
     template_path = '{0}/{1}_embed.html'.format(template_path, template_action)
-    # template_path_full = os.path.join(current_app.config['TEMPLATES_PATH'], template_path)
-    #
-    # # Check if template exists on the filesystem
-    # if not os.path.exists(template_path_full):
-    #     log.warning('Template %s does not exist for node type %s',
-    #                 template_path, node_type_name)
-    #     raise NotFound("Missing template '{0}'".format(template_path))
 
     try:
         return render_template(template_path,
