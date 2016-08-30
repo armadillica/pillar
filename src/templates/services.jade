@@ -62,7 +62,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 				a.page-card-cta.download(
 							href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
 							i.pi-download
-							| Download <small>v</small>1.3
+							| Download <small>v</small>{{ config.BLENDER_CLOUD_ADDON_VERSION }}
 
 			section.page-card.dark.right
 
