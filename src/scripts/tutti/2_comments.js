@@ -21,8 +21,8 @@ $(document).on('click','body .comment-action-reply',function(e){
 	commentField.setAttribute('data-parent_id', parentNodeId);
 
 	// Start the comment field with @authorname:
-	var replyAuthor = $(this).parent().parent().find('.comment-author:first').html();
-	$(commentField).val("**@" + replyAuthor + ":** ");
+	var replyAuthor = $(this).parent().parent().find('.comment-author:first span').html();
+	$(commentField).val("**@" + replyAuthor.slice(1, -1) + ":** ");
 
 	// Add class for styling
 	$('.comment-container').removeClass('is-replying');
