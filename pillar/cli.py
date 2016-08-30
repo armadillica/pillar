@@ -9,7 +9,7 @@ import logging
 
 from bson.objectid import ObjectId, InvalidId
 from flask import current_app
-from flask.ext.script import Manager
+from flask_script import Manager
 
 log = logging.getLogger(__name__)
 manager = Manager(current_app)
