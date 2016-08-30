@@ -104,7 +104,7 @@ script.
 
 			if (preview_img) {
 
-				preview_img.load(function() {
+				preview_img.on('load', function() {
 
 					var preview = thumbnail.find('.list-node-children-item-preview');
 

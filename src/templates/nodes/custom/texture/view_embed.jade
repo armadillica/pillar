@@ -135,7 +135,7 @@ script.
 		/* Make dummy img in memory otherwise we have css issues */
 		$("<img/>")
 			.attr('src', src_xl)
-			.load(function(){
+			.on('load', function(){
 				src_xl_width = this.width;
 				src_xl_height = this.height;
 		});

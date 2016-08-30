@@ -130,7 +130,7 @@ function hopToTop(limit){
 
 	document.getElementById("hop").onclick = function(e){ window.scrollTo(0, 0);}
 
-	$(window).scroll(function() {
+	$(window).on("scroll", function () {
 		if ($(window).scrollTop() >= limit) {$("#hop").addClass("active")} else {$("#hop").removeAttr("class")}
 	});
 }

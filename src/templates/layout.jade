@@ -24,7 +24,7 @@ html(lang="en")
 		meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_gleb_locomotive.jpg')}}")
 		| {% endblock %}
 
-		script(src="//code.jquery.com/jquery-2.2.1.min.js")
+		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery-3.1.0.min.js')}}")
 		script(src="//cdn.jsdelivr.net/typeahead.js/0.11.1/typeahead.jquery.min.js")
 		script(src="//cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js")
 		script(src="//cdnjs.cloudflare.com/ajax/libs/js-cookie/2.0.3/js.cookie.min.js",)
@@ -407,7 +407,7 @@ html(lang="en")
 			link(href='//fonts.googleapis.com/css?family=Roboto:300,400,500', rel='stylesheet', type='text/css')
 			link(href='//fonts.googleapis.com/css?family=Lato:300,400', rel='stylesheet', type='text/css')
 
-		script(type="text/javascript", src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js")
+		script(type="text/javascript", src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js")
 		script(type="text/javascript", src="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.10/js/min/perfect-scrollbar.min.js")
 		script(type="text/javascript", src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.0.5/handlebars.min.js")
 
