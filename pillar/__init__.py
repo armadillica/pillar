@@ -192,14 +192,15 @@ class PillarServer(Eve):
         # Load extension Eve settings
         eve_settings = pillar_extension.eve_settings()
 
-        for key, collection in eve_settings['DOMAIN'].items():
-            source = '%s.%s' % (pillar_extension.name, key)
-            url = '%s/%s' % (pillar_extension.name, key)
+        if 'DOMAIN' in eve_settings:
+            for key, collection in eve_settings['DOMAIN'].items():
+                source = '%s.%s' % (pillar_extension.name, key)
+                url = '%s/%s' % (pillar_extension.name, key)
 
-            collection.setdefault('datasource', {}).setdefault('source', source)
-            collection.setdefault('url', url)
+                collection.setdefault('datasource', {}).setdefault('source', source)
+                collection.setdefault('url', url)
 
-        self.config['DOMAIN'].update(eve_settings['DOMAIN'])
+            self.config['DOMAIN'].update(eve_settings['DOMAIN'])
 
     def _config_jinja_env(self):
         pillar_dir = os.path.dirname(os.path.realpath(__file__))
