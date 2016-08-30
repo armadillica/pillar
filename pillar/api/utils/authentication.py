@@ -15,6 +15,22 @@ from flask import current_app
 
 log = logging.getLogger(__name__)
 
+CLI_USER = {
+    'user_id': 'CLI',
+    'groups': [],
+    'roles': {'admin'},
+}
+
+
+def force_cli_user():
+    """Sets g.current_user to the CLI_USER object.
+
+    This is used as a marker to avoid authorization checks and just allow everything.
+    """
+
+    log.warning('Logging in as CLI_USER, circumventing authentication.')
+    g.current_user = CLI_USER
+
 
 def validate_token():
     """Validate the token provided in the request and populate the current_user
