@@ -212,13 +212,23 @@ def view(node_id):
     #                 template_path, node_type_name)
     #     raise NotFound("Missing template '{0}'".format(template_path))
 
-    return render_template(template_path,
-                           node_id=node._id,
-                           node=node,
-                           parent=node.parent,
-                           children=children,
-                           config=current_app.config,
-                           api=api)
+    try:
+        return render_template(template_path,
+                               node_id=node._id,
+                               node=node,
+                               parent=node.parent,
+                               children=children,
+                               config=current_app.config,
+                               api=api)
+    except TemplateNotFound:
+        log.error('Template %s does not exist for node type %s', template_path, node_type_name)
+        return render_template('nodes/error_type_not_found.html',
+                               node_id=node._id,
+                               node=node,
+                               parent=node.parent,
+                               children=children,
+                               config=current_app.config,
+                               api=api)
 
 
 def _view_handler_asset(node, template_path, template_action, link_allowed):

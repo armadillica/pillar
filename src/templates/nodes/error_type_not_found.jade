@@ -1,0 +1,57 @@
+| {% block body %}
+
+#node-container
+	#node-overlay
+
+	section.node-details-container
+
+		.node-details-header
+			.node-title#node-title
+				| {{node.name}}
+		
+		| {% if node.description %}
+		.node-details-description#node-description
+			| {{node.description}}
+		| {% endif %}
+
+		.node-details-meta.footer
+			p.error-node-type-not-found
+				| Sorry, I don't know how to display a node of type {{ node.node_type }}.
+				| {% if node.description %}
+				| I'll just show the description.
+				| {% endif %}
+			ul.node-details-meta-list
+				li.node-details-meta-list-item.status
+					| {{node.properties.status}}
+
+				li.node-details-meta-list-item.author
+					| {{ node.user.full_name }}
+
+				li.node-details-meta-list-item.date(title="Created {{ node._created }}")
+					| {{ node._created | pretty_date }}
+					| {% if (node._created | pretty_date) != (node._updated | pretty_date) %}
+					span(title="Updated {{ node._updated }}") (updated {{ node._updated | pretty_date }})
+					| {% endif %}
+
+
+include custom/_scripts
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+	// Generate GA pageview
+	ga('send', 'pageview', location.pathname);
+
+
+	$('.sorry').click(function() {
+		$.get('/403', function(data) {
+			$('#node-overlay').html(data).show().addClass('active');
+		})
+	});
+
+	$('#node-overlay').click(function(){
+		$(this).removeClass('active').hide().html();
+	});
+
+| {% endblock %}
