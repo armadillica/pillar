@@ -52,9 +52,9 @@ BLENDER_ID_USER_RESPONSE = {'status': 'success',
                             'token_expires': 'Mon, 1 Jan 2018 01:02:03 GMT'}
 
 
-class TestPillarServer(pillar.PillarServer):
+class PillarTestServer(pillar.PillarServer):
     def _load_flask_config(self):
-        super(TestPillarServer, self)._load_flask_config()
+        super(PillarTestServer, self)._load_flask_config()
 
         pillar_config_file = os.path.join(MY_PATH, 'config_testing.py')
         self.config.from_pyfile(pillar_config_file)
@@ -70,7 +70,7 @@ class TestPillarServer(pillar.PillarServer):
 
 
 class AbstractPillarTest(TestMinimal):
-    pillar_server_class = TestPillarServer
+    pillar_server_class = PillarTestServer
 
     def setUp(self, **kwargs):
         eve_settings_file = os.path.join(MY_PATH, 'eve_test_settings.py')
