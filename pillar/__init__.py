@@ -35,6 +35,8 @@ class PillarServer(Eve):
         kwargs.setdefault('validator', custom_field_validation.ValidateCustomFields)
         super(PillarServer, self).__init__(settings=empty_settings, **kwargs)
 
+        self.pillar_extensions = {}  # mapping from extension name to extension object.
+
         self.app_root = os.path.abspath(app_root)
         self._load_flask_config()
         self._config_logging()
@@ -178,8 +180,14 @@ class PillarServer(Eve):
     def load_extension(self, pillar_extension, url_prefix):
         from .extension import PillarExtension
 
-        self.log.info('Initialising extension %r', pillar_extension)
-        assert isinstance(pillar_extension, PillarExtension)
+        assert isinstance(pillar_extension, PillarExtension), \
+            'Extension has wrong type %r' % type(pillar_extension)
+        self.log.info('Loading extension %s', pillar_extension.name)
+
+        # Remember this extension, and disallow duplicates.
+        if pillar_extension.name in self.pillar_extensions:
+            raise ValueError('Extension with name %s already loaded', pillar_extension.name)
+        self.pillar_extensions[pillar_extension.name] = pillar_extension
 
         # Load extension Flask configuration
         for key, value in pillar_extension.flask_config():
