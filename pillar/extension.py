@@ -62,3 +62,6 @@ class PillarExtension(object):
 
         :rtype: dict
         """
+
+    def setup_app(self, app):
+        """Called during app startup, after all extensions have loaded."""

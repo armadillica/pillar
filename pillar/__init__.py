@@ -284,6 +284,10 @@ class PillarServer(Eve):
         web.setup_app(self)
         authentication.setup_app(self)
 
+        for ext in self.pillar_extensions.itervalues():
+            self.log.info('Setting up extension %s', ext.name)
+            ext.setup_app(self)
+
         self._config_jinja_env()
         self._config_static_dirs()
 
