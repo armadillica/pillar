@@ -278,9 +278,9 @@ def render_project(project, api, extra_context=None, template_name=None):
 
         return list_latest
 
-    project.nodes_latest = load_latest(project.nodes_latest)
+    project.nodes_latest = load_latest(project.nodes_latest, get_picture=True)
     project.nodes_featured = load_latest(project.nodes_featured, get_picture=True)
-    project.nodes_blog = load_latest(project.nodes_blog)
+    project.nodes_blog = load_latest(project.nodes_blog, get_picture=True)
 
     if extra_context is None:
         extra_context = {}
