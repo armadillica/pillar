@@ -49,8 +49,9 @@ def jstree_get_children(node_id, project_id=None):
             if child.node_type not in ['comment', 'post']:
                 if child.properties.status == 'published':
                     children_list.append(jstree_parse_node(child))
-                elif child.node_type == 'blog':
-                    children_list.append(jstree_parse_node(child))
+                # TODO: Remove this code (blog now accessible from sidebar)
+                # elif child.node_type == 'blog':
+                #     children_list.append(jstree_parse_node(child))
                 elif current_user.is_authenticated and child.user == current_user.objectid:
                     children_list.append(jstree_parse_node(child))
     except ForbiddenAccess:
