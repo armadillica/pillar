@@ -5,7 +5,7 @@ $(function () {
 
 function NavbarTransparent() {
 
-	var startingpoint = 50;
+	var startingpoint = 15;
 
 	$(window).on("load scroll", function () {
 
