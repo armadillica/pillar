@@ -358,6 +358,8 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 									img(alt="Ton", src="{{ url_for('static', filename='assets/img/people/ton.jpg')}}")
 								.face(data-blenderhead='francesco')
 									img(alt="Francesco", src="{{ url_for('static', filename='assets/img/people/francesco.jpg')}}")
+								.face(data-blenderhead='colin')
+									img(alt="Colin", src="{{ url_for('static', filename='assets/img/people/colin.jpg')}}")
 								.face(data-blenderhead='pablo')
 									img(alt="Pablo", src="{{ url_for('static', filename='assets/img/people/pablo.jpg')}}")
 								.face(data-blenderhead='andy')
@@ -368,6 +370,8 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 									img(alt="Sergey", src="{{ url_for('static', filename='assets/img/people/sergey.jpg')}}")
 								.face(data-blenderhead='sybren')
 									img(alt="Sybren", src="{{ url_for('static', filename='assets/img/people/sybren.jpg')}}")
+								.face(data-blenderhead='beau')
+									img(alt="beau", src="{{ url_for('static', filename='assets/img/people/beau.jpg')}}")
 
 							.people-bio
 								.bio#ton
@@ -390,9 +394,14 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 										small Shading, Lighting, Rendering, FX
 									span Germany
 
+								.bio#colin
+									h3 Colin Levy
+										small Director. Layout.
+									span United States
+
 								.bio#hjalti
 									h3 Hjalti Hjálmarsson
-										small Animation. Layout Artist.
+										small Director. Animation. Layout.
 									span Iceland
 
 								.bio#sergey
@@ -405,6 +414,10 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 										small Blender Cloud Developer
 									span The Netherlands
 
+								.bio#beau
+									h3 Beau Dreier Gligoor
+										small Modeling. Shading.
+									span The Netherlands
 
 						.people-container.online
 							.people-intro
@@ -476,13 +489,6 @@ script.
 
 	$('.triplet-card').click(function(){
 		window.location.href = $(this).attr('data-url');
-	});
-
-	$(window).on('load scroll', function() {
-		var y = $(this).scrollTop();
-		if (y < 100){
-			$('.navbar-backdrop').css('background-position-y', (parseInt(-y / 4) * -1) + 'px');
-		}
 	});
 
 	function getSubscribers(){
