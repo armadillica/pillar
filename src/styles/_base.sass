@@ -273,18 +273,14 @@ header.navbar-header
 		user-select: none
 		a.navbar-item
 			user-select: none
-			color: white
+			color: $color-text-light-secondary
 			height: $navbar-height
 			display: flex
 			align-items: center
 
-			font:
-				family: $font-headings
-				size: 1em
-				weight: 400
+			font-weight: 400
 			text-transform: uppercase
 			border-bottom: 3px solid transparent
-			text-shadow: 1px 1px 0 rgba(black, .2), 1px 1px 10px rgba(black, .5)
 
 			padding:
 				top: 3px
@@ -300,6 +296,7 @@ header.navbar-header
 				padding-right: 10px
 
 			&:hover, &:focus
+				color: $color-text-light
 				background-color: rgba($color-background-nav, .4)
 				border-bottom: 3px solid $color-primary
 
@@ -307,6 +304,7 @@ header.navbar-header
 				border-bottom: 3px solid $color-primary
 
 			&.active
+				color: $color-text-light
 				background-color: $color-background-nav
 				border-bottom: 3px solid lighten($color-secondary, 10%)
 

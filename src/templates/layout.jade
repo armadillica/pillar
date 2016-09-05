@@ -35,8 +35,7 @@ html(lang="en")
 
 			!function(e){"use strict";e.loadCSS=function(t,n,o){var r,i=e.document,l=i.createElement("link");if(n)r=n;else{var d=(i.body||i.getElementsByTagName("head")[0]).childNodes;r=d[d.length-1]}var a=i.styleSheets;l.rel="stylesheet",l.href=t,l.media="only x",r.parentNode.insertBefore(l,n?r:r.nextSibling);var f=function(e){for(var t=l.href,n=a.length;n--;)if(a[n].href===t)return e();setTimeout(function(){f(e)})};return l.onloadcssdefined=f,f(function(){l.media=o||"all"}),l},"undefined"!=typeof module&&(module.exports=e.loadCSS)}(this);
 
-			loadCSS( "//fonts.googleapis.com/css?family=Roboto:300,400,500" );
-			loadCSS( "//fonts.googleapis.com/css?family=Lato:300,400" );
+			loadCSS( "//fonts.googleapis.com/css?family=Roboto:300,400" );
 
 		script(src="{{ url_for('static_pillar', filename='assets/js/markdown.min.js', v=040820161) }}")
 		script(src="{{ url_for('static_pillar', filename='assets/js/tutti.min.js', v=040820161) }}")
@@ -404,8 +403,7 @@ html(lang="en")
 						a(href="")
 
 		noscript
-			link(href='//fonts.googleapis.com/css?family=Roboto:300,400,500', rel='stylesheet', type='text/css')
-			link(href='//fonts.googleapis.com/css?family=Lato:300,400', rel='stylesheet', type='text/css')
+			link(href='//fonts.googleapis.com/css?family=Roboto:300,400', rel='stylesheet', type='text/css')
 
 		script(type="text/javascript", src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js")
 		script(type="text/javascript", src="//cdnjs.cloudflare.com/ajax/libs/jquery.perfect-scrollbar/0.6.10/js/min/perfect-scrollbar.min.js")
