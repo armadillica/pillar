@@ -104,7 +104,20 @@ script(type="text/javascript").
 		var url = '/u/' + userId + '/edit?embed=1';
 		$.get(url, function(dataHtml){
 			$('#search-hit-container').html(dataHtml);
-		});
+		})
+		.fail(function(jqXHR, textStatus, errorThrown) {
+			var $userbox = $(".search-hit.users[data-user-id='" + userId + "']");
+			var $msgbox = $userbox.find('.search-hit-roles');
+
+			if (console) console.log('Error fetching user', userId, '; jqXHR=', jqXHR);
+			$userbox.addClass('alert alert-warning');
+			if (jqXHR.status == 404) {
+				$msgbox.text('This user does not seem to exist.');
+			} else {
+				$msgbox.text('There was an error fetching the user: ' + jqXHR.responseText + '.')
+			}
+		})
+		;
 	}
 
 	$('body').on('click', '.search-hit', function(){

@@ -6,6 +6,8 @@ from flask import (abort, Blueprint, current_app, flash, redirect,
                    render_template, request, session, url_for)
 from flask_login import login_required, login_user, logout_user, current_user
 from flask_oauthlib.client import OAuthException
+from werkzeug import exceptions as wz_exceptions
+
 from pillar.auth import UserClass, subscriptions
 from pillar.web import system_util
 from .forms import UserProfileForm
@@ -192,7 +194,13 @@ def users_edit(user_id):
     if not current_user.has_role('admin'):
         return abort(403)
     api = system_util.pillar_api()
-    user = User.find(user_id, api=api)
+
+    try:
+        user = User.find(user_id, api=api)
+    except sdk_exceptions.ResourceNotFound:
+        log.warning('Non-existing user %r requested.', user_id)
+        raise wz_exceptions.NotFound('Non-existing user %r requested.' % user_id)
+
     form = UserEditForm()
     if form.validate_on_submit():
         def get_groups(roles):
