@@ -82,17 +82,24 @@ $(document).ready(function() {
         firstHit.addClass('active');
         firstHit.find('#search-loading').addClass('active');
 
-        var getNode = setTimeout(function() {
-            $.get('/nodes/' + firstHit.attr('data-hit-id') + '/view', function(dataHtml) {
+        function done() {
+            $('.search-loading').removeClass('active');
+            $('#search-error').hide();
+            $('#search-hit-container').show();
+        }
+
+        window.setTimeout(function() {
+            // Ignore getting that first result when there is none.
+            var hit_id = firstHit.attr('data-hit-id');
+            if (hit_id === undefined) {
+                done();
+                return;
+            }
+
+            $.get('/nodes/' + hit_id + '/view', function(dataHtml) {
                     $('#search-hit-container').html(dataHtml);
                 })
-                .done(function() {
-                    $('.search-loading').removeClass('active');
-                    $('#search-error').hide();
-                    $('#search-hit-container').show();
-
-                    clearTimeout(getNode);
-                })
+                .done(done)
                 .fail(function(data) {
                     $('.search-loading').removeClass('active');
                     $('#search-hit-container').hide();
