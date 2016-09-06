@@ -2,6 +2,7 @@ import json
 import logging
 import httplib2  # used by the oauth2 package
 import requests
+import urlparse
 
 from flask import (abort, Blueprint, current_app, flash, redirect,
                    render_template, request, session, url_for)
@@ -258,12 +259,9 @@ def user_roles_update(user_id):
     # subscription status once.
     user = User.me(api=api)
 
+    # Fetch user info from different sources.
     store_user = subscriptions.fetch_user(user.email) or {}
-    try:
-        bid_user = current_app.oauth_blender_id.get('/api/user').data or {}
-    except httplib2.HttpLib2Error:
-        log.exception('Error getting /api/user from BlenderID')
-        bid_user = {}
+    bid_user = fetch_blenderid_user()
 
     grant_subscriber = store_user.get('cloud_access', 0) == 1
     grant_demo = bid_user.get('roles', {}).get('cloud_demo', False)
@@ -307,3 +305,32 @@ def user_roles_update(user_id):
     else:
         log.warning('Tried %i times to update user %s, and failed each time. Giving up.',
                     max_retry, user_id)
+
+
+def fetch_blenderid_user():
+    """Returns the user info from BlenderID.
+
+    Returns an empty dict if communication fails.
+
+    :rtype: dict
+    """
+
+    bid_url = urlparse.urljoin(current_app.config['BLENDER_ID_ENDPOINT'], 'api/user')
+    log.debug('Fetching user info from %s', bid_url)
+
+    try:
+        bid_resp = current_app.oauth_blender_id.get(bid_url)
+    except httplib2.HttpLib2Error:
+        log.exception('Error getting %s from BlenderID', bid_url)
+        return {}
+
+    if bid_resp.status != 200:
+        log.warning('Error %i from BlenderID %s: %s', bid_resp.status, bid_url, bid_resp.data)
+        return {}
+
+    if not bid_resp.data:
+        log.warning('Empty data returned from BlenderID %s', bid_url)
+        return {}
+
+    log.debug('BlenderID returned %s', bid_resp.data)
+    return bid_resp.data
