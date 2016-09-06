@@ -34,6 +34,8 @@ def share_node(node_id):
                                    'node_type': 1,
                                    'short_code': 1
                                })
+    if not node:
+        raise wz_exceptions.NotFound('Node %s does not exist.' % node_id)
 
     check_permissions('nodes', node, request.method)
 

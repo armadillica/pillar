@@ -10,10 +10,11 @@ import jinja2
 import os
 import os.path
 from eve import Eve
+from flask import render_template, request
+from flask.templating import TemplateNotFound
 
 from pillar.api import custom_field_validation
 from pillar.api.utils import authentication
-from pillar.api.utils import gravatar
 from pillar.web.utils import pretty_date
 from pillar.web.nodes.routes import url_for_node
 
@@ -276,6 +277,37 @@ class PillarServer(Eve):
         # EVIL ENDS HERE. No guarantees, though.
 
         self.finish_startup()
+
+    def register_error_handlers(self):
+        super(PillarServer, self).register_error_handlers()
+
+        for code in (403, 404, 500):
+            self.register_error_handler(code, self.pillar_error_handler)
+
+    def pillar_error_handler(self, error_ob):
+
+        if request.full_path.startswith('/%s/' % self.config['URL_PREFIX']):
+            from pillar.api.utils import jsonify
+            # This is an API request, so respond in JSON.
+            return jsonify({
+                '_status': 'ERR',
+                '_code': error_ob.code,
+                '_message': error_ob.description,
+            }, status=error_ob.code)
+
+        # See whether we should return an embedded page or a regular one.
+        if request.is_xhr:
+            fname = 'errors/%i_embed.html' % error_ob.code
+        else:
+            fname = 'errors/%i.html' % error_ob.code
+
+        # Also handle the case where we didn't create a template for this error.
+        try:
+            return render_template(fname), error_ob.code
+        except TemplateNotFound:
+            self.log.warning('Error template %s for code %i not found',
+                             fname, error_ob.code)
+            return render_template('errors/500.html'), error_ob.code
 
     def finish_startup(self):
         self.log.info('Using MongoDB database %r', self.config['MONGO_DBNAME'])
