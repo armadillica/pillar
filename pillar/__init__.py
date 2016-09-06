@@ -286,6 +286,12 @@ class PillarServer(Eve):
 
     def pillar_error_handler(self, error_ob):
 
+        # 'error_ob' can be any exception. If it's not a Werkzeug exception,
+        # handle it as a 500.
+        if not hasattr(error_ob, 'code'):
+            error_ob.code = 500
+            error_ob.description = str(error_ob)
+
         if request.full_path.startswith('/%s/' % self.config['URL_PREFIX']):
             from pillar.api.utils import jsonify
             # This is an API request, so respond in JSON.
