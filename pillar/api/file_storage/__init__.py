@@ -639,6 +639,14 @@ def stream_to_storage(project_id):
     log.info('Streaming file to bucket for project=%s user_id=%s', project_id,
              authentication.current_user_id())
     log.info('request.headers[Origin] = %r', request.headers.get('Origin'))
+    log.info('request.content_length = %r', request.content_length)
+
+    # Try a check for the content length before we access request.files[]. This allows us
+    # to abort the upload early. The entire body content length is always a bit larger than
+    # the actual file size, so if we accept here, we're sure it'll be accepted in subsequent
+    # checks as well.
+    if request.content_length:
+        assert_file_size_allowed(request.content_length)
 
     uploaded_file = request.files['file']
 

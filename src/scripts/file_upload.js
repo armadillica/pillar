@@ -70,10 +70,6 @@ function setup_file_uploader(index, upload_element) {
             if (data.originalFiles[0]['type'].length && !acceptFileTypes.test(data.originalFiles[0]['type'])) {
                 uploadErrors.push('Not an accepted file type');
             }
-            // Limit upload size to 1GB
-            if (data.originalFiles[0]['size'] && data.originalFiles[0]['size'] > 1262485504) {
-                uploadErrors.push('Filesize is too big');
-            }
             if (uploadErrors.length > 0) {
                 $(this).parent().parent().addClass('error');
                 $(this).after(uploadErrors.join("\n"));
@@ -118,11 +114,21 @@ function setup_file_uploader(index, upload_element) {
 
             $('body').trigger('file-upload:finished');
         },
-        fail: function (jqXHR, textStatus, errorThrown) {
+        fail: function (jqXHR, fileupload) {
             if (console) {
-                console.log(textStatus, 'Upload error: ' + errorThrown);
+                console.log('Upload error:');
+                console.log('jqXHR', jqXHR);
+                console.log('fileupload', fileupload);
             }
-            statusBarSet(textStatus, 'Upload error: ' + errorThrown, 'pi-attention', 8000);
+
+            var uploadErrors = [];
+            for (var key in fileupload.messages) {
+                uploadErrors.push(fileupload.messages[key]);
+            }
+
+            statusBarSet('error',
+                         'Upload error: ' + uploadErrors.join("; "),
+                         'pi-attention', 16000);
 
             set_progress_bar(100, 'progress-error');
 
