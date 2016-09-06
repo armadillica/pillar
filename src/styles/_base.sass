@@ -277,16 +277,16 @@ header.navbar-header
 			height: $navbar-height
 			display: flex
 			align-items: center
-
-			font-weight: 400
-			text-transform: uppercase
-			border-bottom: 3px solid transparent
-
 			padding:
 				top: 3px
 				bottom: 0
 				left: 20px
 				right: 20px
+
+			font-weight: 400
+			text-transform: uppercase
+			border-bottom: 3px solid transparent
+			transition: color 200ms ease-in-out, border-bottom 100ms ease-in-out
 
 			+media-md
 				padding-left: 15px
@@ -298,18 +298,18 @@ header.navbar-header
 			&:hover, &:focus
 				color: $color-text-light
 				background-color: rgba($color-background-nav, .4)
-				border-bottom: 3px solid $color-primary
+				border-bottom-color: $color-primary
 
 			&:focus
-				border-bottom: 3px solid $color-primary
+				border-bottom-color: $color-primary
 
 			&.active
 				color: $color-text-light
 				background-color: $color-background-nav
-				border-bottom: 3px solid lighten($color-secondary, 10%)
+				border-bottom-color: lighten($color-secondary, 10%)
 
 				&:hover
-					border-color: lighten($color-secondary, 20%)
+					border-bottom-color: lighten($color-secondary, 20%)
 
 			.pi-angle-down
 				position: relative
