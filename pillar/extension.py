@@ -63,5 +63,14 @@ class PillarExtension(object):
         :rtype: dict
         """
 
+    @property
+    def template_path(self):
+        """Returns the path where templates for this extension are stored.
+
+        Note that this path is not connected to any blueprint, so it is up to
+        the extension to provide extension-unique subdirectories.
+        """
+        return None
+
     def setup_app(self, app):
         """Called during app startup, after all extensions have loaded."""

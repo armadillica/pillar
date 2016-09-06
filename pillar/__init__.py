@@ -37,6 +37,7 @@ class PillarServer(Eve):
         super(PillarServer, self).__init__(settings=empty_settings, **kwargs)
 
         self.pillar_extensions = {}  # mapping from extension name to extension object.
+        self.pillar_extensions_template_paths = []  # list of paths
 
         self.app_root = os.path.abspath(app_root)
         self._load_flask_config()
@@ -198,6 +199,16 @@ class PillarServer(Eve):
         for blueprint in pillar_extension.blueprints():
             self.register_blueprint(blueprint, url_prefix=url_prefix)
 
+        # Load template paths
+        tpath = pillar_extension.template_path
+        if tpath:
+            self.log.info('Extension %s: adding template path %s',
+                          pillar_extension.name, tpath)
+            if not os.path.exists(tpath):
+                raise ValueError('Template path %s for extension %s does not exist.',
+                                 tpath, pillar_extension.name)
+            self.pillar_extensions_template_paths.append(tpath)
+
         # Load extension Eve settings
         eve_settings = pillar_extension.eve_settings()
 
@@ -212,10 +223,17 @@ class PillarServer(Eve):
             self.config['DOMAIN'].update(eve_settings['DOMAIN'])
 
     def _config_jinja_env(self):
+        # Start with the extensions...
+        paths_list = [
+            jinja2.FileSystemLoader(path)
+            for path in reversed(self.pillar_extensions_template_paths)
+        ]
+
+        # ...then load Pillar paths.
         pillar_dir = os.path.dirname(os.path.realpath(__file__))
         parent_theme_path = os.path.join(pillar_dir, 'web', 'templates')
         current_path = os.path.join(self.app_root, 'templates')
-        paths_list = [
+        paths_list += [
             jinja2.FileSystemLoader(current_path),
             jinja2.FileSystemLoader(parent_theme_path),
             self.jinja_loader
