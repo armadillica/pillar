@@ -103,7 +103,9 @@ script(type="text/javascript").
 	function displayUser(userId) {
 		var url = '/u/' + userId + '/edit?embed=1';
 		$.get(url, function(dataHtml){
-			$('#search-hit-container').html(dataHtml);
+			$('#search-hit-container')
+				.html(dataHtml)
+				.show();
 		})
 		.fail(function(jqXHR, textStatus, errorThrown) {
 			var $userbox = $(".search-hit.users[data-user-id='" + userId + "']");
