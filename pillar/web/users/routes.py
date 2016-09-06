@@ -1,5 +1,6 @@
 import json
 import logging
+import httplib2  # used by the oauth2 package
 import requests
 
 from flask import (abort, Blueprint, current_app, flash, redirect,
@@ -247,16 +248,25 @@ def users_index():
 
 
 def user_roles_update(user_id):
+    """Update the user's roles based on the store subscription status and BlenderID roles."""
+
     api = system_util.pillar_api()
     group_subscriber = Group.find_one({'where': {'name': 'subscriber'}}, api=api)
+    group_demo = Group.find_one({'where': {'name': 'demo'}}, api=api)
 
     # Fetch the user once outside the loop, because we only need to get the
     # subscription status once.
     user = User.me(api=api)
 
-    store_user = subscriptions.fetch_user(user.email)
-    if store_user is None:
-        return
+    store_user = subscriptions.fetch_user(user.email) or {}
+    try:
+        bid_user = current_app.oauth_blender_id.get('/api/user').data or {}
+    except httplib2.HttpLib2Error:
+        log.exception('Error getting /api/user from BlenderID')
+        bid_user = {}
+
+    grant_subscriber = store_user.get('cloud_access', 0) == 1
+    grant_demo = bid_user.get('roles', {}).get('cloud_demo', False)
 
     max_retry = 5
     for retry_count in range(max_retry):
@@ -264,13 +274,17 @@ def user_roles_update(user_id):
         roles = set(user.roles or [])
         groups = set(user.groups or [])
 
-        if store_user['cloud_access'] == 1:
+        if grant_subscriber:
             roles.add(u'subscriber')
             groups.add(group_subscriber._id)
-
         elif u'admin' not in roles:
+            # Don't take away roles from admins.
             roles.discard(u'subscriber')
             groups.discard(group_subscriber._id)
+
+        if grant_demo:
+            roles.add(u'demo')
+            groups.add(group_demo._id)
 
         # Only send an API request when the user has actually changed
         if set(user.roles or []) == roles and set(user.groups or []) == groups:
