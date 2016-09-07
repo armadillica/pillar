@@ -231,7 +231,7 @@ class PillarServer(Eve):
         paths_list = [
             jinja2.FileSystemLoader(path)
             for path in reversed(self.pillar_extensions_template_paths)
-        ]
+            ]
 
         # ...then load Pillar paths.
         pillar_dir = os.path.dirname(os.path.realpath(__file__))
@@ -251,23 +251,27 @@ class PillarServer(Eve):
         pillar.web.jinja.setup_jinja_env(self.jinja_env)
 
     def _config_static_dirs(self):
-        pillar_dir = os.path.dirname(os.path.realpath(__file__))
         # Setup static folder for the instanced app
         self.static_folder = os.path.join(self.app_root, 'static')
+
         # Setup static folder for Pillar
-        self.pillar_static_folder = os.path.join(pillar_dir, 'web', 'static')
+        pillar_dir = os.path.dirname(os.path.realpath(__file__))
+        pillar_static_folder = os.path.join(pillar_dir, 'web', 'static')
+        self.register_static_file_endpoint('/static/pillar', 'static_pillar', pillar_static_folder)
 
-        from flask.views import MethodView
-        from flask import send_from_directory
-        from flask import current_app
+        # Setup static folders for extensions
+        for name, ext in self.pillar_extensions.items():
+            if not ext.static_path:
+                continue
+            self.register_static_file_endpoint('/static/%s' % name,
+                                               'static_%s' % name,
+                                               ext.static_path)
 
-        class PillarStaticFile(MethodView):
-            def get(self, filename):
-                return send_from_directory(current_app.pillar_static_folder,
-                                           filename)
+    def register_static_file_endpoint(self, url_prefix, endpoint_name, static_folder):
+        from pillar.web.static import PillarStaticFile
 
-        self.add_url_rule('/static/pillar/<path:filename>',
-                          view_func=PillarStaticFile.as_view('static_pillar'))
+        view_func = PillarStaticFile.as_view(endpoint_name, static_folder=static_folder)
+        self.add_url_rule('%s/<path:filename>' % url_prefix, view_func=view_func)
 
     def process_extensions(self):
         # Re-initialise Eve after we allowed Pillar submodules to be loaded.

@@ -72,5 +72,17 @@ class PillarExtension(object):
         """
         return None
 
+    @property
+    def static_path(self):
+        """Returns the path where static files are stored.
+
+        Registers an endpoint named 'static_<extension name>', to use like:
+        `url_for('static_attract', filename='js/somefile.js')`
+
+        May return None, in which case the extension will not be able to serve
+        static files.
+        """
+        return None
+
     def setup_app(self, app):
         """Called during app startup, after all extensions have loaded."""
