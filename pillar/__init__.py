@@ -10,6 +10,7 @@ import jinja2
 import os
 import os.path
 from eve import Eve
+import flask
 from flask import render_template, request
 from flask.templating import TemplateNotFound
 
@@ -303,8 +304,63 @@ class PillarServer(Eve):
     def register_error_handlers(self):
         super(PillarServer, self).register_error_handlers()
 
+        # Register error handlers per code.
         for code in (403, 404, 500):
             self.register_error_handler(code, self.pillar_error_handler)
+
+        # Register error handlers per exception.
+        from pillarsdk import exceptions as sdk_exceptions
+
+        sdk_handlers = [
+            (sdk_exceptions.UnauthorizedAccess, self.handle_sdk_unauth),
+            (sdk_exceptions.ForbiddenAccess, self.handle_sdk_forbidden),
+            (sdk_exceptions.ResourceNotFound, self.handle_sdk_resource_not_found),
+            (sdk_exceptions.ResourceInvalid, self.handle_sdk_resource_invalid),
+            (sdk_exceptions.MethodNotAllowed, self.handle_sdk_method_not_allowed),
+        ]
+
+        for (eclass, handler) in sdk_handlers:
+            self.register_error_handler(eclass, handler)
+
+    def handle_sdk_unauth(self, error):
+        """Global exception handling for pillarsdk UnauthorizedAccess
+        Currently the api is fully locked down so we need to constantly
+        check for user authorization.
+        """
+
+        return flask.redirect(flask.url_for('users.login'))
+
+    def handle_sdk_forbidden(self, error):
+        from flask import render_template
+        self.log.info('Forwarding ForbiddenAccess exception to client: %s', error, exc_info=True)
+        return render_template('errors/403_embed.html'), 403
+
+    def handle_sdk_resource_not_found(self, error):
+        from flask import render_template
+        self.log.info('Forwarding ResourceNotFound exception to client: %s', error, exc_info=True)
+        return render_template('errors/404.html'), 404
+
+    def handle_sdk_resource_invalid(self, error):
+        self.log.info('Forwarding ResourceInvalid exception to client: %s', error, exc_info=True)
+
+        # Raising a Werkzeug 422 exception doens't work, as Flask turns it into a 500.
+        return 'The submitted data could not be validated.', 422
+
+    def handle_sdk_method_not_allowed(self, error):
+        """Forwards 405 Method Not Allowed to the client.
+
+        This is actually not fair, as a 405 between Pillar and Pillar-Web
+        doesn't imply that the request the client did on Pillar-Web is not
+        allowed. However, it does allow us to debug this if it happens, by
+        watching for 405s in the browser.
+        """
+        from flask import request
+
+        self.log.info('Forwarding MethodNotAllowed exception to client: %s', error, exc_info=True)
+        self.log.info('HTTP Referer is %r', request.referrer)
+
+        # Raising a Werkzeug 405 exception doens't work, as Flask turns it into a 500.
+        return 'The requested HTTP method is not allowed on this URL.', 405
 
     def pillar_error_handler(self, error_ob):
 
