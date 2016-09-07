@@ -5,10 +5,10 @@ import logging
 import logging.config
 import subprocess
 import tempfile
-
-import jinja2
 import os
 import os.path
+
+import jinja2
 from eve import Eve
 import flask
 from flask import render_template, request
@@ -16,8 +16,7 @@ from flask.templating import TemplateNotFound
 
 from pillar.api import custom_field_validation
 from pillar.api.utils import authentication
-from pillar.web.utils import pretty_date
-from pillar.web.nodes.routes import url_for_node
+import pillar.web.jinja
 
 from . import api
 from . import web
@@ -249,15 +248,7 @@ class PillarServer(Eve):
         custom_jinja_loader = jinja2.ChoiceLoader(paths_list)
         self.jinja_loader = custom_jinja_loader
 
-        def format_pretty_date(d):
-            return pretty_date(d)
-
-        def format_pretty_date_time(d):
-            return pretty_date(d, detail=True)
-
-        self.jinja_env.filters['pretty_date'] = format_pretty_date
-        self.jinja_env.filters['pretty_date_time'] = format_pretty_date_time
-        self.jinja_env.globals['url_for_node'] = url_for_node
+        pillar.web.jinja.setup_jinja_env(self.jinja_env)
 
     def _config_static_dirs(self):
         pillar_dir = os.path.dirname(os.path.realpath(__file__))
