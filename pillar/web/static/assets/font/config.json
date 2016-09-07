@@ -933,6 +933,12 @@
       "src": "fontawesome"
     },
     {
+      "uid": "31972e4e9d080eaa796290349ae6c1fd",
+      "css": "users",
+      "code": 59502,
+      "src": "fontawesome"
+    },
+    {
       "uid": "03e6e1bfe72275c6eaa0d0898fde6c1d",
       "css": "chatbubble-working",
       "code": 59407,
@@ -1005,7 +1011,7 @@
     {
       "uid": "c8388cae1ba05fec948ec5af83771377",
       "css": "people-outline",
-      "code": 59399,
+      "code": 59407,
       "src": "custom_icons",
       "selected": false,
       "svg": {
