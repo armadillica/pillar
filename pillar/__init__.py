@@ -197,7 +197,11 @@ class PillarServer(Eve):
 
         # Load extension blueprint(s)
         for blueprint in pillar_extension.blueprints():
-            self.register_blueprint(blueprint, url_prefix=url_prefix)
+            if blueprint.url_prefix:
+                blueprint_prefix = url_prefix + blueprint.url_prefix
+            else:
+                blueprint_prefix = url_prefix
+            self.register_blueprint(blueprint, url_prefix=blueprint_prefix)
 
         # Load template paths
         tpath = pillar_extension.template_path
