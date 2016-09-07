@@ -25,8 +25,17 @@ def format_undertitle(s):
     return jinja2.filters.do_title(s.replace('_', ' '))
 
 
+def do_hide_none(s):
+    """Returns the input, or an empty string if the input is None."""
+
+    if s is None:
+        return ''
+    return s
+
+
 def setup_jinja_env(jinja_env):
     jinja_env.filters['pretty_date'] = format_pretty_date
     jinja_env.filters['pretty_date_time'] = format_pretty_date_time
     jinja_env.filters['undertitle'] = format_undertitle
+    jinja_env.filters['hide_none'] = do_hide_none
     jinja_env.globals['url_for_node'] = url_for_node
