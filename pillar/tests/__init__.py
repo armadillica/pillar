@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 
+from __future__ import absolute_import
+
 import base64
 import copy
 import json
@@ -26,8 +28,8 @@ import pymongo.collection
 from flask.testing import FlaskClient
 import responses
 
-from pillar.tests.common_test_data import EXAMPLE_PROJECT, EXAMPLE_FILE
 import pillar
+from . import common_test_data as ctd
 
 # from six:
 PY3 = sys.version_info[0] == 3
@@ -44,11 +46,10 @@ TEST_EMAIL_USER = 'koro'
 TEST_EMAIL_ADDRESS = '%s@testing.blender.org' % TEST_EMAIL_USER
 TEST_FULL_NAME = u'врач Сергей'
 TEST_SUBCLIENT_TOKEN = 'my-subclient-token-for-pillar'
-BLENDER_ID_TEST_USERID = 1896
 BLENDER_ID_USER_RESPONSE = {'status': 'success',
                             'user': {'email': TEST_EMAIL_ADDRESS,
                                      'full_name': TEST_FULL_NAME,
-                                     'id': BLENDER_ID_TEST_USERID},
+                                     'id': ctd.BLENDER_ID_TEST_USERID},
                             'token_expires': 'Mon, 1 Jan 2018 01:02:03 GMT'}
 
 
@@ -105,7 +106,7 @@ class AbstractPillarTest(TestMinimal):
             files_collection = self.app.data.driver.db['files']
             assert isinstance(files_collection, pymongo.collection.Collection)
 
-            file = copy.deepcopy(EXAMPLE_FILE)
+            file = copy.deepcopy(ctd.EXAMPLE_FILE)
             if file_overrides is not None:
                 file.update(file_overrides)
             if '_id' in file and file['_id'] is None:
@@ -120,13 +121,24 @@ class AbstractPillarTest(TestMinimal):
             return file_id, from_db
 
     def ensure_project_exists(self, project_overrides=None):
+        self.ensure_group_exists(ctd.EXAMPLE_ADMIN_GROUP_ID, 'project admin')
+        self.ensure_group_exists(ctd.EXAMPLE_PROJECT_READONLY_GROUP_ID, 'r/o group')
+        self.ensure_group_exists(ctd.EXAMPLE_PROJECT_READONLY_GROUP2_ID, 'r/o group 2')
+        self.ensure_user_exists(ctd.EXAMPLE_PROJECT_OWNER_ID,
+                                'proj-owner',
+                                [ctd.EXAMPLE_ADMIN_GROUP_ID])
+
         with self.app.test_request_context():
             projects_collection = self.app.data.driver.db['projects']
             assert isinstance(projects_collection, pymongo.collection.Collection)
 
-            project = copy.deepcopy(EXAMPLE_PROJECT)
+            project = copy.deepcopy(ctd.EXAMPLE_PROJECT)
             if project_overrides is not None:
-                project.update(project_overrides)
+                for key, value in project_overrides.items():
+                    if value is None:
+                        project.pop(key, None)
+                    else:
+                        project[key] = value
 
             found = projects_collection.find_one(project['_id'])
             if found is None:
@@ -134,6 +146,37 @@ class AbstractPillarTest(TestMinimal):
                 return result.inserted_id, project
 
             return found['_id'], found
+
+    def ensure_user_exists(self, user_id, name, group_ids=()):
+        user = copy.deepcopy(ctd.EXAMPLE_USER)
+        user['groups'] = list(group_ids)
+        user['full_name'] = name
+        user['_id'] = ObjectId(user_id)
+
+        with self.app.test_request_context():
+            users_coll = self.app.data.driver.db['users']
+            assert isinstance(users_coll, pymongo.collection.Collection)
+
+            found = users_coll.find_one(user_id)
+            if found:
+                return
+
+            result = users_coll.insert_one(user)
+            assert result.inserted_id
+
+    def ensure_group_exists(self, group_id, name):
+        group_id = ObjectId(group_id)
+
+        with self.app.test_request_context():
+            groups_coll = self.app.data.driver.db['groups']
+            assert isinstance(groups_coll, pymongo.collection.Collection)
+
+            found = groups_coll.find_one(group_id)
+            if found:
+                return
+
+            result = groups_coll.insert_one({'_id': group_id, 'name': name})
+            assert result.inserted_id
 
     def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',),
                     groups=None):
@@ -152,7 +195,7 @@ class AbstractPillarTest(TestMinimal):
                 'roles': list(roles),
                 'settings': {'email_communications': 1},
                 'auth': [{'token': '',
-                          'user_id': unicode(BLENDER_ID_TEST_USERID),
+                          'user_id': unicode(ctd.BLENDER_ID_TEST_USERID),
                           'provider': 'blender-id'}],
                 'full_name': u'คนรักของผัดไทย',
                 'email': TEST_EMAIL_ADDRESS
@@ -335,3 +378,16 @@ class AbstractPillarTest(TestMinimal):
 
     def patch(self, *args, **kwargs):
         return self.client_request('PATCH', *args, **kwargs)
+
+
+def mongo_to_sdk(data):
+    """Transforms a MongoDB dict to a dict suitable to give to the PillarSDK.
+
+    Not efficient, as it converts to JSON and back again. Only use in unittests.
+    """
+
+    import pillar.api.utils
+    import json
+
+    as_json = pillar.api.utils.dumps(data)
+    return json.loads(as_json)

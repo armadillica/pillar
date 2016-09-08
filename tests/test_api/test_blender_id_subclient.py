@@ -5,8 +5,9 @@ import json
 import responses
 from bson import ObjectId
 from flask import g
-from pillar.tests import (AbstractPillarTest, TEST_EMAIL_ADDRESS, BLENDER_ID_TEST_USERID,
+from pillar.tests import (AbstractPillarTest, TEST_EMAIL_ADDRESS,
                           TEST_SUBCLIENT_TOKEN, TEST_EMAIL_USER, TEST_FULL_NAME)
+from pillar.tests import common_test_data as ctd
 
 
 class BlenderIdSubclientTest(AbstractPillarTest):
@@ -22,7 +23,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
                       json={'status': 'success',
                             'user': {'email': TEST_EMAIL_ADDRESS,
                                      'full_name': None,
-                                     'id': BLENDER_ID_TEST_USERID},
+                                     'id': ctd.BLENDER_ID_TEST_USERID},
                             'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'},
                       status=200)
 
@@ -35,7 +36,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
         # Make sure the user exists in our database.
         from pillar.api.utils.authentication import create_new_user
         with self.app.test_request_context():
-            create_new_user(TEST_EMAIL_ADDRESS, 'apekoppie', BLENDER_ID_TEST_USERID)
+            create_new_user(TEST_EMAIL_ADDRESS, 'apekoppie', ctd.BLENDER_ID_TEST_USERID)
 
         self._common_user_test(200, expected_full_name='apekoppie')
 
@@ -80,7 +81,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
 
         subclient_id = self.app.config['BLENDER_ID_SUBCLIENT_ID']
         resp = self.client.post('/api/blender_id/store_scst',
-                                data={'user_id': BLENDER_ID_TEST_USERID,
+                                data={'user_id': ctd.BLENDER_ID_TEST_USERID,
                                       'subclient_id': subclient_id,
                                       'token': scst})
         self.assertEqual(expected_status_code, resp.status_code, resp.data)
@@ -97,7 +98,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
             self.assertEqual(TEST_EMAIL_ADDRESS, db_user['email'])
             self.assertEqual(expected_full_name, db_user['full_name'])
             # self.assertEqual(TEST_SUBCLIENT_TOKEN, db_user['auth'][0]['token'])
-            self.assertEqual(str(BLENDER_ID_TEST_USERID), db_user['auth'][0]['user_id'])
+            self.assertEqual(str(ctd.BLENDER_ID_TEST_USERID), db_user['auth'][0]['user_id'])
             self.assertEqual('blender-id', db_user['auth'][0]['provider'])
 
             # Check that the token was succesfully stored.

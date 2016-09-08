@@ -3,8 +3,11 @@ import datetime
 from bson import tz_util, ObjectId
 
 EXAMPLE_ADMIN_GROUP_ID = ObjectId('5596e975ea893b269af85c0e')
+EXAMPLE_PROJECT_READONLY_GROUP_ID = ObjectId('5596e975ea893b269af85c0f')
+EXAMPLE_PROJECT_READONLY_GROUP2_ID = ObjectId('564733b56dcaf85da2faee8a')
 
 EXAMPLE_PROJECT_ID = ObjectId('5672beecc0261b2005ed1a33')
+EXAMPLE_PROJECT_OWNER_ID = ObjectId('552b066b41acdf5dec4436f2')
 
 EXAMPLE_FILE = {u'_id': ObjectId('5672e2c1c379cf0007b31995'),
                 u'_updated': datetime.datetime(2016, 3, 25, 10, 28, 24, tzinfo=tz_util.utc),
@@ -45,7 +48,7 @@ EXAMPLE_PROJECT = {
     u'category': u'assets',
     u'description': u'Welcome to this curated collection of Blender Institute textures and image resources. This collection is an on-going project, as with each project we create a number of textures based on our own resources (photographs, scans, etc.) or made completely from scratch. At the moment you can find all the textures from the past Open Projects that were deemed re-usable. \r\n\r\nPeople who have contributed to these textures:\r\n\r\nAndrea Weikert, Andy Goralczyk, Basse Salmela, Ben Dansie, Campbell Barton, Enrico Valenza, Ian Hubert, Kjartan Tysdal, Manu J\xe4rvinen, Massimiliana Pulieso, Matt Ebb, Pablo Vazquez, Rob Tuytel, Roland Hess, Sarah Feldlaufer, S\xf6nke M\xe4ter',
     u'is_private': False,
-    u'name': u'Textures',
+    u'name': u'Unittest project',
     u'node_types': [{u'description': u'Group for texture node type',
                      u'dyn_schema': {u'order': {u'type': u'integer'},
                                      u'status': {u'allowed': [u'published', u'pending'],
@@ -114,9 +117,9 @@ EXAMPLE_PROJECT = {
                      u'parent': [u'group', u'project'],
                      u'permissions': {u'groups': [{u'group': EXAMPLE_ADMIN_GROUP_ID,
                                                    u'methods': [u'GET', u'PUT', u'POST']},
-                                                  {u'group': ObjectId('5596e975ea893b269af85c0f'),
+                                                  {u'group': EXAMPLE_PROJECT_READONLY_GROUP_ID,
                                                    u'methods': [u'GET']},
-                                                  {u'group': ObjectId('564733b56dcaf85da2faee8a'),
+                                                  {u'group': EXAMPLE_PROJECT_READONLY_GROUP2_ID,
                                                    u'methods': [u'GET']}],
                                       u'users': [],
                                       u'world': []}},
@@ -232,8 +235,6 @@ EXAMPLE_PROJECT = {
     u'nodes_blog': [],
     u'nodes_featured': [],
     u'nodes_latest': [],
-    u'organization': ObjectId('55a99fb43004867fb9934f01'),
-    u'owners': {u'groups': [], u'users': []},
     u'permissions': {u'groups': [{u'group': EXAMPLE_ADMIN_GROUP_ID,
                                   u'methods': [u'GET', u'POST', u'PUT', u'DELETE']}],
                      u'users': [],
@@ -243,7 +244,7 @@ EXAMPLE_PROJECT = {
     u'status': u'published',
     u'summary': u'Texture collection from all Blender Institute open projects.',
     u'url': u'textures',
-    u'user': ObjectId('552b066b41acdf5dec4436f2')}
+    u'user': EXAMPLE_PROJECT_OWNER_ID}
 
 EXAMPLE_NODE = {
     u'_id': ObjectId('572761099837730efe8e120d'),
@@ -262,3 +263,19 @@ EXAMPLE_NODE = {
     u'_created': datetime.datetime(2016, 5, 2, 14, 19, 37, 0, tzinfo=tz_util.utc),
     u'_etag': u'6b8589b42c880e3626f43f3e82a5c5b946742687'
 }
+
+BLENDER_ID_TEST_USERID = 1533
+EXAMPLE_USER = {'_id': EXAMPLE_PROJECT_OWNER_ID,
+                'username': 'sybren+unittests@blender.studio',
+                'groups': [],
+                'auth': [{
+                    'provider': 'blender-id',
+                    'token': '',
+                    'user_id': str(BLENDER_ID_TEST_USERID),
+                }],
+                'full_name': 'sybren+unittest@blender.studio',
+                'settings': {'email_communications': 1},
+                '_updated': datetime.datetime(2016, 8, 5, 18, 19, 29),
+                '_etag': '25a6a90781bf27333218fbbf33b3e8d53e37b1cb',
+                '_created': datetime.datetime(2016, 8, 5, 18, 19, 29),
+                'email': 'sybren+unittests@blender.studio'}
