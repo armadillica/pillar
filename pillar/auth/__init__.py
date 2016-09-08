@@ -33,6 +33,11 @@ class UserClass(flask_login.UserMixin):
 
 
 class AnonymousUser(flask_login.AnonymousUserMixin):
+    @property
+    def objectid(self):
+        """Anonymous user has no settable objectid."""
+        return None
+
     def has_role(self, *roles):
         return False
 
@@ -71,6 +76,13 @@ def config_login_manager(app):
     login_manager.user_loader(_load_user)
 
     return login_manager
+
+
+def login_user(oauth_token):
+    """Log in the user identified by the given token."""
+
+    user = UserClass(oauth_token)
+    flask_login.login_user(user)
 
 
 def get_blender_id_oauth_token():

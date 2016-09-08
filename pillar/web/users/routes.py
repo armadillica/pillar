@@ -6,11 +6,12 @@ import urlparse
 
 from flask import (abort, Blueprint, current_app, flash, redirect,
                    render_template, request, session, url_for)
-from flask_login import login_required, login_user, logout_user, current_user
+from flask_login import login_required, logout_user, current_user
 from flask_oauthlib.client import OAuthException
 from werkzeug import exceptions as wz_exceptions
 
-from pillar.auth import UserClass, subscriptions
+import pillar.auth
+from pillar.auth import subscriptions
 from pillar.web import system_util
 from .forms import UserProfileForm
 from .forms import UserSettingsEmailsForm
@@ -57,9 +58,7 @@ def blender_id_authorized():
 
     session['blender_id_oauth_token'] = (oauth_resp['access_token'], '')
 
-    user = UserClass(oauth_resp['access_token'])
-    login_user(user)
-    current_app.login_manager.reload_user()  # This ensures that flask_login.current_user is set.
+    pillar.auth.login_user(oauth_resp['access_token'])
 
     if current_user is not None:
         # Check with the store for user roles. If the user has an active
@@ -91,8 +90,7 @@ def login_local():
             return abort(r.status_code)
         res = r.json()
         # If correct, receive token and log in the user
-        user = UserClass(res['token'])
-        login_user(user)
+        pillar.auth.login_user(res['token'])
         return redirect(url_for('main.homepage'))
     return render_template('users/login.html', form=form)
 
