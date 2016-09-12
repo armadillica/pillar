@@ -1,176 +1,34 @@
-$slide-height: 600px
-
+.navbar-backdrop.join
+	+media-xs
+		background-size: initial
 .join
 	position: relative
 
-	.slide
-		position: relative
-		display: flex
-		justify-content: center
-		width: 100%
+	#page-header
+		display: block
+		padding: 30px 0 15px 0
+		font-size: .9em
+
+		.container
+			+media-sm
+				margin-left: 0
+
+		.page-title, .page-title-summary
+			text-align: left
+			text-shadow: none
+
+			ul
+				margin-bottom: 25px
+
+				li.special
+					color: $color-danger
+
+		.page-header-cta-container
+			margin: 30px 0 50px 60px
+			justify-content: flex-start
 
 
-		&.icons
-			margin: 50px auto 100px auto
-			flex-direction: row
-			justify-content: space-around
 
-			.join__points_item
-				display: inline-block
-				width: 20%
-				padding: 0 20px
-				text-align: center
-
-				.join__points_item-icon
-					font-size: 4em
-					display: block
-					color: $color-text-dark-secondary
-					margin: 0 0 15px 0
-
-				.join__points_item-title
-					display: block
-					font-family: $font-headings
-					font-size: 1.5em
-					line-height: 1.2em
-					color: lighten($color-text, 10%)
-
-				.join__points_item-description
-					margin-top: 25px
-					display: block
-
-		&.image
-			flex-direction: column
-
-			height: $slide-height
-			width: 100%
-			background:
-				repeat: no-repeat
-				size: cover
-
-			color: white
-
-			.lead
-				z-index: 1
-				max-width: 500px
-				font-size: 1.2em
-				padding: 0 50px
-				text-shadow: 0 0 25px rgba(black, .8)
-
-				h1
-					font:
-						family: $font-headings
-
-				a
-					color: white
-
-				&.right
-					align-self: flex-end
-
-		&.main
-			text-align: center
-			align-items: center
-
-			h1
-				z-index: 1
-				font:
-					family: $font-headings
-				font-size: 3.5em
-				margin: 0
-				padding: 0 0 15px 0
-				text-shadow: 0 0 30px rgba(black, .5)
-
-			h2
-				z-index: 1
-				font:
-					size: 1.4em
-					family: $font-headings
-					margin: 0
-					padding: 0
-					weight: 400
-
-				max-width: 500px
-				text-shadow: 0 0 25px rgba(black, .8)
-
-
-		&.subscribe
-			.box
-				padding: 15px 65rpx
-				margin: 25px auto
-				+container-box
-
-				h2
-					text-align: center
-					padding: 0 0 15px 0
-
-				ul
-					max-width: 300px
-					margin: 0 30px
-					padding: 0
-					list-style-type: none
-
-					li
-						position: relative
-						padding: 0
-						margin: 0
-
-						&:after
-							position: absolute
-							content: '\f00c'
-							font-size: 75%
-							top: 3px
-							left: -15px
-							font-family: "FontAwesome"
-							color: $color-success
-
-				a.subscribe
-					display: inline-block
-					width: 100%
-					text-align: center
-
-				button.subscribe
-					color: $color-text-dark
-					border-color: $color-text-dark
-					margin: 25px auto 25px auto
-					transition: opacity .1s
-
-					&:hover
-						opacity: .8
-
-					i
-						padding-left: 10px
-
-
-		.overlay
-			z-index: 1
-
-		.gradient
-			position: absolute
-			width: 100%
-			height: 100%
-			top: 0
-			left: 0
-			right: 0
-			bottom: 0
-			z-index: 0
-			background: linear-gradient(to top, rgba(5,6,6,0.6) 0%, transparent 80%)
-
-			&.left
-				background: linear-gradient(to right, rgba(5,6,6,0.6) 0%, transparent 80%)
-			&.right
-				background: linear-gradient(to left, rgba(5,6,6,0.6) 0%, transparent 80%)
-
-		button
-			color: white
-			border-color: white
-			padding: 5px 25px
-			margin: 45px auto 0 auto
-			font:
-				family: $font-headings
-				size: 1.6em
-
-			&:hover, &:focus
-				background-color: rgba(white, .2)
-
-			&:active
-				background-color: rgba(white, .4)
-				color: white
+	li.special
+		color: $color-danger
+		font-weight: bold

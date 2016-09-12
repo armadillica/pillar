@@ -777,17 +777,17 @@ section.pricing
 		text-shadow: 1px 1px 0 white
 		margin:
 			top: 10px
-			bottom: 70px
+			bottom: 50px
 		padding: 0
 
 		+media-xs
 			font-size: 1.6em
 
 	.box
-		padding: 0 20px
+		margin-top: 40px
+		padding: 20px 20px 60px 20px
 		border: 1px solid $color-text-dark-hint
 		background-color: white
-		height: 340px
 		min-height: 340px
 		position: relative
 		text-align: center
@@ -814,7 +814,6 @@ section.pricing
 		&.education
 			.pricing-caption
 				padding: 25px
-				color: $color-text-dark-secondary
 				font-size: 1.1em
 				transition: color 100ms ease-in-out
 
@@ -851,8 +850,11 @@ section.pricing
 
 		.pricing-caption
 			color: $color-text-dark
-			// font-size: .9em
+			text-align: center
 			padding-bottom: 0
+
+			ul
+				text-align: left
 
 		+list-bullets
 
