@@ -780,18 +780,27 @@ $node-preview-max-height-lg: 700px
 		float: left
 		text-transform: capitalize
 		+project-node-title
-		text-shadow: 1px 1px 0 rgba(white, .5)
 
 		position: relative
 		z-index: 1
 
 	.texture-license
-		float: right
-		padding: 20px 20px 0 0
-		i
-			font-size: 1.3em
 		position: relative
 		z-index: 1
+		float: right
+		padding: 25px 20px 0 0
+		cursor: default
+
+		i
+			font-size: 1.3em
+			&.pi-license-cc-0
+				top: -1px
+
+		span
+			position: relative
+			bottom: 2px
+			margin-right: 10px
+			color: $color-text-dark-secondary
 
 	.texture-backdrop
 		background:

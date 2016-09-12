@@ -8,15 +8,11 @@
 
 	| {% if node.properties.license_type %}
 	| {% if node.properties.license_notes %}
-	.texture-license(
-		id="asset-license",
-		data-toggle="popover",
-		data-placement="left",
-		data-trigger="hover",
-		data-content="{{ node.properties.license_notes }}",
-		title="{{ node.properties.license_type }}")
-
+	.texture-license(title="License {{ node.properties.license_type }}")
+		span {{ node.properties.license_notes }}
+		i(class="pi-license-cc-by")
 		i(class="pi-license-{{ node.properties.license_type }}")
+
 	| {% else %}
 	.texture-license(
 		id="asset-license",
