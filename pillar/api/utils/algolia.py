@@ -81,12 +81,15 @@ def algolia_index_node_save(node):
     if 'permissions' in node and 'world' in node['permissions']:
         if 'GET' in node['permissions']['world']:
             node_ob['is_free'] = True
+
     # Append the media key if the node is of node_type 'asset'
     if node['node_type'] == 'asset':
         node_ob['media'] = node['properties']['content_type']
-    # Add tags
-    if 'tags' in node['properties']:
-        node_ob['tags'] = node['properties']['tags']
+
+    # Add extra properties
+    for prop in ('tags', 'license_notes'):
+        if prop in node['properties']:
+            node_ob[prop] = node['properties'][prop]
 
     current_app.algolia_index_nodes.save_object(node_ob)
 
