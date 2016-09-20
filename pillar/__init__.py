@@ -182,8 +182,13 @@ class PillarServer(Eve):
     def load_extension(self, pillar_extension, url_prefix):
         from .extension import PillarExtension
 
-        assert isinstance(pillar_extension, PillarExtension), \
-            'Extension has wrong type %r' % type(pillar_extension)
+        if not isinstance(pillar_extension, PillarExtension):
+            if self.config.get('DEBUG'):
+                for cls in type(pillar_extension).mro():
+                    self.log.error('class %42r (%i) is %42r (%i): %s',
+                                   cls, id(cls), PillarExtension, id(PillarExtension),
+                                   cls is PillarExtension)
+            raise AssertionError('Extension has wrong type %r' % type(pillar_extension))
         self.log.info('Loading extension %s', pillar_extension.name)
 
         # Remember this extension, and disallow duplicates.

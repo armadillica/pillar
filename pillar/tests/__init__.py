@@ -1,5 +1,7 @@
 # -*- encoding: utf-8 -*-
 
+from __future__ import print_function
+
 from __future__ import absolute_import
 
 import base64
@@ -94,9 +96,15 @@ class AbstractPillarTest(TestMinimal):
 
         # Not only delete self.app (like the superclass does),
         # but also un-import the application.
-        del sys.modules['pillar']
-        remove = [modname for modname in sys.modules
-                  if modname.startswith('pillar.')]
+        self.unload_modules('pillar')
+
+    def unload_modules(self, module_name):
+        """Uploads the named module, and all submodules."""
+
+        del sys.modules[module_name]
+
+        remove = {modname for modname in sys.modules
+                  if modname.startswith('%s.' % module_name)}
         for modname in remove:
             del sys.modules[modname]
 
