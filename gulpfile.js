@@ -11,6 +11,7 @@ var rename       = require('gulp-rename');
 var sass         = require('gulp-sass');
 var sourcemaps   = require('gulp-sourcemaps');
 var uglify       = require('gulp-uglify');
+var cache        = require('gulp-cached');
 
 var enabled = {
     uglify: argv.production,
@@ -20,10 +21,12 @@ var enabled = {
     liveReload: !argv.production
 };
 
+
 /* CSS */
 gulp.task('styles', function() {
     gulp.src('src/styles/**/*.sass')
         .pipe(gulpif(enabled.failCheck, plumber()))
+        .pipe(cache('styling'))
         .pipe(gulpif(enabled.maps, sourcemaps.init()))
         .pipe(sass({
             outputStyle: 'compressed'}
@@ -39,6 +42,7 @@ gulp.task('styles', function() {
 gulp.task('templates', function() {
     gulp.src('src/templates/**/*.jade')
         .pipe(gulpif(enabled.failCheck, plumber()))
+        .pipe(cache('templating'))
         .pipe(jade({
             pretty: enabled.prettyPug
         }))
@@ -51,6 +55,7 @@ gulp.task('templates', function() {
 gulp.task('scripts', function() {
     gulp.src('src/scripts/*.js')
         .pipe(gulpif(enabled.failCheck, plumber()))
+        .pipe(cache('scripting'))
         .pipe(gulpif(enabled.maps, sourcemaps.init()))
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(rename({suffix: '.min'}))
