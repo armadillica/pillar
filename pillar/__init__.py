@@ -331,14 +331,15 @@ class PillarServer(Eve):
         return flask.redirect(flask.url_for('users.login'))
 
     def handle_sdk_forbidden(self, error):
-        from flask import render_template
         self.log.info('Forwarding ForbiddenAccess exception to client: %s', error, exc_info=True)
-        return render_template('errors/403_embed.html'), 403
+        error.code = 403
+        return self.pillar_error_handler(error)
 
     def handle_sdk_resource_not_found(self, error):
-        from flask import render_template
         self.log.info('Forwarding ResourceNotFound exception to client: %s', error, exc_info=True)
-        return render_template('errors/404.html'), 404
+
+        error.code = 404
+        return self.pillar_error_handler(error)
 
     def handle_sdk_resource_invalid(self, error):
         self.log.info('Forwarding ResourceInvalid exception to client: %s', error, exc_info=True)
