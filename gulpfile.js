@@ -95,7 +95,10 @@ gulp.task('scripts_concat_markdown', function() {
 
 // While developing, run 'gulp watch'
 gulp.task('watch',function() {
-    livereload.listen();
+    // Only listen for live reloads if ran with --livereload
+    if (argv.livereload){
+        livereload.listen();
+    }
 
     gulp.watch('src/styles/**/*.sass',['styles']);
     gulp.watch('src/templates/**/*.jade',['templates']);
