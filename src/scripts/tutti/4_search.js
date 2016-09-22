@@ -4,10 +4,13 @@
 */
 
 $(document).ready(function() {
+
+	if (typeof algoliaIndex === 'undefined') return;
+
 	var searchInput = $('#cloud-search');
 
 	var tu = searchInput.typeahead({hint: true}, {
-		source: index.ttAdapter(),
+		source: algoliaIndex.ttAdapter(),
 		displayKey: 'name',
 		limit: 10,
 		minLength: 0,
@@ -46,7 +49,6 @@ $(document).ready(function() {
 			}
 		}
 	});
-
 
 	$('.search-site-result.advanced, .search-icon').on('click', function(e){
 		e.stopPropagation();
