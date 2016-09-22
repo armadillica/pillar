@@ -6,6 +6,7 @@ ProjectUtils = {
     isProject: function() { return document.body.dataset.isProject === 'true'; },
     nodeType: function() { return document.body.dataset.nodeType; },
     isModified: function() { return document.body.dataset.isModified === 'true'; },
+    context: function() { return document.body.dataset.context; },
     setProjectAttributes: function(props) {
         for (var key in props) {
             if (!props.hasOwnProperty(key)) continue;
