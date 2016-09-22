@@ -1,7 +1,9 @@
-$(function () {
-	$('[data-toggle="tooltip"]').tooltip({'delay' : {'show': 1250, 'hide': 250}});
+if(typeof($.fn.popover) != 'undefined'){
 	$('[data-toggle="popover"]').popover();
-})
+}
+if(typeof($.fn.tooltip) != 'undefined'){
+	$('[data-toggle="tooltip"]').tooltip({'delay' : {'show': 1250, 'hide': 250}});
+}
 
 function NavbarTransparent() {
 
