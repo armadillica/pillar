@@ -22,6 +22,10 @@ def format_undertitle(s):
     Replaces underscores with spaces, and then applies Jinja2's own title filter.
     """
 
+    # Just keep empty strings and Nones as they are.
+    if not s:
+        return s
+
     return jinja2.filters.do_title(s.replace('_', ' '))
 
 
