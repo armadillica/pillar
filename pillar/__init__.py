@@ -317,6 +317,7 @@ class PillarServer(Eve):
             (sdk_exceptions.ResourceNotFound, self.handle_sdk_resource_not_found),
             (sdk_exceptions.ResourceInvalid, self.handle_sdk_resource_invalid),
             (sdk_exceptions.MethodNotAllowed, self.handle_sdk_method_not_allowed),
+            (sdk_exceptions.PreconditionFailed, self.handle_sdk_precondition_failed),
         ]
 
         for (eclass, handler) in sdk_handlers:
@@ -339,6 +340,12 @@ class PillarServer(Eve):
         self.log.info('Forwarding ResourceNotFound exception to client: %s', error, exc_info=True)
 
         error.code = 404
+        return self.pillar_error_handler(error)
+
+    def handle_sdk_precondition_failed(self, error):
+        self.log.info('Forwarding PreconditionFailed exception to client: %s', error, exc_info=True)
+
+        error.code = 412
         return self.pillar_error_handler(error)
 
     def handle_sdk_resource_invalid(self, error):
