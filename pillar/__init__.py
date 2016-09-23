@@ -343,7 +343,7 @@ class PillarServer(Eve):
         return self.pillar_error_handler(error)
 
     def handle_sdk_precondition_failed(self, error):
-        self.log.info('Forwarding PreconditionFailed exception to client: %s', error, exc_info=True)
+        self.log.info('Forwarding PreconditionFailed exception to client: %s', error)
 
         error.code = 412
         return self.pillar_error_handler(error)
