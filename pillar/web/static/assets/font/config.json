@@ -939,6 +939,18 @@
       "src": "fontawesome"
     },
     {
+      "uid": "c8585e1e5b0467f28b70bce765d5840c",
+      "css": "clipboard-copy",
+      "code": 61637,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "b429436ec5a518c78479d44ef18dbd60",
+      "css": "clipboard-paste",
+      "code": 61674,
+      "src": "fontawesome"
+    },
+    {
       "uid": "03e6e1bfe72275c6eaa0d0898fde6c1d",
       "css": "chatbubble-working",
       "code": 59407,
