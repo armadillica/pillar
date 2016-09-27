@@ -1,4 +1,5 @@
 # Primary requirements
+attrs==16.2.0
 algoliasearch==1.8.0
 bcrypt==2.0.0
 blinker==1.4

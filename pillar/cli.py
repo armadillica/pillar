@@ -444,3 +444,61 @@ def mass_copy_between_backends(src_backend='cdnsun', dest_backend='gcs'):
 
     log.info('%i files copied ok', copied_ok)
     log.info('%i files we did not copy', copy_errs)
+
+
+@manager.command
+@manager.option('-p', '--project', dest='dest_proj_url',
+                help='Destination project URL')
+@manager.option('-f', '--force', dest='force', action='store_true', default=False,
+                help='Move even when already at the given project.')
+@manager.option('-s', '--skip-gcs', dest='skip_gcs', action='store_true', default=False,
+                help='Skip file handling on GCS, just update the database.')
+def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=False):
+    """Copies all files from one project to the other, then moves the nodes.
+
+    The node and all its children are moved recursively.
+    """
+
+    from pillar.api.nodes import moving
+    from pillar.api.utils import str2id
+
+    logging.getLogger('pillar').setLevel(logging.INFO)
+
+    db = current_app.db()
+    nodes_coll = db['nodes']
+    projs_coll = db['projects']
+
+    # Parse CLI args and get the node, source and destination projects.
+    node_uuid = str2id(node_uuid)
+    node = nodes_coll.find_one({'_id': node_uuid})
+    if node is None:
+        log.error("Node %s can't be found!", node_uuid)
+        return 1
+
+    if node.get('parent', None):
+        log.error('Node cannot have a parent, it must be top-level.')
+        return 4
+
+    src_proj = projs_coll.find_one({'_id': node['project']})
+    dest_proj = projs_coll.find_one({'url': dest_proj_url})
+
+    if src_proj is None:
+        log.warning("Node's source project %s doesn't exist!", node['project'])
+    if dest_proj is None:
+        log.error("Destination project url='%s' doesn't exist.", dest_proj_url)
+        return 2
+    if src_proj['_id'] == dest_proj['_id']:
+        if force:
+            log.warning("Node is already at project url='%s'!", dest_proj_url)
+        else:
+            log.error("Node is already at project url='%s'!", dest_proj_url)
+            return 3
+
+    log.info("Mass-moving %s (%s) and children from project '%s' (%s) to '%s' (%s)",
+             node_uuid, node['name'], src_proj['url'], src_proj['_id'], dest_proj['url'],
+             dest_proj['_id'])
+
+    mover = moving.NodeMover(db=db, skip_gcs=skip_gcs)
+    mover.change_project(node, dest_proj)
+
+    log.info('Done moving.')

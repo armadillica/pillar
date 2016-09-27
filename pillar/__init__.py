@@ -509,3 +509,11 @@ class PillarServer(Eve):
         links.sort(key=lambda t: len(t[0]) + 100 * ('/api/' in t[0]))
 
         pprint(links)
+
+    def db(self):
+        """Returns the MongoDB database.
+
+        :rtype: flask_pymongo.PyMongo
+        """
+
+        return self.data.driver.db

@@ -169,6 +169,15 @@ class GoogleCloudStorageBucket(object):
         blob.content_disposition = u'attachment; filename="{0}"'.format(name)
         blob.patch()
 
+    def copy_blob(self, blob, to_bucket):
+        """Copies the given blob from this bucket to the other bucket.
+
+        Returns the new blob.
+        """
+
+        assert isinstance(to_bucket, GoogleCloudStorageBucket)
+        return self.bucket.copy_blob(blob, to_bucket.bucket)
+
 
 def update_file_name(node):
     """Assign to the CGS blob the same name of the asset node. This way when
@@ -222,3 +231,16 @@ def update_file_name(node):
     if 'files' in node['properties']:
         for file_props in node['properties']['files']:
             _update_name(file_props['file'], file_props)
+
+
+def copy_to_bucket(file_path, src_project_id, dest_project_id):
+    """Copies a file from one bucket to the other."""
+
+    log.info('Copying %s from project bucket %s to %s',
+             file_path, src_project_id, dest_project_id)
+
+    src_storage = GoogleCloudStorageBucket(str(src_project_id))
+    dest_storage = GoogleCloudStorageBucket(str(dest_project_id))
+
+    blob = src_storage.Get(file_path, to_dict=False)
+    src_storage.copy_blob(blob, dest_storage)

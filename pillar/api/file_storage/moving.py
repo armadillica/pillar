@@ -12,6 +12,7 @@ import requests
 import requests.exceptions
 
 from . import stream_to_gcs, generate_all_links, ensure_valid_link
+import pillar.api.utils.gcs
 
 __all__ = ['PrerequisiteNotMetError', 'change_file_storage_backend']
 
@@ -138,7 +139,8 @@ def fetch_file_from_local(file_doc):
     :param file_doc: dict with 'link' key pointing to a path in STORAGE_DIR, and
         'content_type' key.
     :type file_doc: dict
-    :rtype: dict
+    :rtype: dict        self._log.info('Moving file %s to project %s', file_id, dest_proj['_id'])
+
     """
 
     local_file = open(os.path.join(current_app.config['STORAGE_DIR'], file_doc['file_path']), 'rb')
@@ -148,3 +150,42 @@ def fetch_file_from_local(file_doc):
         'local_file': local_file
     }
     return local_finfo
+
+
+def gcs_move_to_bucket(file_id, dest_project_id, skip_gcs=False):
+    """Moves a file from its own bucket to the new project_id bucket."""
+
+    files_coll = current_app.db()['files']
+
+    f = files_coll.find_one(file_id)
+    if f is None:
+        raise ValueError('File with _id: {} not found'.format(file_id))
+
+    # Check that new backend differs from current one
+    if f['backend'] != 'gcs':
+        raise ValueError('Only Google Cloud Storage is supported for now.')
+
+    # Move file and variations to the new bucket.
+    if skip_gcs:
+        log.warning('NOT ACTUALLY MOVING file %s on GCS, just updating MongoDB', file_id)
+    else:
+        src_project = f['project']
+        pillar.api.utils.gcs.copy_to_bucket(f['file_path'], src_project, dest_project_id)
+        for var in f.get('variations', []):
+            pillar.api.utils.gcs.copy_to_bucket(var['file_path'], src_project, dest_project_id)
+
+    # Update the file document after moving was successful.
+    log.info('Switching file %s to project %s', file_id, dest_project_id)
+    update_result = files_coll.update_one({'_id': file_id},
+                                          {'$set': {'project': dest_project_id}})
+    if update_result.matched_count != 1:
+        raise RuntimeError(
+            'Unable to update file %s in MongoDB: matched_count=%i; modified_count=%i' % (
+                file_id, update_result.matched_count, update_result.modified_count))
+
+    log.info('Switching file %s: matched_count=%i; modified_count=%i',
+             file_id, update_result.matched_count, update_result.modified_count)
+
+    # Regenerate the links for this file
+    f['project'] = dest_project_id
+    generate_all_links(f, now=datetime.datetime.now(tz=bson.tz_util.utc))
