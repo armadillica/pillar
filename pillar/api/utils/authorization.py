@@ -155,7 +155,7 @@ def compute_aggr_permissions(collection_name, resource, check_node_type=None):
     project_permissions = project['permissions']
 
     # Find the node type from the project.
-    node_type = next((node_type for node_type in project['node_types']
+    node_type = next((node_type for node_type in project.get('node_types', ())
                       if node_type['name'] == node_type_name), None)
     if node_type is None:  # This node type is not known, so doesn't give permissions.
         node_type_permissions = {}
