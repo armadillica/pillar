@@ -368,7 +368,7 @@ def check_cdnsun():
     fdocs = files_collection.find({'backend': 'cdnsun'})
     for idx, fdoc in enumerate(fdocs):
         if idx % 100 == 0:
-            print('Handling file %i/~1800' % (idx+1))
+            print('Handling file %i/~1800' % (idx + 1))
 
         variations = fdoc.get('variations', ())
         resp = s.head(fdoc['link'])
