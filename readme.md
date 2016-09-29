@@ -21,3 +21,17 @@ it to [css2sass](http://css2sass.herokuapp.com/) to convert it to SASS, and
 place it in [src/styles/_font-pillar.sass](src/styles/_font-pillar.sass).
 
 Don't forget to Gulp!
+
+
+## Installation
+
+Make sure your /data directory exists and is writable by the current user.
+Alternatively, provide a `pillar/config_local.py` that changes the relevant
+settings.
+
+```
+git clone git@git.blender.org:pillar-python-sdk.git ../pillar-python-sdk
+pip install -e ../pillar-python-sdk
+pip install -U -r requirements.txt
+pip install -e .
+```
