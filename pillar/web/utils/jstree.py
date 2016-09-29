@@ -1,7 +1,7 @@
 from pillarsdk import Node
 from pillarsdk.exceptions import ForbiddenAccess
 from pillarsdk.exceptions import ResourceNotFound
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from pillar.web import system_util
 
@@ -34,26 +34,28 @@ def jstree_get_children(node_id, project_id=None):
             'name': 1, 'parent': 1, 'node_type': 1, 'properties.order': 1,
             'properties.status': 1, 'properties.content_type': 1, 'user': 1,
             'project': 1},
-        'sort': [('properties.order', 1), ('_created', 1)]}
+        'sort': [('properties.order', 1), ('_created', 1)],
+        'where': {
+            '$and': [
+                {'node_type': {'$regex': '^(?!attract_)'}},
+                {'node_type': {'$not': {'$in': ['comment', 'post', 'blog']}}},
+            ],
+        }
+    }
     if node_id:
         if node_id.startswith('n_'):
             node_id = node_id.split('_')[1]
-        lookup['where'] = {'parent': node_id}
+        lookup['where']['parent'] = node_id
     elif project_id:
-        lookup['where'] = {'project': project_id, 'parent': {'$exists': False}}
+        lookup['where']['project'] = project_id
+        lookup['where']['parent'] = {'$exists': False}
 
     try:
         children = Node.all(lookup, api=api)
         for child in children['_items']:
-            # Skip nodes of type comment
-            if child.node_type not in ['comment', 'post']:
-                if child.properties.status == 'published':
-                    children_list.append(jstree_parse_node(child))
-                # TODO: Remove this code (blog now accessible from sidebar)
-                # elif child.node_type == 'blog':
-                #     children_list.append(jstree_parse_node(child))
-                elif current_user.is_authenticated and child.user == current_user.objectid:
-                    children_list.append(jstree_parse_node(child))
+            is_pub = child.properties.status == 'published'
+            if is_pub or (current_user.is_authenticated and child.user == current_user.objectid):
+                children_list.append(jstree_parse_node(child))
     except ForbiddenAccess:
         pass
     return children_list
