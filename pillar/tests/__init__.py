@@ -229,11 +229,23 @@ class AbstractPillarTest(TestMinimal):
         :rtype: tuple
         """
         project_id, proj = self.ensure_project_exists()
-        admin_group_id = proj['permissions']['groups'][0]['group']
-
-        user_id = self.create_user(user_id=user_id, roles=roles, groups=[admin_group_id])
+        user_id = self.create_project_admin(proj, user_id, roles)
 
         return project_id, user_id
+
+    def create_project_admin(self, proj, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber', )):
+        """Creates a user that's member of the project's admin group.
+
+        :param proj: project document, or at least a dict with permissions in it.
+        :type proj: dict
+        :returns: user_id
+        :rtype: ObjectId
+        """
+
+        admin_group_id = proj['permissions']['groups'][0]['group']
+        user_id = self.create_user(user_id=user_id, roles=roles, groups=[admin_group_id])
+
+        return user_id
 
     def badger(self, user_email, roles, action, srv_token=None):
         """Creates a service account, and uses it to grant or revoke a role to the user.
