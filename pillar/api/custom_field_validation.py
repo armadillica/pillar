@@ -72,7 +72,7 @@ class ValidateCustomFields(Validator):
         except Exception as e:
             log.warning("Error converting form properties", exc_info=True)
 
-        v = Validator(node_type['dyn_schema'])
+        v = self.__class__(schema=node_type['dyn_schema'])
         val = v.validate(value)
 
         if val:
@@ -80,3 +80,22 @@ class ValidateCustomFields(Validator):
 
         log.warning('Error validating properties for node %s: %s', self.document, v.errors)
         self._error(field, "Error validating properties")
+
+    def _validate_required_after_creation(self, required_after_creation, field, value):
+        """Makes a value required after creation only.
+
+        Combine "required_after_creation=True" with "required=False" to allow
+        pre-insert hooks to set default values.
+        """
+
+        if not required_after_creation:
+            # Setting required_after_creation=False is the same as not mentioning this
+            # validator at all.
+            return
+
+        if self._id is None:
+            # This is a creation call, in which case this validator shouldn't run.
+            return
+
+        if not value:
+            self._error(field, "Value is required once the document was created")
