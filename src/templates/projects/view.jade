@@ -585,7 +585,9 @@ script.
 	$(window).on("load resize",function(){
 		containerResizeY($(window).height());
 
-		project_container.style.height = (window.innerHeight - project_container.offsetTop) + "px";
+		if ($(window).width() > 480) {
+			project_container.style.height = (window.innerHeight - project_container.offsetTop) + "px";
+		}
 	});
 
 	if (projectTree){
