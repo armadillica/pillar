@@ -11,5 +11,9 @@ function install() {
 [ -e $GULP ] || install
 [ gulpfile.js -nt $GULP ] && install
 
-$GULP
-exec $GULP watch
+if [ "$1" == "watch" ]; then
+    # Treat "gulp watch" as "gulp && gulp watch"
+    $GULP
+fi
+
+exec $GULP "$@"
