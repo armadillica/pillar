@@ -112,7 +112,7 @@ script.
 
 			| {% if project.nodes_latest %}
 			.node-updates
-				h3 Latest Updates
+				h3 Latest Assets
 				ul.node-updates-list
 					| {% for n in project.nodes_latest %}
 					| {% if n.node_type not in ['comment'] %}
@@ -176,7 +176,7 @@ script.
 	$(function() {
 		montage();
 
-		$(".node-updates-list-item, .node-blog-list-item")
+		$(".node-updates-list-item")
 				.unbind('click')
 				.click(function(e) {
 			e.preventDefault();
