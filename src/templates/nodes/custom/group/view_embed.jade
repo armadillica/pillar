@@ -43,7 +43,7 @@
 
 		| {# Browse type: List #}
 		a(
-			href="#",
+			href="{{ url_for_node(node=child) }}",
 			data-node_id="{{ child._id }}",
 			class="item_icon list-node-children-item browse-list")
 			.list-node-children-item-thumbnail
@@ -112,7 +112,10 @@
 
 
 		| {# Browse type: Icon #}
-		a(href="#", data-node_id="{{ child._id }}", title="{{ child.name }}", class="item_icon list-node-children-item browse-icon")
+		a(href="{{ url_for_node(node=child) }}",
+			data-node_id="{{ child._id }}",
+			title="{{ child.name }}",
+			class="item_icon list-node-children-item browse-icon")
 			.list-node-children-item-thumbnail
 
 				| {% if child.picture %}
