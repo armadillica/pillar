@@ -258,7 +258,8 @@ def render_project(project, api, extra_context=None, template_name=None):
             return []
 
         # Construct query parameters outside the loop.
-        projection = {'name': 1, 'user': 1, 'node_type': 1, 'project': 1, 'properties.url': 1}
+        projection = {'name': 1, 'user': 1, 'node_type': 1, 'project': 1,
+                      'properties.url': 1, 'properties.content_type': 1}
         params = {'projection': projection, 'embedded': {'user': 1}}
         if get_picture:
             projection['picture'] = 1
