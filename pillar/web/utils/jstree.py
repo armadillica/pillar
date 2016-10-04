@@ -5,17 +5,21 @@ from flask_login import current_user
 
 from pillar.web import system_util
 
+
 GROUP_NODES = {'group', 'storage', 'group_texture', 'group_hdri'}
 
 
 def jstree_parse_node(node, children=None):
     """Generate JStree node from node object"""
+    from pillar.web.nodes.routes import url_for_node
+
     node_type = node.node_type
     # Define better the node type
     if node_type == 'asset':
         node_type = node.properties.content_type
     parsed_node = dict(
         id="n_{0}".format(node._id),
+        a_attr={ "href" : url_for_node(node=node) },
         text=node.name,
         type=node_type,
         children=False)
