@@ -13,7 +13,6 @@ from flask import current_app
 from werkzeug import exceptions as wz_exceptions
 import pymongo.results
 
-__all__ = ('remove_private_keys', 'PillarJSONEncoder')
 log = logging.getLogger(__name__)
 
 
