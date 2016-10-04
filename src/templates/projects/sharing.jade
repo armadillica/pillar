@@ -73,7 +73,7 @@
 			span#project-statusbar
 
 			span#project-edit-title
-				| Manage users for this project
+				| Manage team members for this project
 
 		#project_context
 			#node-edit-container
@@ -85,10 +85,10 @@
 								input#user-select.form-control(
 									name='contacts',
 									type='text',
-									placeholder='Add users by name')
+									placeholder='Add team members by name')
 						| {% else %}
 						.sharing-users-search
-							.disabled Only project owners can manage users
+							.disabled Only project owners &amp; admins can manage users
 						| {% endif %}
 
 
@@ -131,8 +131,9 @@
 						.sharing-users-info
 							h4 What can team members do?
 							p.
-								Team members are able to upload new content to the
-								project; as well as view, edit, and comment on the content previously created.
+								Team members are able to upload new content to the project,
+								as well as view, edit, delete, and comment on the content
+								previously created.
 
 | {% endblock %}
 
