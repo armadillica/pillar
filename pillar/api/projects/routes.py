@@ -65,9 +65,10 @@ def project_manage_users():
     project = projects_collection.find_one({'_id': project_id})
 
     # Check if the current_user is owner of the project, or removing themselves.
-    remove_self = target_user_id == current_user_id and action == 'remove'
-    if project['user'] != current_user_id and not remove_self:
-        utils.abort_with_error(403)
+    if not authorization.user_has_role(u'admin'):
+        remove_self = target_user_id == current_user_id and action == 'remove'
+        if project['user'] != current_user_id and not remove_self:
+            utils.abort_with_error(403)
 
     admin_group = utils.get_admin_group(project)
 
