@@ -174,8 +174,7 @@ $node-type-post: #647bce
 			li.activity-stream__list-item
 				display: flex
 				align-items: center
-				padding: 5px 20px
-
+				padding: 5px 15px
 				+clearfix
 
 				&:hover
@@ -187,46 +186,39 @@ $node-type-post: #647bce
 						.title
 							font-size: 1.2em
 
-					&.video
-						.activity-stream__list-details
-							a.image
-								border-color: $node-type-asset_video
-								&:hover
-									i
-										font-size: 3.5em
-									img
-										opacity: .9
-								img
-									opacity: .7
-									z-index: 0
-									transition: opacity 150ms ease-in-out
-
+					&.video .activity-stream__list-details
+						border-color: $node-type-asset_video
+						a.image
+							&:hover
 								i
-									+position-center-translate
-									z-index: 1
-									color: rgba(white, .6)
-									font-size: 3em
-									transition: font-size 100ms ease-in-out
+									font-size: 3.5em
+								img
+									opacity: .9
+							img
+								opacity: .7
+								z-index: 0
+								transition: opacity 150ms ease-in-out
 
-					&.image
-						.activity-stream__list-details
-							a.image
-								border-color: $node-type-asset_image
-					&.file
-						.activity-stream__list-details
-							a.image
-								border-color: $node-type-asset_file
+							i
+								+position-center-translate
+								z-index: 1
+								color: rgba(white, .6)
+								font-size: 3em
+								transition: font-size 100ms ease-in-out
+
+					&.image .activity-stream__list-details
+						border-color: $node-type-asset_image
+					&.file .activity-stream__list-details
+						border-color: $node-type-asset_file
 
 				&.comment
 					.activity-stream__list-details
+						border-color: $node-type-comment
 						.title
 							color: $color-text-dark
-							padding: 10px 10px 5px 10px
+							padding: 10px 15px 5px 15px
 							+text-overflow-ellipsis
 							width: 100%
-
-						ul.meta
-							border-color: $node-type-comment
 
 						li.where-parent:before
 							content: '\e83a'
@@ -236,13 +228,13 @@ $node-type-post: #647bce
 							float: right
 							&:before
 								content: ''
-						li.who
-							font-weight: 500
 
 				&.post
 					.activity-stream__list-thumbnail
 						color: $node-type-post
 					.activity-stream__list-details
+						border-color: $node-type-post
+
 						.title
 							color: $color-text-dark-primary
 							max-width: 80%
@@ -251,9 +243,6 @@ $node-type-post: #647bce
 							font:
 								size: 1.2em
 								weight: 500
-
-						a.image
-							border-color: $node-type-post
 
 				&.asset, &.comment, &.post
 					&:hover
@@ -285,11 +274,11 @@ $node-type-post: #647bce
 					align-self: flex-start
 					align-items: center
 					justify-content: center
-					margin-top: 5px
-					width: 30px
-					height: 30px
-					min-width: 30px
-					min-height: 30px
+					margin-top: 8px
+					width: 25px
+					height: 25px
+					min-width: 25px
+					min-height: 25px
 
 					+media-xs
 						display: none
@@ -313,12 +302,12 @@ $node-type-post: #647bce
 
 				.activity-stream__list-details
 					position: relative
-					overflow: hidden
 					width: 100%
 					margin-left: 15px
 					background-color: white
-					border: thin solid $color-background-dark
 					border-radius: 3px
+					border-left: 2px solid $color-background
+					box-shadow: 0 0 1px 1px rgba(black, .1), 0 2px 5px rgba(black, .05)
 
 					+media-xs
 						margin-left: 0
@@ -337,7 +326,7 @@ $node-type-post: #647bce
 					.title
 						display: inline-block
 						padding: 10px 15px
-						color: $color-text-dark-primary
+						color: $color-text-dark
 
 						span
 							@include badge(hsl(hue($color-success), 60%, 45%), 3px)
@@ -359,7 +348,6 @@ $node-type-post: #647bce
 					.image
 						display: block
 						position: relative
-						border-bottom: 2px solid $color-background
 						text-align: center
 						background-color: $color-background
 
@@ -367,15 +355,14 @@ $node-type-post: #647bce
 							max-width: 100%
 							display: inline-block
 							margin: 0 auto
+							border-top-left-radius: 3px
+							border-top-right-radius: 3px
 
 					ul.meta
 						+list-meta
-						padding: 5px 10px
-						display: block
-						font-size: .9em
+						padding: 0 10px 5px 15px
+						font-size: .85em
 						color: $color-text-dark-secondary
-						background-color: $color-background-light
-						border-top: thin solid $color-background-dark
 
 						li
 							padding-left: 10px
@@ -390,7 +377,7 @@ $node-type-post: #647bce
 			list-style: none
 			position: absolute
 			top: 20px
-			right: 20px
+			right: 15px
 			border-radius: 3px
 
 			li
