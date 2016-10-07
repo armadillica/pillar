@@ -127,6 +127,8 @@ script.
 							i.pi-picture
 							| {% elif n.properties.content_type == 'file' %}
 							i.pi-file-archive
+							| {% elif n.node_type == 'texture' or n.node_type == 'group_texture' %}
+							i.pi-texture
 							| {% else %}
 							i.pi-folder
 							| {% endif %}
@@ -134,7 +136,7 @@ script.
 						.info
 							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
 							span.details
-								span.what {% if n.properties.content_type %}{{ n.properties.content_type }}{% else %}folder{% endif %} ·
+								span.what {% if n.properties.content_type %}{{ n.properties.content_type }}{% else %}{{ n.node_type }}{% endif %} ·
 								span.when  {{ n._updated | pretty_date }} by
 								span.who {{ n.user.full_name }}
 					| {% endif %}
