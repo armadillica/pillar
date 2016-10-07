@@ -418,9 +418,9 @@ def edit(node_id):
         if process_node_form(form, node_id=node_id, node_type=node_type, user=user_id):
             # Handle the specific case of a blog post
             if node_type.name == 'post':
-                project_update_nodes_list(node, list_name='blog')
+                project_update_nodes_list(node, project_id=project._id, list_name='blog')
             else:
-                project_update_nodes_list(node)
+                project_update_nodes_list(node, project_id=project._id)
             # Emergency hardcore cache flush
             # cache.clear()
             return redirect(url_for('nodes.view', node_id=node_id, embed=1,
