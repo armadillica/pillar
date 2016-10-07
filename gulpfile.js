@@ -26,7 +26,6 @@ var enabled = {
 gulp.task('styles', function() {
     gulp.src('src/styles/**/*.sass')
         .pipe(gulpif(enabled.failCheck, plumber()))
-        .pipe(cache('styling'))
         .pipe(gulpif(enabled.maps, sourcemaps.init()))
         .pipe(sass({
             outputStyle: 'compressed'}
