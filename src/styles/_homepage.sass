@@ -34,7 +34,7 @@ $node-type-post: #647bce
 		+media-xs
 			width: 100%
 
-	section#announcement,
+	section.announcement,
 	section#blog-stream,
 	section#random-asset
 		+container-box
@@ -526,8 +526,22 @@ $node-type-post: #647bce
 						font-size: .9em
 
 
-	section#announcement
+	section.announcement
 		border-bottom: thin solid $color-background
+
+		.header-icons
+			display: flex
+			align-items: center
+			justify-content: center
+			padding: 20px 0 5px 0
+
+			i
+				font-size: 2.5em
+				color: $color-info
+
+				&.pi-heart-filled
+					color: $color-danger
+					margin-left: 5px
 
 		img.header
 			width: 100%
@@ -561,11 +575,19 @@ $node-type-post: #647bce
 				+media-xs
 					font-size: 1.4em
 
+				strong
+					color: $color-primary-dark
+
 				a
 					color: $color-text-dark-primary
 
 			.lead
 				font-size: 1em
+				+list-bullets
+
+				ul
+					margin-top: 10px
+					padding-left: 10px
 
 				hr
 					border: none
@@ -577,6 +599,7 @@ $node-type-post: #647bce
 
 				+media-xs
 					padding-left: 10px
+
 
 			.buttons
 				margin: 15px auto 0 auto

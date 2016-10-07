@@ -128,30 +128,28 @@ meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_
 
 
 	section#side
-		section#announcement
+		section.announcement
 			| {% if main_project.picture_header %}
-			a(href="https://cloud.blender.org/blog/introducing-blender-sync")
+			a(href="https://cloud.blender.org/p/agent-327/")
 				img.header(
 					src="{{ main_project.picture_header.thumbnail('l', api=api) }}")
 			| {% endif %}
 			.text
 				.title
-					a(href="https://cloud.blender.org/blog/introducing-blender-sync") Blender Sync
+					a(href="https://cloud.blender.org/p/agent-327/")
+						span In production:
+						strong  Agent 327
 
 				.lead
 					span.
-						Save your settings once. Use them anywhere.
-						Carry your Blender configuration with you, use our free add-on to sync your keymaps and preferences.
-						<hr/>
-						Syncing is free for everyone. No subscription required.
+						Follow the ongoing progress of the Barbershop fight scene, a character study for the Agent 327 project.
 
 				.buttons
 					a.btn.btn-default.btn-outline.orange(
-						href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
-						i.pi-download
-						| Download <small>v</small> {{ config.BLENDER_CLOUD_ADDON_VERSION }}
+						href="https://cloud.blender.org/p/agent-327/blog/")
+						| Blog
 					a.btn.btn-default.btn-outline.blue(
-						href="https://cloud.blender.org/blog/introducing-blender-sync")
+						href="https://cloud.blender.org/p/agent-327/")
 						| Learn More
 
 
@@ -281,6 +279,32 @@ meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_
 
 				| {% endif %}
 				| {% endfor %}
+
+
+		section.announcement
+			a(href="https://cloud.blender.org/blog/introducing-blender-sync")
+			img.header(
+				src="{{ url_for('static', filename='assets/img/blender_sync_header.jpg') }}")
+			.text
+				.title
+					a(href="https://cloud.blender.org/blog/introducing-blender-sync") Textures Browser & Settings Sync
+
+				.lead
+					span.
+						Get the official Blender Cloud add-on:
+					ul
+						li Save your Blender settings online, use them anywhere
+						li Browse over 800 textures & HDRIs within Blender
+						li Share Screenshots & Renders directly to Blender Cloud
+
+				.buttons
+					a.btn.btn-default.btn-outline.orange(
+						href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
+						i.pi-download
+						| Download Add-on <small>v</small> {{ config.BLENDER_CLOUD_ADDON_VERSION }}
+					a.btn.btn-default.btn-outline.blue(
+						href="https://cloud.blender.org/blog/introducing-blender-sync")
+						| Learn More
 
 
 | {% endblock %}
