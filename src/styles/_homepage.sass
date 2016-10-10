@@ -168,13 +168,11 @@ $node-type-post: #647bce
 			margin: 0
 			padding: 15px 0
 			list-style: none
-			+text-overflow-ellipsis
-			+clearfix
 
 			li.activity-stream__list-item
 				display: flex
 				align-items: center
-				padding: 5px 15px
+				margin: 0 10px 10px
 				+clearfix
 
 				&:hover
@@ -217,7 +215,6 @@ $node-type-post: #647bce
 						.title
 							color: $color-text-dark
 							padding: 10px 15px 5px 15px
-							+text-overflow-ellipsis
 							width: 100%
 
 						li.where-parent:before
@@ -239,7 +236,6 @@ $node-type-post: #647bce
 							color: $color-text-dark-primary
 							max-width: 80%
 							padding-bottom: 5px
-							+text-overflow-ellipsis
 							font:
 								size: 1.2em
 								weight: 500
@@ -267,18 +263,14 @@ $node-type-post: #647bce
 
 				.activity-stream__list-thumbnail
 					display: flex
-					font-size: 1.5em
-					color: $node-type-comment // #B6D1CD
-					position: relative
-					overflow: hidden
 					align-self: flex-start
-					align-items: center
 					justify-content: center
-					margin-top: 8px
-					width: 25px
-					height: 25px
-					min-width: 25px
-					min-height: 25px
+					font-size: 1.4em
+					width: 30px
+					height: 30px
+					min-width: 30px
+					min-height: 30px
+					color: $node-type-comment
 
 					+media-xs
 						display: none
@@ -301,10 +293,12 @@ $node-type-post: #647bce
 						+position-center-translate
 
 				.activity-stream__list-details
+					flex: 1
 					position: relative
-					width: 100%
-					margin-left: 15px
+					max-width: 100%
 					background-color: white
+					margin-left: 5px
+					margin-right: auto
 					border-radius: 3px
 					border-left: 2px solid $color-background
 					box-shadow: 0 0 1px 1px rgba(black, .1), 0 2px 5px rgba(black, .05)

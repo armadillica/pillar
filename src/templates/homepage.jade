@@ -57,7 +57,7 @@ meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_
 					a.activity-stream__list-thumbnail(href="{{ url_for_node(node=n) }}")
 						i.pi-comment
 					.activity-stream__list-details
-						a.title(href="{{ url_for_node(node=n) }}") {{ n.properties.content }}
+						a.title(href="{{ url_for_node(node=n) }}") {{ n.properties.content | striptags | truncate(200) }}
 						ul.meta
 							li.who {{ n.user.full_name }}
 							li.where-project
