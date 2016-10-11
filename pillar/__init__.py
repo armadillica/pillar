@@ -1,5 +1,6 @@
 """Pillar server."""
 
+import collections
 import copy
 import logging
 import logging.config
@@ -36,7 +37,8 @@ class PillarServer(Eve):
         kwargs.setdefault('validator', custom_field_validation.ValidateCustomFields)
         super(PillarServer, self).__init__(settings=empty_settings, **kwargs)
 
-        self.pillar_extensions = {}  # mapping from extension name to extension object.
+        # mapping from extension name to extension object.
+        self.pillar_extensions = collections.OrderedDict()
         self.pillar_extensions_template_paths = []  # list of paths
 
         self.app_root = os.path.abspath(app_root)
@@ -517,3 +519,15 @@ class PillarServer(Eve):
         """
 
         return self.data.driver.db
+
+    def extension_sidebar_links(self, project):
+        """Returns the sidebar links for the given projects.
+
+        :returns: HTML as a string for the sidebar.
+        """
+
+        if not project:
+            return ''
+
+        return jinja2.Markup(''.join(ext.sidebar_links(project)
+                                     for ext in self.pillar_extensions.values()))

@@ -82,6 +82,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 					a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
 						i.pi-search
 				| {% endif %}
+				| {{ extension_sidebar_links }}
 
 				.project_nav-toggle-btn(
 					title="Expand Navigation [T]",

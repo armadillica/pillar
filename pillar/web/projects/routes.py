@@ -301,6 +301,8 @@ def render_project(project, api, extra_context=None, template_name=None):
             embed_string = ''
         template_name = "projects/view{0}.html".format(embed_string)
 
+    extension_sidebar_links = current_app.extension_sidebar_links(project)
+
     return render_template(template_name,
                            api=api,
                            project=project,
@@ -308,6 +310,7 @@ def render_project(project, api, extra_context=None, template_name=None):
                            show_node=False,
                            show_project=True,
                            og_picture=project.picture_header,
+                           extension_sidebar_links=extension_sidebar_links,
                            **extra_context)
 
 
@@ -355,13 +358,16 @@ def view_node(project_url, node_id):
     # Append _theatre to load the proper template
     theatre = '_theatre' if theatre_mode else ''
 
+    extension_sidebar_links = current_app.extension_sidebar_links(project)
+
     return render_template('projects/view{}.html'.format(theatre),
                            api=api,
                            project=project,
                            node=node,
                            show_node=True,
                            show_project=False,
-                           og_picture=og_picture)
+                           og_picture=og_picture,
+                           extension_sidebar_links=extension_sidebar_links)
 
 
 def find_project_or_404(project_url, embedded=None, api=None):

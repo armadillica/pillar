@@ -86,3 +86,11 @@ class PillarExtension(object):
 
     def setup_app(self, app):
         """Called during app startup, after all extensions have loaded."""
+
+    def sidebar_links(self, project):
+        """Returns the sidebar link(s) for the given projects.
+
+        :returns: HTML as a string for the sidebar.
+        """
+
+        return ''
