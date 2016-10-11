@@ -4,8 +4,7 @@ from pillarsdk.exceptions import ResourceNotFound
 from flask import abort
 from flask import render_template
 from flask import redirect
-from flask.ext.login import login_required
-from flask.ext.login import current_user
+from flask_login import login_required, current_user
 from pillar.web.utils import system_util
 from pillar.web.utils import attach_project_pictures
 from pillar.web.utils import get_file

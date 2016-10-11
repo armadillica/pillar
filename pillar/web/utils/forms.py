@@ -4,7 +4,7 @@ from markupsafe import Markup
 
 from pillarsdk import File
 from flask import current_app
-from flask.ext.login import current_user
+from flask_login import current_user
 from wtforms import Form
 from wtforms import StringField
 from wtforms import SelectField

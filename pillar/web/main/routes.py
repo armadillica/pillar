@@ -10,7 +10,7 @@ from flask import current_app
 from flask import render_template
 from flask import redirect
 from flask import request
-from flask.ext.login import current_user
+from flask_login import current_user
 from werkzeug.contrib.atom import AtomFeed
 
 from pillar.web.utils import system_util

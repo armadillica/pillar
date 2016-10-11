@@ -4,8 +4,7 @@ from flask import Blueprint
 from flask import request
 from flask import url_for
 from flask import abort
-from flask.ext.login import login_required
-from flask.ext.login import current_user
+from flask_login import login_required, current_user
 from pillarsdk.activities import Notification
 from pillarsdk.activities import ActivitySubscription
 from pillar.web.utils import system_util

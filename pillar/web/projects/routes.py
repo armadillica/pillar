@@ -13,8 +13,7 @@ from flask import session
 from flask import abort
 from flask import redirect
 from flask import url_for
-from flask.ext.login import login_required
-from flask.ext.login import current_user
+from flask_login import login_required, current_user
 import werkzeug.exceptions as wz_exceptions
 
 from pillar.web import system_util

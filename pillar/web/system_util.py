@@ -5,7 +5,7 @@ Replacement of the old SystemUtility class.
 import os
 import logging
 from flask import current_app, session
-from flask.ext.login import current_user
+from flask_login import current_user
 
 from pillar.sdk import FlaskInternalApi
 

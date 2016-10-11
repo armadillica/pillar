@@ -1,7 +1,6 @@
 from flask import request
 from flask import jsonify
-from flask.ext.login import login_required
-from flask.ext.login import current_user
+from flask_login import login_required, current_user
 from pillarsdk import Node
 from pillar.web.utils import system_util
 from ..routes import blueprint

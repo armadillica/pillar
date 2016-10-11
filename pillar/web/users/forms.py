@@ -1,4 +1,4 @@
-from flask.ext.login import current_user
+from flask_login import current_user
 from flask_wtf import Form
 from pillar.web import system_util
 from pillarsdk.users import User
