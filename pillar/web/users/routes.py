@@ -47,12 +47,19 @@ def login():
 @blueprint.route('/oauth/blender-id/authorized')
 def blender_id_authorized():
     check_oauth_provider(current_app.oauth_blender_id)
-    oauth_resp = current_app.oauth_blender_id.authorized_response()
+    try:
+        oauth_resp = current_app.oauth_blender_id.authorized_response()
+    except OAuthException as ex:
+        log.warning('Error parsing BlenderID OAuth response. data=%s; message=%s',
+                    ex.data, ex.message)
+        raise wz_exceptions.Forbidden('Access denied, sorry!')
+
     if oauth_resp is None:
-        return 'Access denied: reason=%s error=%s' % (
-            request.args['error_reason'],
-            request.args['error_description']
-        )
+        msg = 'Access denied: reason=%s error=%s' % (
+            request.args.get('error_reason'), request.args.get('error_description'))
+        log.warning('Access denied to user because oauth_resp=None: %s', msg)
+        return wz_exceptions.Forbidden(msg)
+
     if isinstance(oauth_resp, OAuthException):
         return 'Access denied: %s' % oauth_resp.message
 

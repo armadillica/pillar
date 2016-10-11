@@ -307,7 +307,7 @@ class PillarServer(Eve):
         super(PillarServer, self).register_error_handlers()
 
         # Register error handlers per code.
-        for code in (403, 404, 500):
+        for code in (403, 404, 412, 500):
             self.register_error_handler(code, self.pillar_error_handler)
 
         # Register error handlers per exception.
