@@ -54,6 +54,27 @@ class DocDiffTest(unittest.TestCase):
 
         self.assertEqual([(3, 42, 513)], list(diff))
 
+    def test_diff_values_falsey(self):
+        from pillar.api.utils import doc_diff, DoesNotExist
+
+        # DoesNotExist vs. empty string
+        diff = doc_diff({'a': 'b', 3: ''},
+                        {'a': 'b'})
+        self.assertEqual([], list(diff))
+
+        diff = doc_diff({'a': 'b', 3: ''},
+                        {'a': 'b'}, falsey_is_equal=False)
+        self.assertEqual([(3, '', DoesNotExist)], list(diff))
+
+        # Empty string vs. None
+        diff = doc_diff({'a': 'b', 3: ''},
+                        {'a': 'b', 3: None})
+        self.assertEqual([], list(diff))
+
+        diff = doc_diff({'a': 'b', 3: ''},
+                        {'a': 'b', 3: None}, falsey_is_equal=False)
+        self.assertEqual([(3, '', None)], list(diff))
+
     def test_diff_keys_simple(self):
         from pillar.api.utils import doc_diff, DoesNotExist
         diff = doc_diff({'a': 'b', 3: 42},

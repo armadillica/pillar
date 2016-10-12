@@ -115,11 +115,19 @@ def gravatar(email, size=64):
            "?" + urllib.urlencode(parameters)
 
 
+
+class MetaFalsey(type):
+    def __nonzero__(cls):
+        return False
+    __bool__ = __nonzero__  # for Python 3
+
+
 class DoesNotExist(object):
     """Returned as value by doc_diff if a value does not exist."""
+    __metaclass__ = MetaFalsey
 
 
-def doc_diff(doc1, doc2):
+def doc_diff(doc1, doc2, falsey_is_equal=True):
     """Generator, yields differences between documents.
 
     Yields changes as (key, value in doc1, value in doc2) tuples, where
@@ -128,6 +136,9 @@ def doc_diff(doc1, doc2):
 
     Sub-documents (i.e. dicts) are recursed, and dot notation is used
     for the keys if changes are found.
+
+    If falsey_is_equal=True, all Falsey values compare as equal, i.e. this
+    function won't report differences between DoesNotExist, False, '', and 0.
     """
 
     for key in set(doc1.keys()).union(set(doc2.keys())):
@@ -144,6 +155,8 @@ def doc_diff(doc1, doc2):
             continue
 
         if val1 == val2:
+            continue
+        if falsey_is_equal and bool(val1) == bool(val2) == False:
             continue
 
         yield key, val1, val2
