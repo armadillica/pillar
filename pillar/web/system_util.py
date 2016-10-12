@@ -4,7 +4,7 @@ Replacement of the old SystemUtility class.
 
 import os
 import logging
-from flask import current_app, session
+from flask import current_app, session, request
 from flask_login import current_user
 
 from pillar.sdk import FlaskInternalApi
@@ -35,6 +35,11 @@ def pillar_server_endpoint_static():
 
 
 def pillar_api(token=None):
+    # Cache API objects on the request.
+    api = getattr(request, 'pillar_api', None)
+    if api is not None:
+        return api
+
     # Check if current_user is initialized (in order to support manage.py
     # scripts and non authenticated server requests).
     if token is None and current_user and current_user.is_authenticated:
@@ -47,6 +52,7 @@ def pillar_api(token=None):
         token=token
     )
 
+    request.pillar_api = api
     return api
 
 
