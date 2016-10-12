@@ -153,7 +153,7 @@ def activity_object_add(actor_user_id, verb, object_type, object_id,
 
 def register_activity(actor_user_id, verb, object_type, object_id,
                       context_object_type, context_object_id,
-                      project_id=None):
+                      project_id=None, **extra_fields):
     """Registers an activity.
 
     This works using the following pattern:
@@ -183,6 +183,7 @@ def register_activity(actor_user_id, verb, object_type, object_id,
         'context_object': context_object_id}
     if project_id:
         activity['project'] = project_id
+    activity.update(extra_fields)
 
     info, _, _, status_code = current_app.post_internal('activities', activity)
 

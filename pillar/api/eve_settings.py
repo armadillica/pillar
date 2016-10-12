@@ -684,6 +684,11 @@ activities_schema = {
         },
         'required': False,
     },
+    # If the object type is 'node', the node type can be stored here.
+    'node_type': {
+        'type': 'string',
+        'required': False,
+    }
 }
 
 notifications_schema = {
