@@ -1,5 +1,9 @@
+import logging
+
 from flask import g, request, current_app
 from pillar.api.utils import gravatar
+
+log = logging.getLogger(__name__)
 
 
 def notification_parse(notification):
@@ -131,25 +135,65 @@ def activity_object_add(actor_user_id, verb, object_type, object_id,
     subscriptions = notification_get_subscriptions(
         context_object_type, context_object_id, actor_user_id)
 
-    if subscriptions.count() > 0:
-        activity = dict(
-            actor_user=actor_user_id,
-            verb=verb,
-            object_type=object_type,
-            object=object_id,
-            context_object_type=context_object_type,
-            context_object=context_object_id
-        )
+    if subscriptions.count() == 0:
+        return
 
-        activity = current_app.post_internal('activities', activity)
-        if activity[3] != 201:
-            # If creation failed for any reason, do not create a any notifcation
-            return
-        for subscription in subscriptions:
-            notification = dict(
-                user=subscription['user'],
-                activity=activity[0]['_id'])
-            current_app.post_internal('notifications', notification)
+    info, status = register_activity(actor_user_id, verb, object_type, object_id,
+                                     context_object_type, context_object_id)
+    if status != 201:
+        # If creation failed for any reason, do not create a any notifcation
+        return
+
+    for subscription in subscriptions:
+        notification = dict(
+            user=subscription['user'],
+            activity=info['_id'])
+        current_app.post_internal('notifications', notification)
+
+
+def register_activity(actor_user_id, verb, object_type, object_id,
+                      context_object_type, context_object_id,
+                      project_id=None):
+    """Registers an activity.
+
+    This works using the following pattern:
+
+    ACTOR -> VERB -> OBJECT -> CONTEXT
+
+    :param actor_user_id: id of the user who is changing the object
+    :param verb: the action on the object ('commented', 'replied')
+    :param object_type: hardcoded name, see database schema
+    :param object_id: object id, to be traced with object_type
+    :param context_object_type: the type of the context object, like 'project' or 'node',
+        see database schema
+    :param context_object_id:
+    :param project_id: optional project ID to make the activity easily queryable
+        per project.
+
+    :returns: tuple (info, status_code), where a successful operation should have
+        status_code=201. If it is not 201, a warning is logged.
+    """
+
+    activity = {
+        'actor_user': actor_user_id,
+        'verb': verb,
+        'object_type': object_type,
+        'object': object_id,
+        'context_object_type': context_object_type,
+        'context_object': context_object_id}
+    if project_id:
+        activity['project'] = project_id
+
+    info, _, _, status_code = current_app.post_internal('activities', activity)
+
+    if status_code != 201:
+        log.warning('register_activity: code %i creating activity %s: %s',
+                    status_code, activity, info)
+    else:
+        log.info('register_activity: user %s %s on %s %s, context %s %s',
+                 actor_user_id, verb, object_type, object_id,
+                 context_object_type, context_object_id)
+    return info, status_code
 
 
 def before_returning_item_notifications(response):

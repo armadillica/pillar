@@ -676,6 +676,14 @@ activities_schema = {
         'type': 'objectid',
         'required': True
     },
+    'project': {
+        'type': 'objectid',
+        'data_relation': {
+            'resource': 'projects',
+            'field': '_id',
+        },
+        'required': False,
+    },
 }
 
 notifications_schema = {
