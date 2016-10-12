@@ -113,3 +113,37 @@ def gravatar(email, size=64):
     return "https://www.gravatar.com/avatar/" + \
            hashlib.md5(str(email)).hexdigest() + \
            "?" + urllib.urlencode(parameters)
+
+
+class DoesNotExist(object):
+    """Returned as value by doc_diff if a value does not exist."""
+
+
+def doc_diff(doc1, doc2):
+    """Generator, yields differences between documents.
+
+    Yields changes as (key, value in doc1, value in doc2) tuples, where
+    the value can also be the DoesNotExist class. Does not report changed
+    private keys (i.e. starting with underscores).
+
+    Sub-documents (i.e. dicts) are recursed, and dot notation is used
+    for the keys if changes are found.
+    """
+
+    for key in set(doc1.keys()).union(set(doc2.keys())):
+        if isinstance(key, basestring) and key[0] == u'_':
+            continue
+
+        val1 = doc1.get(key, DoesNotExist)
+        val2 = doc2.get(key, DoesNotExist)
+
+        # Only recurse if both values are dicts
+        if isinstance(val1, dict) and isinstance(val2, dict):
+            for subkey, subval1, subval2 in doc_diff(val1, val2):
+                yield '%s.%s' % (key, subkey), subval1, subval2
+            continue
+
+        if val1 == val2:
+            continue
+
+        yield key, val1, val2
