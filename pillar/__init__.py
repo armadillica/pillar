@@ -378,6 +378,7 @@ class PillarServer(Eve):
         # handle it as a 500.
         if not hasattr(error_ob, 'code'):
             error_ob.code = 500
+        if not hasattr(error_ob, 'description'):
             error_ob.description = str(error_ob)
 
         if request.full_path.startswith('/%s/' % self.config['URL_PREFIX']):
