@@ -1,4 +1,5 @@
 import base64
+import functools
 import logging
 import urlparse
 
@@ -18,6 +19,27 @@ from pillar.api.utils.gcs import update_file_name
 log = logging.getLogger(__name__)
 blueprint = Blueprint('nodes_api', __name__)
 ROLES_FOR_SHARING = {u'subscriber', u'demo'}
+
+
+def only_for_node_type_decorator(required_node_type_name):
+    """Returns a decorator that checks its first argument's node type.
+
+    If the node type is not of the required node type, returns None,
+    otherwise calls the wrapped function.
+    """
+
+    def only_for_node_type(wrapped):
+        @functools.wraps(wrapped)
+        def wrapper(node, *args, **kwargs):
+            if node.get('node_type') != required_node_type_name:
+                return
+
+            return wrapped(node, *args, **kwargs)
+        return wrapper
+
+    only_for_node_type.__doc__ = "Decorator, immediately returns when " \
+                                 "the first argument is not of type %s." % required_node_type_name
+    return only_for_node_type
 
 
 @blueprint.route('/<node_id>/share', methods=['GET', 'POST'])
