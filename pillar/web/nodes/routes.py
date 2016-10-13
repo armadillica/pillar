@@ -609,6 +609,10 @@ def project_url(project_id, project):
     if project is not None:
         return project
 
+    if not current_app.config['URLER_SERVICE_AUTH_TOKEN']:
+        log.error('No URLER_SERVICE_AUTH_TOKEN token, unable to use URLer service.')
+        return None
+
     urler_api = system_util.pillar_api(
         token=current_app.config['URLER_SERVICE_AUTH_TOKEN'])
     return Project.find_from_endpoint(
