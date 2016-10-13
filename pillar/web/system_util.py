@@ -35,24 +35,29 @@ def pillar_server_endpoint_static():
 
 
 def pillar_api(token=None):
-    # Cache API objects on the request.
-    api = getattr(request, 'pillar_api', None)
+    # Cache API objects on the request per token.
+    api = getattr(request, 'pillar_api', {}).get(token)
     if api is not None:
         return api
 
     # Check if current_user is initialized (in order to support manage.py
     # scripts and non authenticated server requests).
+    use_token = token
     if token is None and current_user and current_user.is_authenticated:
-        token = current_user.id
+        use_token = current_user.id
 
     api = FlaskInternalApi(
         endpoint=pillar_server_endpoint(),
         username=None,
         password=None,
-        token=token
+        token=use_token
     )
 
-    request.pillar_api = api
+    if token is None:
+        if not hasattr(request, 'pillar_api'):
+            request.pillar_api = {}
+        request.pillar_api[token] = api
+
     return api
 
 
