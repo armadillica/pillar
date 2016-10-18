@@ -34,6 +34,8 @@ from pillar.web.utils.forms import ProceduralFileSelectForm
 from pillar.web.utils.forms import build_file_select_form
 from pillar.web import system_util
 
+from . import finders
+
 blueprint = Blueprint('nodes', __name__)
 log = logging.getLogger(__name__)
 
@@ -581,8 +583,9 @@ def url_for_node(node_id=None, node=None):
 
     api = system_util.pillar_api()
 
-    # Find node by its ID, or the ID by the node, depending on what was passed
-    # as parameters.
+    if node_id is None and node is None:
+        raise ValueError('Either node or node_id must be given')
+
     if node is None:
         try:
             node = Node.find(node_id, api=api)
@@ -591,101 +594,8 @@ def url_for_node(node_id=None, node=None):
                 'url_for_node(node_id=%r, node=None): Unable to find node.',
                 node_id)
             raise ValueError('Unable to find node %r' % node_id)
-    elif node_id is None:
-        node_id = node['_id']
-    else:
-        raise ValueError('Either node or node_id must be given')
 
-    return _find_url_for_node(node_id, node=node)
-
-
-@caching.cache_for_request()
-def project_url(project_id, project):
-    """Returns the project, raising a ValueError if it can't be found.
-
-    Uses the "urler" service endpoint.
-    """
-
-    if project is not None:
-        return project
-
-    if not current_app.config['URLER_SERVICE_AUTH_TOKEN']:
-        log.error('No URLER_SERVICE_AUTH_TOKEN token, unable to use URLer service.')
-        return None
-
-    urler_api = system_util.pillar_api(
-        token=current_app.config['URLER_SERVICE_AUTH_TOKEN'])
-    return Project.find_from_endpoint(
-        '/service/urler/%s' % project_id, api=urler_api)
-
-
-# Cache the actual URL based on the node ID, for the duration of the request.
-@caching.cache_for_request()
-def _find_url_for_node(node_id, node):
-    api = system_util.pillar_api()
-
-    # Find the node's project, or its ID, depending on whether a project
-    # was embedded. This is needed in two of the three finder functions.
-    project_id = node.project
-    if isinstance(project_id, pillarsdk.Resource):
-        # Embedded project
-        project = project_id
-        project_id = project['_id']
-    else:
-        project = None
-
-    def find_for_comment():
-        """Returns the URL for a comment."""
-
-        parent = node
-        while parent.node_type == 'comment':
-            if isinstance(parent.parent, pillarsdk.Resource):
-                parent = parent.parent
-                continue
-
-            try:
-                parent = Node.find(parent.parent, api=api)
-            except ResourceNotFound:
-                log.warning(
-                    'url_for_node(node_id=%r): Unable to find parent node %r',
-                    node_id, parent.parent)
-                raise ValueError('Unable to find parent node %r' % parent.parent)
-
-        # Find the redirection URL for the parent node.
-        parent_url = url_for_node(node=parent)
-        if '#' in parent_url:
-            # We can't attach yet another fragment, so just don't link to
-            # the comment for now.
-            return parent_url
-        return parent_url + '#{}'.format(node_id)
-
-    def find_for_post():
-        """Returns the URL for a blog post."""
-
-        if str(project_id) == current_app.config['MAIN_PROJECT_ID']:
-            return url_for('main.main_blog',
-                           url=node.properties.url)
-
-        the_project = project_url(project_id, project=project)
-        return url_for('main.project_blog',
-                       project_url=the_project.url,
-                       url=node.properties.url)
-
-    # Fallback: Assets, textures, and other node types.
-    def find_for_other():
-        the_project = project_url(project_id, project=project)
-        return url_for('projects.view_node',
-                       project_url=the_project.url,
-                       node_id=node_id)
-
-    # Determine which function to use to find the correct URL.
-    url_finders = {
-        'comment': find_for_comment,
-        'post': find_for_post,
-    }
-
-    finder = url_finders.get(node.node_type, find_for_other)
-    return finder()
+    return finders.find_url_for_node(node)
 
 
 # Import of custom modules (using the same nodes decorator)
