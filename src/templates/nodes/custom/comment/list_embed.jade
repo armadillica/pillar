@@ -71,7 +71,7 @@
 
 		section#comments-list-header
 			#comments-list-title
-				| {% if comments['_meta']['total'] == 0 %}No{% else %}{{ comments['_meta']['total'] }}{% endif %} comment{{ comments['_meta']['total']|pluralize }}
+				| {% if nr_of_comments == 0 %}No{% else %}{{ nr_of_comments }}{% endif %} comment{{ nr_of_comments|pluralize }}
 			#comments-list-items
 				| {% for comment in comments['_items'] %}
 				| {{ macros.render_comment(comment, False) }}

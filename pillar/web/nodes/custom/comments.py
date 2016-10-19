@@ -206,10 +206,14 @@ def comments_for_node(node_id):
         for reply in comment['_replies']['_items']:
             enrich(reply)
 
+    nr_of_comments = sum(1 + comment['_replies']['_meta']['total']
+                         for comment in comments['_items'])
+
     # Data will be requested via javascript
     return render_template('nodes/custom/comment/list_embed.html',
                            node_id=node_id,
                            comments=comments,
+                           nr_of_comments=nr_of_comments,
                            can_post_comments=can_post_comments)
 
 
