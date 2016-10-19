@@ -11,7 +11,7 @@ from pillar.tests import AbstractPillarTest, TEST_EMAIL_USER, TEST_EMAIL_ADDRESS
 from pillar.tests.common_test_data import EXAMPLE_NODE
 from werkzeug.exceptions import Forbidden
 
-PUBLIC_USER_FIELDS = {'full_name', 'email'}
+PUBLIC_USER_FIELDS = {'full_name', 'email', 'username'}
 
 # Use the example project with some additional permissions for these tests.
 EXAMPLE_PROJECT = copy.deepcopy(ctd.EXAMPLE_PROJECT)

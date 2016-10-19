@@ -9,9 +9,9 @@ from pillar.web.system_util import pillar_api
 
 
 def get_user_info(user_id):
-    """Returns email & full name of the user.
+    """Returns email, username and full name of the user.
 
-    Only returns those two fields, so the return value is the same
+    Only returns the public fields, so the return value is the same
     for authenticated & non-authenticated users, which is why we're
     allowed to cache it globally.
 
@@ -26,7 +26,8 @@ def get_user_info(user_id):
         return {}
 
     return {'email': user.email,
-            'full_name': user.full_name}
+            'full_name': user.full_name,
+            'username': user.username}
 
 
 def setup_app(app):
