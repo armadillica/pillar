@@ -4,24 +4,29 @@ $(document).on('click','body .comment-action-reply',function(e){
 	e.preventDefault();
 
 	// container of the comment we are replying to
-	var parentDiv = $(this).parent().parent();
+	var parentDiv = $(this).closest('.comment-container');
 
 	// container of the first-level comment in the thread
-	var parentDivFirst = $(this).parent().parent().prevAll('.is-first:first');
+	var parentDivFirst = parentDiv.prevAll('.is-first:first');
 
 	// Get the id of the comment
 	if (parentDiv.hasClass('is-reply')) {
-		parentNodeId = parentDivFirst.data('node_id');
+		parentNodeId = parentDivFirst.data('node-id');
 	} else {
-		parentNodeId = parentDiv.data('node_id');
+		parentNodeId = parentDiv.data('node-id');
+	}
+	if (!parentNodeId) {
+		if (console) console.log('No parent ID found on ', parentDiv.toArray(), parentDivFirst.toArray());
+
+		return;
 	}
 
 	// Get the textarea and set its parent_id data
 	var commentField = document.getElementById('comment_field');
-	commentField.setAttribute('data-parent_id', parentNodeId);
+	commentField.dataset.parentId = parentNodeId;
 
 	// Start the comment field with @authorname:
-	var replyAuthor = $(this).parent().parent().find('.comment-author:first span').html();
+	var replyAuthor = parentDiv.find('.comment-author:first span').html();
 	$(commentField).val("**@" + replyAuthor.slice(1, -1) + ":** ");
 
 	// Add class for styling
@@ -107,3 +112,179 @@ $(document).on('click','body .comment-action-rating',function(e){
 		$this.siblings('.comment-rating-value').text(rating);
 	});
 });
+
+/**
+ * Fetches a comment, returns a promise object.
+ */
+function loadComment(comment_id, projection)
+{
+	if (typeof comment_id === 'undefined') {
+		console.log('Error, loadComment(', comment_id, ', ', projection, ') called.');
+		return $.Deferred().reject();
+	}
+
+	// Add required projections for the permission system to work.
+	projection.node_type = 1;
+	projection.project = 1;
+
+	var url = '/api/nodes/' + comment_id;
+	return $.get({
+		url: url,
+		data: {projection: projection},
+		cache: false,  // user should be ensured the latest comment to edit.
+	});
+}
+
+
+function loadComments(commentsUrl)
+{
+	return $.get(commentsUrl)
+	.done(function(dataHtml) {
+		// Update the DOM injecting the generate HTML into the page
+		$('#comments-container').html(dataHtml);
+	})
+	.fail(function(xhr) {
+		statusBarSet('error', "Couldn't load comments. Error: " + xhr.responseText, 'pi-attention', 5000);
+		$('#comments-container').html('<a id="comments-reload"><i class="pi-refresh"></i> Reload comments</a>');
+	});
+}
+
+
+/**
+ * Shows an error in the "Post Comment" button.
+ */
+function show_comment_button_error(msg) {
+	var $button = $('.comment-action-submit');
+	var $textarea = $('#comment_field');
+
+	$button.addClass('button-field-error');
+	$textarea.addClass('field-error');
+	$button.html(msg);
+
+	setTimeout(function(){
+		$button.html('Post Comment');
+		$button.removeClass('button-field-error');
+		$textarea.removeClass('field-error');
+	}, 2500);
+}
+
+
+/**
+ * Shows an error in the "edit comment" button.
+ */
+function show_comment_edit_button_error($button, msg) {
+	var $textarea = $('#comment_field');
+
+	$button.addClass('error');
+	$textarea.addClass('field-error');
+	$button.html(msg);
+
+	setTimeout(function(){
+		$button.html('<i class="pi-check"></i> save changes');
+		$button.removeClass('button-field-error');
+		$textarea.removeClass('field-error');
+	}, 2500);
+}
+
+
+/**
+ * Switches the comment to either 'edit' or 'view' mode.
+ */
+function comment_mode(clicked_item, mode)
+{
+	var $container = $(clicked_item).closest('.comment-container');
+	var comment_id = $container.data('node-id');
+
+	var $edit_buttons = $container.find('.comment-action-edit');
+
+	if (mode == 'edit') {
+		$edit_buttons.find('.edit_mode').hide();
+		$edit_buttons.find('.edit_cancel').show();
+		$edit_buttons.find('.edit_save').show();
+	} else {
+		$edit_buttons.find('.edit_mode').show();
+		$edit_buttons.find('.edit_cancel').hide();
+		$edit_buttons.find('.edit_save').hide();
+	}
+}
+
+/**
+ * Return UI to normal, when cancelling or saving.
+ *
+ * clicked_item: save/cancel button.
+ *
+ * Returns a promise on the comment loading.
+ */
+function commentEditCancel(clicked_item) {
+	var comment_container = $(clicked_item).closest('.comment-container');
+	var comment_id = comment_container.data('node-id');
+
+	return loadComment(comment_id, {'properties.content': 1})
+	.done(function(data) {
+		var comment_raw = data['properties']['content'];
+		var comment_html = convert(comment_raw);
+
+		comment_mode(clicked_item, 'view');
+		comment_container.find('.comment-content')
+			.removeClass('editing')
+			.html(comment_html);
+		comment_container.find('.comment-content-preview').html('').hide();
+	})
+	.fail(function(data) {
+		if (console) console.log('Error fetching comment: ', xhr);
+		statusBarSet('error', 'Error canceling.', 'pi-warning');
+	});
+}
+
+function save_comment(is_new_comment, $commentContainer)
+{
+	var promise = $.Deferred();
+	var commentField;
+	var commentId;
+	var parent_id;
+
+	// Get data from HTML, and validate it.
+	if (is_new_comment)
+		commentField = $('#comment_field');
+	else {
+		commentField = $commentContainer.find('textarea');
+		commentId = $commentContainer.data('node-id');
+	}
+
+	if (!commentField.length)
+		return promise.reject("Unable to find comment field.");
+
+	if (is_new_comment) {
+		parent_id = commentField.data('parent-id');
+		if (!parent_id) {
+			if (console) console.log("No parent ID found in comment field data.");
+			return promise.reject("No parent ID!");
+		}
+	}
+
+	// Validate the comment itself.
+	var comment = commentField.val();
+	if (comment.length < 5) {
+		if (comment.length == 0) promise.reject("Say something...");
+		else promise.reject("Minimum 5 characters.");
+		return promise;
+	}
+
+	// Notify callers of the fact that client-side validation has passed.
+	promise.notify();
+
+	// Actually post the comment.
+	if (is_new_comment) {
+		$.post('/nodes/comments/create',
+			{'content': comment, 'parent_id': parent_id})
+		.fail(promise.reject)
+		.done(function(data) { promise.resolve(data.node_id, comment); });
+	} else {
+		$.post('/nodes/comments/' + commentId,
+			{'content': comment})
+		.fail(promise.reject)
+		.done(function(data) { promise.resolve(commentId, comment); });
+	}
+
+	return promise;
+}

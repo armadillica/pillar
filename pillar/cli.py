@@ -5,9 +5,12 @@ Run commands with 'flask <command>'
 
 from __future__ import print_function, division
 
+import copy
 import logging
 
 from bson.objectid import ObjectId, InvalidId
+from eve.methods.put import put_internal
+
 from flask import current_app
 from flask_script import Manager
 
@@ -502,3 +505,125 @@ def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=Fals
     mover.change_project(node, dest_proj)
 
     log.info('Done moving.')
+
+
+@manager.command
+@manager.option('-p', '--project', dest='proj_url', nargs='?',
+                help='Project URL')
+@manager.option('-a', '--all', dest='all_projects', action='store_true', default=False,
+                help='Replace on all projects.')
+def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
+    """Replaces the project's node type schemas with the standard Pillar ones.
+
+    Non-standard node types are left alone.
+    """
+
+    if bool(proj_url) == all_projects:
+        log.error('Use either --project or --all.')
+        return 1
+
+    from pillar.api.utils.authentication import force_cli_user
+    force_cli_user()
+
+    from pillar.api.node_types.asset import node_type_asset
+    from pillar.api.node_types.blog import node_type_blog
+    from pillar.api.node_types.comment import node_type_comment
+    from pillar.api.node_types.group import node_type_group
+    from pillar.api.node_types.group_hdri import node_type_group_hdri
+    from pillar.api.node_types.group_texture import node_type_group_texture
+    from pillar.api.node_types.hdri import node_type_hdri
+    from pillar.api.node_types.page import node_type_page
+    from pillar.api.node_types.post import node_type_post
+    from pillar.api.node_types.storage import node_type_storage
+    from pillar.api.node_types.text import node_type_text
+    from pillar.api.node_types.texture import node_type_texture
+    from pillar.api.utils import remove_private_keys
+
+    node_types = [node_type_asset, node_type_blog, node_type_comment, node_type_group,
+                  node_type_group_hdri, node_type_group_texture, node_type_hdri, node_type_page,
+                  node_type_post, node_type_storage, node_type_text, node_type_texture]
+    name_to_nt = {nt['name']: nt for nt in node_types}
+
+    projects_collection = current_app.db()['projects']
+
+    def handle_project(project):
+        log.info('Handling project %s', project['url'])
+
+        for proj_nt in project['node_types']:
+            nt_name = proj_nt['name']
+            try:
+                pillar_nt = name_to_nt[nt_name]
+            except KeyError:
+                log.info('   - skipping non-standard node type "%s"', nt_name)
+                continue
+
+            log.info('   - replacing schema on node type "%s"', nt_name)
+
+            # This leaves node type keys intact that aren't in Pillar's node_type_xxx definitions,
+            # such as permissions.
+            proj_nt.update(copy.deepcopy(pillar_nt))
+
+        # Use Eve to PUT, so we have schema checking.
+        db_proj = remove_private_keys(project)
+        r, _, _, status = put_internal('projects', db_proj, _id=project['_id'])
+        if status != 200:
+            log.error('Error %i storing altered project %s: %s', status, project['_id'], r)
+            return 4
+        log.info('Project saved succesfully.')
+
+    if all_projects:
+        for project in projects_collection.find():
+            handle_project(project)
+        return
+
+    project = projects_collection.find_one({'url': proj_url})
+    if not project:
+        log.error('Project url=%s not found', proj_url)
+        return 3
+
+    handle_project(project)
+
+
+@manager.command
+def remarkdown_comments():
+    """Retranslates all Markdown to HTML for all comment nodes.
+    """
+
+    from pillar.api.nodes import convert_markdown
+    from pprint import pformat
+
+    nodes_collection = current_app.db()['nodes']
+    comments = nodes_collection.find({'node_type': 'comment'},
+                                     projection={'properties.content': 1,
+                                                 'node_type': 1})
+
+    updated = identical = skipped = errors = 0
+    for node in comments:
+        convert_markdown(node)
+        node_id = node['_id']
+
+        try:
+            content_html = node['properties']['content_html']
+        except KeyError:
+            log.warning('Node %s has no content_html', node_id)
+            skipped += 1
+            continue
+
+        result = nodes_collection.update_one(
+            {'_id': node_id},
+            {'$set': {'properties.content_html': content_html}}
+        )
+        if result.matched_count != 1:
+            log.error('Unable to update node %s', node_id)
+            errors += 1
+            continue
+
+        if result.modified_count:
+            updated += 1
+        else:
+            identical += 1
+
+    log.info('updated  : %i', updated)
+    log.info('identical: %i', identical)
+    log.info('skipped  : %i', skipped)
+    log.info('errors   : %i', errors)

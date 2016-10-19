@@ -53,26 +53,8 @@ script(type="text/javascript").
 			}
 		}
 
-		function loadComments(){
-			var commentsUrl = "{{ url_for('nodes.comments_index', parent_id=node._id) }}";
-
-			$.get(commentsUrl, function(dataHtml) {
-			})
-			.done(function(dataHtml){
-				// Update the DOM injecting the generate HTML into the page
-				$('#comments-container').replaceWith(dataHtml);
-			})
-			.fail(function(e, data){
-				statusBarSet('error', 'Couldn\'t load comments. Error: ' + data.errorThrown, 'pi-attention', 5000);
-				$('#comments-container').html('<a id="comments-reload"><i class="pi-refresh"></i> Reload comments</a>');
-			});
-		}
-
-		loadComments();
-
-		$('body').on('click', '#comments-reload', function(){
-			loadComments();
-		});
+		var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node._id) }}";
+		loadComments(commentsUrl);
 
 		{% if node.has_method('PUT') %}
 			$('.project-mode-view').show();
@@ -186,4 +168,3 @@ script(type="text/javascript").
 	if (typeof $().tooltip != 'undefined'){
 		$('[data-toggle="tooltip"]').tooltip({'delay' : {'show': 1250, 'hide': 250}});
 	}
-

@@ -1,4 +1,7 @@
 import logging
+import warnings
+
+import flask
 from flask import current_app
 from flask import request
 from flask import jsonify
@@ -7,6 +10,8 @@ from flask_login import login_required, current_user
 from pillarsdk import Node
 from pillarsdk import Project
 import werkzeug.exceptions as wz_exceptions
+
+from pillar.web import subquery
 from pillar.web.nodes.routes import blueprint
 from pillar.web.utils import gravatar
 from pillar.web.utils import pretty_date
@@ -20,10 +25,22 @@ log = logging.getLogger(__name__)
 def comments_create():
     content = request.form['content']
     parent_id = request.form.get('parent_id')
+
+    if not parent_id:
+        log.warning('User %s tried to create comment without parent_id', current_user.objectid)
+        raise wz_exceptions.UnprocessableEntity()
+
     api = system_util.pillar_api()
     parent_node = Node.find(parent_id, api=api)
+    if not parent_node:
+        log.warning('Unable to create comment for user %s, parent node %r not found',
+                    current_user.objectid, parent_id)
+        raise wz_exceptions.UnprocessableEntity()
 
-    node_asset_props = dict(
+    log.warning('Creating comment for user %s on parent node %r',
+                current_user.objectid, parent_id)
+
+    comment_props = dict(
         project=parent_node.project,
         name='Comment',
         user=current_user.objectid,
@@ -36,20 +53,18 @@ def comments_create():
             rating_negative=0))
 
     if parent_id:
-        node_asset_props['parent'] = parent_id
+        comment_props['parent'] = parent_id
 
     # Get the parent node and check if it's a comment. In which case we flag
     # the current comment as a reply.
     parent_node = Node.find(parent_id, api=api)
     if parent_node.node_type == 'comment':
-        node_asset_props['properties']['is_reply'] = True
+        comment_props['properties']['is_reply'] = True
 
-    node_asset = Node(node_asset_props)
-    node_asset.create(api=api)
+    comment = Node(comment_props)
+    comment.create(api=api)
 
-    return jsonify(
-        asset_id=node_asset._id,
-        content=node_asset.properties.content)
+    return jsonify({'node_id': comment._id}), 201
 
 
 @blueprint.route('/comments/<string(length=24):comment_id>', methods=['POST'])
@@ -119,6 +134,8 @@ def format_comment(comment, is_reply=False, is_team=False, replies=None):
 
 @blueprint.route("/comments/")
 def comments_index():
+    warnings.warn('comments_index() is deprecated in favour of comments_for_node()')
+
     parent_id = request.args.get('parent_id')
     # Get data only if we format it
     api = system_util.pillar_api()
@@ -150,6 +167,50 @@ def comments_index():
                                          parent_id=parent_id,
                                          has_method_POST=has_method_POST)
     return return_content
+
+
+@blueprint.route('/<string(length=24):node_id>/comments')
+def comments_for_node(node_id):
+    """Shows the comments attached to the given node."""
+
+    api = system_util.pillar_api()
+
+    node = Node.find(node_id, api=api)
+    project = Project({'_id': node.project})
+    can_post_comments = project.node_type_has_method('comment', 'POST', api=api)
+
+    # Query for all children, i.e. comments on the node.
+    comments = Node.all({
+        'where': {'node_type': 'comment', 'parent': node_id},
+    }, api=api)
+
+    def enrich(some_comment):
+        some_comment['_user'] = subquery.get_user_info(some_comment['user'])
+        some_comment['_is_own'] = some_comment['user'] == current_user.objectid
+        some_comment['_current_user_rating'] = None  # tri-state boolean
+
+        if current_user.is_authenticated:
+            for rating in comment.properties.ratings or ():
+                if rating.user != current_user.objectid:
+                    continue
+
+                some_comment['_current_user_rating'] = rating.is_positive
+
+    for comment in comments['_items']:
+        # Query for all grandchildren, i.e. replies to comments on the node.
+        comment['_replies'] = Node.all({
+            'where': {'node_type': 'comment', 'parent': comment['_id']},
+        }, api=api)
+
+        enrich(comment)
+        for reply in comment['_replies']['_items']:
+            enrich(reply)
+
+    # Data will be requested via javascript
+    return render_template('nodes/custom/comment/list_embed.html',
+                           node_id=node_id,
+                           comments=comments,
+                           can_post_comments=can_post_comments)
 
 
 @blueprint.route("/comments/<comment_id>/rate/<operation>", methods=['POST'])

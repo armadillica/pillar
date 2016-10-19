@@ -577,3 +577,19 @@
 	display: block
 	max-width: 100%
 	height: auto
+
+
+.flash-on
+	background-color: lighten($color-success, 50%) !important
+	border-color: lighten($color-success, 40%) !important
+	color: $color-success !important
+	text-shadow: 1px 1px 0 white
+	transition: all .1s ease-in
+	img
+		transition: all .1s ease-in
+		opacity: .8
+
+.flash-off
+	transition: all 1s ease-out
+	img
+		transition: all 1s ease-out

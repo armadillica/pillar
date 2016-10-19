@@ -8,6 +8,8 @@ import rsa.randnum
 import werkzeug.exceptions as wz_exceptions
 from bson import ObjectId
 from flask import current_app, g, Blueprint, request
+
+import pillar.markdown
 from pillar.api import file_storage
 from pillar.api.activities import activity_subscribe, activity_object_add
 from pillar.api.utils.algolia import algolia_index_node_delete
@@ -26,6 +28,11 @@ def only_for_node_type_decorator(required_node_type_name):
 
     If the node type is not of the required node type, returns None,
     otherwise calls the wrapped function.
+
+    >>> deco = only_for_node_type_decorator('comment')
+    >>> @deco
+    ... def handle_comment(node): pass
+
     """
 
     def only_for_node_type(wrapped):
@@ -35,6 +42,7 @@ def only_for_node_type_decorator(required_node_type_name):
                 return
 
             return wrapped(node, *args, **kwargs)
+
         return wrapper
 
     only_for_node_type.__doc__ = "Decorator, immediately returns when " \
@@ -415,8 +423,31 @@ def after_deleting_node(item):
                     item.get('_id'), ex)
 
 
-def setup_app(app, url_prefix):
+only_for_comments = only_for_node_type_decorator('comment')
 
+
+@only_for_comments
+def convert_markdown(node, original=None):
+    """Converts comments from Markdown to HTML.
+
+    Always does this on save, even when the original Markdown hasn't changed,
+    because our Markdown -> HTML conversion rules might have.
+    """
+
+    try:
+        content = node['properties']['content']
+    except KeyError:
+        node['properties']['content_html'] = ''
+    else:
+        node['properties']['content_html'] = pillar.markdown.markdown(content)
+
+
+def nodes_convert_markdown(nodes):
+    for node in nodes:
+        convert_markdown(node)
+
+
+def setup_app(app, url_prefix):
     from . import patch
     patch.setup_app(app, url_prefix=url_prefix)
 
@@ -427,6 +458,7 @@ def setup_app(app, url_prefix):
     app.on_fetched_resource_nodes += resource_parse_attachments
 
     app.on_replace_nodes += before_replacing_node
+    app.on_replace_nodes += convert_markdown
     app.on_replace_nodes += deduct_content_type
     app.on_replace_nodes += node_set_default_picture
     app.on_replaced_nodes += after_replacing_node
@@ -434,6 +466,7 @@ def setup_app(app, url_prefix):
     app.on_insert_nodes += before_inserting_nodes
     app.on_insert_nodes += nodes_deduct_content_type
     app.on_insert_nodes += nodes_set_default_picture
+    app.on_insert_nodes += nodes_convert_markdown
     app.on_inserted_nodes += after_inserting_nodes
 
     app.on_deleted_item_nodes += after_deleting_node

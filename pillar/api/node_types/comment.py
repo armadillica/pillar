@@ -6,6 +6,11 @@ node_type_comment = {
         'content': {
             'type': 'string',
             'minlength': 5,
+            'required': True,
+        },
+        # The converted-to-HTML content.
+        'content_html': {
+            'type': 'string',
         },
         'status': {
             'type': 'string',

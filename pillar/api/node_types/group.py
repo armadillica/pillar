@@ -1,6 +1,6 @@
 node_type_group = {
     'name': 'group',
-    'description': 'Generic group node type edited',
+    'description': 'Folder node type',
     'parent': ['group', 'project'],
     'dyn_schema': {
         # Used for sorting within the context of a group
