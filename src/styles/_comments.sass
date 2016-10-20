@@ -408,13 +408,12 @@ $comments-width-max: 710px
 						padding: 10px
 						color: $color-text-dark
 						resize: vertical
-
-						transition: all 300ms ease-in-out
-
+						transition: border-color 300ms ease-in-out
 
 						&:focus
 							border: 1px solid $color-success
 							outline: none
+							min-height: 150px
 
 						&.field-error
 							border-color: $color-danger
