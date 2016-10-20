@@ -25,6 +25,7 @@ def get_user_info(user_id):
     if not user:
         return {}
 
+    # TODO: put those fields into a config var or module-level global.
     return {'email': user.email,
             'full_name': user.full_name,
             'username': user.username}
