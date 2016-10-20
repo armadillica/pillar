@@ -146,7 +146,7 @@ script.
 			comment_content
 				.addClass('editing')
 				.find('textarea')
-				.height(height + 30)
+				.height(Math.max(150, height + 30))
 				.focus()
 				.trigger('keyup');
 			comment_content.siblings('.comment-content-preview').show();
