@@ -70,26 +70,19 @@ def comments_create():
 @blueprint.route('/comments/<string(length=24):comment_id>', methods=['POST'])
 @login_required
 def comment_edit(comment_id):
-    """Allows a user to edit their comment (or any they have PUT access to)."""
+    """Allows a user to edit their comment."""
 
     api = system_util.pillar_api()
 
-    # Fetch the old comment.
-    comment_node = Node.find(comment_id, api=api)
-    if comment_node.node_type != 'comment':
-        log.info('POST to %s node %s done as if it were a comment edit; rejected.',
-                 comment_node.node_type, comment_id)
-        raise wz_exceptions.BadRequest('Node ID is not a comment.')
+    comment = Node({'_id': comment_id})
+    result = comment.patch({'op': 'edit', 'content': request.form['content']}, api=api)
+    assert result['_status'] == 'OK'
 
-    # Update the node.
-    comment_node.properties.content = request.form['content']
-    update_ok = comment_node.update(api=api)
-    if not update_ok:
-        log.warning('Unable to update comment node %s: %s',
-                    comment_id, comment_node.error)
-        raise wz_exceptions.InternalServerError('Unable to update comment node, unknown why.')
-
-    return '', 204
+    return jsonify({
+        'status': 'success',
+        'data': {
+            'content_html': result.properties.content_html,
+        }})
 
 
 def format_comment(comment, is_reply=False, is_team=False, replies=None):
@@ -233,13 +226,8 @@ def comments_rate(comment_id, operation):
 
     api = system_util.pillar_api()
 
-    comment = Node.find(comment_id, {'projection': {'_id': 1}}, api=api)
-    if not comment:
-        log.info('Node %i not found; how could someone click on the upvote/downvote button?',
-                 comment_id)
-        raise wz_exceptions.NotFound()
-
     # PATCH the node and return the result.
+    comment = Node({'_id': comment_id})
     result = comment.patch({'op': operation}, api=api)
     assert result['_status'] == 'OK'
 

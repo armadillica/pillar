@@ -210,6 +210,9 @@ function comment_mode(clicked_item, mode)
 		$edit_buttons.find('.edit_mode').show();
 		$edit_buttons.find('.edit_cancel').hide();
 		$edit_buttons.find('.edit_save').hide();
+
+		$container.find('.comment-content').removeClass('editing');
+		$container.find('.comment-content-preview').html('').hide();
 	}
 }
 
@@ -218,22 +221,20 @@ function comment_mode(clicked_item, mode)
  *
  * clicked_item: save/cancel button.
  *
- * Returns a promise on the comment loading.
+ * Returns a promise on the comment loading if reload_comment=true.
  */
-function commentEditCancel(clicked_item) {
+function commentEditCancel(clicked_item, reload_comment) {
+	comment_mode(clicked_item, 'view');
+
 	var comment_container = $(clicked_item).closest('.comment-container');
 	var comment_id = comment_container.data('node-id');
 
+	if (!reload_comment) return;
+
 	return loadComment(comment_id, {'properties.content': 1})
 	.done(function(data) {
-		var comment_raw = data['properties']['content'];
-		var comment_html = convert(comment_raw);
-
-		comment_mode(clicked_item, 'view');
-		comment_container.find('.comment-content')
-			.removeClass('editing')
-			.html(comment_html);
-		comment_container.find('.comment-content-preview').html('').hide();
+		var comment_html = data['properties']['content_html'];
+		comment_container.find('.comment-content').html(comment_html);
 	})
 	.fail(function(data) {
 		if (console) console.log('Error fetching comment: ', xhr);
@@ -288,7 +289,9 @@ function save_comment(is_new_comment, $commentContainer)
 		$.post('/nodes/comments/' + commentId,
 			{'content': comment})
 		.fail(promise.reject)
-		.done(function(data) { promise.resolve(commentId, comment); });
+		.done(function(resp) {
+			promise.resolve(commentId, resp.data.content_html);
+		});
 	}
 
 	return promise;

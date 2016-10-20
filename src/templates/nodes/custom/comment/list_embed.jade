@@ -158,7 +158,7 @@ script.
 	});
 
 	$(document).on('click','body .comment-action-edit span.edit_cancel',function(e){
-		commentEditCancel(this);
+		commentEditCancel(this, true);
 	});
 
 	/* Save edited comment */
@@ -181,14 +181,12 @@ script.
 				show_comment_edit_button_error($button, "Houston! Try again?");
 			}
 		})
-		.done(function(comment_id, comment) {
-			commentEditCancel($button)
-			.done(function() {
-				// TODO: reload just this comment's HTML from the back-end,
-				// rather than relying on our JS-converted Markdown.
-				$container.find('.comment-content').html(convert(comment));
-				$container.flashOnce();
-			});
+		.done(function(comment_id, comment_html) {
+			commentEditCancel($button, false)
+
+			$container.find('.comment-content')
+				.html(comment_html)
+				.flashOnce();
 
 			$button
 				.html('<i class="pi-check"></i> save changes')

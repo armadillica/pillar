@@ -24,12 +24,12 @@ class AbstractPatchCommentTest(AbstractPillarTest):
         resp = self.post('/api/nodes', json=asset,
                          auth_token='owner-token',
                          expected_status=201)
-        asset_id = resp.json()['_id']
+        self.asset_id = resp.json()['_id']
 
         # Create the comment
         comment = {'description': '',
                    'project': self.project_id,
-                   'parent': asset_id,
+                   'parent': self.asset_id,
                    'node_type': 'comment',
                    'user': self.owner_id,
                    'properties': {'rating_positive': 0,
@@ -201,3 +201,19 @@ class EditCommentTest(AbstractPatchCommentTest):
                          patched_node['properties']['content'])
         self.assertEqual(u'<p>Purrrr kittycat</p>\n',
                          patched_node['properties']['content_html'])
+
+    def test_edit_noncomment_node(self):
+        url = '/api/nodes/%s' % self.asset_id
+
+        self.patch(url,
+                   json={'op': 'edit', 'content': 'Je moeder is niet je vader.'},
+                   auth_token='owner-token',
+                   expected_status=405)
+
+    def test_edit_nonexistant_node(self):
+        url = '/api/nodes/%s' % ('0' * 24)
+
+        self.patch(url,
+                   json={'op': 'edit', 'content': 'Je moeder is niet je vader.'},
+                   auth_token='owner-token',
+                   expected_status=404)
