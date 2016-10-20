@@ -18,12 +18,4 @@ node_type_blog = {
         'template': {},
     },
     'parent': ['project',],
-    'permissions': {
-        # 'groups': [{
-        #     'group': app.config['ADMIN_USER_GROUP'],
-        #     'methods': ['GET', 'PUT', 'POST']
-        # }],
-        # 'users': [],
-        # 'world': ['GET']
-    }
 }

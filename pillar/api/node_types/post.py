@@ -55,5 +55,4 @@ node_type_post = {
         'attachments': {'visible': False},
     },
     'parent': ['blog', ],
-    'permissions': {}
 }

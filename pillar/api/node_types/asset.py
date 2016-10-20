@@ -69,6 +69,4 @@ node_type_asset = {
         'tags': {'visible': False},
         'categories': {'visible': False}
     },
-    'permissions': {
-    }
 }

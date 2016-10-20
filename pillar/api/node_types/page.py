@@ -50,5 +50,4 @@ node_type_page = {
         'attachments': {'visible': False},
     },
     'parent': ['project', ],
-    'permissions': {}
 }

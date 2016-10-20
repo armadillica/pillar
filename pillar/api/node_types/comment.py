@@ -65,6 +65,4 @@ node_type_comment = {
         'is_reply': {}
     },
     'parent': ['asset', 'comment'],
-    'permissions': {
-    }
 }

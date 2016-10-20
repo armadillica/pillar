@@ -27,11 +27,4 @@ node_type_storage = {
         'backend': {}
     },
     'parent': ['group', 'project'],
-    'permissions': {
-        # 'groups': [{
-        #     'group': app.config['ADMIN_USER_GROUP'],
-        #     'methods': ['GET', 'PUT', 'POST']
-        # }],
-        # 'users': [],
-    }
 }

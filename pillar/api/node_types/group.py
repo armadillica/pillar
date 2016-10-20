@@ -28,6 +28,4 @@ node_type_group = {
         'notes': {'visible': False},
         'order': {'visible': False}
     },
-    'permissions': {
-    }
 }

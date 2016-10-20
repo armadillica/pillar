@@ -18,15 +18,17 @@ EXAMPLE_PROJECT = copy.deepcopy(ctd.EXAMPLE_PROJECT)
 
 _texture_nt = next(nt for nt in EXAMPLE_PROJECT['node_types']
                    if nt['name'] == 'texture')
-_texture_nt['permissions']['groups'] = [
+_texture_nt['permissions'] = {'groups': [
     {u'group': ObjectId('5596e975ea893b269af85c0f'), u'methods': [u'GET']},
-    {u'group': ObjectId('564733b56dcaf85da2faee8a'), u'methods': [u'GET']}, ]
+    {u'group': ObjectId('564733b56dcaf85da2faee8a'), u'methods': [u'GET']}
+]}
 
 _asset_nt = next(nt for nt in EXAMPLE_PROJECT['node_types']
                  if nt['name'] == 'asset')
-_asset_nt['permissions']['groups'] = [
+_asset_nt['permissions'] = {'groups': [
     {u'group': ObjectId('5596e975ea893b269af85c0f'), u'methods': [u'DELETE', u'GET']},
-    {u'group': ObjectId('564733b56dcaf85da2faee8a'), u'methods': [u'GET']}]
+    {u'group': ObjectId('564733b56dcaf85da2faee8a'), u'methods': [u'GET']}
+]}
 
 
 class AuthenticationTests(AbstractPillarTest):
