@@ -590,7 +590,6 @@ def remarkdown_comments():
     """
 
     from pillar.api.nodes import convert_markdown
-    from pprint import pformat
 
     nodes_collection = current_app.db()['nodes']
     comments = nodes_collection.find({'node_type': 'comment'},
