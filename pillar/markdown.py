@@ -14,12 +14,16 @@ ALLOWED_TAGS = [
     'acronym',
     'b', 'strong',
     'i', 'em',
+    'del', 'kbd',
+    'dl', 'dt', 'dd',
     'blockquote',
     'code',
     'li', 'ol', 'ul',
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
-    'p',
+    'p', 'br', 'hr',
+    'sup', 'sub', 'strike',
     'img',
+    'iframe',
 ]
 
 ALLOWED_ATTRIBUTES = {
@@ -27,6 +31,7 @@ ALLOWED_ATTRIBUTES = {
     'abbr': ['title'],
     'acronym': ['title'],
     'img': ['src', 'alt', 'width', 'height', 'title'],
+    'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
     '*': ['style'],
 }
 
