@@ -23,6 +23,7 @@ $(document).on('click','body .comment-action-reply',function(e){
 
 	// Get the textarea and set its parent_id data
 	var commentField = document.getElementById('comment_field');
+	commentField.dataset.originalParentId = commentField.dataset.parentId;
 	commentField.dataset.parentId = parentNodeId;
 
 	// Start the comment field with @authorname:
@@ -57,6 +58,9 @@ $(document).on('click','body .comment-action-cancel',function(e){
 
 	$('.comment-reply-container').detach().prependTo('#comments-list');
 	var commentField = document.getElementById('comment_field');
+	commentField.dataset.parentId = commentField.dataset.originalParentId;
+	delete commentField.dataset.originalParentId;
+
 	$(commentField).val('');
 	// Convert Markdown
 	var convert = new Markdown.getSanitizingConverter().makeHtml;
