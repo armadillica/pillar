@@ -6,7 +6,7 @@ This is for user-generated stuff, like comments.
 from __future__ import absolute_import
 
 import bleach
-import markdown as _markdown
+import CommonMark
 
 ALLOWED_TAGS = [
     'a',
@@ -36,7 +36,7 @@ ALLOWED_STYLES = [
 
 
 def markdown(s):
-    tainted_html = _markdown.markdown(s)
+    tainted_html = CommonMark.commonmark(s)
     safe_html = bleach.clean(tainted_html,
                              tags=ALLOWED_TAGS,
                              attributes=ALLOWED_ATTRIBUTES,
