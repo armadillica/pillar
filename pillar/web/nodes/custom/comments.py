@@ -37,8 +37,8 @@ def comments_create():
                     current_user.objectid, parent_id)
         raise wz_exceptions.UnprocessableEntity()
 
-    log.warning('Creating comment for user %s on parent node %r',
-                current_user.objectid, parent_id)
+    log.info('Creating comment for user %s on parent node %r',
+             current_user.objectid, parent_id)
 
     comment_props = dict(
         project=parent_node.project,
@@ -209,7 +209,6 @@ def comments_for_node(node_id):
     nr_of_comments = sum(1 + comment['_replies']['_meta']['total']
                          for comment in comments['_items'])
 
-    # Data will be requested via javascript
     return render_template('nodes/custom/comment/list_embed.html',
                            node_id=node_id,
                            comments=comments,
