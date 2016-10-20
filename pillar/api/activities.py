@@ -17,6 +17,11 @@ def notification_parse(notification):
     if activity is None or activity['object_type'] != 'node':
         return
     node = nodes_collection.find_one({'_id': activity['object']})
+    if not node:
+        # This can happen when a notification is generated and then the
+        # node is deleted.
+        return
+
     # Initial support only for node_type comments
     if node['node_type'] != 'comment':
         return
