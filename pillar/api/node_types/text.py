@@ -24,5 +24,5 @@ node_type_text = {
     },
     'form_schema': {
         'shared_slug': {'visible': False},
-    }
+    },
 }

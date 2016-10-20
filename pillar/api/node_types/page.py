@@ -44,9 +44,6 @@ node_type_page = {
         }
     },
     'form_schema': {
-        'content': {},
-        'status': {},
-        'url': {},
         'attachments': {'visible': False},
     },
     'parent': ['project', ],

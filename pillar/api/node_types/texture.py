@@ -58,15 +58,8 @@ node_type_texture = {
         }
     },
     'form_schema': {
-        'status': {},
         'content_type': {'visible': False},
-        'files': {},
-        'is_tileable': {},
-        'is_landscape': {},
-        'resolution': {},
-        'aspect_ratio': {},
-        'order': {},
         'tags': {'visible': False},
         'categories': {'visible': False},
-    }
+    },
 }

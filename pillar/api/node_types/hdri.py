@@ -62,5 +62,5 @@ node_type_hdri = {
         'content_type': {'visible': False},
         'tags': {'visible': False},
         'categories': {'visible': False},
-    }
+    },
 }

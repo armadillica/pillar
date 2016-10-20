@@ -48,10 +48,6 @@ node_type_post = {
         }
     },
     'form_schema': {
-        'content': {},
-        'status': {},
-        'category': {},
-        'url': {},
         'attachments': {'visible': False},
     },
     'parent': ['blog', ],

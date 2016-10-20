@@ -15,8 +15,5 @@ node_type_group_hdri = {
             ],
         }
     },
-    'form_schema': {
-        'status': {},
-        'order': {}
-    }
+    'form_schema': {},
 }

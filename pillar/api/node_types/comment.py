@@ -55,14 +55,6 @@ node_type_comment = {
         'confidence': {'type': 'float'},
         'is_reply': {'type': 'boolean'}
     },
-    'form_schema': {
-        'content': {},
-        'status': {},
-        'rating_positive': {},
-        'rating_negative': {},
-        'ratings': {},
-        'confidence': {},
-        'is_reply': {}
-    },
+    'form_schema': {},
     'parent': ['asset', 'comment'],
 }

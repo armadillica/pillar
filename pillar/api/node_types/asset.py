@@ -61,9 +61,7 @@ node_type_asset = {
         }
     },
     'form_schema': {
-        'status': {},
         'content_type': {'visible': False},
-        'file': {},
         'attachments': {'visible': False},
         'order': {'visible': False},
         'tags': {'visible': False},

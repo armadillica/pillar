@@ -21,10 +21,6 @@ node_type_storage = {
             'type': 'string',
         },
     },
-    'form_schema': {
-        'subdir': {},
-        'project': {},
-        'backend': {}
-    },
+    'form_schema': {},
     'parent': ['group', 'project'],
 }
