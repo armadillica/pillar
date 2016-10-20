@@ -1,7 +1,7 @@
 from pillar.tests import AbstractPillarTest
 
 
-class PatchCommentTest(AbstractPillarTest):
+class AbstractPatchCommentTest(AbstractPillarTest):
     def setUp(self, **kwargs):
         AbstractPillarTest.setUp(self, **kwargs)
 
@@ -46,6 +46,8 @@ class PatchCommentTest(AbstractPillarTest):
         comment_info = resp.json()
         self.node_url = '/api/nodes/%s' % comment_info['_id']
 
+
+class VoteCommentTest(AbstractPatchCommentTest):
     def test_upvote_other_comment(self):
         # Patch the node
         res = self.patch(self.node_url,
@@ -161,3 +163,41 @@ class PatchCommentTest(AbstractPillarTest):
             {u'user': unicode(other_user_ids[4]), u'is_positive': False},
             {u'user': unicode(self.user_id), u'is_positive': False},
         ], patched_node['properties'].get('ratings', []))
+
+
+class EditCommentTest(AbstractPatchCommentTest):
+    def test_comment_edit_happy(self, token='owner-token'):
+        pre_node = self.get(self.node_url, auth_token=token).json()
+
+        res = self.patch(self.node_url,
+                         json={'op': 'edit', 'content': 'Je moeder is niet je vader.'},
+                         auth_token=token).json()
+        self.assertEqual(u'<p>Je moeder is niet je vader.</p>\n',
+                         res['properties']['content_html'])
+
+        # Get the node again, to inspect its changed state.
+        patched_node = self.get(self.node_url, auth_token=token).json()
+        self.assertEqual(u'Je moeder is niet je vader.',
+                         patched_node['properties']['content'])
+        self.assertEqual(u'<p>Je moeder is niet je vader.</p>\n',
+                         patched_node['properties']['content_html'])
+        self.assertNotEqual(pre_node['_etag'], patched_node['_etag'])
+
+    def test_comment_edit_other_user_admin(self):
+        admin_id = self.create_user(user_id=24 * 'c', roles={u'admin'})
+        self.create_valid_auth_token(admin_id, 'admin-token')
+
+        self.test_comment_edit_happy(token='admin-token')
+
+    def test_comment_edit_other_user_nonadmin(self):
+        self.patch(self.node_url,
+                   json={'op': 'edit', 'content': 'Je moeder is niet je vader.'},
+                   auth_token='token',
+                   expected_status=403)
+
+        # Get the node again, to inspect its old state.
+        patched_node = self.get(self.node_url, auth_token='token').json()
+        self.assertEqual(u'Purrrr kittycat',
+                         patched_node['properties']['content'])
+        self.assertEqual(u'<p>Purrrr kittycat</p>\n',
+                         patched_node['properties']['content_html'])

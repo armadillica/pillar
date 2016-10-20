@@ -469,6 +469,8 @@ def setup_app(app, url_prefix):
     app.on_insert_nodes += nodes_convert_markdown
     app.on_inserted_nodes += after_inserting_nodes
 
+    app.on_update_nodes += convert_markdown
+
     app.on_deleted_item_nodes += after_deleting_node
 
     app.register_api_blueprint(blueprint, url_prefix=url_prefix)
