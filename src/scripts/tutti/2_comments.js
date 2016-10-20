@@ -76,10 +76,15 @@ $(document).on('click','body .comment-action-rating',function(e){
 	e.preventDefault();
 
 	var $this = $(this);
-	var nodeId = $this.parent().parent().parent().data('node_id');
+	var nodeId = $this.closest('.comment-container').data('node-id');
 	var is_positive = !$this.hasClass('down');
 	var parentDiv = $this.parent();
 	var rated_positive = parentDiv.hasClass('positive');
+
+	if (typeof nodeId === 'undefined') {
+		if (console) console.log('Undefined node ID');
+		return;
+	}
 
 	var op;
 	if (parentDiv.hasClass('rated') && is_positive == rated_positive) {
