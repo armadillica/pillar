@@ -3,7 +3,7 @@
 		.error-title 404. Not Found.
 
 		.error-lead.
-			Whatever you're looking for, it's not here.
+			{{ description | default("Whatever you're looking for, it's not here.", True) }}
 
 		hr
 
