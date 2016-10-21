@@ -2,13 +2,19 @@
 
 from __future__ import absolute_import
 
+import logging
+
+import flask
 import jinja2.filters
 import jinja2.utils
+import werkzeug.exceptions as wz_exceptions
 
 import pillar.api.utils
 from pillar.web.utils import pretty_date
 from pillar.web.nodes.routes import url_for_node
 import pillar.markdown
+
+log = logging.getLogger(__name__)
 
 
 def format_pretty_date(d):
@@ -92,6 +98,15 @@ def do_markdown(s):
     return jinja2.utils.Markup(safe_html)
 
 
+def do_url_for_node(node_id=None, node=None):
+    try:
+        return url_for_node(node_id=node_id, node=node)
+    except wz_exceptions.NotFound:
+        log.info('%s: do_url_for_node(node_id=%r, ...) called for non-existing node.',
+                 flask.request.url, node_id)
+        return None
+
+
 def setup_jinja_env(jinja_env):
     jinja_env.filters['pretty_date'] = format_pretty_date
     jinja_env.filters['pretty_date_time'] = format_pretty_date_time
@@ -100,4 +115,4 @@ def setup_jinja_env(jinja_env):
     jinja_env.filters['pluralize'] = do_pluralize
     jinja_env.filters['gravatar'] = pillar.api.utils.gravatar
     jinja_env.filters['markdown'] = do_markdown
-    jinja_env.globals['url_for_node'] = url_for_node
+    jinja_env.globals['url_for_node'] = do_url_for_node

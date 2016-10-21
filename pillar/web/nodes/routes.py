@@ -593,7 +593,7 @@ def url_for_node(node_id=None, node=None):
             log.warning(
                 'url_for_node(node_id=%r, node=None): Unable to find node.',
                 node_id)
-            raise ValueError('Unable to find node %r' % node_id)
+            raise NotFound('Unable to find node %r' % node_id)
 
     return finders.find_url_for_node(node)
 
