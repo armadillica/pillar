@@ -2,6 +2,7 @@
 
 import collections
 import copy
+import json
 import logging
 import logging.config
 import subprocess
@@ -341,6 +342,31 @@ class PillarServer(Eve):
     def handle_sdk_resource_not_found(self, error):
         self.log.info('Forwarding ResourceNotFound exception to client: %s', error, exc_info=True)
 
+        content = getattr(error, 'content', None)
+        if content:
+            try:
+                error_content = json.loads(content)
+            except ValueError:
+                error_content = None
+
+            if error_content and error_content.get('_deleted', False):
+                # This document used to exist, but doesn't any more. Let the user know.
+                doc_name = error_content.get('name')
+                node_type = error_content.get('node_type')
+                if node_type:
+                    node_type = node_type.replace('_', ' ').title()
+                    if doc_name:
+                        description = u'%s "%s" was deleted.' % (node_type, doc_name)
+                    else:
+                        description = u'This %s was deleted.' % (node_type, )
+                else:
+                    if doc_name:
+                        description = u'"%s" was deleted.' % doc_name
+                    else:
+                        description = None
+
+                error.description = description
+
         error.code = 404
         return self.pillar_error_handler(error)
 
@@ -398,7 +424,7 @@ class PillarServer(Eve):
 
         # Also handle the case where we didn't create a template for this error.
         try:
-            return render_template(fname), error_ob.code
+            return render_template(fname, description=error_ob.description), error_ob.code
         except TemplateNotFound:
             self.log.warning('Error template %s for code %i not found',
                              fname, error_ob.code)
