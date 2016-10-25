@@ -128,12 +128,7 @@ def services():
 def main_blog(url=None):
     """Blog with project news"""
     project_id = current_app.config['MAIN_PROJECT_ID']
-
-    @current_app.cache.memoize(timeout=3600, unless=current_user_is_authenticated)
-    def cache_post_view(url):
-        return posts_view(project_id, url)
-
-    return cache_post_view(url)
+    return posts_view(project_id, url)
 
 
 @blueprint.route('/blog/create')
@@ -147,18 +142,7 @@ def main_posts_create():
 def project_blog(project_url, url=None):
     """View project blog"""
 
-    @current_app.cache.memoize(timeout=3600,
-                               unless=current_user_is_authenticated)
-    def cache_post_view(project_url, url):
-        api = system_util.pillar_api()
-        try:
-            project = Project.find_one({
-                'where': '{"url" : "%s"}' % (project_url)}, api=api)
-            return posts_view(project._id, url=url)
-        except ResourceNotFound:
-            return abort(404)
-
-    return cache_post_view(project_url, url)
+    return posts_view(project_url=project_url, url=url)
 
 
 def get_projects(category):

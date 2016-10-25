@@ -8,6 +8,7 @@ from flask_login import login_required, current_user
 from pillar.web.utils import system_util
 from pillar.web.utils import attach_project_pictures
 from pillar.web.utils import get_file
+from pillar.web.utils import current_user_is_authenticated
 
 from pillar.web.nodes.routes import blueprint
 from pillar.web.nodes.routes import url_for_node
@@ -16,28 +17,35 @@ from pillar.web.nodes.forms import process_node_form
 from pillar.web.projects.routes import project_update_nodes_list
 
 
-def posts_view(project_id, url=None):
+# Cached, see setup_app() below.
+def posts_view(project_id=None, project_url=None, url=None):
     """View individual blogpost"""
+
+    if bool(project_id) == bool(project_url):
+        raise ValueError('posts_view(): pass either project_id or project_url')
+
     api = system_util.pillar_api()
+
     # Fetch project (for backgroud images and links generation)
-    project = Project.find(project_id, api=api)
+    if project_id:
+        project = Project.find(project_id, api=api)
+    else:
+        project = Project.find_one({'where': {'url': project_url}}, api=api)
+        project_id = project['_id']
+
     attach_project_pictures(project, api)
-    try:
-        blog = Node.find_one({
-            'where': {'node_type': 'blog', 'project': project_id},
-            }, api=api)
-    except ResourceNotFound:
-        abort(404)
+
+    blog = Node.find_one({
+        'where': {'node_type': 'blog', 'project': project_id},
+    }, api=api)
+
     if url:
-        try:
-            post = Node.find_one({
-                'where': '{"parent": "%s", "properties.url": "%s"}' % (blog._id, url),
-                'embedded': '{"node_type": 1, "user": 1}',
-                }, api=api)
-            if post.picture:
-                post.picture = get_file(post.picture, api=api)
-        except ResourceNotFound:
-            return abort(404)
+        post = Node.find_one({
+            'where': {'parent': blog._id, 'properties.url': url},
+            'embedded': {'node_type': 1, 'user': 1},
+        }, api=api)
+        if post.picture:
+            post.picture = get_file(post.picture, api=api)
 
         # If post is not published, check that the user is also the author of
         # the post. If not, return 404.
@@ -62,7 +70,7 @@ def posts_view(project_id, url=None):
             'where': '{"parent": "%s" %s}' % (blog._id, status_query),
             'embedded': '{"user": 1}',
             'sort': '-_created'
-            }, api=api)
+        }, api=api)
 
         for post in posts._items:
             post.picture = get_file(post.picture, api=api)
@@ -116,10 +124,10 @@ def posts_create(project_id):
         return redirect(url_for_node(node=post))
     form.parent.data = blog._id
     return render_template('nodes/custom/post/create.html',
-        node_type=node_type,
-        form=form,
-        project=project,
-        api=api)
+                           node_type=node_type,
+                           form=form,
+                           project=project,
+                           api=api)
 
 
 @blueprint.route("/posts/<post_id>/edit", methods=['GET', 'POST'])
@@ -165,3 +173,11 @@ def posts_edit(post_id):
                            form=form,
                            project=project,
                            api=api)
+
+
+
+def setup_app(app):
+    global posts_view
+
+    memoize = app.cache.memoize(timeout=3600, unless=current_user_is_authenticated)
+    posts_view = memoize(posts_view)
