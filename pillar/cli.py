@@ -268,7 +268,7 @@ def badger(action, user_email, role):
         log.info('Status  : %i', status)
 
 
-def _create_service_account(email, service_roles, service_definition):
+def create_service_account(email, service_roles, service_definition):
     from pillar.api import service
     from pillar.api.utils import dumps
 
@@ -295,14 +295,14 @@ def create_badger_account(email, badges):
         this account can assign and revoke.
     """
 
-    _create_service_account(email, [u'badger'], {'badger': badges.strip().split()})
+    create_service_account(email, [u'badger'], {'badger': badges.strip().split()})
 
 
 @manager.command
 def create_urler_account(email):
     """Creates a new service account that can fetch all project URLs."""
 
-    _create_service_account(email, [u'urler'], {})
+    create_service_account(email, [u'urler'], {})
 
 
 @manager.command

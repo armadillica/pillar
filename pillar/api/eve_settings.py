@@ -121,6 +121,7 @@ users_schema = {
     },
     'service': {
         'type': 'dict',
+        'allow_unknown': True,
         'schema': {
             'badger': {
                 'type': 'list',
