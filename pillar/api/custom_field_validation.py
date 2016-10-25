@@ -9,6 +9,7 @@ log = logging.getLogger(__name__)
 
 
 class ValidateCustomFields(Validator):
+    # TODO: split this into a convert_property(property, schema) and call that from this function.
     def convert_properties(self, properties, node_schema):
         """Converts datetime strings and ObjectId strings to actual Python objects."""
 
@@ -23,10 +24,10 @@ class ValidateCustomFields(Validator):
             if prop_type == 'dict':
                 try:
                     dict_valueschema = schema_prop['schema']
+                    properties[prop] = self.convert_properties(properties[prop], dict_valueschema)
                 except KeyError:
-                    # TODO: will be renamed to 'keyschema' in Cerberus 1.0
                     dict_valueschema = schema_prop['valueschema']
-                properties[prop] = self.convert_properties(properties[prop], dict_valueschema)
+                    self.convert_dict_values(properties[prop], dict_valueschema)
 
             elif prop_type == 'list':
                 if properties[prop] in ['', '[]']:
@@ -51,6 +52,20 @@ class ValidateCustomFields(Validator):
                     properties[prop] = None
 
         return properties
+
+    def convert_dict_values(self, dict_property, dict_valueschema):
+        """Calls convert_properties() for the values in the dict.
+
+        Only validates the dict values, not the keys. Modifies the given dict in-place.
+        """
+
+        assert dict_valueschema[u'type'] == u'dict'
+        assert isinstance(dict_property, dict)
+
+        for key, val in dict_property.items():
+            item_schema = {u'item': dict_valueschema}
+            item_prop = {u'item': val}
+            dict_property[key] = self.convert_properties(item_prop, item_schema)[u'item']
 
     def _validate_valid_properties(self, valid_properties, field, value):
         from pillar.api.utils import project_get_node_type
