@@ -172,62 +172,6 @@ def short_link_info(short_code):
     }
 
 
-def item_parse_attachments(response):
-    """Before returning a response, check if the 'attachments' property is
-    defined. If yes, load the file (for the moment only images) in the required
-    variation, get the link and build a Markdown representation. Search in the
-    'field' specified in the attachment and replace the 'slug' tag with the
-    generated link.
-    """
-
-    attachments = response.get('properties', {}).get('attachments', None)
-    if not attachments:
-        return
-
-    files_collection = current_app.data.driver.db['files']
-    for attachment in attachments:
-        # Make a list from the property path
-        field_name_path = attachment['field'].split('.')
-        # This currently allow to access only properties inside of
-        # the properties property
-        if len(field_name_path) > 1:
-            field_content = response[field_name_path[0]][field_name_path[1]]
-        # This is for the "normal" first level property
-        else:
-            field_content = response[field_name_path[0]]
-        for af in attachment['files']:
-            slug = af['slug']
-            slug_tag = "[{0}]".format(slug)
-            f = files_collection.find_one({'_id': ObjectId(af['file'])})
-            if f is None:
-                af['file'] = None
-                continue
-            size = f['size'] if 'size' in f else 'l'
-
-            # Get the correct variation from the file
-            file_storage.ensure_valid_link(f)
-            thumbnail = next((item for item in f['variations'] if
-                              item['size'] == size), None)
-
-            # Build Markdown img string
-            l = '![{0}]({1} "{2}")'.format(slug, thumbnail['link'], f['name'])
-            # Parse the content of the file and replace the attachment
-            # tag with the actual image link
-            field_content = field_content.replace(slug_tag, l)
-
-        # Apply the parsed value back to the property. See above for
-        # clarifications on how this is done.
-        if len(field_name_path) > 1:
-            response[field_name_path[0]][field_name_path[1]] = field_content
-        else:
-            response[field_name_path[0]] = field_content
-
-
-def resource_parse_attachments(response):
-    for item in response['_items']:
-        item_parse_attachments(item)
-
-
 def before_replacing_node(item, original):
     check_permissions('nodes', original, 'PUT')
     update_file_name(item)
@@ -460,9 +404,6 @@ def setup_app(app, url_prefix):
 
     app.on_fetched_item_nodes += before_returning_node
     app.on_fetched_resource_nodes += before_returning_nodes
-
-    app.on_fetched_item_nodes += item_parse_attachments
-    app.on_fetched_resource_nodes += resource_parse_attachments
 
     app.on_replace_nodes += before_replacing_node
     app.on_replace_nodes += convert_markdown
