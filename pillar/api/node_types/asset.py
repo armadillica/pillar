@@ -1,4 +1,4 @@
-from pillar.api.node_types import _file_embedded_schema
+from pillar.api.node_types import _file_embedded_schema, _attachments_embedded_schema
 
 node_type_asset = {
     'name': 'asset',
@@ -27,26 +27,7 @@ node_type_asset = {
         # We point to the original file (and use it to extract any relevant
         # variation useful for our scope).
         'file': _file_embedded_schema,
-        'attachments': {
-            'type': 'list',
-            'schema': {
-                'type': 'dict',
-                'schema': {
-                    'field': {'type': 'string'},
-                    'files': {
-                        'type': 'list',
-                        'schema': {
-                            'type': 'dict',
-                            'schema': {
-                                'file': _file_embedded_schema,
-                                'slug': {'type': 'string', 'minlength': 1},
-                                'size': {'type': 'string'}
-                            }
-                        }
-                    }
-                }
-            }
-        },
+        'attachments': _attachments_embedded_schema,
         # Tags for search
         'tags': {
             'type': 'list',
