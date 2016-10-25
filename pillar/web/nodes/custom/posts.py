@@ -50,10 +50,7 @@ def posts_view(project_id=None, project_url=None, url=None):
         # If post is not published, check that the user is also the author of
         # the post. If not, return 404.
         if post.properties.status != "published":
-            if current_user.is_authenticated:
-                if not post.has_method('PUT'):
-                    abort(403)
-            else:
+            if not (current_user.is_authenticated and post.has_method('PUT')):
                 abort(403)
 
         return render_template(
