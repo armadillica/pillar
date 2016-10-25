@@ -10,30 +10,34 @@ log = logging.getLogger(__name__)
 
 class ValidateCustomFields(Validator):
     def convert_properties(self, properties, node_schema):
+        """Converts datetime strings and ObjectId strings to actual Python objects."""
+
         date_format = current_app.config['RFC1123_DATE_FORMAT']
 
         for prop in node_schema:
-            if not prop in properties:
+            if prop not in properties:
                 continue
             schema_prop = node_schema[prop]
             prop_type = schema_prop['type']
+
             if prop_type == 'dict':
                 properties[prop] = self.convert_properties(
                     properties[prop], schema_prop['schema'])
-            if prop_type == 'list':
+            elif prop_type == 'list':
                 if properties[prop] in ['', '[]']:
                     properties[prop] = []
-                for k, val in enumerate(properties[prop]):
-                    if not 'schema' in schema_prop:
-                        continue
-                    item_schema = {'item': schema_prop['schema']}
-                    item_prop = {'item': properties[prop][k]}
-                    properties[prop][k] = self.convert_properties(
-                        item_prop, item_schema)['item']
+                if 'schema' in schema_prop:
+                    for k, val in enumerate(properties[prop]):
+                        item_schema = {'item': schema_prop['schema']}
+                        item_prop = {'item': properties[prop][k]}
+                        properties[prop][k] = self.convert_properties(
+                            item_prop, item_schema)['item']
+
             # Convert datetime string to RFC1123 datetime
             elif prop_type == 'datetime':
                 prop_val = properties[prop]
                 properties[prop] = datetime.strptime(prop_val, date_format)
+
             elif prop_type == 'objectid':
                 prop_val = properties[prop]
                 if prop_val:
