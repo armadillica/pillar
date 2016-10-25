@@ -21,8 +21,13 @@ class ValidateCustomFields(Validator):
             prop_type = schema_prop['type']
 
             if prop_type == 'dict':
-                properties[prop] = self.convert_properties(
-                    properties[prop], schema_prop['schema'])
+                try:
+                    dict_valueschema = schema_prop['schema']
+                except KeyError:
+                    # TODO: will be renamed to 'keyschema' in Cerberus 1.0
+                    dict_valueschema = schema_prop['valueschema']
+                properties[prop] = self.convert_properties(properties[prop], dict_valueschema)
+
             elif prop_type == 'list':
                 if properties[prop] in ['', '[]']:
                     properties[prop] = []

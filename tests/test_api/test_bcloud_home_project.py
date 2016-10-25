@@ -404,11 +404,6 @@ class HomeProjectUserChangedRoleTest(AbstractPillarTest):
 
 
 class TextureLibraryTest(AbstractHomeProjectTest):
-    def create_node(self, node_doc):
-        with self.app.test_request_context():
-            nodes_coll = self.app.data.driver.db['nodes']
-            result = nodes_coll.insert_one(node_doc)
-        return result.inserted_id
 
     def setUp(self, **kwargs):
         AbstractHomeProjectTest.setUp(self, **kwargs)

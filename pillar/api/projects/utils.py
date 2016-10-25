@@ -90,3 +90,10 @@ def create_new_project(project_name, user_id, overrides):
     log.info('Created project %s for user %s', project['_id'], user_id)
 
     return project
+
+
+def get_node_type(project, node_type_name):
+    """Returns the named node type, or None if it doesn't exist."""
+
+    return next((nt for nt in project['node_types']
+                 if nt['name'] == node_type_name), None)

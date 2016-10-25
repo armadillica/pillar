@@ -109,7 +109,11 @@ class AbstractPillarTest(TestMinimal):
             del sys.modules[modname]
 
     def ensure_file_exists(self, file_overrides=None):
-        self.ensure_project_exists()
+        if file_overrides and file_overrides.get('project'):
+            self.ensure_project_exists({'_id': file_overrides['project']})
+        else:
+            self.ensure_project_exists()
+
         with self.app.test_request_context():
             files_collection = self.app.data.driver.db['files']
             assert isinstance(files_collection, pymongo.collection.Collection)
@@ -222,7 +226,7 @@ class AbstractPillarTest(TestMinimal):
 
         return token_data
 
-    def create_project_with_admin(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber', )):
+    def create_project_with_admin(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',)):
         """Creates a project and a user that's member of the project's admin group.
 
         :returns: (project_id, user_id)
@@ -233,7 +237,7 @@ class AbstractPillarTest(TestMinimal):
 
         return project_id, user_id
 
-    def create_project_admin(self, proj, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber', )):
+    def create_project_admin(self, proj, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',)):
         """Creates a user that's member of the project's admin group.
 
         :param proj: project document, or at least a dict with permissions in it.
@@ -246,6 +250,14 @@ class AbstractPillarTest(TestMinimal):
         user_id = self.create_user(user_id=user_id, roles=roles, groups=[admin_group_id])
 
         return user_id
+
+    def create_node(self, node_doc):
+        """Creates a node, returning its ObjectId. """
+
+        with self.app.test_request_context():
+            nodes_coll = self.app.data.driver.db['nodes']
+            result = nodes_coll.insert_one(node_doc)
+        return result.inserted_id
 
     def badger(self, user_email, roles, action, srv_token=None):
         """Creates a service account, and uses it to grant or revoke a role to the user.

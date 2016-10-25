@@ -627,3 +627,96 @@ def remarkdown_comments():
     log.info('identical: %i', identical)
     log.info('skipped  : %i', skipped)
     log.info('errors   : %i', errors)
+
+
+@manager.command
+@manager.option('-p', '--project', dest='proj_url', nargs='?',
+                help='Project URL')
+@manager.option('-a', '--all', dest='all_projects', action='store_true', default=False,
+                help='Replace on all projects.')
+def upgrade_attachment_schema(proj_url=None, all_projects=False):
+    """Replaces the project's attachments with the new schema.
+
+    Updates both the schema definition and the nodes with attachments (asset, page, post).
+    """
+
+    if bool(proj_url) == all_projects:
+        log.error('Use either --project or --all.')
+        return 1
+
+    from pillar.api.utils.authentication import force_cli_user
+    force_cli_user()
+
+    from pillar.api.node_types.asset import node_type_asset
+    from pillar.api.node_types.page import node_type_page
+    from pillar.api.node_types.post import node_type_post
+    from pillar.api.node_types import _attachments_embedded_schema
+    from pillar.api.utils import remove_private_keys
+
+    # Node types that support attachments
+    node_types = (node_type_asset, node_type_page, node_type_post)
+    node_type_names = {nt['name'] for nt in node_types}
+
+    db = current_app.db()
+    projects_coll = db['projects']
+    nodes_coll = db['nodes']
+
+    def handle_project(project):
+        log.info('Handling project %s', project['url'])
+
+        replace_schemas(project)
+        replace_attachments(project)
+
+    def replace_schemas(project):
+        for proj_nt in project['node_types']:
+            nt_name = proj_nt['name']
+            if nt_name not in node_type_names:
+                log.info('   - skipping node type "%s"', nt_name)
+                continue
+
+            log.info('   - replacing attachment schema on node type "%s"', nt_name)
+            proj_nt['dyn_schema']['attachments'] = copy.deepcopy(_attachments_embedded_schema)
+
+        # Use Eve to PUT, so we have schema checking.
+        db_proj = remove_private_keys(project)
+        r, _, _, status = put_internal('projects', db_proj, _id=project['_id'])
+        if status != 200:
+            log.error('Error %i storing altered project %s: %s', status, project['_id'], r)
+            return 4
+        log.info('Project saved succesfully.')
+
+    def replace_attachments(project):
+        log.info('Upgrading nodes for project %s', project['url'])
+        nodes = nodes_coll.find({
+            'project': project['_id'],
+            'node_type': {'$in': list(node_type_names)},
+            'properties.attachments.0': {'$exists': True},
+        })
+        for node in nodes:
+            log.info('    - Updating schema on node %s (%s)', node['_id'], node.get('name'))
+            new_atts = {}
+
+            for field_info in node[u'properties'][u'attachments']:
+                for attachment in field_info.get('files', []):
+                    new_atts[attachment[u'slug']] = {u'oid': attachment[u'file']}
+
+            node[u'properties'][u'attachments'] = new_atts
+
+            # Use Eve to PUT, so we have schema checking.
+            db_node = remove_private_keys(node)
+            r, _, _, status = put_internal('nodes', db_node, _id=node['_id'])
+            if status != 200:
+                log.error('Error %i storing altered node %s: %s', status, node['_id'], r)
+                return
+
+    if all_projects:
+        for proj in projects_coll.find():
+            handle_project(proj)
+        return
+
+    proj = projects_coll.find_one({'url': proj_url})
+    if not proj:
+        log.error('Project url=%s not found', proj_url)
+        return 3
+
+    handle_project(proj)

@@ -17,7 +17,10 @@ _attachments_embedded_schema = {
     'valueschema': {
         'type': 'dict',
         'schema': {
-            'oid': 'objectid',
+            'oid': {
+                'type': 'objectid',
+                'required': True,
+            },
             'collection': {
                 'type': 'string',
                 'allowed': ['files'],
