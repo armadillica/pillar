@@ -267,9 +267,7 @@ class AbstractNodeReplacementTest(AbstractPillarTest):
         })
 
     def fetch_project_from_db(self):
-        with self.app.app_context():
-            proj_coll = self.app.db()['projects']
-            return proj_coll.find_one(self.project_id)
+        return super(AbstractNodeReplacementTest, self).fetch_project_from_db(self.project_id)
 
     def add_group_permission_to_asset_node_type(self):
         group_perms = {u'group': ctd.EXAMPLE_PROJECT_READONLY_GROUP_ID,
@@ -342,3 +340,26 @@ class UpgradeAttachmentSchemaTest(AbstractNodeReplacementTest):
 
         # Test that the permissions set previously are still there.
         self.assertEqual([group_perms], nt_asset['permissions']['groups'])
+
+
+class CreateBlogTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        AbstractPillarTest.setUp(self, **kwargs)
+
+        self.project_id, self.proj = self.ensure_project_exists()
+        self.ensure_file_exists({'_id': self.proj[u'picture_header']})
+        self.ensure_file_exists({'_id': self.proj[u'picture_square']})
+
+    def test_create_blog(self):
+        """Very simple test to check the create_blog CLI command."""
+
+        from pillar.cli import create_blog
+
+        with self.app.test_request_context():
+            create_blog(self.proj['url'])
+
+        dbproj = self.fetch_project_from_db()
+        nt_blog = get_node_type(dbproj, 'blog')
+        self.assertIsNotNone(nt_blog)
+
+        # I trust that the blog node has been created too.

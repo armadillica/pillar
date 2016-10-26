@@ -60,6 +60,9 @@ def add_to_project(project, node_types, replace_existing):
     Overwrites any existing by the same name when replace_existing=True.
     """
 
+    assert isinstance(project, dict)
+    assert isinstance(node_types, (list, set, frozenset, tuple))
+
     project_id = project['_id']
 
     for node_type in node_types:

@@ -10,6 +10,7 @@ import logging
 
 from bson.objectid import ObjectId, InvalidId
 from eve.methods.put import put_internal
+from eve.methods.post import post_internal
 
 from flask import current_app
 from flask_script import Manager
@@ -720,3 +721,57 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
         return 3
 
     handle_project(proj)
+
+
+@manager.command
+def create_blog(proj_url):
+    """Adds a blog to the project."""
+
+    from pillar.api.utils.authentication import force_cli_user
+    from pillar.api.utils import node_type_utils
+    from pillar.api.node_types.blog import node_type_blog
+    from pillar.api.node_types.post import node_type_post
+    from pillar.api.utils import remove_private_keys
+
+    force_cli_user()
+
+    db = current_app.db()
+
+    # Add the blog & post node types to the project.
+    projects_coll = db['projects']
+    proj = projects_coll.find_one({'url': proj_url})
+    if not proj:
+        log.error('Project url=%s not found', proj_url)
+        return 3
+
+    node_type_utils.add_to_project(proj,
+                                   (node_type_blog, node_type_post),
+                                   replace_existing=False)
+
+    proj_id = proj['_id']
+    r, _, _, status = put_internal('projects', remove_private_keys(proj), _id=proj_id)
+    if status != 200:
+        log.error('Error %i storing altered project %s: %s', status, proj_id, r)
+        return 4
+    log.info('Project saved succesfully.')
+
+    # Create a blog node.
+    nodes_coll = db['nodes']
+    blog = nodes_coll.find_one({'node_type': 'blog', 'project': proj_id})
+    if not blog:
+        blog = {
+            u'node_type': node_type_blog['name'],
+            u'name': u'Blog',
+            u'description': u'',
+            u'properties': {},
+            u'project': proj_id,
+        }
+        r, _, _, status = post_internal('nodes', blog)
+        if status != 201:
+            log.error('Error %i storing blog node: %s', status, r)
+            return 4
+        log.info('Blog node saved succesfully: %s', r)
+    else:
+        log.info('Blog node already exists: %s', blog)
+
+    return 0
