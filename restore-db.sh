@@ -9,4 +9,4 @@ echo "THIS WILL DROP EXISTING CONNECTIONS"
 echo "Press [ENTER] to continue, [CTRL]+[C] to abort."
 read dummy
 
-mongorestore -h localhost:27017 -d eve --drop --maintainInsertionOrder --stopOnError "$1/eve"
+mongorestore -h localhost:27017 -d eve --drop --maintainInsertionOrder --stopOnError "$1/cloud"
