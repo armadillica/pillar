@@ -19,14 +19,30 @@ from wtforms import FieldList
 from wtforms.validators import DataRequired
 from pillar.web.utils import system_util
 from pillar.web.utils.forms import FileSelectField
-from pillar.web.utils.forms import ProceduralFileSelectForm
 from pillar.web.utils.forms import CustomFormField
 from pillar.web.utils.forms import build_file_select_form
+
+from . import attachments
 
 log = logging.getLogger(__name__)
 
 
-def add_form_properties(form_class, node_schema, form_schema, prefix=''):
+def iter_node_properties(node_type):
+    """Generator, iterates over all node properties with form schema."""
+
+    node_schema = node_type['dyn_schema'].to_dict()
+    form_schema = node_type['form_schema'].to_dict()
+
+    for prop_name, prop_schema in node_schema.iteritems():
+        prop_fschema = form_schema.get(prop_name, {})
+
+        if not prop_fschema.get('visible', True):
+            continue
+
+        yield prop_name, prop_schema, prop_fschema
+
+
+def add_form_properties(form_class, node_type):
     """Add fields to a form based on the node and form schema provided.
     :type node_schema: dict
     :param node_schema: the validation schema used by Cerberus
@@ -37,33 +53,16 @@ def add_form_properties(form_class, node_schema, form_schema, prefix=''):
             show and hide)
     """
 
-    for prop, schema_prop in node_schema.iteritems():
-        form_prop = form_schema.get(prop, {})
-        if prop == 'items':
-            continue
-        if not form_prop.get('visible', True):
-            continue
-        prop_name = "{0}{1}".format(prefix, prop)
+    for prop_name, schema_prop, form_prop in iter_node_properties(node_type):
 
         # Recursive call if detects a dict
         field_type = schema_prop['type']
-        if field_type == 'dict':
-            # This works if the dictionary schema is hardcoded.
-            # If we define it using propertyschema and valueschema, this
-            # validation pattern does not work and crahses.
-            add_form_properties(form_class, schema_prop['schema'],
-                                form_prop['schema'], "{0}__".format(prop_name))
-            continue
 
-        if field_type == 'list':
-            if prop == 'attachments':
-                # class AttachmentForm(Form):
-                #     pass
-                # AttachmentForm.file = FileSelectField('file')
-                # AttachmentForm.size = StringField()
-                # AttachmentForm.slug = StringField()
-                field = FieldList(CustomFormField(ProceduralFileSelectForm))
-            elif prop == 'files':
+        if field_type == 'dict':
+            assert prop_name == 'attachments'
+            field = attachments.attachment_form_group_create(schema_prop)
+        elif field_type == 'list':
+            if prop_name == 'files':
                 schema = schema_prop['schema']['schema']
                 file_select_form = build_file_select_form(schema)
                 field = FieldList(CustomFormField(file_select_form),
@@ -112,8 +111,6 @@ def get_node_form(node_type):
     class ProceduralForm(Form):
         pass
 
-    node_schema = node_type['dyn_schema'].to_dict()
-    form_prop = node_type['form_schema'].to_dict()
     parent_prop = node_type['parent']
 
     ProceduralForm.name = StringField('Name', validators=[DataRequired()])
@@ -126,7 +123,7 @@ def get_node_form(node_type):
     ProceduralForm.picture = FileSelectField('Picture', file_format='image')
     ProceduralForm.node_type = HiddenField(default=node_type['name'])
 
-    add_form_properties(ProceduralForm, node_schema, form_prop)
+    add_form_properties(ProceduralForm, node_type)
 
     return ProceduralForm()
 
@@ -166,59 +163,44 @@ def process_node_form(form, node_id=None, node_type=None, user=None):
             if form.parent.data != "":
                 node.parent = form.parent.data
 
-        def update_data(node_schema, form_schema, prefix=""):
-            for pr in node_schema:
-                schema_prop = node_schema[pr]
-                form_prop = form_schema.get(pr, {})
-                if pr == 'items':
-                    continue
-                if 'visible' in form_prop and not form_prop['visible']:
-                    continue
-                prop_name = "{0}{1}".format(prefix, pr)
-                if schema_prop['type'] == 'dict':
-                    update_data(
-                        schema_prop['schema'],
-                        form_prop['schema'],
-                        "{0}__".format(prop_name))
-                    continue
-                data = form[prop_name].data
-                if schema_prop['type'] == 'dict':
-                    if data == 'None':
-                        continue
-                elif schema_prop['type'] == 'integer':
-                    if data == '':
-                        data = 0
-                    else:
-                        data = int(form[prop_name].data)
-                elif schema_prop['type'] == 'datetime':
-                    data = datetime.strftime(data,
-                        app.config['RFC1123_DATE_FORMAT'])
-                elif schema_prop['type'] == 'list':
-                    if pr == 'attachments':
-                        # data = json.loads(data)
-                        data = [dict(field='description', files=data)]
-                    elif pr == 'files':
-                        # Only keep those items that actually refer to a file.
-                        data = [file_item for file_item in data
-                                if file_item.get('file')]
-                    # elif pr == 'tags':
-                    #     data = [tag.strip() for tag in data.split(',')]
-                elif schema_prop['type'] == 'objectid':
-                    if data == '':
-                        # Set empty object to None so it gets removed by the
-                        # SDK before node.update()
-                        data = None
+        for prop_name, schema_prop, form_prop in iter_node_properties(node_type):
+            data = form[prop_name].data
+            if schema_prop['type'] == 'dict':
+                data = attachments.attachment_form_parse_post_data(data)
+            elif schema_prop['type'] == 'integer':
+                if data == '':
+                    data = 0
                 else:
-                    if pr in form:
-                        data = form[prop_name].data
-                path = prop_name.split('__')
-                if len(path) > 1:
-                    recursive_prop = recursive(
-                        path, node.properties.to_dict(), data)
-                    node.properties = recursive_prop
+                    data = int(form[prop_name].data)
+            elif schema_prop['type'] == 'datetime':
+                data = datetime.strftime(data, current_app.config['RFC1123_DATE_FORMAT'])
+            elif schema_prop['type'] == 'list':
+                if prop_name == 'files':
+                    # Only keep those items that actually refer to a file.
+                    data = [file_item for file_item in data
+                            if file_item.get('file')]
                 else:
-                    node.properties[prop_name] = data
-        update_data(node_schema, form_schema)
+                    log.warning('Ignoring property %s of type %s',
+                                prop_name, schema_prop['type'])
+                # elif pr == 'tags':
+                #     data = [tag.strip() for tag in data.split(',')]
+            elif schema_prop['type'] == 'objectid':
+                if data == '':
+                    # Set empty object to None so it gets removed by the
+                    # SDK before node.update()
+                    data = None
+            else:
+                if prop_name in form:
+                    data = form[prop_name].data
+            path = prop_name.split('__')
+            assert len(path) == 1
+            if len(path) > 1:
+                recursive_prop = recursive(
+                    path, node.properties.to_dict(), data)
+                node.properties = recursive_prop
+            else:
+                node.properties[prop_name] = data
+
         ok = node.update(api=api)
         if not ok:
             log.warning('Unable to update node: %s', node.error)

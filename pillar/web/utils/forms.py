@@ -158,8 +158,8 @@ class CustomFormFieldWidget(object):
 
 
 class CustomFormField(FormField):
-    def __init__(self, name, **kwargs):
-        super(CustomFormField, self).__init__(name, **kwargs)
+    def __init__(self, form_class, **kwargs):
+        super(CustomFormField, self).__init__(form_class, **kwargs)
         self.widget = CustomFormFieldWidget()
 
 

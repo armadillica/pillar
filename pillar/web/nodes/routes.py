@@ -22,7 +22,6 @@ from wtforms import SelectMultipleField
 from flask_login import login_required
 from jinja2.exceptions import TemplateNotFound
 
-import pillar.web.nodes.attachments
 from pillar.web.utils import caching
 from pillar.web.nodes.forms import get_node_form
 from pillar.web.nodes.forms import process_node_form
@@ -35,7 +34,7 @@ from pillar.web.utils.forms import ProceduralFileSelectForm
 from pillar.web.utils.forms import build_file_select_form
 from pillar.web import system_util
 
-from . import finders
+from . import finders, attachments
 
 blueprint = Blueprint('nodes', __name__)
 log = logging.getLogger(__name__)
@@ -261,7 +260,7 @@ def _view_handler_asset(node, template_path, template_action, link_allowed):
         # Treat it as normal file (zip, blend, application, etc)
         asset_type = 'file'
 
-    node['description'] = pillar.web.nodes.attachments.render_attachments(node, node['description'])
+    node['description'] = attachments.render_attachments(node, node['description'])
 
     template_path = os.path.join(template_path, asset_type)
 
@@ -315,27 +314,18 @@ def edit(node_id):
     """Generic node editing form
     """
 
-    def set_properties(dyn_schema, form_schema, node_properties, form,
-                       prefix="",
-                       set_data=True):
+    def set_properties(dyn_schema, form_schema, node_properties, form, set_data,
+                       prefix=""):
         """Initialize custom properties for the form. We run this function once
         before validating the function with set_data=False, so that we can set
         any multiselect field that was originally specified empty and fill it
         with the current choices.
         """
-        for prop in dyn_schema:
-            schema_prop = dyn_schema[prop]
-            form_prop = form_schema.get(prop, {})
-            prop_name = "{0}{1}".format(prefix, prop)
 
-            if schema_prop['type'] == 'dict':
-                set_properties(
-                    schema_prop['schema'],
-                    form_prop['schema'],
-                    node_properties[prop_name],
-                    form,
-                    "{0}__".format(prop_name))
-                continue
+        log.debug('set_properties(..., prefix=%r, set_data=%r) called', prefix, set_data)
+
+        for prop, schema_prop in dyn_schema.iteritems():
+            prop_name = "{0}{1}".format(prefix, prop)
 
             if prop_name not in form:
                 continue
@@ -359,49 +349,32 @@ def edit(node_id):
                     form[prop_name].choices = [(d, d) for d in db_prop_value]
                     # Choices should be a tuple with value and name
 
+            if not set_data:
+                continue
+
             # Assign data to the field
-            if set_data:
-                if prop_name == 'attachments':
-                    for attachment_collection in db_prop_value:
-                        for a in attachment_collection['files']:
-                            attachment_form = ProceduralFileSelectForm()
-                            attachment_form.file = a['file']
-                            attachment_form.slug = a['slug']
-                            attachment_form.size = 'm'
-                            form[prop_name].append_entry(attachment_form)
+            if prop_name == 'attachments':
+                attachments.attachment_form_group_set_data(db_prop_value, schema_prop,
+                                                           form[prop_name])
+            elif prop_name == 'files':
+                subschema = schema_prop['schema']['schema']
+                # Extra entries are caused by min_entries=1 in the form
+                # creation.
+                field_list = form[prop_name]
+                while len(field_list) > len(db_prop_value):
+                    field_list.pop_entry()
 
-                elif prop_name == 'files':
-                    schema = schema_prop['schema']['schema']
-                    # Extra entries are caused by min_entries=1 in the form
-                    # creation.
-                    field_list = form[prop_name]
-                    if len(db_prop_value) > 0:
-                        while len(field_list):
-                            field_list.pop_entry()
+                for file_data in db_prop_value:
+                    file_form_class = build_file_select_form(subschema)
+                    subform = file_form_class()
+                    for key, value in file_data.iteritems():
+                        setattr(subform, key, value)
+                    field_list.append_entry(subform)
 
-                    for file_data in db_prop_value:
-                        file_form_class = build_file_select_form(schema)
-                        subform = file_form_class()
-                        for key, value in file_data.iteritems():
-                            setattr(subform, key, value)
-                        field_list.append_entry(subform)
-
-                # elif prop_name == 'tags':
-                #     form[prop_name].data = ', '.join(data)
-                else:
-                    form[prop_name].data = db_prop_value
+            # elif prop_name == 'tags':
+            #     form[prop_name].data = ', '.join(data)
             else:
-                # Default population of multiple file form list (only if
-                # we are getting the form)
-                if request.method == 'POST':
-                    continue
-                if prop_name == 'attachments':
-                    if not db_prop_value:
-                        attachment_form = ProceduralFileSelectForm()
-                        attachment_form.file = 'file'
-                        attachment_form.slug = ''
-                        attachment_form.size = ''
-                        form[prop_name].append_entry(attachment_form)
+                form[prop_name].data = db_prop_value
 
     api = system_util.pillar_api()
     node = Node.find(node_id, api=api)
@@ -446,7 +419,7 @@ def edit(node_id):
     if node.parent:
         form.parent.data = node.parent
 
-    set_properties(dyn_schema, form_schema, node_properties, form)
+    set_properties(dyn_schema, form_schema, node_properties, form, set_data=True)
 
     # Get previews
     node.picture = get_file(node.picture, api=api) if node.picture else None

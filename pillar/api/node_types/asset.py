@@ -43,7 +43,6 @@ node_type_asset = {
     },
     'form_schema': {
         'content_type': {'visible': False},
-        'attachments': {'visible': False},
         'order': {'visible': False},
         'tags': {'visible': False},
         'categories': {'visible': False}
