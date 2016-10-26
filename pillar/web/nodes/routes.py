@@ -22,6 +22,7 @@ from wtforms import SelectMultipleField
 from flask_login import login_required
 from jinja2.exceptions import TemplateNotFound
 
+import pillar.web.nodes.attachments
 from pillar.web.utils import caching
 from pillar.web.nodes.forms import get_node_form
 from pillar.web.nodes.forms import process_node_form
@@ -259,6 +260,8 @@ def _view_handler_asset(node, template_path, template_action, link_allowed):
     elif asset_type != 'image':
         # Treat it as normal file (zip, blend, application, etc)
         asset_type = 'file'
+
+    node['description'] = pillar.web.nodes.attachments.render_attachments(node, node['description'])
 
     template_path = os.path.join(template_path, asset_type)
 

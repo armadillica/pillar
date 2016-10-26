@@ -691,7 +691,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
         nodes = nodes_coll.find({
             'project': project['_id'],
             'node_type': {'$in': list(node_type_names)},
-            'properties.attachments.0': {'$exists': True},
+            'properties.attachments': {'$exists': True},
         })
         for node in nodes:
             log.info('    - Updating schema on node %s (%s)', node['_id'], node.get('name'))

@@ -14,6 +14,7 @@ from pillar.web.nodes.routes import blueprint
 from pillar.web.nodes.routes import url_for_node
 from pillar.web.nodes.forms import get_node_form
 from pillar.web.nodes.forms import process_node_form
+import pillar.web.nodes.attachments
 from pillar.web.projects.routes import project_update_nodes_list
 
 
@@ -53,6 +54,9 @@ def posts_view(project_id=None, project_url=None, url=None):
             if not (current_user.is_authenticated and post.has_method('PUT')):
                 abort(403)
 
+        post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
+            post, post['properties']['content'])
+
         return render_template(
             'nodes/custom/post/view.html',
             blog=blog,
@@ -71,6 +75,9 @@ def posts_view(project_id=None, project_url=None, url=None):
 
         for post in posts._items:
             post.picture = get_file(post.picture, api=api)
+
+            post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
+                post, post['properties']['content'])
 
         return render_template(
             'nodes/custom/blog/index.html',
