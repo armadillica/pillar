@@ -57,21 +57,11 @@ def before_inserting_override_is_private_field(projects):
 
 
 def before_edit_check_permissions(document, original):
-    # Allow admin users to do whatever they want.
-    # TODO: possibly move this into the check_permissions function.
-    if user_has_role(u'admin'):
-        return
-
     check_permissions('projects', original, request.method)
 
 
 def before_delete_project(document):
     """Checks permissions before we allow deletion"""
-
-    # Allow admin users to do whatever they want.
-    # TODO: possibly move this into the check_permissions function.
-    if user_has_role(u'admin'):
-        return
 
     check_permissions('projects', document, request.method)
 

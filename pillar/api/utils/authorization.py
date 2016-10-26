@@ -28,6 +28,10 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
     :type check_node_type: str
     """
 
+    # Admins can do anything.
+    if user_has_role(u'admin'):
+        return
+
     if not has_permissions(collection_name, resource, method, append_allowed_methods,
                            check_node_type):
         abort(403)
