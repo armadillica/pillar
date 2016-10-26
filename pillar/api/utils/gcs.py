@@ -206,6 +206,11 @@ def update_file_name(node):
 
         storage = GoogleCloudStorageBucket(str(node['project']))
         blob = storage.Get(file_doc['file_path'], to_dict=False)
+        if blob is None:
+            log.warning('Unable to find blob for file %s in project %s',
+                        file_doc['file_path'], file_doc['project'])
+            return
+
         # Pick file extension from original filename
         _, ext = os.path.splitext(file_doc['filename'])
         name = _format_name(node['name'], ext, map_type=map_type)
