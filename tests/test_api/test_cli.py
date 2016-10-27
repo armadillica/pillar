@@ -337,6 +337,7 @@ class UpgradeAttachmentSchemaTest(AbstractNodeReplacementTest):
         nt_asset = get_node_type(dbproj, 'asset')
         self.assertEqual(node_type_asset['dyn_schema']['attachments'],
                          nt_asset['dyn_schema']['attachments'])
+        self.assertNotIn('attachments', nt_asset['form_schema'])
 
         # Test that the permissions set previously are still there.
         self.assertEqual([group_perms], nt_asset['permissions']['groups'])

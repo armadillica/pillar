@@ -656,7 +656,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
 
     # Node types that support attachments
     node_types = (node_type_asset, node_type_page, node_type_post)
-    node_type_names = {nt['name'] for nt in node_types}
+    nts_by_name = {nt['name']: nt for nt in node_types}
 
     db = current_app.db()
     projects_coll = db['projects']
@@ -671,12 +671,21 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
     def replace_schemas(project):
         for proj_nt in project['node_types']:
             nt_name = proj_nt['name']
-            if nt_name not in node_type_names:
+            if nt_name not in nts_by_name:
                 log.info('   - skipping node type "%s"', nt_name)
                 continue
 
             log.info('   - replacing attachment schema on node type "%s"', nt_name)
+            pillar_nt = nts_by_name[nt_name]
             proj_nt['dyn_schema']['attachments'] = copy.deepcopy(_attachments_embedded_schema)
+
+            # Get the form schema the same as the official Pillar one, but only for attachments.
+            try:
+                pillar_form_schema = pillar_nt['form_schema']['attachments']
+            except KeyError:
+                proj_nt['form_schema'].pop('attachments', None)
+            else:
+                proj_nt['form_schema']['attachments'] = pillar_form_schema
 
         # Use Eve to PUT, so we have schema checking.
         db_proj = remove_private_keys(project)
@@ -690,7 +699,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
         log.info('Upgrading nodes for project %s', project['url'])
         nodes = nodes_coll.find({
             'project': project['_id'],
-            'node_type': {'$in': list(node_type_names)},
+            'node_type': {'$in': list(nts_by_name)},
             'properties.attachments': {'$exists': True},
         })
         for node in nodes:
