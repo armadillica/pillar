@@ -672,7 +672,6 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
         for proj_nt in project['node_types']:
             nt_name = proj_nt['name']
             if nt_name not in nts_by_name:
-                log.info('   - skipping node type "%s"', nt_name)
                 continue
 
             log.info('   - replacing attachment schema on node type "%s"', nt_name)
@@ -703,10 +702,14 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
             'properties.attachments': {'$exists': True},
         })
         for node in nodes:
+            attachments = node[u'properties'][u'attachments']
+            if isinstance(attachments, dict):
+                # This node has already been upgraded.
+                continue
+
             log.info('    - Updating schema on node %s (%s)', node['_id'], node.get('name'))
             new_atts = {}
-
-            for field_info in node[u'properties'][u'attachments']:
+            for field_info in attachments:
                 for attachment in field_info.get('files', []):
                     new_atts[attachment[u'slug']] = {u'oid': attachment[u'file']}
 
