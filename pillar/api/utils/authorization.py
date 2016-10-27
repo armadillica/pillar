@@ -28,10 +28,6 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
     :type check_node_type: str
     """
 
-    # Admins can do anything.
-    if user_has_role(u'admin'):
-        return
-
     if not has_permissions(collection_name, resource, method, append_allowed_methods,
                            check_node_type):
         abort(403)
@@ -67,14 +63,17 @@ def compute_allowed_methods(collection_name, resource, check_node_type=None):
     # Accumulate allowed methods from the user, group and world level.
     allowed_methods = set()
     current_user = getattr(g, 'current_user', None)
+
     if current_user:
+        user_is_admin = is_admin(current_user)
+
         # If the user is authenticated, proceed to compare the group permissions
         for permission in computed_permissions.get('groups', ()):
-            if permission['group'] in current_user['groups']:
+            if user_is_admin or permission['group'] in current_user['groups']:
                 allowed_methods.update(permission['methods'])
 
         for permission in computed_permissions.get('users', ()):
-            if current_user['user_id'] == permission['user']:
+            if user_is_admin or current_user['user_id'] == permission['user']:
                 allowed_methods.update(permission['methods'])
 
     # Check if the node is public or private. This must be set for non logged
