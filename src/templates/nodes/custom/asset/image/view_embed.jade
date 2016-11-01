@@ -102,7 +102,8 @@
 					| {% if (node._created | pretty_date) != (node._updated | pretty_date) %}
 					span(title="Updated {{ node._updated }}") (updated {{ node._updated | pretty_date }})
 					| {% endif %}
-		#comments-container
+
+		#comments-embed
 			#comments-list-items-loading
 				i.pi-spin
 

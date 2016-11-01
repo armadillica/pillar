@@ -147,14 +147,17 @@ function loadComment(comment_id, projection)
 
 function loadComments(commentsUrl)
 {
+	var commentsContainer = $('#comments-embed');
+
 	return $.get(commentsUrl)
 	.done(function(dataHtml) {
 		// Update the DOM injecting the generate HTML into the page
-		$('#comments-container').html(dataHtml);
+		commentsContainer.html(dataHtml);
 	})
 	.fail(function(xhr) {
 		statusBarSet('error', "Couldn't load comments. Error: " + xhr.responseText, 'pi-attention', 5000);
-		$('#comments-container').html('<a id="comments-reload"><i class="pi-refresh"></i> Reload comments</a>');
+
+		commentsContainer.html('<a id="comments-reload"><i class="pi-refresh"></i> Reload comments</a>');
 	});
 }
 
