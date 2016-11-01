@@ -183,7 +183,7 @@ def comments_for_node(node_id):
         some_comment['_current_user_rating'] = None  # tri-state boolean
 
         if current_user.is_authenticated:
-            for rating in comment.properties.ratings or ():
+            for rating in some_comment.properties.ratings or ():
                 if rating.user != current_user.objectid:
                     continue
 
