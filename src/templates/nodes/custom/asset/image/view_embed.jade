@@ -91,7 +91,7 @@
 			ul.node-details-meta-list
 				| {% if node.has_method('PUT') %}
 				li.node-details-meta-list-item.status
-					| {{node.properties.status}}
+					| {{ node.properties.status | undertitle }}
 				| {% endif %}
 
 				li.node-details-meta-list-item.author

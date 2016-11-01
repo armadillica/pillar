@@ -20,7 +20,7 @@
 
 				| {% if node.properties.status != 'published' %}
 				li.node-details-meta-list-item.status
-					| {{node.properties.status}}
+					| {{ node.properties.status | undertitle }}
 				| {% endif %}
 
 			.node-details-meta-actions

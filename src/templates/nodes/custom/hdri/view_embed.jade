@@ -96,7 +96,7 @@
 		.node-details-meta.footer
 			ul.node-details-meta-list
 				li.node-details-meta-list-item.status
-					| {{node.properties.status}}
+					| {{ node.properties.status | undertitle }}
 
 				li.node-details-meta-list-item.author
 					| {{ node.user.full_name }}
