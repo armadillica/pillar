@@ -283,6 +283,7 @@ def create_service_account(email, service_roles, service_definition):
     print()
     print('Access token: %s' % token['token'])
     print('  expires on: %s' % token['expire_time'])
+    return account, token
 
 
 @manager.command
