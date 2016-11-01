@@ -22,7 +22,7 @@ def render_attachments(node, field_value):
 
     # TODO: cache this based on the node's etag and attachment links expiry.
 
-    node_attachments = node[u'properties'][u'attachments']
+    node_attachments = node.properties.attachments or {}
     if isinstance(node_attachments, list):
         log.warning('Old-style attachments property found on node %s. Ignoring them, '
                     'will result in attachments not being found.', node[u'_id'])
