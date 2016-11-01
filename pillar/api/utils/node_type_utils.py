@@ -1,5 +1,6 @@
 import copy
 import logging
+import types
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +62,8 @@ def add_to_project(project, node_types, replace_existing):
     """
 
     assert isinstance(project, dict)
-    assert isinstance(node_types, (list, set, frozenset, tuple))
+    assert isinstance(node_types, (list, set, frozenset, tuple, types.GeneratorType)), \
+        'node_types is of wrong type %s' % type(node_types)
 
     project_id = project['_id']
 
