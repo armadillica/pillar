@@ -53,8 +53,10 @@ script(type="text/javascript").
 			}
 		}
 
-		var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node._id) }}";
-		loadComments(commentsUrl);
+		if (ProjectUtils.nodeType() == 'asset' || ProjectUtils.nodeType() == 'post') {
+			var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node._id) }}";
+			loadComments(commentsUrl);
+		}
 
 		{% if node.has_method('PUT') %}
 			$('.project-mode-view').show();
