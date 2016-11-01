@@ -181,6 +181,7 @@ def comments_for_node(node_id):
         some_comment['_user'] = subquery.get_user_info(some_comment['user'])
         some_comment['_is_own'] = some_comment['user'] == current_user.objectid
         some_comment['_current_user_rating'] = None  # tri-state boolean
+        some_comment['_rating'] = some_comment.properties.rating_positive - some_comment.properties.rating_negative
 
         if current_user.is_authenticated:
             for rating in some_comment.properties.ratings or ():

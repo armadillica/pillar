@@ -22,7 +22,7 @@
 	.comment-meta
 		.comment-rating(
 			class="{% if comment._current_user_rating is not none %}rated{% if comment._current_user_rating %} positive{% endif %}{% endif %}")
-			.comment-rating-value(title="Number of likes") {{ rating }}
+			.comment-rating-value(title="Number of likes") {{ comment._rating }}
 			| {% if not comment._is_own %}
 			.comment-action-rating.up(title="Like comment")
 			| {% endif %}
