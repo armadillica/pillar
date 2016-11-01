@@ -5,6 +5,7 @@ to run in Flask Application context, it is manually applied in setup_app().
 """
 
 import pillarsdk
+import pillarsdk.exceptions
 from pillar.web.system_util import pillar_api
 
 
@@ -21,7 +22,11 @@ def get_user_info(user_id):
     if user_id is None:
         return {}
 
-    user = pillarsdk.User.find(user_id, api=pillar_api())
+    try:
+        user = pillarsdk.User.find(user_id, api=pillar_api())
+    except pillarsdk.exceptions.ResourceNotFound:
+        return {}
+
     if not user:
         return {}
 
