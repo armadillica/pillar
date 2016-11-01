@@ -108,7 +108,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 	#project_context-container
 		| {% if project.has_method('PUT') %}
 		#project_context-header
-			span#project-statusbar
+			span#status-bar
 
 			ul.project-edit-tools.disabled
 				li.button-dropdown

@@ -29,6 +29,27 @@ NavbarTransparent();
 
 
 /* Status Bar */
+function statusBarClear(delay_class, delay_html){
+	var statusBar = $("#status-bar");
+
+	if (!delay_class) { delay_class = 0 };
+	if (!delay_html) { delay_html = 250 };
+
+	if (delay_class == 0) {
+		statusBar.removeAttr('class');
+		return
+
+	} else {
+		setTimeout(function(){
+			statusBar.removeAttr('class');
+
+			setTimeout(function() {
+				statusBar.html('');
+			}, delay_html);
+		}, delay_class);
+	}
+}
+
 function statusBarSet(classes, html, icon_name, time){
 	/* Utility to notify the user by temporarily flashing text on the project header
 		 Usage:
@@ -59,14 +80,16 @@ function statusBarSet(classes, html, icon_name, time){
 		icon = '<i class="' + icon_name + '"></i>';
 	};
 
+	statusBarClear(0,0);
+
 	var text = icon + html;
-	$("#project-statusbar").addClass('active ' + classes);
-	$("#project-statusbar").html(text);
+	var statusBar = $("#status-bar");
+
+	statusBar
+		.addClass('active ' + classes)
+		.html(text);
 
 	/* Back to normal */
-	setTimeout(function(){
-	$("#project-statusbar").removeAttr('class');
-	$("#project-statusbar").html();
-	}, time);
+	statusBarClear(time, 250);
 };
 
