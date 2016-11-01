@@ -21,7 +21,7 @@
 
 	.comment-meta
 		.comment-rating(
-			class="{% if comment._current_user_rating is not none %}rated{% if comment._current_user_rating %}positive{% endif %}{% endif %}")
+			class="{% if comment._current_user_rating is not none %}rated{% if comment._current_user_rating %} positive{% endif %}{% endif %}")
 			.comment-rating-value(title="Number of likes") {{ rating }}
 			| {% if not comment._is_own %}
 			.comment-action-rating.up(title="Like comment")
