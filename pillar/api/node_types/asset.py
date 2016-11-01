@@ -39,12 +39,29 @@ node_type_asset = {
         # this schema: "Root > Nested Category > One More Nested Category"
         'categories': {
             'type': 'string'
-        }
+        },
+        'license_type': {
+            'default': 'cc-by',
+            'type': 'string',
+            'allowed': [
+                'cc-by',
+                'cc-0',
+                'cc-by-sa',
+                'cc-by-nd',
+                'cc-by-nc',
+                'copyright'
+            ]
+        },
+        'license_notes': {
+            'type': 'string'
+        },
     },
     'form_schema': {
         'content_type': {'visible': False},
         'order': {'visible': False},
         'tags': {'visible': False},
-        'categories': {'visible': False}
+        'categories': {'visible': False},
+        'license_type': {'visible': False},
+        'license_notes': {'visible': False},
     },
 }
