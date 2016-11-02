@@ -520,7 +520,7 @@ $comments-width-max: 710px
 						min-height: 30px
 						transition: all 200ms ease-in-out
 
-						@include button-rounded($color-success, 6px)
+						+button($color-success, 6px)
 						position: relative
 
 						span.hint
@@ -550,7 +550,7 @@ $comments-width-max: 710px
 
 
 						&.button-field-error
-							@include button-rounded($color-danger, 6px)
+							+button($color-danger, 6px)
 							background: transparent
 
 							pointer-events: none
@@ -567,7 +567,7 @@ $comments-width-max: 710px
 							left: 15px
 							right: 15px
 
-						@include button-rounded($color-text-dark-secondary, 6px)
+						+button($color-text-dark-secondary, 6px)
 						border-color: transparent
 
 						i

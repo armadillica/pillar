@@ -603,7 +603,7 @@ $node-type-post: #647bce
 				flex-wrap: wrap
 
 				a
-					@include button-rounded($color-text-light, 3px)
+					+button($color-text-light, 3px)
 					padding: 5px 0
 					margin:
 						bottom: 5px
@@ -621,14 +621,14 @@ $node-type-post: #647bce
 						margin-right: 15px
 
 					&.blue
-						@include button-rounded(hsl(hue($color-info), 60%, 45%), 3px)
+						+button(hsl(hue($color-info), 60%, 45%), 3px)
 
 					&.orange
-						@include button-rounded(hsl(hue($color-secondary), 50%, 50%), 3px)
+						+button(hsl(hue($color-secondary), 50%, 50%), 3px)
 						padding: 5px 15px
 
 					&.green
-						@include button-rounded-filled(hsl(hue($color-success), 60%, 40%), 3px)
+						+button(hsl(hue($color-success), 60%, 40%), 3px, true)
 
 	section#random-asset
 
@@ -810,10 +810,10 @@ section.pricing
 				transform: scale(1)
 
 			a.sign-up-now
-				+button-rounded-filled($color-primary, 999em)
+				+button($color-primary, 999em, true)
 
 				&:hover
-					+button-rounded-filled($color-success, 999em)
+					+button($color-success, 999em, true)
 
 		&.education
 			.pricing-caption
@@ -878,14 +878,14 @@ section.pricing
 			transform: translateX(-50%)
 			font-size: 1.2em
 
-			+button-rounded($color-primary, 999em)
+			+button($color-primary, 999em)
 			padding: 5px 25px
 			white-space: nowrap
 			text-align: center
 
 		&:hover
 			.sign-up-now
-				+button-rounded-filled($color-success, 999em)
+				+button($color-success, 999em, true)
 
 
 section.supported-by

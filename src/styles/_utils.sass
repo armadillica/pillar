@@ -21,7 +21,7 @@
 
 		+clearfix
 
-@mixin button-rounded($mixin-color, $roundness, $filled: false)
+@mixin button($mixin-color, $roundness, $filled: false)
 	font-family: $font-body
 	text-transform: uppercase
 	opacity: .9
@@ -68,41 +68,6 @@
 	small
 		font-size: .6em
 
-@mixin button-rounded-filled($mixin-color, $roundness)
-	font-family: $font-body
-	text-transform: uppercase
-	opacity: .9
-	padding:
-		left: 20px
-		right: 20px
-	color: white
-	border: thin solid darken($mixin-color, 5%)
-	border-radius: $roundness
-	background: linear-gradient(lighten($mixin-color, 2%), $mixin-color)
-	text-shadow: 1px 1px 0 rgba(black, .15)
-
-	transition: color 150ms ease-out, opacity 100ms ease-in-out, background 100ms ease-out
-
-
-	&:hover
-		opacity: 1
-		cursor: pointer
-		color: white
-		border-color: lighten($mixin-color, 5%)
-		background: linear-gradient(lighten($mixin-color, 5%), lighten($mixin-color, 5%))
-		text-decoration: none
-
-	&:active, &:focus
-		outline: none
-		box-shadow: none
-		border-color: lighten($mixin-color, 5%)
-		background: $mixin-color
-		color: white
-
-	i
-		margin-right: 10px
-	small
-		font-size: .6em
 
 @mixin overlay($from-color, $from-percentage, $to-color, $to-percentage)
 	position: absolute

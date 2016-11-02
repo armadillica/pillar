@@ -48,11 +48,11 @@
 		.button-login,
 		.button-submit
 			min-width: 200px
-			@include button-rounded-filled($color-primary, 999em)
+			+button($color-primary, 999em, true)
 
 		.button-register
 			min-width: 150px
-			@include button-rounded($color-primary, 999em)
+			+button($color-primary, 999em)
 
 #settings
 	display: flex
@@ -133,7 +133,7 @@
 		clear: both
 		min-width: 200px
 		margin: 0 auto
-		@include button-rounded-filled($color-primary, 999em)
+		+button($color-primary, 999em, true)
 
 
 #settings-container
@@ -182,10 +182,10 @@
 		padding: 10px 0
 
 		#submit_edit_user
-			+button-rounded-filled($color-success, 999em)
+			+button($color-success, 999em, true)
 
 		#button-cancel
-			+button-rounded(#aaa, 999em)
+			+button(#aaa, 999em)
 			margin: 0 10px
 
 		#user-edit-notification

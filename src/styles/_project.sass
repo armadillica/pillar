@@ -1161,7 +1161,7 @@ section.node-preview.group
 				display: inline-block
 
 				.btn-browsetoggle
-					+button-rounded(lighten($color-background-nav, 20%), 3px)
+					+button(lighten($color-background-nav, 20%), 3px)
 					width: 48px
 					text-align: center
 					padding: 2px 4px
@@ -1350,7 +1350,7 @@ section.node-preview.group
 
 					/* Actual button */
 					button
-						@include button-rounded($color-primary, 3px)
+						+button($color-primary, 3px)
 						position: relative
 
 						padding:
@@ -1375,7 +1375,7 @@ section.node-preview.group
 
 					&.file.download
 						button
-							@include button-rounded-filled($color-primary, 3px)
+							+button($color-primary, 3px, true)
 							padding:
 								left: 15px
 								right: 15px
@@ -2359,7 +2359,7 @@ section.node-children
 			width: 100%
 
 		#files-action-add
-			+button-rounded-filled($color-success, 3px)
+			+button($color-success, 3px, true)
 			width: 200px
 			padding: 5px 10px
 			margin-bottom: 10px
@@ -2486,10 +2486,10 @@ section.node-children
 
 
 			button.cancel
-				+button-rounded($color-text-dark-primary, 3px)
+				+button($color-text-dark-primary, 3px)
 
 			button.move
-				+button-rounded-filled($color-success, 3px)
+				+button($color-success, 3px, true)
 
 				&.disabled
 					pointer-events: none
@@ -2511,27 +2511,27 @@ section.node-children
 	.fileupload-buttonbar
 		padding: 10px 0
 		.fileinput-button
-			@include button-rounded($color-success, 3px)
+			+button($color-success, 3px)
 		.start
-			@include button-rounded($color-info, 3px)
+			+button($color-info, 3px)
 		.cancel
-			@include button-rounded($color-warning, 3px)
+			+button($color-warning, 3px)
 		.delete
-			@include button-rounded($color-danger, 3px)
+			+button($color-danger, 3px)
 		.toggle
 			margin: 0 20px
 
 	.files
 		.btn
 			&.start
-				@include button-rounded($color-info, 3px)
+				+button($color-info, 3px)
 			&.cancel
-				@include button-rounded($color-warning, 3px)
+				+button($color-warning, 3px)
 			&.delete
-				@include button-rounded($color-danger, 3px)
+				+button($color-danger, 3px)
 
 			&.create
-				@include button-rounded($color-success, 3px)
+				+button($color-success, 3px)
 
 	.template-upload,
 	.template-download

@@ -292,7 +292,7 @@
 			z-index: 2
 			top: 20px
 			right: 20px
-			+button-rounded-filled($color-success, 6px)
+			+button($color-success, 6px, true)
 
 		.button-edit
 			right: 170px
@@ -383,13 +383,13 @@
 	.button-create
 		display: block
 		width: 100%
-		+button-rounded($color-success, 6px)
+		+button($color-success, 6px)
 		margin: 0
 
 	.button-back
 		display: block
 		width: 100%
-		+button-rounded($color-info, 6px)
+		+button($color-info, 6px)
 		margin: 15px 0 0 0
 
 	#blog_post-edit-form
@@ -489,19 +489,19 @@
 
 #blog_post-container
 	.button-create
-		+button-rounded($color-success, 6px)
+		+button($color-success, 6px)
 	.button-back
 		position: absolute
 		top: 15px
 		right: 15px
 		z-index: 2
-		+button-rounded-filled($color-info, 6px)
+		+button($color-info, 6px, true)
 	.button-create, .button-edit
 		position: absolute
 		z-index: 2
 		top: 15px
 		right: 15px
-		+button-rounded-filled($color-success, 6px)
+		+button($color-success, 6px, true)
 
 	.button-edit
 		right: 170px

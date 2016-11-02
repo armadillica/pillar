@@ -92,9 +92,9 @@ body.error
 				font-size: 1.2em
 				margin: 0 15px
 				&.sign-up
-					@include button-rounded-filled($color-primary, 999em)
+					+button($color-primary, 999em, true)
 				&.sign-in
-					@include button-rounded($color-background, 999em)
+					+button($color-background, 999em)
 					border-color: transparent
 
 
