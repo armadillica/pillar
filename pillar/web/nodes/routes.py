@@ -435,10 +435,9 @@ def edit(node_id):
 
     embed_string = ''
     # Check if we want to embed the content via an AJAX call
-    if request.args.get('embed'):
-        if request.args.get('embed') == '1':
-            # Define the prefix for the embedded template
-            embed_string = '_embed'
+    if request.args.get('embed') == '1':
+        # Define the prefix for the embedded template
+        embed_string = '_embed'
 
     template = '{0}/edit{1}.html'.format(node_type['name'], embed_string)
 
