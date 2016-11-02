@@ -260,7 +260,8 @@ def _view_handler_asset(node, template_path, template_action, link_allowed):
         # Treat it as normal file (zip, blend, application, etc)
         asset_type = 'file'
 
-    node['description'] = attachments.render_attachments(node, node['description'])
+    if 'description' in node:
+        node['description'] = attachments.render_attachments(node, node['description'])
 
     template_path = os.path.join(template_path, asset_type)
 
