@@ -10,7 +10,7 @@ from bson import ObjectId
 from flask import current_app, g, Blueprint, request
 
 import pillar.markdown
-from pillar.api import file_storage
+from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
 from pillar.api.activities import activity_subscribe, activity_object_add
 from pillar.api.utils.algolia import algolia_index_node_delete
 from pillar.api.utils.algolia import algolia_index_node_save
@@ -257,9 +257,13 @@ def after_inserting_nodes(items):
             else:
                 activity_subscribe(item['user'], 'node', item['_id'])
                 verb = 'commented'
-        else:
+        elif item['node_type'] in PILLAR_NAMED_NODE_TYPES:
             verb = 'posted'
             activity_subscribe(item['user'], 'node', item['_id'])
+        else:
+            # Don't automatically create activities for non-Pillar node types,
+            # as we don't know what would be a suitable verb (among other things).
+            continue
 
         activity_object_add(
             item['user'],
