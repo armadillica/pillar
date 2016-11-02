@@ -760,10 +760,43 @@ label, label.control-label
 	+label-generic
 
 
+/* File Upload forms */
+.fieldlist
+	list-style: none
+	padding: 0
+	margin: 10px 0 0 0
+
+	li.fieldlist-item
+		background-color: $color-background-light
+		border: thin solid $color-background
+		border-left: 3px solid $color-primary
+		border-top-right-radius: 3px
+		border-bottom-right-radius: 3px
+
+		margin-bottom: 10px
+		padding: 10px
+		display: flex
+		flex-direction: column
+		align-items: center
+
+		.form-group
+			margin-bottom: 0 !important // override bs
+			width: 100%
+
+			&:not(:first-child)
+				border-top: thin solid $color-background-dark
+				padding-top: 10px
+
+			input.form-control
+				background-color: white !important
+				padding: 0 10px !important
+				border: thin solid $color-background-dark !important
+
 .form-upload-file
 	width: 100%
-	margin: 10px 0
-	+clearfix
+	margin-bottom: 10px
+	display: flex
+	flex-direction: column
 
 	.form-upload-progress
 		margin-top: 10px
@@ -783,32 +816,35 @@ label, label.control-label
 	.preview-thumbnail
 		width: 50px
 		height: 50px
+		margin-right: 10px
+		margin-bottom: 10px
 		border-radius: 3px
 		background-color: $color-background
-		margin-right: 10px
-		float: left
+
+	.form-upload-file-meta-container
+		display: flex
 
 	.form-upload-file-meta
-		float: left
-		width: 80%
 		list-style: none
-		font-size: .9em
 		padding: 0
-		margin: 0
+		margin: 0 0 10px 0
+		width: 100%
+		display: flex
 
 		li
-			float: left
-			padding: 5px
+			display: inline-block
+			padding: 5px 10px
+
+			&:first-child
+				padding-left: 0
 
 			&.dimensions, &.size
 				color: $color-text-dark-secondary
 
-			&.delete, &.original
-				float: right
+			&.delete
+				margin-left: auto
 
 			&.name
-				width: 75px
-				max-width: 75px
 				+text-overflow-ellipsis
 
 		.file_delete

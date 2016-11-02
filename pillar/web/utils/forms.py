@@ -42,13 +42,13 @@ class CustomFileSelectWidget(HiddenInput):
             except ResourceNotFound:
                 pass
             else:
+                button.append(u'<div class="form-upload-file-meta-container">')
+
                 filename = Markup.escape(file_item.filename)
                 if file_item.content_type.split('/')[0] == 'image':
                     # If a file of type image is available, display the preview
                     button.append(u'<img class="preview-thumbnail" src="{0}" />'.format(
                         file_item.thumbnail('s', api=api)))
-                else:
-                    button.append(u'<p>{}</p>'.format(filename))
 
                 button.append(u'<ul class="form-upload-file-meta">')
                 # File name
@@ -73,6 +73,7 @@ class CustomFileSelectWidget(HiddenInput):
                               u'<i class="pi-download"></i>Original</a></li>'
                               .format(file_item.link))
                 button.append(u'</ul>')
+                button.append(u'</div>')
 
         upload_url = u'%sstorage/stream/{project_id}' % current_app.config[
             'PILLAR_SERVER_ENDPOINT']
