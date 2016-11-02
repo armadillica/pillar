@@ -132,7 +132,18 @@ def attachment_form_group_set_data(db_prop_value, schema_prop, field_list):
 def attachment_form_parse_post_data(data):
     """Returns a dict that can be stored in the node.properties.attachments."""
 
-    # Moar ugly hardcodedness.
-    attachments = {allprops['slug']: {'oid': allprops['oid']}
-                   for allprops in data}
+    attachments = {}
+
+    # 'allprops' contains all properties, including the slug (which should be a key).
+    for allprops in data:
+        oid = allprops['oid']
+        slug = allprops['slug']
+
+        if not allprops['slug'] and not oid:
+            continue
+
+        if slug in attachments:
+            raise ValueError('Slug "%s" is used more than once' % slug)
+        attachments[slug] = {'oid': oid}
+
     return attachments
