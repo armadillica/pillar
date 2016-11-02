@@ -39,24 +39,58 @@
         }, scroll_duration_msec);
     }
 
+    /***** Attachment handling ******/
+    var attrs = ['for', 'id', 'name', 'data-field-name'];
+    function resetAttributeNames(section) {
+        var tags = section.find('input, select, label, div, a');
+        var idx = section.index();
+        tags.each(function () {
+            var $this = $(this);
+
+            // Renumber certain attributes.
+            $.each(attrs, function (i, attr) {
+                var attr_val = $this.attr(attr);
+                if (attr_val) {
+                    $this.attr(attr, attr_val.replace(/-\d+/, '-' + idx))
+                }
+            });
+
+            // Clear input field values
+            var tagname = $this.prop('tagName');
+            if (tagname == 'INPUT') {
+                if ($this.attr('type') == 'checkbox') {
+                    $this.prop('checked', false);
+                } else {
+                    $this.val('');
+                }
+            } else if (tagname == 'SELECT') {
+                $this.find(':nth-child(1)').prop('selected', true);
+            }
+        });
+
+        // Click on all file delete buttons to clear all file widgets.
+        section.find('a.file_delete').click();
+        section.find('div.form-upload-progress-bar').hide();
+    }
+
     /**
-     * Marks the queried buttons as "Add New Attachment" buttons.
+     * Marks the queried buttons as "Add New Attachment" or
+     * "Add New File" button.
      */
-    $.fn.addNewAttachmentButton = function() {
+    $.fn.addNewFileButton = function() {
         var $button = this;
         $button.click(function() {
-            console.log('Cloning last repeating group');
             var lastRepeatingGroup = $button
                 .parent()
-                .next('.attachments')
+                .next('.form-group')
                 .children('ul.fieldlist')
                 .children('li')
                 .last();
-            console.log(lastRepeatingGroup.toArray());
             var cloned = lastRepeatingGroup.clone(false);
             cloned.insertAfter(lastRepeatingGroup);
             resetAttributeNames(cloned);
             cloned.find('.fileupload').each(setup_file_uploader)
         })
     }
+
 }(jQuery));

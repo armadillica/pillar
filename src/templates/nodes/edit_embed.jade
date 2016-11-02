@@ -48,11 +48,10 @@
 		| {{ render_field(field, field.name) }}
 
 		| {% elif field.name == 'files' %}
-		.files-header
-			#files-actions
-				#files-action-add
-					i.pi-plus
-					| Add New File
+		#files-actions
+			#files-action-add
+				i.pi-plus
+				| Add New File
 		| {{ render_field(field, field.name) }}
 
 		| {% else %}
@@ -219,50 +218,7 @@ script(type="text/javascript").
 		displayNode('{{node._id}}');
 	});
 
-	var attrs = ['for', 'id', 'name', 'data-field-name'];
-	function resetAttributeNames(section) {
-		var tags = section.find('input, select, label, div, a');
-		var idx = section.index();
-		tags.each(function () {
-			var $this = $(this);
-
-			// Renumber certain attributes.
-			$.each(attrs, function (i, attr) {
-				var attr_val = $this.attr(attr);
-				if (attr_val) {
-					$this.attr(attr, attr_val.replace(/-\d+/, '-' + idx))
-				}
-			});
-
-			// Clear input field values
-			var tagname = $this.prop('tagName');
-			if (tagname == 'INPUT') {
-				if ($this.attr('type') == 'checkbox') {
-					$this.prop('checked', false);
-				} else {
-					$this.val('');
-				}
-			} else if (tagname == 'SELECT') {
-				$this.find(':nth-child(1)').prop('selected', true);
-			}
-		});
-
-		// Click on all file delete buttons to clear all file widgets.
-		section.find('a.file_delete').click();
-		section.find('div.form-upload-progress-bar').hide();
-	}
-
-	$("#attachments-action-add").addNewAttachmentButton();
-
-	if (document.getElementById("files") !== null) {
-		$("#files-action-add").on('click', function () {
-			var lastRepeatingGroup = $('#files > li').last();
-			var cloned = lastRepeatingGroup.clone(false);
-			cloned.insertAfter(lastRepeatingGroup);
-			resetAttributeNames(cloned);
-			cloned.find('.fileupload').each(setup_file_uploader)
-		});
-	}
-	//- console.log($._data($(elementSelector)[0], "events"));
+	$("#attachments-action-add").addNewFileButton();
+	$("#files-action-add").addNewFileButton();
 
 | {% endblock %}
