@@ -39,4 +39,24 @@
         }, scroll_duration_msec);
     }
 
+    /**
+     * Marks the queried buttons as "Add New Attachment" buttons.
+     */
+    $.fn.addNewAttachmentButton = function() {
+        var $button = this;
+        $button.click(function() {
+            console.log('Cloning last repeating group');
+            var lastRepeatingGroup = $button
+                .parent()
+                .next('.attachments')
+                .children('ul.fieldlist')
+                .children('li')
+                .last();
+            console.log(lastRepeatingGroup.toArray());
+            var cloned = lastRepeatingGroup.clone(false);
+            cloned.insertAfter(lastRepeatingGroup);
+            resetAttributeNames(cloned);
+            cloned.find('.fileupload').each(setup_file_uploader)
+        })
+    }
 }(jQuery));

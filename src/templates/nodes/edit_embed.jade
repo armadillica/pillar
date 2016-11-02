@@ -252,14 +252,7 @@ script(type="text/javascript").
 		section.find('div.form-upload-progress-bar').hide();
 	}
 
-	if (document.getElementById("attachments") !== null) {
-		$("#attachments-action-add").on('click', function(){
-			var lastRepeatingGroup = $('#attachments > li').last();
-			var cloned = lastRepeatingGroup.clone(true);
-			cloned.insertAfter(lastRepeatingGroup);
-			resetAttributeNames(cloned);
-		});
-	}
+	$("#attachments-action-add").addNewAttachmentButton();
 
 	if (document.getElementById("files") !== null) {
 		$("#files-action-add").on('click', function () {
