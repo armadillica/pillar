@@ -6,7 +6,8 @@
 	.checkbox
 		label
 			| {{ field(class='checkbox') }}
-			| {{ field.label }}
+			| {{ field.name | undertitle }}
+
 	| {% elif field.type == 'FieldList' %}
 
 	ul.fieldlist(id="{{ type }}")
