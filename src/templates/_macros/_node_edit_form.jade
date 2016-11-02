@@ -1,4 +1,4 @@
-| {% macro render_field(field) %}
+| {% macro render_field(field, type) %}
 
 .form-group(class="{{field.name}}{% if field.errors %} error{% endif %}")
 
@@ -9,7 +9,7 @@
 			| {{ field.label }}
 	| {% elif field.type == 'FieldList' %}
 
-	ul.fieldlist#files
+	ul.fieldlist(id="{{ type }}")
 		| {% for file in field %}
 		li.fieldlist-item
 

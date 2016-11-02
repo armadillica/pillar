@@ -45,7 +45,7 @@
 				i.pi-plus
 				| Add New Attachment
 
-		| {{ render_field(field) }}
+		| {{ render_field(field, field.name) }}
 
 		| {% elif field.name == 'files' %}
 		.files-header
@@ -53,9 +53,10 @@
 				#files-action-add
 					i.pi-plus
 					| Add New File
-		| {{ render_field(field) }}
+		| {{ render_field(field, field.name) }}
 
 		| {% else %}
+
 		| {{ render_field(field) }}
 
 		| {% endif %}
