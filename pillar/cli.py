@@ -560,7 +560,7 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
         r, _, _, status = put_internal('projects', db_proj, _id=project['_id'])
         if status != 200:
             log.error('Error %i storing altered project %s %s', status, project['_id'], r)
-            return 4
+            raise SystemExit('Error storing project, see log.')
         log.info('Project saved succesfully.')
 
     if all_projects:
@@ -681,7 +681,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
         r, _, _, status = put_internal('projects', db_proj, _id=project['_id'])
         if status != 200:
             log.error('Error %i storing altered project %s %s', status, project['_id'], r)
-            return 4
+            raise SystemExit('Error storing project, see log.')
         log.info('Project saved succesfully.')
 
     def replace_attachments(project):
