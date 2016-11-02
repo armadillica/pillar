@@ -569,7 +569,7 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
         db_proj = remove_private_keys(project)
         r, _, _, status = put_internal('projects', db_proj, _id=project['_id'])
         if status != 200:
-            log.error('Error %i storing altered project %s: %s', status, project['_id'], r)
+            log.error('Error %i storing altered project %s %s', status, project['_id'], r)
             return 4
         log.info('Project saved succesfully.')
 
@@ -690,7 +690,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
         db_proj = remove_private_keys(project)
         r, _, _, status = put_internal('projects', db_proj, _id=project['_id'])
         if status != 200:
-            log.error('Error %i storing altered project %s: %s', status, project['_id'], r)
+            log.error('Error %i storing altered project %s %s', status, project['_id'], r)
             return 4
         log.info('Project saved succesfully.')
 
@@ -720,7 +720,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
             db_node = remove_private_keys(node)
             r, _, _, status = put_internal('nodes', db_node, _id=node['_id'])
             if status != 200:
-                log.error('Error %i storing altered node %s: %s', status, node['_id'], r)
+                log.error('Error %i storing altered node %s %s', status, node['_id'], r)
                 raise SystemExit('Error storing node; see log.')
 
     if all_projects:
@@ -764,7 +764,7 @@ def create_blog(proj_url):
     proj_id = proj['_id']
     r, _, _, status = put_internal('projects', remove_private_keys(proj), _id=proj_id)
     if status != 200:
-        log.error('Error %i storing altered project %s: %s', status, proj_id, r)
+        log.error('Error %i storing altered project %s %s', status, proj_id, r)
         return 4
     log.info('Project saved succesfully.')
 
