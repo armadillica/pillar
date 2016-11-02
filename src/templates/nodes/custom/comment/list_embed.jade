@@ -101,19 +101,23 @@ script.
 			}
 		})
 		.done(function(comment_node_id) {
-			{% if show_comments %}
-			var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node_id) }}";
-			loadComments(commentsUrl)
-			.done(function() {
-				$('#' + comment_node_id).scrollHere();
-			});
-			{% else %}
-			// TODO: implement something here
-			console.log('Comment posted succesfully, reload the page to see it.');
-			{% endif %}
+			$button
+				.removeClass('submitting')
+				.html('Post Comment');
+			$('#comment_field').val('');
+			$('body').trigger('pillar:comment-posted', [comment_node_id]);
 		});
 	});
 
+	{% if show_comments %}
+	$('body').on('pillar:comment-posted', function(e, comment_node_id) {
+		var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node_id) }}";
+		loadComments(commentsUrl)
+		.done(function() {
+			$('#' + comment_node_id).scrollHere();
+		});
+	});
+	{% endif %}
 
 	/* Edit comment */
 

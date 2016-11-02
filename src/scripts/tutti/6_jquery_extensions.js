@@ -34,6 +34,8 @@
     }
 
     $.fn.scrollHere = function(scroll_duration_msec) {
+        if ($(this).length == 0) return;
+
         $('html, body').animate({
             scrollTop: this.offset().top
         }, scroll_duration_msec);
