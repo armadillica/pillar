@@ -69,6 +69,7 @@
 
 			| {% endif %}
 
+		| {% if show_comments %}
 		section#comments-list-header
 			#comments-list-title
 				| {% if nr_of_comments == 0 %}No{% else %}{{ nr_of_comments }}{% endif %} comment{{ nr_of_comments|pluralize }}
@@ -76,6 +77,7 @@
 				| {% for comment in comments['_items'] %}
 				| {{ macros.render_comment(comment, False) }}
 				| {% endfor %}
+		| {% endif %}
 | {% block comment_scripts %}
 
 script.
@@ -99,11 +101,16 @@ script.
 			}
 		})
 		.done(function(comment_node_id) {
+			{% if show_comments %}
 			var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node_id) }}";
 			loadComments(commentsUrl)
 			.done(function() {
 				$('#' + comment_node_id).scrollHere();
 			});
+			{% else %}
+			// TODO: implement something here
+			console.log('Comment posted succesfully, reload the page to see it.');
+			{% endif %}
 		});
 	});
 

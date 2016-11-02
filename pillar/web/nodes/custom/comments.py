@@ -207,6 +207,26 @@ def comments_for_node(node_id):
                            node_id=node_id,
                            comments=comments,
                            nr_of_comments=nr_of_comments,
+                           show_comments=True,
+                           can_post_comments=can_post_comments)
+
+
+@blueprint.route('/<string(length=24):node_id>/commentform')
+def commentform_for_node(node_id):
+    """Shows only the comment for for comments attached to the given node.
+
+    i.e. does not show the comments themselves, just the form to post a new comment.
+    """
+
+    api = system_util.pillar_api()
+
+    node = Node.find(node_id, api=api)
+    project = Project({'_id': node.project})
+    can_post_comments = project.node_type_has_method('comment', 'POST', api=api)
+
+    return render_template('nodes/custom/comment/list_embed.html',
+                           node_id=node_id,
+                           show_comments=False,
                            can_post_comments=can_post_comments)
 
 
