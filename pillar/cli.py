@@ -721,7 +721,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
             r, _, _, status = put_internal('nodes', db_node, _id=node['_id'])
             if status != 200:
                 log.error('Error %i storing altered node %s: %s', status, node['_id'], r)
-                return
+                raise SystemExit('Error storing node; see log.')
 
     if all_projects:
         for proj in projects_coll.find():
