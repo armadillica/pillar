@@ -155,6 +155,15 @@ $(function () {
         })
         .on('file-upload:activated', on_file_upload_activated)
         .on('file-upload:finished', on_file_upload_finished)
+        .on('click', '.js-append-attachment', function(e) {
+            e.preventDefault();
+
+            // Append widget @[slug-name] to the post's description
+            // Note: Heavily connected to HTML in _node_edit_form.jade
+            var slug = $(this).parent().find("input[id*='slug']").val();
+            var widget = '@[' + slug + ']\n';
+            document.getElementById('description').value += widget;
+        })
     ;
 
     function inject_project_id_into_url(index, element) {

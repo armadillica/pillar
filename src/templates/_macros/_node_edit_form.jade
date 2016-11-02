@@ -15,6 +15,14 @@
 
 			| {% for subfield in file %}
 			| {{ render_field(subfield) }}
+
+			| {% if subfield.name.endswith('slug') %}
+			button.fieldlist-action-button.js-append-attachment(
+				type="button")
+				i.pi-plus
+				| Append to Description
+			| {% endif %}
+
 			| {% endfor %}
 
 		| {% endfor %}
