@@ -102,9 +102,13 @@ function setup_file_uploader(index, upload_element) {
             }
             $file_id_field.val(pillar_file_id);
 
+            var filename = data.files[0].name;
+
+            // Set the slug based on the name, strip special characters
+            $('#' + $(this).attr('data-field-slug')).val(filename.replace(/[^0-9a-zA-Z]+/g, ""));
+
             // Ugly workaround: If the asset has the default name, name it as the file
             if ($('.form-group.name .form-control').val() == 'New asset') {
-                var filename = data.files[0].name;
                 $('.form-group.name .form-control').val(filename);
                 $('.node-edit-title').html(filename);
             }

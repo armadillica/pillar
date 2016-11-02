@@ -80,6 +80,7 @@ class CustomFileSelectWidget(HiddenInput):
         button.append(u'<input class="fileupload" type="file" name="file" '
                       u'data-url="{url}" '
                       u'data-field-name="{name}" '
+                      u'data-field-slug="{slug}" '
                       u'data-token="{token}" '
                       u'data-file-format="{file_format}">'
                       u'<div class="form-upload-progress"> '
@@ -89,6 +90,7 @@ class CustomFileSelectWidget(HiddenInput):
                       u'</div> '
                       u'</div>'.format(url=upload_url,
                                        name=field.name,
+                                       slug=field.name.replace('oid', 'slug'),
                                        token=Markup.escape(current_user.id),
                                        file_format=Markup.escape(file_format_regex)))
 

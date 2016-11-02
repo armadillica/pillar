@@ -40,10 +40,11 @@
     }
 
     /***** Attachment handling ******/
-    var attrs = ['for', 'id', 'name', 'data-field-name'];
+    var attrs = ['for', 'id', 'name', 'data-field-name', 'data-field-slug'];
     function resetAttributeNames(section) {
         var tags = section.find('input, select, label, div, a');
         var idx = section.index();
+
         tags.each(function () {
             var $this = $(this);
 
