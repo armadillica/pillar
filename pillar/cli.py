@@ -534,6 +534,7 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
 
     def handle_project(project):
         log.info('Handling project %s', project['url'])
+        is_public_proj = not project.get('is_private', True)
 
         for proj_nt in project['node_types']:
             nt_name = proj_nt['name']
@@ -548,6 +549,11 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
             # This leaves node type keys intact that aren't in Pillar's node_type_xxx definitions,
             # such as permissions.
             proj_nt.update(copy.deepcopy(pillar_nt))
+
+            # On our own public projects we want to be able to set license stuff.
+            if is_public_proj:
+                proj_nt['form_schema'].pop('license_type', None)
+                proj_nt['form_schema'].pop('license_notes', None)
 
         # Use Eve to PUT, so we have schema checking.
         db_proj = remove_private_keys(project)
