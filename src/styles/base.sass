@@ -775,22 +775,31 @@ label, label.control-label
 
 		margin-bottom: 10px
 		padding: 10px
-		display: flex
-		flex-direction: column
-		align-items: center
+		+clearfix
 
 		.form-group
 			margin-bottom: 0 !important // override bs
 			width: 100%
 
-			&:not(:first-child)
-				border-top: thin solid $color-background-dark
-				padding-top: 10px
-
 			input.form-control
 				background-color: white !important
 				padding: 0 10px !important
 				border: thin solid $color-background-dark !important
+
+		div[class$="slug"]
+			width: 50%
+			float: left
+			display: flex
+			align-items: center
+
+			label
+				margin-right: 10px
+
+		.fieldlist-action-button
+			@include button-rounded($color-success, 3px)
+			margin: 0 0 0 10px
+			padding: 5px 10px
+			text-transform: initial
 
 .form-upload-file
 	width: 100%
@@ -830,6 +839,7 @@ label, label.control-label
 		margin: 0 0 10px 0
 		width: 100%
 		display: flex
+		flex-wrap: wrap
 
 		li
 			display: inline-block
