@@ -128,7 +128,7 @@ def services():
 def main_blog(url=None):
     """Blog with project news"""
     project_id = current_app.config['MAIN_PROJECT_ID']
-    return posts_view(project_id, url)
+    return posts_view(project_id, url=url)
 
 
 @blueprint.route('/blog/create')
