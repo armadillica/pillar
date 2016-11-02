@@ -362,8 +362,9 @@ def edit(node_id):
                 # Extra entries are caused by min_entries=1 in the form
                 # creation.
                 field_list = form[prop_name]
-                while len(field_list) > len(db_prop_value):
-                    field_list.pop_entry()
+                if len(db_prop_value):
+                    while len(field_list):
+                        field_list.pop_entry()
 
                 for file_data in db_prop_value:
                     file_form_class = build_file_select_form(subschema)
