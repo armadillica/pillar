@@ -697,6 +697,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
     def replace_attachments(project):
         log.info('Upgrading nodes for project %s', project['url'])
         nodes = nodes_coll.find({
+            '_deleted': False,
             'project': project['_id'],
             'node_type': {'$in': list(nts_by_name)},
             'properties.attachments': {'$exists': True},
