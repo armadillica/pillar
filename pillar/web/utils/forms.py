@@ -57,8 +57,9 @@ class CustomFileSelectWidget(HiddenInput):
                 button.append(u'<li class="size">({0} MB)</li>'.format(
                     round((file_item.length / 1024) * 0.001, 2)))
                 # Image resolution (if image)
-                button.append(u'<li class="dimensions">{0}x{1}</li>'.format(
-                    file_item.width, file_item.height))
+                if file_item.content_type.split('/')[0] == 'image':
+                    button.append(u'<li class="dimensions">{0}x{1}</li>'.format(
+                        file_item.width, file_item.height))
                 # Delete button
                 button.append(u'<li class="delete">'
                               u'<a href="#" class="file_delete" '
