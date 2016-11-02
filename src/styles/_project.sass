@@ -191,8 +191,6 @@
 	z-index: $z-index-base + 3
 	position: fixed
 	top: $project_header-height
-	left: 0
-	right: 0
 	height: $project_header-height
 	min-height: $project_header-height
 	width: auto
@@ -2174,7 +2172,6 @@ section.node-children
 		.form-group
 			position: relative
 			margin: 0 auto 30px auto
-			font-family: $font-body
 
 			input, textarea, select
 				+input-generic
@@ -2357,6 +2354,12 @@ section.node-children
 						pointer-events: none
 						cursor: progress
 
+			.fieldlist
+				li.fieldlist-item
+					div[class$="file"]
+						width: 75%
+						margin: 0
+
 		.files-header
 			width: 100%
 
@@ -2378,6 +2381,7 @@ section.node-children
 			div[class*="is_tileable"]
 				padding: 10px 15px
 				width: 25%
+				float: right
 				border-left: thin solid $color-background
 
 			div[class*="map_type"]
@@ -2392,7 +2396,9 @@ section.node-children
 					padding-left: 0
 
 			div[class$="file"]
-				flex: 1
+				float: left
+				width: auto
+
 				label
 					display: none
 

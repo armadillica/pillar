@@ -60,6 +60,13 @@ class CustomFileSelectWidget(HiddenInput):
                 if file_item.content_type.split('/')[0] == 'image':
                     button.append(u'<li class="dimensions">{0}x{1}</li>'.format(
                         file_item.width, file_item.height))
+                button.append(u'</ul>')
+                button.append(u'<ul class="form-upload-file-actions">')
+                # Download button for original file
+                button.append(u'<li class="original">'
+                              u'<a href="{}" class="file_original"> '
+                              u'<i class="pi-download"></i>Original</a></li>'
+                              .format(file_item.link))
                 # Delete button
                 button.append(u'<li class="delete">'
                               u'<a href="#" class="file_delete" '
@@ -67,11 +74,6 @@ class CustomFileSelectWidget(HiddenInput):
                               u'data-file_id="{file_id}"> '
                               u'<i class="pi-trash"></i> Delete</a></li>'.format(
                     field_name=field.name, file_id=field.data))
-                # Download button for original file
-                button.append(u'<li class="original">'
-                              u'<a href="{}" class="file_original"> '
-                              u'<i class="pi-download"></i>Original</a></li>'
-                              .format(file_item.link))
                 button.append(u'</ul>')
                 button.append(u'</div>')
 
