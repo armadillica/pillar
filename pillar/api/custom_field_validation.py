@@ -1,7 +1,7 @@
 import logging
 
-from bson import ObjectId
-from datetime import datetime
+from bson import ObjectId, tz_util
+from datetime import datetime, tzinfo
 from eve.io.mongo import Validator
 from flask import current_app
 
@@ -42,7 +42,9 @@ class ValidateCustomFields(Validator):
             # Convert datetime string to RFC1123 datetime
             elif prop_type == 'datetime':
                 prop_val = properties[prop]
-                properties[prop] = datetime.strptime(prop_val, date_format)
+                prop_naieve = datetime.strptime(prop_val, date_format)
+                prop_aware = prop_naieve.replace(tzinfo=tz_util.utc)
+                properties[prop] = prop_aware
 
             elif prop_type == 'objectid':
                 prop_val = properties[prop]
