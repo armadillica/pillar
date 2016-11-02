@@ -165,10 +165,10 @@ script(type="text/javascript").
 		.fail(function(data){
 			/* Something went wrong, print it */
 			if (data.status == 422) {
-				statusBarSet('error', 'The submitted data could not be validated.', 8000);
+				statusBarSet('error', 'The submitted data could not be validated.', 'pi-warning', 8000);
 			} else {
 				statusBarSet('error', 'Error! We\'ve been notified and are working on it - '
-						+ data.status + ' ' + data.statusText, 8000);
+						+ data.status + ' ' + data.statusText, 'pi-warning', 8000);
 			}
 
 			$("li.button-save").addClass('field-error');
@@ -343,6 +343,5 @@ script(type="text/javascript").
 		});
 	}
 	//- console.log($._data($(elementSelector)[0], "events"));
-
 
 | {% endblock %}
