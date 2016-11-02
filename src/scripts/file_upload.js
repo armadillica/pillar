@@ -162,7 +162,13 @@ $(function () {
             // Note: Heavily connected to HTML in _node_edit_form.jade
             var slug = $(this).parent().find("input[id*='slug']").val();
             var widget = '@[' + slug + ']\n';
-            document.getElementById('description').value += widget;
+
+            if (slug) {
+                document.getElementById('description').value += widget;
+                statusBarSet('success', 'Attachment appended to description', 'pi-check');
+            } else {
+                statusBarSet('error', 'Slug is empty, upload something first', 'pi-warning');
+            }
         })
     ;
 
