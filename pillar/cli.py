@@ -527,24 +527,8 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
     from pillar.api.utils.authentication import force_cli_user
     force_cli_user()
 
-    from pillar.api.node_types.asset import node_type_asset
-    from pillar.api.node_types.blog import node_type_blog
-    from pillar.api.node_types.comment import node_type_comment
-    from pillar.api.node_types.group import node_type_group
-    from pillar.api.node_types.group_hdri import node_type_group_hdri
-    from pillar.api.node_types.group_texture import node_type_group_texture
-    from pillar.api.node_types.hdri import node_type_hdri
-    from pillar.api.node_types.page import node_type_page
-    from pillar.api.node_types.post import node_type_post
-    from pillar.api.node_types.storage import node_type_storage
-    from pillar.api.node_types.text import node_type_text
-    from pillar.api.node_types.texture import node_type_texture
+    from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
     from pillar.api.utils import remove_private_keys
-
-    node_types = [node_type_asset, node_type_blog, node_type_comment, node_type_group,
-                  node_type_group_hdri, node_type_group_texture, node_type_hdri, node_type_page,
-                  node_type_post, node_type_storage, node_type_text, node_type_texture]
-    name_to_nt = {nt['name']: nt for nt in node_types}
 
     projects_collection = current_app.db()['projects']
 
@@ -554,7 +538,7 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
         for proj_nt in project['node_types']:
             nt_name = proj_nt['name']
             try:
-                pillar_nt = name_to_nt[nt_name]
+                pillar_nt = PILLAR_NAMED_NODE_TYPES[nt_name]
             except KeyError:
                 log.info('   - skipping non-standard node type "%s"', nt_name)
                 continue
