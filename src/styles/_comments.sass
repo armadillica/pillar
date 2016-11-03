@@ -436,15 +436,17 @@ $comments-width-max: 710px
 
 					.comment-reply-preview
 						position: relative
-						margin: 0 auto 5px auto
+						margin: 10px auto 5px auto
 						padding: 10px
 						color: $color-text-dark-primary
+						border-top: thin solid $color-background-dark
+						border-bottom: thin solid $color-background
 						transition: all 150ms ease-in-out
 
 						&:before
 							content: 'Live Preview'
 							position: absolute
-							top: -28px
+							top: -20px
 							font-size: .9em
 							color: $color-text-dark-hint
 							transition: color 150ms ease-in-out
@@ -462,6 +464,7 @@ $comments-width-max: 710px
 						color: transparent
 						margin: 0 auto
 						padding: 0 10px
+						border: none
 
 						&:before
 							content: ''
@@ -497,10 +500,6 @@ $comments-width-max: 710px
 						.comment-rules
 							padding-right: 8px
 							margin-right: 8px
-							&:after
-								content: "·"
-								position: relative
-								right: -8px
 
 							a
 								color: $color-text-dark-hint
@@ -520,7 +519,7 @@ $comments-width-max: 710px
 						min-height: 30px
 						transition: all 200ms ease-in-out
 
-						+button($color-success, 6px)
+						+button($color-success, 3px)
 						position: relative
 
 						span.hint
@@ -550,7 +549,7 @@ $comments-width-max: 710px
 
 
 						&.button-field-error
-							+button($color-danger, 6px)
+							+button($color-danger, 3px)
 							background: transparent
 
 							pointer-events: none
@@ -567,7 +566,7 @@ $comments-width-max: 710px
 							left: 15px
 							right: 15px
 
-						+button($color-text-dark-secondary, 6px)
+						+button($color-text-dark-secondary, 3px)
 						border-color: transparent
 
 						i

@@ -6,7 +6,9 @@
 		.comment-reply-container
 			| {% if can_post_comments %}
 			.comment-reply-avatar
-				img(src="{{ current_user.gravatar }}")
+				img(
+					title="Commenting as {{ current_user.full_name }}",
+					src="{{ current_user.gravatar }}")
 
 			.comment-reply-form
 
@@ -14,19 +16,16 @@
 					textarea(
 						id="comment_field",
 						data-parent-id="{{ node_id }}",
-						placeholder="Join the conversation...",)
+						placeholder="Join the conversation...")
 
 					.comment-reply-meta
 						.comment-details
 							.comment-rules
 								a(
-									title="Markdown Supported"
+									title="Markdown Supported",
+									target="_blank",
 									href="https://guides.github.com/features/mastering-markdown/")
 									i.pi-markdown
-
-							.comment-author
-								span.commenting-as commenting as
-								span.author-name {{ current_user.full_name }}
 
 						button.comment-action-cancel.btn.btn-outline(
 							type="button",
@@ -35,9 +34,8 @@
 						button.comment-action-submit.btn.btn-outline(
 							id="comment_submit",
 							type="button",
-							title="Post Comment")
+							title="Post Comment (Ctrl+Enter)")
 							| Post Comment
-							span.hint (Ctrl+Enter)
 
 					.comment-reply-preview
 
@@ -78,9 +76,16 @@
 				| {{ macros.render_comment(comment, False) }}
 				| {% endfor %}
 		| {% endif %}
-| {% block comment_scripts %}
 
+| {% block comment_scripts %}
+script(src="{{ url_for('static_pillar', filename='assets/js/markdown.min.js', v=141020161) }}")
 script.
+
+	// Markdown initialization
+	var convert = new Markdown.getSanitizingConverter();
+	Markdown.Extra.init(convert);
+	convert = convert.makeHtml;
+
 	/* Submit new comment */
 	$('.comment-action-submit').click(function(e){
 		var $button = $(this);
@@ -122,21 +127,28 @@ script.
 	/* Edit comment */
 
 	// Markdown convert as we type in the textarea
-	$(document).on('keyup','body .comment-content textarea',function(e){
+	$(document).on('keyup','body .comment-reply-field textarea',function(e){
 		var $textarea = $(this);
 		var $container = $(this).parent();
-		var $preview = $container.next();
+		var $preview = $textarea.next().next();
 
 		// TODO: communicate with back-end to do the conversion,
 		// rather than relying on our JS-converted Markdown.
 		$preview.html(convert($textarea.val()));
 
 		// While we are at it, style if empty
-		if (!$textarea.val()) {
-			$container.addClass('empty');
+		if ($textarea.val()) {
+			$container.addClass('filled');
 		} else {
-			$container.removeClass('empty');
-		};
+			$container.removeClass('filled');
+		}
+
+		// Send on ctrl+enter
+		if ($textarea.is(":focus")) {
+			if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey){
+				$( ".comment-action-submit" ).trigger( "click" );
+			}
+		}
 	});
 
 
