@@ -107,6 +107,39 @@ def do_url_for_node(node_id=None, node=None):
         return None
 
 
+# Source: Django 1.9 defaultfilters.py
+def do_yesno(value, arg=None):
+    """
+    Given a string mapping values for true, false and (optionally) None,
+    returns one of those strings according to the value:
+
+    ==========  ======================  ==================================
+    Value       Argument                Outputs
+    ==========  ======================  ==================================
+    ``True``    ``"yeah,no,maybe"``     ``yeah``
+    ``False``   ``"yeah,no,maybe"``     ``no``
+    ``None``    ``"yeah,no,maybe"``     ``maybe``
+    ``None``    ``"yeah,no"``           ``"no"`` (converts None to False
+                                        if no mapping for None is given.
+    ==========  ======================  ==================================
+    """
+    if arg is None:
+        arg = 'yes,no,maybe'
+    bits = arg.split(',')
+    if len(bits) < 2:
+        return value  # Invalid arg.
+    try:
+        yes, no, maybe = bits
+    except ValueError:
+        # Unpack list of wrong size (no "maybe" value provided).
+        yes, no, maybe = bits[0], bits[1], bits[1]
+    if value is None:
+        return maybe
+    if value:
+        return yes
+    return no
+
+
 def setup_jinja_env(jinja_env):
     jinja_env.filters['pretty_date'] = format_pretty_date
     jinja_env.filters['pretty_date_time'] = format_pretty_date_time
@@ -115,4 +148,5 @@ def setup_jinja_env(jinja_env):
     jinja_env.filters['pluralize'] = do_pluralize
     jinja_env.filters['gravatar'] = pillar.api.utils.gravatar
     jinja_env.filters['markdown'] = do_markdown
+    jinja_env.filters['yesno'] = do_yesno
     jinja_env.globals['url_for_node'] = do_url_for_node
