@@ -68,6 +68,20 @@
 	small
 		font-size: .6em
 
+	&:disabled
+		cursor: not-allowed
+		color: $color-text-dark-secondary
+		border-color: $color-text-dark-hint
+
+		&:hover
+			@if $filled
+				background: rgba($color-text-dark-hint, .2)
+			@else
+				background-color: rgba($color-text-dark-hint, .1)
+
+		@if $filled
+			background: rgba($color-text-dark-hint, .1)
+			text-shadow: none
 
 @mixin overlay($from-color, $from-percentage, $to-color, $to-percentage)
 	position: absolute
