@@ -64,16 +64,24 @@ def homepage():
     random_featured = get_random_featured_nodes()
 
     # Parse results for replies
-    for comment in latest_comments._items:
+    to_remove = []
+    for idx, comment in enumerate(latest_comments._items):
         if comment.properties.is_reply:
-            comment.attached_to = Node.find(comment.parent.parent,
-                                            {'projection': {
-                                                '_id': 1,
-                                                'name': 1,
-                                            }},
-                                            api=api)
+            try:
+                comment.attached_to = Node.find(comment.parent.parent,
+                                                {'projection': {
+                                                    '_id': 1,
+                                                    'name': 1,
+                                                }},
+                                                api=api)
+            except ResourceNotFound:
+                # Remove this comment
+                to_remove.append(idx)
         else:
             comment.attached_to = comment.parent
+
+    for idx in reversed(to_remove):
+        del latest_comments._items[idx]
 
     main_project = Project.find(current_app.config['MAIN_PROJECT_ID'], api=api)
     main_project.picture_header = get_file(main_project.picture_header, api=api)
