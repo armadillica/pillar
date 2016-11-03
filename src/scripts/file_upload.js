@@ -105,7 +105,8 @@ function setup_file_uploader(index, upload_element) {
             var filename = data.files[0].name;
 
             // Set the slug based on the name, strip special characters
-            $('#' + $(this).attr('data-field-slug')).val(filename.replace(/[^0-9a-zA-Z]+/g, ""));
+            // TODO: fix this so that it doesn't set the wrong field.
+            // $('#' + $(this).attr('data-field-slug')).val(filename.replace(/[^0-9a-zA-Z]+/g, ""));
 
             // Ugly workaround: If the asset has the default name, name it as the file
             if ($('.form-group.name .form-control').val() == 'New asset') {
