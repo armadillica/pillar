@@ -2173,12 +2173,6 @@ section.node-children
 			position: relative
 			margin: 0 auto 30px auto
 
-			input, textarea, select
-				+input-generic
-
-				&#fileupload
-					color: $color-info
-
 			&.tags .select2-container
 				.select2-selection
 					+input-generic
@@ -2396,12 +2390,11 @@ section.node-children
 					padding-left: 0
 
 			div[class$="file"]
-				float: left
+				margin-top: 10px
 				width: auto
 
 				label
 					display: none
-
 
 #overlay-mode-move-container
 	visibility: hidden

@@ -29,7 +29,7 @@
 		| {% endfor %}
 
 	| {% else %}
-	label {{ field.name | undertitle }}
+	| {{ field.label }}
 	| {{ field(class='form-control') }}
 	| {% endif %}
 
