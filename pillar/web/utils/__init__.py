@@ -74,7 +74,7 @@ def pretty_date(time=None, detail=False, now=None):
     day_diff = diff.days
 
     if day_diff < 0:
-        return ''
+        return time
 
     if day_diff == 0:
         if second_diff < 10:
