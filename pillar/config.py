@@ -71,6 +71,8 @@ ZENCODER_NOTIFICATIONS_URL = 'http://zencoderfetcher/'
 
 ENCODING_BACKEND = 'zencoder'  # local, flamenco
 
+STORAGE_BACKEND = 'local'  # gcs
+
 # Validity period of links, per file storage backend. Expressed in seconds.
 # Shouldn't be more than a year, as this isn't supported by HTTP/1.1.
 FILE_LINK_VALIDITY = defaultdict(

@@ -9,6 +9,8 @@ from gcloud.exceptions import NotFound
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
+from pillar.api.utils.storage import StorageBackend, FileInStorage
+
 log = logging.getLogger(__name__)
 
 
@@ -32,7 +34,7 @@ def get_client():
 gcs = LocalProxy(get_client)
 
 
-class GoogleCloudStorageBucket(object):
+class GoogleCloudStorageBucket(StorageBackend):
     """Cloud Storage bucket interface. We create a bucket for every project. In
     the bucket we create first level subdirs as follows:
     - '_' (will contain hashed assets, and stays on top of default listing)
@@ -49,6 +51,7 @@ class GoogleCloudStorageBucket(object):
     """
 
     def __init__(self, bucket_name, subdir='_/'):
+        super(GoogleCloudStorageBucket, self).__init__(backend='cgs')
         try:
             self.bucket = gcs.get_bucket(bucket_name)
         except NotFound:
@@ -177,6 +180,21 @@ class GoogleCloudStorageBucket(object):
 
         assert isinstance(to_bucket, GoogleCloudStorageBucket)
         return self.bucket.copy_blob(blob, to_bucket.bucket)
+
+    def get_blob(self, internal_fname, chunk_size=256 * 1024 * 2):
+        return self.bucket.blob('_/' + internal_fname, chunk_size)
+
+
+class GoogleCloudStorageBlob(FileInStorage):
+    """GCS blob interface."""
+    def __init__(self, bucket, internal_fname):
+        super(GoogleCloudStorageBlob, self).__init__(backend='cgs')
+
+        self.blob = bucket.blob('_/' + internal_fname, chunk_size=256 * 1024 * 2)
+        self.size = self.get_size()
+
+    def get_size(self):
+        return self.blob.size
 
 
 def update_file_name(node):

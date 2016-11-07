@@ -1,83 +1,56 @@
-import subprocess
+"""Utility for managing storage backends and files."""
 
+import logging
 import os
 from flask import current_app
-from pillar.api.utils.gcs import GoogleCloudStorageBucket
+
+log = logging.getLogger(__name__)
 
 
-def get_sizedata(filepath):
-    outdata = dict(
-        size=int(os.stat(filepath).st_size)
-    )
-    return outdata
+class StorageBackend(object):
+    """Can be a GCS bucket or simply a project folder in Pillar
 
+    :type backend: string
+    :param backend: Name of the storage backend (gcs, pillar, cdnsun).
 
-def rsync(path, remote_dir=''):
-    BIN_SSH = current_app.config['BIN_SSH']
-    BIN_RSYNC = current_app.config['BIN_RSYNC']
-
-    DRY_RUN = False
-    arguments = ['--verbose', '--ignore-existing', '--recursive', '--human-readable']
-    logs_path = current_app.config['CDN_SYNC_LOGS']
-    storage_address = current_app.config['CDN_STORAGE_ADDRESS']
-    user = current_app.config['CDN_STORAGE_USER']
-    rsa_key_path = current_app.config['CDN_RSA_KEY']
-    known_hosts_path = current_app.config['CDN_KNOWN_HOSTS']
-
-    if DRY_RUN:
-        arguments.append('--dry-run')
-    folder_arguments = list(arguments)
-    if rsa_key_path:
-        folder_arguments.append(
-            '-e ' + BIN_SSH + ' -i ' + rsa_key_path + ' -o "StrictHostKeyChecking=no"')
-    # if known_hosts_path:
-    #     folder_arguments.append("-o UserKnownHostsFile " + known_hosts_path)
-    folder_arguments.append("--log-file=" + logs_path + "/rsync.log")
-    folder_arguments.append(path)
-    folder_arguments.append(user + "@" + storage_address + ":/public/" + remote_dir)
-    # print (folder_arguments)
-    devnull = open(os.devnull, 'wb')
-    # DEBUG CONFIG
-    # print folder_arguments
-    # proc = subprocess.Popen(['rsync'] + folder_arguments)
-    # stdout, stderr = proc.communicate()
-    subprocess.Popen(['nohup', BIN_RSYNC] + folder_arguments, stdout=devnull, stderr=devnull)
-
-
-def remote_storage_sync(path):  # can be both folder and file
-    if os.path.isfile(path):
-        filename = os.path.split(path)[1]
-        rsync(path, filename[:2] + '/')
-    else:
-        if os.path.exists(path):
-            rsync(path)
-        else:
-            raise IOError('ERROR: path not found')
-
-
-def push_to_storage(project_id, full_path, backend='cgs'):
-    """Move a file from temporary/processing local storage to a storage endpoint.
-    By default we store items in a Google Cloud Storage bucket named after the
-    project id.
     """
 
-    def push_single_file(project_id, full_path, backend):
-        if backend == 'cgs':
-            storage = GoogleCloudStorageBucket(project_id, subdir='_')
-            blob = storage.Post(full_path)
-            # XXX Make public on the fly if it's an image and small preview.
-            # This should happen by reading the database (push to storage
-            # should change to accomodate it).
-            if blob is not None and full_path.endswith('-t.jpg'):
-                blob.make_public()
-            os.remove(full_path)
+    def __init__(self, backend):
+        self.backend = backend
 
-    if os.path.isfile(full_path):
-        push_single_file(project_id, full_path, backend)
-    else:
-        if os.path.exists(full_path):
-            for root, dirs, files in os.walk(full_path):
-                for name in files:
-                    push_single_file(project_id, os.path.join(root, name), backend)
-        else:
-            raise IOError('ERROR: path not found')
+
+class FileInStorage(object):
+    """A wrapper for file or blob objects.
+
+    :type backend: string
+    :param backend: Name of the storage backend (gcs, pillar, cdnsun).
+
+    """
+
+    def __init__(self, backend):
+        self.backend = backend
+        self.path = None
+        self.size = None
+
+
+class PillarStorage(StorageBackend):
+    def __init__(self, project_id):
+        super(PillarStorage, self).__init__(backend='local')
+
+
+class PillarStorageFile(FileInStorage):
+    def __init__(self, project_id, internal_fname):
+        super(PillarStorageFile, self).__init__(backend='local')
+
+        self.size = None
+        self.partial_path = os.path.join(project_id[:2], project_id,
+                                         internal_fname[:2], internal_fname)
+        self.path = os.path.join(
+            current_app.config['STORAGE_DIR'], self.partial_path)
+
+    def create_from_file(self, uploaded_file, file_size):
+        # Ensure path exists before saving
+        os.makedirs(os.path.basename(self.path))
+        uploaded_file.save(self.path)
+        self.size = file_size
+
