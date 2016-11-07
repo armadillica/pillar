@@ -142,7 +142,7 @@
 
 | {% block footer_scripts %}
 | {% if (project.user == current_user.objectid or current_user.has_role('admin')) %}
-script(src='//cdn.jsdelivr.net/autocomplete.js/0/autocomplete.jquery.min.js')
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.autocomplete-0.22.0.min.js') }}", async=true)
 script.
 	$(document).ready(function() {
 		var APPLICATION_ID = '{{config.ALGOLIA_USER}}'

@@ -25,9 +25,9 @@ html(lang="en")
 		| {% endblock %}
 
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery-3.1.0.min.js')}}")
-		script(src="//cdn.jsdelivr.net/typeahead.js/0.11.1/typeahead.jquery.min.js")
-		script(src="//cdn.jsdelivr.net/algoliasearch/3/algoliasearch.min.js")
-		script(src="//cdnjs.cloudflare.com/ajax/libs/js-cookie/2.0.3/js.cookie.min.js",)
+		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.typeahead-0.11.1.min.js')}}")
+		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/algoliasearch-3.19.0.min.js')}}")
+		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/js.cookie-2.0.3.min.js')}}")
 
 		script.
 			var algolia = algoliasearch("{{config['ALGOLIA_USER']}}", "{{config['ALGOLIA_PUBLIC_KEY']}}");
