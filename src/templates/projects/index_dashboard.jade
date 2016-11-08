@@ -68,6 +68,10 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 								| {{ project.name }}
 
 							ul.meta
+								li.status(
+									class="{{ project.is_private | yesno('private,public,') }}",
+									title="{{ project.is_private | yesno('Private Project,Public Project,') }}")
+										| {{ project.is_private | yesno('Private,Public,') }}
 								li.when(title="{{ project._created }}") {{ project._created | pretty_date }}
 								li.edit
 									a(href="{{ url_for('projects.edit', project_url=project.url) }}") Edit
