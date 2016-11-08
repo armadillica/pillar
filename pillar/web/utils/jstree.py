@@ -1,10 +1,11 @@
+from flask import Markup
+
 from pillarsdk import Node
 from pillarsdk.exceptions import ForbiddenAccess
 from pillarsdk.exceptions import ResourceNotFound
 from flask_login import current_user
 
 from pillar.web import system_util
-
 
 GROUP_NODES = {'group', 'storage', 'group_texture', 'group_hdri'}
 
@@ -20,7 +21,7 @@ def jstree_parse_node(node, children=None):
     parsed_node = dict(
         id="n_{0}".format(node._id),
         a_attr={ "href" : url_for_node(node=node) },
-        text=node.name,
+        text=Markup.escape(node.name),
         type=node_type,
         children=False)
     # Append children property only if it is a directory type
@@ -68,7 +69,7 @@ def jstree_get_children(node_id, project_id=None):
 def jstree_build_children(node):
     return dict(
         id="n_{0}".format(node._id),
-        text=node.name,
+        text=Markup.escape(node.name),
         type=node.node_type,
         children=jstree_get_children(node._id)
     )
