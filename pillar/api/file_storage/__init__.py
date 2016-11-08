@@ -712,7 +712,7 @@ def stream_to_storage(project_id):
         elif current_app.config['STORAGE_BACKEND'] == 'local':
             storage_backend = PillarStorage(project_id)
             file_in_storage = PillarStorageFile(project_id, internal_fname)
-            file_in_storage.create_from_file(uploaded_file, file_size)
+            file_in_storage.create_from_file(stream_for_gcs, file_size)
 
     log.debug('Marking uploaded file id=%s, fname=%s, '
               'size=%i as "queued_for_processing"',

@@ -2,6 +2,8 @@
 
 import logging
 import os
+import shutil
+
 from flask import current_app
 
 log = logging.getLogger(__name__)
@@ -50,7 +52,9 @@ class PillarStorageFile(FileInStorage):
 
     def create_from_file(self, uploaded_file, file_size):
         # Ensure path exists before saving
-        os.makedirs(os.path.basename(self.path))
-        uploaded_file.save(self.path)
-        self.size = file_size
+        os.makedirs(os.path.dirname(self.path))
 
+        with open(self.path, 'wb') as outfile:
+            shutil.copyfileobj(uploaded_file, outfile)
+
+        self.size = file_size
