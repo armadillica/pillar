@@ -1,3 +1,4 @@
+import datetime
 import hashlib
 import urllib
 import logging
@@ -53,19 +54,24 @@ def gravatar(email, size=64):
         "?" + urllib.urlencode(parameters)
 
 
-def pretty_date(time=None, detail=False, now=None):
+def datetime_now():
+    """Returns a datetime.datetime that represents 'now' in UTC."""
+
+    return datetime.datetime.now(tz=pillarsdk.utils.utc)
+
+
+def pretty_date(time, detail=False, now=None):
     """Get a datetime object or a int() Epoch timestamp and return a
     pretty string like 'an hour ago', 'Yesterday', '3 months ago',
     'just now', etc
     """
 
-    import datetime
+    if time is None:
+        return None
 
     # Normalize the 'time' parameter so it's always a datetime.
     if type(time) is int:
         time = datetime.datetime.fromtimestamp(time, tz=pillarsdk.utils.utc)
-    elif time is None:
-        time = now
 
     now = now or datetime.datetime.now(tz=time.tzinfo)
     diff = now - time  # TODO: flip the sign, so that future = positive and past = negative.

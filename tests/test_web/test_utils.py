@@ -42,6 +42,11 @@ class IsValidIdTest(unittest.TestCase):
 
 
 class PrettyDateTest(unittest.TestCase):
+    def test_none(self):
+        from pillar.web.utils import pretty_date
+
+        self.assertIsNone(pretty_date(None))
+
     def test_past(self):
         from pillar.web.utils import pretty_date
 
