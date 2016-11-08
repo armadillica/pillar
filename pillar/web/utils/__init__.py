@@ -5,6 +5,7 @@ import logging
 import traceback
 import sys
 
+import dateutil.parser
 from flask import current_app
 from flask import request
 from flask_login import current_user
@@ -72,6 +73,8 @@ def pretty_date(time, detail=False, now=None):
     # Normalize the 'time' parameter so it's always a datetime.
     if type(time) is int:
         time = datetime.datetime.fromtimestamp(time, tz=pillarsdk.utils.utc)
+    elif isinstance(time, basestring):
+        time = dateutil.parser.parse(time)
 
     now = now or datetime.datetime.now(tz=time.tzinfo)
     diff = now - time  # TODO: flip the sign, so that future = positive and past = negative.
