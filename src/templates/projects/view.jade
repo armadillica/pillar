@@ -309,7 +309,7 @@ script.
 		updateToggleProjHeaderMenuItem();
 
 		var nodeTitle = document.getElementById('node-title');
-		var nodeTitleText = $(nodeTitle).text() + " - {{project.name}} - Blender Cloud";
+		var nodeTitleText = $(nodeTitle).text() + " - {{ project.name | safe }} - Blender Cloud";
 
 		document.title = nodeTitleText;
 
