@@ -107,6 +107,10 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 								| {{ project.name }}
 
 							ul.meta
+								li.status(
+									class="{{ project.is_private | yesno('private,public,') }}",
+									title="{{ project.is_private | yesno('Private Project,Public Project,') }}")
+										| {{ project.is_private | yesno('Private,Public,') }}
 								li.when {{ project._created | pretty_date }}
 								li.who by {{ project.user.full_name }}
 								li.edit
@@ -134,7 +138,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 					| {% else %}
 					li.projects__list-item
 						a.projects__list-thumbnail
-							i.pi-heart
+							i.pi-heart-broken
 						.projects__list-details
 							.title
 								| No projects shared with you... yet!
