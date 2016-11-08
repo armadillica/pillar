@@ -1366,6 +1366,11 @@ section.node-preview.group
 						i.icon-dropdown-menu
 							padding-left: 10px
 
+						&.disabled
+							border-color: $color-text-dark-hint
+							color: $color-text-dark-hint
+							+stripes(rgba($color-text-dark-hint, .1), rgba($color-text-dark-hint, .2), -45deg, 28px)
+
 					/* Videos have dropdown caret, so paddit 5px less */
 					&.video.download
 						margin-left: auto
