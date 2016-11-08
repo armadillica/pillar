@@ -100,7 +100,7 @@ def pretty_date(time=None, detail=False, now=None):
     elif day_diff <= 22:
         week_count = day_diff/7
         if week_count == 1:
-            pretty = "%s week ago" % week_count
+            pretty = "1 week ago"
         else:
             pretty = "%s weeks ago" % week_count
 
