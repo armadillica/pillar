@@ -3,9 +3,25 @@
 #user-edit-container
 
 	#user-edit-header
-		.user-edit-name {{user.full_name}}
-		.user-edit-username {{user.username}}
-		.user-edit-email {{user.email}}
+		.user-edit-name(title="Full Name") {{user.full_name}}
+		.user-edit-username(title="Username")
+			i.pi-users
+			| {{user.username}}
+		.user-edit-email(title="E-mail")
+			i.pi-email
+			| {{user.email}}
+		.user-edit-id(title="User ID")
+			i.pi-vcard
+			| {{user._id}} &nbsp;
+
+			a.copy-to-clipboard(
+				style="margin-left: auto",
+				name="Copy to Clipboard",
+				type="button",
+				href="javascript:void(0)",
+				data-clipboard-text="{{ user._id }}",
+				title="Copy ID to clipboard")
+				| (copy to clipboard)
 
 	form(
 		id="user-edit-form",
@@ -52,7 +68,7 @@
 
 		#user-edit-notification
 
-
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/clipboard.min.js')}}")
 script(type="text/javascript").
 	$('#roles').select2();
 
@@ -73,6 +89,6 @@ script(type="text/javascript").
 		$('#user-container').html('')
 	});
 
-
+	new Clipboard('.copy-to-clipboard');
 
 | {% endblock %}

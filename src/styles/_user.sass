@@ -48,11 +48,11 @@
 		.button-login,
 		.button-submit
 			min-width: 200px
-			+button($color-primary, 999em, true)
+			+button($color-primary, 3px, true)
 
 		.button-register
 			min-width: 150px
-			+button($color-primary, 999em)
+			+button($color-primary, 3px)
 
 #settings
 	display: flex
@@ -133,7 +133,7 @@
 		clear: both
 		min-width: 200px
 		margin: 0 auto
-		+button($color-primary, 999em, true)
+		+button($color-primary, 3px, true)
 
 
 #settings-container
@@ -158,7 +158,7 @@
 
 		.settings-avatar
 			img
-				border-radius: 999em
+				border-radius: 3px
 			span
 				display: block
 				padding: 15px 0
@@ -175,17 +175,23 @@
 	#user-edit-header
 		.user-edit-name
 			font-size: 1.5em
-		.user-edit-username, .user-edit-email
+		.user-edit-username,
+		.user-edit-email,
+		.user-edit-id
 			color: $color-text-dark-secondary
+			padding: 3px 0
+
+			i
+				margin-right: 5px
 
 	#user-edit-form
 		padding: 10px 0
 
 		#submit_edit_user
-			+button($color-success, 999em, true)
+			+button($color-success, 3px, true)
 
 		#button-cancel
-			+button(#aaa, 999em)
+			+button(#aaa, 3px)
 			margin: 0 10px
 
 		#user-edit-notification
