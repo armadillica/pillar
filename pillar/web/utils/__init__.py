@@ -59,24 +59,54 @@ def pretty_date(time=None, detail=False, now=None):
     'just now', etc
     """
 
-    from datetime import datetime
+    import datetime
 
     # Normalize the 'time' parameter so it's always a datetime.
     if type(time) is int:
-        time = datetime.fromtimestamp(time, tz=pillarsdk.utils.utc)
+        time = datetime.datetime.fromtimestamp(time, tz=pillarsdk.utils.utc)
     elif time is None:
         time = now
 
-    now = now or datetime.now(tz=time.tzinfo)
-    diff = now - time
+    now = now or datetime.datetime.now(tz=time.tzinfo)
+    diff = now - time  # TODO: flip the sign, so that future = positive and past = negative.
 
-    second_diff = diff.seconds
+    second_diff = diff.seconds  # Always positive, so -1 second = -1 day + 23h59m59s
     day_diff = diff.days
 
-    if day_diff < 0:
-        return time
+    if day_diff < 0 and time.year != now.year:
+        # "16 Jul 2018"
+        pretty = time.strftime("%d %b %Y")
 
-    if day_diff == 0:
+    elif day_diff < -21 and time.year == now.year:
+        # "16 Jul"
+        pretty = time.strftime("%d %b")
+
+    elif day_diff < -7:
+        week_count = -day_diff // 7
+        if week_count == 1:
+            pretty = "in 1 week"
+        else:
+            pretty = "in %s weeks" % week_count
+
+    elif day_diff < -1:
+        # "next Tuesday"
+        pretty = 'next %s' % time.strftime("%A")
+    elif day_diff == -1:
+        # Compute the actual number of seconds in the future, positively.
+        seconds = 24 * 3600 - second_diff
+        if seconds < 10:
+            return 'just now'
+        if seconds < 60:
+            return 'in %ss' % seconds
+        if seconds < 120:
+            return 'in a minute'
+        if seconds < 3600:
+            return 'in %im' % (seconds // 60)
+        if seconds < 7200:
+            return 'in an hour'
+        if seconds < 86400:
+            return 'in %ih' % (seconds // 3600)
+    elif day_diff == 0:
         if second_diff < 10:
             return "just now"
         if second_diff < 60:
@@ -84,21 +114,21 @@ def pretty_date(time=None, detail=False, now=None):
         if second_diff < 120:
             return "a minute ago"
         if second_diff < 3600:
-            return str(second_diff / 60 ) + "m ago"
+            return str(second_diff // 60) + "m ago"
         if second_diff < 7200:
             return "an hour ago"
         if second_diff < 86400:
-            return str(second_diff / 3600) + "h ago"
+            return str(second_diff // 3600) + "h ago"
 
-    if day_diff == 1:
+    elif day_diff == 1:
         pretty = "yesterday"
 
     elif day_diff <= 7:
-        # "Tuesday"
-        pretty = time.strftime("%A")
+        # "last Tuesday"
+        pretty = 'last %s' % time.strftime("%A")
 
     elif day_diff <= 22:
-        week_count = day_diff/7
+        week_count = day_diff // 7
         if week_count == 1:
             pretty = "1 week ago"
         else:
