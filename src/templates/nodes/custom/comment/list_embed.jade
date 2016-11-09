@@ -44,18 +44,12 @@
 			| {# * User is authenticated, but has no subscription or 'POST' permission #}
 			.comment-reply-form
 				.comment-reply-field.sign-in
-					textarea(
-						disabled,
-						id="comment_field",
-						data-parent-id="{{ node_id }}",
-						placeholder="")
-					.sign-in
-						| {% if current_user.has_role('subscriber') %}
-						i.pi-lock
-						|  Only project members can comment.
-						| {% else %}
-						| Join the conversation!&nbsp;<a href="https://store.blender.org/product/membership/">Subscribe to Blender Cloud</a> now.
-						| {% endif %}
+					| {% if current_user.has_role('subscriber') or current_user.has_role('demo') %}
+					i.pi-lock
+					|  Only project members can comment.
+					| {% else %}
+					| Join the conversation!&nbsp;<a href="https://store.blender.org/product/membership/">Subscribe to Blender Cloud</a> now.
+					| {% endif %}
 
 			| {% else %}
 			| {# * User is not autenticated #}

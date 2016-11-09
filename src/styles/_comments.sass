@@ -18,11 +18,8 @@ $comments-width-max: 710px
 	#comments-list-header
 		#comments-list-title
 			padding: 15px 0 10px 0
-			margin: 0
-			font:
-				size: 1.5em
-				weight: 300
-				family: $font-body
+			font-size: 1.3em
+			font-weight: 300
 			color: $color-text-dark-primary
 
 	#comments-list-items-loading
@@ -416,22 +413,16 @@ $comments-width-max: 710px
 							border-color: $color-danger
 
 					&.sign-in
-						textarea
-							margin: 0
+						display: block
+						padding: 10px
+						border-radius: 3px
+						border: thin solid $color-background
+						background-color: rgba(white, .5)
+						color: $color-text-dark-primary
+						cursor: default
 
-						.sign-in
-							position: absolute
-							top: 0
-							left: 0
-							right: 0
-							bottom: 0
-							background-color: rgba(white, .5)
-							display: flex
-							align-items: center
-							padding-left: 15px
-
-							a
-								margin-right: 4px
+						a
+							margin-right: 4px
 
 
 					.comment-reply-preview
