@@ -172,7 +172,8 @@ def after_inserting_project(project, db_user):
     else:
         try:
             gcs_storage = GoogleCloudStorageBucket(str(project_id))
-            if gcs_storage.gcs_bucket.exists():
+            # FIXME: don't use internal property, but use our bucket/blob API.
+            if gcs_storage._gcs_bucket.exists():
                 log.info('Created GCS instance for project %s', project_id)
             else:
                 log.warning('Unable to create GCS instance for project %s', project_id)

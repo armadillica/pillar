@@ -54,11 +54,11 @@ class GoogleCloudStorageBucket(Bucket):
     def __init__(self, name, subdir='_/'):
         super(GoogleCloudStorageBucket, self).__init__(name=name)
         try:
-            self.gcs_bucket = gcs.get_bucket(name)
+            self._gcs_bucket = gcs.get_bucket(name)
         except NotFound:
-            self.gcs_bucket = gcs.bucket(name)
+            self._gcs_bucket = gcs.bucket(name)
             # Hardcode the bucket location to EU
-            self.gcs_bucket.location = 'EU'
+            self._gcs_bucket.location = 'EU'
             # Optionally enable CORS from * (currently only used for vrview)
             # self.gcs_bucket.cors = [
             #     {
@@ -68,7 +68,7 @@ class GoogleCloudStorageBucket(Bucket):
             #       "maxAgeSeconds": 3600
             #     }
             # ]
-            self.gcs_bucket.create()
+            self._gcs_bucket.create()
 
         self.subdir = subdir
 
@@ -87,8 +87,8 @@ class GoogleCloudStorageBucket(Bucket):
         prefix = os.path.join(self.subdir, path)
 
         fields_to_return = 'nextPageToken,items(name,size,contentType),prefixes'
-        req = self.gcs_bucket.list_blobs(fields=fields_to_return, prefix=prefix,
-                                         delimiter='/')
+        req = self._gcs_bucket.list_blobs(fields=fields_to_return, prefix=prefix,
+                                          delimiter='/')
 
         files = []
         for f in req:
@@ -138,7 +138,7 @@ class GoogleCloudStorageBucket(Bucket):
         :param to_dict: Return the object as a dictionary.
         """
         path = os.path.join(self.subdir, path)
-        blob = self.gcs_bucket.blob(path)
+        blob = self._gcs_bucket.blob(path)
         if blob.exists():
             if to_dict:
                 return self.blob_to_dict(blob)
@@ -151,7 +151,7 @@ class GoogleCloudStorageBucket(Bucket):
         """Create new blob and upload data to it.
         """
         path = path if path else os.path.join('_', os.path.basename(full_path))
-        blob = self.gcs_bucket.blob(path)
+        blob = self._gcs_bucket.blob(path)
         if blob.exists():
             return None
         blob.upload_from_filename(full_path)
@@ -183,10 +183,10 @@ class GoogleCloudStorageBucket(Bucket):
         """
 
         assert isinstance(to_bucket, GoogleCloudStorageBucket)
-        return self.gcs_bucket.copy_blob(blob, to_bucket.gcs_bucket)
+        return self._gcs_bucket.copy_blob(blob, to_bucket._gcs_bucket)
 
     def get_blob(self, internal_fname, chunk_size=256 * 1024 * 2):
-        return self.gcs_bucket.blob('_/' + internal_fname, chunk_size)
+        return self._gcs_bucket.blob('_/' + internal_fname, chunk_size)
 
 
 class GoogleCloudStorageBlob(Blob):
