@@ -2,9 +2,9 @@
 @import _config
 @import _utils
 
+@import _apps_base
 @import _notifications
 @import _comments
-@import plugins/js_perfectscrollbar
 
 
 html
@@ -252,8 +252,6 @@ header.navbar-header
 	border-width: 0
 	display: flex
 	align-items: center
-
-	width: 100%
 	background-color: $color-background-nav
 
 	+media-lg
@@ -747,16 +745,37 @@ footer
 	&.right .arrow:after
 		border-right-color: lighten($color-background-nav, 5%)
 
-input, input.form-control
+/* Inputs */
+input, input.form-control,
+textarea, textarea.form-control,
+select, select.form-control
 	+input-generic
+
 label, label.control-label
 	+label-generic
+
+select, select.form-control
+	border-top-left-radius: 3px
+	border-top-right-radius: 3px
+	background-color: $color-background-light
+
+	option
+		background-color: white
 
 input.fileupload
 	background-color: transparent
 	display: block
 	margin-top: 10px
 
+textarea
+	resize: vertical
+
+.input-group-flex
+	display: flex
+
+.input-group-separator
+	margin: 10px 0
+	border-top: thin solid $color-background
 
 /* File Upload forms */
 .fieldlist

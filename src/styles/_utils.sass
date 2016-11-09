@@ -123,20 +123,31 @@
 	transform: translate(-50%, -50%)
 
 =input-generic
-	color: $color-text-dark
+	padding: 5px 5px 5px 0
 	box-shadow: none
-	font-family: $font-body
-	border-radius: 3px
-	border-color: $color-background-dark
-	background-color: $color-background-light
+	border: thin solid transparent
+	border-radius: 0
+	border-bottom-color: $color-background-dark
+	background-color: transparent
+	transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out
+
+	&:hover
+		border-bottom-color: $color-text-dark-secondary
 
 	&:focus
-		border-color: $color-info
-		box-shadow: none
+		outline: 0
+		border: thin solid transparent
+		border-bottom-color: $color-primary
+		box-shadow: 0 1px 0 0 $color-primary
+
+	option
+		background-color: white
 
 =label-generic
 	color: $color-text-dark-primary
 	font-weight: normal
+	font-size: .9em
+	margin: 0
 
 @mixin badge($mixin-color, $roundness)
 	padding:
@@ -210,17 +221,14 @@
 
 @mixin badge($mixin-color, $roundness)
 
-=anim-grow-bounce
+=animation-wiggle
 	animation:
-		name: grow-bounce
-		duration: .25s
+		name: wiggle
+		duration: 1s
 		delay: 0s
 		fill-mode: forwards
-		iteration-count: 1
+		iteration-count: infinite
 		timing-function: linear
-
-.anim-grow-bounce
-	+anim-grow-bounce
 
 .spin
 	position: relative
@@ -242,6 +250,16 @@
 		transform: rotate(0deg)
 	to
 		transform: rotate(360deg)
+
+@keyframes wiggle
+	0
+		transform: rotate(0deg)
+	25%
+		transform: rotate(25deg)
+	75%
+		transform: rotate(-25deg)
+	100%
+		transform: rotate(0deg)
 
 @keyframes pulse
 	0

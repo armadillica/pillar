@@ -1,0 +1,322 @@
+::-webkit-scrollbar
+	width: 5px
+	height: 5px
+
+::-webkit-scrollbar-track
+	background-color: $color-background
+
+::-webkit-scrollbar-thumb
+	background-color: $color-text-dark-hint
+
+$splitter-width: 5px
+
+// Main Containers
+#app-main
+	display: flex
+	align-items: stretch
+	position: relative
+	height: 100%
+
+	+media-xs
+		display: block
+		height: auto
+
+	.flyout.notifications
+		left: $sidebar-width + 5
+		top: initial
+		bottom: 40px
+		box-shadow: 1px 1px 0 rgba(black, .1), 0 5px 50px rgba(black, .25)
+
+#col_sidebar
+	position: relative
+	width: $sidebar-width
+	min-width: $sidebar-width
+
+#col_left, #col_main, #col_right
+	position: relative
+	flex: 0 0 auto
+	min-width: 150px
+	height: 100%
+	min-height: 100%
+	position: relative
+
+	+media-xs
+		height: auto
+		min-height: auto
+		margin: 0 auto
+		padding-left: $sidebar-width !important
+
+#col_main
+	background-color: $color-background
+	width: 50% // gets overriden by JS, dragging the col-splitter
+	+media-xs
+		width: 100%
+
+#col_right
+	flex: 1 1 auto
+	background-color: $color-background-light
+
+.col-splitter
+	flex: 0 0 auto
+	width: $splitter-width
+	background-color: $color-background
+	border-left: thin solid $color-background-light
+	border-right: 2px solid $color-background-dark
+	min-height: 200px
+	cursor: col-resize
+	top: 0
+	bottom: 0
+	z-index: 1
+
+	+media-xs
+		display: none
+		visibility: hidden
+
+.col_header
+	position: relative
+	z-index: 1
+	display: flex
+	align-items: center
+	width: 100%
+	min-height: 50px
+	background-color: white
+	padding: 10px 15px
+
+	font-size: 1.2em
+	border-bottom: thin solid $color-background
+	box-shadow: 0 0 15px rgba(black, .2)
+
+	&.scrolled
+		box-shadow: 0 -2px 20px rgba(black, .2)
+
+	.header_text::first-letter
+		text-transform: capitalize
+
+.col-list-item
+	display: flex
+	align-items: center
+	width: 100%
+	background-color: white
+	border-bottom: thin solid $color-background
+
+	&.empty
+		padding: 15px
+		justify-content: center
+		span
+			cursor: default
+			text-align: center
+			color: $color-text-dark-secondary
+			i
+				margin-right: 5px
+				display: inline-block
+				transform-origin: 50% 60%
+
+		&:hover span i
+			+animation-wiggle
+
+/* Status Bar */
+#status-bar
+	color: $color-text-dark-secondary
+	margin-left: auto
+	text-align: right
+
+/* Sidebar Navigation */
+nav.sidebar
+	position: fixed
+	z-index: 1
+	left: 0
+	width: $sidebar-width
+	height: 100%
+	background-color: $color-background-nav-dark
+	display: flex
+	flex-direction: column
+
+	.dropdown
+		min-width: $sidebar-width
+		.dropdown-menu
+			top: initial
+			bottom: 3px
+			left: $sidebar-width
+			box-shadow: 1px 1px 0 rgba(black, .1), 0 5px 50px rgba(black, .25)
+			min-width: 200px
+
+			li a
+				justify-content: flex-start
+
+	ul
+		width: 100%
+		margin: 0
+		padding: 0
+
+		&.bottom
+			margin-top: auto
+
+		li
+			display: block
+
+			a.navbar-item, button
+				display: flex
+				color: $color-text-light-hint
+				font-size: 1.5em
+				align-items: center
+				justify-content: center
+				padding: 10px 0
+				background: transparent
+				border: none
+				width: 100%
+				text-decoration: none
+
+				&:hover
+					color: $color-text-light-primary
+				&:active
+					outline: none
+
+				&.cloud
+					i
+						position: relative
+						left: -4px
+
+			a.dropdown-toggle
+				padding: 0
+				margin: 0
+				width: $sidebar-width
+				max-width: $sidebar-width
+
+			.special
+				top: 8px
+				left: 27px
+
+			#notifications-toggle
+				&.active .flyout-hat
+					display: none
+				#notifications-count
+					right: 5px
+					span
+						top: 1px
+
+/* Tables */
+.table
+	display: table
+	width: 100%
+	position: relative
+	margin-bottom: initial // overrides BS
+
+	.table-row
+		display: table-row
+		position: relative
+
+	.table-head
+		display: table-header-group
+
+		.table-cell
+			font-size: .9em
+			color: $color-text-dark-secondary
+
+	.table-body
+		display: table-row-group
+
+	.table-cell
+		display: table-cell
+		border-bottom: thin solid $color-background-dark
+		vertical-align: middle
+
+		span.hint
+			color: $color-text-dark-hint
+
+	.table-cell-spacer
+		background-color: $color-background-light
+		width: 6px
+		min-width: 4px
+		height: 100%
+		display: table-cell
+		border: 2px solid $color-background
+		border-top: none
+		border-bottom: none
+		cursor: e-resize
+
+.table.table-hover
+	.table-row:hover
+		background-color: $color-background-light
+
+
+/* Generic Statuses */
+.processing
+	+stripes(rgba(black, .1), rgba(white, .1), -45deg, 25px)
+	+stripes-animate
+	animation-duration: 2s
+
+.flash-on
+	background-color: lighten($color-success, 40%) !important
+	border-color: lighten($color-success, 40%) !important
+	color: darken($color-success, 10%) !important
+	text-shadow: 1px 1px 0 white
+	transition: all .1s ease-in
+	img
+		transition: all .1s ease-in
+		opacity: .8
+
+	&:before
+		background-color: lighten($color-success, 40%) !important
+
+.flash-off
+	transition: all 1s ease-out
+	img
+		transition: all 1s ease-out
+
+.btn:active
+	box-shadow: none
+
+.bg-status
+	@include status-color-property(background-color, '', 'dark')
+
+.fg-status
+	@include status-color-property(color, '', 'dark')
+
+
+/* Modal Bootstrap overrides */
+.modal-dialog
+	margin-top: 0
+.modal-content
+	border: none
+	box-shadow: 0 0 25px rgba(black, .25)
+	background-color: $color-background-light
+
+	.modal-header
+		background-color: white
+		padding: 10px 10px 10px 15px
+
+		.title
+			font-size: 1.2em
+
+		.close
+			float: right
+			background: transparent
+			border: none
+			color: $color-text-dark-hint
+
+			&:hover
+				color: $color-primary
+
+.modal-backdrop
+	background-color: transparent
+
+.modal-help-panel
+	overflow: hidden
+	border-radius: 3px
+	width: 30%
+	background-color: white
+	box-shadow: 1px 2px 10px rgba(black, .1)
+
+	.title
+		display: block
+		padding: 10px
+		color: $color-text-dark-primary
+
+.collapsing
+	transition: all 150ms ease-in-out
+	opacity: 0
+
+.collapse
+	transition: all 250ms ease-in-out
+	&.in
+		opacity: 1
