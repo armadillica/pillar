@@ -83,6 +83,7 @@
 			background: rgba($color-text-dark-hint, .1)
 			text-shadow: none
 
+
 @mixin overlay($from-color, $from-percentage, $to-color, $to-percentage)
 	position: absolute
 	top: 0
@@ -101,7 +102,6 @@
 		name: background-slide
 		duration: 1s
 		delay: 0s
-		// fill-mode: forwards
 		iteration-count: infinite
 		timing-function: linear
 
@@ -109,7 +109,7 @@
 	position: relative
 	background-color: white
 	border-radius: 3px
-	box-shadow: 0 0 0 1px rgba(black, .1), 1px 1px 2px rgba(black, .1)
+	box-shadow: rgba(0, 0, 0, 0.298039) 0px 1px 4px -1px
 
 =text-overflow-ellipsis
 	overflow: hidden
@@ -123,31 +123,21 @@
 	transform: translate(-50%, -50%)
 
 =input-generic
-	padding: 5px 5px 5px 0
+	color: $color-text-dark
 	box-shadow: none
-	border: thin solid transparent
-	border-radius: 0
-	border-bottom-color: $color-background-dark
-	background-color: transparent
-	transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out
-
-	&:hover
-		border-bottom-color: $color-text-dark-secondary
+	font-family: $font-body
+	border-radius: 3px
+	border-color: $color-background-dark
+	background-color: $color-background-light
 
 	&:focus
-		outline: 0
-		border: thin solid transparent
-		border-bottom-color: $color-primary
-		box-shadow: 0 1px 0 0 $color-primary
-
-	option
-		background-color: white
+		border-color: $color-info
+		box-shadow: none
 
 =label-generic
-	color: $color-text-dark-primary
-	font-weight: normal
-	font-size: .9em
-	margin: 0
+	color: $color-text-dark
+	font-family: $font-body
+	font-weight: 300
 
 @mixin badge($mixin-color, $roundness)
 	padding:
@@ -574,6 +564,79 @@
 	max-width: 100%
 	height: auto
 
+/* Set the color for a specified property
+ * 1: $property: e.g. background-color
+ * 2: $where: ':before', ' .class-name', etc.
+ * 3: $variation: 'light', 'dark', or empty
+ * e.g. @include status-color-property(background-color, ':before', 'light')
+ */
+@mixin status-color-property($property, $where: false, $variation: false)
+
+	@if not ($where)
+		$where: ''
+
+	&.status
+		&-invalid#{$where}
+			@if ($variation == 'light')
+				#{$property}: $color-status-invalid-light
+			@else if ($variation == 'dark')
+				#{$property}: $color-status-invalid-dark
+			@else
+				#{$property}: $color-status-invalid
+		&-todo#{$where}
+			@if ($variation == 'light')
+				#{$property}: $color-status-todo-light
+			@else if ($variation == 'dark')
+				#{$property}: $color-status-todo-dark
+			@else
+				#{$property}: $color-status-todo
+		&-in_progress#{$where}
+			@if ($variation == 'light')
+				#{$property}: $color-status-in_progress-light
+			@else if ($variation == 'dark')
+				#{$property}: $color-status-in_progress-dark
+			@else
+				#{$property}: $color-status-in_progress
+		&-on_hold#{$where}
+			@if ($variation == 'light')
+				#{$property}: $color-status-on_hold-light
+			@else if ($variation == 'dark')
+				#{$property}: $color-status-on_hold-dark
+			@else
+				#{$property}: $color-status-on_hold
+		&-approved#{$where}
+			@if ($variation == 'light')
+				#{$property}: $color-status-approved-light
+			@else if ($variation == 'dark')
+				#{$property}: $color-status-approved-dark
+			@else
+				#{$property}: $color-status-approved
+		&-cbb#{$where}
+			@if ($variation == 'light')
+				#{$property}: $color-status-cbb-light
+			@else if ($variation == 'dark')
+				#{$property}: $color-status-cbb-dark
+			@else
+				#{$property}: $color-status-cbb
+		&-final#{$where}
+			@if ($variation == 'light')
+				#{$property}: $color-status-final-light
+			@else if ($variation == 'dark')
+				#{$property}: $color-status-final-dark
+			@else
+				#{$property}: $color-status-final
+		&-review#{$where}
+			@if ($variation == 'light')
+				#{$property}: $color-status-review-light
+			@else if ($variation == 'dark')
+				#{$property}: $color-status-review-dark
+			@else
+				#{$property}: $color-status-review
+
+=sidebar-button-active
+	background-color: $color-background-nav
+	box-shadow: inset 2px 0 0 $color-primary
+	color: white
 
 .flash-on
 	background-color: lighten($color-success, 50%) !important
