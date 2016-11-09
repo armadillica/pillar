@@ -9,7 +9,7 @@ from gcloud.exceptions import NotFound
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
-from pillar.api.utils.storage import StorageBackend, FileInStorage
+from pillar.api.utils.storage import register_backend, Bucket, Blob
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +34,8 @@ def get_client():
 gcs = LocalProxy(get_client)
 
 
-class GoogleCloudStorageBucket(StorageBackend):
+@register_backend('gcs')
+class GoogleCloudStorageBucket(Bucket):
     """Cloud Storage bucket interface. We create a bucket for every project. In
     the bucket we create first level subdirs as follows:
     - '_' (will contain hashed assets, and stays on top of default listing)
@@ -50,16 +51,16 @@ class GoogleCloudStorageBucket(StorageBackend):
 
     """
 
-    def __init__(self, bucket_name, subdir='_/'):
-        super(GoogleCloudStorageBucket, self).__init__(backend='cgs')
+    def __init__(self, name, subdir='_/'):
+        super(GoogleCloudStorageBucket, self).__init__(name=name)
         try:
-            self.bucket = gcs.get_bucket(bucket_name)
+            self.gcs_bucket = gcs.get_bucket(name)
         except NotFound:
-            self.bucket = gcs.bucket(bucket_name)
+            self.gcs_bucket = gcs.bucket(name)
             # Hardcode the bucket location to EU
-            self.bucket.location = 'EU'
+            self.gcs_bucket.location = 'EU'
             # Optionally enable CORS from * (currently only used for vrview)
-            # self.bucket.cors = [
+            # self.gcs_bucket.cors = [
             #     {
             #       "origin": ["*"],
             #       "responseHeader": ["Content-Type"],
@@ -67,9 +68,12 @@ class GoogleCloudStorageBucket(StorageBackend):
             #       "maxAgeSeconds": 3600
             #     }
             # ]
-            self.bucket.create()
+            self.gcs_bucket.create()
 
         self.subdir = subdir
+
+    def blob(self, blob_name):
+        return GoogleCloudStorageBlob(name=blob_name, bucket=self)
 
     def List(self, path=None):
         """Display the content of a subdir in the project bucket. If the path
@@ -83,8 +87,8 @@ class GoogleCloudStorageBucket(StorageBackend):
         prefix = os.path.join(self.subdir, path)
 
         fields_to_return = 'nextPageToken,items(name,size,contentType),prefixes'
-        req = self.bucket.list_blobs(fields=fields_to_return, prefix=prefix,
-                                     delimiter='/')
+        req = self.gcs_bucket.list_blobs(fields=fields_to_return, prefix=prefix,
+                                         delimiter='/')
 
         files = []
         for f in req:
@@ -134,7 +138,7 @@ class GoogleCloudStorageBucket(StorageBackend):
         :param to_dict: Return the object as a dictionary.
         """
         path = os.path.join(self.subdir, path)
-        blob = self.bucket.blob(path)
+        blob = self.gcs_bucket.blob(path)
         if blob.exists():
             if to_dict:
                 return self.blob_to_dict(blob)
@@ -147,7 +151,7 @@ class GoogleCloudStorageBucket(StorageBackend):
         """Create new blob and upload data to it.
         """
         path = path if path else os.path.join('_', os.path.basename(full_path))
-        blob = self.bucket.blob(path)
+        blob = self.gcs_bucket.blob(path)
         if blob.exists():
             return None
         blob.upload_from_filename(full_path)
@@ -179,22 +183,18 @@ class GoogleCloudStorageBucket(StorageBackend):
         """
 
         assert isinstance(to_bucket, GoogleCloudStorageBucket)
-        return self.bucket.copy_blob(blob, to_bucket.bucket)
+        return self.gcs_bucket.copy_blob(blob, to_bucket.gcs_bucket)
 
     def get_blob(self, internal_fname, chunk_size=256 * 1024 * 2):
-        return self.bucket.blob('_/' + internal_fname, chunk_size)
+        return self.gcs_bucket.blob('_/' + internal_fname, chunk_size)
 
 
-class GoogleCloudStorageBlob(FileInStorage):
+class GoogleCloudStorageBlob(Blob):
     """GCS blob interface."""
-    def __init__(self, bucket, internal_fname):
-        super(GoogleCloudStorageBlob, self).__init__(backend='cgs')
+    def __init__(self, name, bucket):
+        super(GoogleCloudStorageBlob, self).__init__(name, bucket)
 
-        self.blob = bucket.blob('_/' + internal_fname, chunk_size=256 * 1024 * 2)
-        self.size = self.get_size()
-
-    def get_size(self):
-        return self.blob.size
+        self.blob = bucket.gcs_bucket.blob('_/' + name, chunk_size=256 * 1024 * 2)
 
 
 def update_file_name(node):

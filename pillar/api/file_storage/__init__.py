@@ -28,7 +28,7 @@ from pillar.api.utils.cdn import hash_file_path
 from pillar.api.utils.encoding import Encoder
 from pillar.api.utils.gcs import GoogleCloudStorageBucket, \
     GoogleCloudStorageBlob
-from pillar.api.utils.storage import PillarStorage, PillarStorageFile
+from pillar.api.utils.storage import LocalBucket, LocalBlob, default_storage_backend
 
 log = logging.getLogger(__name__)
 
@@ -317,7 +317,7 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
             return blob['public_url']
         return blob['signed_url']
     if backend == 'local':
-        f = PillarStorageFile(project_id, file_path)
+        f = LocalBlob(project_id, file_path)
         return url_for('file_storage.index', file_name=f.partial_path,
                        _external=True, _scheme=current_app.config['SCHEME'])
     if backend == 'pillar':
@@ -705,14 +705,17 @@ def stream_to_storage(project_id):
         # Fake a Blob object.
         file_in_storage = type('Blob', (), {'size': file_size})
     else:
-        if current_app.config['STORAGE_BACKEND'] == 'gcs':
-            file_in_storage, storage_backend = stream_to_gcs(
-                file_id, file_size, internal_fname, project_id, stream_for_gcs,
-                uploaded_file.mimetype)
-        elif current_app.config['STORAGE_BACKEND'] == 'local':
-            storage_backend = PillarStorage(project_id)
-            file_in_storage = PillarStorageFile(project_id, internal_fname)
-            file_in_storage.create_from_file(stream_for_gcs, file_size)
+        bucket = default_storage_backend(project_id)
+        blob = bucket.blob(internal_fname)
+        blob.create_from_file(stream_for_gcs, file_size)
+        # if current_app.config['STORAGE_BACKEND'] == 'gcs':
+        #     file_in_storage, storage_backend = stream_to_gcs(
+        #         file_id, file_size, internal_fname, project_id,
+        #         stream_for_gcs, uploaded_file.mimetype)
+        # elif current_app.config['STORAGE_BACKEND'] == 'local':
+        #     storage_backend = LocalBucket(project_id)
+        #     file_in_storage = LocalBlob(project_id, internal_fname)
+        #     file_in_storage.create_from_file(stream_for_gcs, file_size)
 
     log.debug('Marking uploaded file id=%s, fname=%s, '
               'size=%i as "queued_for_processing"',
@@ -720,11 +723,11 @@ def stream_to_storage(project_id):
     update_file_doc(file_id,
                     status='queued_for_processing',
                     file_path=internal_fname,
-                    length=file_in_storage.size,
+                    length=blob.size,
                     content_type=uploaded_file.mimetype)
 
     log.debug('Processing uploaded file id=%s, fname=%s, size=%i', file_id,
-              internal_fname, file_in_storage.size)
+              internal_fname, blob.size)
     process_file(storage_backend, file_id, local_file)
 
     # Local processing is done, we can close the local file so it is removed.
@@ -732,7 +735,7 @@ def stream_to_storage(project_id):
         local_file.close()
 
     log.debug('Handled uploaded file id=%s, fname=%s, size=%i, status=%i',
-              file_id, internal_fname, file_in_storage.size, status)
+              file_id, internal_fname, blob.size, status)
 
     # Status is 200 if the file already existed, and 201 if it was newly
     # created.

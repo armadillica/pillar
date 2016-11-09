@@ -45,8 +45,8 @@ def size_descriptor(width, height):
 @skip_when_testing
 def rename_on_gcs(bucket_name, from_path, to_path):
     gcs = GoogleCloudStorageBucket(str(bucket_name))
-    blob = gcs.bucket.blob(from_path)
-    gcs.bucket.rename_blob(blob, to_path)
+    blob = gcs.gcs_bucket.blob(from_path)
+    gcs.gcs_bucket.rename_blob(blob, to_path)
 
 
 @encoding.route('/zencoder/notifications', methods=['POST'])
