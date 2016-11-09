@@ -203,6 +203,8 @@ class LocalBlob(Blob):
             current_app.config['STORAGE_DIR'], self.partial_path)
 
     def create_from_file(self, uploaded_file, file_size):
+        assert hasattr(uploaded_file, 'read')
+
         # Ensure path exists before saving
         directory = os.path.dirname(self.path)
         if not os.path.exists(directory):
@@ -236,11 +238,11 @@ class LocalBlob(Blob):
             if current_app.config['TESTING']:
                 log.warning('  - NOT making thumbnails', fname)
             else:
-                log.debug('  - Sending thumbnail %s to GCS', fname)
+                log.debug('  - Sending thumbnail %s to %s', fname, self.bucket)
 
                 blob = self.bucket.blob(fname)
-                blob.create_from_file(variation['local_path'],
-                                      variation['length'])
+                with open(variation['local_path'], 'rb') as local_file:
+                    blob.create_from_file(local_file, variation['length'])
 
             try:
                 os.unlink(variation['local_path'])
