@@ -394,7 +394,7 @@ files_schema = {
     'backend': {
         'type': 'string',
         'required': True,
-        'allowed': ["attract-web", "pillar", "cdnsun", "gcs", "unittest"]
+        'allowed': ["local", "pillar", "cdnsun", "gcs", "unittest"]
     },
 
     # Where the file is in the backend storage itself. In the case of GCS,

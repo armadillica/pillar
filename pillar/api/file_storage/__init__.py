@@ -1,26 +1,26 @@
+import datetime
 import io
 import logging
 import mimetypes
+import os
 import tempfile
 import uuid
 from hashlib import md5
-import os
-import requests
+
 import bson.tz_util
-import datetime
 import eve.utils
 import pymongo
 import werkzeug.exceptions as wz_exceptions
 from bson import ObjectId
-from flask import Blueprint
+from flask import Blueprint, current_app
 from flask import current_app
 from flask import g
 from flask import jsonify
 from flask import request
 from flask import send_from_directory
 from flask import url_for, helpers
+
 from pillar.api import utils
-from pillar.api.utils.imaging import generate_local_thumbnails
 from pillar.api.utils import remove_private_keys, authentication
 from pillar.api.utils.authorization import require_login, user_has_role, \
     user_matches_roles
@@ -28,7 +28,8 @@ from pillar.api.utils.cdn import hash_file_path
 from pillar.api.utils.encoding import Encoder
 from pillar.api.utils.gcs import GoogleCloudStorageBucket, \
     GoogleCloudStorageBlob
-from pillar.api.utils.storage import LocalBucket, LocalBlob, default_storage_backend
+from pillar.api.utils.imaging import generate_local_thumbnails
+from pillar.api.utils.storage import LocalBlob, default_storage_backend
 
 log = logging.getLogger(__name__)
 
@@ -317,8 +318,9 @@ def generate_link(backend, file_path, project_id=None, is_public=False):
             return blob['public_url']
         return blob['signed_url']
     if backend == 'local':
-        f = LocalBlob(project_id, file_path)
-        return url_for('file_storage.index', file_name=f.partial_path,
+        bucket = default_storage_backend(project_id)
+        blob = bucket.get_blob(file_path)
+        return url_for('file_storage.index', file_name=blob.partial_path,
                        _external=True, _scheme=current_app.config['SCHEME'])
     if backend == 'pillar':
         return url_for('file_storage.index', file_name=file_path,
@@ -550,11 +552,14 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
 
 @require_login()
 def create_file_doc(name, filename, content_type, length, project,
-                    backend='gcs', **extra_fields):
+                    backend=None, **extra_fields):
     """Creates a minimal File document for storage in MongoDB.
 
     Doesn't save it to MongoDB yet.
     """
+
+    if backend is None:
+        backend = current_app.config['STORAGE_BACKEND']
 
     current_user = g.get('current_user')
 
@@ -728,7 +733,8 @@ def stream_to_storage(project_id):
 
     log.debug('Processing uploaded file id=%s, fname=%s, size=%i', file_id,
               internal_fname, blob.size)
-    process_file(storage_backend, file_id, local_file)
+    # process_file(storage_backend, file_id, local_file)
+    blob.process_file(file_id)
 
     # Local processing is done, we can close the local file so it is removed.
     if local_file is not None:
@@ -781,15 +787,6 @@ def add_access_control_headers(resp):
     resp.headers['Access-Control-Allow-Origin'] = request.headers['Origin']
     resp.headers['Access-Control-Allow-Credentials'] = 'true'
     return resp
-
-
-def update_file_doc(file_id, **updates):
-    files = current_app.data.driver.db['files']
-    res = files.update_one({'_id': ObjectId(file_id)},
-                           {'$set': updates})
-    log.debug('update_file_doc(%s, %s): %i matched, %i updated.',
-              file_id, updates, res.matched_count, res.modified_count)
-    return res
 
 
 def create_file_doc_for_upload(project_id, uploaded_file):
@@ -876,3 +873,12 @@ def setup_app(app, url_prefix):
     app.on_insert_files += compute_aggregate_length_items
 
     app.register_api_blueprint(file_storage, url_prefix=url_prefix)
+
+
+def update_file_doc(file_id, **updates):
+    files = current_app.data.driver.db['files']
+    res = files.update_one({'_id': ObjectId(file_id)},
+                           {'$set': updates})
+    log.debug('update_file_doc(%s, %s): %i matched, %i updated.',
+              file_id, updates, res.matched_count, res.modified_count)
+    return res
