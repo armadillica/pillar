@@ -99,6 +99,13 @@ $splitter-width: 5px
 	background-color: white
 	border-bottom: thin solid $color-background
 
+	&.active
+		background-color: $color-background-active
+		border-bottom-color: darken($color-background-active, 15%)
+
+		&:last-child
+			box-shadow: inset -5px 0 0 $color-primary
+
 	&.empty
 		padding: 15px
 		justify-content: center
@@ -214,6 +221,17 @@ nav.sidebar
 
 	.table-body
 		display: table-row-group
+
+		.table-row
+			&.active
+				background-color: $color-background-active
+				&:hover
+					background-color: lighten($color-background-active, 2%)
+
+				.table-cell
+					border-bottom-color: darken($color-background-active, 15%)
+				.table-cell:last-child
+					box-shadow: inset -5px 0 0 $color-primary
 
 	.table-cell
 		display: table-cell
