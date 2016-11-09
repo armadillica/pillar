@@ -105,3 +105,61 @@ class DocDiffTest(unittest.TestCase):
         self.assertEqual({('props.status1', u'todo', DoesNotExist),
                           ('props.status2', DoesNotExist, u'todo')},
                          set(diff))
+
+
+class NodeSetattrTest(unittest.TestCase):
+    def test_simple(self):
+        from pillar.api.utils import node_setattr
+
+        node = {}
+        node_setattr(node, 'a', 5)
+        self.assertEqual({'a': 5}, node)
+
+        node_setattr(node, 'b', {'complexer': 'value'})
+        self.assertEqual({'a': 5, 'b': {'complexer': 'value'}}, node)
+
+    def test_dotted(self):
+        from pillar.api.utils import node_setattr
+
+        node = {}
+        self.assertRaises(KeyError, node_setattr, node, 'a.b', 5)
+
+        node = {'b': {}}
+        node_setattr(node, 'b.simple', 'value')
+        self.assertEqual({'b': {'simple': 'value'}}, node)
+
+        node_setattr(node, 'b.complex', {'yes': 'value'})
+        self.assertEqual({'b': {'simple': 'value',
+                                'complex': {'yes': 'value'}}}, node)
+
+        node_setattr(node, 'b.complex', {'yes': 5})
+        self.assertEqual({'b': {'simple': 'value',
+                                'complex': {'yes': 5}}}, node)
+
+    def test_none_simple(self):
+        from pillar.api.utils import node_setattr
+
+        node = {}
+        node_setattr(node, 'a', None)
+        node_setattr(node, None, 'b')
+        self.assertEqual({None: 'b'}, node)
+
+    def test_none_dotted(self):
+        from pillar.api.utils import node_setattr
+
+        node = {}
+        self.assertRaises(KeyError, node_setattr, node, 'a.b', None)
+
+        node = {'b': {}}
+        node_setattr(node, 'b.simple', None)
+        self.assertEqual({'b': {}}, node)
+
+        node_setattr(node, 'b.complex', {'yes': None})
+        self.assertEqual({'b': {'complex': {'yes': None}}}, node)
+
+        node_setattr(node, 'b.complex.yes', None)
+        self.assertEqual({'b': {'complex': {}}}, node)
+
+        node_setattr(node, 'b.complex', {None: 5})
+        self.assertEqual({'b': {'complex': {None: 5}}}, node)
+

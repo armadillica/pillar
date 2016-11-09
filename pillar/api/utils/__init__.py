@@ -16,6 +16,27 @@ import pymongo.results
 log = logging.getLogger(__name__)
 
 
+def node_setattr(node, key, value):
+    """Sets a node property by dotted key.
+
+    Modifies the node in-place. Deletes None values.
+
+    :type node: dict
+    :type key: str
+    :param value: the value to set, or None to delete the key.
+    """
+
+    set_on = node
+    while key and '.' in key:
+        head, key = key.split('.', 1)
+        set_on = set_on[head]
+
+    if value is None:
+        set_on.pop(key, None)
+    else:
+        set_on[key] = value
+
+
 def remove_private_keys(document):
     """Removes any key that starts with an underscore, returns result as new
     dictionary.
