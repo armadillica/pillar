@@ -123,21 +123,30 @@
 	transform: translate(-50%, -50%)
 
 =input-generic
+	padding: 5px 5px 5px 0
 	color: $color-text-dark
 	box-shadow: none
 	font-family: $font-body
-	border-radius: 3px
-	border-color: $color-background-dark
-	background-color: $color-background-light
+	border: thin solid transparent
+	border-radius: 0
+	border-bottom-color: $color-background-dark
+	background-color: transparent
+	transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out
+
+	&:hover
+		border-bottom-color: $color-background
 
 	&:focus
-		border-color: $color-info
-		box-shadow: none
+		outline: 0
+		border: thin solid transparent
+		border-bottom-color: $color-primary
+		box-shadow: 0 1px 0 0 $color-primary
 
 =label-generic
-	color: $color-text-dark
-	font-family: $font-body
-	font-weight: 300
+	color: $color-text-dark-primary
+	font-weight: normal
+	font-size: .9em
+	margin: 0
 
 @mixin badge($mixin-color, $roundness)
 	padding:
