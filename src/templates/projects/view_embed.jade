@@ -21,13 +21,7 @@ script.
 
 #node-container
 	section.node-preview.project
-		| {% if project.url == 'caminandes-3' %}
-		iframe(
-			style="height: 490px",
-			src="https://www.youtube.com/embed/SkVqJ1SGeL0?rel=0&amp;controls=0&amp;showinfo=0",
-			frameborder="0",
-			allowfullscreen)
-		| {% elif header_video_file %}
+		| {% if header_video_file %}
 		#flowplayer_container.is-splash.play-button(
 			style="{% if header_video_node.picture %}background-image:url({{header_video_node.picture.thumbnail('l', api=api)}}); background-repeat:no-repeat; {% endif %}")
 			.fp-startscreen.fp-toggle
