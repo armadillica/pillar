@@ -30,7 +30,6 @@
 	z-index: $z-index-base + 5
 	width: $project_nav-width
 	overflow: hidden
-	background-color: $color-background-nav
 
 	+media-xs
 		display: block
@@ -40,7 +39,6 @@
 
 #project_sidebar
 	width: $project-sidebar-width
-	background-color: $color-background-nav-dark
 	z-index: $z-index-base + 4
 
 	+media-xs
@@ -166,7 +164,7 @@
 	visibility: visible
 	width: $project_nav-width
 	position: relative
-	background-color: $color-background-nav
+	background-color: $color-background-light
 
 	color: white
 	left: 0
@@ -485,8 +483,8 @@ ul.project-edit-tools
 			margin-right: 5px
 
 		&:hover
-			background-color: $color-primary
-			border-color: darken($color-primary, 5%)
+			background-color: $color-background-active-dark
+			border-color: darken($color-background-active-dark, 5%)
 			color: $color-text-light
 			text-decoration: none
 
@@ -741,7 +739,7 @@ ul.project_nav-edit-list
 	padding: 5px 0 // some padding on top/bottom of jstree
 	position: relative // for scrollbar alignment
 	margin-top: $project_header-height
-	background-color: $color-background-nav
+	background-color: $color-background-light
 
 	&.edit
 		margin-top: 0
@@ -755,13 +753,21 @@ ul.project_nav-edit-list
 	top: 0
 	right: 0
 	bottom: 0
-	z-index: $z-index-base + 4
+	z-index: $z-index-base
 	cursor: w-resize
 	user-select: none
 
 	+media-xs
 		display: none
 
+	&:before
+		content: ' '
+		position: absolute
+		top: 0
+		right: 0
+		bottom: 0
+		width: 2px
+		background-color: $color-background
 
 /* Node Context */
 =project-node-title

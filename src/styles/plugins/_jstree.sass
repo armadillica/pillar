@@ -1,8 +1,9 @@
 /* jsTree overrides */
 
-$tree-color-text: $color-text-light-primary
-$tree-color-highlight: white
-$tree-color-highlight-background: $color-primary
+$tree-color-text: $color-text-dark
+$tree-color-highlight: hsl(hue($color-background-active), 50%, 50%)
+$tree-color-highlight-background: hsl(hue($color-background-active), 40%, 50%)
+$tree-color-highlight-background-text: white
 
 .jstree-default
 
@@ -14,7 +15,7 @@ $tree-color-highlight-background: $color-primary
 		color: $tree-color-text
 		background-image: none !important
 
-		transition: color 100ms ease-in-out
+		transition: color 100ms ease-in-out, background-color 150ms ease-in-out
 
 		+media-xs
 			width: 100%
@@ -37,7 +38,6 @@ $tree-color-highlight-background: $color-primary
 			.jstree-icon.jstree-themeicon
 				opacity: 1
 				width: 24px !important
-				color: $color-text-light-primary
 
 				&.pi-image
 					font-size: .85em !important
@@ -62,17 +62,7 @@ $tree-color-highlight-background: $color-primary
 						font-size: .85em !important
 
 				.jstree-anchor
-					border-left: thin solid lighten($color-background-nav, 5%)
-
-			/* color of the icon on an expanded item, like a folder */
-			.jstree-ocl,
-			.jstree-anchor,
-			.jstree-ocl .jstree-icon.jstree-themeicon,
-			.jstree-anchor .jstree-icon.jstree-themeicon
-				color: $tree-color-highlight !important
-
-			.jstree-anchor:first-of-type
-				color: white !important
+					border-left: thin solid $color-text-dark-hint
 
 		/* Closed Folder */
 		&.jstree-closed
@@ -90,7 +80,7 @@ $tree-color-highlight-background: $color-primary
 		.jstree-anchor
 			width: 100%
 			padding-left: 28px
-			padding-right: 5px
+			padding-right: 10px
 			height: inherit
 			line-height: 26px
 			white-space: nowrap
@@ -106,14 +96,20 @@ $tree-color-highlight-background: $color-primary
 			.jstree-themeicon
 				margin: 0 !important
 				font-size: 95% !important
+				color: $color-text-dark-secondary
 
 			/* Selected item */
 			&.jstree-clicked
 				background-color: $tree-color-highlight-background !important
+				color: $tree-color-highlight-background-text !important
+
+				.jstree-ocl, .jstree-themeicon
+					color: $tree-color-highlight-background-text !important
+
 				&:after
 					content: '\e83a'
 					font-family: 'pillar-font'
-					color: $tree-color-highlight
+					color: $tree-color-highlight-background-text
 					position: absolute
 					right: 7px
 					top: 1px
@@ -125,7 +121,7 @@ $tree-color-highlight-background: $color-primary
 				/* hover an active item */
 				&.jstree-hovered,
 				&.jstree-hovered .jstree-icon.jstree-themeicon
-					color: lighten($tree-color-highlight, 5%) !important
+					color: $tree-color-highlight-background-text !important
 					box-shadow: none
 
 			.jstree-hovered
@@ -137,7 +133,7 @@ $tree-color-highlight-background: $color-primary
 	/* active item text + icon */
 	.jstree-clicked,
 	.jstree-clicked > .jstree-ocl
-		color: $tree-color-highlight !important
+		color: $tree-color-highlight-background-text !important
 		background-color: transparent !important
 		border-radius: 0
 		box-shadow: none
@@ -154,7 +150,7 @@ $tree-color-highlight-background: $color-primary
 	.jstree-hovered .jstree-ocl
 		background-color: transparent !important
 		box-shadow: none
-		color: white !important
+		color: $tree-color-highlight-background-text !important
 
 	/* Folder that you click to collapse/expand */
 	.jstree-icon
@@ -192,35 +188,12 @@ $tree-color-highlight-background: $color-primary
 .jstree-default .jstree-hovered .jstree-icon.jstree-themeicon
 	color: $tree-color-highlight !important
 
-.jstree-leaf[aria-selected='true']
-	a.jstree-anchor.jstree-clicked
-		background-color: rgba($tree-color-highlight-background, .5) !important
 
 a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked
 	background-color: rgba($tree-color-highlight-background, .7) !important
 
 a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked
 	background-color: rgba($tree-color-highlight-background, .8) !important
-
-a.jstree-anchor+ul
-	border:
-		top: none !important
-		bottom: none !important
-	a.jstree-anchor
-		color: darken($color-text-light-primary, 10%) !important
-
-		&.jstree-hovered,
-		&.jstree-clicked
-			color: white !important
-
-		&+ul
-			a.jstree-anchor
-				color: darken($color-text-light-primary, 10%) !important
-
-				&.jstree-hovered,
-				&.jstree-clicked
-					color: white !important
-
 
 i.jstree-icon.jstree-ocl
 	height: 26px !important
