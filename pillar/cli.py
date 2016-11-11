@@ -255,6 +255,45 @@ def sync_project_groups(user_email, fix):
 
 
 @manager.command
+def check_home_project_groups():
+    """Checks all users' group membership of their home project admin group."""
+
+    users_coll = current_app.data.driver.db['users']
+    proj_coll = current_app.data.driver.db['projects']
+
+    good = bad = 0
+    for proj in proj_coll.find({'category': 'home'}):
+        try:
+            admin_group_perms = proj['permissions']['groups'][0]
+        except IndexError:
+            log.error('Project %s has no admin group', proj['_id'])
+            return 255
+        except KeyError:
+            log.error('Project %s has no group permissions at all', proj['_id'])
+            return 255
+
+        user = users_coll.find_one({'_id': proj['user']},
+                                   projection={'groups': 1})
+        if user is None:
+            log.error('Project %s has non-existing owner %s', proj['user'])
+            return 255
+
+        user_groups = set(user['groups'])
+        admin_group_id = admin_group_perms['group']
+        if admin_group_id in user_groups:
+            # All is fine!
+            good += 1
+            continue
+
+        log.warning('User %s has no admin rights to home project %s -- needs group %s',
+                    proj['user'], proj['_id'], admin_group_id)
+        bad += 1
+
+    log.info('%i projects OK, %i projects in error', good, bad)
+    return bad
+
+
+@manager.command
 def badger(action, user_email, role):
     from pillar.api import service
 
