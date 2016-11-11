@@ -66,7 +66,6 @@ script.
 		| {% if title != 'about' %}
 		.node-extra
 			a.learn-more(href="{{ url_for( 'projects.about', project_url=project.url) }}") LEARN MORE
-		| {% endif %}
 
 		| {% if project.nodes_featured %}
 		.project-featured-container
@@ -137,6 +136,7 @@ script.
 					| {% endfor %}
 			| {% endif %}
 
+		| {% endif %}
 
 include _scripts
 
