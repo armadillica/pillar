@@ -21,6 +21,7 @@ def jstree_parse_node(node, children=None):
     parsed_node = dict(
         id="n_{0}".format(node._id),
         a_attr={ "href" : url_for_node(node=node) },
+        li_attr={ "data-node-type" : node.node_type },
         text=Markup.escape(node.name),
         type=node_type,
         children=False)
