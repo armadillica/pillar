@@ -199,7 +199,7 @@ def register_activity(actor_user_id, verb, object_type, object_id,
         log.error('register_activity: code %i creating activity %s: %s',
                   status_code, activity, info)
     else:
-        log.info('register_activity: user %s %s on %s %s, context %s %s',
+        log.info('register_activity: user %s "%s" on %s %s, context %s %s',
                  actor_user_id, verb, object_type, object_id,
                  context_object_type, context_object_id)
     return info, status_code
