@@ -185,7 +185,7 @@ def after_inserting_project(project, db_user):
     result = projects_collection.update_one({'_id': project_id},
                                             {'$set': remove_private_keys(project)})
     if result.matched_count != 1:
-        log.warning('Unable to update project %s: %s', project_id, result.raw_result)
+        log.error('Unable to update project %s: %s', project_id, result.raw_result)
         abort_with_error(500)
 
 
