@@ -170,6 +170,8 @@ def comments_for_node(node_id):
     node = Node.find(node_id, api=api)
     project = Project({'_id': node.project})
     can_post_comments = project.node_type_has_method('comment', 'POST', api=api)
+    can_comment_override = request.args.get('can_comment', 'True') == 'True'
+    can_post_comments = can_post_comments and can_comment_override
 
     # Query for all children, i.e. comments on the node.
     comments = Node.all({
