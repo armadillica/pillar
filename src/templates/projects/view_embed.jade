@@ -95,7 +95,7 @@ script.
 							| {% if n.picture %}
 							img(src="{{ n.picture.thumbnail('m', api=api) }}")
 							| {% else %}
-							i.pi-chatbubble-working
+							i.pi-newspaper
 							| {% endif %}
 						.info
 							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
