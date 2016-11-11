@@ -211,8 +211,9 @@
 	height: $project_header-height
 	min-height: $project_header-height
 	width: 100%
-	border-bottom: 2px solid $color-background-nav-light
-	background-color: $color-background-nav-dark
+	background-color: $color-background-light
+	border-bottom: thin solid lighten($color-text-dark-hint, 10%)
+	box-shadow: 0 0 25px rgba(black, .2)
 
 	/* Name of the project */
 	.project-title
@@ -224,12 +225,13 @@
 		a
 			display: block
 			width: 100%
-			color: white
+			color: $color-text-dark
 			padding: 15px
 			font-size: 1.1em
 			+text-overflow-ellipsis
 
-			&:hover, &:active, &:focus
+			&:hover, &:active
+				color: $color-primary
 				text-decoration: none
 				outline: none
 
@@ -736,7 +738,7 @@ ul.project_nav-edit-list
 
 /* The actual navigation tree container */
 #project_tree
-	padding-bottom: 5px // some padding on bottom of jstree
+	padding: 5px 0 // some padding on top/bottom of jstree
 	position: relative // for scrollbar alignment
 	margin-top: $project_header-height
 	background-color: $color-background-nav
