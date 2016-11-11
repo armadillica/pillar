@@ -32,7 +32,7 @@ class UserAdminTest(AbstractPillarTest):
         import pillar.web.users.routes
         import pillar.auth
 
-        user_id = self.create_user(roles=())
+        user_id = self.create_user(roles=(u'mønkeybütler', ))
         self.create_valid_auth_token(user_id, 'token')
 
         # Try to access the home project, creating it.
@@ -69,12 +69,16 @@ class UserAdminTest(AbstractPillarTest):
         edit_user(['subscriber', 'demo'])
 
         # Re-check the user group membership.
-        groups = get_dbuser()['groups']
+        dbuser = get_dbuser()
         self.assertEqual({home_project_gid, self.subscriber_gid, self.demo_gid},
-                         set(groups))
+                         set(dbuser['groups']))
+        self.assertEqual({u'subscriber', u'demo', u'mønkeybütler'},
+                         set(dbuser['roles']))
 
         # Edit user again, revoking demo role.
         edit_user(['subscriber'])
-        groups = get_dbuser()['groups']
+        dbuser = get_dbuser()
         self.assertEqual({home_project_gid, self.subscriber_gid},
-                         set(groups))
+                         set(dbuser['groups']))
+        self.assertEqual({u'subscriber', u'mønkeybütler'},
+                         set(dbuser['roles']))
