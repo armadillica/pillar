@@ -86,7 +86,8 @@ script.
 		.node-extra
 			| {% if project.nodes_blog %}
 			.node-blog
-				h3 Blog
+				a(href="{{url_for('main.project_blog', project_url=project.url)}}")
+					h3 Blog
 				ul.node-blog-list
 					| {% for n in project.nodes_blog %}
 					li.node-blog-list-item(data-node_id="{{ n._id }}")
