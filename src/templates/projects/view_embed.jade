@@ -92,7 +92,7 @@ script.
 					li.node-blog-list-item(data-node_id="{{ n._id }}")
 						a.image(href="{{ url_for_node(node=n) }}")
 							| {% if n.picture %}
-							img(src="{{ n.picture.thumbnail('s', api=api) }}")
+							img(src="{{ n.picture.thumbnail('m', api=api) }}")
 							| {% else %}
 							i.pi-chatbubble-working
 							| {% endif %}
@@ -113,7 +113,7 @@ script.
 					li.node-updates-list-item(data-node_id="{{ n._id }}")
 						a.image(href="{{ url_for_node(node=n) }}")
 							| {% if n.picture %}
-							img(src="{{ n.picture.thumbnail('s', api=api) }}")
+							img(src="{{ n.picture.thumbnail('m', api=api) }}")
 							| {% else %}
 							| {% if n.properties.content_type == 'video' %}
 							i.pi-film-thick
@@ -130,9 +130,8 @@ script.
 						.info
 							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
 							span.details
-								span.what {% if n.properties.content_type %}{{ n.properties.content_type }}{% else %}{{ n.node_type }}{% endif %} ·
-								span.when  {{ n._updated | pretty_date }} by
-								span.who {{ n.user.full_name }}
+								span.what {% if n.properties.content_type %}{{ n.properties.content_type | undertitle }}{% else %}{{ n.node_type | undertitle }}{% endif %} ·
+								span.when  {{ n._updated | pretty_date }}
 					| {% endif %}
 					| {% endfor %}
 			| {% endif %}
