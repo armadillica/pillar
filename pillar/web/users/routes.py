@@ -210,39 +210,35 @@ def users_edit(user_id):
 
     form = UserEditForm()
     if form.validate_on_submit():
-        def get_groups(roles):
-            """Return a set of role ids matching the group names provided"""
-            groups_set = set()
-            for system_role in roles:
-                group = Group.find_one({'where': "name=='%s'" % system_role}, api=api)
-                groups_set.add(group._id)
-            return groups_set
-
-        # Remove any of the default roles
-        system_roles = set([role[0] for role in form.roles.choices])
-        system_groups = get_groups(system_roles)
-        # Current user roles
-        user_roles_list = user.roles if user.roles else []
-        user_roles = set(user_roles_list)
-        user_groups = get_groups(user_roles_list)
-        # Remove all form roles from current roles
-        user_roles = list(user_roles.difference(system_roles))
-        user_groups = list(user_groups.difference(system_groups))
-        # Get the assigned roles
-        system_roles_assigned = form.roles.data
-        system_groups_assigned = get_groups(system_roles_assigned)
-        # Reassign roles based on form.roles.data by adding them to existing roles
-        user_roles += system_roles_assigned
-        user_groups += list(get_groups(user_roles))
-        # Fetch the group for the assigned system roles
-        user.roles = user_roles
-        user.groups = user_groups
-        user.update(api=api)
+        _users_edit(form, user, api)
     else:
         form.roles.data = user.roles
     return render_template('users/edit_embed.html',
         user=user,
         form=form)
+
+
+def _users_edit(form, user, api):
+    """Performs the actual user editing."""
+
+    from pillar.api.service import role_to_group_id, ROLES_WITH_GROUPS
+
+    current_user_roles = set(user.roles or [])
+    current_user_groups = set(user.groups or [])
+
+    roles_in_form = set(form.roles.data)
+
+    granted_roles = roles_in_form - current_user_roles
+    revoked_roles = ROLES_WITH_GROUPS - roles_in_form
+
+    # role_to_group_id contains ObjectIDs, but the SDK works with strings.
+    granted_groups = {str(role_to_group_id[role]) for role in granted_roles}
+    revoked_groups = {str(role_to_group_id[role]) for role in revoked_roles}
+
+    user.roles = list((current_user_roles - revoked_roles).union(granted_roles))
+    user.groups = list((current_user_groups - revoked_groups).union(granted_groups))
+
+    user.update(api=api)
 
 
 @blueprint.route('/u')
