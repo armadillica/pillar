@@ -1,0 +1,43 @@
+| {% block body %}
+
+#node-container
+	#node-overlay
+
+	| {% if node.picture %}
+	section#node-preview.node-preview.page
+		img.node-preview-thumbnail#node-preview-thumbnail(
+			src="{{ node.picture.thumbnail('l', api=api) }}")
+	| {% endif %}
+
+	section.node-details-container.page
+
+		.node-details-header
+			.node-title#node-title
+				| {{node.name}}
+
+		| {% if node.description %}
+		.node-details-description#node-description
+			| {{node.description}}
+		| {% endif %}
+
+		.node-details-meta.footer
+			ul.node-details-meta-list
+				li.node-details-meta-list-item.author
+					| {{ node.user.full_name }}
+
+				li.node-details-meta-list-item.date(title="Created {{ node._created }}")
+					| {{ node._created | pretty_date }}
+					| {% if (node._created | pretty_date) != (node._updated | pretty_date) %}
+					span(title="Updated {{ node._updated }}") (updated {{ node._updated | pretty_date }})
+					| {% endif %}
+
+include ../_scripts
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+	// Generate GA pageview
+	ga('send', 'pageview', location.pathname);
+| {% endblock %}
+
