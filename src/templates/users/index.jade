@@ -96,10 +96,6 @@ script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.select
 
 script(type="text/javascript").
 
-	if (typeof Ps !== 'undefined'){
-		Ps.initialize(document.getElementById('hits'), {suppressScrollX: true});
-	}
-
 	function displayUser(userId) {
 		var url = '/u/' + userId + '/edit?embed=1';
 		$.get(url, function(dataHtml){

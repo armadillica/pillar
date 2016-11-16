@@ -309,10 +309,9 @@ $search-hit-width_grid: 100px
 		border-left: 2px solid darken(white, 3%)
 
 		#search-hit-container
-			position: absolute // for custom scrollbars
+			position: absolute // for scrollbars
 			width: 100%
-			.ps-scrollbar-y-rail
-				z-index: 1
+			overflow-y: auto
 
 			#error_container
 				position: relative

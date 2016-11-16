@@ -49,9 +49,6 @@ include ../_scripts
 script.
 	$(function () {
 
-		// Load scrollbar for sidebar
-		Ps.initialize(document.getElementById('theatre-info'), {suppressScrollX: true});
-
 		var file_width = {{ node.file.width }};
 		var file_height = {{ node.file.height }};
 		var theatre_media = document.getElementById('theatre-media');
@@ -80,11 +77,9 @@ script.
 			if (started_zoomed_in) {
 				$theatre_media.removeClass('zoomed-in');
 				$theatre_media.addClass('zoomed-out');
-				Ps.destroy(theatre_media);
 			} else {
 				$theatre_media.addClass('zoomed-in');
 				$theatre_media.removeClass('zoomed-out');
-				Ps.initialize(theatre_media);
 			}
 
 			// Style toolbar button

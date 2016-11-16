@@ -174,11 +174,6 @@ script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets
 
 script(type="text/javascript").
 
-	/* Initialize scrollbars */
-	if ((typeof Ps !== 'undefined') && window.innerWidth > 768){
-		Ps.initialize(document.getElementById('project_tree'), {suppressScrollX: true});
-	}
-
 	$('.project-mode-edit').show();
 
 	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: true, nodeId: ''});

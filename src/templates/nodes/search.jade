@@ -265,12 +265,6 @@ script(type="text/javascript").
 		}
 	});
 
-	/* Scrollbars */
-	if (typeof Ps !== 'undefined'){
-		Ps.initialize(searchList, {suppressScrollX: true});
-		Ps.initialize(document.getElementById('search-hit-container'), {suppressScrollX: true});
-	}
-
 	/* Hide site-wide search, kinda confusing */
 	$('.search-input').hide();
 

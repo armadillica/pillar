@@ -2,20 +2,12 @@ function projectNavCollapse() {
 
 	$("#project-side-container").addClass('collapsed');
 	$("ul.breadcrumb.context").addClass('active');
-
-	if (typeof Ps !== 'undefined'){
-		Ps.destroy(document.getElementById('project_tree'));
-	};
 };
 
 function projectNavExpand() {
 
 	$("#project-side-container").removeClass('collapsed');
 	$("ul.breadcrumb.context").removeAttr('class');
-
-	if (typeof Ps !== 'undefined'){
-		Ps.initialize(document.getElementById('project_tree'), {suppressScrollX: true});
-	}
 };
 
 function projectNavCheck(){
@@ -177,7 +169,4 @@ function containerResizeY(window_height){
 		}
 
 	};
-
-	if (projectTree){ Ps.update(projectTree) }
-
 };

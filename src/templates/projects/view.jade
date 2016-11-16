@@ -244,11 +244,6 @@ script.
 
 	var projectTree = document.getElementById('project_tree');
 
-	/* Initialize project_tree scrollbar */
-	if ((typeof Ps !== 'undefined') && projectTree && window.innerWidth > 768){
-		Ps.initialize(projectTree, {suppressScrollX: true});
-	}
-
 	var urlNodeMove = "{{url_for('projects.move_node')}}";
 	var urlNodeFeature = "{{url_for('projects.add_featured_node')}}";
 	var urlNodeDelete = "{{url_for('projects.delete_node')}}";
@@ -564,18 +559,6 @@ script.
 				displayStorage(data.node.original.storage_node, data.node.original.path);
 				jstreeAPI.toggle_node(data.node);
 			}
-
-			/* Update scrollbar */
-			Ps.update(projectTree);
-		});
-
-		$(projectTree).on("open_node.jstree", function () {
-			/* Update scrollbar */
-			Ps.update(projectTree);
-		});
-		$(projectTree).on("close_node.jstree", function () {
-			/* Update scrollbar */
-			Ps.update(projectTree);
 		});
 	};
 
@@ -592,12 +575,6 @@ script.
 			project_container.style.height = (window.innerHeight - project_container.offsetTop) + "px";
 		}
 	});
-
-	if (projectTree){
-		$(projectTree).hover(function(){
-			Ps.update(projectTree);
-		});
-	}
 
 | {% endblock %}
 

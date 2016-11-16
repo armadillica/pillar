@@ -408,7 +408,6 @@ html(lang="en")
 			link(href='//fonts.googleapis.com/css?family=Roboto:300,400', rel='stylesheet', type='text/css')
 
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.bootstrap-3.3.7.min.js') }}")
-		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/perfect-scrollbar-0.6.14.min.js') }}")
 
 		script.
 			$(document).ready(function() {
@@ -417,10 +416,6 @@ html(lang="en")
 
 					// Resize #notifications and change overflow for scrollbars
 					$(window).on("resize", function() { notificationsResize(); });
-
-					// Load perfectScrollbar
-					Ps.initialize(document.getElementById('notifications'), {suppressScrollX: true});
-
 				{% endif %}
 			});
 
