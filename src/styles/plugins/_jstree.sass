@@ -1,8 +1,8 @@
 /* jsTree overrides */
 
-$tree-color-text: $color-text-dark
-$tree-color-highlight: hsl(hue($color-background-active), 50%, 50%)
-$tree-color-highlight-background: hsl(hue($color-background-active), 40%, 50%)
+$tree-color-text: $color-text-light-primary
+$tree-color-highlight: white
+$tree-color-highlight-background: hsl(hue($color-background-active), 40%, 40%)
 $tree-color-highlight-background-text: white
 
 .jstree-default
@@ -34,7 +34,6 @@ $tree-color-highlight-background-text: white
 
 		/* Items at top level */
 		&.jstree-leaf
-			// border-left: 2px solid lighten($color-background-nav, 15%)
 			.jstree-icon.jstree-themeicon
 				opacity: 1
 				width: 24px !important
@@ -62,11 +61,10 @@ $tree-color-highlight-background-text: white
 						font-size: .85em !important
 
 				.jstree-anchor
-					border-left: thin solid $color-text-dark-hint
+					border-left: thin solid rgba($tree-color-text, .2)
 
 		/* Closed Folder */
-		&.jstree-closed
-			// border-left: 2px solid lighten($color-background-nav, 20%)
+		// &.jstree-closed
 
 		&.jstree-open .jstree-icon.jstree-ocl,
 		&.jstree-closed .jstree-icon.jstree-ocl

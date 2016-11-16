@@ -1,3 +1,5 @@
+$project-sidebar-background: $color-background-nav
+
 #project-container
 	display: flex
 	flex-direction: row
@@ -164,7 +166,7 @@
 	visibility: visible
 	width: $project_nav-width
 	position: relative
-	background-color: $color-background-light
+	background-color: $project-sidebar-background
 
 	color: white
 	left: 0
@@ -738,9 +740,9 @@ ul.project_nav-edit-list
 /* The actual navigation tree container */
 #project_tree
 	padding: 5px 0 // some padding on top/bottom of jstree
-	position: relative // for scrollbar alignment
+	position: relative
 	margin-top: $project_header-height
-	background-color: $color-background-light
+	background-color: $project-sidebar-background
 	overflow-y: auto
 
 	&.edit
@@ -769,7 +771,7 @@ ul.project_nav-edit-list
 		right: 0
 		bottom: 0
 		width: 2px
-		background-color: $color-background
+		background-color: $color-background-nav-light
 
 /* Node Context */
 =project-node-title
