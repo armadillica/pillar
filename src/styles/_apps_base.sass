@@ -214,51 +214,51 @@ nav.sidebar
 	position: relative
 	margin-bottom: initial // overrides BS
 
-	.table-row
-		display: table-row
-		position: relative
-		background-attachment: fixed // for stripes to look nice
+.table-row
+	display: table-row
+	position: relative
+	background-attachment: fixed // for stripes to look nice
 
-	.table-head
-		display: table-header-group
-
-		.table-cell
-			font-size: .9em
-			color: $color-text-dark-secondary
-
-	.table-body
-		display: table-row-group
-
-		.table-row
-			&.active
-				background-color: $color-background-active
-				&:hover
-					background-color: lighten($color-background-active, 2%)
-
-				.table-cell
-					border-bottom-color: darken($color-background-active, 5%)
-					box-shadow: inset 0 1px darken($color-background-active, 5%)
-				.table-cell:last-child
-					box-shadow: inset -5px 0 0 darken($color-background-active, 10%), inset 0 1px darken($color-background-active, 5%)
+.table-head
+	display: table-header-group
 
 	.table-cell
-		display: table-cell
-		border-bottom: thin solid $color-background
-		vertical-align: middle
+		font-size: .9em
+		color: $color-text-dark-secondary
 
-		span.hint
-			color: $color-text-dark-hint
+.table-body
+	display: table-row-group
 
-	.table-cell-spacer
-		background-color: $color-background-light
-		width: 6px
-		min-width: 4px
-		height: 100%
-		display: table-cell
-		border: none
-		border-left: 2px solid $color-background-light
-		border-right: 2px solid $color-background
-		cursor: e-resize
+	.table-row
+		&.active
+			background-color: $color-background-active
+			&:hover
+				background-color: lighten($color-background-active, 2%)
+
+			.table-cell
+				border-bottom-color: darken($color-background-active, 5%)
+				box-shadow: inset 0 1px darken($color-background-active, 5%)
+			.table-cell:last-child
+				box-shadow: inset -5px 0 0 darken($color-background-active, 10%), inset 0 1px darken($color-background-active, 5%)
+
+.table-cell
+	display: table-cell
+	border-bottom: thin solid $color-background
+	vertical-align: middle
+
+	span.hint
+		color: $color-text-dark-hint
+
+.table-cell-spacer
+	background-color: $color-background-light
+	width: 6px
+	min-width: 4px
+	height: 100%
+	display: table-cell
+	border: none
+	border-left: 2px solid $color-background-light
+	border-right: 2px solid $color-background
+	cursor: e-resize
 
 .table.table-hover
 	.table-row:hover
