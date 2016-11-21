@@ -56,7 +56,6 @@ html5lib==0.9999999
 googleapis-common-protos==1.1.0
 ipaddress==1.0.16
 itsdangerous==0.24
-mock==2.0.0
 oauth2client==2.0.2
 pbr==1.9.1
 protobuf==3.0.0b2.post2
