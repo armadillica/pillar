@@ -31,7 +31,6 @@ $project-sidebar-background: $color-background-nav
 	position: fixed
 	z-index: $z-index-base + 5
 	width: $project_nav-width
-	overflow: hidden
 
 	+media-xs
 		display: block
@@ -213,7 +212,7 @@ $project-sidebar-background: $color-background-nav
 	width: 100%
 	background-color: $color-background-light
 	border-bottom: thin solid lighten($color-text-dark-hint, 10%)
-	box-shadow: 0 0 25px rgba(black, .2)
+	box-shadow: -15px 5px 25px rgba(black, .2)
 
 	/* Name of the project */
 	.project-title
@@ -712,6 +711,9 @@ ul.project_nav-edit-list
 		.project_split
 			background-color: $color-background-nav
 			cursor: e-resize
+			right: 0
+			left: 8px
+			width: 10px
 
 		#project_nav
 			width: 5px
@@ -755,23 +757,13 @@ ul.project_nav-edit-list
 	width: 15px
 	margin-left: -8px
 	top: 0
-	right: 0
+	right: -15px
 	bottom: 0
-	z-index: $z-index-base
 	cursor: w-resize
 	user-select: none
 
 	+media-xs
 		display: none
-
-	&:before
-		content: ' '
-		position: absolute
-		top: 0
-		right: 0
-		bottom: 0
-		width: 2px
-		background-color: $color-background-nav-light
 
 /* Node Context */
 =project-node-title
