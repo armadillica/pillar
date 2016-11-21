@@ -5,7 +5,7 @@
 | {% block page_title %}New {{ node_type.name }}{% endblock %}
 
 | {% block body %}
-.container.box
+.container
 	form(
 		method='POST',
 		action="{{url_for('nodes.posts_create', project_id=project._id)}}")
