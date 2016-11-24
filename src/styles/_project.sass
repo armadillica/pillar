@@ -1552,7 +1552,7 @@ a.learn-more
 				display: flex
 				flex-direction: column
 				list-style: none
-				padding: 10px 5px
+				padding: 5px
 				border-top: thin solid $color-background
 				cursor: pointer
 				width: 33.3333%
@@ -1572,17 +1572,17 @@ a.learn-more
 						color: $node-type-post
 					a.image
 						border-color: $node-type-post
-						background-color: $node-type-post
+						background-color: hsl(hue($node-type-post), 20%, 55%)
 
 				&.asset.image a.image
 					border-color: $node-type-asset_image
-					background-color: $node-type-asset_image
+					background-color: hsl(hue($node-type-asset_image), 20%, 55%)
 				&.asset.file a.image
 					border-color: $node-type-asset_file
-					background-color: $node-type-asset_file
+					background-color: hsl(hue($node-type-asset_file), 20%, 55%)
 				&.asset.video a.image
 					border-color: $node-type-asset_video
-					background-color: $node-type-asset_video
+					background-color: hsl(hue($node-type-asset_video), 20%, 55%)
 
 				$node-latest-thumbnail-size: 160px
 				.image
@@ -1604,9 +1604,19 @@ a.learn-more
 						+position-center-translate
 
 					i
-						color: $color-text-dark-hint
-						font-size: 3em
-						+position-center-translate
+						color: rgba(white, .9)
+						font-size: 1.8em
+						position: absolute
+						bottom: 3px
+						left: 5px
+						text-shadow: 1px 1px 0 rgba(black, .2)
+
+						&.pi-file-archive
+							font-size: 1.5em
+							bottom: 5px
+						&.pi-newspaper
+							font-size: 1.6em
+							left: 7px
 
 				.info
 					width: 100%
@@ -1614,17 +1624,19 @@ a.learn-more
 					display: flex
 					flex-direction: column
 					justify-content: space-between
+					word-break: break-word
 
 					.description
 						font-size: .9em
 						padding-top: 5px
+						color: $color-text-dark-primary
 
 					.title
 						display: block
-						word-break: break-word
-						font-size: 1.1em
-						color: $color-text-dark-primary
+						font-size: 1em
+						color: $color-text-dark
 						+clearfix
+						+text-overflow-ellipsis
 
 					span.details
 						width: 100%
@@ -2145,7 +2157,7 @@ section.node-children
 
 		.item-info
 			position: relative
-			padding: 15px 20px 25px 20px
+			padding: 15px 20px 30px 20px
 
 			a.item-title
 				display: inline-block
@@ -2164,11 +2176,12 @@ section.node-children
 
 		a.learn-more
 			position: absolute
-			padding: 15px 20px
+			padding: 3px 20px
 			bottom: 0
 			right: 0
 			visibility: hidden
-			font-size: .9em
+			font-size: .8em
+			margin: 10px
 		&:hover
 			a.learn-more
 				visibility: visible
