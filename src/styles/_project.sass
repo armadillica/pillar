@@ -1523,6 +1523,12 @@ section.node-details-container
 	color: $color-danger
 	clear: both
 
+a.learn-more
+	font-size: .9em
+	margin-left: 20px
+	padding: 5px 10px
+	+button($color-info, 3px)
+
 .node-extra
 	display: flex
 	flex-direction: column
@@ -1530,13 +1536,10 @@ section.node-details-container
 	padding: 0 20px
 	width: 100%
 
-	a.learn-more
-		font-size: .9em
-
-	.node-updates,
-	.node-blog
+	.node-updates
 		flex: 1
 		font-size: 1.1em
+		margin-top: 15px
 
 		ul
 			padding: 0
@@ -1554,12 +1557,32 @@ section.node-details-container
 				cursor: pointer
 				width: 33.3333%
 
+				&.texture
+					width: 25%
+
 				&:hover
 					img
 						opacity: .9
 					a.title
 						color: $color-primary
 						text-decoration: underline
+
+				&.post
+					.info .title
+						color: $node-type-post
+					a.image
+						border-color: $node-type-post
+						background-color: $node-type-post
+
+				&.asset.image a.image
+					border-color: $node-type-asset_image
+					background-color: $node-type-asset_image
+				&.asset.file a.image
+					border-color: $node-type-asset_file
+					background-color: $node-type-asset_file
+				&.asset.video a.image
+					border-color: $node-type-asset_video
+					background-color: $node-type-asset_video
 
 				$node-latest-thumbnail-size: 160px
 				.image
@@ -1571,6 +1594,9 @@ section.node-details-container
 					margin: 5px auto 10px auto
 					position: relative
 					overflow: hidden
+					border-bottom: 3px solid $color-background-dark
+					border-top-left-radius: 3px
+					border-top-right-radius: 3px
 
 					img
 						// max-width: 100%
@@ -1593,6 +1619,7 @@ section.node-details-container
 						display: block
 						word-break: break-word
 						font-size: 1.1em
+						color: $color-text-dark-primary
 						+clearfix
 
 					span.details

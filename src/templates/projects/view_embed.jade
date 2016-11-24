@@ -64,8 +64,7 @@ script.
 			| {{ description }}
 
 		| {% if title != 'about' %}
-		.node-extra
-			a.learn-more(href="{{ url_for( 'projects.about', project_url=project.url) }}") LEARN MORE
+		a.learn-more(href="{{ url_for( 'projects.about', project_url=project.url) }}") LEARN MORE
 
 		.node-extra
 
@@ -74,19 +73,24 @@ script.
 				ul.node-updates-list
 					| {% for n in activity_stream %}
 					| {% if n.node_type not in ['comment'] %}
-					li.node-updates-list-item(data-node_id="{{ n._id }}")
+					li.node-updates-list-item(
+						data-node_id="{{ n._id }}",
+						class="{{ n.node_type }} {{ n.properties.content_type | hide_none }}")
 						a.image(href="{{ url_for_node(node=n) }}")
 							| {% if n.picture %}
 							img(src="{{ n.picture.thumbnail('l', api=api) }}")
 							| {% else %}
-							| {% if n.properties.content_type == 'video' %}
+
+							| {% if n.node_type == 'post' %}
+							i.pi-newspaper
+							| {% elif n.node_type == 'texture' or n.node_type == 'group_texture' %}
+							i.pi-texture
+							| {% elif n.properties.content_type == 'video' %}
 							i.pi-film-thick
 							| {% elif n.properties.content_type == 'image' %}
 							i.pi-picture
 							| {% elif n.properties.content_type == 'file' %}
 							i.pi-file-archive
-							| {% elif n.node_type == 'texture' or n.node_type == 'group_texture' %}
-							i.pi-texture
 							| {% else %}
 							i.pi-folder
 							| {% endif %}
