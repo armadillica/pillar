@@ -50,7 +50,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 				li.tabs-thumbnail(
 					title="About",
 					data-toggle="tooltip",
-					data-placement="left",
+					data-placement="right",
 					class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
 					a(href="{{url_for('projects.about', project_url=project.url, _external=True)}}")
 						#project-loading
@@ -64,14 +64,14 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 				li.tabs-blog(
 					title="Blog",
 					data-toggle="tooltip",
-					data-placement="left")
+					data-placement="right")
 					a(href="{{url_for('main.project_blog', project_url=project.url)}}")
 						i.pi-newspaper
 				| {% endif %}
 				li.tabs-browse(
 					title="Browse",
 					data-toggle="tooltip",
-					data-placement="left",
+					data-placement="right",
 					class="{% if title != 'about' %}active{% endif %}")
 					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 						i.pi-tree-flow
@@ -79,7 +79,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 				li.tabs-search(
 					title="Search",
 					data-toggle="tooltip",
-					data-placement="left")
+					data-placement="right")
 					a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
 						i.pi-search
 				| {% endif %}
@@ -153,7 +153,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 						li.button-toggle-public
 							a#item_toggle_public(
 								href="javascript:void(0);",
-								title="Toggle public",
+								title="Make it accessible to anyone",
 								data-toggle="tooltip",
 								data-placement="left")
 								i.pi-lock-open
@@ -181,7 +181,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 						li.button-delete
 							a#item_delete(
 								href="javascript:void(0);",
-								title="Delete",
+								title="Delete (Warning: no undo)",
 								data-toggle="tooltip",
 								data-placement="left")
 								i.pi-trash
