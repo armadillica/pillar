@@ -1,5 +1,6 @@
 import json
 import logging
+import itertools
 
 from pillarsdk import Node
 from pillarsdk import Project
@@ -278,9 +279,16 @@ def render_project(project, api, extra_context=None, template_name=None):
 
         return list_latest
 
-    project.nodes_latest = load_latest(project.nodes_latest, get_picture=True)
-    project.nodes_featured = load_latest(project.nodes_featured, get_picture=True)
-    project.nodes_blog = load_latest(project.nodes_blog, get_picture=True)
+    project.nodes_featured = load_latest(project.nodes_featured)
+    project.nodes_blog = load_latest(project.nodes_blog)
+
+    # Merge featured assets and blog posts into one activity stream
+    def sort_key(item):
+        return item._created
+
+    activities = itertools.chain(project.nodes_featured,
+                                 project.nodes_blog)
+    activity_stream = sorted(activities, key=sort_key, reverse=True)
 
     if extra_context is None:
         extra_context = {}
@@ -310,6 +318,7 @@ def render_project(project, api, extra_context=None, template_name=None):
                            show_node=False,
                            show_project=True,
                            og_picture=project.picture_header,
+                           activity_stream=activity_stream,
                            extension_sidebar_links=extension_sidebar_links,
                            **extra_context)
 
