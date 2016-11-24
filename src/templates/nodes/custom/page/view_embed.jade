@@ -21,15 +21,7 @@
 		| {% endif %}
 
 		.node-details-meta.footer
-			ul.node-details-meta-list
-				li.node-details-meta-list-item.author
-					| {{ node.user.full_name }}
-
-				li.node-details-meta-list-item.date(title="Created {{ node._created }}")
-					| {{ node._created | pretty_date }}
-					| {% if (node._created | pretty_date) != (node._updated | pretty_date) %}
-					span(title="Updated {{ node._updated }}") (updated {{ node._updated | pretty_date }})
-					| {% endif %}
+			span.updated(title="created {{ node._created | pretty_date }}") updated {{ node._updated | pretty_date }}
 
 include ../_scripts
 
