@@ -1,8 +1,8 @@
 /* jsTree overrides */
 
 $tree-color-text: $color-text-dark-primary
-$tree-color-highlight: hsl(hue($color-background-active), 40%, 40%)
-$tree-color-highlight-background: hsl(hue($color-background-active), 40%, 40%)
+$tree-color-highlight: hsl(hue($color-background-active), 40%, 50%)
+$tree-color-highlight-background: hsl(hue($color-background-active), 40%, 50%)
 $tree-color-highlight-background-text: white
 
 .jstree-default
@@ -20,8 +20,11 @@ $tree-color-highlight-background-text: white
 		+media-xs
 			width: 100%
 
-		&[data-node-type="page"]
-			font-weight: bold
+		&[data-node-type="page"],
+		&[data-node-type="blog"]
+			font-size: 1.15em
+			color: darken($tree-color-highlight, 5%)
+			border-bottom: 2px solid $tree-color-highlight
 
 			.jstree-anchor
 				padding: 3px 8px
