@@ -20,14 +20,14 @@ $node-type-post: #647bce
 	section#main
 		+container-box
 		margin: 20px auto
-		width: 64%
+		width: 52%
 
 		+media-xs
 			width: 100%
 			border-radius: 0
 
 	section#side
-		width: 33%
+		width: 46%
 		flex-direction: column
 		margin-right: auto
 
@@ -158,7 +158,7 @@ $node-type-post: #647bce
 		h3
 			padding:
 				top: 25px
-				left: 20px
+				left: 15px
 				bottom: 0
 			span
 				padding-left: 5px
@@ -170,21 +170,20 @@ $node-type-post: #647bce
 			list-style: none
 
 			li.activity-stream__list-item
+				position: relative
 				display: flex
-				align-items: center
 				margin: 0 10px 10px
-				+clearfix
+				background-color: white
+				border-radius: 3px
+				box-shadow: 0 0 0 1px rgba(black, .05), 0 2px 5px rgba(black, .1)
+
+				&.post .activity-stream__list-details .title
+					color: darken($node-type-post, 15%)
 
 				&:hover
 					.title
 						text-decoration: underline
-
-				&.asset
-					.activity-stream__list-details
-						.title
-							font-size: 1.2em
-
-					&.video .activity-stream__list-details
+					&.video
 						border-color: $node-type-asset_video
 						a.image
 							&:hover
@@ -204,18 +203,38 @@ $node-type-post: #647bce
 								font-size: 3em
 								transition: font-size 100ms ease-in-out
 
-					&.image .activity-stream__list-details
+					&.image
 						border-color: $node-type-asset_image
-					&.file .activity-stream__list-details
+
+					&.file
 						border-color: $node-type-asset_file
 
 				&.comment
-					.activity-stream__list-details
+					.activity-stream__list-thumbnail
+						background: transparent
 						border-color: $node-type-comment
+						width: 35px
+						height: auto
+						min-width: 35px
+						min-height: auto
+						color: $node-type-comment
+						font-size: 1.4em
+
+						i
+							position: absolute
+							left: 21px
+							top: 18px
+
+					.activity-stream__list-details
 						.title
 							color: $color-text-dark
-							padding: 10px 15px 5px 15px
-							width: 100%
+							padding: 5px 10px 2px 10px
+							font-size: 1em
+							margin: 0
+
+						ul.meta
+							padding: 0 10px 5px 10px
+							margin: 0
 
 						li.where-parent:before
 							content: '\e83a'
@@ -227,28 +246,22 @@ $node-type-post: #647bce
 								content: ''
 
 				&.post
-					.activity-stream__list-thumbnail
-						color: $node-type-post
-					.activity-stream__list-details
-						border-color: $node-type-post
+					border-right: 2px solid $node-type-post
 
-						.title
-							color: $color-text-dark-primary
-							max-width: 80%
-							padding-bottom: 5px
-							font:
-								size: 1.2em
-								weight: 500
+					.activity-stream__list-thumbnail
+						border-color: $node-type-post
+						background-color: $node-type-post
+					.activity-stream__list-details .title
+						font:
+							size: 1.3em
+							weight: 500
 
 				&.asset, &.comment, &.post
 					&:hover
 						cursor: pointer
 
 					&.active
-						.activity-stream__list-details
-							border-color: $color-primary
-						.spin
-							animation-duration: 5s
+						border-color: $color-primary
 
 				&.empty
 					display: none
@@ -261,48 +274,49 @@ $node-type-post: #647bce
 							text-decoration: underline
 							cursor: pointer
 
+				$activity-stream-thumbnail-size: 75px
 				.activity-stream__list-thumbnail
+					position: relative
 					display: flex
-					align-self: flex-start
 					justify-content: center
-					font-size: 1.4em
-					width: 30px
-					height: 30px
-					min-width: 30px
-					min-height: 30px
-					color: $node-type-comment
+					align-items: center
+					overflow: hidden
+					width: $activity-stream-thumbnail-size * 1.69
+					min-width: $activity-stream-thumbnail-size * 1.69
+					min-height: $activity-stream-thumbnail-size
+					font-size: 1.8em
+					color: rgba(white, .5)
+					background-color: $color-background-light
+					border-top-left-radius: 3px
+					border-bottom-left-radius: 3px
 
 					+media-xs
 						display: none
 
 					&.image
-						color: $node-type-asset_image
+						background-color: $node-type-asset_image
 					&.file
-						color: $node-type-asset_file
-						font-size: 1.1em
+						background-color: $node-type-asset_file
 					&.video
-						color: $node-type-asset_video
+						background-color: $node-type-asset_video
 						i.pi-film-thick
 							font-size: .8em
 
 					i
-						position: relative
-
-					img.thumbnail
-						width: 100%
+						+position-center-translate
+					img
+						max-height: $activity-stream-thumbnail-size
 						+position-center-translate
 
 				.activity-stream__list-details
+					display: flex
+					flex-direction: column
+					justify-content: center
 					flex: 1
 					overflow: hidden
 					position: relative
 					max-width: 100%
-					background-color: white
-					margin-left: 5px
 					margin-right: auto
-					border-radius: 3px
-					border-left: 2px solid $color-background
-					box-shadow: 0 0 1px 1px rgba(black, .1), 0 2px 5px rgba(black, .05)
 
 					+media-xs
 						margin-left: 0
@@ -320,8 +334,9 @@ $node-type-post: #647bce
 
 					.title
 						display: inline-block
-						padding: 10px 15px
+						padding: 5px 15px
 						color: $color-text-dark
+						font-size: 1.1em
 
 						span
 							@include badge(hsl(hue($color-success), 60%, 45%), 3px)
@@ -329,41 +344,24 @@ $node-type-post: #647bce
 							padding: 1px 5px
 							margin-right: 5px
 
-					.date
-						display: inline-block
-						float: right
-						color: $color-text-dark-secondary
-						padding: 15px
-						font-size: .9em
-
-					.date+.ribbon
-						box-shadow: 0 0 15px 5px white
-
-					.image
-						display: block
-						position: relative
-						text-align: center
-						background-color: $color-background
-
-						img
-							max-width: 100%
-							display: inline-block
-							margin: 0 auto
-							border-top-left-radius: 3px
-							border-top-right-radius: 3px
-
 					ul.meta
 						+list-meta
-						padding: 0 10px 5px 15px
+						padding: 0 10px 7px 15px
 						font-size: .85em
 						color: $color-text-dark-secondary
+						display: flex
+						white-space: nowrap
 
 						li
 							padding-left: 10px
 							&:before
 								left: -5px
-							&.what
-								text-transform: capitalize
+							&.where-project
+								+text-overflow-ellipsis
+							&.when
+								margin-left: auto
+								&:before
+									display: none
 
 		ul#activity-stream__filters
 			margin: 0
@@ -412,112 +410,6 @@ $node-type-post: #647bce
 
 				&.clear:hover
 					color: $color-danger
-
-
-	section#blog-stream
-		position: relative
-
-		.feed
-			position: absolute
-			top: 10px
-			right: 10px
-			font-size: 1.4em
-			color: lighten($color-text-dark-hint, 10%)
-
-			&:hover
-				color: $color-primary
-
-		ul#blog-stream__list
-			background-color: $color-background-light
-			margin: 0
-			padding: 0
-			list-style: none
-			border:
-				top: thin solid $color-background
-				bottom-left-radius: 3px
-				bottom-right-radius: 3px
-
-			.blog-stream__list-item
-				display: flex
-				padding: 7px 15px
-				border-top: thin solid $color-background
-
-				&:first-child
-					border-top: none
-				&:last-child
-					border:
-						bottom-left-radius: 3px
-						bottom-right-radius: 3px
-
-				&.more
-					font-size: .9em
-					a
-						width: 100%
-						text-align: right
-						color: $color-text-dark-secondary
-						&:hover
-							color: $color-primary
-
-				.blog-stream__list-thumbnail
-					display: block
-					position: relative
-					width: 50px
-					min-width: 50px
-					height: 50px
-					min-height: 50px
-					margin-right: 15px
-					background-color: $node-type-post
-					border-radius: 50%
-					overflow: hidden
-
-					img
-						width: 100%
-
-					i
-						+position-center-translate
-						font-size: 1.6em
-						color: $color-text-light-primary
-
-				.blog-stream__list-details
-					.title
-						display: block
-						color: $color-text-dark-primary
-						&:hover
-							color: $color-primary
-
-					ul.meta
-						+list-meta
-						padding-top: 5px
-						font-size: .9em
-						color: $color-text-dark-secondary
-
-						li
-							padding-left: 10px
-							&:before
-								left: -5px
-
-				&.featured
-					flex-direction: column
-					padding: 0
-
-					a.title
-						font-size: 1.1em
-						padding: 10px 0 0 15px
-						display: block
-						color: $color-text-dark-primary
-						&:hover
-							color: $color-primary
-
-					a.blog-stream__thumbnail
-						display: block
-						position: relative
-						img
-							width: 100%
-
-					ul.meta
-						+list-meta
-						padding: 5px 15px 10px 15px
-						font-size: .9em
 
 
 	section.announcement
