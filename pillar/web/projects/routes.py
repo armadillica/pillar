@@ -251,7 +251,7 @@ def render_project(project, api, extra_context=None, template_name=None):
     project.picture_square = utils.get_file(project.picture_square, api=api)
     project.picture_header = utils.get_file(project.picture_header, api=api)
 
-    def load_latest(list_of_ids, get_picture=False):
+    def load_latest(list_of_ids):
         """Loads a list of IDs in reversed order."""
 
         if not list_of_ids:
@@ -259,10 +259,9 @@ def render_project(project, api, extra_context=None, template_name=None):
 
         # Construct query parameters outside the loop.
         projection = {'name': 1, 'user': 1, 'node_type': 1, 'project': 1,
-                      'properties.url': 1, 'properties.content_type': 1}
+                      'properties.url': 1, 'properties.content_type': 1,
+                      'picture': 1}
         params = {'projection': projection, 'embedded': {'user': 1}}
-        if get_picture:
-            projection['picture'] = 1
 
         list_latest = []
         for node_id in reversed(list_of_ids or ()):
