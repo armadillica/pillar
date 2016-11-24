@@ -1,4 +1,4 @@
-$project-sidebar-background: $color-background
+$project-sidebar-background: lighten($color-background, 5%)
 
 #project-container
 	display: flex
@@ -46,7 +46,7 @@ $project-sidebar-background: $color-background
 		width: 100%
 
 	ul.project-tabs
-		background-color: $color-background-nav-dark
+		background-color: $color-background-nav
 		margin: 0
 		padding: 0
 		list-style: none
@@ -70,7 +70,7 @@ $project-sidebar-background: $color-background
 			height: $project-sidebar-width
 			position: relative
 			color: white
-			background-color: $color-background-nav-dark
+			background-color: $color-background-nav
 			border-left: 2px solid transparent
 			transition: all 100ms ease-in-out
 
@@ -111,7 +111,7 @@ $project-sidebar-background: $color-background
 				font-size: 1.1em
 
 			&.active
-				background-color: $color-background-nav
+				background-color: $color-background-nav-light
 
 				+media-xs
 					border-bottom: 2px solid $color-primary
@@ -740,10 +740,11 @@ ul.project_nav-edit-list
 
 /* The actual navigation tree container */
 #project_tree
-	padding: 5px 0 // some padding on top/bottom of jstree
+	padding: 0 0 5px 0// some padding on top/bottom of jstree
 	position: relative
 	margin-top: $project_header-height
 	background-color: $project-sidebar-background
+	border-right: thin solid $color-background
 	overflow-y: auto
 
 	&.edit
@@ -1180,6 +1181,11 @@ section.node-preview.group
 		font-weight: 400
 		padding: 15px 20px 25px 20px
 
+		span.updated
+			color: $color-text-dark-hint
+			font-size: .8em
+			float: right
+
 		&.preview
 			padding: 0
 			color: $color-text-light-primary
@@ -1523,7 +1529,6 @@ section.node-details-container
 
 	padding: 0 20px
 	width: 100%
-	max-width: 840px
 
 	a.learn-more
 		font-size: .9em
@@ -1547,7 +1552,7 @@ section.node-details-container
 				padding: 10px 5px
 				border-top: thin solid $color-background
 				cursor: pointer
-				width: 25%
+				width: 33.3333%
 
 				&:hover
 					img
@@ -1556,19 +1561,20 @@ section.node-details-container
 						color: $color-primary
 						text-decoration: underline
 
+				$node-latest-thumbnail-size: 160px
 				.image
 					width: 100%
-					height: 90px
-					min-height: 90px
-					max-height: 90px
-					height: auto
+					height: $node-latest-thumbnail-size
+					min-height: $node-latest-thumbnail-size
+					max-height: $node-latest-thumbnail-size
 					background-color: $color-background
 					margin: 5px auto 10px auto
 					position: relative
 					overflow: hidden
-					border-radius: 3px
 
 					img
+						// max-width: 100%
+						max-height: $node-latest-thumbnail-size
 						+position-center-translate
 
 					i
@@ -1586,6 +1592,7 @@ section.node-details-container
 					.title
 						display: block
 						word-break: break-word
+						font-size: 1.1em
 						+clearfix
 
 					span.details
@@ -1720,14 +1727,14 @@ section.node-children
 	/* Browse group as list */
 	&.browse-list
 		display: none
-		width: 50%
+		width: 99%
 		position: relative
 		background-color: initial
 		box-shadow: none
 		border: thin solid transparent
 		border-top-color: darken(white, 8%)
 
-		margin: 0
+		margin: 0 10px 0 0
 		padding:
 			top: 7px
 			bottom: 7px
