@@ -1,10 +1,3 @@
-if(typeof($.fn.popover) != 'undefined'){
-	$('[data-toggle="popover"]').popover();
-}
-if(typeof($.fn.tooltip) != 'undefined'){
-	$('[data-toggle="tooltip"]').tooltip({'delay' : {'show': 0, 'hide': 0}});
-}
-
 /* Status Bar */
 function statusBarClear(delay_class, delay_html){
 	var statusBar = $("#status-bar");
