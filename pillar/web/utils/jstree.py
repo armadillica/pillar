@@ -44,7 +44,7 @@ def jstree_get_children(node_id, project_id=None):
         'where': {
             '$and': [
                 {'node_type': {'$regex': '^(?!attract_)'}},
-                {'node_type': {'$not': {'$in': ['comment', 'post', 'blog']}}},
+                {'node_type': {'$not': {'$in': ['comment', 'post']}}},
             ],
         }
     }
