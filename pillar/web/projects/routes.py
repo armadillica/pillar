@@ -728,7 +728,7 @@ def project_update_nodes_list(node, project_id=None, list_name='latest'):
             node_list_name = 'nodes_' + list_name
             project[node_list_name] = []
             nodes_list = project[node_list_name]
-        elif len(nodes_list) > 5:
+        elif len(nodes_list) > 10:
             nodes_list.pop(0)
 
         if node._id in nodes_list:
