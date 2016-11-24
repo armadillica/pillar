@@ -97,6 +97,12 @@ script.
 							| {% endif %}
 						.info
 							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
+							p.description(href="{{ url_for_node(node=n) }}")
+								| {% if n.node_type == 'post' %}
+								| {{ n.properties.content | striptags | truncate(125, end="... <small>read more</small>") | safe | hide_none }}
+								| {% else %}
+								| {{ n.description | striptags | truncate(125, end="... <small>read more</small>") | hide_none }}
+								| {% endif %}
 							span.details
 								span.what {% if n.properties.content_type %}{{ n.properties.content_type | undertitle }}{% else %}{{ n.node_type | undertitle }}{% endif %} ·
 								span.when  {{ n._updated | pretty_date }} by

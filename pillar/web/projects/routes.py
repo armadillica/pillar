@@ -251,7 +251,7 @@ def render_project(project, api, extra_context=None, template_name=None):
     project.picture_square = utils.get_file(project.picture_square, api=api)
     project.picture_header = utils.get_file(project.picture_header, api=api)
 
-    def load_latest(list_of_ids):
+    def load_latest(list_of_ids, node_type=None):
         """Loads a list of IDs in reversed order."""
 
         if not list_of_ids:
@@ -262,6 +262,11 @@ def render_project(project, api, extra_context=None, template_name=None):
                       'properties.url': 1, 'properties.content_type': 1,
                       'picture': 1}
         params = {'projection': projection, 'embedded': {'user': 1}}
+
+        if node_type == 'post':
+            projection['properties.content'] = 1
+        elif node_type == 'asset':
+            projection['description'] = 1
 
         list_latest = []
         for node_id in reversed(list_of_ids or ()):
@@ -278,8 +283,8 @@ def render_project(project, api, extra_context=None, template_name=None):
 
         return list_latest
 
-    project.nodes_featured = load_latest(project.nodes_featured)
-    project.nodes_blog = load_latest(project.nodes_blog)
+    project.nodes_featured = load_latest(project.nodes_featured, node_type='asset')
+    project.nodes_blog = load_latest(project.nodes_blog, node_type='post')
 
     # Merge featured assets and blog posts into one activity stream
     def sort_key(item):
