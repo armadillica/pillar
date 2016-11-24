@@ -5,29 +5,6 @@ if(typeof($.fn.tooltip) != 'undefined'){
 	$('[data-toggle="tooltip"]').tooltip({'delay' : {'show': 0, 'hide': 0}});
 }
 
-function NavbarTransparent() {
-
-	var startingpoint = 15;
-
-	$(window).on("load scroll", function () {
-
-		if ($(this).scrollTop() > startingpoint) {
-			$('.navbar-overlay, .navbar-transparent').addClass('is-active');
-			if(document.getElementById("project_context-header") !== null) {
-				$('#project_context-header').addClass('is-offset');
-			}
-		} else {
-			$('.navbar-overlay, .navbar-transparent').removeClass('is-active');
-			if(document.getElementById("project_context-header") !== null) {
-				$('#project_context-header').removeClass('is-offset');
-			}
-		};
-	});
-};
-
-NavbarTransparent();
-
-
 /* Status Bar */
 function statusBarClear(delay_class, delay_html){
 	var statusBar = $("#status-bar");
