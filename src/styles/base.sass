@@ -170,7 +170,6 @@ header.navbar-header
 	z-index: 0
 	width: 100%
 	height: 100%
-	background-color: rgba($color-background-nav,0)
 
 	transition: background-color 350ms ease-in-out
 
@@ -180,13 +179,8 @@ header.navbar-header
 			border-radius: 3px
 			border: thin solid transparent
 
-			+media-sm
-				background-color: darken($color-background-nav, 6%)
-			+media-md
-				background-color: darken($color-background-nav, 6%)
 			+media-lg
 				border: thin solid rgba(white, .2)
-				background-color: transparent
 
 				#cloud-search, .tt-hint
 					&::placeholder
@@ -214,15 +208,6 @@ header.navbar-header
 	+media-lg
 		display: block
 
-.navbar-transparent
-	a
-		height: 75px
-		transition: height 150ms ease-in-out
-
-	&.is-active a
-		height: 50px
-		text-shadow: none
-
 .navbar-container
 	+container-behavior
 
@@ -249,20 +234,13 @@ header.navbar-header
 						padding: 0 10px
 
 
-.navbar-transparent, nav.sidebar
+nav.navbar, nav.sidebar
 	z-index: $z-index-base + 5 /* Flowplayer seems to take up to 11, project container is 12 */
 	border: none
 	border-width: 0
 	display: flex
 	align-items: center
 	background-color: $color-background-nav
-
-	+media-lg
-		background:
-			color: transparent
-			repeat: repeat-x
-			size: 100% 100% // 'contain' gives a black-line appearing for a few seconds in webkit when scrolling
-		background: linear-gradient(to bottom, rgba(darken($color-background-nav, 10%), .8) 0%, transparent 100%)
 
 	nav
 		margin-left: auto
@@ -1028,7 +1006,6 @@ textarea
 	float: left
 	padding: 0
 	margin: 0
-	transition: background-color 350ms ease-in-out
 
 	+media-lg
 		max-width: 350px
