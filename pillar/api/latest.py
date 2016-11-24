@@ -102,7 +102,7 @@ def latest_comments():
                            'properties.content': 1, 'node_type': 1,
                            'properties.status': 1,
                            'properties.is_reply': 1},
-                          has_public_project, 6)
+                          has_public_project, 10)
 
     # Embed the comments' parents.
     nodes = current_app.data.driver.db['nodes']
