@@ -285,13 +285,8 @@ script.
 
 	/* Click on the whole asset/comment row to go */
 	$('li.activity-stream__list-item.asset, li.activity-stream__list-item.comment').click(function(e){
-
 		window.location.href = $(this).data('url');
-
 		$(this).addClass('active');
-		$(this).find('.activity-stream__list-thumbnail i')
-			.removeAttr('class')
-			.addClass('pi-spin spin');
 	});
 
 	hopToTop(); // Display jump to top button

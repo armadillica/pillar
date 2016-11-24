@@ -177,8 +177,8 @@ $node-type-post: #647bce
 				border-radius: 3px
 				box-shadow: 0 0 0 1px rgba(black, .05), 0 2px 5px rgba(black, .1)
 
-				&.post .activity-stream__list-details .title
-					color: darken($node-type-post, 15%)
+				&.active .activity-stream__list-details .title
+					color: $color-primary
 
 				&:hover
 					.title
@@ -218,12 +218,12 @@ $node-type-post: #647bce
 						min-width: 35px
 						min-height: auto
 						color: $node-type-comment
-						font-size: 1.4em
+						font-size: 1.25em
 
 						i
 							position: absolute
-							left: 21px
-							top: 18px
+							left: 22px
+							top: 17px
 
 					.activity-stream__list-details
 						.title
@@ -246,12 +246,11 @@ $node-type-post: #647bce
 								content: ''
 
 				&.post
-					border-right: 2px solid $node-type-post
-
 					.activity-stream__list-thumbnail
 						border-color: $node-type-post
 						background-color: $node-type-post
 					.activity-stream__list-details .title
+						color: darken($node-type-post, 15%)
 						font:
 							size: 1.3em
 							weight: 500
@@ -259,10 +258,6 @@ $node-type-post: #647bce
 				&.asset, &.comment, &.post
 					&:hover
 						cursor: pointer
-
-					&.active
-						border-color: $color-primary
-
 				&.empty
 					display: none
 					color: $color-text-dark-primary
