@@ -137,7 +137,7 @@ script.
 	$(function() {
 		montage();
 
-		$(".node-updates-list-item")
+		$(".node-updates-list-item.asset, .node-updates-list-item.group")
 				.unbind('click')
 				.click(function(e) {
 			e.preventDefault();
