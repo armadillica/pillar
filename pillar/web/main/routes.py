@@ -90,8 +90,7 @@ def homepage():
     def sort_key(item):
         return item._created
 
-    activities = itertools.chain(latest_posts._items,
-                                 latest_assets._items,
+    activities = itertools.chain(latest_assets._items,
                                  latest_comments._items)
     activity_stream = sorted(activities, key=sort_key, reverse=True)
 
