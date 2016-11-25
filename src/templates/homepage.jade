@@ -39,10 +39,6 @@ meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_
 					data-filter='file',
 					title="List files")
 					i.pi-file-archive
-				li.filter.active(
-					data-filter='post',
-					title="List blog posts")
-					i.pi-newspaper
 				li.filter(
 					data-filter='comment',
 					title="List comments")
@@ -132,6 +128,64 @@ meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_
 					a.btn.btn-default.btn-outline.blue(
 						href="https://cloud.blender.org/p/agent-327/")
 						| Learn More
+
+		section#blog-stream
+			a.feed(
+				href="{{ url_for('main.feeds_blogs') }}",
+				title="Blender Cloud & Projects Blog Feed",
+				data-toggle="tooltip",
+				data-placement="left")
+				i.pi-rss
+
+			h3
+				a(href="{{ url_for('main.main_blog') }}") Blog
+
+			ul#blog-stream__list
+				| {% if latest_posts %}
+				| {% for n in latest_posts %}
+				| {% if n.picture and loop.first %}
+				li.blog-stream__list-item.featured
+					a.blog-stream__thumbnail(
+						href="{{ url_for_node(node=n) }}")
+						img(src="{{ n.picture.thumbnail('l', api=api) }}")
+					a.title(href="{{ url_for_node(node=n) }}")
+						| {{ n.name }}
+
+					ul.meta
+						li.when
+							a(href="{{ url_for_node(node=n) }}",
+								title="Updated {{ n._updated | pretty_date }}")
+								| {{ n._created | pretty_date }}
+						li.where-project
+							a.project(href="{{ url_for('projects.view', project_url=n.project.url) }}") {{ n.project.name }}
+				| {% else %}
+				li.blog-stream__list-item
+					a.blog-stream__list-thumbnail(href="{{ url_for_node(node=n) }}")
+						| {% if n.picture %}
+						img.image(src="{{ n.picture.thumbnail('s', api=api) }}")
+						| {% else %}
+						i.pi-newspaper
+						| {% endif %}
+					.blog-stream__list-details
+						a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
+						ul.meta
+							li.when
+								a(href="{{ url_for_node(node=n) }}",
+									title="Updated {{ n._updated | pretty_date }}")
+									| {{ n._created | pretty_date }}
+							li.where-project
+								a.project(href="{{ url_for('projects.view', project_url=n.project.url) }}") {{ n.project.name }}
+				| {% endif %}
+				| {% endfor %}
+				| {% else %}
+				li.blog-stream__list-item
+					.blog-stream__list-details
+						ul.meta
+							li.when No updates yet
+				| {% endif %}
+				li.blog-stream__list-item.more
+					a(href="{{ url_for('main.main_blog') }}") See All Blog Posts
+
 
 		section#random-asset
 			h3
