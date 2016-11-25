@@ -59,6 +59,8 @@ def jstree_get_children(node_id, project_id=None):
     try:
         children = Node.all(lookup, api=api)
         for child in children['_items']:
+            # TODO: allow nodes that don't have a status property to be visible
+            # in the node tree (for example blog)
             is_pub = child.properties.status == 'published'
             if is_pub or (current_user.is_authenticated and child.user == current_user.objectid):
                 children_list.append(jstree_parse_node(child))
