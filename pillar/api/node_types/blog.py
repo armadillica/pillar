@@ -6,7 +6,7 @@ node_type_blog = {
         'template': {
             'type': 'string',
         },
-        'categories' : {
+        'categories': {
             'type': 'list',
             'schema': {
                 'type': 'string'
