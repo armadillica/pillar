@@ -1684,6 +1684,24 @@ section.node-children
 			.list-node-children-item-name
 				bottom: 26px
 
+	&.group_hdri, &.hdri
+		width: 300px
+
+		.list-node-children-item.hdri,
+		.list-node-children-item.group_hdri
+			height: $list-node-children-item-width
+			width: 300px
+			margin-top: 5px
+			.list-node-children-item-thumbnail
+				width: 300px
+				.list-node-children-item-thumbnail-icon i
+					position: relative
+					bottom: 10px
+			.list-node-children-item-name
+				bottom: 26px
+				width: 100%
+				max-width: 100%
+
 	.list-node-children-empty
 		color: $color-text-dark-secondary
 		font-size: 1.2em
@@ -1892,9 +1910,6 @@ section.node-children
 		background-color: darken($color-background, 5%)
 		position: relative
 		overflow: hidden
-
-		img
-			width: $list-node-children-item-width
 
 		& .list-node-children-item-thumbnail-icon
 			position: absolute

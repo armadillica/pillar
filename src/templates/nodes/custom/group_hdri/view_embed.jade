@@ -41,7 +41,7 @@
 			.list-node-children-item(class="{{child.node_type}}")
 				.list-node-children-item-thumbnail
 					| {% if child.picture %}
-					img.texture-thumbnail(src="{{ child.picture.thumbnail('b', api=api)}}")
+					img.texture-thumbnail(src="{{ child.picture.thumbnail('m', api=api)}}")
 					| {% else %}
 					.list-node-children-item-thumbnail-icon
 						| {% if child.node_type == 'group_hdri' %}
