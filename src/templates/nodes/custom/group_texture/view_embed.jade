@@ -9,6 +9,12 @@
 		style="background-image: url({{ node.picture.thumbnail('m', api=api) }})")
 	| {% endif %}
 
+	| {% if node.description %}
+	section.node-row
+		.node-details-description
+			| {{node.description}}
+	| {% endif %}
+
 	| {% if children %}
 	section.node-row.texture-info
 		span.texture-info-files {{ children|length }} item{% if children|length != 1 %}s{% endif %}
