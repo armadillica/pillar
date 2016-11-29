@@ -87,7 +87,7 @@ def jstree_build_from_node(node):
     api = system_util.pillar_api()
     # Parse the node and mark it as selected
     child_node = jstree_parse_node(node)
-    child_node['state'] = dict(selected=True)
+    child_node['state'] = dict(selected=True, opened=True)
 
     # Splice the specified child node between the other project children.
     def select_node(x):
@@ -123,7 +123,7 @@ def jstree_build_from_node(node):
         # Overwrite children_node with the current parent
         child_node = parent_parent
         # Set the node to open so that jstree actually displays the nodes
-        child_node['state'] = dict(opened=True)
+        child_node['state'] = dict(selected=True, opened=True)
         # Push in the computed children into the parent
         child_node['children'] = parent_children
         # If we have a parent
