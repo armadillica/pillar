@@ -6,7 +6,6 @@ $tree-color-highlight-background: hsl(hue($color-background-active), 40%, 50%)
 $tree-color-highlight-background-text: white
 
 .jstree-default
-
 	/* list item */
 	.jstree-node
 		position: relative
@@ -23,23 +22,29 @@ $tree-color-highlight-background-text: white
 		&[data-node-type="asset"],
 		&[data-node-type="texture"],
 		&[data-node-type="hdri"]
+			.jstree-anchor
+				padding-right: 20px
+				&:before
+					font-family: 'pillar-font'
+					content: '\e84d'
+					color: $color-text-dark-hint
+					font-size: .8em
+					padding: 0 5px
+					position: absolute
+					right: 5px
+
+				&.jstree-clicked
+					&:before
+						color: $tree-color-highlight-background-text !important
+					&:after
+						display: none
 			&[is_free='true']
 				.jstree-anchor
-					padding-right: 20px
+					padding-right: initial
 					&:before
-						font-family: 'pillar-font'
-						content: '\e84e'
-						color: $color-success
-						font-size: .8em
-						padding: 0 5px
-						position: absolute
-						right: 5px
-
-					&.jstree-clicked
-						padding-right: 30px
-						&:before
-							color: $tree-color-highlight-background-text !important
-							right: 15px
+						display: none
+					&:after
+						display: none
 
 		&[data-node-type="page"],
 		&[data-node-type="blog"]
@@ -185,6 +190,13 @@ $tree-color-highlight-background-text: white
 		&:empty
 			line-height: 26px
 			left: 5px
+
+	&.is_subscriber .jstree-anchor
+		padding-right: initial
+		&:before
+			display: none
+		&:after
+			display: none
 
 .jstree-loading
 	padding: 5px

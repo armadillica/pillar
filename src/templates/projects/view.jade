@@ -568,6 +568,11 @@ script.
 		}
 	});
 
+	/* NOTE: {{ subscription }} is defined in layout.jade */
+	{% if subscription in ['demo', 'subscriber', 'admin'] %}
+		$(projectTree).addClass('is_subscriber');
+	{% endif %}
+
 | {% endblock %}
 
 | {% block comment_scripts %} {% endblock%}
