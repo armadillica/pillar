@@ -149,7 +149,7 @@ function containerResizeY(window_height){
 	var container_offset = $('#project-container').offset();
 	var container_height = window_height - container_offset.top;
 	var container_height_wheader = window_height - container_offset.top - $('#project_nav-header').height();
-	var window_height_minus_nav = window_height - $('#project_nav-header').height();
+	var window_height_minus_nav = window_height - $('#project_nav-header').height() - 50; // 50 is global top navbar
 
 	$('#project_context-header').width($('#project_context-container').width());
 
