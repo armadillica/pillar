@@ -71,7 +71,7 @@
 							download)
 								span.length {{ var.file.length | filesizeformat }}
 
-								span.format {{ var.file.format }}
+								span.format {{ var.file.format | hide_none }}
 								span.size {{ var.resolution }}
 
 						| {% endfor %}
