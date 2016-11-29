@@ -95,6 +95,11 @@ script.
 							i.pi-folder
 							| {% endif %}
 
+							| {% if n.permissions.world %}
+							.ribbon
+								span free
+							| {% endif %}
+
 						.info
 							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
 							p.description(href="{{ url_for_node(node=n) }}")
