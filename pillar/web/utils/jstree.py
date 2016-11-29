@@ -18,6 +18,7 @@ def jstree_parse_node(node, children=None):
     # Define better the node type
     if node_type == 'asset':
         node_type = node.properties.content_type
+
     parsed_node = dict(
         id="n_{0}".format(node._id),
         a_attr={"href": url_for_node(node=node)},
@@ -25,9 +26,13 @@ def jstree_parse_node(node, children=None):
         text=Markup.escape(node.name),
         type=node_type,
         children=False)
+
     # Append children property only if it is a directory type
     if node_type in GROUP_NODES:
         parsed_node['children'] = True
+
+    if node.permissions and node.permissions.world:
+        parsed_node['li_attr']['is_free'] = True
 
     return parsed_node
 
