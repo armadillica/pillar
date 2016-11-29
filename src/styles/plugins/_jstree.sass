@@ -20,23 +20,25 @@ $tree-color-highlight-background-text: white
 		+media-xs
 			width: 100%
 
-		&[is_free='true']
-			.jstree-anchor
-				padding-right: 20px
-				&:before
-					font-family: 'pillar-font'
-					content: '\e84e'
-					color: $color-success
-					font-size: .8em
-					padding: 0 5px
-					position: absolute
-					right: 5px
-
-				&.jstree-clicked
-					padding-right: 30px
+		&[data-node-type="asset"],
+		&[data-node-type="texture"]
+			&[is_free='true']
+				.jstree-anchor
+					padding-right: 20px
 					&:before
-						color: $tree-color-highlight-background-text !important
-						right: 15px
+						font-family: 'pillar-font'
+						content: '\e84e'
+						color: $color-success
+						font-size: .8em
+						padding: 0 5px
+						position: absolute
+						right: 5px
+
+					&.jstree-clicked
+						padding-right: 30px
+						&:before
+							color: $tree-color-highlight-background-text !important
+							right: 15px
 
 		&[data-node-type="page"],
 		&[data-node-type="blog"]
