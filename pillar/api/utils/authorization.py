@@ -7,7 +7,7 @@ from flask import abort
 from flask import current_app
 from werkzeug.exceptions import Forbidden
 
-CHECK_PERMISSIONS_IMPLEMENTED_FOR = {'projects', 'nodes'}
+CHECK_PERMISSIONS_IMPLEMENTED_FOR = {'projects', 'nodes', 'flamenco.jobs'}
 
 log = logging.getLogger(__name__)
 
@@ -135,6 +135,14 @@ def compute_aggr_permissions(collection_name, resource, check_node_type=None):
         if check_node_type is None:
             return project['permissions']
         node_type_name = check_node_type
+    elif 'node_type' not in resource:
+        # Neither a project, nor a node, therefore is another collection
+        projects_collection = current_app.data.driver.db['projects']
+        project = projects_collection.find_one(
+            ObjectId(resource['project']),
+            {'permissions': 1})
+        return project['permissions']
+
     else:
         # Not a project, so it's a node.
         assert 'project' in resource
