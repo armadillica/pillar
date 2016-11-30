@@ -2,6 +2,27 @@ body.error
 	width: 100%
 	height: 100%
 
+.error-watchamissing
+	padding: 0 15px
+
+	h2
+		color: $color-danger
+		font-size: 1.5em
+
+	h3
+		margin-top: 5px
+		font-size: 1.4em
+	p
+		color: $color-text-light-primary
+		font-size: .95em
+
+	a:hover
+		text-decoration: none
+		h3
+			color: lighten($color-primary, 10%)
+		p
+			color: $color-text-light
+
 #error_container
 	display: flex
 	justify-content: center
@@ -11,7 +32,6 @@ body.error
 	left: 0
 	right: 0
 	bottom: 0
-	background-color: darken($color-background-nav, 3%)
 
 	&.standalone
 		width: 100%
@@ -28,11 +48,13 @@ body.error
 				&.extra
 					padding-top: 0
 
+	a
+		color: $color-primary
 
 	#error_box
 		min-width: 60%
-		max-width: 500px
-		text-align: center
+		width: 100%
+		max-width: 800px
 		display: flex
 		justify-content: center
 		align-items: center
@@ -43,28 +65,71 @@ body.error
 		box-shadow: 0 0 15px rgba(black, .2)
 		padding: 0
 		background-color: $color-background-nav
+		border-top-left-radius: 3px
+		border-top-right-radius: 3px
+		overflow: hidden
 
 		.error-top-container
 			position: relative
 			width: 100%
 			background-color: $color-background-nav
-			background: repeating-linear-gradient(-45deg, lighten($color-background-nav, 2%), lighten($color-background-nav, 2%) 10px, $color-background-nav 10px, $color-background-nav 20px)
+
+		.error-top-header-overlay
+			background: repeating-linear-gradient(-45deg, rgba(white, .1), rgba(white, .1) 10px, transparent 10px, transparent 20px)
+			position: absolute
+			top: 0
+			left: 0
+			right: 0
+			bottom: 0
+			width: 100%
+			z-index: 1
+
+
+		.error-top-header
+			width: 100%
+			position: absolute
+			top: 0
+			bottom: 0
+			background:
+				size: cover
+				position-y: 12%
+			z-index: 0
 
 		.error-title
+			position: relative
+			z-index: 2
+			width: auto
+			display: flex
+			margin: 0 auto
 			padding: 25px 0 10px 0
 			color: white
 			font:
-				size: 2em
+				size: 1.8em
 				weight: 300
 
+			span.icon
+				display: flex
+				align-items: center
+				font-size: 2em
+
+			span.text
+				display: flex
+				align-items: center
+				text-align: left
+				line-height: 1.2em
+				margin-right: auto
+
+
 		.error-lead
+			position: relative
+			z-index: 1
+			display: block
 			width: 100%
-			padding: 0 25px 25px 0
 			line-height: 1.6em
 
-			color: $color-text-light-primary
+			color: $color-text-light-secondary
 			font:
-				family: $font-body
+				size: .9em
 				weight: 300
 
 			a
@@ -73,7 +138,7 @@ body.error
 					text-decoration: underline
 
 			&.extra
-				padding: 25px 20px
+				padding: 15px
 				font-size: .9em
 				color: $color-text-light-secondary
 
@@ -86,15 +151,17 @@ body.error
 			background-color: lighten($color-background-nav, 5%)
 
 		.buttons
-			margin: 0 15px 25px 0
+			position: relative
+			z-index: 2
+			margin: 5px 0 20px 5px
 
 			a
 				font-size: 1.2em
 				margin: 0 15px
 				&.sign-up
-					+button($color-primary, 999em, true)
+					+button($color-primary, 3px, true)
 				&.sign-in
-					+button($color-background, 999em)
+					+button($color-background, 3px)
 					border-color: transparent
 
 
