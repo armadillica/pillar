@@ -274,7 +274,7 @@ def error_403():
 @blueprint.route('/join-agent')
 def join_agent():
     """Custom page to support Agent 327 barbershop campaign"""
-    return render_template('join.html')
+    return render_template('join_agent.html')
 
 
 # Shameful redirects

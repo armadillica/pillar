@@ -1,0 +1,133 @@
+| {% set title = 'join' %}
+link(href="{{ url_for('static_pillar', filename='assets/css/main.css', v=291120162) }}", rel="stylesheet")
+
+| {% block body %}
+#page-container.join
+.navbar-backdrop.join(
+	style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/background_agent327_02.jpg')}})")
+	#page-header
+		.page-title Support the Agent 327 project
+
+		.page-title-summary
+			p Join us as we make the Agent 327 "Barbershop" scene
+			ul
+				li Exclusive production insight &amp; walk-throughs
+				li High-quality assets ready to use
+				li All the open movies files & tutorials
+				li 100+ hours of training
+
+		.page-header-cta-container
+			a.page-header-cta(href="https://store.blender.org/product/membership/")
+				| Join Now
+
+			a.page-header-cta-extra(href="https://store.blender.org/product/membership/")
+				| for only €9.90
+				i.pi-angle-right
+
+
+	#page-content
+		.page-triplet-container.homepage
+			.row
+				.col-md-6
+					.triplet-card(data-url="{{ url_for('main.open_projects') }}")
+						.triplet-card-thumbnail
+							img(
+								alt="Open Projects",
+								src="{{ url_for('static', filename='assets/img/features/open_movies_02.jpg')}}")
+						.triplet-card-info
+							h3 Open Projects
+							p.
+								The iconic Blender Institute Open Movies,
+								featuring all the production files, assets, artwork, and never-seen-before content.
+							a.triplet-cta(href="{{ url_for('main.open_projects') }}")
+								| LEARN MORE
+
+				.col-md-6
+					.triplet-card(data-url="{{ url_for('main.training') }}")
+						.triplet-card-thumbnail
+							img(
+								alt="Training and Tutorials",
+								src="{{ url_for('static', filename='assets/img/features/training_02.jpg')}}")
+						.triplet-card-info
+							h3 Training &amp; Tutorials
+							p.
+								Character modeling, 3D printing, VFX, rigging and more. We offer
+								12 complete training series with +100 hours of training.
+							a.triplet-cta(href="{{ url_for('main.training') }}")
+								| LEARN MORE
+
+			.row
+				.col-md-6
+					.triplet-card(data-url="{{ url_for('main.redir_hdri') }}")
+						.triplet-card-thumbnail
+							img(
+								alt="HDRI",
+								src="{{ url_for('static', filename='assets/img/features/hdri_01.jpg')}}")
+						.triplet-card-info
+							h3 HDRI
+							p.
+								Up to 8K and 18 EVs (extremely high) HDR images to light your renders.
+							a.triplet-cta(href="{{ url_for('main.redir_hdri') }}")
+								| LEARN MORE
+				.col-md-6
+					.triplet-card(data-url="{{ url_for('main.redir_textures') }}")
+						.triplet-card-thumbnail
+							img(
+								alt="Textures",
+								src="{{ url_for('static', filename='assets/img/features/textures_01.jpg')}}")
+						.triplet-card-info
+							h3 Textures
+							p.
+								More than 1500 texture maps.
+								Browse online or from Blender with our awesome  add-on.
+							a.triplet-cta(href="{{ url_for('main.redir_textures') }}")
+								| LEARN MORE
+
+			.row
+				.col-md-6
+					.triplet-card(data-url="{{ url_for('main.redir_characters') }}")
+						.triplet-card-thumbnail
+							img(
+								alt="Characters",
+								src="{{ url_for('static', filename='assets/img/features/characters_01.jpg')}}")
+						.triplet-card-info
+							h3 Characters
+							p.
+								Production quality, fully rigged and shaded characters ready to animate.
+							a.triplet-cta(href="{{ url_for('main.redir_characters') }}")
+								| LEARN MORE
+				.col-md-6
+					.triplet-card(data-url="{{ url_for('main.services') }}")
+						.triplet-card-thumbnail
+							img(
+								alt="Services and Tools",
+								src="{{ url_for('static', filename='assets/img/features/services_01.jpg')}}")
+						.triplet-card-info
+							h3 Services & Tools
+							p.
+								Create your personal projects, collaborate with other members, store
+								and sync your Blender settings across multiple workstations.
+							a.triplet-cta(href="{{ url_for('main.services') }}")
+								| LEARN MORE
+
+		section.page-card.subscribe(
+			style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/background_services.jpg')}});")
+			.page-card-side
+				h2.page-card-title
+					| Get inspiration, knowledge, and tools in one place.
+				.page-card-summary
+					| Join us for only $9.90/month!
+				a.page-card-cta(
+					href="https://store.blender.org/product/membership/")
+					| Subscribe Now
+
+| {% endblock %}
+
+| {% block footer_scripts %}
+script.
+
+	$('.triplet-card').click(function(){
+		window.location.href = $(this).attr('data-url');
+	});
+
+| {% endblock %}
