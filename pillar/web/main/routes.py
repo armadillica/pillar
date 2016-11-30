@@ -271,6 +271,12 @@ def error_403():
     return render_template('errors/403_embed.html')
 
 
+@blueprint.route('/join-agent')
+def join_agent():
+    """Custom page to support Agent 327 barbershop campaign"""
+    return render_template('join.html')
+
+
 # Shameful redirects
 @blueprint.route('/p/blender-cloud/')
 def redirect_cloud_blog():

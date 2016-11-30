@@ -361,7 +361,13 @@ script.
 		if (nodeId.substring(0, 2) == 'n_') {
 			nodeId = nodeId.substr(2);
 		}
+
+		{% if subscription not in ['demo', 'subscriber', 'admin'] and project.url == 'agent-327' %}
+		var url = '/join-agent';
+		{% else %}
 		var url = '/nodes/' + nodeId + '/view';
+		// var url = '/join-agent';
+		{% endif %}
 		loadNodeContent(url, nodeId);
 
 		// Determine whether we should push the new state or not.
