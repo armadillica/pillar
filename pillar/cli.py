@@ -18,8 +18,15 @@ from flask_script import Manager
 log = logging.getLogger(__name__)
 manager = Manager(current_app)
 
+manager_maintenance = Manager(
+    current_app, usage="Maintenance scripts, to update user groups")
+manager_setup = Manager(
+    current_app, usage="Setup utilities, like setup_db() or create_blog()")
+manager_operations = Manager(
+    current_app, usage="Backend operations, like moving nodes across projects")
 
-@manager.command
+
+@manager_setup.command
 def setup_db(admin_email):
     """Setup the database
     - Create admin, subscriber and demo Group collection
@@ -62,7 +69,7 @@ def setup_db(admin_email):
                                               'is_private': False})
 
 
-@manager.command
+@manager_maintenance.command
 def find_duplicate_users():
     """Finds users that have the same BlenderID user_id."""
 
@@ -98,7 +105,7 @@ def find_duplicate_users():
             ))
 
 
-@manager.command
+@manager_maintenance.command
 def sync_role_groups(do_revoke_groups):
     """For each user, synchronizes roles and group membership.
 
@@ -190,7 +197,7 @@ def sync_role_groups(do_revoke_groups):
     print('%i bad and %i ok users seen.' % (bad_users, ok_users))
 
 
-@manager.command
+@manager_maintenance.command
 def sync_project_groups(user_email, fix):
     """Gives the user access to their self-created projects."""
 
@@ -254,7 +261,7 @@ def sync_project_groups(user_email, fix):
         log.info('Updated %i user.', result.modified_count)
 
 
-@manager.command
+@manager_maintenance.command
 def check_home_project_groups():
     """Checks all users' group membership of their home project admin group."""
 
@@ -293,7 +300,7 @@ def check_home_project_groups():
     return bad
 
 
-@manager.command
+@manager_setup.command
 def badger(action, user_email, role):
     from pillar.api import service
 
@@ -326,7 +333,7 @@ def create_service_account(email, service_roles, service_definition):
     return account, token
 
 
-@manager.command
+@manager_setup.command
 def create_badger_account(email, badges):
     """
     Creates a new service account that can give badges (i.e. roles).
@@ -339,24 +346,24 @@ def create_badger_account(email, badges):
     create_service_account(email, [u'badger'], {'badger': badges.strip().split()})
 
 
-@manager.command
+@manager_setup.command
 def create_urler_account(email):
     """Creates a new service account that can fetch all project URLs."""
 
     create_service_account(email, [u'urler'], {})
 
 
-@manager.command
+@manager_setup.command
 def create_local_user_account(email, password):
     from pillar.api.local_auth import create_local_user
     create_local_user(email, password)
 
 
-@manager.command
-@manager.option('-c', '--chunk', dest='chunk_size', default=50,
+@manager_maintenance.command
+@manager_maintenance.option('-c', '--chunk', dest='chunk_size', default=50,
                 help='Number of links to update, use 0 to update all.')
-@manager.option('-q', '--quiet', dest='quiet', action='store_true', default=False)
-@manager.option('-w', '--window', dest='window', default=12,
+@manager_maintenance.option('-q', '--quiet', dest='quiet', action='store_true', default=False)
+@manager_maintenance.option('-w', '--window', dest='window', default=12,
                 help='Refresh links that expire in this many hours.')
 def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
     """Refreshes all file links that are using a certain storage backend.
@@ -376,7 +383,7 @@ def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
     file_storage.refresh_links_for_backend(backend_name, chunk_size, window * 3600)
 
 
-@manager.command
+@manager_maintenance.command
 def expire_all_project_links(project_uuid):
     """Expires all file links for a certain project without refreshing.
 
@@ -399,43 +406,7 @@ def expire_all_project_links(project_uuid):
     print('Expired %i links' % result.matched_count)
 
 
-@manager.command
-def check_cdnsun():
-    import requests
-
-    files_collection = current_app.data.driver.db['files']
-
-    s = requests.session()
-
-    missing_main = 0
-    missing_variation = 0
-    fdocs = files_collection.find({'backend': 'cdnsun'})
-    for idx, fdoc in enumerate(fdocs):
-        if idx % 100 == 0:
-            print('Handling file %i/~1800' % (idx + 1))
-
-        variations = fdoc.get('variations', ())
-        resp = s.head(fdoc['link'])
-        if resp.status_code == 404:
-            missing_main += 1
-            if variations:
-                # print('File %(_id)s (%(filename)s): link not found, checking variations' % fdoc)
-                pass
-            else:
-                print('File %(_id)s (%(filename)s): link not found, and no variations' % fdoc)
-
-        for var in variations:
-            resp = s.head(var['link'])
-            if resp.status_code != 200:
-                missing_variation += 1
-                print('File %s (%s): error %i for variation %s' % (
-                    fdoc['_id'], fdoc['filename'], resp.status_code, var['link']))
-
-    print('Missing main: %i' % missing_main)
-    print('Missing vars: %i' % missing_variation)
-
-
-@manager.command
+@manager_operations.command
 def file_change_backend(file_id, dest_backend='gcs'):
     """Given a file document, move it to the specified backend (if not already
     there) and update the document to reflect that.
@@ -446,7 +417,7 @@ def file_change_backend(file_id, dest_backend='gcs'):
     change_file_storage_backend(file_id, dest_backend)
 
 
-@manager.command
+@manager_operations.command
 def mass_copy_between_backends(src_backend='cdnsun', dest_backend='gcs'):
     """Copies all files from one backend to the other, updating them in Mongo.
 
@@ -490,12 +461,12 @@ def mass_copy_between_backends(src_backend='cdnsun', dest_backend='gcs'):
     log.info('%i files we did not copy', copy_errs)
 
 
-@manager.command
-@manager.option('-p', '--project', dest='dest_proj_url',
+@manager_operations.command
+@manager_operations.option('-p', '--project', dest='dest_proj_url',
                 help='Destination project URL')
-@manager.option('-f', '--force', dest='force', action='store_true', default=False,
+@manager_operations.option('-f', '--force', dest='force', action='store_true', default=False,
                 help='Move even when already at the given project.')
-@manager.option('-s', '--skip-gcs', dest='skip_gcs', action='store_true', default=False,
+@manager_operations.option('-s', '--skip-gcs', dest='skip_gcs', action='store_true', default=False,
                 help='Skip file handling on GCS, just update the database.')
 def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=False):
     """Copies all files from one project to the other, then moves the nodes.
@@ -548,10 +519,10 @@ def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=Fals
     log.info('Done moving.')
 
 
-@manager.command
-@manager.option('-p', '--project', dest='proj_url', nargs='?',
+@manager_maintenance.command
+@manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
                 help='Project URL')
-@manager.option('-a', '--all', dest='all_projects', action='store_true', default=False,
+@manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
                 help='Replace on all projects.')
 def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
     """Replaces the project's node type schemas with the standard Pillar ones.
@@ -615,7 +586,7 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
     handle_project(project)
 
 
-@manager.command
+@manager_maintenance.command
 def remarkdown_comments():
     """Retranslates all Markdown to HTML for all comment nodes.
     """
@@ -659,10 +630,10 @@ def remarkdown_comments():
     log.info('errors   : %i', errors)
 
 
-@manager.command
-@manager.option('-p', '--project', dest='proj_url', nargs='?',
+@manager_maintenance.command
+@manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
                 help='Project URL')
-@manager.option('-a', '--all', dest='all_projects', action='store_true', default=False,
+@manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
                 help='Replace on all projects.')
 def upgrade_attachment_schema(proj_url=None, all_projects=False):
     """Replaces the project's attachments with the new schema.
@@ -765,7 +736,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
     handle_project(proj)
 
 
-@manager.command
+@manager_setup.command
 def create_blog(proj_url):
     """Adds a blog to the project."""
 
@@ -817,3 +788,7 @@ def create_blog(proj_url):
         log.info('Blog node already exists: %s', blog)
 
     return 0
+
+manager.add_command("maintenance", manager_maintenance)
+manager.add_command("setup", manager_setup)
+manager.add_command("operations", manager_operations)
