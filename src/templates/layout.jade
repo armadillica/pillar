@@ -37,8 +37,8 @@ html(lang="en")
 
 			loadCSS( "//fonts.googleapis.com/css?family=Roboto:300,400" );
 
-		script(src="{{ url_for('static_pillar', filename='assets/js/markdown.min.js', v=11220161) }}")
-		script(src="{{ url_for('static_pillar', filename='assets/js/tutti.min.js', v=11220161) }}")
+		script(src="{{ url_for('static_pillar', filename='assets/js/markdown.min.js', v=11220162) }}")
+		script(src="{{ url_for('static_pillar', filename='assets/js/tutti.min.js', v=11220162) }}")
 
 		link(href="{{ url_for('static', filename='assets/img/favicon.png') }}", rel="shortcut icon")
 		link(href="{{ url_for('static', filename='assets/img/apple-touch-icon-precomposed.png') }}", rel="icon apple-touch-icon-precomposed", sizes="192x192")
@@ -48,12 +48,12 @@ html(lang="en")
 		| {% block head %}{% endblock %}
 
 		| {% block css %}
-		link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=11220161) }}", rel="stylesheet")
-		link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=11220161) }}", rel="stylesheet")
+		link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=11220162) }}", rel="stylesheet")
+		link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=11220162) }}", rel="stylesheet")
 		| {% if title == 'blog' %}
-		link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=11220161) }}", rel="stylesheet")
+		link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=11220162) }}", rel="stylesheet")
 		| {% else %}
-		link(href="{{ url_for('static_pillar', filename='assets/css/main.css', v=11220161) }}", rel="stylesheet")
+		link(href="{{ url_for('static_pillar', filename='assets/css/main.css', v=11220162) }}", rel="stylesheet")
 		| {% endif %}
 		| {% endblock %}
 
@@ -407,7 +407,7 @@ html(lang="en")
 		noscript
 			link(href='//fonts.googleapis.com/css?family=Roboto:300,400', rel='stylesheet', type='text/css')
 
-		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.bootstrap-3.3.7.min.js', v=11220161) }}")
+		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.bootstrap-3.3.7.min.js', v=11220162) }}")
 
 		script.
 			$(document).ready(function() {
