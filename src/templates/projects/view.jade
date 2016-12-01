@@ -13,9 +13,11 @@ meta(property="og:title", content="{{project.name}} - Blender Cloud")
 meta(property="og:url", content="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 meta(property="og:description", content="{{project.summary}}")
 | {% else %}
+| {% if node %}
 meta(property="og:title", content="{{node.name}} - Blender Cloud")
 meta(property="og:url", content="{{url_for('projects.view_node', project_url=project.url, node_id=node._id)}}")
 meta(property="og:description", content="{{node.description}}")
+| {% endif %}
 | {% endif %}
 | {% endblock %}
 
@@ -27,8 +29,10 @@ meta(property="twitter:image", content="{{ og_picture.thumbnail('l', api=api) }}
 meta(name="twitter:title", content="{{project.name}} on Blender Cloud")
 meta(name="twitter:description", content="{{project.summary}}")
 | {% else %}
+| {% if node %}
 meta(name="twitter:title", content="{{node.name}} on Blender Cloud")
 meta(name="twitter:description", content="{{node.description}}")
+| {% endif %}
 | {% endif %}
 | {% endblock %}
 
@@ -37,9 +41,9 @@ link(href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.1/themes/default/style.mi
 | {% endblock %}
 
 | {% block css %}
-link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=291120162) }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=291120162) }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v=291120163) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=11220161) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=11220161) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v=11220161) }}", rel="stylesheet")
 | {% endblock %}
 
 | {% block body %}
@@ -91,11 +95,12 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 						a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 							| {{ project.name }}
 
+				| {% block project_tree %}
 				#project_tree
+				| {% endblock %}
 				| {% endif %}
 
 				.project_split(title="Toggle Navigation [T]")
-
 
 	#project_context-container
 		| {% if project.has_method('PUT') %}
@@ -197,9 +202,11 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 		| {% endif %}
 
 		#project_context
+			| {% block project_context %}
 			| {% if show_project %}
 			| {% include "projects/view_embed.html" %}
 			| {% endif %}
+			| {% endblock %}
 
 		#overlay-mode-move-container
 			.overlay-container
@@ -224,14 +231,16 @@ script(src="//releases.flowplayer.org/6.0.5/flowplayer.min.js")
 
 | {% if project.has_method('PUT') %}
 | {# JS containing the Edit, Add, Featured, and Move functions #}
-script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets/js/project-edit.min.js', v=291120162) }}")
+script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets/js/project-edit.min.js', v=11220161) }}")
 | {% endif %}
 
 script.
 	{% if show_project %}
 	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: true, nodeId: ''});
 	{% else %}
+	{% if node %}
 	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: false, nodeId: '{{node._id}}'});
+	{% endif %}
 	{% endif %}
 
 	var projectTree = document.getElementById('project_tree');

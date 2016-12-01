@@ -1,130 +1,118 @@
-| {% extends 'layout.html' %}
-
+| {% extends 'projects/view.html' %}
 | {% set title = 'blog' %}
-
 | {% block page_title %}Blog{% endblock%}
 
-| {% block body %}
+| {% block css %}
+link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=11220161) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=11220161) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v=11220161) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=11220161) }}", rel="stylesheet")
+| {% endblock %}
 
-.container
-	#blog_container(class="{% if project._id == config.MAIN_PROJECT_ID %}cloud-blog{% endif %}")
+| {% block project_context %}
 
-		#blog_index-container
+#blog_container
 
-			| {% if project._id == config.MAIN_PROJECT_ID and project.node_type_has_method('post', 'POST', api=api) %}
-			a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
-				i.pi-plus
-				| Create New Post
-			| {% endif %}
+	#blog_index-container
 
-			| {% if posts %}
-
-			| {% for node in posts %}
-
-			| {% if loop.first %}
-			| {% if node.picture %}
-			.blog_index-header
-				img(src="{{ node.picture.thumbnail('l', api=api) }}")
-			| {% endif %}
-			.blog_index-item
-				a.item-title(
-					href="{{ url_for_node(node=node) }}")
-					| {{node.name}}
-
-				.item-info.
-					<span title="{{node._created}}">{{node._created | pretty_date }}</span>
-					{% if node._created != node._updated %}
-					<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
-					{% endif %}
-					{% if node.properties.category %}| {{node.properties.category}}{% endif %}
-					| by {{node.user.full_name}}
-					| <a href="{{ url_for_node(node=node) }}#comments">Leave a comment</a>
-					{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
-
-				.item-content
-					| {{node.properties.content}}
-
-				.item-meta
-					a(href="{{ url_for_node(node=node) }}#comments") Leave a comment
-
-			| {% else %}
-
-			| {% if loop.index == 2 %}
-			h4.blog_index-title Blasts from the past
-			| {% endif %}
-
-			.blog_index-item.list
-				| {% if node.picture %}
-				.item-header
-					img.image(src="{{ node.picture.thumbnail('s', api=api) }}")
-				| {% else %}
-				.item-header.nothumb
-					i.pi-document-text
-				| {% endif %}
-				a.item-title(
-					href="{{ url_for_node(node=node) }}")
-					| {{node.name}}
-
-				.item-info.
-					<span title="{{node._created}}">{{node._created | pretty_date }}</span>
-					{% if node._created != node._updated %}
-					<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
-					{% endif %}
-					{% if node.properties.category %}| {{node.properties.category}}{% endif %}
-					| by {{node.user.full_name}}
-					{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
-
-			| {% endif %} {# loop #}
-
-			| {% endfor %} {# posts #}
-
-			| {% else %}
-
-			.blog_index-item
-				.item-content No posts yet.
-
-			| {% endif %} {# posts #}
-
-		| {% if project._id != config.MAIN_PROJECT_ID %}
-		#blog_index-sidebar
-			.blog_project-card
-				a.item-header(
-					href="{{ url_for('projects.view', project_url=project.url) }}")
-
-					.overlay
-					| {% if project.picture_header %}
-					img.background(src="{{ project.picture_header.thumbnail('m', api=api) }}")
-					| {% endif %}
-
-				a.card-thumbnail(
-					href="{{ url_for('projects.view', project_url=project.url) }}")
-					| {% if project.picture_square %}
-					img.thumb(src="{{ project.picture_square.thumbnail('m', api=api) }}")
-					| {% endif %}
-
-				.item-info
-
-					a.item-title(
-						href="{{ url_for('projects.view', project_url=project.url) }}")
-						| {{ project.name }}
-
-					| {% if project.summary %}
-					p.item-description
-						| {{project.summary|safe}}
-					| {% endif %}
-
-			| {% if project.node_type_has_method('post', 'POST', api=api) %}
-			.blog_project-sidebar
-				a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
-					| Create New Post
-			| {% endif %}
+		| {% if project.node_type_has_method('post', 'POST', api=api) %}
+		a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
+			i.pi-plus
+			| Create New Post
 		| {% endif %}
+
+		| {% if posts %}
+
+		| {% for node in posts %}
+
+		| {% if loop.first %}
+		| {% if node.picture %}
+		.blog_index-header
+			img(src="{{ node.picture.thumbnail('l', api=api) }}")
+		| {% endif %}
+		.blog_index-item
+			a.item-title(
+				href="{{ url_for_node(node=node) }}")
+				| {{node.name}}
+
+			.item-info.
+				<span title="{{node._created}}">{{node._created | pretty_date }}</span>
+				{% if node._created != node._updated %}
+				<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
+				{% endif %}
+				{% if node.properties.category %}| {{node.properties.category}}{% endif %}
+				| by {{node.user.full_name}}
+				| <a href="{{ url_for_node(node=node) }}#comments">Leave a comment</a>
+				{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
+
+			.item-content
+				| {{node.properties.content}}
+
+			.item-meta
+				a(href="{{ url_for_node(node=node) }}#comments") Leave a comment
+
+		| {% else %}
+
+		| {% if loop.index == 2 %}
+		h4.blog_index-title Blasts from the past
+		| {% endif %}
+
+		.blog_index-item.list
+			| {% if node.picture %}
+			.item-header
+				img.image(src="{{ node.picture.thumbnail('s', api=api) }}")
+			| {% else %}
+			.item-header.nothumb
+				i.pi-document-text
+			| {% endif %}
+			a.item-title(
+				href="{{ url_for_node(node=node) }}")
+				| {{node.name}}
+
+			.item-info.
+				<span title="{{node._created}}">{{node._created | pretty_date }}</span>
+				{% if node._created != node._updated %}
+				<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
+				{% endif %}
+				{% if node.properties.category %}| {{node.properties.category}}{% endif %}
+				| by {{node.user.full_name}}
+				{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
+
+		| {% endif %} {# loop #}
+
+		| {% endfor %} {# posts #}
+
+		| {% else %}
+
+		.blog_index-item
+			.item-content No posts yet.
+
+		| {% endif %} {# posts #}
 
 | {% endblock %}
 
+| {% block project_tree %}
+#project_tree.jstree.jstree-default.blog
+	ul.jstree-container-ul.jstree-children
+		li.jstree-node.jstree-leaf(data-node-type="page")
+			a.jstree-anchor.jstree-clicked(
+				href="{{ url_for('main.project_blog', project_url=project.url) }}") Blog
+
+		| {% for post in posts %}
+		li.jstree-node
+			a.jstree-anchor(
+				href="{{ url_for_node(node=post) }}")
+				i.jstree-icon.pi-document-text
+				| {{ post.name }}
+		| {% endfor %}
+
+		li.jstree-node(data-node-type="page")
+			a.jstree-anchor(
+				href="{{ url_for('projects.view', project_url=project.url) }}")
+				i.jstree-icon.pi-folder
+				| Browse Project
+| {% endblock %}
+
 | {% block footer_scripts %}
-
 include ../_scripts
-script hopToTop(); // Display jump to top button
-
 | {% endblock %}

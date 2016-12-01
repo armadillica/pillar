@@ -2,6 +2,7 @@ from pillarsdk import Node
 from pillarsdk import Project
 from pillarsdk.exceptions import ResourceNotFound
 from flask import abort
+from flask import current_app
 from flask import render_template
 from flask import redirect
 from flask_login import login_required, current_user
@@ -40,6 +41,22 @@ def posts_view(project_id=None, project_url=None, url=None):
         'where': {'node_type': 'blog', 'project': project_id},
     }, api=api)
 
+    status_query = "" if blog.has_method('PUT') else ', "properties.status": "published"'
+    posts = Node.all({
+        'where': '{"parent": "%s" %s}' % (blog._id, status_query),
+        'embedded': '{"user": 1}',
+        'sort': '-_created'
+    }, api=api)
+
+    for post in posts._items:
+        post.picture = get_file(post.picture, api=api)
+
+        post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
+            post, post['properties']['content'])
+
+    # Use the *_main_project.html template for the main blog
+    main_project_template = '_main_project' if project_id == current_app.config['MAIN_PROJECT_ID'] else ''
+
     if url:
         post = Node.find_one({
             'where': {'parent': blog._id, 'properties.url': url},
@@ -58,29 +75,19 @@ def posts_view(project_id=None, project_url=None, url=None):
             post, post['properties']['content'])
 
         return render_template(
-            'nodes/custom/post/view.html',
+            'nodes/custom/post/view{0}.html'.format(main_project_template),
             blog=blog,
             node=post,
+            posts=posts._items,
             project=project,
             title='blog',
             api=api)
     else:
         node_type_post = project.get_node_type('post')
-        status_query = "" if blog.has_method('PUT') else ', "properties.status": "published"'
-        posts = Node.all({
-            'where': '{"parent": "%s" %s}' % (blog._id, status_query),
-            'embedded': '{"user": 1}',
-            'sort': '-_created'
-        }, api=api)
-
-        for post in posts._items:
-            post.picture = get_file(post.picture, api=api)
-
-            post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
-                post, post['properties']['content'])
+        template_path = 'nodes/custom/blog/index.html'
 
         return render_template(
-            'nodes/custom/blog/index.html',
+            'nodes/custom/blog/index{0}.html'.format(main_project_template),
             node_type_post=node_type_post,
             posts=posts._items,
             project=project,

@@ -52,9 +52,14 @@ $tree-color-highlight-background-text: white
 			color: darken($tree-color-highlight, 5%)
 			border-bottom: 2px solid $tree-color-highlight
 
+			&:hover
+				border-bottom-color: lighten($tree-color-highlight, 5%)
+
 			.jstree-anchor
-				padding: 3px 8px
-			.jstree-icon.jstree-themeicon
+				padding: 5px 8px 1px 8px
+				&:after
+					top: 3px !important
+			.jstree-icon
 				display: none
 
 		/* Brief moment when a node is being loaded */
@@ -63,7 +68,7 @@ $tree-color-highlight-background-text: white
 
 		/* Items at top level */
 		&.jstree-leaf
-			.jstree-icon.jstree-themeicon
+			.jstree-icon
 				opacity: 1
 				width: 24px !important
 
@@ -120,7 +125,7 @@ $tree-color-highlight-background-text: white
 				width: 98%
 				padding: 0 !important
 
-			.jstree-themeicon
+			.jstree-icon
 				margin: 0 !important
 				font-size: 95% !important
 				color: $color-text-dark-secondary
@@ -130,7 +135,7 @@ $tree-color-highlight-background-text: white
 				background-color: $tree-color-highlight-background !important
 				color: $tree-color-highlight-background-text !important
 
-				.jstree-ocl, .jstree-themeicon
+				.jstree-ocl, .jstree-icon
 					color: $tree-color-highlight-background-text !important
 
 				&:after
@@ -147,7 +152,7 @@ $tree-color-highlight-background-text: white
 
 				/* hover an active item */
 				&.jstree-hovered,
-				&.jstree-hovered .jstree-icon.jstree-themeicon
+				&.jstree-hovered .jstree-icon
 					color: $tree-color-highlight-background-text !important
 					box-shadow: none
 
@@ -198,6 +203,11 @@ $tree-color-highlight-background-text: white
 		&:after
 			display: none
 
+	&.blog
+		.jstree-anchor
+			&:hover, &:hover i
+				color: $tree-color-highlight
+
 .jstree-loading
 	padding: 5px
 	color: $color-text-light-secondary
@@ -219,7 +229,7 @@ $tree-color-highlight-background-text: white
 /* hovered text */
 .jstree-default .jstree-hovered,
 .jstree-default .jstree-open .jstree-hovered,
-.jstree-default .jstree-hovered .jstree-icon.jstree-themeicon
+.jstree-default .jstree-hovered .jstree-icon
 	color: $tree-color-highlight !important
 
 

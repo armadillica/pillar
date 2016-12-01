@@ -169,8 +169,6 @@ $project-sidebar-background: lighten($color-background, 5%)
 	width: $project_nav-width
 	position: relative
 	background-color: $project-sidebar-background
-
-	color: white
 	left: 0
 
 	&.about
@@ -2663,3 +2661,17 @@ section.node-children
 
 .file_delete, .file_original
 	display: block
+
+/* Project blog overrides */
+#project_context
+	#blog_container
+		padding: 0
+		#blog_index-container,
+		#blog_post-container
+			width: 100%
+			padding: 0
+			border: none
+			border-radius: 0
+
+			.blog_index-header
+				border-radius: 0
