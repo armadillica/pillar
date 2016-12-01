@@ -93,4 +93,16 @@ script.
 		window.location.replace("{{url_for('nodes.posts_edit', post_id=node._id)}}");
 	});
 	{% endif %}
+
+	var project_container = document.getElementById('project-container');
+
+	/* UI Stuff */
+	$(window).on("load resize",function(){
+		containerResizeY($(window).height());
+
+		if ($(window).width() > 480) {
+			project_container.style.height = (window.innerHeight - project_container.offsetTop) + "px";
+		}
+	});
+
 | {% endblock %}

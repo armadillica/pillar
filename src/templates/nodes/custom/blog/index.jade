@@ -121,4 +121,16 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=1122016
 
 | {% block footer_scripts %}
 include ../_scripts
+script.
+	var project_container = document.getElementById('project-container');
+
+	/* UI Stuff */
+	$(window).on("load resize",function(){
+		containerResizeY($(window).height());
+
+		if ($(window).width() > 480) {
+			project_container.style.height = (window.innerHeight - project_container.offsetTop) + "px";
+		}
+	});
+
 | {% endblock %}
