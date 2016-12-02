@@ -51,12 +51,8 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 	#project-side-container
 		#project_sidebar
 			ul.project-tabs
-				li.tabs-thumbnail(
-					title="About",
-					data-toggle="tooltip",
-					data-placement="right",
-					class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
-					a(href="{{url_for('projects.about', project_url=project.url, _external=True)}}")
+				li.tabs-thumbnail(class="{% if project.picture_square %}image{% endif %}")
+					a(href="{{url_for('projects.view', project_url=project.url)}}")
 						#project-loading
 							i.pi-spin
 						| {% if project.picture_square %}
@@ -68,7 +64,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 					title="Browse",
 					data-toggle="tooltip",
 					data-placement="right",
-					class="{% if title != 'about' %}active{% endif %}")
+					class="active")
 					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 						i.pi-folder
 				| {% if not project.is_private %}
