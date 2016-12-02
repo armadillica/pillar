@@ -327,10 +327,29 @@ def render_project(project, api, extra_context=None, template_name=None):
                            **extra_context)
 
 
+def render_node_page(project_url, page_url, api):
+    """Custom behaviour for pages, which are nodes, but accessible on a custom
+    route base.
+    """
+
+    # TODO: ensure this is not called for the home project, as it would
+    # generate conflicting websites
+    project = find_project_or_404(project_url, api=api)
+    try:
+        page = Node.find_one({
+            'where': {
+                'project': project['_id'],
+                'node_type': 'page',
+                'properties.url': page_url}}, api=api)
+    except ResourceNotFound:
+        raise wz_exceptions.NotFound('No such node')
+
+    return project, page
+
+
 @blueprint.route('/<project_url>/<node_id>')
 def view_node(project_url, node_id):
     """Entry point to view a node in the context of a project"""
-
     # Some browsers mangle URLs and URL-encode /p/{p-url}/#node-id
     if node_id.startswith('#'):
         return redirect(url_for('projects.view_node',
@@ -338,29 +357,31 @@ def view_node(project_url, node_id):
                                 node_id=node_id[1:]),
                         code=301)  # permanent redirect
 
-    if not utils.is_valid_id(node_id):
-        raise wz_exceptions.NotFound('No such node')
-
-    api = system_util.pillar_api()
     theatre_mode = 't' in request.args
+    api = system_util.pillar_api()
+    # First we check if it's a simple string, in which case we are looking for
+    # a static page. Maybe we could use bson.objectid.ObjectId.is_valid(node_id)
+    if not utils.is_valid_id(node_id):
+        # raise wz_exceptions.NotFound('No such node')
+        project, node = render_node_page(project_url, node_id, api)
+    else:
+        # Fetch the node before the project. If this user has access to the
+        # node, we should be able to get the project URL too.
+        try:
+            node = Node.find(node_id, api=api)
+        except ForbiddenAccess:
+            return render_template('errors/403.html'), 403
+        except ResourceNotFound:
+            raise wz_exceptions.NotFound('No such node')
 
-    # Fetch the node before the project. If this user has access to the
-    # node, we should be able to get the project URL too.
-    try:
-        node = Node.find(node_id, api=api)
-    except ForbiddenAccess:
-        return render_template('errors/403.html'), 403
-    except ResourceNotFound:
-        raise wz_exceptions.NotFound('No such node')
-
-    try:
-        project = Project.find_one({'where': {"url": project_url, '_id': node.project}}, api=api)
-    except ResourceNotFound:
-        # In theatre mode, we don't need access to the project at all.
-        if theatre_mode:
-            project = None
-        else:
-            raise wz_exceptions.NotFound('No such project')
+        try:
+            project = Project.find_one({'where': {"url": project_url, '_id': node.project}}, api=api)
+        except ResourceNotFound:
+            # In theatre mode, we don't need access to the project at all.
+            if theatre_mode:
+                project = None
+            else:
+                raise wz_exceptions.NotFound('No such project')
 
     og_picture = node.picture = utils.get_file(node.picture, api=api)
     if project:

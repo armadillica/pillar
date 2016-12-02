@@ -29,6 +29,18 @@ include ../_scripts
 
 | {% block footer_scripts %}
 script.
+	// Push the correct URL onto the history. This push happens after the id has
+	// been pushed to the history already. We should probably keep only this and
+	// skip the project-level displayNode push.
+	
+	var url = '{{ node.properties.url }}'
+	var push_state = {nodeId: '{{node._id}}', url: url};
+	// console.log('Pushing state ', push_state, ' with URL ', push_url);
+	window.history.pushState(
+		push_state,
+		'{{node.properties.url}}',
+		url
+	);
 	// Generate GA pageview
 	ga('send', 'pageview', location.pathname);
 | {% endblock %}
