@@ -35,7 +35,7 @@ meta(name="twitter:description", content="{{project.summary}}")
 				data-toggle="tooltip",
 				data-placement="left",
 				class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
-				a(href="{{url_for('projects.about', project_url=project.url, _external=True)}}")
+				a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 					#project-loading
 						i.pi-spin
 					| {% if project.picture_square %}

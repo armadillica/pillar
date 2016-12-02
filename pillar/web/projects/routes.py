@@ -432,32 +432,6 @@ def search(project_url):
                            og_picture=project.picture_header)
 
 
-@blueprint.route('/<project_url>/about')
-def about(project_url):
-    """About page of a project"""
-
-    # TODO: Duplicated code from view function, we could re-use view instead
-
-    api = system_util.pillar_api()
-    project = find_project_or_404(project_url,
-                                  embedded={'header_node': 1},
-                                  api=api)
-
-    # Load the header video file, if there is any.
-    header_video_file = None
-    header_video_node = None
-    if project.header_node and project.header_node.node_type == 'asset' and \
-                    project.header_node.properties.content_type == 'video':
-            header_video_node = project.header_node
-            header_video_file = utils.get_file(project.header_node.properties.file)
-            header_video_node.picture = utils.get_file(header_video_node.picture)
-
-    return render_project(project, api,
-                          extra_context={'title': 'about',
-                                         'header_video_file': header_video_file,
-                                         'header_video_node': header_video_node})
-
-
 @blueprint.route('/<project_url>/edit', methods=['GET', 'POST'])
 @login_required
 def edit(project_url):

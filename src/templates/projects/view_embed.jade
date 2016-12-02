@@ -34,7 +34,7 @@ script.
 			.fp-waiting
 				i.pi-spin.spin
 		| {% elif project.picture_header %}
-		a(href="{{ url_for( 'projects.about', project_url=project.url) }}")
+		a(href="{{ url_for( 'projects.view', project_url=project.url) }}")
 			img.header(src="{{ project.picture_header.thumbnail('l', api=api) }}")
 		| {% endif %}
 
@@ -52,13 +52,13 @@ script.
 
 		.node-details-title
 			h1
-				a(href="{{ url_for( 'projects.about', project_url=project.url) }}") {{ project.name }}
+				a(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
 
 		.node-details-description
 			| {{ project.summary }}
 
 		| {# Until we implement urls for pages
-		a.learn-more(href="{{ url_for( 'projects.about', project_url=project.url) }}") LEARN MORE
+		a.learn-more(href="{{ url_for( 'projects.view', project_url=project.url) }}") LEARN MORE
 		| #}
 
 		.node-extra
