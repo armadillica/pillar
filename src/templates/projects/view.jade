@@ -377,7 +377,7 @@ script.
 		}
 
 		// XXX temporary lock for agent 327 project
-		{% if subscription not in ['demo', 'subscriber', 'admin'] and project.url == 'agent-327' and not node.permissions.world %}
+		{% if subscription not in ['demo', 'subscriber', 'admin'] and project.url == 'agent-327' and not (node.permissions and node.permissions.world) %}
 		var url = '/join-agent';
 		{% else %}
 		var url = '/nodes/' + nodeId + '/view';
