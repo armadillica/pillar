@@ -54,17 +54,12 @@ script.
 			h1
 				a(href="{{ url_for( 'projects.about', project_url=project.url) }}") {{ project.name }}
 
-		| {% if title != 'about' or not project.description %}
-		| {% set description = project.summary %}
-		| {% else %}
-		| {% set description = project.description %}
-		| {% endif %}
-
 		.node-details-description
-			| {{ description }}
+			| {{ project.summary }}
 
-		| {% if title != 'about' %}
+		| {# Until we implement urls for pages
 		a.learn-more(href="{{ url_for( 'projects.about', project_url=project.url) }}") LEARN MORE
+		| #}
 
 		.node-extra
 
@@ -115,8 +110,6 @@ script.
 					| {% endif %}
 					| {% endfor %}
 			| {% endif %}
-
-		| {% endif %}
 
 include _scripts
 
