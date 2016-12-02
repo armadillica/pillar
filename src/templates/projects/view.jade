@@ -41,9 +41,9 @@ link(href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.1/themes/default/style.mi
 | {% endblock %}
 
 | {% block css %}
-link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=11220163) }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=11220163) }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v=11220163) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=21220161) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=21220161) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v=21220161) }}", rel="stylesheet")
 | {% endblock %}
 
 | {% block body %}
@@ -236,7 +236,7 @@ script(src="//releases.flowplayer.org/6.0.5/flowplayer.min.js")
 
 | {% if project.has_method('PUT') %}
 | {# JS containing the Edit, Add, Featured, and Move functions #}
-script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets/js/project-edit.min.js', v=11220163) }}")
+script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets/js/project-edit.min.js', v=21220161) }}")
 | {% endif %}
 
 script.
