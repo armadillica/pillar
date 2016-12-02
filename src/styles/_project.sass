@@ -2674,3 +2674,63 @@ section.node-children
 
 			.blog_index-header
 				border-radius: 0
+
+.join-project
+	display: flex
+	flex-direction: column
+	width: 100%
+	height: 100%
+	color: white
+
+	background-position-x: 64%
+
+	a.cta
+		padding: 5px 35px
+		+button($color-primary, 3px, true)
+
+	a.cta-learn-more
+		padding: 5px 20px
+		+button(white, 3px)
+		display: inline-block
+		margin: 25px 0 25px 15px
+		padding: 5px 35px
+
+	&__title
+		display: flex
+		padding: 25px 0 10px 10px
+		font:
+			size: 2.5em
+			weight: 300
+
+		span.icon
+			display: flex
+			align-items: center
+
+		span.text
+			display: flex
+			align-items: center
+			text-align: left
+			line-height: 1.2em
+			margin-right: auto
+
+	&__lead
+		font-size: 1.4em
+		font-weight: 300
+		padding: 0 25px 25px
+		max-width: 800px
+
+	&__summary
+		font-size: 1.1em
+		padding: 0 25px
+		max-width: 500px
+
+		ul
+			margin: 0
+			padding-left: 20px
+
+		&-cta-container
+			a.cta
+				display: inline-block
+				margin: 25px 0 0 0
+				padding: 5px 35px
+				text-align: center
