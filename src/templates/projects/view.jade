@@ -68,12 +68,21 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 						i.pi-folder
 				| {% if not project.is_private %}
+				| {% if subscription in ['demo', 'subscriber', 'admin'] %}
 				li.tabs-search(
 					title="Search",
 					data-toggle="tooltip",
 					data-placement="right")
-					a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
+					a(href="{{ url_for('projects.search', project_url=project.url, _external=True)}} ")
 						i.pi-search
+				| {% else %}
+				li.tabs-search(
+					title="Search (subscribers only)",
+					data-toggle="tooltip",
+					data-placement="right")
+					a(href="{{ url_for('main.join') }}")
+						i.pi-search
+				| {% endif %}
 				| {% endif %}
 				| {{ extension_sidebar_links }}
 
