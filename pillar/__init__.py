@@ -225,11 +225,14 @@ class PillarServer(Eve):
         eve_settings = pillar_extension.eve_settings()
 
         if 'DOMAIN' in eve_settings:
+            pillar_ext_prefix = pillar_extension.name + '.'
             for key, collection in eve_settings['DOMAIN'].items():
-                source = '%s.%s' % (pillar_extension.name, key)
-                url = '%s/%s' % (pillar_extension.name, key)
+                assert key.startswith(pillar_ext_prefix), \
+                    'Eve collection names of %s MUST start with %r' % \
+                    (pillar_extension.name, pillar_ext_prefix)
+                url = key.replace('.', '/')
 
-                collection.setdefault('datasource', {}).setdefault('source', source)
+                collection.setdefault('datasource', {}).setdefault('source', key)
                 collection.setdefault('url', url)
 
             self.config['DOMAIN'].update(eve_settings['DOMAIN'])
