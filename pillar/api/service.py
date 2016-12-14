@@ -162,7 +162,7 @@ def manage_user_group_membership(db_user, role, action):
     return user_groups
 
 
-def create_service_account(email, roles, service):
+def create_service_account(email, roles, service, update_existing=None):
     """Creates a service account with the given roles + the role 'service'.
 
     :param email: email address associated with the account
@@ -170,21 +170,53 @@ def create_service_account(email, roles, service):
     :param roles: iterable of role names
     :param service: dict of the 'service' key in the user.
     :type service: dict
+    :param update_existing: callback function that receives an existing user to update
+        for this service, in case the email address is already in use by someone.
+        If not given or None, updating existing users is disallowed, and a ValueError
+        exception is thrown instead.
+
     :return: tuple (user doc, token doc)
     """
 
-    # Create a user with the correct roles.
-    roles = list(set(roles).union({u'service'}))
-    user = {'username': email,
-            'groups': [],
-            'roles': roles,
-            'settings': {'email_communications': 0},
-            'auth': [],
-            'full_name': email,
-            'email': email,
-            'service': service}
-    result, _, _, status = current_app.post_internal('users', user)
-    if status != 201:
+    from pillar.api.utils import remove_private_keys
+
+    # Find existing
+    users_coll = current_app.db()['users']
+    user = users_coll.find_one({'email': email})
+    if user:
+        # Check whether updating is allowed at all.
+        if update_existing is None:
+            raise ValueError('User %s already exists' % email)
+
+        # Compute the new roles, and assign.
+        roles = list(set(roles).union({u'service'}).union(user['roles']))
+        user['roles'] = list(roles)
+
+        # Let the caller perform any required updates.
+        log.info('Updating existing user %s to become service account for %s',
+                 email, roles)
+        update_existing(user['service'])
+
+        # Try to store the updated user.
+        result, _, _, status = current_app.put_internal('users',
+                                                        remove_private_keys(user),
+                                                        _id=user['_id'])
+        expected_status = 200
+    else:
+        # Create a user with the correct roles.
+        roles = list(set(roles).union({u'service'}))
+        user = {'username': email,
+                'groups': [],
+                'roles': roles,
+                'settings': {'email_communications': 0},
+                'auth': [],
+                'full_name': email,
+                'email': email,
+                'service': service}
+        result, _, _, status = current_app.post_internal('users', user)
+        expected_status = 201
+
+    if status != expected_status:
         raise SystemExit('Error creating user {}: {}'.format(email, result))
     user.update(result)
 
