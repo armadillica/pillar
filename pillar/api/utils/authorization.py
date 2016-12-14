@@ -7,7 +7,7 @@ from flask import abort
 from flask import current_app
 from werkzeug.exceptions import Forbidden
 
-CHECK_PERMISSIONS_IMPLEMENTED_FOR = {'projects', 'nodes', 'flamenco.jobs'}
+CHECK_PERMISSIONS_IMPLEMENTED_FOR = {'projects', 'nodes', 'flamenco_jobs'}
 
 log = logging.getLogger(__name__)
 
