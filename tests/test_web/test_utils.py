@@ -108,3 +108,17 @@ class PrettyDateTest(unittest.TestCase):
         self.assertEqual('in 2 weeks at 11:46', pd(days=14))
         self.assertEqual('08 Dec at 11:46', pd(days=30))
         self.assertEqual('08 Dec 2017 at 11:46', pd(days=30 + 365))
+
+
+class EvePaginationTest(unittest.TestCase):
+    def test_last_page_index(self):
+        from pillar.web.utils import last_page_index as lpi
+
+        self.assertEqual(1, lpi({'total': 0, 'max_results': 313}))
+        self.assertEqual(1, lpi({'total': 5, 'max_results': 10}))
+        self.assertEqual(1, lpi({'total': 5, 'max_results': 5}))
+        self.assertEqual(2, lpi({'total': 6, 'max_results': 5}))
+        self.assertEqual(2, lpi({'total': 9, 'max_results': 5}))
+        self.assertEqual(2, lpi({'total': 10, 'max_results': 5}))
+        self.assertEqual(3, lpi({'total': 11, 'max_results': 5}))
+        self.assertEqual(404129352, lpi({'total': 2828905463, 'max_results': 7}))

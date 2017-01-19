@@ -205,3 +205,24 @@ def is_valid_id(some_id):
         return True
 
     return False
+
+
+def last_page_index(meta_info):
+    """Eve pagination; returns the index of the last page.
+
+    :param meta_info: Eve's '_meta' response.
+    :returns: Eve page number (base-1) of the last page.
+    :rtype: int
+    """
+
+    total = meta_info['total']
+    if total == 0:
+        return 1
+
+    per_page = meta_info['max_results']
+
+    pages = total // per_page
+    if total % per_page == 0:
+        return pages
+
+    return pages + 1
