@@ -105,4 +105,21 @@ script.
 		}
 	});
 
+	/* Expand images when their link points to a jpg/png/gif */
+	/* TODO: De-duplicate code from blog index */
+	$('.blog_index-item .item-content a img').on('click', function(e){
+		e.preventDefault();
+
+		var href = $(this).parent().attr('href');
+		var src = $(this).attr('src');
+
+		if (href.match("jpg$") || href.match("png$") || href.match("gif$")) {
+			var page_overlay = document.getElementById('page-overlay');
+			$(page_overlay)
+						.addClass('active')
+						.html('<img src="' + src + '"/>');
+		} else {
+			window.location.href = href;
+		}
+	});
 | {% endblock %}
