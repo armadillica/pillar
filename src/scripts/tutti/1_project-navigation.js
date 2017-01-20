@@ -160,7 +160,7 @@ function containerResizeY(window_height){
 		);
 
 		if (container_height > parseInt($('#project-container').css("min-height"))) {
-			if (projectTree){
+			if (typeof projectTree !== "undefined"){
 				$(projectTree).css(
 					{'max-height': container_height_wheader + 'px',
 					 'height': container_height_wheader + 'px'}
