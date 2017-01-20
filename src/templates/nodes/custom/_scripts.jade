@@ -14,6 +14,22 @@ script(type="text/javascript").
 
 	ProjectUtils.setProjectAttributes({isProject: false});
 
+	// Click anywhere in the page to hide the overlay
+	var page_overlay = document.getElementById('page-overlay');
+
+	function hidePageOverlay() {
+		$(page_overlay)
+			.removeAttr('class')
+			.html('');
+	}
+
+	$(page_overlay).click(function(e) {
+		e.stopPropagation();
+		e.preventDefault();
+
+		hidePageOverlay();
+	});
+
 	{% if node %}
 		ProjectUtils.setProjectAttributes({
 			nodeId: '{{node._id}}',
@@ -38,8 +54,6 @@ script(type="text/javascript").
 
 
 		// If we are im preview mode, update the image source
-		var page_overlay = document.getElementById('page-overlay');
-
 		if (page_overlay.classList.contains('active')) {
 			var node_preview = document.getElementById('node-preview');
 
@@ -79,20 +93,6 @@ script(type="text/javascript").
 			});
 
 		{% endif %}
-
-		// Click anywhere in the page to hide the overlay
-		function hidePageOverlay() {
-			$(page_overlay)
-				.removeAttr('class')
-				.html('');
-		}
-
-		$(page_overlay).click(function(e) {
-			e.stopPropagation();
-			e.preventDefault();
-
-			hidePageOverlay();
-		});
 
 		function navigateTree(prev){
 			var tree = $('#project_tree').jstree(true);

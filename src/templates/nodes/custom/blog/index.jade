@@ -122,19 +122,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=2122016
 | {% block footer_scripts %}
 include ../_scripts
 script.
-	var project_container = document.getElementById('project-container');
-
-	/* UI Stuff */
-	$(window).on("load resize",function(){
-		containerResizeY($(window).height());
-
-		if ($(window).width() > 480) {
-			project_container.style.height = (window.innerHeight - project_container.offsetTop) + "px";
-		}
-	});
-
 	/* Expand images when their link points to a jpg/png/gif */
-	/* TODO: De-duplicate code from view post */
 	$('.blog_index-item .item-content a img').on('click', function(e){
 		e.preventDefault();
 
@@ -142,7 +130,6 @@ script.
 		var src = $(this).attr('src');
 
 		if (href.match("jpg$") || href.match("png$") || href.match("gif$")) {
-			var page_overlay = document.getElementById('page-overlay');
 			$(page_overlay)
 						.addClass('active')
 						.html('<img src="' + src + '"/>');
@@ -150,4 +137,5 @@ script.
 			window.location.href = href;
 		}
 	});
+
 | {% endblock %}
