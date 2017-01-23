@@ -207,6 +207,10 @@ def view(node_id):
 
     template_path = '{0}/{1}_embed.html'.format(template_path, template_action)
 
+    # Full override for AMP view
+    if request.args.get('format') == 'amp':
+        template_path = 'nodes/view_amp.html'
+
     try:
         return render_template(template_path,
                                node_id=node._id,
