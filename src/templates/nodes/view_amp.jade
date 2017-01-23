@@ -21,6 +21,7 @@ html(⚡)
 		| {% if node.picture %}
 		amp-img(
 			src="{{ node.picture.thumbnail('l', api=api) }}",
+			srcset="{{ node.picture.thumbnail('l', api=api) }} 1080w, {{ node.picture.thumbnail('m', api=api) }} 320w",
 			layout="responsive",
 			height="{{ node.picture.height }}",
 			width="{{ node.picture.width }}")
