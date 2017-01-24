@@ -85,6 +85,18 @@ def jsonify(mongo_doc, status=200, headers=None):
                                       headers=headers)
 
 
+def bsonify(mongo_doc, status=200, headers=None):
+    """BSonifies a Mongo document into a Flask response object."""
+
+    import bson
+
+    data = bson.BSON.encode(mongo_doc)
+    return current_app.response_class(data,
+                                      mimetype='application/bson',
+                                      status=status,
+                                      headers=headers)
+
+
 def skip_when_testing(func):
     """Decorator, skips the decorated function when app.config['TESTING']"""
 
