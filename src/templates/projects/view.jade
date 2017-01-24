@@ -39,7 +39,7 @@ meta(name="twitter:description", content="{{node.description}}")
 | {% block head %}
 link(href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.1/themes/default/style.min.css", rel="stylesheet")
 | {% if node %}
-link(rel="amphtml", href="{{ url_for('nodes.view', node_id=node._id, _external=True) }}?format=amp")
+link(rel="amphtml", href="{{ url_for('nodes.view', node_id=node._id, _external=True, format='amp') }}")
 | {% endif %}
 | {% endblock %}
 
