@@ -104,9 +104,9 @@ include _scripts
 
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.montage.min.js') }}")
 script.
-	| {% if header_video_file %}
+	{% if header_video_file %}
 		videojs(document.getElementById('videoplayer'), { fluid: true });
-	| {% endif %}
+	{% endif %}
 
 	function montage(){
 		var $container 	= $('#featured-list'),
