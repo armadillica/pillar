@@ -1031,23 +1031,26 @@ section.node-preview
 
 	&.video
 		background-color: black
-		min-height: 350px
+		min-height: 320px
+		position: relative
 
 		.video-dummy
-			img
-				display: block
-				margin: 0 auto
-				position: absolute
-				z-index: 1
-				opacity: .6
-
+			min-height: 320px
 			display: flex
 			width: 100%
 			align-items: center
 			justify-content: center
 			color: white
+			background:
+				repeat: no-repeat
+				size: cover
+				position: center
+			height: 100%
 
 			&-content
+				background-color: rgba(black, .8)
+				padding: 15px
+				border-radius: 3px
 				position: relative
 				z-index: 2
 				display: flex
@@ -1068,6 +1071,7 @@ section.node-preview
 						em
 							font-style: normal
 							color: $color-warning
+							margin-right: 10px
 
 	&.group, &.project
 		background-color: $color-background

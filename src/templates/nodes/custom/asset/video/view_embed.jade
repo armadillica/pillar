@@ -20,10 +20,7 @@
 				<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
 		| {% else %}
 		.video-dummy.sorry(
-			style="{% if node.picture %}height: {{ node.picture.height }}px{% endif %}")
-			| {% if node.picture %}
-			img.video-dummy-thumbnail(src="{{ node.picture.thumbnail('l', api=api) }}")
-			| {% endif %}
+			style="{% if node.picture %}background-image: url({{ node.picture.thumbnail('l', api=api) }});{% endif %}")
 			.video-dummy-content
 				i.pi-lock.video-dummy-content-icon
 				.video-dummy-content-text
@@ -133,8 +130,10 @@
 			#comments-list-items-loading
 				i.pi-spin
 
+| {% if node.video_sources %}
 script(type="text/javascript").
 	videojs(document.getElementById('videoplayer'), { fluid: true });
+| {% endif %}
 
 include ../../_scripts
 
