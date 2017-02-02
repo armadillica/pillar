@@ -1,19 +1,6 @@
 | {% block head %}
 | {% if header_video_file %}
-script(src="//releases.flowplayer.org/6.0.5/flowplayer.min.js")
-script.
-	$(function() {
-		$('#flowplayer_container').flowplayer({
-			key: "{{config.FLOWPLAYER_KEY}}",
-			embed: false,
-			splash: true,
-			clip: { sources: [
-			{% for var in header_video_file.variations %}
-				{type: "{{ var.content_type }}", src: "{{ var.link|safe }}"},
-			{% endfor %}
-			]}
-		});
-	});
+script(src="//vjs.zencdn.net/5.8.8/video.js")
 | {% endif %}
 | {% endblock %}
 
@@ -22,17 +9,19 @@ script.
 #node-container
 	section.node-preview.project
 		| {% if header_video_file %}
-		#flowplayer_container.is-splash.play-button(
-			style="{% if header_video_node.picture %}background-image:url({{header_video_node.picture.thumbnail('l', api=api)}}); background-repeat:no-repeat; {% endif %}")
-			.fp-startscreen.fp-toggle
-				a.big-play-button
-					i.pi-play
-			.fp-endscreen
-				a.watch-again.fp-toggle
-					i.pi-replay
-					| Watch again
-			.fp-waiting
-				i.pi-spin.spin
+		video.video-js.vjs-fluid(
+			controls,
+			data-setup="{}",
+			preload="auto",
+			poster="{% if node.picture %}{{ header_video_node.picture.thumbnail('l', api=api) }}{% endif %}")
+			| {% for source in node.video_sources %}
+			source(
+				src="{{ source.src }}",
+				type="{{ source.type }}")
+			| {% endfor %}
+			p.vjs-no-js.
+				To view this video please enable JavaScript, and consider upgrading to a web browser that
+				<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
 		| {% elif project.picture_header %}
 		a(href="{{ url_for( 'projects.view', project_url=project.url) }}")
 			img.header(src="{{ project.picture_header.thumbnail('l', api=api) }}")
