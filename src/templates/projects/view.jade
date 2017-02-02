@@ -46,9 +46,9 @@ script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-5.8.8
 | {% endblock %}
 
 | {% block css %}
-link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=21220161) }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=21220161) }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v=21220161) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=2220171) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=2220171) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v=2220171) }}", rel="stylesheet")
 | {% endblock %}
 
 | {% block body %}
@@ -237,11 +237,10 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 
 | {% block footer_scripts %}
 script(src="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.1/jstree.min.js")
-script(src="//vjs.zencdn.net/5.8.8/video.js")
 
 | {% if project.has_method('PUT') %}
 | {# JS containing the Edit, Add, Featured, and Move functions #}
-script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets/js/project-edit.min.js', v=21220161) }}")
+script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets/js/project-edit.min.js', v=2220171) }}")
 | {% endif %}
 
 script.
