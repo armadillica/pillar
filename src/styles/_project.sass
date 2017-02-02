@@ -1032,6 +1032,43 @@ section.node-preview
 	&.video
 		background-color: black
 
+		.video-dummy
+			min-height: 250px
+			img
+				display: block
+				margin: 0 auto
+				position: absolute
+				z-index: 1
+				opacity: .6
+
+			display: flex
+			width: 100%
+			align-items: center
+			justify-content: center
+			color: white
+
+			&-content
+				position: relative
+				z-index: 2
+				display: flex
+				align-items: center
+
+				&-icon
+					font-size: 4em
+
+				&-text
+					font-size: 1.6em
+					span
+						display: block
+					a
+						display: inline-block
+						color: white
+						font-size: .8em
+
+						em
+							font-style: normal
+							color: $color-warning
+
 	&.group, &.project
 		background-color: $color-background
 		@include overlay(rgba($color-background, .3), 0%, transparent, 100%)
@@ -2637,7 +2674,7 @@ section.node-children
 		.toggle
 			margin: 0 20px
 
-@import plugins/_flowplayer
+@import plugins/_videoplayer
 
 
 /* Edit Project specific classes*/

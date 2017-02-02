@@ -255,7 +255,7 @@ def _view_handler_asset(node, template_path, template_action, link_allowed):
                     # TODO: move this to Pillar
                     if f.backend == 'cdnsun':
                         f.link = "{0}&name={1}.{2}".format(f.link, node.name, f.format)
-            node.video_sources = json.dumps(sources)
+            node.video_sources = sources
             node.file_variations = node_file.variations
         else:
             node.video_sources = None
