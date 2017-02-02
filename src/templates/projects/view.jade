@@ -41,6 +41,8 @@ link(href="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.1/themes/default/style.mi
 | {% if node %}
 link(rel="amphtml", href="{{ url_for('nodes.view', node_id=node._id, _external=True, format='amp') }}")
 | {% endif %}
+
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-5.8.8.min.js', v=2220171) }}")
 | {% endblock %}
 
 | {% block css %}

@@ -5,7 +5,7 @@
 
 	section.node-preview.video
 		| {% if node.video_sources %}
-		video.video-js.vjs-fluid(
+		video#videoplayer.video-js.vjs-fluid(
 			controls,
 			data-setup="{}",
 			preload="auto",
@@ -132,6 +132,9 @@
 		#comments-embed
 			#comments-list-items-loading
 				i.pi-spin
+
+script(type="text/javascript").
+	videojs(document.getElementById('videoplayer'), { fluid: true });
 
 include ../../_scripts
 
