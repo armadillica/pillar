@@ -4,9 +4,15 @@
 | {% set title = 'services' %}
 
 | {% block og %}
-meta(property="og:title", content="Services - Blender Cloud")
+meta(property="og:type", content="website")
 meta(property="og:url", content="https://cloud.blender.org/services")
+
+meta(property="og:title", content="Services - Blender Cloud")
+meta(name="twitter:title", content="Services - Blender Cloud")
+meta(property="og:description", content="Personal Projects · Blender Integration · Texture Browsing · Production Management")
+meta(name="twitter:description", content="Personal Projects · Blender Integration · Texture Browsing · Production Management")
 meta(property="og:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_services.jpg')}}")
+meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_services.jpg')}}")
 | {% endblock %}
 
 | {% block header_backdrop %}

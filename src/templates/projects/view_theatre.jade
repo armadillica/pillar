@@ -4,24 +4,19 @@
 
 | {% block og %}
 meta(property="og:title", content="{{ node.name }}")
+meta(name="twitter:title", content="{{node.name}}")
 meta(property="og:url", content="{{ url_for('projects.view_node', project_url=project.url, node_id=node._id, t=1, _external=True) }}")
 meta(property="og:type", content="website")
 meta(property="og:description", content="Created on {{ node._created.strftime('%d %b %Y') }}")
+meta(name="twitter:description", content="Created on {{ node._created.strftime('%d %b %Y') }}")
 | {% if og_picture %}
 meta(property="og:image", content="{{ og_picture.thumbnail('l', api=api) }}")
 meta(property="og:image:secure_url", content="{{ og_picture.thumbnail('l', api=api) }}")
 meta(property="og:image:type", content="{{ og_picture.content_type }}")
 meta(property="og:image:witdh", content="{{ og_picture.width }}")
 meta(property="og:image:height", content="{{ og_picture.height }}")
-| {% endif %}
-| {% endblock %}
-
-| {% block tw %}
-| {% if og_picture %}
 meta(property="twitter:image", content="{{ og_picture.thumbnail('l', api=api) }}")
 | {% endif %}
-meta(name="twitter:title", content="{{node.name}}")
-meta(name="twitter:description", content="Created on {{ node._created.strftime('%d %b %Y') }}")
 | {% endblock %}
 
 | {% block header_backdrop %}{% endblock %}

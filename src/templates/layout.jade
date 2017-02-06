@@ -9,16 +9,17 @@ html(lang="en")
 		meta(name="theme-color", content="#3e92aa")
 
 		meta(property="og:site_name", content="Blender Cloud")
+		meta(property="og:locale", content="en_US")
+		meta(name="twitter:card", content="summary_large_image")
+		meta(name="twitter:site", content="@Blender_Cloud")
+
 		| {% block og %}
 		meta(property="og:title", content="Blender Cloud")
 		meta(property="og:url", content="https://cloud.blender.org")
 		meta(property="og:type", content="website")
 		meta(property="og:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_gleb_locomotive.jpg')}}")
-		| {% endblock %}
+		meta(property="og:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
 
-		meta(name="twitter:card", content="summary_large_image")
-		meta(name="twitter:site", content="@Blender_Cloud")
-		| {% block tw %}
 		meta(name="twitter:title", content="Blender Cloud")
 		meta(name="twitter:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
 		meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_gleb_locomotive.jpg')}}")

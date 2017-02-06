@@ -5,20 +5,13 @@
 meta(property="og:type", content="website")
 | {% if og_picture %}
 meta(property="og:image", content="{{ og_picture.thumbnail('l', api=api) }}")
-| {% endif %}
-| {% if project %}
-meta(property="og:title", content="{{project.name}} - Blender Cloud")
-meta(property="og:url", content="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-meta(property="og:description", content="{{project.summary}}")
-| {% endif %}
-| {% endblock %}
-
-| {% block tw %}
-| {% if og_picture %}
 meta(property="twitter:image", content="{{ og_picture.thumbnail('l', api=api) }}")
 | {% endif %}
 | {% if project %}
+meta(property="og:title", content="{{project.name}} - Blender Cloud")
 meta(name="twitter:title", content="{{project.name}} on Blender Cloud")
+meta(property="og:url", content="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+meta(property="og:description", content="{{project.summary}}")
 meta(name="twitter:description", content="{{project.summary}}")
 | {% endif %}
 | {% endblock %}

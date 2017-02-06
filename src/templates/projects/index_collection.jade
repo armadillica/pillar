@@ -1,17 +1,16 @@
 | {% extends 'layout.html' %}
 
 | {% block og %}
-meta(property="og:title", content="{% if title == 'open-projects' %}Open Projects{% elif title == 'training' %}Training{% endif %}")
-// XXX - Replace with actual url
-meta(property="og:url", content="https://cloud.blender.org")
 meta(property="og:type", content="website")
-| {% endblock %}
+meta(property="og:url", content="https://cloud.blender.org")
 
-| {% block tw %}
-meta(name="twitter:card", content="summary_large_image")
-meta(name="twitter:site", content="@Blender_Cloud")
+meta(property="og:title", content="{% if title == 'open-projects' %}Open Projects{% elif title == 'training' %}Training{% endif %}")
 meta(name="twitter:title", content="{% if title == 'open-projects' %}Open Projects{% elif title == 'training' %}Training{% endif %} on Blender Cloud")
+
+meta(property="og:description", content="{% if title == 'open-projects' %}Full production data and tutorials from all open movies, for you to use freely{% elif title == 'training' %}Production quality training by 3D professionals{% endif %}")
 meta(name="twitter:description", content="{% if title == 'open-projects' %}Full production data and tutorials from all open movies, for you to use freely{% elif title == 'training' %}Production quality training by 3D professionals{% endif %}")
+
+meta(property="og:image", content="{% if title == 'training' %}{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_03.jpg')}}{% else %}{{ url_for('static', filename='assets/img/backgrounds/background_agent327_01.jpg')}}{% endif %}")
 meta(name="twitter:image", content="{% if title == 'training' %}{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_03.jpg')}}{% else %}{{ url_for('static', filename='assets/img/backgrounds/background_agent327_01.jpg')}}{% endif %}")
 | {% endblock %}
 

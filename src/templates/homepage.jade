@@ -4,14 +4,16 @@
 | {% set title = 'homepage' %}
 
 | {% block og %}
-meta(property="og:title", content="Blender Cloud")
+meta(property="og:type", content="website")
 meta(property="og:url", content="https://cloud.blender.org/")
-meta(property="og:image", content="{% if main_project.picture_header %}{{ main_project.picture_header.thumbnail('l', api=api) }}{% else %}{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_02.jpg')}}{% endif %}")
-| {% endblock %}
 
-| {% block tw %}
+meta(property="og:title", content="Blender Cloud")
 meta(name="twitter:title", content="Blender Cloud")
+
+meta(property="og:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
 meta(name="twitter:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
+
+meta(property="og:image", content="{% if main_project.picture_header %}{{ main_project.picture_header.thumbnail('l', api=api) }}{% else %}{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_02.jpg')}}{% endif %}")
 meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_project.picture_header.thumbnail('l', api=api) }}{% else %}{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_02.jpg')}}{% endif %}")
 | {% endblock %}
 
