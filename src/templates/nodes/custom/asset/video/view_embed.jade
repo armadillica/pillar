@@ -130,17 +130,11 @@
 			#comments-list-items-loading
 				i.pi-spin
 
-| {% if node.video_sources %}
 script(type="text/javascript").
+	{% if node.video_sources %}
 	videojs(document.getElementById('videoplayer'), { fluid: true });
-| {% endif %}
+	{% endif %}
 
-include ../../_scripts
-
-| {% endblock %}
-
-| {% block footer_scripts %}
-script(type="text/javascript").
 	$(function(){
 		// Generate GA pageview
 		ga('send', 'pageview', location.pathname);
@@ -156,5 +150,7 @@ script(type="text/javascript").
 		});
 		{% endif %}
 	});
+
+include ../../_scripts
 
 | {% endblock %}
