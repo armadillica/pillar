@@ -13,8 +13,8 @@ meta(name="twitter:image", content="{{ og_picture.thumbnail('l', api=api) }}")
 meta(property="og:image", content="{{ node.picture.thumbnail('l', api=api) }}")
 meta(name="twitter:image", content="{{ node.picture.thumbnail('l', api=api) }}")
 | {% else %}
-meta(property="og:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_02.jpg')}}")
-meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_caminandes_3_02.jpg')}}")
+meta(property="og:image", content="{{ project.picture_header.thumbnail('l', api=api) }}")
+meta(name="twitter:image", content="{{ project.picture_header.thumbnail('l', api=api) }}")
 | {% endif %}
 
 | {% if show_project %}
@@ -29,8 +29,14 @@ meta(property="og:url", content="{{ url_for('projects.view', project_url=project
 | {% if node %}
 meta(property="og:title", content="{{ node.name }} - Blender Cloud")
 meta(name="twitter:title", content="{{ node.name }} on Blender Cloud")
-meta(property="og:description", content="{{ node.description }}")
-meta(name="twitter:description", content="{{ node.description }}")
+
+| {% if node.node_type == 'post' %}
+meta(property="og:description", content="{{ node.properties.content | truncate(180) }}")
+meta(name="twitter:description", content="{{ node.properties.content | truncate(180) }}")
+| {% else %}
+meta(property="og:description", content="{{ node.description | truncate(180) }}")
+meta(name="twitter:description", content="{{ node.description | truncate(180) }}")
+| {% endif %}
 
 meta(property="og:url", content="{{url_for('projects.view_node', project_url=project.url, node_id=node._id)}}")
 | {% else %}
