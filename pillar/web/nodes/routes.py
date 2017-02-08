@@ -28,9 +28,9 @@ from pillar.web.nodes.forms import process_node_form
 from pillar.web.nodes.custom.storage import StorageNode
 from pillar.web.projects.routes import project_update_nodes_list
 from pillar.web.utils import get_file
+from pillar.web.utils import attach_project_pictures
 from pillar.web.utils.jstree import jstree_build_children
 from pillar.web.utils.jstree import jstree_build_from_node
-from pillar.web.utils.forms import ProceduralFileSelectForm
 from pillar.web.utils.forms import build_file_select_form
 from pillar.web import system_util
 
@@ -120,8 +120,9 @@ def view(node_id):
 
     node_type_name = node.node_type
 
-    if node_type_name == 'post':
-        # Posts shouldn't be shown at this route, redirect to the correct one.
+    if node_type_name == 'post' and not request.args.get('embed'):
+        # Posts shouldn't be shown at this route (unless viewed embedded, tipically
+        # after an edit. Redirect to the correct one.
         return redirect(url_for_node(node=node))
 
     # Set the default name of the template path based on the node name
@@ -353,12 +354,14 @@ def edit(node_id):
                 if not form[prop_name].choices:
                     form[prop_name].choices = [(d, d) for d in db_prop_value]
                     # Choices should be a tuple with value and name
-
             if not set_data:
                 continue
 
             # Assign data to the field
             if prop_name == 'attachments':
+                # If attachments is an empty list, do not append data
+                if not db_prop_value:
+                    continue
                 attachments.attachment_form_group_set_data(db_prop_value, schema_prop,
                                                            form[prop_name])
             elif prop_name == 'files':
@@ -391,7 +394,6 @@ def edit(node_id):
     dyn_schema = node_type['dyn_schema'].to_dict()
     form_schema = node_type['form_schema'].to_dict()
     error = ""
-
     node_properties = node.properties.to_dict()
 
     ensure_lists_exist_as_empty(node.to_dict(), node_type)
@@ -405,8 +407,6 @@ def edit(node_id):
                 project_update_nodes_list(node, project_id=project._id, list_name='blog')
             else:
                 project_update_nodes_list(node, project_id=project._id)
-            # Emergency hardcore cache flush
-            # cache.clear()
             return redirect(url_for('nodes.view', node_id=node_id, embed=1,
                                     _external=True,
                                     _scheme=current_app.config['SCHEME']))
@@ -416,7 +416,6 @@ def edit(node_id):
     else:
         if form.errors:
             log.debug('Form errors: %s', form.errors)
-
     # Populate Form
     form.name.data = node.name
     form.description.data = node.description
@@ -424,7 +423,6 @@ def edit(node_id):
         form.picture.data = node.picture
     if node.parent:
         form.parent.data = node.parent
-
     set_properties(dyn_schema, form_schema, node_properties, form, set_data=True)
 
     # Get previews
@@ -443,9 +441,10 @@ def edit(node_id):
     if request.args.get('embed') == '1':
         # Define the prefix for the embedded template
         embed_string = '_embed'
+    else:
+        attach_project_pictures(project, api)
 
     template = '{0}/edit{1}.html'.format(node_type['name'], embed_string)
-
     # We should more simply check if the template file actually exsists on
     # the filesystem level
     try:
@@ -459,6 +458,7 @@ def edit(node_id):
             api=api)
     except TemplateNotFound:
         template = 'nodes/edit{1}.html'.format(node_type['name'], embed_string)
+        is_embedded_edit = True if embed_string else False
         return render_template(
             template,
             node=node,
@@ -466,7 +466,10 @@ def edit(node_id):
             form=form,
             errors=form.errors,
             error=error,
-            api=api)
+            api=api,
+            project=project,
+            is_embedded_edit=is_embedded_edit,
+        )
 
 
 def ensure_lists_exist_as_empty(node_doc, node_type):

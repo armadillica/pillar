@@ -137,7 +137,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 
 				| {% block project_tree %}
 				#project_tree
-				| {% endblock %}
+				| {% endblock project_tree %}
 				| {% endif %}
 
 				.project_split(title="Toggle Navigation [T]")
@@ -246,7 +246,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 			| {% if show_project %}
 			| {% include "projects/view_embed.html" %}
 			| {% endif %}
-			| {% endblock %}
+			| {% endblock project_context %}
 
 		#overlay-mode-move-container
 			.overlay-container
@@ -265,8 +265,8 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 | {% block footer_navigation %}{% endblock %}
 | {% block footer %}{% endblock %}
 
-| {% block footer_scripts %}
-script(src="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.1/jstree.min.js")
+
+| {% block footer_scripts_pre %}
 
 | {% if project.has_method('PUT') %}
 | {# JS containing the Edit, Add, Featured, and Move functions #}
@@ -274,24 +274,6 @@ script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets
 | {% endif %}
 
 script.
-	{% if show_project %}
-	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: true, nodeId: ''});
-	{% else %}
-	{% if node %}
-	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: false, nodeId: '{{node._id}}'});
-	{% endif %}
-	{% endif %}
-
-	var projectTree = document.getElementById('project_tree');
-
-	var urlNodeMove = "{{url_for('projects.move_node')}}";
-	var urlNodeFeature = "{{url_for('projects.add_featured_node')}}";
-	var urlNodeDelete = "{{url_for('projects.delete_node')}}";
-	var urlNodeTogglePublic = "{{url_for('projects.toggle_node_public')}}";
-	var urlNodeToggleProjHeader = "{{url_for('projects.toggle_node_project_header')}}";
-	var urlProjectDelete = "{{url_for('projects.delete')}}";
-	var urlProjectEdit = "{{url_for('projects.edit', project_url=project.url)}}";
-
 	function updateToggleProjHeaderMenuItem() {
 		var $toggle_projheader = $('#item_toggle_projheader');
 
@@ -308,15 +290,15 @@ script.
 	$(updateToggleProjHeaderMenuItem);
 
 	// Function to update the interface on loadNodeContent, and edit/saving assets
-	function updateUi(nodeId, mode){
+	function updateUi(nodeId, mode) {
 
 		if (mode === 'view') {
 			$('.project-mode-view').show();
 			$('.project-mode-edit').hide();
 
-			$("#node-edit-form").unbind( "submit" );
-			$("#item_save").unbind( "click" );
-			$("#item_cancel").unbind( "click" );
+			$("#node-edit-form").unbind("submit");
+			$("#item_save").unbind("click");
+			$("#item_cancel").unbind("click");
 		} else if (mode === 'edit') {
 			$('.project-mode-view').hide();
 			$('.project-mode-edit').show();
@@ -352,11 +334,33 @@ script.
 		// it's done like that in all users of updateUi().
 		$('#project-loading').removeAttr('class');
 	}
+| {% endblock %}
+
+| {% block footer_scripts %}
+script(src="//cdnjs.cloudflare.com/ajax/libs/jstree/3.3.1/jstree.min.js")
+
+script.
+	{% if show_project %}
+	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: true, nodeId: ''});
+	{% else %}
+	{% if node %}
+	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: false, nodeId: '{{node._id}}'});
+	{% endif %}
+	{% endif %}
+
+	var projectTree = document.getElementById('project_tree');
+
+	var urlNodeMove = "{{url_for('projects.move_node')}}";
+	var urlNodeFeature = "{{url_for('projects.add_featured_node')}}";
+	var urlNodeDelete = "{{url_for('projects.delete_node')}}";
+	var urlNodeTogglePublic = "{{url_for('projects.toggle_node_public')}}";
+	var urlNodeToggleProjHeader = "{{url_for('projects.toggle_node_project_header')}}";
+	var urlProjectDelete = "{{url_for('projects.delete')}}";
+	var urlProjectEdit = "{{url_for('projects.edit', project_url=project.url)}}";
 
 
 	function loadNodeContent(url, nodeId) {
 		$('#project-loading').addClass('active');
-
 		$.get(url, function(dataHtml) {
 			// Update the DOM injecting the generate HTML into the page
 			$('#project_context').html(dataHtml);
@@ -608,8 +612,10 @@ script.
 		});
 	};
 
-	// Initialize the page
+	{% if is_embedded_edit is not defined or is_embedded_edit %}
+	// Initialize the page if we are not directly editing a node (most of the time)
 	loadContent();
+	{% endif %}
 
 	var project_container = document.getElementById('project-container');
 

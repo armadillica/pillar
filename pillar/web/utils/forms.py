@@ -108,12 +108,6 @@ class FileSelectField(StringField):
         self.widget = CustomFileSelectWidget(file_format=file_format)
 
 
-class ProceduralFileSelectForm(Form):
-    file = FileSelectField('file')
-    size = StringField()
-    slug = StringField()
-
-
 def build_file_select_form(schema):
     class FileSelectForm(Form):
         pass

@@ -38,7 +38,6 @@ def render_attachments(node, field_value):
             att = node_attachments[slug]
         except KeyError:
             return u'[attachment "%s" not found]' % slug
-
         return render_attachment(att)
 
     return shortcode_re.sub(replace, field_value)
@@ -60,14 +59,14 @@ def render_attachment(attachment):
         log.error(u'Unable to render attachment from collection %s', collection)
         return u'Unable to render attachment'
 
-    return renderer(oid)
+    return renderer(attachment)
 
 
-def render_attachment_file(oid):
+def render_attachment_file(attachment):
     """Renders a file attachment."""
 
     api = system_util.pillar_api()
-    sdk_file = pillarsdk.File.find(oid, api=api)
+    sdk_file = pillarsdk.File.find(attachment[u'oid'], api=api)
 
     file_renderers = {
         'image': render_attachment_file_image
@@ -79,15 +78,15 @@ def render_attachment_file(oid):
     except KeyError:
         return flask.render_template('nodes/attachments/file_generic.html', file=sdk_file)
 
-    return renderer(sdk_file)
+    return renderer(sdk_file, attachment)
 
 
-def render_attachment_file_image(sdk_file):
+def render_attachment_file_image(sdk_file, attachment):
     """Renders an image file."""
 
     variations = {var.size: var for var in sdk_file.variations}
     return flask.render_template('nodes/attachments/file_image.html',
-                                 file=sdk_file, vars=variations)
+                                 file=sdk_file, vars=variations, attachment=attachment)
 
 
 def attachment_form_group_create(schema_prop):
@@ -104,6 +103,8 @@ def _attachment_build_single_field(schema_prop):
     fake_schema = {
         'slug': schema_prop['propertyschema'],
         'oid': schema_prop['valueschema']['schema']['oid'],
+        'link': schema_prop['valueschema']['schema']['link'],
+        'link_custom': schema_prop['valueschema']['schema']['link_custom'],
     }
     file_select_form_group = build_file_select_form(fake_schema)
     return file_select_form_group
@@ -125,7 +126,12 @@ def attachment_form_group_set_data(db_prop_value, schema_prop, field_list):
         # Even uglier hard-coded
         subform.slug = slug
         subform.oid = att_data['oid']
-
+        subform.link = 'self'
+        subform.link_custom = None
+        if 'link' in att_data:
+            subform.link = att_data['link']
+        if 'link_custom' in att_data:
+            subform.link_custom = att_data['link_custom']
         field_list.append_entry(subform)
 
 
@@ -138,6 +144,8 @@ def attachment_form_parse_post_data(data):
     for allprops in data:
         oid = allprops['oid']
         slug = allprops['slug']
+        link = allprops['link']
+        link_custom = allprops['link_custom']
 
         if not allprops['slug'] and not oid:
             continue
@@ -145,5 +153,9 @@ def attachment_form_parse_post_data(data):
         if slug in attachments:
             raise ValueError('Slug "%s" is used more than once' % slug)
         attachments[slug] = {'oid': oid}
+        attachments[slug]['link'] = link
+
+        if link == 'custom':
+            attachments[slug]['link_custom'] = link_custom
 
     return attachments

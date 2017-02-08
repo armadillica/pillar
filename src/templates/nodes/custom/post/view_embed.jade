@@ -1,111 +1,43 @@
-| {% set title = 'blog' %}
 
-| {% block body %}
+#blog_container(class="{% if project and project._id == config.MAIN_PROJECT_ID %}cloud-blog{% endif %}")
 
-.container
-	#blog_container(class="{% if project._id == config.MAIN_PROJECT_ID %}cloud-blog{% endif %}")
+	#blog_post-container
+		| {% if project and project._id == config.MAIN_PROJECT_ID %}
+		a.btn.btn-default.button-back(href="{{ url_for('projects.view', project_url=project.url) }}blog")
+			| Back to Blog
 
-		#blog_post-container
-			| {% if project._id == config.MAIN_PROJECT_ID %}
-			a.btn.btn-default.button-back(href="{{ url_for('projects.view', project_url=project.url) }}blog")
-				| Back to Blog
-
-			| {% if node.has_method('PUT') %}
-			a.btn.btn-default.button-edit(href="{{url_for('nodes.posts_edit', post_id=node._id)}}")
-				i.pi-edit
-				| Edit Post
-			| {% endif %}
-
-			.clearfix
-			| {% endif %}
-
-			| {% if node.picture %}
-			.blog_index-header
-				img(src="{{ node.picture.thumbnail('l', api=api) }}")
-			| {% endif %}
-			.blog_index-item
-
-				.item-title
-					| {{node.name}}
-
-				.item-info.
-					<span title="{{node._created}}">{{node._created | pretty_date }}</span>
-					{% if node._created != node._updated %}
-					<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
-					{% endif %}
-					{% if node.properties.category %}| {{node.properties.category}}{% endif %}
-					| by {{node.user.full_name}}
-
-				.item-content
-					| {{ node.properties.content }}
-
-
-			#comments-embed
-				#comments-list-items-loading
-					i.pi-spin
-
-		| {% if project._id != config.MAIN_PROJECT_ID %}
-		#blog_index-sidebar
-			.blog_project-card
-				a.item-header(
-					href="{{ url_for('projects.view', project_url=project.url) }}")
-
-					.overlay
-					| {% if project.picture_header %}
-					img.background(src="{{ project.picture_header.thumbnail('m', api=api) }}")
-					| {% endif %}
-
-				a.card-thumbnail(
-					href="{{ url_for('projects.view', project_url=project.url) }}")
-					| {% if project.picture_square %}
-					img.thumb(src="{{ project.picture_square.thumbnail('m', api=api) }}")
-					| {% endif %}
-
-				.item-info
-
-					a.item-title(
-						href="{{ url_for('projects.view', project_url=project.url) }}")
-						| {{ project.name }}
-
-					| {% if project.summary %}
-					p.item-description
-						| {{project.summary|safe}}
-					| {% endif %}
-			.blog_project-sidebar
-				| {% if node.has_method('PUT') %}
-				a.btn.btn-default.button-create(href="{{url_for('nodes.posts_edit', post_id=node._id)}}")
-					| Edit Post
-				| {% endif %}
-
-				a.btn.btn-default.button-back(href="{{ url_for('projects.view', project_url=project.url) }}blog")
-					| Back to Blog
+		| {% if node.has_method('PUT') %}
+		a.btn.btn-default.button-edit(href="{{url_for('nodes.edit', node_id=node._id)}}")
+			i.pi-edit
+			| Edit Post
 		| {% endif %}
 
+		.clearfix
+		| {% endif %}
 
-| {% endblock %}
+		| {% if node.picture %}
+		.blog_index-header
+			img(src="{{ node.picture.thumbnail('l', api=api) }}")
+		| {% endif %}
+		.blog_index-item
+
+			.item-title
+				| {{node.name}}
+
+			.item-info.
+				<span title="{{node._created}}">{{node._created | pretty_date }}</span>
+				{% if node._created != node._updated %}
+				<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
+				{% endif %}
+				{% if node.properties.category %}| {{node.properties.category}}{% endif %}
+				| by {{node.user.full_name}}
+
+			.item-content
+				| {{ node.properties.content }}
 
 
-| {% block footer_scripts %}
+		#comments-embed
+			#comments-list-items-loading
+				i.pi-spin
 
 include ../_scripts
-script.
-	hopToTop(); // Display jump to top button
-
-	/* Expand images when their link points to a jpg/png/gif */
-	/* TODO: De-duplicate code from view post */
-	var page_overlay = document.getElementById('page-overlay');
-	$('.blog_index-item .item-content a img').on('click', function(e){
-		e.preventDefault();
-
-		var href = $(this).parent().attr('href');
-		var src = $(this).attr('src');
-
-		if (href.match("jpg$") || href.match("png$") || href.match("gif$")) {
-			$(page_overlay)
-						.addClass('active')
-						.html('<img src="' + src + '"/>');
-		} else {
-			window.location.href = href;
-		}
-	});
-| {% endblock %}

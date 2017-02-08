@@ -73,7 +73,6 @@ def posts_view(project_id=None, project_url=None, url=None):
 
         post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
             post, post['properties']['content'])
-
         return render_template(
             'nodes/custom/post/view{0}.html'.format(main_project_template),
             blog=blog,
@@ -139,52 +138,6 @@ def posts_create(project_id):
                            form=form,
                            project=project,
                            api=api)
-
-
-@blueprint.route("/posts/<post_id>/edit", methods=['GET', 'POST'])
-@login_required
-def posts_edit(post_id):
-    api = system_util.pillar_api()
-
-    try:
-        post = Node.find(post_id, {
-            'embedded': '{"user": 1}'}, api=api)
-    except ResourceNotFound:
-        return abort(404)
-    # Check if user is allowed to edit the post
-    if not post.has_method('PUT'):
-        return abort(403)
-
-    project = Project.find(post.project, api=api)
-    attach_project_pictures(project, api)
-
-    node_type = project.get_node_type(post.node_type)
-    form = get_node_form(node_type)
-    if form.validate_on_submit():
-        if process_node_form(form, node_id=post_id, node_type=node_type,
-                             user=current_user.objectid):
-            # The the post is published, add it to the list
-            if form.status.data == 'published':
-                project_update_nodes_list(post, project_id=project._id, list_name='blog')
-            return redirect(url_for_node(node=post))
-    form.parent.data = post.parent
-    form.name.data = post.name
-    form.content.data = post.properties.content
-    form.status.data = post.properties.status
-    form.url.data = post.properties.url
-    if post.picture:
-        form.picture.data = post.picture
-        # Embed picture file
-        post.picture = get_file(post.picture, api=api)
-    if post.properties.picture_square:
-        form.picture_square.data = post.properties.picture_square
-    return render_template('nodes/custom/post/edit.html',
-                           node_type=node_type,
-                           post=post,
-                           form=form,
-                           project=project,
-                           api=api)
-
 
 
 def setup_app(app):

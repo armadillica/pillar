@@ -1,1 +1,11 @@
-img(src="{{ vars['l'].link }}",alt="{{ file.filename }}")
+| {% if 'link' in attachment and attachment['link'] != 'none' %}
+| {% if attachment['link'] == 'self' %}
+a(href="{{ vars['l'].link }}")
+	img(src="{{ vars['l'].link }}", alt="{{ file.filename }}")
+| {% elif attachment['link'] == 'custom' %}
+a(href="{{ attachment['link_custom'] }}")
+	img(src="{{ vars['l'].link }}", alt="{{ file.filename }}")
+| {% endif %}
+| {% else %}
+img(src="{{ vars['l'].link }}", alt="{{ file.filename }}")
+| {% endif %}

@@ -23,6 +23,14 @@ _attachments_embedded_schema = {
                 'type': 'objectid',
                 'required': True,
             },
+            'link': {
+                'type': 'string',
+                'allowed': ['self', 'none', 'custom'],
+                'default': 'self',
+            },
+            'link_custom': {
+                'type': 'string',
+            },
             'collection': {
                 'type': 'string',
                 'allowed': ['files'],

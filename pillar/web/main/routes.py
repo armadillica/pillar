@@ -148,7 +148,6 @@ def main_posts_create():
 @blueprint.route('/p/<project_url>/blog/<url>')
 def project_blog(project_url, url=None):
     """View project blog"""
-
     return posts_view(project_url=project_url, url=url)
 
 

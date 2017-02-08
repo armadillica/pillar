@@ -1,4 +1,37 @@
 | {% extends 'layout.html' %}
 | {% block page_title %}{{node.name}} - Blog{% endblock%}
 
-include view_embed
+| {% set title = 'blog' %}
+
+| {% block body %}
+
+.container
+    | {% include 'nodes/custom/post/view_embed.html' %}
+
+| {% endblock %}
+
+
+| {% block footer_scripts %}
+
+script.
+    hopToTop(); // Display jump to top button
+
+    /* Expand images when their link points to a jpg/png/gif */
+    /* TODO: De-duplicate code from view post */
+    var page_overlay = document.getElementById('page-overlay');
+    $('.blog_index-item .item-content a img').on('click', function (e) {
+        e.preventDefault();
+
+        var href = $(this).parent().attr('href').split("?")[0];
+        var src = $(this).attr('src');
+
+
+        if (href.match("jpg$") || href.match("png$") || href.match("gif$")) {
+            $(page_overlay)
+                .addClass('active')
+                .html('<img src="' + src + '"/>');
+        } else {
+          window.location.href = href;
+        }
+    });
+| {% endblock %}

@@ -148,9 +148,18 @@ script(type="text/javascript").
 
 
 	/* Submit changes */
-	$("#node-edit-form").unbind( "submit" )
-						.submit(function(e) {
+	$("#node-edit-form").unbind("submit").submit(function(e) {
 		e.preventDefault();
+
+		// Assets always need a file
+		var $file = $('.form-group.file #file');
+		if ($file.val() == '') {
+			$file.addClass('error');
+			statusBarSet('error', 'No File Selected', 'pi-warning', 5000);
+			return jQuery.Deferred().reject("nofile");
+		}
+
+		$file.removeClass('error');
 
 		/* Let us know started saving */
 		$("li.button-save").addClass('saving');
@@ -181,7 +190,10 @@ script(type="text/javascript").
 		})
 		.done(function(dataHtml){
 			/* Success! */
+			// Disable beforeunolad when submitting a form
+			$(window).off('beforeunload');
 
+			{% if is_embedded_edit %}
 			/* Load content*/
 			$('#project_context').html(dataHtml);
 			statusBarSet('success', 'Saved Successfully', 'pi-check');
@@ -194,24 +206,18 @@ script(type="text/javascript").
 			//- $('#project_tree').jstree("refresh");
 
 			updateUi(ProjectUtils.nodeId(), 'view');
+			{% else %}
+			// This code runs only if we are in direct node editing mode, and since we do a redirect,
+			// nothing of what follows is executed, because of the redirect.
+			location.href = "{{ url_for('nodes.view', node_id=node._id)}}";
+			{% endif %}
 		});
 
 	});
 
 	$('#item_save, .item-save').click(function(e){
 		e.preventDefault();
-
-		// Assets always need a file
-		if ($('.form-group.file #file').val() == ''){
-			$('.form-group.file').addClass('error');
-			statusBarSet('error', 'No File Selected', 'pi-warning', 5000);
-		} else {
-			$('.form-group.file').removeClass('error');
-			$("#node-edit-form").submit();
-
-			// Disable beforeunolad when submitting a form
-			$(window).off('beforeunload');
-		}
+		$("#node-edit-form").submit();
 	});
 
 	$('#item_cancel, .item-cancel').click(function(e){
