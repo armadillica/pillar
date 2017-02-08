@@ -12,7 +12,7 @@ meta(name="twitter:image", content="{{ og_picture.thumbnail('l', api=api) }}")
 | {% elif node and node.picture %}
 meta(property="og:image", content="{{ node.picture.thumbnail('l', api=api) }}")
 meta(name="twitter:image", content="{{ node.picture.thumbnail('l', api=api) }}")
-| {% else %}
+| {% elif project.picture_header %}
 meta(property="og:image", content="{{ project.picture_header.thumbnail('l', api=api) }}")
 meta(name="twitter:image", content="{{ project.picture_header.thumbnail('l', api=api) }}")
 | {% endif %}
