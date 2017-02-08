@@ -31,11 +31,25 @@ meta(property="og:title", content="{{ node.name }} - Blender Cloud")
 meta(name="twitter:title", content="{{ node.name }} on Blender Cloud")
 
 | {% if node.node_type == 'post' %}
+
+| {% if node.properties.content %}
 meta(property="og:description", content="{{ node.properties.content | truncate(180) }}")
 meta(name="twitter:description", content="{{ node.properties.content | truncate(180) }}")
 | {% else %}
+meta(property="og:description", content="Blender Cloud, your source for open content and training")
+meta(name="twitter:description", content="Blender Cloud, your source for open content and training")
+| {% endif %}
+
+| {% else %}
+
+| {% if node.description %}
 meta(property="og:description", content="{{ node.description | truncate(180) }}")
 meta(name="twitter:description", content="{{ node.description | truncate(180) }}")
+| {% else %}
+meta(property="og:description", content="Blender Cloud, your source for open content and training")
+meta(name="twitter:description", content="Blender Cloud, your source for open content and training")
+| {% endif %}
+
 | {% endif %}
 
 meta(property="og:url", content="{{url_for('projects.view_node', project_url=project.url, node_id=node._id)}}")
