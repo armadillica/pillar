@@ -37,8 +37,10 @@
 			h1
 				a(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
 
+		| {% if project.summary %}
 		.node-details-description
 			| {{ project.summary }}
+		| {% endif %}
 
 		| {# Until we implement urls for pages
 		a.learn-more(href="{{ url_for( 'projects.view', project_url=project.url) }}") LEARN MORE
