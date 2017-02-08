@@ -132,7 +132,17 @@
 
 script(type="text/javascript").
 	{% if node.video_sources %}
-	videojs(document.getElementById('videoplayer'), { fluid: true });
+	videojs(document.getElementById('videoplayer'), {
+			fluid: true
+		},
+		function(){
+			this.ga({
+				'eventLabel' : '{{ node._id }} - {{ node.name }}',
+				'eventCategory' : '{{ node.project }}',
+				'eventsToTrack' : ['start', 'error', 'percentsPlayed']
+			});
+		}
+	);
 	{% endif %}
 
 	$(function(){
