@@ -193,6 +193,9 @@ def view(node_id):
     for child in children:
         child.picture = get_file(child.picture, api=api)
 
+    if 'description' in node:
+        node['description'] = attachments.render_attachments(node, node['description'])
+
     if request.args.get('format') == 'json':
         node = node.to_dict()
         node['url_edit'] = url_for('nodes.edit', node_id=node['_id'])
@@ -264,9 +267,6 @@ def _view_handler_asset(node, template_path, template_action, link_allowed):
     elif asset_type != 'image':
         # Treat it as normal file (zip, blend, application, etc)
         asset_type = 'file'
-
-    if 'description' in node:
-        node['description'] = attachments.render_attachments(node, node['description'])
 
     template_path = os.path.join(template_path, asset_type)
 
