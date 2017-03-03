@@ -95,7 +95,7 @@ class NodeMoverTest(unittest.TestCase):
                 ],
             }
         }
-        prid = ObjectId('project_dest')
+        prid = ObjectId(b'project_dest')
         new_project = {
             '_id': prid
         }
@@ -124,7 +124,7 @@ class NodeMoverTest(unittest.TestCase):
                 ],
             }
         }
-        prid = ObjectId('project_dest')
+        prid = ObjectId(b'project_dest')
         new_project = {
             '_id': prid
         }

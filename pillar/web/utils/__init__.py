@@ -4,6 +4,7 @@ import urllib.request, urllib.parse, urllib.error
 import logging
 import traceback
 import sys
+import typing
 
 import dateutil.parser
 from flask import current_app
@@ -174,7 +175,7 @@ def get_main_project():
     return main_project
 
 
-def is_valid_id(some_id):
+def is_valid_id(some_id: typing.Union[str, bytes]):
     """Returns True iff the given string is a valid ObjectId.
 
     Only use this if you do NOT need an ObjectId object. If you do need that,
@@ -184,27 +185,22 @@ def is_valid_id(some_id):
     :rtype: bool
     """
 
+    if isinstance(some_id, bytes):
+        return len(some_id) == 12
+
     if not isinstance(some_id, str):
         return False
 
-    if isinstance(some_id, str):
-        try:
-            some_id = some_id.encode('ascii')
-        except UnicodeEncodeError:
-            return False
+    if len(some_id) != 24:
+        return False
 
-    if len(some_id) == 12:
-        return True
-    elif len(some_id) == 24:
-        # This is more than 5x faster than checking character by
-        # character in a loop.
-        try:
-            int(some_id, 16)
-        except ValueError:
-            return False
-        return True
-
-    return False
+    # This is more than 5x faster than checking character by
+    # character in a loop.
+    try:
+        int(some_id, 16)
+    except ValueError:
+        return False
+    return True
 
 
 def last_page_index(meta_info):

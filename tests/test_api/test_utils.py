@@ -15,7 +15,7 @@ class Str2idTest(AbstractPillarTest):
             self.assertEqual(ObjectId(str_id), str2id(str_id))
 
         happy(24 * 'a')
-        happy(12 * 'a')
+        happy(12 * b'a')
         happy('577e23ad98377323f74c368c')
 
     def test_unhappy(self):
@@ -25,10 +25,11 @@ class Str2idTest(AbstractPillarTest):
             self.assertRaises(BadRequest, str2id, str_id)
 
         unhappy(13 * 'a')
+        unhappy(13 * b'a')
         unhappy('577e23ad 8377323f74c368c')
         unhappy('김치')  # Kimchi
         unhappy('')
-        unhappy('')
+        unhappy(b'')
         unhappy(None)
 
 

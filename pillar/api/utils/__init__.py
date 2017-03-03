@@ -136,7 +136,7 @@ def str2id(document_id):
 
     try:
         return bson.ObjectId(document_id)
-    except bson.objectid.InvalidId:
+    except (bson.objectid.InvalidId, TypeError):
         log.debug('str2id(%r): Invalid Object ID', document_id)
         raise wz_exceptions.BadRequest('Invalid object ID %r' % document_id)
 
