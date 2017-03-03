@@ -49,11 +49,13 @@ def attach_project_pictures(project, api):
     project.picture_header = get_file(project.picture_header, api=api)
 
 
-def gravatar(email, size=64):
-    parameters = {'s': str(size), 'd': 'mm'}
-    return "https://www.gravatar.com/avatar/" + \
-        hashlib.md5(str(email)).hexdigest() + \
-        "?" + urllib.parse.urlencode(parameters)
+def gravatar(email: str, size=64):
+    import warnings
+    warnings.warn("the pillar.web.gravatar function is deprecated; use hashlib instead",
+                  DeprecationWarning, 2)
+
+    from pillar.api.utils import gravatar as api_gravatar
+    return api_gravatar(email, size)
 
 
 def datetime_now():

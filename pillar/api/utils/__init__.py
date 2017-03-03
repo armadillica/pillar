@@ -141,10 +141,10 @@ def str2id(document_id):
         raise wz_exceptions.BadRequest('Invalid object ID %r' % document_id)
 
 
-def gravatar(email, size=64):
+def gravatar(email: str, size=64):
     parameters = {'s': str(size), 'd': 'mm'}
     return "https://www.gravatar.com/avatar/" + \
-           hashlib.md5(str(email)).hexdigest() + \
+           hashlib.md5(email.encode()).hexdigest() + \
            "?" + urllib.parse.urlencode(parameters)
 
 
