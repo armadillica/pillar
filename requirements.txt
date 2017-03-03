@@ -34,41 +34,27 @@ WebOb==1.5.0
 wheel==0.29.0
 zencoder==0.6.5
 
-# Development requirements
-pytest==3.0.1
-responses==0.5.1
-pytest-cov==2.3.1
-mock==2.0.0
-
 # Secondary requirements
 Flask-PyMongo==0.4.1
 Jinja2==2.8
 Werkzeug==0.11.10
 appdirs==1.4.2
-argparse==1.2.1
 cffi==1.6.0
 CommonMark==0.7.2
-cookies==2.2.1
 cryptography==1.3.1
-enum34==1.1.3
-funcsigs==1.0.1
 future==0.15.2
 html5lib==0.9999999
 googleapis-common-protos==1.1.0
-ipaddress==1.0.16
 itsdangerous==0.24
 oauth2client==2.0.2
 oauthlib==2.0.1
 packaging==16.8
-pbr==1.9.1
 protobuf==3.0.0b2.post2
 protorpc==0.11.1
-py==1.4.31
 pyasn1==0.1.9
 pyasn1-modules==0.0.8
 pymongo==3.2.2
 pyparsing==2.1.10
-requests_oauthlib==0.7.0
+requests-oauthlib==0.7.0
 six==1.10.0
-coverage==4.0.3
 WTForms==2.1
