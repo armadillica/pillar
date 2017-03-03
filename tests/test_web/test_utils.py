@@ -15,12 +15,12 @@ class IsValidIdTest(unittest.TestCase):
         self.assertTrue(utils.is_valid_id('deadbeefbeefcacedeadcace'))
         self.assertTrue(utils.is_valid_id('deadbeefbeefcacedeadcace'))
 
-        # 12-byte arbitrary ASCII strings
-        self.assertTrue(utils.is_valid_id('DeadBeefCake'))
-        self.assertTrue(utils.is_valid_id('DeadBeefCake'))
+        # 12-byte arbitrary ASCII bytes
+        self.assertTrue(utils.is_valid_id(b'DeadBeefCake'))
+        self.assertTrue(utils.is_valid_id(b'DeadBeefCake'))
 
-        # 12-byte str object
-        self.assertTrue(utils.is_valid_id('beef€67890'))
+        # 12-byte object
+        self.assertTrue(utils.is_valid_id('beef€67890'.encode()))
 
     def test_bad_length(self):
         self.assertFalse(utils.is_valid_id(23 * 'a'))

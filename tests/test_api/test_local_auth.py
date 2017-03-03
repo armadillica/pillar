@@ -75,3 +75,14 @@ class LocalAuthTest(AbstractPillarTest):
                                       'password': 'koro'})
 
         self.assertEqual(403, resp.status_code, resp.data)
+
+    def test_hash_password(self):
+        from pillar.api.local_auth import hash_password
+
+        salt = b'$2b$12$cHdK4M8/yJ7SWp2Q.PYW0O'
+        self.assertEqual(hash_password('© 2017 je moeder™', salt),
+                         '$2b$12$cHdK4M8/yJ7SWp2Q.PYW0OAU1gE3DIVdeehq0XIzOMM0Vp3ldPMb6')
+        self.assertIsInstance(hash_password('Резиновая уточка', salt), str)
+
+        # The password should be encodable as ASCII.
+        hash_password('Резиновая уточка', salt).encode('ascii')

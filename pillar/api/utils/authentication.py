@@ -118,7 +118,7 @@ def find_token(token, is_subclient_token=False, **extra_filters):
     return db_token
 
 
-def store_token(user_id, token, token_expiry, oauth_subclient_id=False):
+def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False):
     """Stores an authentication token.
 
     :returns: the token document from MongoDB

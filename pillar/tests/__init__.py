@@ -301,10 +301,11 @@ class AbstractPillarTest(TestMinimal):
                       json=BLENDER_ID_USER_RESPONSE,
                       status=200)
 
-    def make_header(self, username, subclient_id=''):
+    def make_header(self, username: str, subclient_id: str='') -> bytes:
         """Returns a Basic HTTP Authentication header value."""
 
-        return 'basic ' + base64.b64encode('%s:%s' % (username, subclient_id))
+        content = '%s:%s' % (username, subclient_id)
+        return b'basic ' + base64.b64encode(content.encode())
 
     def create_standard_groups(self, additional_groups=()):
         """Creates standard admin/demo/subscriber groups, plus any additional.

@@ -146,7 +146,7 @@ class ProjectCreationTest(AbstractProjectTest):
         self.assertEqual({'Prøject B'}, {p['name'] for p in proj_list['_items']})
 
         # No access to anything for user C, should result in empty list.
-        self._create_user_with_token(roles={'subscriber'}, token='token-c', user_id=12 * 'c')
+        self._create_user_with_token(roles={'subscriber'}, token='token-c', user_id=24 * 'c')
         resp = self.client.get('/api/projects',
                                headers={'Authorization': self.make_header('token-c')})
         self.assertEqual(200, resp.status_code)
@@ -277,7 +277,7 @@ class ProjectEditTest(AbstractProjectTest):
         project_url = '/api/projects/%s' % project_id
 
         # Create test user.
-        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeef')
+        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeefcafef00dbeef')
 
         # Admin user should be able to PUT.
         put_project = remove_private_keys(project)
@@ -324,7 +324,7 @@ class ProjectEditTest(AbstractProjectTest):
 
         # Create admin user that doesn't own the project, to check that
         # non-owner admins can delete projects too.
-        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeef')
+        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeefcafef00dbeef')
 
         # Admin user should be able to DELETE.
         resp = self.client.delete(project_url,
@@ -361,7 +361,8 @@ class ProjectEditTest(AbstractProjectTest):
         project_url = '/api/projects/%s' % project_id
 
         # Create test user.
-        self._create_user_with_token(['subscriber'], 'mortal-token', user_id='cafef00dbeef')
+        self._create_user_with_token(['subscriber'], 'mortal-token',
+                                     user_id='cafef00dbeefcafef00dbeef')
 
         # Other user should NOT be able to DELETE.
         resp = self.client.delete(project_url,
@@ -451,7 +452,7 @@ class ProjectNodeAccess(AbstractProjectTest):
         put_project = remove_private_keys(self.project)
 
         # Create admin user.
-        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeef')
+        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeefcafef00dbeef')
 
         # Make the project public
         put_project['permissions']['world'] = ['GET']  # make public
