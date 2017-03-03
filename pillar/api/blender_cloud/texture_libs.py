@@ -74,7 +74,7 @@ def texture_libraries():
     # of the Blender Cloud Addon. If the addon version is None, we're dealing
     # with a version of the BCA that's so old it doesn't send its version along.
     addon_version = blender_cloud_addon_version()
-    return_hdri = addon_version >= FIRST_ADDON_VERSION_WITH_HDRI
+    return_hdri = addon_version is not None and addon_version >= FIRST_ADDON_VERSION_WITH_HDRI
     log.debug('User %s has Blender Cloud Addon version %s; return_hdri=%s',
               current_user_id(), addon_version, return_hdri)
 
