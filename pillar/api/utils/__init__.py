@@ -148,11 +148,9 @@ def gravatar(email, size=64):
            "?" + urllib.parse.urlencode(parameters)
 
 
-
 class MetaFalsey(type):
     def __bool__(cls):
         return False
-    __bool__ = __nonzero__  # for Python 3
 
 
 class DoesNotExist(object, metaclass=MetaFalsey):
