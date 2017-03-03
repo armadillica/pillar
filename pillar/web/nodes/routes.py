@@ -583,7 +583,4 @@ def url_for_node(node_id=None, node=None):
 
 
 # Import of custom modules (using the same nodes decorator)
-from . import custom.comments
-from . import custom.groups
-from . import custom.storage
-from . import custom.posts
+from .custom import comments, groups, storage, posts
