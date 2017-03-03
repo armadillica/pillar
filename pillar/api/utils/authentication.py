@@ -124,7 +124,7 @@ def store_token(user_id, token, token_expiry, oauth_subclient_id=False):
     :returns: the token document from MongoDB
     """
 
-    assert isinstance(token, (str, unicode)), 'token must be string type, not %r' % type(token)
+    assert isinstance(token, str), 'token must be string type, not %r' % type(token)
 
     token_data = {
         'user': user_id,

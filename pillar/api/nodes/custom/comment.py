@@ -11,20 +11,20 @@ from pillar.api.utils import authorization, authentication, jsonify
 from . import register_patch_handler
 
 log = logging.getLogger(__name__)
-ROLES_FOR_COMMENT_VOTING = {u'subscriber', u'demo'}
-COMMENT_VOTING_OPS = {u'upvote', u'downvote', u'revoke'}
-VALID_COMMENT_OPERATIONS = COMMENT_VOTING_OPS.union({u'edit'})
+ROLES_FOR_COMMENT_VOTING = {'subscriber', 'demo'}
+COMMENT_VOTING_OPS = {'upvote', 'downvote', 'revoke'}
+VALID_COMMENT_OPERATIONS = COMMENT_VOTING_OPS.union({'edit'})
 
 
-@register_patch_handler(u'comment')
+@register_patch_handler('comment')
 def patch_comment(node_id, patch):
     assert_is_valid_patch(node_id, patch)
     user_id = authentication.current_user_id()
 
-    if patch[u'op'] in COMMENT_VOTING_OPS:
+    if patch['op'] in COMMENT_VOTING_OPS:
         result, node = vote_comment(user_id, node_id, patch)
     else:
-        assert patch[u'op'] == u'edit', 'Invalid patch operation %s' % patch[u'op']
+        assert patch['op'] == 'edit', 'Invalid patch operation %s' % patch['op']
         result, node = edit_comment(user_id, node_id, patch)
 
     return jsonify({'_status': 'OK',
@@ -95,9 +95,9 @@ def vote_comment(user_id, node_id, patch):
         return update
 
     actions = {
-        u'upvote': upvote,
-        u'downvote': downvote,
-        u'revoke': revoke,
+        'upvote': upvote,
+        'downvote': downvote,
+        'revoke': revoke,
     }
     action = actions[patch['op']]
     mongo_update = action()
@@ -141,7 +141,7 @@ def edit_comment(user_id, node_id, patch):
         log.warning('User %s wanted to patch non-existing node %s' % (user_id, node_id))
         raise wz_exceptions.NotFound('Node %s not found' % node_id)
 
-    if node['user'] != user_id and not authorization.user_has_role(u'admin'):
+    if node['user'] != user_id and not authorization.user_has_role('admin'):
         raise wz_exceptions.Forbidden('You can only edit your own comments.')
 
     # Use Eve to PATCH this node, as that also updates the etag.
@@ -173,8 +173,8 @@ def assert_is_valid_patch(node_id, patch):
         raise wz_exceptions.BadRequest("PATCH should have a key 'op' indicating the operation.")
 
     if op not in VALID_COMMENT_OPERATIONS:
-        raise wz_exceptions.BadRequest(u'Operation should be one of %s',
-                                       u', '.join(VALID_COMMENT_OPERATIONS))
+        raise wz_exceptions.BadRequest('Operation should be one of %s',
+                                       ', '.join(VALID_COMMENT_OPERATIONS))
 
     if op not in COMMENT_VOTING_OPS:
         # We can't check here, we need the node owner for that.

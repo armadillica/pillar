@@ -142,7 +142,7 @@ def view(node_id):
             return 'GET' in node.permissions.world
 
         if current_user.is_authenticated:
-            allowed_roles = {u'subscriber', u'demo', u'admin'}
+            allowed_roles = {'subscriber', 'demo', 'admin'}
             return bool(allowed_roles.intersection(current_user.roles or ()))
 
         return False
@@ -330,7 +330,7 @@ def edit(node_id):
 
         log.debug('set_properties(..., prefix=%r, set_data=%r) called', prefix, set_data)
 
-        for prop, schema_prop in dyn_schema.iteritems():
+        for prop, schema_prop in dyn_schema.items():
             prop_name = "{0}{1}".format(prefix, prop)
 
             if prop_name not in form:
@@ -376,7 +376,7 @@ def edit(node_id):
                 for file_data in db_prop_value:
                     file_form_class = build_file_select_form(subschema)
                     subform = file_form_class()
-                    for key, value in file_data.iteritems():
+                    for key, value in file_data.items():
                         setattr(subform, key, value)
                     field_list.append_entry(subform)
 
@@ -481,7 +481,7 @@ def ensure_lists_exist_as_empty(node_doc, node_type):
 
     node_properties = node_doc.setdefault('properties', {})
 
-    for prop, schema in node_type.dyn_schema.to_dict().iteritems():
+    for prop, schema in node_type.dyn_schema.to_dict().items():
         if schema['type'] != 'list':
             continue
 
@@ -563,7 +563,7 @@ def redirect_to_context(node_id):
 
 
 def url_for_node(node_id=None, node=None):
-    assert isinstance(node_id, (basestring, type(None)))
+    assert isinstance(node_id, (str, type(None)))
 
     api = system_util.pillar_api()
 
@@ -583,7 +583,7 @@ def url_for_node(node_id=None, node=None):
 
 
 # Import of custom modules (using the same nodes decorator)
-import custom.comments
-import custom.groups
-import custom.storage
-import custom.posts
+from . import custom.comments
+from . import custom.groups
+from . import custom.storage
+from . import custom.posts

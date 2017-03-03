@@ -1,6 +1,6 @@
 import logging
 import string
-import urlparse
+import urllib.parse
 
 from flask import Blueprint, redirect, current_app
 from werkzeug.exceptions import NotFound
@@ -54,7 +54,7 @@ def redirect_with_short_code(short_code):
 
     # Redirect to 'theatre' view for the node.
     url = url_for_node(node=node)
-    url = urlparse.urljoin(url, '?t')
+    url = urllib.parse.urljoin(url, '?t')
 
     log.debug('Found short code %s, redirecting to %s', short_code, url)
     return redirect(url, code=307)

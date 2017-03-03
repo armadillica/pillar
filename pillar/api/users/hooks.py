@@ -60,7 +60,7 @@ def check_user_access(request, lookup):
     current_user_id = current_user['user_id'] if current_user else None
 
     # Admins can do anything and get everything, except the 'auth' block.
-    if user_has_role(u'admin'):
+    if user_has_role('admin'):
         return
 
     if not lookup and not current_user:
@@ -74,7 +74,7 @@ def check_user_access(request, lookup):
 def check_put_access(request, lookup):
     """Only allow PUT to the current user, or all users if admin."""
 
-    if user_has_role(u'admin'):
+    if user_has_role('admin'):
         return
 
     current_user = g.get('current_user')
@@ -94,7 +94,7 @@ def after_fetching_user(user):
     current_user_id = current_user['user_id'] if current_user else None
 
     # Admins can do anything and get everything, except the 'auth' block.
-    if user_has_role(u'admin'):
+    if user_has_role('admin'):
         return
 
     # Only allow full access to the current user.

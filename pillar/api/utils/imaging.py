@@ -21,7 +21,7 @@ def generate_local_thumbnails(name_base, src):
     save_to_base, _ = os.path.splitext(src)
     name_base, _ = os.path.splitext(name_base)
 
-    for size, settings in thumbnail_settings.iteritems():
+    for size, settings in thumbnail_settings.items():
         dst = '{0}-{1}{2}'.format(save_to_base, size, '.jpg')
         name = '{0}-{1}{2}'.format(name_base, size, '.jpg')
 
@@ -143,7 +143,7 @@ def get_video_data(filepath):
             res_y=video_stream['height'],
         )
         if video_stream['sample_aspect_ratio'] != '1:1':
-            print '[warning] Pixel aspect ratio is not square!'
+            print('[warning] Pixel aspect ratio is not square!')
 
     return outdata
 
@@ -190,14 +190,14 @@ def ffmpeg_encode(src, format, res_y=720):
     dst = os.path.splitext(src)
     dst = "{0}-{1}p.{2}".format(dst[0], res_y, format)
     args.append(dst)
-    print "Encoding {0} to {1}".format(src, format)
+    print("Encoding {0} to {1}".format(src, format))
     returncode = subprocess.call([current_app.config['BIN_FFMPEG']] + args)
     if returncode == 0:
-        print "Successfully encoded {0}".format(dst)
+        print("Successfully encoded {0}".format(dst))
     else:
-        print "Error during encode"
-        print "Code:    {0}".format(returncode)
-        print "Command: {0}".format(current_app.config['BIN_FFMPEG'] + " " + " ".join(args))
+        print("Error during encode")
+        print("Code:    {0}".format(returncode))
+        print("Command: {0}".format(current_app.config['BIN_FFMPEG'] + " " + " ".join(args)))
         dst = None
     # return path of the encoded video
     return dst

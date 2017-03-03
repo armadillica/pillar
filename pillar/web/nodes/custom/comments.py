@@ -243,7 +243,7 @@ def comments_rate(comment_id, operation):
 
     """
 
-    if operation not in {u'revoke', u'upvote', u'downvote'}:
+    if operation not in {'revoke', 'upvote', 'downvote'}:
         raise wz_exceptions.BadRequest('Invalid operation')
 
     api = system_util.pillar_api()

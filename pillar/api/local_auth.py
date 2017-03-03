@@ -87,7 +87,7 @@ def generate_and_store_token(user_id, days=15, prefix=''):
 
 
 def hash_password(password, salt):
-    if isinstance(salt, unicode):
+    if isinstance(salt, str):
         salt = salt.encode('utf-8')
     encoded_password = base64.b64encode(hashlib.sha256(password).digest())
     return bcrypt.hashpw(encoded_password, salt)

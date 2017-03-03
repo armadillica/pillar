@@ -723,7 +723,7 @@ users = {
 
     # By default don't include the 'auth' field. It can still be obtained
     # using projections, though, so we block that in hooks.
-    'datasource': {'projection': {u'auth': 0}},
+    'datasource': {'projection': {'auth': 0}},
 
     'schema': users_schema
 }

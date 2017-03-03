@@ -166,7 +166,7 @@ class GoogleCloudStorageBucket(object):
         """Set the ContentDisposition metadata so that when a file is downloaded
         it has a human-readable name.
         """
-        blob.content_disposition = u'attachment; filename="{0}"'.format(name)
+        blob.content_disposition = 'attachment; filename="{0}"'.format(name)
         blob.patch()
 
     def copy_blob(self, blob, to_bucket):
@@ -188,11 +188,11 @@ def update_file_name(node):
     if node['properties'].get('status', '') == 'processing':
         return
 
-    def _format_name(name, override_ext, size=None, map_type=u''):
+    def _format_name(name, override_ext, size=None, map_type=''):
         root, _ = os.path.splitext(name)
-        size = u'-{}'.format(size) if size else u''
-        map_type = u'-{}'.format(map_type) if map_type else u''
-        return u'{}{}{}{}'.format(root, size, map_type, override_ext)
+        size = '-{}'.format(size) if size else ''
+        map_type = '-{}'.format(map_type) if map_type else ''
+        return '{}{}{}{}'.format(root, size, map_type, override_ext)
 
     def _update_name(file_id, file_props):
         files_collection = current_app.data.driver.db['files']
@@ -202,7 +202,7 @@ def update_file_name(node):
             return
 
         # For textures -- the map type should be part of the name.
-        map_type = file_props.get('map_type', u'')
+        map_type = file_props.get('map_type', '')
 
         storage = GoogleCloudStorageBucket(str(node['project']))
         blob = storage.Get(file_doc['file_path'], to_dict=False)

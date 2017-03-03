@@ -360,12 +360,12 @@ class PillarServer(Eve):
                 if node_type:
                     node_type = node_type.replace('_', ' ').title()
                     if doc_name:
-                        description = u'%s "%s" was deleted.' % (node_type, doc_name)
+                        description = '%s "%s" was deleted.' % (node_type, doc_name)
                     else:
-                        description = u'This %s was deleted.' % (node_type, )
+                        description = 'This %s was deleted.' % (node_type, )
                 else:
                     if doc_name:
-                        description = u'"%s" was deleted.' % doc_name
+                        description = '"%s" was deleted.' % doc_name
                     else:
                         description = None
 
@@ -441,7 +441,7 @@ class PillarServer(Eve):
         web.setup_app(self)
         authentication.setup_app(self)
 
-        for ext in self.pillar_extensions.itervalues():
+        for ext in self.pillar_extensions.values():
             self.log.info('Setting up extension %s', ext.name)
             ext.setup_app(self)
 

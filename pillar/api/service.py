@@ -13,7 +13,7 @@ blueprint = Blueprint('service', __name__)
 log = logging.getLogger(__name__)
 signal_user_changed_role = blinker.NamedSignal('badger:user_changed_role')
 
-ROLES_WITH_GROUPS = {u'admin', u'demo', u'subscriber'}
+ROLES_WITH_GROUPS = {'admin', 'demo', 'subscriber'}
 
 # Map of role name to group ID, for the above groups.
 role_to_group_id = {}
@@ -38,7 +38,7 @@ def fetch_role_to_group_id_map():
 
 
 @blueprint.route('/badger', methods=['POST'])
-@authorization.require_login(require_roles={u'service', u'badger'}, require_all=True)
+@authorization.require_login(require_roles={'service', 'badger'}, require_all=True)
 def badger():
     if request.mimetype != 'application/json':
         log.debug('Received %s instead of application/json', request.mimetype)
@@ -117,7 +117,7 @@ def do_badger(action, user_email, role):
 
 
 @blueprint.route('/urler/<project_id>', methods=['GET'])
-@authorization.require_login(require_roles={u'service', u'urler'}, require_all=True)
+@authorization.require_login(require_roles={'service', 'urler'}, require_all=True)
 def urler(project_id):
     """Returns the URL of any project."""
 
@@ -189,7 +189,7 @@ def create_service_account(email, roles, service, update_existing=None):
             raise ValueError('User %s already exists' % email)
 
         # Compute the new roles, and assign.
-        roles = list(set(roles).union({u'service'}).union(user['roles']))
+        roles = list(set(roles).union({'service'}).union(user['roles']))
         user['roles'] = list(roles)
 
         # Let the caller perform any required updates.
@@ -204,7 +204,7 @@ def create_service_account(email, roles, service, update_existing=None):
         expected_status = 200
     else:
         # Create a user with the correct roles.
-        roles = list(set(roles).union({u'service'}))
+        roles = list(set(roles).union({'service'}))
         user = {'username': email,
                 'groups': [],
                 'roles': roles,

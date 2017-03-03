@@ -86,7 +86,7 @@ def upsert_user(db_user, blender_id_user_id):
     :type: (ObjectId, int)
     """
 
-    if u'subscriber' in db_user.get('groups', []):
+    if 'subscriber' in db_user.get('groups', []):
         log.error('Non-ObjectID string found in user.groups: %s', db_user)
         raise wz_exceptions.InternalServerError('Non-ObjectID string found in user.groups: %s' % db_user)
 
@@ -117,8 +117,8 @@ def upsert_user(db_user, blender_id_user_id):
         if status == 422:
             # Probably non-unique username, so retry a few times with different usernames.
             log.info('Error creating new user: %s', r)
-            username_issue = r.get('_issues', {}).get(u'username', '')
-            if u'not unique' in username_issue:
+            username_issue = r.get('_issues', {}).get('username', '')
+            if 'not unique' in username_issue:
                 # Retry
                 db_user['username'] = authentication.make_unique_username(db_user['email'])
                 continue

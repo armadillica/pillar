@@ -1,7 +1,7 @@
 import copy
 import hashlib
 import json
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 import datetime
 import functools
@@ -103,7 +103,7 @@ def skip_when_testing(func):
     @functools.wraps(func)
     def wrapper(*args, **kwargs):
         if current_app.config['TESTING']:
-            log.debug('Skipping call to %s(...) due to TESTING', func.func_name)
+            log.debug('Skipping call to %s(...) due to TESTING', func.__name__)
             return None
 
         return func(*args, **kwargs)
@@ -145,19 +145,18 @@ def gravatar(email, size=64):
     parameters = {'s': str(size), 'd': 'mm'}
     return "https://www.gravatar.com/avatar/" + \
            hashlib.md5(str(email)).hexdigest() + \
-           "?" + urllib.urlencode(parameters)
+           "?" + urllib.parse.urlencode(parameters)
 
 
 
 class MetaFalsey(type):
-    def __nonzero__(cls):
+    def __bool__(cls):
         return False
     __bool__ = __nonzero__  # for Python 3
 
 
-class DoesNotExist(object):
+class DoesNotExist(object, metaclass=MetaFalsey):
     """Returned as value by doc_diff if a value does not exist."""
-    __metaclass__ = MetaFalsey
 
 
 def doc_diff(doc1, doc2, falsey_is_equal=True):
@@ -175,7 +174,7 @@ def doc_diff(doc1, doc2, falsey_is_equal=True):
     """
 
     for key in set(doc1.keys()).union(set(doc2.keys())):
-        if isinstance(key, basestring) and key[0] == u'_':
+        if isinstance(key, str) and key[0] == '_':
             continue
 
         val1 = doc1.get(key, DoesNotExist)

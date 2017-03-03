@@ -16,7 +16,7 @@ blueprint_api = Blueprint('projects_api', __name__)
 
 
 @blueprint_api.route('/create', methods=['POST'])
-@authorization.require_login(require_roles={u'admin', u'subscriber', u'demo'})
+@authorization.require_login(require_roles={'admin', 'subscriber', 'demo'})
 def create_project(overrides=None):
     """Creates a new project."""
 
@@ -65,7 +65,7 @@ def project_manage_users():
     project = projects_collection.find_one({'_id': project_id})
 
     # Check if the current_user is owner of the project, or removing themselves.
-    if not authorization.user_has_role(u'admin'):
+    if not authorization.user_has_role('admin'):
         remove_self = target_user_id == current_user_id and action == 'remove'
         if project['user'] != current_user_id and not remove_self:
             utils.abort_with_error(403)

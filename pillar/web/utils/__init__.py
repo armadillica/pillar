@@ -1,6 +1,6 @@
 import datetime
 import hashlib
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import logging
 import traceback
 import sys
@@ -52,7 +52,7 @@ def gravatar(email, size=64):
     parameters = {'s': str(size), 'd': 'mm'}
     return "https://www.gravatar.com/avatar/" + \
         hashlib.md5(str(email)).hexdigest() + \
-        "?" + urllib.urlencode(parameters)
+        "?" + urllib.parse.urlencode(parameters)
 
 
 def datetime_now():
@@ -73,7 +73,7 @@ def pretty_date(time, detail=False, now=None):
     # Normalize the 'time' parameter so it's always a datetime.
     if type(time) is int:
         time = datetime.datetime.fromtimestamp(time, tz=pillarsdk.utils.utc)
-    elif isinstance(time, basestring):
+    elif isinstance(time, str):
         time = dateutil.parser.parse(time)
 
     now = now or datetime.datetime.now(tz=time.tzinfo)
@@ -184,10 +184,10 @@ def is_valid_id(some_id):
     :rtype: bool
     """
 
-    if not isinstance(some_id, basestring):
+    if not isinstance(some_id, str):
         return False
 
-    if isinstance(some_id, unicode):
+    if isinstance(some_id, str):
         try:
             some_id = some_id.encode('ascii')
         except UnicodeEncodeError:

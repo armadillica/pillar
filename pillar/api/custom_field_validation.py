@@ -61,13 +61,13 @@ class ValidateCustomFields(Validator):
         Only validates the dict values, not the keys. Modifies the given dict in-place.
         """
 
-        assert dict_valueschema[u'type'] == u'dict'
+        assert dict_valueschema['type'] == 'dict'
         assert isinstance(dict_property, dict)
 
         for key, val in dict_property.items():
-            item_schema = {u'item': dict_valueschema}
-            item_prop = {u'item': val}
-            dict_property[key] = self.convert_properties(item_prop, item_schema)[u'item']
+            item_schema = {'item': dict_valueschema}
+            item_prop = {'item': val}
+            dict_property[key] = self.convert_properties(item_prop, item_schema)['item']
 
     def _validate_valid_properties(self, valid_properties, field, value):
         from pillar.api.utils import project_get_node_type
