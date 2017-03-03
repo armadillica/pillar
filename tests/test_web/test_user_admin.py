@@ -2,8 +2,6 @@
 
 """Unit tests for the user admin interface."""
 
-from __future__ import absolute_import
-
 import json
 import logging
 
@@ -32,7 +30,7 @@ class UserAdminTest(AbstractPillarTest):
         import pillar.web.users.routes
         import pillar.auth
 
-        user_id = self.create_user(roles=(u'mønkeybütler', ))
+        user_id = self.create_user(roles=('mønkeybütler', ))
         self.create_valid_auth_token(user_id, 'token')
 
         # Try to access the home project, creating it.
@@ -72,7 +70,7 @@ class UserAdminTest(AbstractPillarTest):
         dbuser = get_dbuser()
         self.assertEqual({home_project_gid, self.subscriber_gid, self.demo_gid},
                          set(dbuser['groups']))
-        self.assertEqual({u'subscriber', u'demo', u'mønkeybütler'},
+        self.assertEqual({'subscriber', 'demo', 'mønkeybütler'},
                          set(dbuser['roles']))
 
         # Edit user again, revoking demo role.
@@ -80,5 +78,5 @@ class UserAdminTest(AbstractPillarTest):
         dbuser = get_dbuser()
         self.assertEqual({home_project_gid, self.subscriber_gid},
                          set(dbuser['groups']))
-        self.assertEqual({u'subscriber', u'mønkeybütler'},
+        self.assertEqual({'subscriber', 'mønkeybütler'},
                          set(dbuser['roles']))

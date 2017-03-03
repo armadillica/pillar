@@ -5,7 +5,7 @@
 import functools
 import json
 import logging
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 from bson import ObjectId
 from pillar.tests import AbstractPillarTest
@@ -26,7 +26,7 @@ class AbstractProjectTest(AbstractPillarTest):
         return resp
 
     def _create_user_and_project(self, roles, user_id='cafef00df00df00df00df00d', token='token',
-                                 project_name=u'Prøject El Niño'):
+                                 project_name='Prøject El Niño'):
         self._create_user_with_token(roles, token, user_id=user_id)
         resp = self._create_project(project_name, token)
 
@@ -38,8 +38,8 @@ class AbstractProjectTest(AbstractPillarTest):
 
 class ProjectCreationTest(AbstractProjectTest):
     def test_project_creation_wrong_role(self):
-        self._create_user_with_token([u'whatever'], 'token')
-        resp = self._create_project(u'Prøject El Niño', 'token')
+        self._create_user_with_token(['whatever'], 'token')
+        resp = self._create_project('Prøject El Niño', 'token')
 
         self.assertEqual(403, resp.status_code)
 
@@ -49,8 +49,8 @@ class ProjectCreationTest(AbstractProjectTest):
             self.assertEqual(0, len(list(projects.find())))
 
     def test_project_creation_good_role(self):
-        user_id = self._create_user_with_token([u'subscriber'], 'token')
-        resp = self._create_project(u'Prøject El Niño', 'token')
+        user_id = self._create_user_with_token(['subscriber'], 'token')
+        resp = self._create_project('Prøject El Niño', 'token')
         self.assertEqual(201, resp.status_code)
 
         # The response of a POST is the entire project, but we'll test a GET on
@@ -69,7 +69,7 @@ class ProjectCreationTest(AbstractProjectTest):
         project_id = project['_id']
 
         # Check some of the more complex/interesting fields.
-        self.assertEqual(u'Prøject El Niño', project['name'])
+        self.assertEqual('Prøject El Niño', project['name'])
         self.assertEqual(str(user_id), project['user'])
         self.assertEqual('p-%s' % project_id, project['url'])
         self.assertEqual(1, len(project['permissions']['groups']))
@@ -95,13 +95,13 @@ class ProjectCreationTest(AbstractProjectTest):
     def test_project_creation_access_admin(self):
         """Admin-created projects should be public"""
 
-        proj = self._create_user_and_project(roles={u'admin'})
+        proj = self._create_user_and_project(roles={'admin'})
         self.assertEqual(['GET'], proj['permissions']['world'])
 
     def test_project_creation_access_subscriber(self):
         """Subscriber-created projects should be private"""
 
-        proj = self._create_user_and_project(roles={u'subscriber'})
+        proj = self._create_user_and_project(roles={'subscriber'})
         self.assertEqual([], proj['permissions']['world'])
         self.assertTrue(proj['is_private'])
 
@@ -116,12 +116,12 @@ class ProjectCreationTest(AbstractProjectTest):
         """Test that we get an empty list when querying for non-existing projects, instead of 403"""
 
         proj_a = self._create_user_and_project(user_id=24 * 'a',
-                                               roles={u'subscriber'},
-                                               project_name=u'Prøject A',
+                                               roles={'subscriber'},
+                                               project_name='Prøject A',
                                                token='token-a')
         proj_b = self._create_user_and_project(user_id=24 * 'b',
-                                               roles={u'subscriber'},
-                                               project_name=u'Prøject B',
+                                               roles={'subscriber'},
+                                               project_name='Prøject B',
                                                token='token-b')
 
         # Assertion: each user must have access to their own project.
@@ -137,16 +137,16 @@ class ProjectCreationTest(AbstractProjectTest):
                                headers={'Authorization': self.make_header('token-a')})
         self.assertEqual(200, resp.status_code)
         proj_list = json.loads(resp.data)
-        self.assertEqual({u'Prøject A'}, {p['name'] for p in proj_list['_items']})
+        self.assertEqual({'Prøject A'}, {p['name'] for p in proj_list['_items']})
 
         resp = self.client.get('/api/projects',
                                headers={'Authorization': self.make_header('token-b')})
         self.assertEqual(200, resp.status_code)
         proj_list = json.loads(resp.data)
-        self.assertEqual({u'Prøject B'}, {p['name'] for p in proj_list['_items']})
+        self.assertEqual({'Prøject B'}, {p['name'] for p in proj_list['_items']})
 
         # No access to anything for user C, should result in empty list.
-        self._create_user_with_token(roles={u'subscriber'}, token='token-c', user_id=12 * 'c')
+        self._create_user_with_token(roles={'subscriber'}, token='token-c', user_id=12 * 'c')
         resp = self.client.get('/api/projects',
                                headers={'Authorization': self.make_header('token-c')})
         self.assertEqual(200, resp.status_code)
@@ -161,7 +161,7 @@ class ProjectEditTest(AbstractProjectTest):
         from pillar.api.utils import remove_private_keys, PillarJSONEncoder
         dumps = functools.partial(json.dumps, cls=PillarJSONEncoder)
 
-        project_info = self._create_user_and_project([u'subscriber'])
+        project_info = self._create_user_and_project(['subscriber'])
         project_url = '/api/projects/%(_id)s' % project_info
 
         resp = self.client.get(project_url,
@@ -180,11 +180,11 @@ class ProjectEditTest(AbstractProjectTest):
 
         # Regular user should be able to PUT, but only be able to edit certain fields.
         put_project = remove_private_keys(project)
-        put_project['url'] = u'very-offensive-url'
-        put_project['description'] = u'Blender je besplatan set alata za izradu interaktivnog 3D ' \
-                                     u'sadržaja pod različitim operativnim sustavima.'
-        put_project['name'] = u'โครงการปั่นเมฆ'
-        put_project['summary'] = u'Это переведена на Google'
+        put_project['url'] = 'very-offensive-url'
+        put_project['description'] = 'Blender je besplatan set alata za izradu interaktivnog 3D ' \
+                                     'sadržaja pod različitim operativnim sustavima.'
+        put_project['name'] = 'โครงการปั่นเมฆ'
+        put_project['summary'] = 'Это переведена на Google'
         put_project['status'] = 'pending'
         put_project['category'] = 'software'
         put_project['user'] = other_user_id
@@ -222,7 +222,7 @@ class ProjectEditTest(AbstractProjectTest):
         from pillar.api.utils import remove_private_keys, PillarJSONEncoder
         dumps = functools.partial(json.dumps, cls=PillarJSONEncoder)
 
-        project_info = self._create_user_and_project([u'subscriber', u'admin'])
+        project_info = self._create_user_and_project(['subscriber', 'admin'])
         project_url = '/api/projects/%(_id)s' % project_info
 
         resp = self.client.get(project_url)
@@ -234,11 +234,11 @@ class ProjectEditTest(AbstractProjectTest):
 
         # Admin user should be able to PUT everything.
         put_project = remove_private_keys(project)
-        put_project['url'] = u'very-offensive-url'
-        put_project['description'] = u'Blender je besplatan set alata za izradu interaktivnog 3D ' \
-                                     u'sadržaja pod različitim operativnim sustavima.'
-        put_project['name'] = u'โครงการปั่นเมฆ'
-        put_project['summary'] = u'Это переведена на Google'
+        put_project['url'] = 'very-offensive-url'
+        put_project['description'] = 'Blender je besplatan set alata za izradu interaktivnog 3D ' \
+                                     'sadržaja pod različitim operativnim sustavima.'
+        put_project['name'] = 'โครงการปั่นเมฆ'
+        put_project['summary'] = 'Это переведена на Google'
         put_project['is_private'] = False
         put_project['status'] = 'pending'
         put_project['category'] = 'software'
@@ -272,7 +272,7 @@ class ProjectEditTest(AbstractProjectTest):
         dumps = functools.partial(json.dumps, cls=PillarJSONEncoder)
 
         # Create test project.
-        project = self._create_user_and_project([u'subscriber'])
+        project = self._create_user_and_project(['subscriber'])
         project_id = project['_id']
         project_url = '/api/projects/%s' % project_id
 
@@ -281,7 +281,7 @@ class ProjectEditTest(AbstractProjectTest):
 
         # Admin user should be able to PUT.
         put_project = remove_private_keys(project)
-        put_project['name'] = u'โครงการปั่นเมฆ'
+        put_project['name'] = 'โครงการปั่นเมฆ'
 
         resp = self.client.put(project_url,
                                data=dumps(put_project),
@@ -297,7 +297,7 @@ class ProjectEditTest(AbstractProjectTest):
         dumps = functools.partial(json.dumps, cls=PillarJSONEncoder)
 
         # Create test project.
-        project = self._create_user_and_project([u'subscriber'])
+        project = self._create_user_and_project(['subscriber'])
         project_id = project['_id']
         project_url = '/api/projects/%s' % project_id
 
@@ -307,7 +307,7 @@ class ProjectEditTest(AbstractProjectTest):
 
         # Regular subscriber should not be able to do this.
         put_project = remove_private_keys(project)
-        put_project['name'] = u'Болту́н -- нахо́дка для шпио́на.'
+        put_project['name'] = 'Болту́н -- нахо́дка для шпио́на.'
         put_project['user'] = my_user_id
         resp = self.client.put(project_url,
                                data=dumps(put_project),
@@ -318,7 +318,7 @@ class ProjectEditTest(AbstractProjectTest):
 
     def test_delete_by_admin(self):
         # Create public test project.
-        project_info = self._create_user_and_project([u'admin'])
+        project_info = self._create_user_and_project(['admin'])
         project_id = project_info['_id']
         project_url = '/api/projects/%s' % project_id
 
@@ -338,7 +338,7 @@ class ProjectEditTest(AbstractProjectTest):
 
         # ... but we should still get it in the body.
         db_proj = json.loads(resp.data)
-        self.assertEqual(u'Prøject El Niño', db_proj['name'])
+        self.assertEqual('Prøject El Niño', db_proj['name'])
         self.assertTrue(db_proj['_deleted'])
 
         # Querying for deleted projects should include it.
@@ -347,16 +347,16 @@ class ProjectEditTest(AbstractProjectTest):
         projection = json.dumps({'name': 1, 'permissions': 1})
         where = json.dumps({'_deleted': True})  # MUST be True, 1 does not work.
         resp = self.client.get('/api/projects?where=%s&projection=%s' %
-                               (urllib.quote(where), urllib.quote(projection)))
+                               (urllib.parse.quote(where), urllib.parse.quote(projection)))
         self.assertEqual(200, resp.status_code, resp.data)
 
         projlist = json.loads(resp.data)
         self.assertEqual(1, projlist['_meta']['total'])
-        self.assertEqual(u'Prøject El Niño', projlist['_items'][0]['name'])
+        self.assertEqual('Prøject El Niño', projlist['_items'][0]['name'])
 
     def test_delete_by_subscriber(self):
         # Create test project.
-        project_info = self._create_user_and_project([u'subscriber'])
+        project_info = self._create_user_and_project(['subscriber'])
         project_id = project_info['_id']
         project_url = '/api/projects/%s' % project_id
 
@@ -383,14 +383,14 @@ class ProjectNodeAccess(AbstractProjectTest):
         from pillar.api.utils import PillarJSONEncoder
 
         # Project is created by regular subscriber, so should be private.
-        self.user_id = self._create_user_with_token([u'subscriber'], 'token')
-        resp = self._create_project(u'Prøject El Niño', 'token')
+        self.user_id = self._create_user_with_token(['subscriber'], 'token')
+        resp = self._create_project('Prøject El Niño', 'token')
         self.assertEqual(201, resp.status_code)
         self.assertEqual('application/json', resp.mimetype)
         self.project = json.loads(resp.data)
         self.project_id = ObjectId(self.project['_id'])
 
-        self.other_user_id = self._create_user_with_token([u'subscriber'], 'other-token',
+        self.other_user_id = self._create_user_with_token(['subscriber'], 'other-token',
                                                           user_id='deadbeefdeadbeefcafef00d')
 
         self.test_node = {
@@ -435,7 +435,7 @@ class ProjectNodeAccess(AbstractProjectTest):
                                headers={'Authorization': self.make_header('token')})
         self.assertEqual(200, resp.status_code, (resp.status_code, resp.data))
         listed_nodes = json.loads(resp.data)['_items']
-        self.assertEquals(self.node_id, listed_nodes[0]['_id'])
+        self.assertEqual(self.node_id, listed_nodes[0]['_id'])
 
         # Listing all nodes should not include nodes from private projects.
         resp = self.client.get('/api/nodes',

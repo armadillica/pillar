@@ -24,7 +24,7 @@ class AbstractHomeProjectTest(AbstractPillarTest):
 
         Adds the 'homeproject' role too, which we need to get past the AB-testing.
         """
-        user_id = self.create_user(roles=roles.union({u'homeproject'}), user_id=user_id)
+        user_id = self.create_user(roles=roles.union({'homeproject'}), user_id=user_id)
         self.create_valid_auth_token(user_id, token)
         return user_id
 
@@ -34,7 +34,7 @@ class HomeProjectTest(AbstractHomeProjectTest):
         from pillar.api.blender_cloud import home_project
         from pillar.api.utils.authentication import validate_token
 
-        user_id = self._create_user_with_token(roles={u'subscriber'}, token='token')
+        user_id = self._create_user_with_token(roles={'subscriber'}, token='token')
 
         # Test home project creation
         with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
@@ -42,7 +42,7 @@ class HomeProjectTest(AbstractHomeProjectTest):
 
             proj = home_project.create_home_project(user_id, write_access=True)
             self.assertEqual('home', proj['category'])
-            self.assertEqual({u'group', u'asset', u'comment'},
+            self.assertEqual({'group', 'asset', 'comment'},
                              set(nt['name'] for nt in proj['node_types']))
 
             endpoint = url_for('blender_cloud.home_project.home_project')
@@ -143,11 +143,11 @@ class HomeProjectTest(AbstractHomeProjectTest):
         admin_group_id = json_proj['permissions']['groups'][0]['group']
 
         # Check that a Blender Sync node was created automatically.
-        expected_node_permissions = {u'users': [],
-                                     u'groups': [
-                                         {u'group': ObjectId(admin_group_id),
-                                          u'methods': [u'GET', u'PUT', u'POST', u'DELETE']}, ],
-                                     u'world': []}
+        expected_node_permissions = {'users': [],
+                                     'groups': [
+                                         {'group': ObjectId(admin_group_id),
+                                          'methods': ['GET', 'PUT', 'POST', 'DELETE']}, ],
+                                     'world': []}
         with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
             nodes_coll = self.app.data.driver.db['nodes']
             node = nodes_coll.find_one({
@@ -191,7 +191,7 @@ class HomeProjectTest(AbstractHomeProjectTest):
         from pillar.api.blender_cloud import home_project
         from pillar.api.utils.authentication import validate_token
 
-        user_id = self._create_user_with_token(roles={u'subscriber'}, token='token')
+        user_id = self._create_user_with_token(roles={'subscriber'}, token='token')
 
         # Test home project creation
         with self.app.test_request_context(headers={'Authorization': self.make_header('token')}):
@@ -257,8 +257,8 @@ class HomeProjectTest(AbstractHomeProjectTest):
         from pillar.api.blender_cloud import home_project
         from pillar.api.utils.authentication import validate_token
 
-        uid1 = self._create_user_with_token(roles={u'subscriber'}, token='token1', user_id=24 * 'a')
-        uid2 = self._create_user_with_token(roles={u'subscriber'}, token='token2', user_id=24 * 'b')
+        uid1 = self._create_user_with_token(roles={'subscriber'}, token='token1', user_id=24 * 'a')
+        uid2 = self._create_user_with_token(roles={'subscriber'}, token='token2', user_id=24 * 'b')
 
         # Create home projects
         with self.app.test_request_context(headers={'Authorization': self.make_header('token1')}):
@@ -292,7 +292,7 @@ class HomeProjectTest(AbstractHomeProjectTest):
     def test_delete_restore(self):
         """Deleting and then recreating a home project should restore the deleted project."""
 
-        self._create_user_with_token(roles={u'subscriber'}, token='token')
+        self._create_user_with_token(roles={'subscriber'}, token='token')
 
         # Create home project by getting it.
         resp = self.client.get('/api/bcloud/home-project',
@@ -460,8 +460,8 @@ class TextureLibraryTest(AbstractHomeProjectTest):
         libs = resp.json()['_items']
         library_project_ids = {proj['_id'] for proj in libs}
 
-        self.assertNotIn(unicode(self.hdri_proj_id), library_project_ids)
-        self.assertIn(unicode(self.tex_proj_id), library_project_ids)
+        self.assertNotIn(str(self.hdri_proj_id), library_project_ids)
+        self.assertIn(str(self.tex_proj_id), library_project_ids)
 
     def test_hdri_library__old_bcloud_addon(self):
         resp = self.get('/api/bcloud/texture-libraries',
@@ -469,8 +469,8 @@ class TextureLibraryTest(AbstractHomeProjectTest):
                         headers={'Blender-Cloud-Addon': '1.3.3'})
         libs = resp.json()['_items']
         library_project_ids = {proj['_id'] for proj in libs}
-        self.assertNotIn(unicode(self.hdri_proj_id), library_project_ids)
-        self.assertIn(unicode(self.tex_proj_id), library_project_ids)
+        self.assertNotIn(str(self.hdri_proj_id), library_project_ids)
+        self.assertIn(str(self.tex_proj_id), library_project_ids)
 
     def test_hdri_library__new_bcloud_addon(self):
         resp = self.get('/api/bcloud/texture-libraries',
@@ -478,8 +478,8 @@ class TextureLibraryTest(AbstractHomeProjectTest):
                         headers={'Blender-Cloud-Addon': '1.4.0'})
         libs = resp.json()['_items']
         library_project_ids = {proj['_id'] for proj in libs}
-        self.assertIn(unicode(self.hdri_proj_id), library_project_ids)
-        self.assertIn(unicode(self.tex_proj_id), library_project_ids)
+        self.assertIn(str(self.hdri_proj_id), library_project_ids)
+        self.assertIn(str(self.tex_proj_id), library_project_ids)
 
 
 class HdriSortingTest(AbstractHomeProjectTest):
@@ -488,7 +488,7 @@ class HdriSortingTest(AbstractHomeProjectTest):
 
         super(HdriSortingTest, self).setUp(**kwargs)
 
-        self.user_id = self._create_user_with_token({u'subscriber'}, 'token')
+        self.user_id = self._create_user_with_token({'subscriber'}, 'token')
         self.hdri_proj_id, proj = self.ensure_project_exists(project_overrides={
             'user': self.user_id,
             'permissions': {'world': ['DELETE', 'GET', 'POST', 'PUT']},

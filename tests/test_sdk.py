@@ -84,8 +84,8 @@ class FlaskInternalApiTest(AbstractPillarTest):
 
         with self.app.test_request_context(), open(blender_desktop_logo_path, 'rb') as fileobj:
             resp = pillarsdk.Node.create_asset_from_file(
-                unicode(self.project_id),
-                unicode(parent_id),
+                str(self.project_id),
+                str(parent_id),
                 'image',
                 blender_desktop_logo_path,
                 mimetype='image/jpeg',

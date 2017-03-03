@@ -43,7 +43,7 @@ class NodeContentTypeTest(AbstractPillarTest):
                 g.current_user = {'user_id': user_id,
                                   # This group is hardcoded in the EXAMPLE_PROJECT.
                                   'groups': [ObjectId('5596e975ea893b269af85c0e')],
-                                  'roles': {u'subscriber', u'admin'}}
+                                  'roles': {'subscriber', 'admin'}}
                 nodes = self.app.data.driver.db['nodes']
 
                 # Create the node.
@@ -81,7 +81,7 @@ class NodeContentTypeTest(AbstractPillarTest):
         self.assertEqual(200, resp.status_code)
 
         data = json.loads(resp.data)
-        self.assertEqual([u'GET'], data['allowed_methods'])
+        self.assertEqual(['GET'], data['allowed_methods'])
 
     def test_default_picture_image_asset(self):
         from pillar.api.utils import dumps
@@ -240,12 +240,12 @@ class NodeSharingTest(AbstractPillarTest):
 
         self.project_id, _ = self.ensure_project_exists(
             project_overrides={
-                u'category': 'home',
-                u'permissions':
-                    {u'groups': [{u'group': ctd.EXAMPLE_ADMIN_GROUP_ID,
-                                  u'methods': [u'GET', u'POST', u'PUT', u'DELETE']}],
-                     u'users': [],
-                     u'world': []}}
+                'category': 'home',
+                'permissions':
+                    {'groups': [{'group': ctd.EXAMPLE_ADMIN_GROUP_ID,
+                                  'methods': ['GET', 'POST', 'PUT', 'DELETE']}],
+                     'users': [],
+                     'world': []}}
         )
         self.user_id = self.create_user(groups=[ctd.EXAMPLE_ADMIN_GROUP_ID])
         self.create_valid_auth_token(self.user_id, 'token')

@@ -75,8 +75,8 @@ class FileAccessTest(AbstractPillarTest):
 
         img_file_id, _ = self.ensure_file_exists()
         video_file_id, _ = self.ensure_file_exists({
-            u'_id': None,
-            u'content_type': u'video/matroska',
+            '_id': None,
+            'content_type': 'video/matroska',
             'variations': [
                 {
                     'format': 'mp4',
@@ -105,14 +105,14 @@ class FileAccessTest(AbstractPillarTest):
             ]
 
         })
-        blend_file_id, _ = self.ensure_file_exists({u'_id': None,
-                                                    u'content_type': u'application/x-blender',
-                                                    u'variations': None})
+        blend_file_id, _ = self.ensure_file_exists({'_id': None,
+                                                    'content_type': 'application/x-blender',
+                                                    'variations': None})
 
         nonsub_user_id = self.create_user(user_id='cafef00dcafef00d00000000', roles=())
-        sub_user_id = self.create_user(user_id='cafef00dcafef00dcafef00d', roles=(u'subscriber',))
-        demo_user_id = self.create_user(user_id='cafef00dcafef00ddeadbeef', roles=(u'demo',))
-        admin_user_id = self.create_user(user_id='aaaaaaaaaaaaaaaaaaaaaaaa', roles=(u'admin',))
+        sub_user_id = self.create_user(user_id='cafef00dcafef00dcafef00d', roles=('subscriber',))
+        demo_user_id = self.create_user(user_id='cafef00dcafef00ddeadbeef', roles=('demo',))
+        admin_user_id = self.create_user(user_id='aaaaaaaaaaaaaaaaaaaaaaaa', roles=('admin',))
 
         self.create_valid_auth_token(nonsub_user_id, 'nonsub-token')
         self.create_valid_auth_token(sub_user_id, 'sub-token')

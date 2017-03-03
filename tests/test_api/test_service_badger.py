@@ -11,8 +11,8 @@ class BadgerServiceTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             self.badger, token_doc = service.create_service_account(
-                'serviceaccount@example.com', [u'badger'],
-                {u'badger': [u'succubus', u'subscriber', u'demo']}
+                'serviceaccount@example.com', ['badger'],
+                {'badger': ['succubus', 'subscriber', 'demo']}
             )
             self.badger_token = token_doc['token']
 
@@ -33,7 +33,7 @@ class BadgerServiceTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             user = self.app.data.driver.db['users'].find_one(self.user_id)
-            self.assertIn(u'succubus', user['roles'])
+            self.assertIn('succubus', user['roles'])
 
         # Aaaahhhw it's gone again
         resp = self._post({'action': 'revoke', 'user_email': self.user_email, 'role': 'succubus'})
@@ -41,7 +41,7 @@ class BadgerServiceTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             user = self.app.data.driver.db['users'].find_one(self.user_id)
-            self.assertNotIn(u'succubus', user['roles'])
+            self.assertNotIn('succubus', user['roles'])
 
     def test_grant_not_allowed_badge(self):
         resp = self._post({'action': 'grant', 'user_email': self.user_email, 'role': 'admin'})
@@ -49,7 +49,7 @@ class BadgerServiceTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             user = self.app.data.driver.db['users'].find_one(self.user_id)
-            self.assertNotIn(u'admin', user['roles'])
+            self.assertNotIn('admin', user['roles'])
 
     def test_group_membership(self):
         """Certain roles are linked to certain groups."""
