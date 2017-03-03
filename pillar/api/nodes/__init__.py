@@ -4,7 +4,6 @@ import logging
 import urllib.parse
 
 import pymongo.errors
-import rsa.randnum
 import werkzeug.exceptions as wz_exceptions
 from bson import ObjectId
 from flask import current_app, g, Blueprint, request
@@ -150,13 +149,19 @@ def make_world_gettable(node):
                                                 node_id)
 
 
-def create_short_code(node):
+def create_short_code(node) -> str:
     """Generates a new 'short code' for the node."""
 
+    import secrets
+
     length = current_app.config['SHORT_CODE_LENGTH']
-    bits = rsa.randnum.read_random_bits(32)
-    short_code = base64.b64encode(bits, altchars='xy').rstrip('=')
-    short_code = short_code[:length]
+
+    # Base64 encoding will expand it a bit, so we'll cut that off later.
+    # It's a good idea to start with enough bytes, though.
+    bits = secrets.token_bytes(length)
+
+    short_code = base64.b64encode(bits, altchars=b'xy').rstrip(b'=')
+    short_code = short_code[:length].decode('ascii')
 
     return short_code
 

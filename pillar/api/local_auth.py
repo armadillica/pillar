@@ -5,7 +5,6 @@ import typing
 
 import bcrypt
 import datetime
-import rsa.randnum
 from bson import tz_util
 from flask import abort, Blueprint, current_app, jsonify, request
 from pillar.api.utils.authentication import create_new_user_document
@@ -77,7 +76,12 @@ def generate_and_store_token(user_id, days=15, prefix=b''):
     :return: the token document.
     """
 
-    random_bits = rsa.randnum.read_random_bits(256)
+    if not isinstance(prefix, bytes):
+        raise TypeError('prefix must be bytes, not %s' % type(prefix))
+
+    import secrets
+
+    random_bits = secrets.token_bytes(32)
 
     # Use 'xy' as altargs to prevent + and / characters from appearing.
     # We never have to b64decode the string anyway.
