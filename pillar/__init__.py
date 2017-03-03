@@ -280,7 +280,7 @@ class PillarServer(Eve):
                                                ext.static_path)
 
     def register_static_file_endpoint(self, url_prefix, endpoint_name, static_folder):
-        from pillar.web.static import PillarStaticFile
+        from pillar.web.staticfile import PillarStaticFile
 
         view_func = PillarStaticFile.as_view(endpoint_name, static_folder=static_folder)
         self.add_url_rule('%s/<path:filename>' % url_prefix, view_func=view_func)
