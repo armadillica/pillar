@@ -28,7 +28,7 @@ def before_inserting_projects(items):
     """
 
     # Allow admin users to do whatever they want.
-    if user_has_role(u'admin'):
+    if user_has_role('admin'):
         return
 
     for item in items:
@@ -70,7 +70,7 @@ def protect_sensitive_fields(document, original):
     """When not logged in as admin, prevents update to certain fields."""
 
     # Allow admin users to do whatever they want.
-    if user_has_role(u'admin'):
+    if user_has_role('admin'):
         return
 
     def revert(name):

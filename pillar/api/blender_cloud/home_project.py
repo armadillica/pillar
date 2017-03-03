@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 HOME_PROJECT_USERS = set()
 
 # Users with any of these roles will get full write access to their home project.
-HOME_PROJECT_WRITABLE_USERS = {u'subscriber', u'demo'}
+HOME_PROJECT_WRITABLE_USERS = {'subscriber', 'demo'}
 
 HOME_PROJECT_DESCRIPTION = ('# Your home project\n\n'
                             'This is your home project. It allows synchronisation '
@@ -30,7 +30,7 @@ HOME_PROJECT_SUMMARY = 'This is your home project. Here you can sync your Blende
 #                             'as a pastebin for text, images and other assets, and '
 #                             'allows synchronisation of your Blender settings.')
 # HOME_PROJECT_SUMMARY = 'This is your home project. Pastebin and Blender settings sync in one!'
-SYNC_GROUP_NODE_NAME = u'Blender Sync'
+SYNC_GROUP_NODE_NAME = 'Blender Sync'
 SYNC_GROUP_NODE_DESC = ('The [Blender Cloud Addon](https://cloud.blender.org/services'
                         '#blender-addon) will synchronize your Blender settings here.')
 
@@ -135,8 +135,8 @@ def create_home_project(user_id, write_access):
     # This allows people to comment on shared images and see comments.
     node_type_comment = assign_permissions(
         node_type_comment,
-        subscriber_methods=[u'GET', u'POST'],
-        world_methods=[u'GET'])
+        subscriber_methods=['GET', 'POST'],
+        world_methods=['GET'])
 
     project['node_types'] = [
         node_type_group,
@@ -215,7 +215,7 @@ def home_project():
         write_access = write_access_with_roles(roles)
         create_home_project(user_id, write_access)
 
-    resp, _, _, status, _ = get('projects', category=u'home', user=user_id)
+    resp, _, _, status, _ = get('projects', category='home', user=user_id)
     if status != 200:
         return utils.jsonify(resp), status
 
@@ -248,8 +248,8 @@ def home_project_permissions(write_access):
     """
 
     if write_access:
-        return [u'GET', u'PUT', u'POST', u'DELETE']
-    return [u'GET']
+        return ['GET', 'PUT', 'POST', 'DELETE']
+    return ['GET']
 
 
 def has_home_project(user_id):

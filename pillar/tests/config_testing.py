@@ -8,4 +8,4 @@ TESTING = True
 CDN_STORAGE_USER = 'u41508580125621'
 
 FILESIZE_LIMIT_BYTES_NONSUBS = 20 * 2 ** 10
-ROLES_FOR_UNLIMITED_UPLOADS = {u'subscriber', u'demo', u'admin'}
+ROLES_FOR_UNLIMITED_UPLOADS = {'subscriber', 'demo', 'admin'}

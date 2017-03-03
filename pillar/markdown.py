@@ -3,8 +3,6 @@
 This is for user-generated stuff, like comments.
 """
 
-from __future__ import absolute_import
-
 import bleach
 import CommonMark
 

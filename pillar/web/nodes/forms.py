@@ -33,7 +33,7 @@ def iter_node_properties(node_type):
     node_schema = node_type['dyn_schema'].to_dict()
     form_schema = node_type['form_schema'].to_dict()
 
-    for prop_name, prop_schema in node_schema.iteritems():
+    for prop_name, prop_schema in node_schema.items():
         prop_fschema = form_schema.get(prop_name, {})
 
         if not prop_fschema.get('visible', True):

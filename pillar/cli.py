@@ -3,7 +3,7 @@
 Run commands with 'flask <command>'
 """
 
-from __future__ import print_function, division
+
 
 import copy
 import logging
@@ -57,7 +57,7 @@ def setup_db(admin_email):
     print("Created user {0}".format(user['_id']))
 
     # Create a default project by faking a POST request.
-    with current_app.test_request_context(data={'project_name': u'Default Project'}):
+    with current_app.test_request_context(data={'project_name': 'Default Project'}):
         from flask import g
         from pillar.api.projects import routes as proj_routes
 
@@ -89,7 +89,7 @@ def find_duplicate_users():
         blender_id = blender_ids[0]
         found_users[blender_id].append(user)
 
-    for blender_id, users in found_users.iteritems():
+    for blender_id, users in found_users.items():
         if len(users) == 1:
             continue
 
@@ -344,14 +344,14 @@ def create_badger_account(email, badges):
         this account can assign and revoke.
     """
 
-    create_service_account(email, [u'badger'], {'badger': badges.strip().split()})
+    create_service_account(email, ['badger'], {'badger': badges.strip().split()})
 
 
 @manager_setup.command
 def create_urler_account(email):
     """Creates a new service account that can fetch all project URLs."""
 
-    create_service_account(email, [u'urler'], {})
+    create_service_account(email, ['urler'], {})
 
 
 @manager_setup.command
@@ -704,7 +704,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
             'properties.attachments': {'$exists': True},
         })
         for node in nodes:
-            attachments = node[u'properties'][u'attachments']
+            attachments = node['properties']['attachments']
             if isinstance(attachments, dict):
                 # This node has already been upgraded.
                 continue
@@ -713,9 +713,9 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
             new_atts = {}
             for field_info in attachments:
                 for attachment in field_info.get('files', []):
-                    new_atts[attachment[u'slug']] = {u'oid': attachment[u'file']}
+                    new_atts[attachment['slug']] = {'oid': attachment['file']}
 
-            node[u'properties'][u'attachments'] = new_atts
+            node['properties']['attachments'] = new_atts
 
             # Use Eve to PUT, so we have schema checking.
             db_node = remove_private_keys(node)
@@ -774,11 +774,11 @@ def create_blog(proj_url):
     blog = nodes_coll.find_one({'node_type': 'blog', 'project': proj_id})
     if not blog:
         blog = {
-            u'node_type': node_type_blog['name'],
-            u'name': u'Blog',
-            u'description': u'',
-            u'properties': {},
-            u'project': proj_id,
+            'node_type': node_type_blog['name'],
+            'name': 'Blog',
+            'description': '',
+            'properties': {},
+            'project': proj_id,
         }
         r, _, _, status = post_internal('nodes', blog)
         if status != 201:

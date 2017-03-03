@@ -25,7 +25,7 @@ def render_attachments(node, field_value):
     node_attachments = node.properties.attachments or {}
     if isinstance(node_attachments, list):
         log.warning('Old-style attachments property found on node %s. Ignoring them, '
-                    'will result in attachments not being found.', node[u'_id'])
+                    'will result in attachments not being found.', node['_id'])
         return field_value
 
     if not node_attachments:
@@ -37,7 +37,7 @@ def render_attachments(node, field_value):
         try:
             att = node_attachments[slug]
         except KeyError:
-            return u'[attachment "%s" not found]' % slug
+            return '[attachment "%s" not found]' % slug
         return render_attachment(att)
 
     return shortcode_re.sub(replace, field_value)
@@ -46,8 +46,8 @@ def render_attachments(node, field_value):
 def render_attachment(attachment):
     """Renders an attachment as HTML"""
 
-    oid = ObjectId(attachment[u'oid'])
-    collection = attachment.collection or u'files'
+    oid = ObjectId(attachment['oid'])
+    collection = attachment.collection or 'files'
 
     renderers = {
         'files': render_attachment_file
@@ -56,8 +56,8 @@ def render_attachment(attachment):
     try:
         renderer = renderers[collection]
     except KeyError:
-        log.error(u'Unable to render attachment from collection %s', collection)
-        return u'Unable to render attachment'
+        log.error('Unable to render attachment from collection %s', collection)
+        return 'Unable to render attachment'
 
     return renderer(attachment)
 
@@ -66,7 +66,7 @@ def render_attachment_file(attachment):
     """Renders a file attachment."""
 
     api = system_util.pillar_api()
-    sdk_file = pillarsdk.File.find(attachment[u'oid'], api=api)
+    sdk_file = pillarsdk.File.find(attachment['oid'], api=api)
 
     file_renderers = {
         'image': render_attachment_file_image
@@ -119,7 +119,7 @@ def attachment_form_group_set_data(db_prop_value, schema_prop, field_list):
     while len(field_list):
         field_list.pop_entry()
 
-    for slug, att_data in sorted(db_prop_value.iteritems()):
+    for slug, att_data in sorted(db_prop_value.items()):
         file_select_form_group = _attachment_build_single_field(schema_prop)
         subform = file_select_form_group()
 

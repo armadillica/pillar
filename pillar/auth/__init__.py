@@ -55,11 +55,11 @@ def _load_user(token):
 
     login_user = UserClass(token)
     login_user.email = db_user['email']
-    login_user.objectid = unicode(db_user['_id'])
+    login_user.objectid = str(db_user['_id'])
     login_user.username = db_user['username']
     login_user.gravatar = utils.gravatar(db_user['email'])
     login_user.roles = db_user.get('roles', [])
-    login_user.groups = [unicode(g) for g in db_user['groups'] or ()]
+    login_user.groups = [str(g) for g in db_user['groups'] or ()]
     login_user.full_name = db_user.get('full_name', '')
 
     return login_user

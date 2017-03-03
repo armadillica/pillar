@@ -238,22 +238,22 @@ def merge_permissions(*args):
         asdict0 = {permission[field_name]: permission['methods'] for permission in from0}
         asdict1 = {permission[field_name]: permission['methods'] for permission in from1}
 
-        keys = set(asdict0.keys() + asdict1.keys())
+        keys = set(asdict0.keys()).union(set(asdict1.keys()))
         for key in maybe_sorted(keys):
             methods0 = asdict0.get(key, [])
             methods1 = asdict1.get(key, [])
             methods = maybe_sorted(set(methods0).union(set(methods1)))
-            effective.setdefault(plural_name, []).append({field_name: key, u'methods': methods})
+            effective.setdefault(plural_name, []).append({field_name: key, 'methods': methods})
 
-    merge(u'user')
-    merge(u'group')
+    merge('user')
+    merge('group')
 
     # Gather permissions for world
     world0 = args[0].get('world', [])
     world1 = args[1].get('world', [])
     world_methods = set(world0).union(set(world1))
     if world_methods:
-        effective[u'world'] = maybe_sorted(world_methods)
+        effective['world'] = maybe_sorted(world_methods)
 
     # Recurse for longer merges
     if len(args) > 2:
@@ -380,4 +380,4 @@ def user_matches_roles(require_roles=set(),
 def is_admin(user):
     """Returns True iff the given user has the admin role."""
 
-    return user_has_role(u'admin', user)
+    return user_has_role('admin', user)

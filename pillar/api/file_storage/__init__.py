@@ -222,7 +222,7 @@ def process_file(gcs, file_id, local_file):
     mime_category, src_file['format'] = src_file['content_type'].split('/', 1)
 
     # Prevent video handling for non-admins.
-    if not user_has_role(u'admin') and mime_category == 'video':
+    if not user_has_role('admin') and mime_category == 'video':
         if src_file['format'].startswith('x-'):
             xified = src_file['format']
         else:

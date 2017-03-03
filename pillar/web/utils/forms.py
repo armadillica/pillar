@@ -32,7 +32,7 @@ class CustomFileSelectWidget(HiddenInput):
         if file_format and file_format == 'image':
             file_format_regex = '^image\/(gif|jpe?g|png|tif?f|tga)$'
 
-        button = [u'<div class="form-upload-file">']
+        button = ['<div class="form-upload-file">']
 
         if field.data:
             api = system_util.pillar_api()
@@ -42,64 +42,64 @@ class CustomFileSelectWidget(HiddenInput):
             except ResourceNotFound:
                 pass
             else:
-                button.append(u'<div class="form-upload-file-meta-container">')
+                button.append('<div class="form-upload-file-meta-container">')
 
                 filename = Markup.escape(file_item.filename)
                 if file_item.content_type.split('/')[0] == 'image':
                     # If a file of type image is available, display the preview
-                    button.append(u'<img class="preview-thumbnail" src="{0}" />'.format(
+                    button.append('<img class="preview-thumbnail" src="{0}" />'.format(
                         file_item.thumbnail('s', api=api)))
 
-                button.append(u'<ul class="form-upload-file-meta">')
+                button.append('<ul class="form-upload-file-meta">')
                 # File name
-                button.append(u'<li class="name">{0}</li>'.format(filename))
+                button.append('<li class="name">{0}</li>'.format(filename))
                 # File size
-                button.append(u'<li class="size">({0} MB)</li>'.format(
+                button.append('<li class="size">({0} MB)</li>'.format(
                     round((file_item.length / 1024) * 0.001, 2)))
                 # Image resolution (if image)
                 if file_item.content_type.split('/')[0] == 'image':
-                    button.append(u'<li class="dimensions">{0}x{1}</li>'.format(
+                    button.append('<li class="dimensions">{0}x{1}</li>'.format(
                         file_item.width, file_item.height))
-                button.append(u'</ul>')
-                button.append(u'<ul class="form-upload-file-actions">')
+                button.append('</ul>')
+                button.append('<ul class="form-upload-file-actions">')
                 # Download button for original file
-                button.append(u'<li class="original">'
-                              u'<a href="{}" class="file_original"> '
-                              u'<i class="pi-download"></i>Original</a></li>'
+                button.append('<li class="original">'
+                              '<a href="{}" class="file_original"> '
+                              '<i class="pi-download"></i>Original</a></li>'
                               .format(file_item.link))
                 # Delete button
-                button.append(u'<li class="delete">'
-                              u'<a href="#" class="file_delete" '
-                              u'data-field-name="{field_name}" '
-                              u'data-file_id="{file_id}"> '
-                              u'<i class="pi-trash"></i> Delete</a></li>'.format(
+                button.append('<li class="delete">'
+                              '<a href="#" class="file_delete" '
+                              'data-field-name="{field_name}" '
+                              'data-file_id="{file_id}"> '
+                              '<i class="pi-trash"></i> Delete</a></li>'.format(
                     field_name=field.name, file_id=field.data))
-                button.append(u'</ul>')
-                button.append(u'</div>')
+                button.append('</ul>')
+                button.append('</div>')
 
-        upload_url = u'%sstorage/stream/{project_id}' % current_app.config[
+        upload_url = '%sstorage/stream/{project_id}' % current_app.config[
             'PILLAR_SERVER_ENDPOINT']
 
-        button.append(u'<input class="fileupload" type="file" name="file" '
-                      u'data-url="{url}" '
-                      u'data-field-name="{name}" '
-                      u'data-field-slug="{slug}" '
-                      u'data-token="{token}" '
-                      u'data-file-format="{file_format}">'
-                      u'<div class="form-upload-progress"> '
-                      u'<div class="form-upload-progress-bar" role="progressbar" '
-                      u'aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" '
-                      u'style="width: 0%;"> '
-                      u'</div> '
-                      u'</div>'.format(url=upload_url,
+        button.append('<input class="fileupload" type="file" name="file" '
+                      'data-url="{url}" '
+                      'data-field-name="{name}" '
+                      'data-field-slug="{slug}" '
+                      'data-token="{token}" '
+                      'data-file-format="{file_format}">'
+                      '<div class="form-upload-progress"> '
+                      '<div class="form-upload-progress-bar" role="progressbar" '
+                      'aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" '
+                      'style="width: 0%;"> '
+                      '</div> '
+                      '</div>'.format(url=upload_url,
                                        name=field.name,
                                        slug=field.name.replace('oid', 'slug'),
                                        token=Markup.escape(current_user.id),
                                        file_format=Markup.escape(file_format_regex)))
 
-        button.append(u'</div>')
+        button.append('</div>')
 
-        return HTMLString(html + u''.join(button))
+        return HTMLString(html + ''.join(button))
 
 
 class FileSelectField(StringField):
@@ -112,7 +112,7 @@ def build_file_select_form(schema):
     class FileSelectForm(Form):
         pass
 
-    for field_name, field_schema in schema.iteritems():
+    for field_name, field_schema in schema.items():
         if field_schema['type'] == 'boolean':
             field = BooleanField()
         elif field_schema['type'] == 'string':
@@ -142,19 +142,19 @@ class CustomFormFieldWidget(object):
     def __call__(self, field, **kwargs):
         html = []
         kwargs.setdefault('id', field.id)
-        html.append(u'<div %s>' % html_params(**kwargs))
-        hidden = u''
+        html.append('<div %s>' % html_params(**kwargs))
+        hidden = ''
         for subfield in field:
             if subfield.type == 'HiddenField':
                 hidden += text_type(subfield)
             else:
-                html.append(u'<div><span>%s</span>%s%s</div>' % (
+                html.append('<div><span>%s</span>%s%s</div>' % (
                     text_type(subfield.label), hidden, text_type(subfield)))
-                hidden = u''
-        html.append(u'</div>')
+                hidden = ''
+        html.append('</div>')
         if hidden:
             html.append(hidden)
-        return HTMLString(u''.join(html))
+        return HTMLString(''.join(html))
 
 
 class CustomFormField(FormField):

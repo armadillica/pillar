@@ -1,9 +1,5 @@
 # -*- encoding: utf-8 -*-
 
-from __future__ import print_function
-
-from __future__ import absolute_import
-
 import base64
 import copy
 import json
@@ -16,7 +12,7 @@ import sys
 try:
     from urllib.parse import urlencode
 except ImportError:
-    from urllib import urlencode
+    from urllib.parse import urlencode
 
 from bson import ObjectId, tz_util
 
@@ -46,7 +42,7 @@ MY_PATH = os.path.dirname(os.path.abspath(__file__))
 
 TEST_EMAIL_USER = 'koro'
 TEST_EMAIL_ADDRESS = '%s@testing.blender.org' % TEST_EMAIL_USER
-TEST_FULL_NAME = u'врач Сергей'
+TEST_FULL_NAME = 'врач Сергей'
 TEST_SUBCLIENT_TOKEN = 'my-subclient-token-for-pillar'
 BLENDER_ID_USER_RESPONSE = {'status': 'success',
                             'user': {'email': TEST_EMAIL_ADDRESS,
@@ -207,9 +203,9 @@ class AbstractPillarTest(TestMinimal):
                 'roles': list(roles),
                 'settings': {'email_communications': 1},
                 'auth': [{'token': '',
-                          'user_id': unicode(ctd.BLENDER_ID_TEST_USERID),
+                          'user_id': str(ctd.BLENDER_ID_TEST_USERID),
                           'provider': 'blender-id'}],
-                'full_name': u'คนรักของผัดไทย',
+                'full_name': 'คนรักของผัดไทย',
                 'email': TEST_EMAIL_ADDRESS
             })
 

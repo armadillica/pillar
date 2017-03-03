@@ -2,7 +2,7 @@ import json
 import logging
 import httplib2  # used by the oauth2 package
 import requests
-import urlparse
+import urllib.parse
 
 from flask import (abort, Blueprint, current_app, flash, redirect,
                    render_template, request, session, url_for)
@@ -274,15 +274,15 @@ def user_roles_update(user_id):
         groups = set(user.groups or [])
 
         if grant_subscriber:
-            roles.add(u'subscriber')
+            roles.add('subscriber')
             groups.add(group_subscriber._id)
-        elif u'admin' not in roles:
+        elif 'admin' not in roles:
             # Don't take away roles from admins.
-            roles.discard(u'subscriber')
+            roles.discard('subscriber')
             groups.discard(group_subscriber._id)
 
         if grant_demo:
-            roles.add(u'demo')
+            roles.add('demo')
             groups.add(group_demo._id)
 
         # Only send an API request when the user has actually changed
@@ -316,7 +316,7 @@ def fetch_blenderid_user():
     :rtype: dict
     """
 
-    bid_url = urlparse.urljoin(current_app.config['BLENDER_ID_ENDPOINT'], 'api/user')
+    bid_url = urllib.parse.urljoin(current_app.config['BLENDER_ID_ENDPOINT'], 'api/user')
     log.debug('Fetching user info from %s', bid_url)
 
     try:

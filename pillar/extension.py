@@ -18,9 +18,7 @@ can then be registered to the application at app creation time:
 import abc
 
 
-class PillarExtension(object):
-    __metaclass__ = abc.ABCMeta
-
+class PillarExtension(object, metaclass=abc.ABCMeta):
     @abc.abstractproperty
     def name(self):
         """The name of this extension.

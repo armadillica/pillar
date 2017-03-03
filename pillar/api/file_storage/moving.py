@@ -29,7 +29,7 @@ def change_file_storage_backend(file_id, dest_backend):
     Files on the original backend are not deleted automatically.
     """
 
-    dest_backend = unicode(dest_backend)
+    dest_backend = str(dest_backend)
     file_id = ObjectId(file_id)
 
     # Fetch file document

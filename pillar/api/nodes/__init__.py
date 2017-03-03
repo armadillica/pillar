@@ -1,7 +1,7 @@
 import base64
 import functools
 import logging
-import urlparse
+import urllib.parse
 
 import pymongo.errors
 import rsa.randnum
@@ -20,7 +20,7 @@ from pillar.api.utils.gcs import update_file_name
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('nodes_api', __name__)
-ROLES_FOR_SHARING = {u'subscriber', u'demo'}
+ROLES_FOR_SHARING = {'subscriber', 'demo'}
 
 
 def only_for_node_type_decorator(*required_node_type_names):
@@ -138,7 +138,7 @@ def make_world_gettable(node):
     log.debug('Ensuring the world can read node %s', node_id)
 
     world_perms = set(node.get('permissions', {}).get('world', []))
-    world_perms.add(u'GET')
+    world_perms.add('GET')
     world_perms = list(world_perms)
 
     result = nodes_coll.update_one({'_id': node_id},
@@ -164,7 +164,7 @@ def create_short_code(node):
 def short_link_info(short_code):
     """Returns the short link info in a dict."""
 
-    short_link = urlparse.urljoin(current_app.config['SHORT_LINK_BASE_URL'], short_code)
+    short_link = urllib.parse.urljoin(current_app.config['SHORT_LINK_BASE_URL'], short_code)
 
     return {
         'short_code': short_code,
@@ -349,7 +349,7 @@ def node_set_default_picture(node, original=None):
         # Find the colour map, defaulting to the first image map available.
         image_file_id = None
         for image in props.get('files', []):
-            if image_file_id is None or image.get('map_type') == u'color':
+            if image_file_id is None or image.get('map_type') == 'color':
                 image_file_id = image.get('file')
     else:
         log.debug('Not setting default picture on node type %s content type %s',
