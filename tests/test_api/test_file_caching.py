@@ -25,7 +25,7 @@ class FileCachingTest(AbstractPillarTest):
             # Make sure the file link has not expired.
             expires = datetime.datetime.now(tz=bson.tz_util.utc) + datetime.timedelta(minutes=1)
             file_id, file_doc = self.ensure_file_exists(file_overrides={
-                u'link_expires': expires
+                'link_expires': expires
             })
 
             updated = file_doc['_updated'].strftime(RFC1123_DATE_FORMAT)
@@ -49,7 +49,7 @@ class FileCachingTest(AbstractPillarTest):
             # Make sure the file link has expired.
             expires = datetime.datetime.now(tz=bson.tz_util.utc) - datetime.timedelta(seconds=1)
             file_id, file_doc = self.ensure_file_exists(file_overrides={
-                u'link_expires': expires
+                'link_expires': expires
             })
 
             updated = file_doc['_updated'].strftime(RFC1123_DATE_FORMAT)

@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-from __future__ import absolute_import
+
 import unittest
 
 from bson import ObjectId
@@ -16,7 +16,7 @@ class Str2idTest(AbstractPillarTest):
 
         happy(24 * 'a')
         happy(12 * 'a')
-        happy(u'577e23ad98377323f74c368c')
+        happy('577e23ad98377323f74c368c')
 
     def test_unhappy(self):
         from pillar.api.utils import str2id
@@ -25,10 +25,10 @@ class Str2idTest(AbstractPillarTest):
             self.assertRaises(BadRequest, str2id, str_id)
 
         unhappy(13 * 'a')
-        unhappy(u'577e23ad 8377323f74c368c')
-        unhappy(u'김치')  # Kimchi
+        unhappy('577e23ad 8377323f74c368c')
+        unhappy('김치')  # Kimchi
         unhappy('')
-        unhappy(u'')
+        unhappy('')
         unhappy(None)
 
 
@@ -84,26 +84,26 @@ class DocDiffTest(unittest.TestCase):
 
     def test_no_diff_nested(self):
         from pillar.api.utils import doc_diff
-        diff = doc_diff({'a': 'b', 'props': {'status': u'todo', 'notes': u'jemoeder'}},
-                        {'a': 'b', 'props': {'status': u'todo', 'notes': u'jemoeder'}})
+        diff = doc_diff({'a': 'b', 'props': {'status': 'todo', 'notes': 'jemoeder'}},
+                        {'a': 'b', 'props': {'status': 'todo', 'notes': 'jemoeder'}})
 
         self.assertEqual([], list(diff))
 
     def test_diff_values_nested(self):
         from pillar.api.utils import doc_diff
-        diff = doc_diff({'a': 'b', 'props': {'status': u'todo', 'notes': u'jemoeder'}},
-                        {'a': 'c', 'props': {'status': u'done', 'notes': u'jemoeder'}})
+        diff = doc_diff({'a': 'b', 'props': {'status': 'todo', 'notes': 'jemoeder'}},
+                        {'a': 'c', 'props': {'status': 'done', 'notes': 'jemoeder'}})
 
-        self.assertEqual({('a', 'b', 'c'), ('props.status', u'todo', u'done')},
+        self.assertEqual({('a', 'b', 'c'), ('props.status', 'todo', 'done')},
                          set(diff))
 
     def test_diff_keys_nested(self):
         from pillar.api.utils import doc_diff, DoesNotExist
-        diff = doc_diff({'a': 'b', 'props': {'status1': u'todo', 'notes': u'jemoeder'}},
-                        {'a': 'b', 'props': {'status2': u'todo', 'notes': u'jemoeder'}})
+        diff = doc_diff({'a': 'b', 'props': {'status1': 'todo', 'notes': 'jemoeder'}},
+                        {'a': 'b', 'props': {'status2': 'todo', 'notes': 'jemoeder'}})
 
-        self.assertEqual({('props.status1', u'todo', DoesNotExist),
-                          ('props.status2', DoesNotExist, u'todo')},
+        self.assertEqual({('props.status1', 'todo', DoesNotExist),
+                          ('props.status2', DoesNotExist, 'todo')},
                          set(diff))
 
 

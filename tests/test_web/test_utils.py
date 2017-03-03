@@ -1,7 +1,5 @@
 # -*- encoding: utf-8 -*-
 
-from __future__ import absolute_import
-
 import unittest
 import datetime
 
@@ -13,20 +11,20 @@ class IsValidIdTest(unittest.TestCase):
     def test_valid(self):
         # 24-byte hex strings
         self.assertTrue(utils.is_valid_id(24 * 'a'))
-        self.assertTrue(utils.is_valid_id(24 * u'a'))
+        self.assertTrue(utils.is_valid_id(24 * 'a'))
         self.assertTrue(utils.is_valid_id('deadbeefbeefcacedeadcace'))
-        self.assertTrue(utils.is_valid_id(u'deadbeefbeefcacedeadcace'))
+        self.assertTrue(utils.is_valid_id('deadbeefbeefcacedeadcace'))
 
         # 12-byte arbitrary ASCII strings
         self.assertTrue(utils.is_valid_id('DeadBeefCake'))
-        self.assertTrue(utils.is_valid_id(u'DeadBeefCake'))
+        self.assertTrue(utils.is_valid_id('DeadBeefCake'))
 
         # 12-byte str object
         self.assertTrue(utils.is_valid_id('beef€67890'))
 
     def test_bad_length(self):
         self.assertFalse(utils.is_valid_id(23 * 'a'))
-        self.assertFalse(utils.is_valid_id(25 * u'a'))
+        self.assertFalse(utils.is_valid_id(25 * 'a'))
 
     def test_non_string(self):
         self.assertFalse(utils.is_valid_id(None))
@@ -38,7 +36,7 @@ class IsValidIdTest(unittest.TestCase):
         self.assertFalse(utils.is_valid_id('deadbeefbeefcakedeadcake'))
 
         # unicode variant of valid 12-byte str object
-        self.assertFalse(utils.is_valid_id(u'beef€67890'))
+        self.assertFalse(utils.is_valid_id('beef€67890'))
 
 
 class PrettyDateTest(unittest.TestCase):

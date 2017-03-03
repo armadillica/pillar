@@ -60,7 +60,7 @@ class VoteCommentTest(AbstractPatchCommentTest):
         patched_node = self.get(self.node_url, auth_token='token').json()
         self.assertEqual(1, patched_node['properties']['rating_positive'])
         self.assertEqual(0, patched_node['properties']['rating_negative'])
-        self.assertEqual({u'user': str(self.user_id), u'is_positive': True},
+        self.assertEqual({'user': str(self.user_id), 'is_positive': True},
                          patched_node['properties']['ratings'][0])
         self.assertEqual(1, len(patched_node['properties']['ratings']))
 
@@ -81,7 +81,7 @@ class VoteCommentTest(AbstractPatchCommentTest):
         patched_node = self.get(self.node_url, auth_token='token').json()
         self.assertEqual(0, patched_node['properties']['rating_positive'])
         self.assertEqual(1, patched_node['properties']['rating_negative'])
-        self.assertEqual({u'user': str(self.user_id), u'is_positive': False},
+        self.assertEqual({'user': str(self.user_id), 'is_positive': False},
                          patched_node['properties']['ratings'][0])
         self.assertEqual(1, len(patched_node['properties']['ratings']))
 
@@ -157,11 +157,11 @@ class VoteCommentTest(AbstractPatchCommentTest):
         self.assertEqual(3, patched_node['properties']['rating_positive'])
         self.assertEqual(2, patched_node['properties']['rating_negative'])
         self.assertEqual([
-            {u'user': unicode(other_user_ids[0]), u'is_positive': True},
-            {u'user': unicode(other_user_ids[1]), u'is_positive': True},
-            {u'user': unicode(other_user_ids[3]), u'is_positive': True},
-            {u'user': unicode(other_user_ids[4]), u'is_positive': False},
-            {u'user': unicode(self.user_id), u'is_positive': False},
+            {'user': str(other_user_ids[0]), 'is_positive': True},
+            {'user': str(other_user_ids[1]), 'is_positive': True},
+            {'user': str(other_user_ids[3]), 'is_positive': True},
+            {'user': str(other_user_ids[4]), 'is_positive': False},
+            {'user': str(self.user_id), 'is_positive': False},
         ], patched_node['properties'].get('ratings', []))
 
 
@@ -172,19 +172,19 @@ class EditCommentTest(AbstractPatchCommentTest):
         res = self.patch(self.node_url,
                          json={'op': 'edit', 'content': 'Je moeder is niet je vader.'},
                          auth_token=token).json()
-        self.assertEqual(u'<p>Je moeder is niet je vader.</p>\n',
+        self.assertEqual('<p>Je moeder is niet je vader.</p>\n',
                          res['properties']['content_html'])
 
         # Get the node again, to inspect its changed state.
         patched_node = self.get(self.node_url, auth_token=token).json()
-        self.assertEqual(u'Je moeder is niet je vader.',
+        self.assertEqual('Je moeder is niet je vader.',
                          patched_node['properties']['content'])
-        self.assertEqual(u'<p>Je moeder is niet je vader.</p>\n',
+        self.assertEqual('<p>Je moeder is niet je vader.</p>\n',
                          patched_node['properties']['content_html'])
         self.assertNotEqual(pre_node['_etag'], patched_node['_etag'])
 
     def test_comment_edit_other_user_admin(self):
-        admin_id = self.create_user(user_id=24 * 'c', roles={u'admin'})
+        admin_id = self.create_user(user_id=24 * 'c', roles={'admin'})
         self.create_valid_auth_token(admin_id, 'admin-token')
 
         self.test_comment_edit_happy(token='admin-token')
@@ -197,9 +197,9 @@ class EditCommentTest(AbstractPatchCommentTest):
 
         # Get the node again, to inspect its old state.
         patched_node = self.get(self.node_url, auth_token='token').json()
-        self.assertEqual(u'Purrrr kittycat',
+        self.assertEqual('Purrrr kittycat',
                          patched_node['properties']['content'])
-        self.assertEqual(u'<p>Purrrr kittycat</p>\n',
+        self.assertEqual('<p>Purrrr kittycat</p>\n',
                          patched_node['properties']['content_html'])
 
     def test_edit_noncomment_node(self):

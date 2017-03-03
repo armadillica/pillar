@@ -9,13 +9,13 @@ from datetime import datetime, timedelta
 class LinkRefreshTest(AbstractPillarTest):
     # noinspection PyMethodOverriding
     def ensure_file_exists(self, file_overrides):
-        file_id = file_overrides[u'_id']
+        file_id = file_overrides['_id']
 
         file_overrides.update({
-            u'_id': ObjectId(file_id),
-            u'name': '%s.png' % file_id,
-            u'file_path': '%s.png' % file_id,
-            u'backend': 'unittest',
+            '_id': ObjectId(file_id),
+            'name': '%s.png' % file_id,
+            'file_path': '%s.png' % file_id,
+            'backend': 'unittest',
         })
 
         return super(LinkRefreshTest, self).ensure_file_exists(file_overrides)
@@ -33,8 +33,8 @@ class LinkRefreshTest(AbstractPillarTest):
                   datetime(2016, 3, 22, 9, 28, 3, tzinfo=tz_util.utc),
                   self.now + timedelta(minutes=30), self.now + timedelta(minutes=90), ]
         ids_and_files = [self.ensure_file_exists(file_overrides={
-            u'_id': 'cafef00ddeadbeef0000000%i' % file_idx,
-            u'link_expires': expiry})
+            '_id': 'cafef00ddeadbeef0000000%i' % file_idx,
+            'link_expires': expiry})
                          for file_idx, expiry in enumerate(expiry)]
 
         self.file_id, self.file = zip(*ids_and_files)

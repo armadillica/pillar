@@ -1,5 +1,3 @@
-from __future__ import absolute_import
-
 import datetime
 
 import responses
@@ -47,11 +45,11 @@ class ChangeBackendTest(AbstractPillarTest):
             files_coll = self.app.data.driver.db['files']
             fdoc = files_coll.find_one(image_file_id)
 
-        self.assertEqual(u'gcs', fdoc['backend'])
-        self.assertIn(u'/path/to/testing/gcs/', fdoc['link'])
+        self.assertEqual('gcs', fdoc['backend'])
+        self.assertIn('/path/to/testing/gcs/', fdoc['link'])
 
         for variation in fdoc['variations']:
-            self.assertIn(u'/path/to/testing/gcs/', variation['link'])
+            self.assertIn('/path/to/testing/gcs/', variation['link'])
 
     @mock.activate
     def test_only_variations(self):
@@ -77,11 +75,11 @@ class ChangeBackendTest(AbstractPillarTest):
             files_coll = self.app.data.driver.db['files']
             fdoc = files_coll.find_one(image_file_id)
 
-        self.assertEqual(u'gcs', fdoc['backend'])
-        self.assertIn(u'/path/to/testing/gcs/', fdoc['link'])
+        self.assertEqual('gcs', fdoc['backend'])
+        self.assertIn('/path/to/testing/gcs/', fdoc['link'])
 
         for variation in fdoc['variations']:
-            self.assertIn(u'/path/to/testing/gcs/', variation['link'])
+            self.assertIn('/path/to/testing/gcs/', variation['link'])
 
     @mock.activate
     def test_no_variations(self):
@@ -102,8 +100,8 @@ class ChangeBackendTest(AbstractPillarTest):
             files_coll = self.app.data.driver.db['files']
             fdoc = files_coll.find_one(image_file_id)
 
-        self.assertEqual(u'gcs', fdoc['backend'])
-        self.assertIn(u'/path/to/testing/gcs/', fdoc['link'])
+        self.assertEqual('gcs', fdoc['backend'])
+        self.assertIn('/path/to/testing/gcs/', fdoc['link'])
 
     def _create_image_file_doc(self, variations=True):
         fdoc = {'status': 'complete', 'name': 'some-hash.jpg', 'backend': 'unittest',

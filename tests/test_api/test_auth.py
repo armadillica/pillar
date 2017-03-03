@@ -19,15 +19,15 @@ EXAMPLE_PROJECT = copy.deepcopy(ctd.EXAMPLE_PROJECT)
 _texture_nt = next(nt for nt in EXAMPLE_PROJECT['node_types']
                    if nt['name'] == 'texture')
 _texture_nt['permissions'] = {'groups': [
-    {u'group': ObjectId('5596e975ea893b269af85c0f'), u'methods': [u'GET']},
-    {u'group': ObjectId('564733b56dcaf85da2faee8a'), u'methods': [u'GET']}
+    {'group': ObjectId('5596e975ea893b269af85c0f'), 'methods': ['GET']},
+    {'group': ObjectId('564733b56dcaf85da2faee8a'), 'methods': ['GET']}
 ]}
 
 _asset_nt = next(nt for nt in EXAMPLE_PROJECT['node_types']
                  if nt['name'] == 'asset')
 _asset_nt['permissions'] = {'groups': [
-    {u'group': ObjectId('5596e975ea893b269af85c0f'), u'methods': [u'DELETE', u'GET']},
-    {u'group': ObjectId('564733b56dcaf85da2faee8a'), u'methods': [u'GET']}
+    {'group': ObjectId('5596e975ea893b269af85c0f'), 'methods': ['DELETE', 'GET']},
+    {'group': ObjectId('564733b56dcaf85da2faee8a'), 'methods': ['GET']}
 ]}
 
 
@@ -127,7 +127,7 @@ class AuthenticationTests(AbstractPillarTest):
         from pillar.api.utils import authentication as auth
         from pillar.api.utils import PillarJSONEncoder, remove_private_keys
 
-        user_id = self.create_user(roles=[u'subscriber'])
+        user_id = self.create_user(roles=['subscriber'])
 
         now = datetime.datetime.now(tz_util.utc)
         future = now + datetime.timedelta(days=1)
@@ -174,7 +174,7 @@ class AuthenticationTests(AbstractPillarTest):
             users = self.app.data.driver.db['users']
             db_user = users.find_one(user_id)
 
-            self.assertEqual([u'subscriber'], db_user['roles'])
+            self.assertEqual(['subscriber'], db_user['roles'])
 
     def test_token_expiry(self):
         """Expired tokens should be deleted from the database."""
@@ -207,9 +207,9 @@ class UserListTests(AbstractPillarTest):
     def setUp(self, **kwargs):
         super(UserListTests, self).setUp()
 
-        self.create_user(roles=[u'subscriber'], user_id='123456789abc123456789abc')
-        self.create_user(roles=[u'admin'], user_id='223456789abc123456789abc')
-        self.create_user(roles=[u'subscriber'], user_id='323456789abc123456789abc')
+        self.create_user(roles=['subscriber'], user_id='123456789abc123456789abc')
+        self.create_user(roles=['admin'], user_id='223456789abc123456789abc')
+        self.create_user(roles=['subscriber'], user_id='323456789abc123456789abc')
 
         self.create_valid_auth_token('123456789abc123456789abc', 'token')
         self.create_valid_auth_token('223456789abc123456789abc', 'admin-token')
@@ -371,7 +371,7 @@ class UserListTests(AbstractPillarTest):
             'roles': ['subscriber'],
             'settings': {'email_communications': 1},
             'auth': [],
-            'full_name': u'คนรักของผัดไทย',
+            'full_name': 'คนรักของผัดไทย',
             'email': TEST_EMAIL_ADDRESS,
         }
 
@@ -464,22 +464,22 @@ class PermissionComputationTest(AbstractPillarTest):
             # Test project permissions.
             self.assertEqual(
                 {
-                    u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                                 u'methods': [u'DELETE', u'GET', u'POST', u'PUT']}],
-                    u'world': [u'GET']
+                    'groups': [{'group': ObjectId('5596e975ea893b269af85c0e'),
+                                 'methods': ['DELETE', 'GET', 'POST', 'PUT']}],
+                    'world': ['GET']
                 },
                 self.sort(compute_aggr_permissions('projects', EXAMPLE_PROJECT, None)))
 
             # Test node type permissions.
             self.assertEqual(
                 {
-                    u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                                 u'methods': [u'DELETE', u'GET', u'POST', u'PUT']},
-                                {u'group': ObjectId('5596e975ea893b269af85c0f'),
-                                 u'methods': [u'GET']},
-                                {u'group': ObjectId('564733b56dcaf85da2faee8a'),
-                                 u'methods': [u'GET']}],
-                    u'world': [u'GET']
+                    'groups': [{'group': ObjectId('5596e975ea893b269af85c0e'),
+                                 'methods': ['DELETE', 'GET', 'POST', 'PUT']},
+                                {'group': ObjectId('5596e975ea893b269af85c0f'),
+                                 'methods': ['GET']},
+                                {'group': ObjectId('564733b56dcaf85da2faee8a'),
+                                 'methods': ['GET']}],
+                    'world': ['GET']
                 },
                 self.sort(compute_aggr_permissions('projects', EXAMPLE_PROJECT, 'texture')))
 
@@ -492,13 +492,13 @@ class PermissionComputationTest(AbstractPillarTest):
             # Test node permissions without embedded project.
             self.ensure_project_exists(project_overrides=EXAMPLE_PROJECT)
             self.assertEqual(
-                {u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                              u'methods': [u'DELETE', u'GET', u'POST', u'PUT']},
-                             {u'group': ObjectId('5596e975ea893b269af85c0f'),
-                              u'methods': [u'DELETE', u'GET']},
-                             {u'group': ObjectId('564733b56dcaf85da2faee8a'),
-                              u'methods': [u'GET']}],
-                 u'world': [u'GET']},
+                {'groups': [{'group': ObjectId('5596e975ea893b269af85c0e'),
+                              'methods': ['DELETE', 'GET', 'POST', 'PUT']},
+                             {'group': ObjectId('5596e975ea893b269af85c0f'),
+                              'methods': ['DELETE', 'GET']},
+                             {'group': ObjectId('564733b56dcaf85da2faee8a'),
+                              'methods': ['GET']}],
+                 'world': ['GET']},
                 self.sort(compute_aggr_permissions('nodes', node, None)))
 
         with self.app.test_request_context():
@@ -506,13 +506,13 @@ class PermissionComputationTest(AbstractPillarTest):
             node = copy.deepcopy(EXAMPLE_NODE)
             node['project'] = EXAMPLE_PROJECT
             self.assertEqual(
-                {u'groups': [{u'group': ObjectId('5596e975ea893b269af85c0e'),
-                              u'methods': [u'DELETE', u'GET', u'POST', u'PUT']},
-                             {u'group': ObjectId('5596e975ea893b269af85c0f'),
-                              u'methods': [u'DELETE', u'GET']},
-                             {u'group': ObjectId('564733b56dcaf85da2faee8a'),
-                              u'methods': [u'GET']}],
-                 u'world': [u'GET']},
+                {'groups': [{'group': ObjectId('5596e975ea893b269af85c0e'),
+                              'methods': ['DELETE', 'GET', 'POST', 'PUT']},
+                             {'group': ObjectId('5596e975ea893b269af85c0f'),
+                              'methods': ['DELETE', 'GET']},
+                             {'group': ObjectId('564733b56dcaf85da2faee8a'),
+                              'methods': ['GET']}],
+                 'world': ['GET']},
                 self.sort(compute_aggr_permissions('nodes', node, None)))
 
 
@@ -529,7 +529,7 @@ class RequireRolesTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': [u'succubus']}
+                              'roles': ['succubus']}
             call_me()
 
         self.assertTrue(called[0])
@@ -540,19 +540,19 @@ class RequireRolesTest(AbstractPillarTest):
 
         called = [False]
 
-        @require_login(require_roles={u'admin'})
+        @require_login(require_roles={'admin'})
         def call_me():
             called[0] = True
 
         with self.app.test_request_context():
             g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': [u'succubus']}
+                              'roles': ['succubus']}
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
             g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': [u'admin']}
+                              'roles': ['admin']}
             call_me()
         self.assertTrue(called[0])
 
@@ -562,32 +562,32 @@ class RequireRolesTest(AbstractPillarTest):
 
         called = [False]
 
-        @require_login(require_roles={u'service', u'badger'},
+        @require_login(require_roles={'service', 'badger'},
                        require_all=True)
         def call_me():
             called[0] = True
 
         with self.app.test_request_context():
             g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': [u'admin']}
+                              'roles': ['admin']}
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
             g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': [u'service']}
+                              'roles': ['service']}
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
             g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': [u'badger']}
+                              'roles': ['badger']}
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
             g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': [u'service', u'badger']}
+                              'roles': ['service', 'badger']}
             call_me()
         self.assertTrue(called[0])
 
@@ -596,8 +596,8 @@ class RequireRolesTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             self.assertTrue(user_has_role('subscriber', {'roles': ['aap', 'noot', 'subscriber']}))
-            self.assertTrue(user_has_role('subscriber', {'roles': [u'aap', u'subscriber']}))
-            self.assertFalse(user_has_role('admin', {'roles': [u'aap', u'noot', u'subscriber']}))
+            self.assertTrue(user_has_role('subscriber', {'roles': ['aap', 'subscriber']}))
+            self.assertFalse(user_has_role('admin', {'roles': ['aap', 'noot', 'subscriber']}))
             self.assertFalse(user_has_role('admin', {'roles': []}))
             self.assertFalse(user_has_role('admin', {'roles': None}))
             self.assertFalse(user_has_role('admin', {}))
