@@ -1,6 +1,6 @@
 -r requirements.txt
 -e ../pillar-python-sdk
--e .
+-e ../pillar  # also works from parent project, like blender-cloud
 
 # Development requirements
 pytest==3.0.6
