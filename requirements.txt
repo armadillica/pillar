@@ -25,6 +25,7 @@ ndg-httpsclient==0.4.0
 Pillow==2.8.1
 pycrypto==2.6.1
 python-dateutil==2.5.3
+redis==2.10.5
 simplejson==3.8.2
 WebOb==1.5.0
 wheel==0.29.0
