@@ -206,6 +206,9 @@ class PillarServer(Eve):
         # Load extension blueprint(s)
         for blueprint in pillar_extension.blueprints():
             if blueprint.url_prefix:
+                if not url_prefix:
+                    # If we registered the extension with url_prefix=None
+                    url_prefix = ''
                 blueprint_prefix = url_prefix + blueprint.url_prefix
             else:
                 blueprint_prefix = url_prefix
