@@ -133,7 +133,14 @@
 script(type="text/javascript").
 	{% if node.video_sources %}
 	videojs(document.getElementById('videoplayer'), {
-			fluid: true
+			fluid: true,
+			controlBar: {
+				volumeMenuButton: {
+					inline: false,
+					vertical: true
+				}
+			},
+			loop: true,
 		},
 		function(){
 			this.ga({
