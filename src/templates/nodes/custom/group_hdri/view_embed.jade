@@ -77,11 +77,8 @@
 						| {% endif %}
 					| {% endif %}
 
-				| {% if child.node_type == 'group_hdri' %}
 				.list-node-children-item-name
-					i.pi-folder-texture
 					span {{ child.name }}
-				| {% endif %}
 
 		| 	{% endif %}
 		| 	{% endfor %}

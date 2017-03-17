@@ -12,8 +12,8 @@
 	section.node-details-container.group
 		.node-details-meta.preview
 			ul.node-details-meta-list
-				li.node-details-meta-list-item.date(title="Created {{ node._created | pretty_date }}")
-					| {{ node._updated | pretty_date }}
+				li.node-details-meta-list-item.date(title="Updated {{ node._updated | pretty_date }}")
+					| {{ node._created | pretty_date }}
 
 				li.node-details-meta-list-item.author
 					| {{ node.user.full_name }}
@@ -53,32 +53,6 @@
 					src="{{ child.picture.thumbnail('t', api=api)}} ")
 				| {% endif %}
 
-				.list-node-children-item-thumbnail-icon
-					| {# If there's a type available, otherwise show a folder icon #}
-					| {% if child.properties.content_type %}
-
-					| {# Show an icon if there's no thumbnail #}
-					| {% if not child.picture %}
-					| {% if child.properties.content_type == 'image' %}
-					i.dark.pi-image
-					| {% elif child.properties.content_type == 'video' %}
-					i.dark.pi-film-thick
-					| {% elif child.properties.content_type == 'file' %}
-					i.dark.pi-document
-					| {% endif %}
-
-					| {% else %}
-					| {% if child.properties.content_type == 'video' %}
-					i.pi-play
-					| {% endif %}
-					| {% endif %}
-
-					| {% else %}
-					| {% if not child.picture %}
-					i.dark.pi-folder
-					| {% endif %}
-					| {% endif %}
-
 				| {% if child.permissions.world %}
 				.list-node-children-item-ribbon
 					span free
@@ -103,13 +77,7 @@
 				| {% endif %}
 				| {% endif %}
 
-				| {% if child._updated %}
-				span(title="Updated on {{ child._created }}")  {{ child._updated | pretty_date }}
-				span.updated(title="Created on {{ child._updated }}") *
-				| {% else %}
-				span(title="Created on {{ child._created }}")  {{ child._created | pretty_date }}
-				| {% endif %}
-
+				span(title="Created on {{ child._created }}") {{ child._created | pretty_date }}
 
 		| {# Browse type: Icon #}
 		a(href="{{ url_for_node(node=child) }}",
@@ -120,16 +88,16 @@
 
 				| {% if child.picture %}
 				img(
-					src="{{ child.picture.thumbnail('b', api=api)}} ")
+					src="{{ child.picture.thumbnail('m', api=api)}} ")
 				| {% endif %}
 
 				.list-node-children-item-thumbnail-icon
-					| {% if child.properties.content_type %}
-
-					| {% if child.properties.content_type == 'video' %}
+					| {% if child.properties.content_type and child.properties.content_type == 'video' %}
 					i.pi-play
-					| {% endif %}
-
+					| {% elif child.properties.content_type and child.properties.content_type == 'image' %}
+					i.pi-image
+					| {% elif child.properties.content_type and child.properties.content_type == 'file' %}
+					i.pi-file-archive
 					| {% else %}
 					i.pi-folder
 					| {% endif %}
@@ -144,17 +112,6 @@
 				| {% endif %}
 
 			.list-node-children-item-name
-
-				| {% if child.properties.content_type == 'video' %}
-				i.pi-film-thick
-				| {% elif child.properties.content_type == 'image' %}
-				i.pi-image
-				| {% elif child.properties.content_type == 'file' %}
-				i.pi-document
-				| {% else %}
-				i.pi-folder
-				| {% endif %}
-
 				span {{ child.name }}
 
 		| 	{% endfor %}

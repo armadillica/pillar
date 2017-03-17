@@ -946,7 +946,6 @@ section.node-row
 
 			.node-title
 				color: $color-text-dark-primary
-				text-transform: capitalize
 				font:
 					family: $font-body
 					weight: 500
@@ -1743,14 +1742,15 @@ section.node-children
 
 			.list-node-children-item-thumbnail
 				width: 100%
+				height: $list-node-children-item-width
 
 				+media-sm
 					img
 						width: 100%
 
 				.list-node-children-item-thumbnail-icon i
-					position: relative
-					bottom: 10px
+					bottom: 30px
+
 			.list-node-children-item-name
 				bottom: 26px
 				width: 100%
@@ -1818,26 +1818,17 @@ section.node-children
 
 .list-node-children-item
 	float: left
-	margin: 10px 15px 10px 0
+	margin: 10px 10px 10px 0
 	border-radius: 3px
-
-	color: $color-background-nav
-	background-color: darken(white, 6%)
-
-	box-shadow: 2px 2px 0 rgba(darken($color-background, 60%), .1)
+	color: $color-text-dark
+	box-shadow: 2px 2px 0 rgba(black, .1)
 	width: $list-node-children-item-width
 	overflow: hidden
-	text-overflow: ellipsis
 
 	&:hover
 		color: darken($color-primary, 20%)
-
-		& .list-node-children-item-name i
-			color: darken($color-primary, 20%)
-
-		& .list-node-children-item-thumbnail
-			& .list-node-children-item-thumbnail-icon
-				transform: translate(-50%, -50%) scale(1.1)
+		opacity: .9
+		text-decoration: none
 
 	&:active
 		opacity: .8
@@ -1874,9 +1865,6 @@ section.node-children
 
 			.list-node-children-item-thumbnail
 				cursor: pointer
-
-				.list-node-children-item-thumbnail-icon
-					transform: translate(-50%, -50%) scale(1)
 
 		&:active
 			background-color: rgba($color-background, .5)
@@ -1960,20 +1948,30 @@ section.node-children
 		justify-content: center
 
 		width: $list-node-children-item-width
-		height: $list-node-children-item-width
-		background-color: darken($color-background, 5%)
+		height: $list-node-children-item-width / 1.69
+		background-color: darken($color-background, 30%)
 		position: relative
 		overflow: hidden
 
+		img
+			height: 100%
+			+position-center-translate
+
 		& .list-node-children-item-thumbnail-icon
 			position: absolute
-			top: 50%
-			left: 50%
-			transform: translate(-50%, -50%)
-			font-size: 4em
+			top: 0
+			left: 0
+			right: 0
+			bottom: 0
+			font-size: 1.5em
 			color: white
-			text-shadow: 1px 1px 1px rgba(black, .2), 0 0 50px rgba(black, .3)
-			transition: transform .1s ease-in-out
+			text-shadow: 1px 1px 0 rgba(black, .2)
+			background-image: linear-gradient(10deg, darken($color-background, 55%) 0%, transparent 40%)
+
+			i
+				position: absolute
+				bottom: 5px
+				left: 5px
 
 		& .list-node-children-item-status
 			color: $color-text-light-primary
@@ -1997,33 +1995,26 @@ section.node-children
 		display: flex
 		align-items: center
 
-		background-color: darken(white, 6%)
+		// background-color: darken(white, 6%)
+		color: $color-text-light
+		text-shadow: 1px 1px 0 rgba(black, .2)
+		background-color: darken($color-background, 55%)
 
-		padding:
-			top: 5px
-			bottom: 5px
-		font-size: .9em
+		padding: 5px 10px
+		font-size: .85em
 		width: $list-node-children-item-width
 		max-width: $list-node-children-item-width
 
-		i
-			color: $color-text-dark-secondary
-			padding:
-				left: 7px
-				right: 3px
-			font-size: .9em
-
 		span
-			padding:
-				left: 0
-				right: 3px
 			+text-overflow-ellipsis
 	&.texture, &.hdri
 		margin: 5px 10px 5px 0
 		position: relative
+		width: $list-node-children-item-width
 		height: $list-node-children-item-width
 
 		.list-node-children-item-thumbnail
+			height: $list-node-children-item-width
 			background-color: $color-background-nav
 
 		&:hover
