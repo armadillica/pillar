@@ -49,31 +49,30 @@ meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_
 			ul#activity-stream__list
 				| {% for n in activity_stream %}
 				li.activity-stream__list-item(
-					class="{{ n.node_type }} {{ n.properties.content_type }}",
+					class="{{ n.node_type }} {{ n.properties.content_type }} {% if n.picture %}with-picture{% endif %}",
 					data-url="{{ url_for_node(node=n) }}")
 					a.activity-stream__list-thumbnail(
-						class="{{ n.properties.content_type }} {% if n.picture %}with-picture{% endif %}",
+						class="{{ n.properties.content_type }}",
 						href="{{ url_for_node(node=n) }}")
 						| {% if n.picture %}
 						img(src="{{ n.picture.thumbnail('m', api=api) }}")
-						| {% else %}
+						| {% endif %}
 
-						| {% if n.node_type == 'asset' %}
-						| {% if n.properties.content_type == 'video' %}
-						i.pi-film-thick
-						| {% elif n.properties.content_type == 'image' %}
-						i.pi-picture
-						| {% elif n.properties.content_type == 'file' %}
-						i.pi-file-archive
-						| {% else %}
-						i.pi-folder
-						| {% endif %}
-						| {% elif n.node_type == 'post' %}
-						i.pi-newspaper
-						| {% elif n.node_type == 'comment' %}
-						i.pi-comment
-						| {% endif %}
-						| {% endif %}
+						.activity-stream__list-thumbnail-icon
+							| {% if n.node_type == 'asset' %}
+							| {% if n.properties.content_type == 'video' %}
+							i.pi-play
+							| {% elif n.properties.content_type == 'image' %}
+							i.pi-picture
+							| {% elif n.properties.content_type == 'file' %}
+							i.pi-file-archive
+							| {% else %}
+							i.pi-folder
+							| {% endif %}
+							| {% elif n.node_type == 'comment' %}
+							i.pi-comment
+							| {% endif %}
+
 
 					.activity-stream__list-details
 						a.title(href="{{ url_for_node(node=n) }}")
@@ -87,19 +86,31 @@ meta(name="twitter:image", content="{% if main_project.picture_header %}{{ main_
 							span free
 						| {% endif %}
 						ul.meta
-							li.what
-								| {% if n.node_type == 'asset' %}{{ n.properties.content_type | undertitle  }}{% else %}{{ n.node_type | undertitle }}{% endif %}
-							| {% if n.node_type != 'post' %}
+							| {% if n.node_type == 'comment' or not n.picture %}
+							li.when
+								a(href="{{ url_for_node(node=n) }}", title="{{ n._created }}") {{ n._created | pretty_date_time }}
 							li.who {{ n.user.full_name }}
 							| {% endif %}
+
 							| {% if n.attached_to %}
 							li.where-parent
 								a(href="{{ url_for_node(node_id=n.attached_to._id) }}") {{ n.attached_to.name }}
 							| {% endif %}
 							li.where-project
 								a.project(href="{{ url_for('projects.view', project_url=n.project.url) }}") {{ n.project.name }}
+							li.what
+								| {% if n.node_type == 'asset' %}
+								| {{ n.properties.content_type | undertitle  }}
+								| {% elif n.node_type != 'comment' %}
+								| {{ n.node_type | undertitle }}
+								| {% endif %}
+
+						| {% if n.picture %}
+						ul.meta.extra
 							li.when
 								a(href="{{ url_for_node(node=n) }}", title="{{ n._created }}") {{ n._created | pretty_date_time }}
+							li.who {{ n.user.full_name }}
+						| {% endif %}
 				| {% endfor %}
 
 				li.activity-stream__list-item.empty#activity-stream__empty
