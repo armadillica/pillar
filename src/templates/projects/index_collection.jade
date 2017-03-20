@@ -52,7 +52,7 @@ meta(name="twitter:image", content="{% if title == 'training' %}{{ url_for('stat
 				| {% if project.picture_header %}
 				a.item-header(
 					href="{{ url_for('projects.view', project_url=project.url) }}")
-					img(src="{{ project.picture_header.thumbnail('m', api=api) }}")
+					img(src="{{ project.picture_header.thumbnail('l', api=api) }}")
 				| {% endif %}
 
 				.item-info
