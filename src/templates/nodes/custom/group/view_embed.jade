@@ -83,12 +83,15 @@
 		a(href="{{ url_for_node(node=child) }}",
 			data-node_id="{{ child._id }}",
 			title="{{ child.name }}",
-			class="item_icon list-node-children-item browse-icon")
+			class="item_icon list-node-children-item browse-icon {% if child.picture %}has-picture{% endif %}")
 			.list-node-children-item-thumbnail
 
 				| {% if child.picture %}
 				img(
 					src="{{ child.picture.thumbnail('m', api=api)}} ")
+				| {% else %}
+				.cloud-logo
+					i.pi-blender-cloud
 				| {% endif %}
 
 				.list-node-children-item-thumbnail-icon

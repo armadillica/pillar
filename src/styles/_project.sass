@@ -1836,6 +1836,16 @@ section.node-children
 		& .list-node-children-item-name i
 			color: $color-primary
 
+	&.has-picture
+		.list-node-children-item-thumbnail
+			background-color: black
+
+	.cloud-logo
+		font-size: 4em
+		color: darken($color-background, 60%)
+		+position-center-translate
+		left: $list-node-children-item-width / 2 - 10
+
 	/* Browse group as list */
 	&.browse-list
 		display: none
@@ -1949,7 +1959,7 @@ section.node-children
 
 		width: $list-node-children-item-width
 		height: $list-node-children-item-width / 1.69
-		background-color: darken($color-background, 30%)
+		background-color: darken($color-background, 55%)
 		position: relative
 		overflow: hidden
 
@@ -1963,10 +1973,10 @@ section.node-children
 			left: 0
 			right: 0
 			bottom: 0
-			font-size: 1.5em
+			font-size: 1.3em
 			color: white
 			text-shadow: 1px 1px 0 rgba(black, .2)
-			background-image: linear-gradient(10deg, darken($color-background, 55%) 0%, transparent 40%)
+			background-image: linear-gradient(10deg, rgba(black, .2) 0%, transparent 40%)
 
 			i
 				position: absolute
@@ -1994,11 +2004,9 @@ section.node-children
 
 		display: flex
 		align-items: center
-
-		// background-color: darken(white, 6%)
 		color: $color-text-light
 		text-shadow: 1px 1px 0 rgba(black, .2)
-		background-color: darken($color-background, 55%)
+		background-color: darken($color-background, 60%)
 
 		padding: 5px 10px
 		font-size: .85em
