@@ -702,25 +702,25 @@ def stream_to_storage(project_id):
     file_id, internal_fname, status = create_file_doc_for_upload(project_oid,
                                                                  uploaded_file)
     storage_backend = None
-    file_in_storage = None
+    blob = None
 
     if current_app.config['TESTING']:
         log.warning('NOT streaming to GCS because TESTING=%r',
                     current_app.config['TESTING'])
         # Fake a Blob object.
-        file_in_storage = type('Blob', (), {'size': file_size})
+        blob = type('Blob', (), {'size': file_size})
     else:
         bucket = default_storage_backend(project_id)
         blob = bucket.blob(internal_fname)
         blob.create_from_file(stream_for_gcs, file_size)
         # if current_app.config['STORAGE_BACKEND'] == 'gcs':
-        #     file_in_storage, storage_backend = stream_to_gcs(
+        #     blob, storage_backend = stream_to_gcs(
         #         file_id, file_size, internal_fname, project_id,
         #         stream_for_gcs, uploaded_file.mimetype)
         # elif current_app.config['STORAGE_BACKEND'] == 'local':
         #     storage_backend = LocalBucket(project_id)
-        #     file_in_storage = LocalBlob(project_id, internal_fname)
-        #     file_in_storage.create_from_file(stream_for_gcs, file_size)
+        #     blob = LocalBlob(project_id, internal_fname)
+        #     blob.create_from_file(stream_for_gcs, file_size)
 
     log.debug('Marking uploaded file id=%s, fname=%s, '
               'size=%i as "queued_for_processing"',
