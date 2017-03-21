@@ -4,6 +4,7 @@ import abc
 import logging
 import os
 import shutil
+import typing
 
 from bson import ObjectId
 from flask import current_app
@@ -15,7 +16,7 @@ from pillar.api.utils.imaging import generate_local_thumbnails
 log = logging.getLogger(__name__)
 
 
-class Bucket(object, metaclass=abc.ABCMeta):
+class Bucket(metaclass=abc.ABCMeta):
     """Can be a GCS bucket or simply a project folder in Pillar
 
     :type name: string
@@ -43,7 +44,7 @@ class Bucket(object, metaclass=abc.ABCMeta):
         return cls.backends[backend_name]
 
     @abc.abstractmethod
-    def blob(self, blob_name):
+    def blob(self, blob_name) -> 'Blob':
         """Factory constructor for blob object.
 
         :type blob_name: string
@@ -52,7 +53,7 @@ class Bucket(object, metaclass=abc.ABCMeta):
         return Blob(name=blob_name, bucket=self)
 
     @abc.abstractmethod
-    def get_blob(self, blob_name):
+    def get_blob(self, blob_name) -> typing.Optional['Blob']:
         """Get a blob object by name.
 
         If the blob exists return the object, otherwise None.
@@ -60,7 +61,7 @@ class Bucket(object, metaclass=abc.ABCMeta):
         pass
 
 
-class Blob(object, metaclass=abc.ABCMeta):
+class Blob(metaclass=abc.ABCMeta):
     """A wrapper for file or blob objects.
 
     :type name: string
@@ -68,16 +69,15 @@ class Blob(object, metaclass=abc.ABCMeta):
 
     """
 
-    def __init__(self, name, bucket):
+    def __init__(self, name: str, bucket: Bucket):
         self.name = name
         self.bucket = bucket
         self._size_in_bytes = None
 
     @property
-    def size(self):
+    def size(self) -> typing.Optional[int]:
         """Size of the object, in bytes.
 
-        :rtype: integer or ``NoneType``
         :returns: The size of the blob or ``None`` if the property
                   is not set locally.
         """
@@ -98,7 +98,8 @@ class Blob(object, metaclass=abc.ABCMeta):
     def _process_video(self, file_doc):
         pass
 
-    def process_file(self, file_id):
+    # TODO Sybren: change file_id type to ObjectId?
+    def process_file(self, file_id: str):
         """Generate image thumbnails or encode video.
 
         :type file_id: string
@@ -126,8 +127,8 @@ class Blob(object, metaclass=abc.ABCMeta):
 
         # Update the 'format' field from the content type.
         # TODO: overrule the content type based on file extention & magic numbers.
-        mime_category, src_file['format'] = src_file['content_type'].split('/',
-                                                                           1)
+        mime_category, src_file['format'] = src_file['content_type'].split('/', 1)
+
         # Prevent video handling for non-admins.
         if not user_has_role('admin') and mime_category == 'video':
             if src_file['format'].startswith('x-'):
@@ -181,17 +182,17 @@ class Blob(object, metaclass=abc.ABCMeta):
 class LocalBucket(Bucket):
     backend_name = 'local'
 
-    def blob(self, blob_name):
+    def blob(self, blob_name: str) -> 'LocalBlob':
         return LocalBlob(name=blob_name, bucket=self)
 
-    def get_blob(self, blob_name):
+    def get_blob(self, blob_name: str) -> typing.Optional['LocalBlob']:
         # TODO: Check if file exists, otherwise None
         return self.blob(blob_name)
 
 
 class LocalBlob(Blob):
-    def __init__(self, name, bucket):
-        super(LocalBlob, self).__init__(name=name, bucket=bucket)
+    def __init__(self, name: str, bucket: LocalBucket):
+        super().__init__(name=name, bucket=bucket)
 
         bucket_name = bucket.name
         self.partial_path = os.path.join(bucket_name[:2], bucket_name,
@@ -199,7 +200,7 @@ class LocalBlob(Blob):
         self.path = os.path.join(
             current_app.config['STORAGE_DIR'], self.partial_path)
 
-    def create_from_file(self, uploaded_file, file_size):
+    def create_from_file(self, uploaded_file: typing.io.BinaryIO, file_size: int):
         assert hasattr(uploaded_file, 'read')
 
         # Ensure path exists before saving
@@ -212,7 +213,7 @@ class LocalBlob(Blob):
 
         self._size_in_bytes = file_size
 
-    def _process_image(self, file_doc):
+    def _process_image(self, file_doc: dict):
         from PIL import Image
 
         im = Image.open(self.path)
