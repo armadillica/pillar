@@ -14,18 +14,6 @@ from pillar.api.utils.imaging import generate_local_thumbnails
 
 log = logging.getLogger(__name__)
 
-# Mapping from backend name to backend class
-backends = {}
-
-
-def register_backend(backend_name):
-    def wrapper(cls):
-        assert backend_name not in backends
-        backends[backend_name] = cls
-        return cls
-
-    return wrapper
-
 
 class Bucket(object, metaclass=abc.ABCMeta):
     """Can be a GCS bucket or simply a project folder in Pillar
@@ -36,8 +24,23 @@ class Bucket(object, metaclass=abc.ABCMeta):
 
     """
 
+    # Mapping from backend name to Bucket class
+    backends = {}
+
+    backend_name: str = None  # define in subclass.
+
     def __init__(self, name):
         self.name = name
+
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        assert cls.backend_name, '%s.backend_name must be non-empty string' % cls
+        cls.backends[cls.backend_name] = cls
+
+    @classmethod
+    def for_backend(cls, backend_name: str) -> type:
+        """Returns the Bucket subclass for the given backend."""
+        return cls.backends[backend_name]
 
     @abc.abstractmethod
     def blob(self, blob_name):
@@ -175,10 +178,8 @@ class Blob(object, metaclass=abc.ABCMeta):
                 file_id, status, r)
 
 
-@register_backend('local')
 class LocalBucket(Bucket):
-    def __init__(self, name):
-        super(LocalBucket, self).__init__(name=name)
+    backend_name = 'local'
 
     def blob(self, blob_name):
         return LocalBlob(name=blob_name, bucket=self)
@@ -259,7 +260,6 @@ class LocalBlob(Blob):
 def default_storage_backend(name):
     from flask import current_app
 
-    backend_cls = backends[current_app.config['STORAGE_BACKEND']]
+    backend_name = current_app.config['STORAGE_BACKEND']
+    backend_cls = Bucket.for_backend(backend_name)
     return backend_cls(name)
-
-

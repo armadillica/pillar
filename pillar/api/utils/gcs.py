@@ -9,7 +9,7 @@ from gcloud.exceptions import NotFound
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
-from pillar.api.utils.storage import register_backend, Bucket, Blob
+from pillar.api.utils.storage import Bucket, Blob
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +34,6 @@ def get_client():
 gcs = LocalProxy(get_client)
 
 
-@register_backend('gcs')
 class GoogleCloudStorageBucket(Bucket):
     """Cloud Storage bucket interface. We create a bucket for every project. In
     the bucket we create first level subdirs as follows:
@@ -50,6 +49,8 @@ class GoogleCloudStorageBucket(Bucket):
     :param subdir: The local entry point to browse the bucket.
 
     """
+
+    backend_name = 'gcs'
 
     def __init__(self, name, subdir='_/'):
         super(GoogleCloudStorageBucket, self).__init__(name=name)
