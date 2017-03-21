@@ -197,13 +197,13 @@ class GoogleCloudStorageBlob(Blob):
         self.blob = bucket.gcs_bucket.blob('_/' + name, chunk_size=256 * 1024 * 2)
 
     def create_from_file(self, uploaded_file, file_size):
-        pass
+        raise NotImplementedError()
 
     def _process_image(self, file_doc):
-        pass
+        raise NotImplementedError()
 
     def _process_video(self, file_doc):
-        pass
+        raise NotImplementedError()
 
 
 def update_file_name(node):
