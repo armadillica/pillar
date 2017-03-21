@@ -8,6 +8,10 @@ html(lang="en")
 		meta(name="author", content="Blender Institute")
 		meta(name="theme-color", content="#3e92aa")
 
+		| {% if config['GOOGLE_SITE_VERIFICATION'] %}
+		meta(name="google-site-verification" content="{{ config['GOOGLE_SITE_VERIFICATION'] }}")
+		| {% endif %}
+
 		meta(property="og:site_name", content="Blender Cloud")
 		meta(property="og:locale", content="en_US")
 		meta(name="twitter:card", content="summary_large_image")

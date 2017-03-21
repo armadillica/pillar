@@ -53,6 +53,8 @@ BIN_RSYNC = '/usr/bin/rsync'
 
 GCLOUD_APP_CREDENTIALS = 'google_app.json'
 GCLOUD_PROJECT = '-SECRET-'
+# Used for cross-verification on various Google sites (eg. YouTube)
+GOOGLE_SITE_VERIFICATION = ''
 
 ADMIN_USER_GROUP = '5596e975ea893b269af85c0e'
 SUBSCRIBER_USER_GROUP = '5596e975ea893b269af85c0f'
