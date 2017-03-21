@@ -27,7 +27,7 @@ def register_backend(backend_name):
     return wrapper
 
 
-class Bucket(object):
+class Bucket(object, metaclass=abc.ABCMeta):
     """Can be a GCS bucket or simply a project folder in Pillar
 
     :type name: string
@@ -35,8 +35,6 @@ class Bucket(object):
     the project to name the bucket.
 
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, name):
         self.name = name
@@ -59,15 +57,13 @@ class Bucket(object):
         pass
 
 
-class Blob(object):
+class Blob(object, metaclass=abc.ABCMeta):
     """A wrapper for file or blob objects.
 
     :type name: string
     :param name: Name of the blob.
 
     """
-
-    __metaclass__ = abc.ABCMeta
 
     def __init__(self, name, bucket):
         self.name = name
@@ -130,7 +126,7 @@ class Blob(object):
         mime_category, src_file['format'] = src_file['content_type'].split('/',
                                                                            1)
         # Prevent video handling for non-admins.
-        if not user_has_role(u'admin') and mime_category == 'video':
+        if not user_has_role('admin') and mime_category == 'video':
             if src_file['format'].startswith('x-'):
                 xified = src_file['format']
             else:
