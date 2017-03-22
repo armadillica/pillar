@@ -11,7 +11,8 @@ __all__ = ['Bucket', 'Blob', 'Path', 'FileType']
 # Shorthand for the type of path we use.
 Path = pathlib.PurePosixPath
 
-# This is a mess: typing.IO keeps mypy-0.501 happy, and io.FileIO keeps PyCharm-2017.1 happy.
+# This is a mess: typing.IO keeps mypy-0.501 happy, but not in all cases,
+# and io.FileIO keeps PyCharm-2017.1 happy.
 FileType = typing.Union[typing.IO, io.FileIO]
 
 

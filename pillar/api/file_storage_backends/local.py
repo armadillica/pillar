@@ -22,7 +22,8 @@ class LocalBucket(Bucket):
         # For local storage, the name is actually a partial path, relative
         # to the local storage root.
         self.root = pathlib.Path(current_app.config['STORAGE_DIR'])
-        self.abspath = self.root / name[:2] / name
+        self.bucket_path = pathlib.PurePosixPath(name[:2]) / name
+        self.abspath = self.root / self.bucket_path
 
     def blob(self, blob_name: str) -> 'LocalBlob':
         return LocalBlob(name=blob_name, bucket=self)
@@ -71,7 +72,8 @@ class LocalBlob(Blob):
     def get_url(self, *, is_public: bool) -> str:
         from flask import url_for
 
-        url = url_for('file_storage.index', file_name=str(self.partial_path), _external=True,
+        path = self.bucket.bucket_path / self.partial_path
+        url = url_for('file_storage.index', file_name=str(path), _external=True,
                       _scheme=current_app.config['SCHEME'])
         return url
 
