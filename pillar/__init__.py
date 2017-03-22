@@ -173,7 +173,12 @@ class PillarServer(Eve):
     def _config_encoding_backend(self):
         # Encoding backend
         if self.config['ENCODING_BACKEND'] != 'zencoder':
+            self.log.warning('Encoding backend %r not supported, no video encoding possible!',
+                             self.config['ENCODING_BACKEND'])
             return
+
+        self.log.info('Setting up video encoding backend %r',
+                      self.config['ENCODING_BACKEND'])
 
         from zencoder import Zencoder
         self.encoding_service_client = Zencoder(self.config['ZENCODER_API_KEY'])
