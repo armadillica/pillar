@@ -48,31 +48,6 @@ mimetypes.add_type('application/x-radiance-hdr', '.hdr')
 mimetypes.add_type('application/x-exr', '.exr')
 
 
-@file_storage.route('/gcs/<bucket_name>/<subdir>/')
-@file_storage.route('/gcs/<bucket_name>/<subdir>/<path:file_path>')
-def browse_gcs(bucket_name, subdir, file_path=None):
-    """Browse the content of a Google Cloud Storage bucket"""
-
-    # Initialize storage client
-    storage = GoogleCloudStorageBucket(bucket_name, subdir=subdir)
-    if file_path:
-        # If we provided a file_path, we try to fetch it
-        file_object = storage.Get(file_path)
-        if file_object:
-            # If it exists, return file properties in a dictionary
-            return jsonify(file_object)
-        else:
-            listing = storage.List(file_path)
-            return jsonify(listing)
-            # We always return an empty listing even if the directory does not
-            # exist. This can be changed later.
-            # return abort(404)
-
-    else:
-        listing = storage.List('')
-        return jsonify(listing)
-
-
 @file_storage.route('/file', methods=['POST'])
 @file_storage.route('/file/<path:file_name>', methods=['GET', 'POST'])
 def index(file_name=None):
