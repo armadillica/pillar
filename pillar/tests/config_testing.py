@@ -9,3 +9,6 @@ CDN_STORAGE_USER = 'u41508580125621'
 
 FILESIZE_LIMIT_BYTES_NONSUBS = 20 * 2 ** 10
 ROLES_FOR_UNLIMITED_UPLOADS = {'subscriber', 'demo', 'admin'}
+
+GCLOUD_APP_CREDENTIALS = 'invalid-file-because-gcloud-storage-should-be-mocked-in-tests'
+STORAGE_BACKEND = 'local'

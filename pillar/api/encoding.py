@@ -1,14 +1,15 @@
-import logging
-
 import datetime
+import logging
 import os
+
 from bson import ObjectId, tz_util
 from flask import Blueprint
 from flask import abort
 from flask import current_app
 from flask import request
+
 from pillar.api import utils
-from pillar.api.utils.gcs import GoogleCloudStorageBucket
+from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket
 from pillar.api.utils import skip_when_testing
 
 encoding = Blueprint('encoding', __name__)

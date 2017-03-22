@@ -5,6 +5,7 @@ from PIL import Image
 from flask import current_app
 
 
+# TODO: refactor to use pathlib.Path and f-strings.
 def generate_local_thumbnails(name_base, src):
     """Given a source image, use Pillow to generate thumbnails according to the
     application settings.

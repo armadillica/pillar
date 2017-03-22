@@ -2,24 +2,24 @@ import os
 import time
 import datetime
 import logging
+import typing
 
 from bson import ObjectId
 from gcloud.storage.client import Client
+import gcloud.storage.blob
 from gcloud.exceptions import NotFound
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
-from pillar.api.utils.storage import Bucket, Blob
+from .abstract import Bucket, Blob, Path, FileType
 
 log = logging.getLogger(__name__)
 
 
-def get_client():
+def get_client() -> Client:
     """Stores the GCS client on the global Flask object.
 
     The GCS client is not user-specific anyway.
-
-    :rtype: Client
     """
 
     _gcs = getattr(g, '_gcs_client', None)
@@ -31,7 +31,7 @@ def get_client():
 # This hides the specifics of how/where we store the GCS client,
 # and allows the rest of the code to use 'gcs' as a simple variable
 # that does the right thing.
-gcs = LocalProxy(get_client)
+gcs: Client = LocalProxy(get_client)
 
 
 class GoogleCloudStorageBucket(Bucket):
@@ -52,8 +52,11 @@ class GoogleCloudStorageBucket(Bucket):
 
     backend_name = 'gcs'
 
-    def __init__(self, name, subdir='_/'):
-        super(GoogleCloudStorageBucket, self).__init__(name=name)
+    def __init__(self, name: str, subdir='_/') -> None:
+        super().__init__(name=name)
+
+        self._log = logging.getLogger(f'{__name__}.GoogleCloudStorageBucket')
+
         try:
             self._gcs_bucket = gcs.get_bucket(name)
         except NotFound:
@@ -73,138 +76,110 @@ class GoogleCloudStorageBucket(Bucket):
 
         self.subdir = subdir
 
-    def blob(self, blob_name):
+    def blob(self, blob_name: str) -> 'GoogleCloudStorageBlob':
         return GoogleCloudStorageBlob(name=blob_name, bucket=self)
 
-    def List(self, path=None):
-        """Display the content of a subdir in the project bucket. If the path
-        points to a file the listing is simply empty.
+    def get_blob(self, internal_fname: str) -> typing.Optional['GoogleCloudStorageBlob']:
+        blob = self.blob(internal_fname)
+        if not blob.gblob.exists():
+            return None
+        return blob
 
-        :type path: string
-        :param path: The relative path to the directory or asset.
-        """
-        if path and not path.endswith('/'):
-            path += '/'
-        prefix = os.path.join(self.subdir, path)
-
-        fields_to_return = 'nextPageToken,items(name,size,contentType),prefixes'
-        req = self._gcs_bucket.list_blobs(fields=fields_to_return, prefix=prefix,
-                                          delimiter='/')
-
-        files = []
-        for f in req:
-            filename = os.path.basename(f.name)
-            if filename != '':  # Skip own folder name
-                files.append(dict(
-                    path=os.path.relpath(f.name, self.subdir),
-                    text=filename,
-                    type=f.content_type))
-
-        directories = []
-        for dir_path in req.prefixes:
-            directory_name = os.path.basename(os.path.normpath(dir_path))
-            directories.append(dict(
-                text=directory_name,
-                path=os.path.relpath(dir_path, self.subdir),
-                type='group_storage',
-                children=True))
-            # print os.path.basename(os.path.normpath(path))
-
-        list_dict = dict(
-            name=os.path.basename(os.path.normpath(path)),
-            type='group_storage',
-            children=files + directories
-        )
-
-        return list_dict
-
-    def blob_to_dict(self, blob):
-        blob.reload()
-        expiration = datetime.datetime.now() + datetime.timedelta(days=1)
-        expiration = int(time.mktime(expiration.timetuple()))
-        return dict(
-            updated=blob.updated,
-            name=os.path.basename(blob.name),
-            size=blob.size,
-            content_type=blob.content_type,
-            signed_url=blob.generate_signed_url(expiration),
-            public_url=blob.public_url)
-
-    def Get(self, path, to_dict=True):
+    def _gcs_get(self, path: str, *, chunk_size=None) -> gcloud.storage.Blob:
         """Get selected file info if the path matches.
 
-        :type path: string
-        :param path: The relative path to the file.
-        :type to_dict: bool
-        :param to_dict: Return the object as a dictionary.
+        :param path: The path to the file, relative to the bucket's subdir.
         """
         path = os.path.join(self.subdir, path)
-        blob = self._gcs_bucket.blob(path)
-        if blob.exists():
-            if to_dict:
-                return self.blob_to_dict(blob)
-            else:
-                return blob
-        else:
-            return None
+        blob = self._gcs_bucket.blob(path, chunk_size=chunk_size)
+        return blob
 
-    def Post(self, full_path, path=None):
+    def _gcs_post(self, full_path, *, path=None) -> typing.Optional[gcloud.storage.Blob]:
         """Create new blob and upload data to it.
         """
         path = path if path else os.path.join('_', os.path.basename(full_path))
-        blob = self._gcs_bucket.blob(path)
-        if blob.exists():
+        gblob = self._gcs_bucket.blob(path)
+        if gblob.exists():
+            self._log.error(f'Trying to upload to {path}, but that blob already exists. '
+                            f'Not uploading.')
             return None
-        blob.upload_from_filename(full_path)
-        return blob
+
+        gblob.upload_from_filename(full_path)
+        return gblob
         # return self.blob_to_dict(blob) # Has issues with threading
 
-    def Delete(self, path):
-        """Delete blob (when removing an asset or replacing a preview)"""
+    def delete_blob(self, path: str) -> bool:
+        """Deletes the blob (when removing an asset or replacing a preview)"""
 
         # We want to get the actual blob to delete
-        blob = self.Get(path, to_dict=False)
+        gblob = self._gcs_get(path)
         try:
-            blob.delete()
+            gblob.delete()
             return True
         except NotFound:
-            return None
+            return False
 
-    def update_name(self, blob, name):
-        """Set the ContentDisposition metadata so that when a file is downloaded
-        it has a human-readable name.
-        """
-        blob.content_disposition = 'attachment; filename="{0}"'.format(name)
-        blob.patch()
-
-    def copy_blob(self, blob, to_bucket):
+    def copy_blob(self, blob: Blob, to_bucket: Bucket):
         """Copies the given blob from this bucket to the other bucket.
 
         Returns the new blob.
         """
 
+        assert isinstance(blob, GoogleCloudStorageBlob)
         assert isinstance(to_bucket, GoogleCloudStorageBucket)
-        return self._gcs_bucket.copy_blob(blob, to_bucket._gcs_bucket)
 
-    def get_blob(self, internal_fname, chunk_size=256 * 1024 * 2):
-        return self._gcs_bucket.blob('_/' + internal_fname, chunk_size)
+        self._log.info('Copying %s to bucket %s', blob, to_bucket)
+
+        return self._gcs_bucket.copy_blob(blob.gblob, to_bucket._gcs_bucket)
 
 
 class GoogleCloudStorageBlob(Blob):
     """GCS blob interface."""
-    def __init__(self, name, bucket):
-        super(GoogleCloudStorageBlob, self).__init__(name, bucket)
 
-        self.blob = bucket.gcs_bucket.blob('_/' + name, chunk_size=256 * 1024 * 2)
+    def __init__(self, name: str, bucket: GoogleCloudStorageBucket) -> None:
+        super().__init__(name, bucket)
 
-    def create_from_file(self, uploaded_file, file_size):
-        raise NotImplementedError()
+        self._log = logging.getLogger(f'{__name__}.GoogleCloudStorageBlob')
+        self.gblob = bucket._gcs_get(name, chunk_size=256 * 1024 * 2)
 
-    def _process_image(self, file_doc):
-        raise NotImplementedError()
+    def create_from_file(self, file_obj: FileType, *,
+                         content_type: str,
+                         file_size: int = -1) -> None:
+        from gcloud.streaming import transfer
 
-    def _process_video(self, file_doc):
-        raise NotImplementedError()
+        self._log.debug('Streaming file to GCS bucket %r, size=%i', self, file_size)
+
+        # Files larger than this many bytes will be streamed directly from disk,
+        # smaller ones will be read into memory and then uploaded.
+        transfer.RESUMABLE_UPLOAD_THRESHOLD = 102400
+        self.gblob.upload_from_file(file_obj,
+                                    size=file_size,
+                                    content_type=content_type)
+
+        # Reload the blob to get the file size according to Google.
+        self.gblob.reload()
+        self._size_in_bytes = self.gblob.size
+
+    def update_filename(self, filename: str):
+        """Set the ContentDisposition metadata so that when a file is downloaded
+        it has a human-readable name.
+        """
+
+        if '"' in filename:
+            raise ValueError(f'Filename is not allowed to have double quote in it: {filename!r}')
+
+        self.gblob.content_disposition = f'attachment; filename="{filename}"'
+        self.gblob.patch()
+
+    def get_url(self, *, is_public: bool) -> str:
+        if is_public:
+            return self.gblob.public_url
+
+        expiration = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        return self.gblob.generate_signed_url(expiration)
+
+    def make_public(self):
+        self.gblob.make_public()
 
 
 def update_file_name(node):
@@ -233,7 +208,7 @@ def update_file_name(node):
         map_type = file_props.get('map_type', '')
 
         storage = GoogleCloudStorageBucket(str(node['project']))
-        blob = storage.Get(file_doc['file_path'], to_dict=False)
+        blob = storage.get_blob(file_doc['file_path'])
         if blob is None:
             log.warning('Unable to find blob for file %s in project %s',
                         file_doc['file_path'], file_doc['project'])
@@ -242,18 +217,18 @@ def update_file_name(node):
         # Pick file extension from original filename
         _, ext = os.path.splitext(file_doc['filename'])
         name = _format_name(node['name'], ext, map_type=map_type)
-        storage.update_name(blob, name)
+        blob.update_filename(name)
 
         # Assign the same name to variations
         for v in file_doc.get('variations', []):
             _, override_ext = os.path.splitext(v['file_path'])
             name = _format_name(node['name'], override_ext, v['size'], map_type=map_type)
-            blob = storage.Get(v['file_path'], to_dict=False)
+            blob = storage.get_blob(v['file_path'])
             if blob is None:
                 log.info('Unable to find blob for file %s in project %s. This can happen if the '
                          'video encoding is still processing.', v['file_path'], node['project'])
                 continue
-            storage.update_name(blob, name)
+            blob.update_filename(name)
 
     # Currently we search for 'file' and 'files' keys in the object properties.
     # This could become a bit more flexible and realy on a true reference of the
@@ -264,16 +239,3 @@ def update_file_name(node):
     if 'files' in node['properties']:
         for file_props in node['properties']['files']:
             _update_name(file_props['file'], file_props)
-
-
-def copy_to_bucket(file_path, src_project_id, dest_project_id):
-    """Copies a file from one bucket to the other."""
-
-    log.info('Copying %s from project bucket %s to %s',
-             file_path, src_project_id, dest_project_id)
-
-    src_storage = GoogleCloudStorageBucket(str(src_project_id))
-    dest_storage = GoogleCloudStorageBucket(str(dest_project_id))
-
-    blob = src_storage.Get(file_path, to_dict=False)
-    src_storage.copy_blob(blob, dest_storage)

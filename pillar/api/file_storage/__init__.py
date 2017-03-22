@@ -3,7 +3,9 @@ import io
 import logging
 import mimetypes
 import os
+import pathlib
 import tempfile
+import typing
 import uuid
 from hashlib import md5
 
@@ -12,7 +14,7 @@ import eve.utils
 import pymongo
 import werkzeug.exceptions as wz_exceptions
 from bson import ObjectId
-from flask import Blueprint, current_app
+from flask import Blueprint
 from flask import current_app
 from flask import g
 from flask import jsonify
@@ -21,15 +23,15 @@ from flask import send_from_directory
 from flask import url_for, helpers
 
 from pillar.api import utils
+from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket, \
+    GoogleCloudStorageBlob
 from pillar.api.utils import remove_private_keys, authentication
 from pillar.api.utils.authorization import require_login, user_has_role, \
     user_matches_roles
 from pillar.api.utils.cdn import hash_file_path
 from pillar.api.utils.encoding import Encoder
-from pillar.api.utils.gcs import GoogleCloudStorageBucket, \
-    GoogleCloudStorageBlob
 from pillar.api.utils.imaging import generate_local_thumbnails
-from pillar.api.utils.storage import LocalBlob, default_storage_backend
+from pillar.api.file_storage_backends import default_storage_backend, Bucket
 
 log = logging.getLogger(__name__)
 
@@ -81,7 +83,8 @@ def index(file_name=None):
     return jsonify({'url': url_for('file_storage.index', file_name=file_name)})
 
 
-def _process_image(gcs, file_id, local_file, src_file):
+def _process_image(bucket: Bucket,
+                   file_id, local_file, src_file):
     from PIL import Image
 
     im = Image.open(local_file)
@@ -102,12 +105,12 @@ def _process_image(gcs, file_id, local_file, src_file):
     for variation in src_file['variations']:
         fname = variation['file_path']
         if current_app.config['TESTING']:
-            log.warning('  - NOT sending thumbnail %s to GCS', fname)
+            log.warning('  - NOT sending thumbnail %s to %s', fname, bucket)
         else:
-            log.debug('  - Sending thumbnail %s to GCS', fname)
-            blob = gcs.bucket.blob('_/' + fname, chunk_size=256 * 1024 * 2)
-            blob.upload_from_filename(variation['local_path'],
-                                      content_type=variation['content_type'])
+            blob = bucket.blob(fname)
+            log.debug('  - Sending thumbnail %s to %s', fname, blob)
+            blob.upload_from_path(pathlib.Path(variation['local_path']),
+                                  content_type=variation['content_type'])
 
             if variation.get('size') == 't':
                 blob.make_public()
@@ -172,7 +175,7 @@ def _process_video(gcs, file_id, local_file, src_file):
         'backend': j['backend']}
 
 
-def process_file(gcs, file_id, local_file):
+def process_file(bucket: Bucket, file_id, local_file):
     """Process the file by creating thumbnails, sending to Zencoder, etc.
 
     :param file_id: '_id' key of the file
@@ -227,7 +230,7 @@ def process_file(gcs, file_id, local_file):
         update_file_doc(file_id, status='processing')
 
         try:
-            processor(gcs, file_id, local_file, src_file)
+            processor(bucket, file_id, local_file, src_file)
         except Exception:
             log.warning('process_file(%s): error when processing file, '
                         'resetting status to '
@@ -243,60 +246,31 @@ def process_file(gcs, file_id, local_file):
                     file_id, status, r)
 
 
-def delete_file(file_item):
-    def process_file_delete(file_item):
-        """Given a file item, delete the actual file from the storage backend.
-        This function can be probably made self-calling."""
-        if file_item['backend'] == 'gcs':
-            storage = GoogleCloudStorageBucket(str(file_item['project']))
-            storage.Delete(file_item['file_path'])
-            # Delete any file variation found in the file_item document
-            if 'variations' in file_item:
-                for v in file_item['variations']:
-                    storage.Delete(v['file_path'])
-            return True
-        elif file_item['backend'] == 'pillar':
-            pass
-        elif file_item['backend'] == 'cdnsun':
-            pass
-        else:
-            pass
-
-    files_collection = current_app.data.driver.db['files']
-    # Collect children (variations) of the original file
-    children = files_collection.find({'parent': file_item['_id']})
-    for child in children:
-        process_file_delete(child)
-    # Finally remove the original file
-    process_file_delete(file_item)
-
-
-def generate_link(backend, file_path: str, project_id=None, is_public=False):
+def generate_link(backend, file_path: str, project_id=None, is_public=False) -> str:
     """Hook to check the backend of a file resource, to build an appropriate link
     that can be used by the client to retrieve the actual file.
     """
 
-    if backend == 'gcs':
-        if current_app.config['TESTING']:
-            log.info('Skipping GCS link generation, and returning a fake link '
-                     'instead.')
-            return '/path/to/testing/gcs/%s' % file_path
+    # TODO: replace config['TESTING'] with mocking GCS.
+    if backend == 'gcs' and current_app.config['TESTING']:
+        log.info('Skipping GCS link generation, and returning a fake link '
+                 'instead.')
+        return '/path/to/testing/gcs/%s' % file_path
 
-        storage = GoogleCloudStorageBucket(project_id)
-        blob = storage.Get(file_path)
+    if backend in {'gcs', 'local'}:
+        from ..file_storage_backends import Bucket
+
+        bucket_cls = Bucket.for_backend(backend)
+        storage = bucket_cls(project_id)
+        blob = storage.get_blob(file_path)
+
         if blob is None:
             log.warning('generate_link(%r, %r): unable to find blob for file'
                         ' path, returning empty link.', backend, file_path)
             return ''
 
-        if is_public:
-            return blob['public_url']
-        return blob['signed_url']
-    if backend == 'local':
-        bucket = default_storage_backend(project_id)
-        blob = bucket.get_blob(file_path)
-        return url_for('file_storage.index', file_name=blob.partial_path,
-                       _external=True, _scheme=current_app.config['SCHEME'])
+        return blob.get_url(is_public=is_public)
+
     if backend == 'pillar':
         return url_for('file_storage.index', file_name=file_path,
                        _external=True, _scheme=current_app.config['SCHEME'])
@@ -408,10 +382,6 @@ def generate_all_links(response, now):
     etag_doc = current_app.data.driver.db['files'].find_one({'_id': file_id},
                                                             {'_etag': 1})
     response['_etag'] = etag_doc['_etag']
-
-
-def before_deleting_file(item):
-    delete_file(item)
 
 
 def on_pre_get_files(_, lookup):
@@ -587,10 +557,10 @@ def override_content_type(uploaded_file):
         del uploaded_file._parsed_content_type
 
 
-def assert_file_size_allowed(file_size):
+def assert_file_size_allowed(file_size: int):
     """Asserts that the current user is allowed to upload a file of the given size.
 
-    :raises
+    :raises wz_exceptions.RequestEntityTooLarge:
     """
 
     roles = current_app.config['ROLES_FOR_UNLIMITED_UPLOADS']
@@ -674,28 +644,14 @@ def stream_to_storage(project_id):
     assert_file_size_allowed(file_size)
 
     # Create file document in MongoDB.
-    file_id, internal_fname, status = create_file_doc_for_upload(project_oid,
-                                                                 uploaded_file)
-    storage_backend = None
-    blob = None
+    file_id, internal_fname, status = create_file_doc_for_upload(project_oid, uploaded_file)
 
-    if current_app.config['TESTING']:
-        log.warning('NOT streaming to GCS because TESTING=%r',
-                    current_app.config['TESTING'])
-        # Fake a Blob object.
-        blob = type('Blob', (), {'size': file_size})
-    else:
-        bucket = default_storage_backend(project_id)
-        blob = bucket.blob(internal_fname)
-        blob.create_from_file(stream_for_gcs, file_size)
-        # if current_app.config['STORAGE_BACKEND'] == 'gcs':
-        #     blob, storage_backend = stream_to_gcs(
-        #         file_id, file_size, internal_fname, project_id,
-        #         stream_for_gcs, uploaded_file.mimetype)
-        # elif current_app.config['STORAGE_BACKEND'] == 'local':
-        #     storage_backend = LocalBucket(project_id)
-        #     blob = LocalBlob(project_id, internal_fname)
-        #     blob.create_from_file(stream_for_gcs, file_size)
+    # Copy the file into storage.
+    bucket = default_storage_backend(project_id)
+    blob = bucket.blob(internal_fname)
+    blob.create_from_file(stream_for_gcs,
+                          file_size=file_size,
+                          content_type=uploaded_file.mimetype)
 
     log.debug('Marking uploaded file id=%s, fname=%s, '
               'size=%i as "queued_for_processing"',
@@ -708,8 +664,7 @@ def stream_to_storage(project_id):
 
     log.debug('Processing uploaded file id=%s, fname=%s, size=%i', file_id,
               internal_fname, blob.size)
-    # process_file(storage_backend, file_id, local_file)
-    blob.process_file(file_id)
+    process_file(bucket, file_id, local_file)
 
     # Local processing is done, we can close the local file so it is removed.
     if local_file is not None:
@@ -727,20 +682,17 @@ def stream_to_storage(project_id):
     return resp
 
 
-def stream_to_gcs(file_id, file_size, internal_fname, project_id,
-                  stream_for_gcs, content_type):
+from ..file_storage_backends.abstract import FileType
+
+
+def stream_to_gcs(file_id: ObjectId, file_size: int, internal_fname: str, project_id: ObjectId,
+                  stream_for_gcs: FileType, content_type: str) \
+        -> typing.Tuple[GoogleCloudStorageBlob, GoogleCloudStorageBucket]:
     # Upload the file to GCS.
-    from gcloud.streaming import transfer
-    log.debug('Streaming file to GCS bucket; id=%s, fname=%s, size=%i',
-              file_id, internal_fname, file_size)
-    # Files larger than this many bytes will be streamed directly from disk,
-    # smaller ones will be read into memory and then uploaded.
-    transfer.RESUMABLE_UPLOAD_THRESHOLD = 102400
     try:
-        gcs = GoogleCloudStorageBucket(project_id)
-        file_in_storage = GoogleCloudStorageBlob(gcs, internal_fname)
-        file_in_storage.blob.upload_from_file(stream_for_gcs, size=file_size,
-                                              content_type=content_type)
+        bucket = GoogleCloudStorageBucket(str(project_id))
+        blob = bucket.blob(internal_fname)
+        blob.create_from_file(stream_for_gcs, file_size=file_size, content_type=content_type)
     except Exception:
         log.exception('Error uploading file to Google Cloud Storage (GCS),'
                       ' aborting handling of uploaded file (id=%s).', file_id)
@@ -748,9 +700,7 @@ def stream_to_gcs(file_id, file_size, internal_fname, project_id,
         raise wz_exceptions.InternalServerError(
             'Unable to stream file to Google Cloud Storage')
 
-    # Reload the blob to get the file size according to Google.
-    file_in_storage.blob.reload()
-    return file_in_storage, gcs
+    return blob, bucket
 
 
 def add_access_control_headers(resp):
@@ -840,8 +790,6 @@ def setup_app(app, url_prefix):
 
     app.on_fetched_item_files += before_returning_file
     app.on_fetched_resource_files += before_returning_files
-
-    app.on_delete_item_files += before_deleting_file
 
     app.on_update_files += compute_aggregate_length
     app.on_replace_files += compute_aggregate_length

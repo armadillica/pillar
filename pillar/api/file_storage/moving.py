@@ -5,14 +5,13 @@ import logging
 import os
 import tempfile
 
-from bson import ObjectId
 import bson.tz_util
-from flask import current_app
 import requests
 import requests.exceptions
+from bson import ObjectId
+from flask import current_app
 
 from . import stream_to_gcs, generate_all_links, ensure_valid_link
-import pillar.api.utils.gcs
 
 __all__ = ['PrerequisiteNotMetError', 'change_file_storage_backend']
 
@@ -90,22 +89,23 @@ def copy_file_to_backend(file_id, project_id, file_or_var, src_backend, dest_bac
     else:
         local_finfo = fetch_file_from_link(file_or_var['link'])
 
-    # Upload to GCS
-    if dest_backend != 'gcs':
-        raise ValueError('Only dest_backend="gcs" is supported now.')
+    try:
+        # Upload to GCS
+        if dest_backend != 'gcs':
+            raise ValueError('Only dest_backend="gcs" is supported now.')
 
-    if current_app.config['TESTING']:
-        log.warning('Skipping actual upload to GCS due to TESTING')
-    else:
-        # TODO check for name collisions
-        stream_to_gcs(file_id, local_finfo['file_size'],
-                      internal_fname=internal_fname,
-                      project_id=str(project_id),
-                      stream_for_gcs=local_finfo['local_file'],
-                      content_type=local_finfo['content_type'])
-
-    # No longer needed, so it can be closed & dispersed of.
-    local_finfo['local_file'].close()
+        if current_app.config['TESTING']:
+            log.warning('Skipping actual upload to GCS due to TESTING')
+        else:
+            # TODO check for name collisions
+            stream_to_gcs(file_id, local_finfo['file_size'],
+                          internal_fname=internal_fname,
+                          project_id=project_id,
+                          stream_for_gcs=local_finfo['local_file'],
+                          content_type=local_finfo['content_type'])
+    finally:
+        # No longer needed, so it can be closed & dispersed of.
+        local_finfo['local_file'].close()
 
 
 def fetch_file_from_link(link):
@@ -169,10 +169,12 @@ def gcs_move_to_bucket(file_id, dest_project_id, skip_gcs=False):
     if skip_gcs:
         log.warning('NOT ACTUALLY MOVING file %s on GCS, just updating MongoDB', file_id)
     else:
+        from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket
+
         src_project = f['project']
-        pillar.api.utils.gcs.copy_to_bucket(f['file_path'], src_project, dest_project_id)
+        GoogleCloudStorageBucket.copy_to_bucket(f['file_path'], src_project, dest_project_id)
         for var in f.get('variations', []):
-            pillar.api.utils.gcs.copy_to_bucket(var['file_path'], src_project, dest_project_id)
+            GoogleCloudStorageBucket.copy_to_bucket(var['file_path'], src_project, dest_project_id)
 
     # Update the file document after moving was successful.
     log.info('Switching file %s to project %s', file_id, dest_project_id)

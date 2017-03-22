@@ -3,12 +3,13 @@ import logging
 
 from flask import request, abort, current_app
 from gcloud import exceptions as gcs_exceptions
+
 from pillar.api.node_types.asset import node_type_asset
 from pillar.api.node_types.comment import node_type_comment
 from pillar.api.node_types.group import node_type_group
 from pillar.api.node_types.group_texture import node_type_group_texture
 from pillar.api.node_types.texture import node_type_texture
-from pillar.api.utils.gcs import GoogleCloudStorageBucket
+from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket
 from pillar.api.utils import authorization, authentication
 from pillar.api.utils import remove_private_keys
 from pillar.api.utils.authorization import user_has_role, check_permissions

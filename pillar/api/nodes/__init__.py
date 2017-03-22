@@ -9,13 +9,13 @@ from bson import ObjectId
 from flask import current_app, g, Blueprint, request
 
 import pillar.markdown
-from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
 from pillar.api.activities import activity_subscribe, activity_object_add
+from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
+from pillar.api.file_storage_backends.gcs import update_file_name
+from pillar.api.utils import str2id, jsonify
 from pillar.api.utils.algolia import algolia_index_node_delete
 from pillar.api.utils.algolia import algolia_index_node_save
-from pillar.api.utils import str2id, jsonify
 from pillar.api.utils.authorization import check_permissions, require_login
-from pillar.api.utils.gcs import update_file_name
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('nodes_api', __name__)

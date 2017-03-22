@@ -29,15 +29,6 @@ import responses
 import pillar
 from . import common_test_data as ctd
 
-# from six:
-PY3 = sys.version_info[0] == 3
-if PY3:
-    string_type = str
-    text_type = str
-else:
-    string_type = basestring
-    text_type = unicode
-
 MY_PATH = os.path.dirname(os.path.abspath(__file__))
 
 TEST_EMAIL_USER = 'koro'
@@ -71,6 +62,32 @@ class PillarTestServer(pillar.PillarServer):
 class AbstractPillarTest(TestMinimal):
     pillar_server_class = PillarTestServer
 
+    @classmethod
+    def setUpClass(cls):
+        import tempfile
+
+        # Store the global temporary directory location, as Pillar itself will
+        # change this into the config['STORAGE_DIR'] directory. If we don't
+        # restore that, mkdtemp() will keep trying to create inside its previously
+        # created temporary storage directory.
+        cls._orig_tempdir = tempfile.gettempdir()
+
+        # Point the storage directory to something temporary.
+        try:
+            cls._pillar_storage_dir = tempfile.mkdtemp(prefix='test-pillar-storage-')
+        except FileNotFoundError as ex:
+            raise FileNotFoundError(f'Error creating temp dir: {ex}')
+        os.environ['PILLAR_STORAGE_DIR'] = cls._pillar_storage_dir
+
+    @classmethod
+    def tearDownClass(cls):
+        import tempfile
+        import shutil
+
+        tempfile.tempdir = cls._orig_tempdir
+        shutil.rmtree(cls._pillar_storage_dir)
+
+
     def setUp(self, **kwargs):
         eve_settings_file = os.path.join(MY_PATH, 'eve_test_settings.py')
         kwargs['settings_file'] = eve_settings_file
@@ -81,6 +98,8 @@ class AbstractPillarTest(TestMinimal):
         config.DEBUG = True
 
         self.app = self.pillar_server_class(os.path.dirname(os.path.dirname(__file__)))
+        self.assertEqual(self.app.config['STORAGE_DIR'], self._pillar_storage_dir)
+
         self.app.process_extensions()
         assert self.app.config['MONGO_DBNAME'] == 'pillar_test'
 
@@ -301,7 +320,7 @@ class AbstractPillarTest(TestMinimal):
                       json=BLENDER_ID_USER_RESPONSE,
                       status=200)
 
-    def make_header(self, username: str, subclient_id: str='') -> bytes:
+    def make_header(self, username: str, subclient_id: str = '') -> bytes:
         """Returns a Basic HTTP Authentication header value."""
 
         content = '%s:%s' % (username, subclient_id)
@@ -348,16 +367,16 @@ class AbstractPillarTest(TestMinimal):
         if not isinstance(params, dict):
             return params
 
-        def convert_to_string(param):
+        def convert_to_bytes(param):
             if isinstance(param, dict):
                 return json.dumps(param, sort_keys=True)
-            if isinstance(param, text_type):
+            if isinstance(param, str):
                 return param.encode('utf-8')
             return param
 
         # Pass as (key, value) pairs, so that the sorted order is maintained.
         jsonified_params = [
-            (key, convert_to_string(params[key]))
+            (key, convert_to_bytes(params[key]))
             for key in sorted(params.keys())]
         return urlencode(jsonified_params)
 
