@@ -1864,6 +1864,12 @@ section.node-children
 		+clearfix
 		clear: none
 
+		.cloud-logo
+			font-size: 2em
+			color: darken($color-background, 60%)
+			+position-center-translate
+			left: $list-node-children-item-width_list / 1.3
+
 		&:hover
 			opacity: 1
 			text-decoration: none
@@ -1886,8 +1892,9 @@ section.node-children
 			min-width: $list-node-children-item-width_list * 1.69
 			max-width: $list-node-children-item-width_list * 1.69
 			height: $list-node-children-item-width_list
-			border-radius: 3px
-			background: $color-background
+			background-color: darken($color-background, 55%)
+			box-shadow: inset 0 0 1px darken($color-background, 65%)
+
 			img
 				height: $list-node-children-item-width_list
 				width: auto
@@ -1895,11 +1902,6 @@ section.node-children
 			.list-node-children-item-thumbnail-icon
 				font-size: 1.2em
 				transition: none
-
-				.dark
-					text-shadow: none
-					color: $color-text-dark-secondary
-					font-size: 1.3em
 
 			.list-node-children-item-ribbon
 				+ribbon
@@ -1917,8 +1919,9 @@ section.node-children
 				top: 0
 				left: 15px
 			font:
-				size: 1.2em
-			color: darken($color-primary, 15%)
+				size: 1.15em
+			color: $color-text-dark-primary
+			text-shadow: none
 
 			background-color: initial
 			width: initial

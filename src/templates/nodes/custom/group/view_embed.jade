@@ -51,12 +51,26 @@
 				| {% if child.picture %}
 				img(
 					src="{{ child.picture.thumbnail('t', api=api)}} ")
+				| {% else %}
+				.cloud-logo
+					i.pi-blender-cloud
 				| {% endif %}
 
 				| {% if child.permissions.world %}
 				.list-node-children-item-ribbon
 					span free
 				| {% endif %}
+
+				.list-node-children-item-thumbnail-icon
+					| {% if child.properties.content_type and child.properties.content_type == 'video' %}
+					i.pi-play
+					| {% elif child.properties.content_type and child.properties.content_type == 'image' %}
+					i.pi-image
+					| {% elif child.properties.content_type and child.properties.content_type == 'file' %}
+					i.pi-file-archive
+					| {% else %}
+					i.pi-folder
+					| {% endif %}
 
 			.list-node-children-item-name {{ child.name }}
 
@@ -65,17 +79,14 @@
 				span.status {{ child.properties.status }}
 				| {% endif %}
 
-				| {% if child.properties.content_type == 'video' %}
-				span Video ·
-				| {% elif child.properties.content_type == 'image' %}
-				span Image ·
-				| {% elif child.properties.content_type == 'file' %}
-				span File ·
-				| {% else %}
-				| {% if child.picture %}
-				span Folder ·
-				| {% endif %}
-				| {% endif %}
+				span.type
+					| {% if child.properties.content_type %}
+					| {{ child.properties.content_type | undertitle }} ·
+					| {% elif child.node_type == 'group' %}
+					| Folder ·
+					| {% else %}
+					| {{ child.node_type | undertitle }} ·
+					| {% endif %}
 
 				span(title="Created on {{ child._created }}") {{ child._created | pretty_date }}
 
