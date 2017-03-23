@@ -18,6 +18,7 @@ var enabled = {
     maps: argv.production,
     failCheck: argv.production,
     prettyPug: !argv.production,
+    cachify: !argv.production,
     liveReload: !argv.production
 };
 
@@ -41,7 +42,7 @@ gulp.task('styles', function() {
 gulp.task('templates', function() {
     gulp.src('src/templates/**/*.jade')
         .pipe(gulpif(enabled.failCheck, plumber()))
-        .pipe(cache('templating'))
+        .pipe(gulpif(enabled.cachify, cache('templating')))
         .pipe(jade({
             pretty: enabled.prettyPug
         }))
@@ -54,7 +55,7 @@ gulp.task('templates', function() {
 gulp.task('scripts', function() {
     gulp.src('src/scripts/*.js')
         .pipe(gulpif(enabled.failCheck, plumber()))
-        .pipe(cache('scripting'))
+        .pipe(gulpif(enabled.cachify, cache('scripting')))
         .pipe(gulpif(enabled.maps, sourcemaps.init()))
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(rename({suffix: '.min'}))
