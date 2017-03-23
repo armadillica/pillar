@@ -7,11 +7,11 @@ pytest==3.0.6
 responses==0.5.1
 pytest-cov==2.4.0
 mock==2.0.0
-
-# mypy-0.501 typed-ast-1.0.2
+mypy==0.501
 
 # Secondary development requirements
 cookies==2.2.1
 coverage==4.3.4
 pbr==2.0.0
 py==1.4.32
+typed-ast==1.0.2
