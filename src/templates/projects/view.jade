@@ -241,6 +241,11 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 
 		| {% endif %}
 
+		| {% if request.args.get('utm_source') and config.UTM_LINK %}
+		#utm_container
+			a(href="{{config.UTM_LINK['link']}}")
+				img(src="{{config.UTM_LINK['image']}}", alt="gift", class="img-responsive")
+		| {% endif %}
 		#project_context
 			| {% block project_context %}
 			| {% if show_project %}
