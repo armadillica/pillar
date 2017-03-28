@@ -30,14 +30,6 @@
 			href="#",
 			data-node_id="{{ child._id }}",
 			class="item_icon {{child.node_type}} {% if child.picture %}thumbnail{% endif %}")
-			.list-node-children-item-preview
-				span.texture-name {{child.name}}
-				| {% if child.picture %}
-				img.texture-preview(
-					src="",
-					data-preview="{{ child.picture.thumbnail('m', api=api)}}",
-					alt='{{child.name}}')
-				| {% endif %}
 			.list-node-children-item(class="{{child.node_type}}")
 				.list-node-children-item-thumbnail
 					| {% if child.picture %}
