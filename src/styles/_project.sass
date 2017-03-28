@@ -1264,6 +1264,12 @@ section.node-preview.group
 				max-width: 100%
 				padding-top: 15px
 
+			ul.node-details-meta-list
+				> li:first-child
+					margin-left: auto
+				> li:not(:last-child)
+					margin-right: 10px
+
 		&.license
 			+clearfix
 			padding-bottom: 5px
@@ -1282,11 +1288,15 @@ section.node-preview.group
 				width: 100%
 				max-width: 100%
 
-			li.node-details-meta-list-item
+			> li
 				margin: 0
-				padding: 0 10px 0 0
+				padding: 0
 				line-height: 1em
 				float: left
+
+				& a.btn
+					padding: 4px 12px 5px 12px
+					margin: 0
 
 				&.date
 					color: $color-text-dark-secondary
@@ -1321,7 +1331,6 @@ section.node-preview.group
 					cursor: default
 
 				&.access
-					margin: 0 0 0 auto
 					color: $color-text-dark-primary
 					cursor: default
 					opacity: .5
@@ -1344,7 +1353,6 @@ section.node-preview.group
 
 
 				&.type
-					margin-left: auto
 					text-transform: uppercase
 					padding: 0 5px 0 15px
 					cursor: default
@@ -1361,10 +1369,6 @@ section.node-preview.group
 						font-size: 1.2em
 						color: $color-text-dark-secondary
 
-				&.access+li.node-details-meta-list-item.type,
-				&.access+.tooltip+li.node-details-meta-list-item.type
-					margin-left: 0
-
 				&.access+li.node-details-meta-list-item.video.download,
 				&.access+.tooltip+li.node-details-meta-list-item.video.download
 					margin-left: 10px
@@ -1377,7 +1381,6 @@ section.node-preview.group
 					white-space: nowrap
 
 				&.license
-					margin-left: 15px
 					color: $color-text-dark-secondary
 
 					i
@@ -1386,13 +1389,6 @@ section.node-preview.group
 						position: relative
 						bottom: -2px
 						left: -5px
-
-				&.video.license
-					margin-left: auto
-
-				&.video.license+li.node-details-meta-list-item.video.download,
-				&.video.license+.popover+li.node-details-meta-list-item.video.download
-					margin-left: 0
 
 				/* Download button */
 				&.download
@@ -1424,8 +1420,6 @@ section.node-preview.group
 
 					/* Videos have dropdown caret, so paddit 5px less */
 					&.video.download
-						margin-left: auto
-
 						button
 							padding-right: 10px
 

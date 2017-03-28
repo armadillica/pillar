@@ -48,9 +48,16 @@
 				data-toggle="tooltip",
 				data-placement="bottom",
 				title="{{ node.properties.license_type }}")
-
 					i(class="pi-license-{{ node.properties.license_type }}")
 				| {% endif %}
+				| {% endif %}
+
+				| {% if write_access %}
+				li.node-details-meta-list-item
+					a.btn#copy_yaw(
+						href='javascript:void(0);'
+						title='Copies current yaw of panorama to the clipboard, so you can set it as default yaw.'
+						) Copy yaw
 				| {% endif %}
 
 				| {% if node.properties.files %}
@@ -114,6 +121,8 @@ include ../_scripts
 | {% endblock %}
 
 | {% block footer_scripts %}
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/clipboard.min.js')}}")
+
 script.
 	$('#asset-license').popover();
 	// Generate GA pageview
@@ -128,6 +137,21 @@ script.
 
 	$('#node-overlay').click(function(){
 		$(this).removeClass('active').hide().html();
+	});
+
+	$().ready(function () {
+		new Clipboard('#copy_yaw', {
+			text: function(trigger) {
+				var frame = document.getElementById('vrview_window').contentWindow;
+				var yaw = frame.yaw();
+				if (console)
+					console.log('Current yaw is: ', yaw, ", which was copied to your clipboard.");
+				return yaw;
+			}
+		})
+		.on('success', function(e) {
+		    $(e.trigger).flashOnce();
+		});
 	});
 
 | {% endblock %}

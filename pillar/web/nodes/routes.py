@@ -215,6 +215,8 @@ def view(node_id):
     if request.args.get('format') == 'amp':
         template_path = 'nodes/view_amp.html'
 
+    write_access = 'PUT' in (node.allowed_methods or set())
+
     try:
         return render_template(template_path,
                                node_id=node._id,
@@ -222,6 +224,7 @@ def view(node_id):
                                parent=node.parent,
                                children=children,
                                config=current_app.config,
+                               write_access=write_access,
                                api=api)
     except TemplateNotFound:
         log.error('Template %s does not exist for node type %s', template_path, node_type_name)
@@ -231,6 +234,7 @@ def view(node_id):
                                parent=node.parent,
                                children=children,
                                config=current_app.config,
+                               write_access=write_access,
                                api=api)
 
 
