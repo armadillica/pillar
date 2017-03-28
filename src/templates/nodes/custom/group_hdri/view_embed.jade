@@ -24,7 +24,7 @@
 
 		| {% if children %}
 		| 	{% for child in children %}
-		| 	{% if child.properties.status == 'published' %}
+		| 	{% if child.properties.status == 'published' or child.user == current_user.objectid %}
 
 		a.list-node-children-container(
 			href="#",
