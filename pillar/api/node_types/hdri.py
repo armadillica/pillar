@@ -7,6 +7,11 @@ node_type_hdri = {
     'description': 'HDR Image',
     'parent': ['group_hdri'],
     'dyn_schema': {
+        # Default yaw angle in degrees.
+        'default_yaw': {
+            'type': 'float',
+            'default': 0.0
+        },
         'status': {
             'type': 'string',
             'allowed': [

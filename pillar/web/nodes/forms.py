@@ -85,7 +85,7 @@ def add_form_properties(form_class, node_type):
         elif field_type == 'integer':
             field = IntegerField(prop_name, default=0)
         elif field_type == 'float':
-            field = FloatField(prop_name, default=0)
+            field = FloatField(prop_name, default=0.0)
         elif field_type == 'boolean':
             field = BooleanField(prop_name)
         elif field_type == 'objectid' and 'data_relation' in schema_prop:
@@ -172,6 +172,11 @@ def process_node_form(form, node_id=None, node_type=None, user=None):
                     data = 0
                 else:
                     data = int(form[prop_name].data)
+            elif schema_prop['type'] == 'float':
+                if not data:
+                    data = None
+                else:
+                    data = float(form[prop_name].data)
             elif schema_prop['type'] == 'datetime':
                 data = datetime.strftime(data, current_app.config['RFC1123_DATE_FORMAT'])
             elif schema_prop['type'] == 'list':

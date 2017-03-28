@@ -5,12 +5,13 @@
 	section.node-preview
 		| {% if node.picture %}
 		iframe(
+		id='vrview_window'
 		width='100%',
 		height='450px',
 		scrolling='no',
 		frameborder='0',
 		allowfullscreen='',
-		src="{{url_for('main.vrview', preview=node.picture.thumbnail('l', api=api), image=node.picture.thumbnail('h', api=api), is_stereo='false')}}")
+		src="{{url_for('main.vrview', preview=node.picture.thumbnail('l', api=api), image=node.picture.thumbnail('h', api=api), default_yaw=(node.properties.default_yaw or 0))}}")
 		| {% endif %}
 
 	section.node-details-container
@@ -130,4 +131,3 @@ script.
 	});
 
 | {% endblock %}
-
