@@ -13,4 +13,13 @@ html(lang='en')
       .wrap
         h1.title Error
         p.message An unknown error occurred.
-    script(src="{{url_for('static_pillar', filename='assets/js/vrview-analytics.min.js')}}")
+    script(src="{{url_for('static_pillar', filename='assets/vrview/three.min.js')}}")
+    script(src="{{url_for('static_pillar', filename='assets/vrview/embed.min.js')}}")
+    script.
+        /** Returns the current yaw in degrees. */
+        function yaw() {
+            console.log('default yaw:', worldRenderer.sceneInfo.defaultYaw * 180 / Math.PI);
+            console.log('camera rotation: ', worldRenderer.camera.rotation.y * 180 / Math.PI);
+            var the_yaw = worldRenderer.sceneInfo.defaultYaw + worldRenderer.camera.rotation.y;
+            return the_yaw * 180 / Math.PI;
+        }

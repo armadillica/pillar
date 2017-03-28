@@ -35,3 +35,22 @@ pip install -e ../pillar-python-sdk
 pip install -U -r requirements.txt
 pip install -e .
 ```
+
+## HDRi viewer
+
+The HDRi viewer uses [Google VRView](https://github.com/googlevr/vrview). To upgrade,
+get those files:
+
+* [three.min.js](https://raw.githubusercontent.com/googlevr/vrview/master/build/three.min.js)
+* [embed.min.js](https://raw.githubusercontent.com/googlevr/vrview/master/build/embed.min.js)
+* [loading.gif](https://raw.githubusercontent.com/googlevr/vrview/master/images/loading.gif)
+
+and place them in `pillar/web/static/assets/vrview`. Replace `images/loading.gif` in `embed.min.js` with `static/pillar/assets/vrview/loading.gif`.
+
+You may also want to compare their
+[index.html](https://raw.githubusercontent.com/googlevr/vrview/master/index.html) to our
+`src/templates/vrview.jade`.
+
+When on a HDRi page with the viewer embedded, use this JavaScript code to find the current
+yaw: `vrview_window.contentWindow.yaw()`. This can be passed as `default_yaw` parameter to
+the iframe.

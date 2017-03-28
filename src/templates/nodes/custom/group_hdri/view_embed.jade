@@ -24,20 +24,12 @@
 
 		| {% if children %}
 		| 	{% for child in children %}
-		| 	{% if child.properties.status == 'published' %}
+		| 	{% if child.properties.status == 'published' or child.user == current_user.objectid %}
 
 		a.list-node-children-container(
 			href="#",
 			data-node_id="{{ child._id }}",
 			class="item_icon {{child.node_type}} {% if child.picture %}thumbnail{% endif %}")
-			.list-node-children-item-preview
-				span.texture-name {{child.name}}
-				| {% if child.picture %}
-				img.texture-preview(
-					src="",
-					data-preview="{{ child.picture.thumbnail('m', api=api)}}",
-					alt='{{child.name}}')
-				| {% endif %}
 			.list-node-children-item(class="{{child.node_type}}")
 				.list-node-children-item-thumbnail
 					| {% if child.picture %}
@@ -76,9 +68,6 @@
 							| {% endif %}
 						| {% endif %}
 					| {% endif %}
-
-				.list-node-children-item-name
-					span {{ child.name }}
 
 		| 	{% endif %}
 		| 	{% endfor %}
