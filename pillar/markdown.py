@@ -22,6 +22,7 @@ ALLOWED_TAGS = [
     'sup', 'sub', 'strike',
     'img',
     'iframe',
+    'video',
 ]
 
 ALLOWED_ATTRIBUTES = {
@@ -30,6 +31,7 @@ ALLOWED_ATTRIBUTES = {
     'acronym': ['title'],
     'img': ['src', 'alt', 'width', 'height', 'title'],
     'iframe': ['src', 'width', 'height', 'frameborder', 'allowfullscreen'],
+    'video': ['autoplay', 'controls', 'loop', 'muted', 'src'],
     '*': ['style'],
 }
 
