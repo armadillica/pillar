@@ -1,6 +1,7 @@
 """Our custom Jinja filters and other template stuff."""
 
 import logging
+import typing
 
 import flask
 import jinja2.filters
@@ -90,7 +91,13 @@ def do_pluralize(value, arg='s'):
     return singular_suffix
 
 
-def do_markdown(s):
+def do_markdown(s: typing.Optional[str]):
+    if s is None:
+        return None
+
+    if not s:
+        return s
+
     # FIXME: get rid of this filter altogether and cache HTML of comments.
     safe_html = pillar.markdown.markdown(s)
     return jinja2.utils.Markup(safe_html)
