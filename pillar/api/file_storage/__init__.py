@@ -84,7 +84,9 @@ def index(file_name=None):
 
 
 def _process_image(bucket: Bucket,
-                   file_id, local_file, src_file):
+                   file_id: ObjectId,
+                   local_file: tempfile._TemporaryFileWrapper,
+                   src_file: dict):
     from PIL import Image
 
     im = Image.open(local_file)
@@ -127,7 +129,10 @@ def _process_image(bucket: Bucket,
     src_file['status'] = 'complete'
 
 
-def _process_video(gcs, file_id, local_file, src_file):
+def _process_video(gcs,
+                   file_id: ObjectId,
+                   local_file: tempfile._TemporaryFileWrapper,
+                   src_file: dict):
     """Video is processed by Zencoder; the file isn't even stored locally."""
 
     log.info('Processing video for file %s', file_id)
@@ -175,14 +180,14 @@ def _process_video(gcs, file_id, local_file, src_file):
         'backend': j['backend']}
 
 
-def process_file(bucket: Bucket, file_id, local_file):
+def process_file(bucket: Bucket,
+                 file_id: typing.Union[str, ObjectId],
+                 local_file: tempfile._TemporaryFileWrapper):
     """Process the file by creating thumbnails, sending to Zencoder, etc.
 
     :param file_id: '_id' key of the file
-    :type file_id: ObjectId or str
     :param local_file: locally stored file, or None if no local processing is
     needed.
-    :type local_file: file
     """
 
     file_id = ObjectId(file_id)
@@ -211,7 +216,7 @@ def process_file(bucket: Bucket, file_id, local_file):
         log.info('Not processing video file %s for non-admin user', file_id)
 
     # Run the required processor, based on the MIME category.
-    processors = {
+    processors: typing.Mapping[str, typing.Callable] = {
         'image': _process_image,
         'video': _process_video,
     }
