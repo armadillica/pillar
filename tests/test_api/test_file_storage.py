@@ -233,3 +233,50 @@ class FileMaxSizeTest(AbstractPillarTest):
     def create_test_file(self, file_size_bytes):
         fileob = io.BytesIO(rsa.randnum.read_random_bits(file_size_bytes * 8))
         return fileob
+
+
+class VideoSizeTest(AbstractPillarTest):
+    def test_video_size(self):
+        from pillar.api import file_storage
+        from pathlib import Path
+
+        fname = Path(__file__).with_name('video-tiny.mkv')
+
+        with self.app.test_request_context():
+            size = file_storage._video_size_pixels(fname)
+
+        self.assertEqual((960, 540), size)
+
+    def test_video_size_nonexistant(self):
+        from pillar.api import file_storage
+        from pathlib import Path
+
+        fname = Path(__file__).with_name('video-nonexistant.mkv')
+
+        with self.app.test_request_context():
+            size = file_storage._video_size_pixels(fname)
+
+        self.assertEqual((0, 0), size)
+
+    def test_video_cap_at_1080(self):
+        from pillar.api import file_storage
+
+        # Up to 1920x1080, the input should be returned as-is.
+        self.assertEqual((0, 0), file_storage._video_cap_at_1080(0, 0))
+        self.assertEqual((1, 1), file_storage._video_cap_at_1080(1, 1))
+        self.assertEqual((960, 540), file_storage._video_cap_at_1080(960, 540))
+        self.assertEqual((1920, 540), file_storage._video_cap_at_1080(1920, 540))
+
+        # The height must be multiple of 8
+        self.assertEqual((1920, 784), file_storage._video_cap_at_1080(2048, 840))
+
+        # The width must be multiple of 16
+        self.assertEqual((1024, 1080), file_storage._video_cap_at_1080(1920, 2000))
+
+        # Resizing the height based on the width will still produce a too high video,
+        # so this one hits both resize branches in one call:
+        self.assertEqual((1104, 1080), file_storage._video_cap_at_1080(2048, 2000))
+
+        size = file_storage._video_cap_at_1080(2048, 2000)
+        self.assertIsInstance(size[0], int)
+        self.assertIsInstance(size[1], int)

@@ -129,13 +129,98 @@ def _process_image(bucket: Bucket,
     src_file['status'] = 'complete'
 
 
+def _video_size_pixels(filename: pathlib.Path) -> typing.Tuple[int, int]:
+    """Figures out the size (in pixels) of the video file.
+
+    Returns (0, 0) if there was any error detecting the size.
+    """
+
+    import json
+    import subprocess
+
+    cli_args = [
+        current_app.config['BIN_FFPROBE'],
+        '-loglevel', 'error',
+        '-hide_banner',
+        '-print_format', 'json',
+        '-select_streams', 'v:0',  # we only care about the first video stream
+        '-show_streams',
+        str(filename),
+    ]
+
+    if log.isEnabledFor(logging.INFO):
+        import shlex
+        cmd = ' '.join(shlex.quote(s) for s in cli_args)
+        log.info('Calling %s', cmd)
+
+    ffprobe = subprocess.run(
+        cli_args,
+        stdin=subprocess.DEVNULL,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        timeout=10,  # seconds
+    )
+
+    if ffprobe.returncode:
+        import shlex
+        cmd = ' '.join(shlex.quote(s) for s in cli_args)
+        log.error('Error running %s: stopped with return code %i',
+                  cmd, ffprobe.returncode)
+        log.error('Output was: %s', ffprobe.stdout)
+        return 0, 0
+
+    try:
+        ffprobe_info = json.loads(ffprobe.stdout)
+    except json.JSONDecodeError:
+        log.exception('ffprobe produced invalid JSON: %s', ffprobe.stdout)
+        return 0, 0
+
+    try:
+        stream_info = ffprobe_info['streams'][0]
+        return stream_info['width'], stream_info['height']
+    except (KeyError, IndexError):
+        log.exception('ffprobe produced unexpected JSON: %s', ffprobe.stdout)
+        return 0, 0
+
+
+def _video_cap_at_1080(width: int, height: int) -> typing.Tuple[int, int]:
+    """Returns an appropriate width/height for a video capped at 1920x1080.
+
+    Takes into account that h264 has limitations:
+        - the width must be a multiple of 16
+        - the height must be a multiple of 8
+    """
+
+    if width > 1920:
+        # The height must be a multiple of 8
+        new_height = height / width * 1920
+        height = new_height - (new_height % 8)
+        width = 1920
+
+    if height > 1080:
+        # The width must be a multiple of 16
+        new_width = width / height * 1080
+        width = new_width - (new_width % 16)
+        height = 1080
+
+    return int(width), int(height)
+
+
 def _process_video(gcs,
                    file_id: ObjectId,
                    local_file: tempfile._TemporaryFileWrapper,
                    src_file: dict):
-    """Video is processed by Zencoder; the file isn't even stored locally."""
+    """Video is processed by Zencoder."""
 
     log.info('Processing video for file %s', file_id)
+
+    # Use ffprobe to find the size (in pixels) of the video.
+    # Even though Zencoder can do resizing to a maximum resolution without upscaling,
+    # by determining the video size here we already have this information in the file
+    # document before Zencoder calls our notification URL. It also opens up possibilities
+    # for other encoding backends that don't support this functionality.
+    video_width, video_height = _video_size_pixels(pathlib.Path(local_file.name))
+    capped_video_width, capped_video_height = _video_cap_at_1080(video_width, video_height)
 
     # Create variations
     root, _ = os.path.splitext(src_file['file_path'])
@@ -149,8 +234,8 @@ def _process_video(gcs,
         file_path='{}-{}.{}'.format(root, v, v),
         size='',
         duration=0,
-        width=0,
-        height=0,
+        width=capped_video_width,
+        height=capped_video_height,
         length=0,
         md5='',
     )
@@ -624,8 +709,9 @@ def stream_to_storage(project_id):
                     project_oid)
         raise wz_exceptions.BadRequest('Missing content type.')
 
-    if uploaded_file.content_type.startswith('image/'):
-        # We need to do local thumbnailing, so we have to write the stream
+    if uploaded_file.content_type.startswith('image/') or uploaded_file.content_type.startswith(
+            'video/'):
+        # We need to do local thumbnailing and ffprobe, so we have to write the stream
         # both to Google Cloud Storage and to local storage.
         local_file = tempfile.NamedTemporaryFile(
             dir=current_app.config['STORAGE_DIR'])

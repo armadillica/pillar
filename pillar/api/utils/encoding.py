@@ -31,7 +31,10 @@ class Encoder:
         options = dict(notifications=current_app.config['ZENCODER_NOTIFICATIONS_URL'])
 
         outputs = [{'format': v['format'],
-                    'url': os.path.join(storage_base, v['file_path'])}
+                    'url': os.path.join(storage_base, v['file_path']),
+                    'upscale': False,
+                    'size': '{width}x{height}'.format(**v),
+                    }
                    for v in src_file['variations']]
         r = current_app.encoding_service_client.job.create(file_input,
                                                            outputs=outputs,
