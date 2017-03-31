@@ -156,8 +156,8 @@ def _process_video(gcs, file_id, local_file, src_file):
     if current_app.config['TESTING']:
         log.warning('_process_video: NOT sending out encoding job due to '
                     'TESTING=%r', current_app.config['TESTING'])
-        j = type('EncoderJob', (), {'process_id': 'fake-process-id',
-                                    'backend': 'fake'})
+        j = {'process_id': 'fake-process-id',
+             'backend': 'fake'}
     else:
         j = Encoder.job_create(src_file)
         if j is None:
