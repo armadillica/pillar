@@ -37,9 +37,9 @@
 			h1
 				a(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
 
-		| {% if project.summary %}
+		| {% if project.description %}
 		.node-details-description
-			| {{ project.summary }}
+			| {{ project.description }}
 		| {% endif %}
 
 		| {# Until we implement urls for pages
