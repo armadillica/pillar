@@ -193,7 +193,7 @@ def after_replacing_node(item, original):
         # Skip index updating and return
         return
 
-    from algoliasearch.client import AlgoliaException
+    from algoliasearch.helpers import AlgoliaException
     status = item['properties'].get('status', 'unpublished')
 
     if status == 'published':
@@ -375,7 +375,7 @@ def nodes_set_default_picture(nodes):
 
 
 def after_deleting_node(item):
-    from algoliasearch.client import AlgoliaException
+    from algoliasearch.helpers import AlgoliaException
     try:
         algolia_index_node_delete(item)
     except AlgoliaException as ex:

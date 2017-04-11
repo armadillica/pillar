@@ -29,7 +29,7 @@ def before_replacing_user(request, lookup):
 def push_updated_user_to_algolia(user, original):
     """Push an update to the Algolia index when a user item is updated"""
 
-    from algoliasearch.client import AlgoliaException
+    from algoliasearch.helpers import AlgoliaException
     from pillar.api.utils.algolia import algolia_index_user_save
 
     try:
