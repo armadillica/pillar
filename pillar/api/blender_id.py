@@ -200,8 +200,11 @@ def _compute_token_expiry(token_expires_string):
     the token.
     """
 
-    date_format = current_app.config['RFC1123_DATE_FORMAT']
-    blid_expiry = datetime.datetime.strptime(token_expires_string, date_format)
+    # requirement is called python-dateutil, so PyCharm doesn't find it.
+    # noinspection PyPackageRequirements
+    from dateutil import parser
+
+    blid_expiry = parser.parse(token_expires_string)
     blid_expiry = blid_expiry.replace(tzinfo=tz_util.utc)
     our_expiry = datetime.datetime.now(tz=tz_util.utc) + datetime.timedelta(hours=1)
 
