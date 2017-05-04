@@ -1,7 +1,9 @@
 """Service accounts."""
 
 import logging
+import typing
 
+import bson
 import blinker
 import bson
 
@@ -20,6 +22,10 @@ ROLES_WITH_GROUPS = {'admin', 'demo', 'subscriber'}
 
 # Map of role name to group ID, for the above groups.
 role_to_group_id = {}
+
+
+class ServiceAccountCreationError(Exception):
+    """Raised when a service account cannot be created."""
 
 
 @blueprint.before_app_first_request
@@ -173,62 +179,35 @@ def manage_user_group_membership(db_user, role, action):
     return user_groups
 
 
-def create_service_account(email, roles, service, update_existing=None):
+def create_service_account(email: str, roles: typing.Iterable, service: dict):
     """Creates a service account with the given roles + the role 'service'.
 
-    :param email: email address associated with the account
-    :type email: str
+    :param email: optional email address associated with the account.
     :param roles: iterable of role names
     :param service: dict of the 'service' key in the user.
-    :type service: dict
-    :param update_existing: callback function that receives an existing user to update
-        for this service, in case the email address is already in use by someone.
-        If not given or None, updating existing users is disallowed, and a ValueError
-        exception is thrown instead.
 
     :return: tuple (user doc, token doc)
     """
 
-    from pillar.api.utils import remove_private_keys
+    # Create a user with the correct roles.
+    roles = sorted(set(roles).union({'service'}))
+    user_id = bson.ObjectId()
 
-    # Find existing
-    users_coll = current_app.db()['users']
-    user = users_coll.find_one({'email': email})
-    if user:
-        # Check whether updating is allowed at all.
-        if update_existing is None:
-            raise ValueError('User %s already exists' % email)
+    log.info('Creating service account %s with roles %s', user_id, roles)
+    user = {'_id': user_id,
+            'username': f'SRV-{user_id}',
+            'groups': [],
+            'roles': roles,
+            'settings': {'email_communications': 0},
+            'auth': [],
+            'full_name': f'SRV-{user_id}',
+            'service': service}
+    if email:
+        user['email'] = email
+    result, _, _, status = current_app.post_internal('users', user)
 
-        # Compute the new roles, and assign.
-        roles = list(set(roles).union({'service'}).union(user['roles']))
-        user['roles'] = list(roles)
-
-        # Let the caller perform any required updates.
-        log.info('Updating existing user %s to become service account for %s',
-                 email, roles)
-        update_existing(user['service'])
-
-        # Try to store the updated user.
-        result, _, _, status = current_app.put_internal('users',
-                                                        remove_private_keys(user),
-                                                        _id=user['_id'])
-        expected_status = 200
-    else:
-        # Create a user with the correct roles.
-        roles = list(set(roles).union({'service'}))
-        user = {'username': email,
-                'groups': [],
-                'roles': roles,
-                'settings': {'email_communications': 0},
-                'auth': [],
-                'full_name': email,
-                'email': email,
-                'service': service}
-        result, _, _, status = current_app.post_internal('users', user)
-        expected_status = 201
-
-    if status != expected_status:
-        raise SystemExit('Error creating user {}: {}'.format(email, result))
+    if status != 201:
+        raise ServiceAccountCreationError('Error creating user {}: {}'.format(user_id, result))
     user.update(result)
 
     # Create an authentication token that won't expire for a long time.

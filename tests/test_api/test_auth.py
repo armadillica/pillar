@@ -234,7 +234,8 @@ class UserListTests(AbstractPillarTest):
 
     def test_list_all_users_admin(self):
         # Admin access should result in all users
-        resp = self.client.get('/api/users', headers={'Authorization': self.make_header('admin-token')})
+        resp = self.client.get('/api/users',
+                               headers={'Authorization': self.make_header('admin-token')})
         users = json.loads(resp.data)
 
         self.assertEqual(200, resp.status_code)
@@ -281,8 +282,9 @@ class UserListTests(AbstractPillarTest):
     def test_own_user_subscriber_explicit_projection(self):
         # With a custom projection requesting the auth list
         projection = json.dumps({'auth': 1})
-        resp = self.client.get('/api/users/%s?projection=%s' % ('123456789abc123456789abc', projection),
-                               headers={'Authorization': self.make_header('token')})
+        resp = self.client.get(
+            '/api/users/%s?projection=%s' % ('123456789abc123456789abc', projection),
+            headers={'Authorization': self.make_header('token')})
         user_info = json.loads(resp.data)
 
         self.assertEqual(200, resp.status_code)
@@ -502,7 +504,7 @@ class PermissionComputationTest(AbstractPillarTest):
             self.assertEqual(
                 {
                     'groups': [{'group': ObjectId('5596e975ea893b269af85c0e'),
-                                 'methods': ['DELETE', 'GET', 'POST', 'PUT']}],
+                                'methods': ['DELETE', 'GET', 'POST', 'PUT']}],
                     'world': ['GET']
                 },
                 self.sort(compute_aggr_permissions('projects', EXAMPLE_PROJECT, None)))
@@ -511,11 +513,11 @@ class PermissionComputationTest(AbstractPillarTest):
             self.assertEqual(
                 {
                     'groups': [{'group': ObjectId('5596e975ea893b269af85c0e'),
-                                 'methods': ['DELETE', 'GET', 'POST', 'PUT']},
-                                {'group': ObjectId('5596e975ea893b269af85c0f'),
-                                 'methods': ['GET']},
-                                {'group': ObjectId('564733b56dcaf85da2faee8a'),
-                                 'methods': ['GET']}],
+                                'methods': ['DELETE', 'GET', 'POST', 'PUT']},
+                               {'group': ObjectId('5596e975ea893b269af85c0f'),
+                                'methods': ['GET']},
+                               {'group': ObjectId('564733b56dcaf85da2faee8a'),
+                                'methods': ['GET']}],
                     'world': ['GET']
                 },
                 self.sort(compute_aggr_permissions('projects', EXAMPLE_PROJECT, 'texture')))
@@ -530,11 +532,11 @@ class PermissionComputationTest(AbstractPillarTest):
             self.ensure_project_exists(project_overrides=EXAMPLE_PROJECT)
             self.assertEqual(
                 {'groups': [{'group': ObjectId('5596e975ea893b269af85c0e'),
-                              'methods': ['DELETE', 'GET', 'POST', 'PUT']},
-                             {'group': ObjectId('5596e975ea893b269af85c0f'),
-                              'methods': ['DELETE', 'GET']},
-                             {'group': ObjectId('564733b56dcaf85da2faee8a'),
-                              'methods': ['GET']}],
+                             'methods': ['DELETE', 'GET', 'POST', 'PUT']},
+                            {'group': ObjectId('5596e975ea893b269af85c0f'),
+                             'methods': ['DELETE', 'GET']},
+                            {'group': ObjectId('564733b56dcaf85da2faee8a'),
+                             'methods': ['GET']}],
                  'world': ['GET']},
                 self.sort(compute_aggr_permissions('nodes', node, None)))
 
@@ -544,11 +546,11 @@ class PermissionComputationTest(AbstractPillarTest):
             node['project'] = EXAMPLE_PROJECT
             self.assertEqual(
                 {'groups': [{'group': ObjectId('5596e975ea893b269af85c0e'),
-                              'methods': ['DELETE', 'GET', 'POST', 'PUT']},
-                             {'group': ObjectId('5596e975ea893b269af85c0f'),
-                              'methods': ['DELETE', 'GET']},
-                             {'group': ObjectId('564733b56dcaf85da2faee8a'),
-                              'methods': ['GET']}],
+                             'methods': ['DELETE', 'GET', 'POST', 'PUT']},
+                            {'group': ObjectId('5596e975ea893b269af85c0f'),
+                             'methods': ['DELETE', 'GET']},
+                            {'group': ObjectId('564733b56dcaf85da2faee8a'),
+                             'methods': ['GET']}],
                  'world': ['GET']},
                 self.sort(compute_aggr_permissions('nodes', node, None)))
 
@@ -638,3 +640,67 @@ class RequireRolesTest(AbstractPillarTest):
             self.assertFalse(user_has_role('admin', {'roles': []}))
             self.assertFalse(user_has_role('admin', {'roles': None}))
             self.assertFalse(user_has_role('admin', {}))
+
+
+class UserCreationTest(AbstractPillarTest):
+    @responses.activate
+    def test_create_by_auth(self):
+        """Create user by authenticating against Blender ID."""
+
+        with self.app.test_request_context():
+            users_coll = self.app.db().users
+            self.assertEqual(0, users_coll.count())
+
+        self.mock_blenderid_validate_happy()
+        token = 'this is my life now'
+        self.get('/api/users/me', auth_token=token)
+
+        with self.app.test_request_context():
+            users_coll = self.app.db().users
+            self.assertEqual(1, users_coll.count())
+
+            db_user = users_coll.find()[0]
+            self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)
+
+    def test_user_without_email_address(self):
+        """Regular users should always have an email address.
+        
+        Regular users are created by authentication with Blender ID, so we do not
+        have to test that (Blender ID ensures there is an email address). We do need
+        to test PUT access to erase the email address, though.
+        """
+
+        from pillar.api.utils import remove_private_keys
+
+        user_id = self.create_user(24 * 'd', token='user-token')
+
+        with self.app.test_request_context():
+            users_coll = self.app.db().users
+            db_user = users_coll.find_one(user_id)
+
+        puttable = remove_private_keys(db_user)
+
+        empty_email = copy.deepcopy(puttable)
+        empty_email['email'] = ''
+
+        without_email = copy.deepcopy(puttable)
+        del without_email['email']
+
+        etag = db_user['_etag']
+        resp = self.put(f'/api/users/{user_id}', json=puttable, etag=etag,
+                        auth_token='user-token', expected_status=200).json()
+        etag = resp['_etag']
+        self.put(f'/api/users/{user_id}', json=empty_email, etag=etag,
+                 auth_token='user-token', expected_status=422)
+        self.put(f'/api/users/{user_id}', json=without_email, etag=etag,
+                 auth_token='user-token', expected_status=422)
+
+        # An admin should be able to edit this user, but also not clear the email address.
+        self.create_user(24 * 'a', roles={'admin'}, token='admin-token')
+        resp = self.put(f'/api/users/{user_id}', json=puttable, etag=etag,
+                        auth_token='admin-token', expected_status=200).json()
+        etag = resp['_etag']
+        self.put(f'/api/users/{user_id}', json=empty_email, etag=etag,
+                 auth_token='admin-token', expected_status=422)
+        self.put(f'/api/users/{user_id}', json=without_email, etag=etag,
+                 auth_token='admin-token', expected_status=422)

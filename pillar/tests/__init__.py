@@ -449,6 +449,25 @@ class AbstractPillarTest(TestMinimal):
     def patch(self, *args, **kwargs):
         return self.client_request('PATCH', *args, **kwargs)
 
+    def assertAllowsAccess(self,
+                           token: typing.Union[str, dict],
+                           expected_user_id: typing.Union[str, ObjectId] = None):
+        """Asserts that this authentication token allows access to /api/users/me."""
+
+        if isinstance(token, dict) and 'token' in token:
+            token = token['token']
+
+        if not isinstance(token, str):
+            raise TypeError(f'token should be a string, but is {token!r}')
+        if expected_user_id and not isinstance(expected_user_id, (str, ObjectId)):
+            raise TypeError('expected_user_id should be a string or ObjectId, '
+                            f'but is {expected_user_id!r}')
+
+        resp = self.get('/api/users/me', expected_status=200, auth_token=token).json()
+
+        if expected_user_id:
+            self.assertEqual(resp['_id'], str(expected_user_id))
+
 
 def mongo_to_sdk(data):
     """Transforms a MongoDB dict to a dict suitable to give to the PillarSDK.

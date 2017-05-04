@@ -315,15 +315,14 @@ def badger(action, user_email, role):
         log.info('Status  : %i', status)
 
 
-def create_service_account(email, service_roles, service_definition, update_existing=None):
+def create_service_account(email, service_roles, service_definition):
     from pillar.api import service
     from pillar.api.utils import dumps
 
     account, token = service.create_service_account(
         email,
         service_roles,
-        service_definition,
-        update_existing=update_existing
+        service_definition
     )
 
     print('Service account information:')
