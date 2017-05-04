@@ -88,7 +88,8 @@ def upsert_user(db_user, blender_id_user_id):
 
     if 'subscriber' in db_user.get('groups', []):
         log.error('Non-ObjectID string found in user.groups: %s', db_user)
-        raise wz_exceptions.InternalServerError('Non-ObjectID string found in user.groups: %s' % db_user)
+        raise wz_exceptions.InternalServerError(
+            'Non-ObjectID string found in user.groups: %s' % db_user)
 
     r = {}
     for retry in range(5):
@@ -235,6 +236,51 @@ def find_user_in_db(blender_id_user_id, user_info):
             db_user['full_name'] = db_user['username']
 
     return db_user
+
+
+def fetch_blenderid_user() -> dict:
+    """Returns the user info of the currently logged in user from BlenderID.
+
+    Returns an empty dict if communication fails.
+
+    Example dict:
+    {
+         "email": "some@email.example.com",
+         "full_name": "dr. Sybren A. St\u00fcvel",
+         "id": 5555,
+         "roles": {
+           "admin": true,
+           "bfct_trainer": false,
+           "cloud_single_member": true,
+           "conference_speaker": true,
+           "network_member": true
+         }
+    }
+
+    """
+
+    import urllib.parse
+    import httplib2  # used by the oauth2 package
+
+    bid_url = urllib.parse.urljoin(blender_id_endpoint(), 'api/user')
+    log.debug('Fetching user info from %s', bid_url)
+
+    try:
+        bid_resp = current_app.oauth_blender_id.get(bid_url)
+    except httplib2.HttpLib2Error:
+        log.exception('Error getting %s from BlenderID', bid_url)
+        return {}
+
+    if bid_resp.status != 200:
+        log.warning('Error %i from BlenderID %s: %s', bid_resp.status, bid_url, bid_resp.data)
+        return {}
+
+    if not bid_resp.data:
+        log.warning('Empty data returned from BlenderID %s', bid_url)
+        return {}
+
+    log.debug('BlenderID returned %s', bid_resp.data)
+    return bid_resp.data
 
 
 def setup_app(app, url_prefix):

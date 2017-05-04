@@ -12,3 +12,5 @@ ROLES_FOR_UNLIMITED_UPLOADS = {'subscriber', 'demo', 'admin'}
 
 GCLOUD_APP_CREDENTIALS = 'invalid-file-because-gcloud-storage-should-be-mocked-in-tests'
 STORAGE_BACKEND = 'local'
+
+EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER = "http://store.localhost/api"

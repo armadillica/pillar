@@ -93,7 +93,10 @@ def get_blender_id_oauth_token():
 def config_oauth_login(app):
     config = app.config
     if not config.get('SOCIAL_BLENDER_ID'):
-        log.info('OAuth Blender-ID login not setup.')
+        log.info('OAuth Blender-ID login not set up, no app config SOCIAL_BLENDER_ID.')
+        return None
+    if not config.get('BLENDER_ID_OAUTH_URL'):
+        log.error('Unable to use Blender ID, missing configuration BLENDER_ID_OAUTH_URL.')
         return None
 
     oauth = flask_oauthlib.client.OAuth(app)

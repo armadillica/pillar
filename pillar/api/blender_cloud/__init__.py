@@ -24,7 +24,8 @@ def blender_cloud_addon_version():
 
 
 def setup_app(app, url_prefix):
-    from . import texture_libs, home_project
+    from . import texture_libs, home_project, subscription
 
     texture_libs.setup_app(app, url_prefix=url_prefix)
     home_project.setup_app(app, url_prefix=url_prefix)
+    subscription.setup_app(app, url_prefix=url_prefix)

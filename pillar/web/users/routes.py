@@ -1,8 +1,6 @@
 import json
 import logging
-import httplib2  # used by the oauth2 package
 import requests
-import urllib.parse
 
 from flask import (abort, Blueprint, current_app, flash, redirect,
                    render_template, request, session, url_for)
@@ -10,8 +8,8 @@ from flask_login import login_required, logout_user, current_user
 from flask_oauthlib.client import OAuthException
 from werkzeug import exceptions as wz_exceptions
 
+import pillar.api.blender_cloud.subscription
 import pillar.auth
-from pillar.auth import subscriptions
 from pillar.web import system_util
 from .forms import UserProfileForm
 from .forms import UserSettingsEmailsForm
@@ -46,6 +44,8 @@ def login():
 
 @blueprint.route('/oauth/blender-id/authorized')
 def blender_id_authorized():
+    from pillar.api.blender_cloud import subscription
+
     check_oauth_provider(current_app.oauth_blender_id)
     try:
         oauth_resp = current_app.oauth_blender_id.authorized_response()
@@ -70,7 +70,7 @@ def blender_id_authorized():
     if current_user is not None:
         # Check with the store for user roles. If the user has an active
         # subscription, we apply the 'subscriber' role
-        user_roles_update(current_user.objectid)
+        subscription.update_subscription()
 
     next_after_login = session.get('next_after_login')
     if next_after_login:
@@ -188,7 +188,7 @@ def settings_billing():
             group = Group.find(group_id, api=api)
             groups.append(group.name)
 
-    store_user = subscriptions.fetch_user(user.email)
+    store_user = pillar.api.blender_cloud.subscription.fetch_subscription_info(user.email)
 
     return render_template(
         'users/settings/billing.html',
@@ -247,91 +247,3 @@ def users_index():
     if not current_user.has_role('admin'):
         return abort(403)
     return render_template('users/index.html')
-
-
-def user_roles_update(user_id):
-    """Update the user's roles based on the store subscription status and BlenderID roles."""
-
-    api = system_util.pillar_api()
-    group_subscriber = Group.find_one({'where': {'name': 'subscriber'}}, api=api)
-    group_demo = Group.find_one({'where': {'name': 'demo'}}, api=api)
-
-    # Fetch the user once outside the loop, because we only need to get the
-    # subscription status once.
-    user = User.me(api=api)
-
-    # Fetch user info from different sources.
-    store_user = subscriptions.fetch_user(user.email) or {}
-    bid_user = fetch_blenderid_user()
-
-    grant_subscriber = store_user.get('cloud_access', 0) == 1
-    grant_demo = bid_user.get('roles', {}).get('cloud_demo', False)
-
-    max_retry = 5
-    for retry_count in range(max_retry):
-        # Update the user's role & groups for their subscription status.
-        roles = set(user.roles or [])
-        groups = set(user.groups or [])
-
-        if grant_subscriber:
-            roles.add('subscriber')
-            groups.add(group_subscriber._id)
-        elif 'admin' not in roles:
-            # Don't take away roles from admins.
-            roles.discard('subscriber')
-            groups.discard(group_subscriber._id)
-
-        if grant_demo:
-            roles.add('demo')
-            groups.add(group_demo._id)
-
-        # Only send an API request when the user has actually changed
-        if set(user.roles or []) == roles and set(user.groups or []) == groups:
-            break
-
-        user.roles = list(roles)
-        user.groups = list(groups)
-
-        try:
-            user.update(api=api)
-        except sdk_exceptions.PreconditionFailed:
-            log.warning('User etag changed while updating roles, retrying.')
-        else:
-            # Successful update, so we can stop the loop.
-            break
-
-        # Fetch the user for the next iteration.
-        if retry_count < max_retry - 1:
-            user = User.me(api=api)
-    else:
-        log.warning('Tried %i times to update user %s, and failed each time. Giving up.',
-                    max_retry, user_id)
-
-
-def fetch_blenderid_user():
-    """Returns the user info from BlenderID.
-
-    Returns an empty dict if communication fails.
-
-    :rtype: dict
-    """
-
-    bid_url = urllib.parse.urljoin(current_app.config['BLENDER_ID_ENDPOINT'], 'api/user')
-    log.debug('Fetching user info from %s', bid_url)
-
-    try:
-        bid_resp = current_app.oauth_blender_id.get(bid_url)
-    except httplib2.HttpLib2Error:
-        log.exception('Error getting %s from BlenderID', bid_url)
-        return {}
-
-    if bid_resp.status != 200:
-        log.warning('Error %i from BlenderID %s: %s', bid_resp.status, bid_url, bid_resp.data)
-        return {}
-
-    if not bid_resp.data:
-        log.warning('Empty data returned from BlenderID %s', bid_url)
-        return {}
-
-    log.debug('BlenderID returned %s', bid_resp.data)
-    return bid_resp.data

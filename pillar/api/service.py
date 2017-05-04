@@ -3,11 +3,14 @@
 import logging
 
 import blinker
+import bson
+
 from flask import Blueprint, current_app, request
+from werkzeug import exceptions as wz_exceptions
+
 from pillar.api import local_auth
 from pillar.api.utils import mongo
 from pillar.api.utils import authorization, authentication, str2id, jsonify
-from werkzeug import exceptions as wz_exceptions
 
 blueprint = Blueprint('service', __name__)
 log = logging.getLogger(__name__)
@@ -70,16 +73,19 @@ def badger():
                     action, user_email, role, action, role)
         return 'Role not allowed', 403
 
-    return do_badger(action, user_email, role)
+    return do_badger(action, role, user_email=user_email)
 
 
-def do_badger(action, user_email, role):
-    """Performs a badger action, returning a HTTP response."""
+def do_badger(action: str, role: str, *, user_email: str='', user_id: bson.ObjectId=None):
+    """Performs a badger action, returning a HTTP response.
+
+    Either user_email or user_id must be given.
+    """
 
     if action not in {'grant', 'revoke'}:
         raise wz_exceptions.BadRequest('Action %r not supported' % action)
 
-    if not user_email:
+    if not user_email and user_id is None:
         raise wz_exceptions.BadRequest('User email not given')
 
     if not role:
@@ -88,9 +94,14 @@ def do_badger(action, user_email, role):
     users_coll = current_app.data.driver.db['users']
 
     # Fetch the user
-    db_user = users_coll.find_one({'email': user_email}, projection={'roles': 1, 'groups': 1})
+    if user_email:
+        query = {'email': user_email}
+    else:
+        query = user_id
+    db_user = users_coll.find_one(query, projection={'roles': 1, 'groups': 1})
     if db_user is None:
-        log.warning('badger(%s, %s, %s): user not found', action, user_email, role)
+        log.warning('badger(%s, %s, user_email=%s, user_id=%s): user not found',
+                    action, role, user_email, user_id)
         return 'User not found', 404
 
     # Apply the action
