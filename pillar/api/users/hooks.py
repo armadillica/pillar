@@ -7,23 +7,50 @@ from pillar.api.users.routes import log
 from pillar.api.utils.authorization import user_has_role
 from werkzeug.exceptions import Forbidden
 
+USER_EDITABLE_FIELDS = {'full_name', 'username', 'email', 'settings'}
+
+# These fields nobody is allowed to touch directly, not even admins.
+USER_ALWAYS_RESTORE_FIELDS = {'auth'}
 
 def before_replacing_user(request, lookup):
-    """Loads the auth field from the database, preventing any changes."""
+    """Prevents changes to any field of the user doc, except USER_EDITABLE_FIELDS."""
 
     # Find the user that is being replaced
     req = parse_request('users')
-    req.projection = json.dumps({'auth': 1})
+    req.projection = json.dumps({key: 0 for key in USER_EDITABLE_FIELDS})
     original = current_app.data.find_one('users', req, **lookup)
 
     # Make sure that the replacement has a valid auth field.
-    updates = request.get_json()
-    assert updates is request.get_json()  # We should get a ref to the cached JSON, and not a copy.
+    put_data = request.get_json()
 
-    if 'auth' in original:
-        updates['auth'] = copy.deepcopy(original['auth'])
-    else:
-        updates.pop('auth', None)
+    # We should get a ref to the cached JSON, and not a copy. This will allow us to
+    # modify the cached JSON so that Eve sees our modifications.
+    assert put_data is request.get_json()
+
+    # Reset fields that shouldn't be edited to their original values. This is only
+    # needed when users are editing themselves; admins are allowed to edit much more.
+    if not user_has_role('admin'):
+        for db_key, db_value in original.items():
+            if db_key[0] == '_' or db_key in USER_EDITABLE_FIELDS:
+                continue
+
+            if db_key in original:
+                put_data[db_key] = copy.deepcopy(original[db_key])
+
+        # Remove fields added by this PUT request, except when they are user-editable.
+        for put_key in list(put_data.keys()):
+            if put_key[0] == '_' or put_key in USER_EDITABLE_FIELDS:
+                continue
+
+            if put_key not in original:
+                del put_data[put_key]
+
+    # Always restore those fields
+    for db_key in USER_ALWAYS_RESTORE_FIELDS:
+        if db_key in original:
+            put_data[db_key] = copy.deepcopy(original[db_key])
+        else:
+            del put_data[db_key]
 
 
 def push_updated_user_to_algolia(user, original):

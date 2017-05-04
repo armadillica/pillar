@@ -309,6 +309,8 @@ class UserListTests(AbstractPillarTest):
         resp = self.client.get('/api/users/123456789abc123456789abc',
                                headers={'Authorization': self.make_header('token')})
         user_info = json.loads(resp.data)
+        self.assertNotIn('auth', user_info)
+
         put_user = remove_private_keys(user_info)
 
         resp = self.client.put('/api/users/123456789abc123456789abc',
@@ -323,6 +325,41 @@ class UserListTests(AbstractPillarTest):
             users = self.app.data.driver.db['users']
             db_user = users.find_one(ObjectId('123456789abc123456789abc'))
             self.assertIn('auth', db_user)
+
+    def test_put_user_restricted_fields(self):
+        from pillar.api.utils import remove_private_keys
+
+        gid_admin = self.ensure_group_exists(24 * '1', 'admin')
+        gid_subscriber = self.ensure_group_exists(24 * '2', 'subscriber')
+        gid_demo = self.ensure_group_exists(24 * '3', 'demo')
+
+        # A user should be able to change only some fields, but not all.
+        user_info = self.get('/api/users/me', auth_token='token').json()
+
+        # Alter all fields (except auth, another test already checks that that's uneditable).
+        put_user = remove_private_keys(user_info)
+        put_user['full_name'] = '¿new name?'
+        put_user['username'] = 'üniék'
+        put_user['email'] = 'new+email@example.com'
+        put_user['roles'] = ['subscriber', 'demo', 'admin', 'service', 'flamenco_manager']
+        put_user['groups'] = [gid_admin, gid_subscriber, gid_demo]
+        put_user['settings']['email_communications'] = 0
+        put_user['service'] = {'flamenco_manager': {}}
+
+        self.put('/api/users/%(_id)s' % user_info,
+                 json=put_user,
+                 auth_token='token',
+                 etag=user_info['_etag'])
+
+        new_user_info = self.get('/api/users/me', auth_token='token').json()
+        self.assertEqual(new_user_info['full_name'], put_user['full_name'])
+        self.assertEqual(new_user_info['username'], put_user['username'])
+        self.assertEqual(new_user_info['email'], put_user['email'])
+        self.assertEqual(new_user_info['roles'], user_info['roles'])
+        self.assertEqual(new_user_info['groups'], user_info['groups'])
+        self.assertEqual(new_user_info['settings']['email_communications'],
+                         put_user['settings']['email_communications'])
+        self.assertNotIn('service', new_user_info)
 
     def test_put_other_user(self):
         from pillar.api.utils import remove_private_keys

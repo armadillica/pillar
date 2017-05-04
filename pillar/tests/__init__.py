@@ -4,6 +4,7 @@ import base64
 import copy
 import json
 import logging
+import typing
 
 import datetime
 import os
@@ -200,14 +201,16 @@ class AbstractPillarTest(TestMinimal):
 
             found = groups_coll.find_one(group_id)
             if found:
-                return
+                return group_id
 
             result = groups_coll.insert_one({'_id': group_id, 'name': name})
             assert result.inserted_id
+            return result.inserted_id
 
     def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',),
-                    groups=None):
+                    groups=None, *, token: str = None):
         from pillar.api.utils.authentication import make_unique_username
+        import uuid
 
         with self.app.test_request_context():
             users = self.app.data.driver.db['users']
@@ -217,6 +220,7 @@ class AbstractPillarTest(TestMinimal):
                 '_id': ObjectId(user_id),
                 '_updated': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
                 '_created': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
+                '_etag': 'unittest-%s' % uuid.uuid4().hex,
                 'username': make_unique_username('tester'),
                 'groups': groups or [],
                 'roles': list(roles),
@@ -228,7 +232,12 @@ class AbstractPillarTest(TestMinimal):
                 'email': TEST_EMAIL_ADDRESS
             })
 
-            return result.inserted_id
+            user_id = result.inserted_id
+
+        if token:
+            self.create_valid_auth_token(user_id, token)
+
+        return user_id
 
     def create_valid_auth_token(self, user_id, token='token'):
         now = datetime.datetime.now(tz_util.utc)
@@ -381,7 +390,7 @@ class AbstractPillarTest(TestMinimal):
         return urlencode(jsonified_params)
 
     def client_request(self, method, path, qs=None, expected_status=200, auth_token=None, json=None,
-                       data=None, headers=None, files=None, content_type=None):
+                       data=None, headers=None, files=None, content_type=None, etag=None):
         """Performs a HTTP request to the server."""
 
         from pillar.api.utils import dumps
@@ -394,6 +403,14 @@ class AbstractPillarTest(TestMinimal):
         if json is not None:
             data = dumps(json)
             headers['Content-Type'] = 'application/json'
+
+        if etag is not None:
+            if method == 'PUT':
+                headers['If-Match'] = etag
+            elif method == 'GET':
+                headers['If-None-Match'] = etag
+            else:
+                raise ValueError('Not sure what to do with etag and method %s' % method)
 
         if files:
             data = data or {}
