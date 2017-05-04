@@ -259,10 +259,9 @@ def fetch_blenderid_user() -> dict:
 
     """
 
-    import urllib.parse
     import httplib2  # used by the oauth2 package
 
-    bid_url = urllib.parse.urljoin(blender_id_endpoint(), 'api/user')
+    bid_url = '%s/api/user' % blender_id_endpoint()
     log.debug('Fetching user info from %s', bid_url)
 
     try:
