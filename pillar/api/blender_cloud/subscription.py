@@ -79,7 +79,7 @@ def update_subscription():
     if not bid_user:
         my_log.warning('Logged in user %s has no BlenderID account! '
                        'Unable to update subscription status.', user_id)
-        return
+        return '', 204
 
     # Use the Blender ID email address to check with the store. At least that reduces the
     # number of email addresses that could be out of sync to two (rather than three when we
@@ -90,7 +90,7 @@ def update_subscription():
         my_log.error('Blender ID response did not include an email address, '
                      'unable to update subscription status: %s',
                      pprint.pformat(bid_user, compact=True))
-        return
+        return 'Internal error', 500
     store_user = fetch_subscription_info(email) or {}
 
     # Handle the role changes via the badger service functionality.
