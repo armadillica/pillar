@@ -1,4 +1,10 @@
 | {% extends 'layout.html' %}
+| {% block head %}
+style(type='text/css').
+	button#recheck_subscription {
+		margin-top: 1em;
+	}
+| {% endblock %}
 | {% block body %}
 .container
 	#settings
@@ -18,15 +24,7 @@
 				hr
 
 				p Subscription expires on: <strong>{{ store_user['expiration_date'][:10] }}</strong>
-				a(href="https://store.blender.org/my-account/") Manage your subscription on Blender Store
-
-				hr
-
-				| {# This text is confusing (refers to the total payments ever made by the user)
-				.settings-billing-info.
-					Paid balance: {{ store_user['paid_balance'] }} {{ store_user['balance_currency'] }}
-				| #}
-
+				a(href="https://store.blender.org/my-account/subscriptions/") Manage your subscription on Blender Store
 				| {% else %}
 
 				| {% if 'demo' in groups %}
@@ -48,8 +46,23 @@
 
 				| {% endif %}
 
+				p
+					button#recheck_subscription.btn.btn-default(onclick="javascript:recheck_subscription(this)") Re-check my subscription
+				hr
 
 
+script.
+	function recheck_subscription(button) {
+		$(button).text('Checking');
 
+		$.get('/api/bcloud/update-subscription')
+		.done(function() {
+			window.location.reload();
+		})
+		.error(function() {
+			alert('Unable to update subscription, please check your internet connection.');
+		})
+		;
+	}
 
 | {% endblock %}
