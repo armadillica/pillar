@@ -71,6 +71,7 @@ def config_login_manager(app):
     login_manager = flask_login.LoginManager()
     login_manager.init_app(app)
     login_manager.login_view = "users.login"
+    login_manager.login_message = ''
     login_manager.anonymous_user = AnonymousUser
     # noinspection PyTypeChecker
     login_manager.user_loader(_load_user)
