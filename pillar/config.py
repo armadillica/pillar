@@ -148,6 +148,7 @@ URLER_SERVICE_AUTH_TOKEN = None
 BLENDER_CLOUD_ADDON_VERSION = '1.4'
 
 EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER = 'https://store.blender.org/api/'
+EXTERNAL_SUBSCRIPTIONS_TIMEOUT_SECS = 10
 
 # Certificate file for communication with other systems.
 TLS_CERT_FILE = requests.certs.where()

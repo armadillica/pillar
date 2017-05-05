@@ -28,6 +28,7 @@ def fetch_subscription_info(email: str) -> typing.Optional[dict]:
 
     import requests
     from requests.adapters import HTTPAdapter
+    import requests.exceptions
 
     external_subscriptions_server = current_app.config['EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER']
 
@@ -41,8 +42,21 @@ def fetch_subscription_info(email: str) -> typing.Optional[dict]:
     # Retry a few times when contacting the store.
     s = requests.Session()
     s.mount(external_subscriptions_server, HTTPAdapter(max_retries=5))
-    r = s.get(external_subscriptions_server, params={'blenderid': email},
-              verify=current_app.config['TLS_CERT_FILE'])
+
+    try:
+        r = s.get(external_subscriptions_server,
+                  params={'blenderid': email},
+                  verify=current_app.config['TLS_CERT_FILE'],
+                  timeout=current_app.config.get('EXTERNAL_SUBSCRIPTIONS_TIMEOUT_SECS', 10))
+    except requests.exceptions.ConnectionError as ex:
+        log.error('Error connecting to %s: %s', external_subscriptions_server, ex)
+        return None
+    except requests.exceptions.Timeout as ex:
+        log.error('Timeout communicating with %s: %s', external_subscriptions_server, ex)
+        return None
+    except requests.exceptions.RequestException as ex:
+        log.error('Some error communicating with %s: %s', external_subscriptions_server, ex)
+        return None
 
     if r.status_code != 200:
         log.warning("Error communicating with %s, code=%i, unable to check "
