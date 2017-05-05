@@ -70,9 +70,9 @@ def blender_id_authorized():
         api = system_util.pillar_api(token=oauth_resp['access_token'])
         api.get('bcloud/update-subscription')
 
-    next_after_login = session.get('next_after_login')
+    next_after_login = session.pop('next_after_login', None)
     if next_after_login:
-        del session['next_after_login']
+        log.debug('Redirecting user to %s', next_after_login)
         return redirect(next_after_login)
     return redirect(url_for('main.homepage'))
 
