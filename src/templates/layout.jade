@@ -301,6 +301,11 @@ html(lang="en")
 									| {% endif %}
 									li
 										a.navbar-item(
+											href="{{ url_for('users.switch') }}")
+											i.pi-log-out(title="Log Out")
+											| Not {{ current_user.full_name }}? Log in as another user
+									li
+										a.navbar-item(
 											href="{{ url_for('users.logout') }}")
 											i.pi-log-out(title="Log Out")
 											| Log out

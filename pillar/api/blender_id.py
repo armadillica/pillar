@@ -284,3 +284,12 @@ def fetch_blenderid_user() -> dict:
 
 def setup_app(app, url_prefix):
     app.register_api_blueprint(blender_id, url_prefix=url_prefix)
+
+
+def switch_user_url(next_url: str) -> str:
+    from urllib.parse import quote
+
+    base_url = '%s/switch' % blender_id_endpoint()
+    if next_url:
+        return '%s?next=%s' % (base_url, quote(next_url))
+    return base_url

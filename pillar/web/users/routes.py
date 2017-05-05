@@ -107,6 +107,23 @@ def logout():
     return redirect('/')
 
 
+@blueprint.route('/switch')
+def switch():
+    from pillar.api import blender_id
+
+    # Without this URL, the Cloud will redirect to the HTTP Referrer, which is the Blender ID
+    # 'switch user' page. We need to explicitly send the user to the homepage to prevent this.
+    next_url_after_cloud_login = url_for('main.homepage')
+
+    # Without this URL, the user will remain on the Blender ID site. We want them to come
+    # back to the Cloud after switching users.
+    next_url_after_bid_login = url_for('users.login',
+                                       next=next_url_after_cloud_login,
+                                       _external=True)
+
+    return redirect(blender_id.switch_user_url(next_url=next_url_after_bid_login))
+
+
 @blueprint.route('/settings/profile', methods=['GET', 'POST'])
 @login_required
 def settings_profile():
