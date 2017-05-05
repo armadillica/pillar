@@ -217,15 +217,11 @@ class UserListTests(AbstractPillarTest):
 
     def test_list_all_users_anonymous(self):
         # Listing all users should be forbidden
-        resp = self.client.get('/api/users')
-        self.assertEqual(403, resp.status_code)
+        self.get('/api/users', expected_status=403)
 
     def test_list_all_users_subscriber(self):
         # Regular access should result in only your own info.
-        resp = self.client.get('/api/users', headers={'Authorization': self.make_header('token')})
-        users = json.loads(resp.data)
-
-        self.assertEqual(200, resp.status_code)
+        users = self.get('/api/users', auth_token='token').json()
         self.assertEqual(1, users['_meta']['total'])
 
         # The 'auth' section should be removed.
@@ -234,11 +230,7 @@ class UserListTests(AbstractPillarTest):
 
     def test_list_all_users_admin(self):
         # Admin access should result in all users
-        resp = self.client.get('/api/users',
-                               headers={'Authorization': self.make_header('admin-token')})
-        users = json.loads(resp.data)
-
-        self.assertEqual(200, resp.status_code)
+        users = self.get('/api/users', auth_token='admin-token').json()
         self.assertEqual(3, users['_meta']['total'])
 
         # The 'auth' section should be removed.
@@ -246,13 +238,10 @@ class UserListTests(AbstractPillarTest):
             self.assertNotIn('auth', user_info)
 
     def test_list_all_users_admin_explicit_projection(self):
-        # Admin access should result in all users
-        projection = json.dumps({'auth': 1})
-        resp = self.client.get('/api/users?projection=%s' % projection,
-                               headers={'Authorization': self.make_header('admin-token')})
-        users = json.loads(resp.data)
+        """Even admins shouldn't be able to GET auth info."""
 
-        self.assertEqual(200, resp.status_code)
+        projection = json.dumps({'auth': 1})
+        users = self.get(f'/api/users?projection={projection}', auth_token='admin-token').json()
         self.assertEqual(3, users['_meta']['total'])
 
         # The 'auth' section should be removed.
@@ -263,8 +252,7 @@ class UserListTests(AbstractPillarTest):
         from pillar.api.utils import remove_private_keys
 
         # Getting a user should be limited to certain fields
-        resp = self.client.get('/api/users/123456789abc123456789abc')
-        self.assertEqual(200, resp.status_code)
+        resp = self.get('/api/users/123456789abc123456789abc')
 
         user_info = json.loads(resp.data)
         regular_info = remove_private_keys(user_info)
@@ -272,33 +260,21 @@ class UserListTests(AbstractPillarTest):
 
     def test_own_user_subscriber(self):
         # Regular access should result in only your own info.
-        resp = self.client.get('/api/users/123456789abc123456789abc',
-                               headers={'Authorization': self.make_header('token')})
-        user_info = json.loads(resp.data)
-
-        self.assertEqual(200, resp.status_code)
+        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').json()
         self.assertNotIn('auth', user_info)
 
     def test_own_user_subscriber_explicit_projection(self):
         # With a custom projection requesting the auth list
         projection = json.dumps({'auth': 1})
-        resp = self.client.get(
-            '/api/users/%s?projection=%s' % ('123456789abc123456789abc', projection),
-            headers={'Authorization': self.make_header('token')})
-        user_info = json.loads(resp.data)
-
-        self.assertEqual(200, resp.status_code)
+        user_info = self.get(f'/api/users/123456789abc123456789abc?projection={projection}',
+                             auth_token='token').json()
         self.assertNotIn('auth', user_info)
 
     def test_other_user_subscriber(self):
         from pillar.api.utils import remove_private_keys
 
         # Requesting another user should be limited to full name and email.
-        resp = self.client.get('/api/users/%s' % '223456789abc123456789abc',
-                               headers={'Authorization': self.make_header('token')})
-        user_info = json.loads(resp.data)
-
-        self.assertEqual(200, resp.status_code)
+        user_info = self.get('/api/users/223456789abc123456789abc', auth_token='token').json()
         self.assertNotIn('auth', user_info)
 
         regular_info = remove_private_keys(user_info)
@@ -308,19 +284,14 @@ class UserListTests(AbstractPillarTest):
         from pillar.api.utils import remove_private_keys
 
         # PUTting a user should work, and not mess up the auth field.
-        resp = self.client.get('/api/users/123456789abc123456789abc',
-                               headers={'Authorization': self.make_header('token')})
-        user_info = json.loads(resp.data)
+        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').json()
         self.assertNotIn('auth', user_info)
 
         put_user = remove_private_keys(user_info)
-
-        resp = self.client.put('/api/users/123456789abc123456789abc',
-                               headers={'Authorization': self.make_header('token'),
-                                        'Content-Type': 'application/json',
-                                        'If-Match': user_info['_etag']},
-                               data=json.dumps(put_user))
-        self.assertEqual(200, resp.status_code, resp.data)
+        self.put('/api/users/123456789abc123456789abc',
+                 auth_token='token',
+                 etag=user_info['_etag'],
+                 json=put_user)
 
         # Get directly from MongoDB, Eve blocks access to the auth field.
         with self.app.test_request_context():
@@ -331,9 +302,7 @@ class UserListTests(AbstractPillarTest):
     def test_put_user_restricted_fields(self):
         from pillar.api.utils import remove_private_keys
 
-        gid_admin = self.ensure_group_exists(24 * '1', 'admin')
-        gid_subscriber = self.ensure_group_exists(24 * '2', 'subscriber')
-        gid_demo = self.ensure_group_exists(24 * '3', 'demo')
+        group_ids = self.create_standard_groups()
 
         # A user should be able to change only some fields, but not all.
         user_info = self.get('/api/users/me', auth_token='token').json()
@@ -344,11 +313,11 @@ class UserListTests(AbstractPillarTest):
         put_user['username'] = 'üniék'
         put_user['email'] = 'new+email@example.com'
         put_user['roles'] = ['subscriber', 'demo', 'admin', 'service', 'flamenco_manager']
-        put_user['groups'] = [gid_admin, gid_subscriber, gid_demo]
+        put_user['groups'] = list(group_ids.keys())
         put_user['settings']['email_communications'] = 0
         put_user['service'] = {'flamenco_manager': {}}
 
-        self.put('/api/users/%(_id)s' % user_info,
+        self.put(f'/api/users/{user_info["_id"]}',
                  json=put_user,
                  auth_token='token',
                  etag=user_info['_etag'])
@@ -367,33 +336,22 @@ class UserListTests(AbstractPillarTest):
         from pillar.api.utils import remove_private_keys
 
         # PUTting the user as another user should fail.
-        resp = self.client.get('/api/users/123456789abc123456789abc',
-                               headers={'Authorization': self.make_header('token')})
-        user_info = json.loads(resp.data)
+        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').json()
         put_user = remove_private_keys(user_info)
 
-        resp = self.client.put('/api/users/123456789abc123456789abc',
-                               headers={'Authorization': self.make_header('other-token'),
-                                        'Content-Type': 'application/json',
-                                        'If-Match': user_info['_etag']},
-                               data=json.dumps(put_user))
-        self.assertEqual(403, resp.status_code, resp.data)
+        self.put('/api/users/123456789abc123456789abc', auth_token='other-token',
+                 json=put_user, etag=user_info['_etag'],
+                 expected_status=403)
 
     def test_put_admin(self):
         from pillar.api.utils import remove_private_keys
 
         # PUTting a user should work, and not mess up the auth field.
-        resp = self.client.get('/api/users/123456789abc123456789abc',
-                               headers={'Authorization': self.make_header('token')})
-        user_info = json.loads(resp.data)
+        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').json()
         put_user = remove_private_keys(user_info)
 
-        resp = self.client.put('/api/users/123456789abc123456789abc',
-                               headers={'Authorization': self.make_header('admin-token'),
-                                        'Content-Type': 'application/json',
-                                        'If-Match': user_info['_etag']},
-                               data=json.dumps(put_user))
-        self.assertEqual(200, resp.status_code, resp.data)
+        self.put('/api/users/123456789abc123456789abc', auth_token='admin-token',
+                 json=put_user, etag=user_info['_etag'])
 
         # Get directly from MongoDB, Eve blocks access to the auth field.
         with self.app.test_request_context():
@@ -414,28 +372,14 @@ class UserListTests(AbstractPillarTest):
             'email': TEST_EMAIL_ADDRESS,
         }
 
-        resp = self.client.post('/api/users',
-                                headers={'Authorization': self.make_header('token'),
-                                         'Content-Type': 'application/json'},
-                                data=json.dumps(post_user))
-        self.assertEqual(405, resp.status_code, resp.data)
-
-        resp = self.client.post('/api/users',
-                                headers={'Authorization': self.make_header('admin-token'),
-                                         'Content-Type': 'application/json'},
-                                data=json.dumps(post_user))
-        self.assertEqual(405, resp.status_code, resp.data)
+        self.post('/api/users', auth_token='token', json=post_user, expected_status=405)
+        self.post('/api/users', auth_token='admin-token', json=post_user, expected_status=405)
 
     def test_delete(self):
         """DELETING a user should fail for subscribers and admins alike."""
 
-        resp = self.client.delete('/api/users/323456789abc123456789abc',
-                                  headers={'Authorization': self.make_header('token')})
-        self.assertEqual(405, resp.status_code, resp.data)
-
-        resp = self.client.delete('/api/users/323456789abc123456789abc',
-                                  headers={'Authorization': self.make_header('admin-token')})
-        self.assertEqual(405, resp.status_code, resp.data)
+        self.delete('/api/users', auth_token='token', expected_status=405)
+        self.delete('/api/users', auth_token='admin-token', expected_status=405)
 
 
 class PermissionComputationTest(AbstractPillarTest):

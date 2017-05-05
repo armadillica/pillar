@@ -335,7 +335,7 @@ class AbstractPillarTest(TestMinimal):
         content = '%s:%s' % (username, subclient_id)
         return b'basic ' + base64.b64encode(content.encode())
 
-    def create_standard_groups(self, additional_groups=()):
+    def create_standard_groups(self, additional_groups=()) -> dict:
         """Creates standard admin/demo/subscriber groups, plus any additional.
 
         :returns: mapping from group name to group ID
