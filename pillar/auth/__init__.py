@@ -87,7 +87,17 @@ def login_user(oauth_token):
 
 def get_blender_id_oauth_token():
     """Returns a tuple (token, ''), for use with flask_oauthlib."""
-    return session.get('blender_id_oauth_token')
+
+    from flask import request
+
+    token = session.get('blender_id_oauth_token')
+    if token:
+        return token
+
+    if request.authorization:
+        return request.authorization.username, ''
+
+    return None
 
 
 def config_oauth_login(app):

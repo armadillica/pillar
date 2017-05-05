@@ -44,11 +44,11 @@ def login():
 
 @blueprint.route('/oauth/blender-id/authorized')
 def blender_id_authorized():
-    from pillar.api.blender_cloud import subscription
-
     check_oauth_provider(current_app.oauth_blender_id)
     try:
         oauth_resp = current_app.oauth_blender_id.authorized_response()
+        if isinstance(oauth_resp, OAuthException):
+            raise oauth_resp
     except OAuthException as ex:
         log.warning('Error parsing BlenderID OAuth response. data=%s; message=%s',
                     ex.data, ex.message)
@@ -60,9 +60,6 @@ def blender_id_authorized():
         log.warning('Access denied to user because oauth_resp=None: %s', msg)
         return wz_exceptions.Forbidden(msg)
 
-    if isinstance(oauth_resp, OAuthException):
-        return 'Access denied: %s' % oauth_resp.message
-
     session['blender_id_oauth_token'] = (oauth_resp['access_token'], '')
 
     pillar.auth.login_user(oauth_resp['access_token'])
@@ -70,7 +67,8 @@ def blender_id_authorized():
     if current_user is not None:
         # Check with the store for user roles. If the user has an active
         # subscription, we apply the 'subscriber' role
-        subscription.update_subscription()
+        api = system_util.pillar_api(token=oauth_resp['access_token'])
+        api.get('bcloud/update-subscription')
 
     next_after_login = session.get('next_after_login')
     if next_after_login:
