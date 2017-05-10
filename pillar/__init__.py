@@ -551,12 +551,14 @@ class PillarServer(Eve):
 
         pprint(links)
 
-    def db(self):
+    def db(self, collection_name: str=None):
         """Returns the MongoDB database.
 
         :rtype: flask_pymongo.PyMongo
         """
 
+        if collection_name:
+            return self.data.driver.db[collection_name]
         return self.data.driver.db
 
     def extension_sidebar_links(self, project):
