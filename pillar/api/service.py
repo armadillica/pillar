@@ -82,19 +82,24 @@ def badger():
     return do_badger(action, role, user_email=user_email)
 
 
-def do_badger(action: str, role: str, *, user_email: str='', user_id: bson.ObjectId=None):
+def do_badger(action: str, role: str, *, user_email: str = '', user_id: bson.ObjectId = None):
     """Performs a badger action, returning a HTTP response.
 
     Either user_email or user_id must be given.
     """
 
     if action not in {'grant', 'revoke'}:
+        log.error('do_badger(%r, %r, %r, %r): action %r not supported.',
+                  action, role, user_email, user_id, action)
         raise wz_exceptions.BadRequest('Action %r not supported' % action)
 
     if not user_email and user_id is None:
+        log.error('do_badger(%r, %r, %r, %r): neither email nor user_id given.',
+                  action, role, user_email, user_id)
         raise wz_exceptions.BadRequest('User email not given')
 
     if not role:
+        log.error('do_badger(%r, %r, %r, %r): no role given.', action, role, user_email, user_id)
         raise wz_exceptions.BadRequest('Role not given')
 
     users_coll = current_app.data.driver.db['users']
@@ -123,6 +128,8 @@ def do_badger(action: str, role: str, *, user_email: str='', user_id: bson.Objec
     if groups is not None:
         updates['groups'] = list(groups)
 
+    log.debug('badger(%s, %s, user_email=%s, user_id=%s): applying updates %r',
+              action, role, user_email, user_id, updates)
     users_coll.update_one({'_id': db_user['_id']},
                           {'$set': updates})
 
