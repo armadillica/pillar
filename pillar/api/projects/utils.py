@@ -27,12 +27,25 @@ def project_total_file_size(project_id):
         return 0
 
 
-def get_admin_group(project):
+def get_admin_group_id(project_id: ObjectId) -> ObjectId:
+    project = current_app.db('projects').find_one({'_id': project_id},
+                                                  {'permissions': 1})
+    # TODO: search through all groups to find the one with the project ID as its name,
+    # or identify "the admin group" in a different way (for example the group with DELETE rights).
+    try:
+        admin_group_id = ObjectId(project['permissions']['groups'][0]['group'])
+    except KeyError:
+        raise ValueError(f'Project {project_id} does not seem to have an admin group')
+
+    return admin_group_id
+
+
+def get_admin_group(project: dict) -> dict:
     """Returns the admin group for the project."""
 
     groups_collection = current_app.data.driver.db['groups']
 
-    # TODO: search through all groups to find the one with the project ID as its name.
+    # TODO: see get_admin_group_id
     admin_group_id = ObjectId(project['permissions']['groups'][0]['group'])
     group = groups_collection.find_one({'_id': admin_group_id})
 
