@@ -116,13 +116,20 @@ def update_subscription():
 
     if grant_subscriber != is_subscriber:
         action = 'grant' if grant_subscriber else 'revoke'
-        log.info('%sing subscriber role to user %s (Blender ID email %s)', action, user_id, email)
+        my_log.info('%sing subscriber role to user %s (Blender ID email %s)',
+                    action, user_id, email)
         service.do_badger(action, 'subscriber', user_id=user_id)
+    else:
+        my_log.debug('Not changing subscriber role, grant=%r and is=%s',
+                     grant_subscriber, is_subscriber)
 
     if grant_demo != is_demo:
         action = 'grant' if grant_demo else 'revoke'
-        log.info('%sing demo role to user %s (Blender ID email %s)', action, user_id, email)
+        my_log.info('%sing demo role to user %s (Blender ID email %s)', action, user_id, email)
         service.do_badger(action, 'demo', user_id=user_id)
+    else:
+        my_log.debug('Not changing demo role, grant=%r and is=%s',
+                     grant_demo, is_demo)
 
     return '', 204
 
