@@ -58,6 +58,19 @@ def get_admin_group(project: dict) -> dict:
     return group
 
 
+def user_rights_in_project(project_id: ObjectId) -> frozenset:
+    """Returns the set of HTTP methods allowed on the given project for the current user."""
+
+    from pillar.api.utils import authorization
+
+    assert isinstance(project_id, ObjectId)
+
+    proj_coll = current_app.db().projects
+    proj = proj_coll.find_one({'_id': project_id})
+
+    return frozenset(authorization.compute_allowed_methods('projects', proj))
+
+
 def abort_with_error(status):
     """Aborts with the given status, or 500 if the status doesn't indicate an error.
 
