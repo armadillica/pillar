@@ -2,11 +2,11 @@
 
 import logging
 
-from flask import current_app, session
+from flask import session
 import flask_login
 import flask_oauthlib.client
 
-from ..api import utils, blender_id
+from ..api import utils
 from ..api.utils import authentication
 
 log = logging.getLogger(__name__)
