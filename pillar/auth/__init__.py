@@ -23,6 +23,7 @@ class UserClass(flask_login.UserMixin):
         self.gravatar: str = None
         self.email: str = None
         self.roles: typing.List[str] = []
+        self.groups: typing.List[str] = []
 
     def has_role(self, *roles):
         """Returns True iff the user has one or more of the given roles."""
