@@ -7,6 +7,7 @@ import logging
 import logging.config
 import subprocess
 import tempfile
+import typing
 import os
 import os.path
 
@@ -15,6 +16,8 @@ from eve import Eve
 import flask
 from flask import render_template, request
 from flask.templating import TemplateNotFound
+import pymongo.collection
+import pymongo.database
 
 from pillar.api import custom_field_validation
 from pillar.api.utils import authentication
@@ -551,11 +554,9 @@ class PillarServer(Eve):
 
         pprint(links)
 
-    def db(self, collection_name: str=None):
-        """Returns the MongoDB database.
-
-        :rtype: flask_pymongo.PyMongo
-        """
+    def db(self, collection_name: str=None) \
+            -> typing.Union[pymongo.collection.Collection, pymongo.database.Database]:
+        """Returns the MongoDB database, or the collection (if given)"""
 
         if collection_name:
             return self.data.driver.db[collection_name]
