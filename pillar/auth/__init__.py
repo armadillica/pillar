@@ -1,6 +1,7 @@
 """Authentication code common to the web and api modules."""
 
 import logging
+import typing
 
 from flask import session
 import flask_login
@@ -13,15 +14,15 @@ log = logging.getLogger(__name__)
 
 
 class UserClass(flask_login.UserMixin):
-    def __init__(self, token):
+    def __init__(self, token: typing.Optional[str]):
         # We store the Token instead of ID
         self.id = token
-        self.username = None
-        self.full_name = None
-        self.objectid = None
-        self.gravatar = None
-        self.email = None
-        self.roles = []
+        self.username: str = None
+        self.full_name: str = None
+        self.objectid: str = None
+        self.gravatar: str = None
+        self.email: str = None
+        self.roles: typing.List[str] = []
 
     def has_role(self, *roles):
         """Returns True iff the user has one or more of the given roles."""
