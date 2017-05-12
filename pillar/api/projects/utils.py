@@ -28,8 +28,13 @@ def project_total_file_size(project_id):
 
 
 def get_admin_group_id(project_id: ObjectId) -> ObjectId:
+    assert isinstance(project_id, ObjectId)
+
     project = current_app.db('projects').find_one({'_id': project_id},
                                                   {'permissions': 1})
+    if not project:
+        raise ValueError(f'Project {project_id} does not exist.')
+
     # TODO: search through all groups to find the one with the project ID as its name,
     # or identify "the admin group" in a different way (for example the group with DELETE rights).
     try:
