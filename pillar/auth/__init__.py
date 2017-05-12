@@ -6,6 +6,7 @@ import typing
 from flask import session
 import flask_login
 import flask_oauthlib.client
+from werkzeug.local import LocalProxy
 
 from ..api import utils
 from ..api.utils import authentication
@@ -131,3 +132,13 @@ def config_oauth_login(app):
     log.info('OAuth Blender-ID login setup as %s', social_blender_id['app_id'])
 
     return oauth_blender_id
+
+
+def _get_current_web_user() -> UserClass:
+    """Returns the current web user as a UserClass instance."""
+
+    return flask_login.current_user
+
+
+current_web_user: UserClass = LocalProxy(_get_current_web_user)
+"""The current web user."""
