@@ -359,6 +359,11 @@ class AbstractPillarTest(TestMinimal):
             proj_coll = self.app.db()['projects']
             return proj_coll.find_one(project_id)
 
+    def fetch_user_from_db(self, user_id=ctd.EXAMPLE_USER['_id']):
+        with self.app.app_context():
+            users_coll = self.app.db('users')
+            return users_coll.find_one(user_id)
+
     @staticmethod
     def join_url_params(params):
         """Constructs a query string from a dictionary and appends it to a url.
