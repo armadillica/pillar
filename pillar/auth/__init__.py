@@ -79,10 +79,13 @@ def config_login_manager(app):
     return login_manager
 
 
-def login_user(oauth_token):
+def login_user(oauth_token, *, load_from_db=False):
     """Log in the user identified by the given token."""
 
-    user = UserClass(oauth_token)
+    if load_from_db:
+        user = _load_user(oauth_token)
+    else:
+        user = UserClass(oauth_token)
     flask_login.login_user(user)
 
 
