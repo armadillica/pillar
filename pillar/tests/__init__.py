@@ -208,7 +208,7 @@ class AbstractPillarTest(TestMinimal):
             return result.inserted_id
 
     def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',),
-                    groups=None, *, token: str = None):
+                    groups=None, *, token: str = None, email: str=TEST_EMAIL_ADDRESS):
         from pillar.api.utils.authentication import make_unique_username
         import uuid
 
@@ -229,7 +229,7 @@ class AbstractPillarTest(TestMinimal):
                           'user_id': str(ctd.BLENDER_ID_TEST_USERID),
                           'provider': 'blender-id'}],
                 'full_name': 'คนรักของผัดไทย',
-                'email': TEST_EMAIL_ADDRESS
+                'email': email
             })
 
             user_id = result.inserted_id
