@@ -33,11 +33,9 @@ class UserClass(flask_login.UserMixin):
         return bool(set(self.roles).intersection(set(roles)))
 
 
-class AnonymousUser(flask_login.AnonymousUserMixin):
-    @property
-    def objectid(self):
-        """Anonymous user has no settable objectid."""
-        return None
+class AnonymousUser(flask_login.AnonymousUserMixin, UserClass):
+    def __init__(self):
+        super().__init__(token=None)
 
     def has_role(self, *roles):
         return False
