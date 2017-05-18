@@ -14,3 +14,5 @@ GCLOUD_APP_CREDENTIALS = 'invalid-file-because-gcloud-storage-should-be-mocked-i
 STORAGE_BACKEND = 'local'
 
 EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER = "http://store.localhost/api"
+
+SECRET_KEY = '12345'

@@ -80,6 +80,9 @@ class PillarServer(Eve):
         # self.settings = self.config['EVE_SETTINGS_PATH']
         self.load_config()
 
+        if not self.config.get('SECRET_KEY'):
+            raise ConfigurationMissingError('SECRET_KEY configuration key is missing')
+
         # Configure authentication
         self.login_manager = auth.config_login_manager(self)
         self.oauth_blender_id = auth.config_oauth_login(self)

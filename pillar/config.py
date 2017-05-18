@@ -18,7 +18,9 @@ PORT = 5000
 HOST = '0.0.0.0'
 DEBUG = False
 
-SECRET_KEY = '123'
+# Flask and CSRF secret key; generate local one with:
+# python3 -c 'import secrets; print(secrets.token_urlsafe(128))'
+SECRET_KEY = ''
 
 # Authentication settings
 BLENDER_ID_ENDPOINT = 'http://blender_id:8000/'
