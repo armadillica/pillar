@@ -261,7 +261,7 @@ class PillarServer(Eve):
         paths_list = [
             jinja2.FileSystemLoader(path)
             for path in reversed(self.pillar_extensions_template_paths)
-            ]
+        ]
 
         # ...then load Pillar paths.
         pillar_dir = os.path.dirname(os.path.realpath(__file__))
@@ -380,7 +380,7 @@ class PillarServer(Eve):
                     if doc_name:
                         description = '%s "%s" was deleted.' % (node_type, doc_name)
                     else:
-                        description = 'This %s was deleted.' % (node_type, )
+                        description = 'This %s was deleted.' % (node_type,)
                 else:
                     if doc_name:
                         description = '"%s" was deleted.' % doc_name
@@ -561,7 +561,7 @@ class PillarServer(Eve):
 
         pprint(links)
 
-    def db(self, collection_name: str=None) \
+    def db(self, collection_name: str = None) \
             -> typing.Union[pymongo.collection.Collection, pymongo.database.Database]:
         """Returns the MongoDB database, or the collection (if given)"""
 

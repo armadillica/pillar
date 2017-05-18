@@ -3,8 +3,6 @@
 Run commands with 'flask <command>'
 """
 
-
-
 import copy
 import logging
 
@@ -361,10 +359,10 @@ def create_local_user_account(email, password):
 
 @manager_maintenance.command
 @manager_maintenance.option('-c', '--chunk', dest='chunk_size', default=50,
-                help='Number of links to update, use 0 to update all.')
+                            help='Number of links to update, use 0 to update all.')
 @manager_maintenance.option('-q', '--quiet', dest='quiet', action='store_true', default=False)
 @manager_maintenance.option('-w', '--window', dest='window', default=12,
-                help='Refresh links that expire in this many hours.')
+                            help='Refresh links that expire in this many hours.')
 def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
     """Refreshes all file links that are using a certain storage backend.
 
@@ -463,11 +461,11 @@ def mass_copy_between_backends(src_backend='cdnsun', dest_backend='gcs'):
 
 @manager_operations.command
 @manager_operations.option('-p', '--project', dest='dest_proj_url',
-                help='Destination project URL')
+                           help='Destination project URL')
 @manager_operations.option('-f', '--force', dest='force', action='store_true', default=False,
-                help='Move even when already at the given project.')
+                           help='Move even when already at the given project.')
 @manager_operations.option('-s', '--skip-gcs', dest='skip_gcs', action='store_true', default=False,
-                help='Skip file handling on GCS, just update the database.')
+                           help='Skip file handling on GCS, just update the database.')
 def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=False):
     """Copies all files from one project to the other, then moves the nodes.
 
@@ -521,9 +519,9 @@ def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=Fals
 
 @manager_maintenance.command
 @manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
-                help='Project URL')
+                            help='Project URL')
 @manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
-                help='Replace on all projects.')
+                            help='Replace on all projects.')
 def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
     """Replaces the project's node type schemas with the standard Pillar ones.
 
@@ -632,9 +630,9 @@ def remarkdown_comments():
 
 @manager_maintenance.command
 @manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
-                help='Project URL')
+                            help='Project URL')
 @manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
-                help='Replace on all projects.')
+                            help='Replace on all projects.')
 def upgrade_attachment_schema(proj_url=None, all_projects=False):
     """Replaces the project's attachments with the new schema.
 
@@ -788,6 +786,7 @@ def create_blog(proj_url):
         log.info('Blog node already exists: %s', blog)
 
     return 0
+
 
 manager.add_command("maintenance", manager_maintenance)
 manager.add_command("setup", manager_setup)
