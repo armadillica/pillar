@@ -618,6 +618,11 @@ class PillarServer(Eve):
 
             yield ctx
 
+    def validator_for_resource(self, resource_name: str) -> custom_field_validation.ValidateCustomFields:
+        schema = self.config['DOMAIN'][resource_name]['schema']
+        validator = self.validator(schema, resource_name)
+        return validator
+
 
 def _get_current_app():
     """Returns the current application."""
