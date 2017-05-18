@@ -718,7 +718,7 @@ users = {
     'cache_expires': 10,
 
     'resource_methods': ['GET'],
-    'item_methods': ['GET', 'PUT', 'PATCH'],
+    'item_methods': ['GET', 'PUT'],
     'public_item_methods': ['GET'],
 
     'schema': users_schema

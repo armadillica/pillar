@@ -7,8 +7,6 @@ import copy
 import logging
 
 from bson.objectid import ObjectId, InvalidId
-from eve.methods.put import put_internal
-from eve.methods.post import post_internal
 
 from flask import current_app
 from flask_script import Manager
@@ -565,7 +563,7 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
 
         # Use Eve to PUT, so we have schema checking.
         db_proj = remove_private_keys(project)
-        r, _, _, status = put_internal('projects', db_proj, _id=project['_id'])
+        r, _, _, status = current_app.put_internal('projects', db_proj, _id=project['_id'])
         if status != 200:
             log.error('Error %i storing altered project %s %s', status, project['_id'], r)
             raise SystemExit('Error storing project, see log.')
@@ -686,7 +684,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
 
         # Use Eve to PUT, so we have schema checking.
         db_proj = remove_private_keys(project)
-        r, _, _, status = put_internal('projects', db_proj, _id=project['_id'])
+        r, _, _, status = current_app.put_internal('projects', db_proj, _id=project['_id'])
         if status != 200:
             log.error('Error %i storing altered project %s %s', status, project['_id'], r)
             raise SystemExit('Error storing project, see log.')
@@ -716,7 +714,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
 
             # Use Eve to PUT, so we have schema checking.
             db_node = remove_private_keys(node)
-            r, _, _, status = put_internal('nodes', db_node, _id=node['_id'])
+            r, _, _, status = current_app.put_internal('nodes', db_node, _id=node['_id'])
             if status != 200:
                 log.error('Error %i storing altered node %s %s', status, node['_id'], r)
                 raise SystemExit('Error storing node; see log.')
@@ -760,7 +758,7 @@ def create_blog(proj_url):
                                    replace_existing=False)
 
     proj_id = proj['_id']
-    r, _, _, status = put_internal('projects', remove_private_keys(proj), _id=proj_id)
+    r, _, _, status = current_app.put_internal('projects', remove_private_keys(proj), _id=proj_id)
     if status != 200:
         log.error('Error %i storing altered project %s %s', status, proj_id, r)
         return 4
@@ -777,7 +775,7 @@ def create_blog(proj_url):
             'properties': {},
             'project': proj_id,
         }
-        r, _, _, status = post_internal('nodes', blog)
+        r, _, _, status = current_app.post_internal('nodes', blog)
         if status != 201:
             log.error('Error %i storing blog node: %s', status, r)
             return 4

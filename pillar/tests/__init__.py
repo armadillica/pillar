@@ -410,7 +410,7 @@ class AbstractPillarTest(TestMinimal):
             headers['Content-Type'] = 'application/json'
 
         if etag is not None:
-            if method == 'PUT':
+            if method in {'PUT', 'PATCH', 'DELETE'}:
                 headers['If-Match'] = etag
             elif method == 'GET':
                 headers['If-None-Match'] = etag

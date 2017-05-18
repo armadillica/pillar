@@ -2,7 +2,6 @@
 
 import logging
 
-from eve.methods.patch import patch_internal
 from flask import current_app
 import werkzeug.exceptions as wz_exceptions
 
@@ -145,13 +144,13 @@ def edit_comment(user_id, node_id, patch):
         raise wz_exceptions.Forbidden('You can only edit your own comments.')
 
     # Use Eve to PATCH this node, as that also updates the etag.
-    r, _, _, status = patch_internal('nodes',
-                                     {'properties.content': patch['content'],
-                                      'project': node['project'],
-                                      'user': node['user'],
-                                      'node_type': node['node_type']},
-                                     concurrency_check=False,
-                                     _id=node_id)
+    r, _, _, status = current_app.patch_internal('nodes',
+                                                 {'properties.content': patch['content'],
+                                                  'project': node['project'],
+                                                  'user': node['user'],
+                                                  'node_type': node['node_type']},
+                                                 concurrency_check=False,
+                                                 _id=node_id)
     if status != 200:
         log.error('Error %i editing comment %s for user %s: %s',
                   status, node_id, user_id, r)

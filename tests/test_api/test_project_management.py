@@ -164,19 +164,17 @@ class ProjectEditTest(AbstractProjectTest):
         project_info = self._create_user_and_project(['subscriber'])
         project_url = '/api/projects/%(_id)s' % project_info
 
-        resp = self.client.get(project_url,
-                               headers={'Authorization': self.make_header('token')})
-        project = json.loads(resp.data.decode('utf-8'))
+        project = self.get(project_url, auth_token='token').json()
 
         # Create another user we can try and assign the project to.
         other_user_id = 'f00dd00df00dd00df00dd00d'
         self._create_user_with_token(['subscriber'], 'other-token', user_id=other_user_id)
 
         # Unauthenticated should be forbidden
-        resp = self.client.put('/api/projects/%s' % project['_id'],
-                               data=dumps(remove_private_keys(project)),
-                               headers={'Content-Type': 'application/json'})
-        self.assertEqual(403, resp.status_code)
+        self.put('/api/projects/%s' % project['_id'],
+                 json=remove_private_keys(project),
+                 etag=project['_etag'],
+                 expected_status=403)
 
         # Regular user should be able to PUT, but only be able to edit certain fields.
         put_project = remove_private_keys(project)
@@ -191,20 +189,15 @@ class ProjectEditTest(AbstractProjectTest):
 
         # Try making the project public. This should update is_private as well.
         put_project['permissions']['world'] = ['GET']
-
-        resp = self.client.put(project_url,
-                               data=dumps(put_project),
-                               headers={'Authorization': self.make_header('token'),
-                                        'Content-Type': 'application/json',
-                                        'If-Match': project['_etag']})
-        self.assertEqual(200, resp.status_code, resp.data)
+        self.put(project_url,
+                 json=put_project,
+                 auth_token='token',
+                 etag=project['_etag'])
 
         # Re-fetch from database to see which fields actually made it there.
         # equal to put_project -> changed in DB
         # equal to project -> not changed in DB
-        resp = self.client.get(project_url,
-                               headers={'Authorization': self.make_header('token')})
-        db_proj = json.loads(resp.data)
+        db_proj = self.get(project_url, auth_token='token').json()
         self.assertEqual(project['url'], db_proj['url'])
         self.assertEqual(put_project['description'], db_proj['description'])
         self.assertEqual(put_project['name'], db_proj['name'])

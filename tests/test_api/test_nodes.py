@@ -2,8 +2,6 @@ import json
 
 import pillar.tests.common_test_data as ctd
 from bson import ObjectId
-from eve.methods.post import post_internal
-from eve.methods.put import put_internal
 from flask import g
 from mock import mock
 from pillar.tests import AbstractPillarTest
@@ -47,7 +45,7 @@ class NodeContentTypeTest(AbstractPillarTest):
                 nodes = self.app.data.driver.db['nodes']
 
                 # Create the node.
-                r, _, _, status = post_internal('nodes', node_doc)
+                r, _, _, status = self.app.post_internal('nodes', node_doc)
                 self.assertEqual(status, 201, r)
                 node_id = r['_id']
 
@@ -56,12 +54,12 @@ class NodeContentTypeTest(AbstractPillarTest):
                 self.assertNotIn('content_type', db_node['properties'])
 
                 # PUT it again, without a file -- should be blocked.
-                self.assertRaises(UnprocessableEntity, put_internal, 'nodes', node_doc,
+                self.assertRaises(UnprocessableEntity, self.app.put_internal, 'nodes', node_doc,
                                   _id=node_id)
 
                 # PUT it with a file.
                 node_doc['properties']['file'] = str(file_id)
-                r, _, _, status = put_internal('nodes', node_doc, _id=node_id)
+                r, _, _, status = self.app.put_internal('nodes', node_doc, _id=node_id)
                 self.assertEqual(status, 200, r)
 
                 # Get from database to test the final node.

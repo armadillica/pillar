@@ -127,54 +127,40 @@ class AuthenticationTests(AbstractPillarTest):
         from pillar.api.utils import authentication as auth
         from pillar.api.utils import PillarJSONEncoder, remove_private_keys
 
-        user_id = self.create_user(roles=['subscriber'])
+        user_id = self.create_user(roles=['subscriber'], token='token')
 
-        now = datetime.datetime.now(tz_util.utc)
-        future = now + datetime.timedelta(days=1)
+        def fetch_user():
+            with self.app.test_request_context():
+                users_coll = self.app.db('users')
+                return users_coll.find_one(user_id)
 
-        with self.app.test_request_context():
-            auth.store_token(user_id, 'nonexpired-main', future, None)
-
-        with self.app.test_request_context(
-                headers={'Authorization': self.make_header('nonexpired-main')}):
-            self.assertTrue(auth.validate_token())
-
-            users = self.app.data.driver.db['users']
-            db_user = users.find_one(user_id)
-
+        db_user = fetch_user()
         updated_fields = remove_private_keys(db_user)
         updated_fields['roles'] = ['admin', 'subscriber', 'demo']  # Try to elevate our roles.
 
         # POSTing updated info to a specific user URL is not allowed by Eve.
-        resp = self.client.post('/api/users/%s' % user_id,
-                                data=json.dumps(updated_fields, cls=PillarJSONEncoder),
-                                headers={'Authorization': self.make_header('nonexpired-main'),
-                                         'Content-Type': 'application/json'})
-        self.assertEqual(405, resp.status_code)
+        self.post('/api/users/%s' % user_id,
+                  json=updated_fields,
+                  auth_token='token',
+                  expected_status=405)
 
-        # PUT and PATCH should not be allowed.
-        resp = self.client.put('/api/users/%s' % user_id,
-                               data=json.dumps(updated_fields, cls=PillarJSONEncoder),
-                               headers={'Authorization': self.make_header('nonexpired-main'),
-                                        'Content-Type': 'application/json'})
-        self.assertEqual(403, resp.status_code)
+        # PUT is allowed, but shouldn't change roles.
+        self.put('/api/users/%s' % user_id,
+                 json=updated_fields,
+                 auth_token='token',
+                 etag=db_user['_etag'])
+        db_user = fetch_user()
+        self.assertEqual(['subscriber'], db_user['roles'])
 
+        # PATCH should not be allowed.
         updated_fields = {'roles': ['admin', 'subscriber', 'demo']}
-        resp = self.client.patch('/api/users/%s' % user_id,
-                                 data=json.dumps(updated_fields, cls=PillarJSONEncoder),
-                                 headers={'Authorization': self.make_header('nonexpired-main'),
-                                          'Content-Type': 'application/json'})
-        self.assertEqual(403, resp.status_code)
-
-        # After all of this, the roles should be the same.
-        with self.app.test_request_context(
-                headers={'Authorization': self.make_header('nonexpired-main')}):
-            self.assertTrue(auth.validate_token())
-
-            users = self.app.data.driver.db['users']
-            db_user = users.find_one(user_id)
-
-            self.assertEqual(['subscriber'], db_user['roles'])
+        self.patch('/api/users/%s' % user_id,
+                   json=updated_fields,
+                   auth_token='token',
+                   etag=db_user['_etag'],
+                   expected_status=405)
+        db_user = fetch_user()
+        self.assertEqual(['subscriber'], db_user['roles'])
 
     def test_token_expiry(self):
         """Expired tokens should be deleted from the database."""

@@ -1,6 +1,7 @@
 """Pillar server."""
 
 import collections
+import contextlib
 import copy
 import json
 import logging
@@ -519,28 +520,32 @@ class PillarServer(Eve):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.post import post_internal
 
-        with self.test_request_context(method='POST', path='%s/%s' % (self.api_prefix, resource)):
-            return post_internal(resource, payl=payl, skip_validation=skip_validation)
+        url = self.config['URLS'][resource]
+        path = '%s/%s' % (self.api_prefix, url)
+        with self.__fake_request_url_rule('POST', path):
+            return post_internal(resource, payl=payl, skip_validation=skip_validation)[:4]
 
     def put_internal(self, resource, payload=None, concurrency_check=False,
                      skip_validation=False, **lookup):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.put import put_internal
 
-        path = '%s/%s/%s' % (self.api_prefix, resource, lookup['_id'])
-        with self.test_request_context(method='PUT', path=path):
+        url = self.config['URLS'][resource]
+        path = '%s/%s/%s' % (self.api_prefix, url, lookup['_id'])
+        with self.__fake_request_url_rule('PUT', path):
             return put_internal(resource, payload=payload, concurrency_check=concurrency_check,
-                                skip_validation=skip_validation, **lookup)
+                                skip_validation=skip_validation, **lookup)[:4]
 
     def patch_internal(self, resource, payload=None, concurrency_check=False,
                        skip_validation=False, **lookup):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.patch import patch_internal
 
-        path = '%s/%s/%s' % (self.api_prefix, resource, lookup['_id'])
-        with self.test_request_context(method='PATCH', path=path):
+        url = self.config['URLS'][resource]
+        path = '%s/%s/%s' % (self.api_prefix, url, lookup['_id'])
+        with self.__fake_request_url_rule('PATCH', path):
             return patch_internal(resource, payload=payload, concurrency_check=concurrency_check,
-                                  skip_validation=skip_validation, **lookup)
+                                  skip_validation=skip_validation, **lookup)[:4]
 
     def _list_routes(self):
         from pprint import pprint
@@ -558,11 +563,15 @@ class PillarServer(Eve):
                 # and rules that require parameters
                 if "GET" in rule.methods and has_no_empty_params(rule):
                     url = url_for(rule.endpoint, **(rule.defaults or {}))
-                    links.append((url, rule.endpoint))
+                    links.append((url, rule.endpoint, rule.methods))
+                if "PATCH" in rule.methods:
+                    args = {arg: arg for arg in rule.arguments}
+                    url = url_for(rule.endpoint, **args)
+                    links.append((url, rule.endpoint, rule.methods))
 
-        links.sort(key=lambda t: len(t[0]) + 100 * ('/api/' in t[0]))
+        links.sort(key=lambda t: (('/api/' in t[0]), len(t[0])))
 
-        pprint(links)
+        pprint(links, width=300)
 
     def db(self, collection_name: str = None) \
             -> typing.Union[pymongo.collection.Collection, pymongo.database.Database]:
@@ -583,3 +592,27 @@ class PillarServer(Eve):
 
         return jinja2.Markup(''.join(ext.sidebar_links(project)
                                      for ext in self.pillar_extensions.values()))
+
+    @contextlib.contextmanager
+    def __fake_request_url_rule(self, method: str, url_path: str):
+        """Tries to force-set the request URL rule.
+
+        This is required by Eve (since 0.70) to be able to construct a
+        Location HTTP header that points to the resource item.
+
+        See post_internal, put_internal and patch_internal.
+        """
+
+        import werkzeug.exceptions as wz_exceptions
+
+        with self.test_request_context(method=method, path=url_path) as ctx:
+            try:
+                rule, _ = ctx.url_adapter.match(url_path, method=method, return_rule=True)
+            except (wz_exceptions.MethodNotAllowed, wz_exceptions.NotFound):
+                # We're POSTing things that we haven't told Eve are POSTable. Try again using the
+                # GET method.
+                rule, _ = ctx.url_adapter.match(url_path, method='GET', return_rule=True)
+            current_request = request._get_current_object()
+            current_request.url_rule = rule
+
+            yield ctx
