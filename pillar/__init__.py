@@ -36,6 +36,13 @@ empty_settings = {
 }
 
 
+class ConfigurationMissingError(SystemExit):
+    """Raised when a vital configuration key is missing.
+
+    Causes Python to exit.
+    """
+
+
 class PillarServer(Eve):
     def __init__(self, app_root, **kwargs):
         kwargs.setdefault('validator', custom_field_validation.ValidateCustomFields)
@@ -152,13 +159,13 @@ class PillarServer(Eve):
             os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = \
                 self.config['GCLOUD_APP_CREDENTIALS']
         except KeyError:
-            raise SystemExit('GCLOUD_APP_CREDENTIALS configuration is missing')
+            raise ConfigurationMissingError('GCLOUD_APP_CREDENTIALS configuration is missing')
 
         # Storage backend (GCS)
         try:
             os.environ['GCLOUD_PROJECT'] = self.config['GCLOUD_PROJECT']
         except KeyError:
-            raise SystemExit('GCLOUD_PROJECT configuration value is missing')
+            raise ConfigurationMissingError('GCLOUD_PROJECT configuration value is missing')
 
     def _config_algolia(self):
         # Algolia search
