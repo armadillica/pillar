@@ -16,7 +16,7 @@ setuptools.setup(
         'Flask-Login>=0.3.2',
         'Flask-OAuthlib>=0.9.3',
         'Flask-WTF>=0.12',
-        'algoliasearch>=1.8.0,<1.9.0',  # 1.9 Gives an issue importing some exception class.
+        'algoliasearch>=1.12.0',
         'attrs>=16.2.0',
         'bugsnag>=2.3.1,<3.0',  # latest version on PyPi is beta of 3.0
         'gcloud>=0.12.0',
