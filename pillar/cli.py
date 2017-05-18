@@ -311,14 +311,16 @@ def badger(action, user_email, role):
         log.info('Status  : %i', status)
 
 
-def create_service_account(email, service_roles, service_definition):
+def create_service_account(email, service_roles, service_definition,
+                           *, full_name: str=None):
     from pillar.api import service
     from pillar.api.utils import dumps
 
     account, token = service.create_service_account(
         email,
         service_roles,
-        service_definition
+        service_definition,
+        full_name=full_name,
     )
 
     print('Service account information:')

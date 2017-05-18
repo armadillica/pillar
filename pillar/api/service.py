@@ -186,12 +186,15 @@ def manage_user_group_membership(db_user, role, action):
     return user_groups
 
 
-def create_service_account(email: str, roles: typing.Iterable, service: dict):
+def create_service_account(email: str, roles: typing.Iterable, service: dict,
+                           *, full_name: str=None):
     """Creates a service account with the given roles + the role 'service'.
 
     :param email: optional email address associated with the account.
     :param roles: iterable of role names
     :param service: dict of the 'service' key in the user.
+    :param full_name: Full name of the service account. If None, will be set to
+        something reasonable.
 
     :return: tuple (user doc, token doc)
     """
@@ -207,7 +210,7 @@ def create_service_account(email: str, roles: typing.Iterable, service: dict):
             'roles': roles,
             'settings': {'email_communications': 0},
             'auth': [],
-            'full_name': f'SRV-{user_id}',
+            'full_name': full_name or f'SRV-{user_id}',
             'service': service}
     if email:
         user['email'] = email
