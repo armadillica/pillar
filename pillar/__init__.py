@@ -19,6 +19,7 @@ from flask import render_template, request
 from flask.templating import TemplateNotFound
 import pymongo.collection
 import pymongo.database
+from werkzeug.local import LocalProxy
 
 from pillar.api import custom_field_validation
 from pillar.api.utils import authentication
@@ -616,3 +617,13 @@ class PillarServer(Eve):
             current_request.url_rule = rule
 
             yield ctx
+
+
+def _get_current_app():
+    """Returns the current application."""
+
+    return flask.current_app
+
+
+current_app: PillarServer = LocalProxy(_get_current_app)
+"""the current app, annotated as PillarServer"""
