@@ -47,8 +47,8 @@ class AbstractPatchHandler:
         }
 
         if self.log.isEnabledFor(logging.INFO):
-            self.log.info('Creating PATCH handler %s%s for operations: %s',
-                          blueprint.name, self.route,
+            self.log.info('Creating PATCH handler %s.%s%s for operations: %s',
+                          blueprint.name, self.patch.__name__, self.route,
                           sorted(self.patch_handlers.keys()))
 
         blueprint.add_url_rule(self.route,
@@ -66,11 +66,13 @@ class AbstractPatchHandler:
         real_object_id = str2id(object_id)
         patch = request.get_json()
         if not patch:
+            self.log.info('Bad PATCH request, did not contain JSON')
             raise wz_exceptions.BadRequest('Patch must contain JSON')
 
         try:
             patch_op = patch['op']
         except KeyError:
+            self.log.info("Bad PATCH request, did not contain 'op' key")
             raise wz_exceptions.BadRequest("PATCH should contain 'op' key to denote operation.")
 
         log.debug('User %s wants to PATCH "%s" %s %s',
