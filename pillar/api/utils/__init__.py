@@ -1,6 +1,7 @@
 import copy
 import hashlib
 import json
+import typing
 import urllib.request, urllib.parse, urllib.error
 
 import datetime
@@ -139,7 +140,10 @@ def str2id(document_id: str) -> bson.ObjectId:
         raise wz_exceptions.BadRequest('Invalid object ID %r' % document_id)
 
 
-def gravatar(email: str, size=64):
+def gravatar(email: str, size=64) -> typing.Optional[str]:
+    if email is None:
+        return None
+
     parameters = {'s': str(size), 'd': 'mm'}
     return "https://www.gravatar.com/avatar/" + \
            hashlib.md5(email.encode()).hexdigest() + \
