@@ -221,9 +221,16 @@ def create_service_account(email: str, roles: typing.Iterable, service: dict,
     user.update(result)
 
     # Create an authentication token that won't expire for a long time.
-    token = local_auth.generate_and_store_token(user['_id'], days=36500, prefix=b'SRV')
+    token = generate_auth_token(user['_id'])
 
     return user, token
+
+
+def generate_auth_token(service_account_id) -> dict:
+    """Generates an authentication token for a service account."""
+
+    token_info = local_auth.generate_and_store_token(service_account_id, days=36500, prefix=b'SRV')
+    return token_info
 
 
 def setup_app(app, api_prefix):
