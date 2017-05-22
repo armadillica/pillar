@@ -81,15 +81,28 @@
 	background-color: white
 	width: 100%
 
+.page-triplet-container-fluid
+	&.dark
+		background-color: $color-background-nav
+		color: $color-text-light-primary
+
+		section.page-card-header
+			h2, h2 a
+				color: white
+
+		p.extra a
+			color: $color-text-light-primary
+
+
 .page-triplet-container
 	+container-behavior
 	padding: 25px 30px
 
-	.row, div[class^="col-md"]
-		+media-md
-			display: flex
-		+media-lg
-			display: flex
+	p.extra
+		padding: 25px 0
+		text-align: center
+		a
+			color: $color-text-dark-primary
 
 	.triplet-card
 		width: 100%
@@ -102,7 +115,6 @@
 				border-top-left-radius: 3px
 				border-top-right-radius: 3px
 				width: 100%
-				border-bottom: 3px solid $color-primary
 				+img-responsive
 
 		.triplet-card-info
@@ -132,6 +144,8 @@
 				line-height: 1.5em
 				color: $color-text-dark-primary
 				flex: 1
+				padding-left: 5px
+				padding-right: 5px
 
 		.triplet-cta
 			display: block
@@ -335,9 +349,9 @@ $page-card-icon-size: 75px
 			max-width: 100%
 
 		.page-card-title
-			color: $color-info
+			color: white
 			text-align: center
-			padding-bottom: 0
+			padding-bottom: 25px
 
 			&:after
 				border: none
@@ -431,15 +445,41 @@ a.page-card-cta
 	background: linear-gradient(rgba(white, .3) 0%, transparent 60%)
 
 .join
+	span.text-background
+		+text-background(white, darken($color-primary, 30%), 2px, 5px 0)
+
+	p
+		padding: 0
+		margin-left: -10px
+
+	ul
+		margin: 0
+		padding: 0
+
+		li span.text-background
+			padding-left: 15px
+			position: relative
+			left: -10px
+			&:before
+				content: "·"
+				color: white
+				position: relative
+				left: -10px
+
 	#page-header
+		padding: 0 0 0 20px
 		.page-title
 			font:
 				size: 2.8em
+
 		.page-title-summary
 			font:
 				style: normal
 				size: 1.4em
 				weight: 400
+
+		.page-header-cta-container
+			margin: 0
 
 	.page-card
 		&:nth-child(even)

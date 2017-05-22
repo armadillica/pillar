@@ -818,10 +818,10 @@ section.pricing
 				transform: scale(1)
 
 			a.sign-up-now
-				+button($color-primary, 999em, true)
+				+button($color-primary, 3px, true)
 
 				&:hover
-					+button($color-success, 999em, true)
+					+button($color-success, 3px, true)
 
 		&.education
 			.pricing-caption
@@ -886,14 +886,14 @@ section.pricing
 			transform: translateX(-50%)
 			font-size: 1.2em
 
-			+button($color-primary, 999em)
+			+button($color-primary, 3px)
 			padding: 5px 25px
 			white-space: nowrap
 			text-align: center
 
 		&:hover
 			.sign-up-now
-				+button($color-success, 999em, true)
+				+button($color-success, 3px, true)
 
 
 section.supported-by
@@ -962,10 +962,9 @@ section.team
 				padding: 4px
 
 				opacity: 1
-				width: 112px
-				height: 112px
-				margin-left: 15px
-				margin-right: 15px
+				width: 120px
+				height: 120px
+				margin: 7px 15px
 				z-index: 0
 				position: relative
 				transition: transform 100ms ease-in-out, background-color 100ms ease-in-out, opacity 100ms ease-in-out
@@ -1004,14 +1003,14 @@ section.team
 				margin: 0
 				padding: 0
 				position: absolute
-				top: -340px
+				top: -370px
 				left: 50%
 				transform: translateX(-50%)
 
 				transition: opacity 180ms ease-in-out, top 150ms ease-out
 
 				&.active
-					top: -330px
+					top: -370px
 					opacity: 1
 					visibility: visible
 
@@ -1038,6 +1037,6 @@ section.team
 
 			.people-bio
 				.bio
-					top: -200px
+					top: -250px
 					&.active
-						top: -220px
+						top: -240px

@@ -11,7 +11,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 
 | {% block header_backdrop %}
 .navbar-backdrop.join(
-	style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/background_andy_waking.jpg')}})")
+	style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/background_agent327_04.jpg')}})")
 | {% endblock %}
 
 | {% block page_overlay %}
@@ -23,15 +23,21 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 #page-container.join
 	#page-header
 		.container
-			.page-title Welcome to the Blender Cloud.
+			.page-title
+				span.text-background Welcome to the Blender Cloud.
 
 			.page-title-summary
-				p Join us as we make the Agent 327 "Barbershop" scene
+				p
+					span.text-background Join us as we make the Agent 327 "Barbershop" scene
 				ul
-					li Exclusive production insight &amp; walk-throughs
-					li High-quality assets ready to use
-					li All the open movies files & tutorials
-					li 100+ hours of training
+					li
+						span.text-background Exclusive production insight &amp; walk-throughs
+					li
+						span.text-background High-quality assets ready to use
+					li
+						span.text-background All the open movies files & tutorials
+					li
+						span.text-background 100+ hours of training
 
 			.page-header-cta-container
 				a.page-header-cta(href="https://store.blender.org/product/membership/")
@@ -43,70 +49,131 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 
 
 	#page-content
+		section.page-card-header
+			h2
+				a(href="{{ url_for('main.training') }}") Training & Tutorials
+
 		.page-triplet-container.homepage
 			.row
 				.col-md-4
-					.triplet-card(data-url="{{ url_for('main.open_projects') }}")
+					.triplet-card(data-url="https://cloud.blender.org/p/motion-graphics/")
 						.triplet-card-thumbnail
 							img(
-								alt="Open Projects",
-								src="{{ url_for('static', filename='assets/img/features/open_movies_02.jpg')}}")
+								alt="HDRI",
+								src="{{ url_for('static', filename='assets/img/features/training_motion_graphics.jpg')}}")
 						.triplet-card-info
-							h3 Open Projects
+							h3 Motion Graphics
 							p.
-								The iconic Blender Institute Open Movies,
-								featuring all the production files, assets, artwork, and never-seen-before content.
-							a.triplet-cta(href="{{ url_for('main.open_projects') }}")
+								A comprehensive guide to motion graphics techniques using Blender.
+							a.triplet-cta(href="https://cloud.blender.org/p/motion-graphics/")
 								| LEARN MORE
 
 				.col-md-4
-					.triplet-card(data-url="{{ url_for('main.training') }}")
+					.triplet-card(data-url="https://cloud.blender.org/p/toon-character-workflow/")
 						.triplet-card-thumbnail
 							img(
-								alt="Training and Tutorials",
-								src="{{ url_for('static', filename='assets/img/features/training_02.jpg')}}")
+								alt="Textures",
+								src="{{ url_for('static', filename='assets/img/features/training_toon_character.jpg')}}")
 						.triplet-card-info
-							h3 Training &amp; Tutorials
+							h3 Toon Character Workflow
 							p.
-								Character modeling, 3D printing, VFX, rigging and more. We offer
-								12 complete training series with +100 hours of training.
-							a.triplet-cta(href="{{ url_for('main.training') }}")
+								Perfect for beginners, learn how to build a cartoon character from concept to finish.
+							a.triplet-cta(href="https://cloud.blender.org/p/toon-character-workflow/")
 								| LEARN MORE
 
 				.col-md-4
-					.triplet-card(data-url="{{ url_for('main.services') }}")
+					.triplet-card(data-url="https://cloud.blender.org/p/gallery")
 						.triplet-card-thumbnail
 							img(
-								alt="Services and Tools",
-								src="{{ url_for('static', filename='assets/img/features/services_01.jpg')}}")
+								alt="Characters",
+								src="{{ url_for('static', filename='assets/img/features/training_bob_forest.jpg')}}")
 						.triplet-card-info
-							h3 Services & Tools
+							h3 Art Walk-throughs
 							p.
-								Create your personal projects, collaborate with other members, store
-								and sync your Blender settings across multiple workstations.
-							a.triplet-cta(href="{{ url_for('main.services') }}")
+								Follow artists through the creative process and techniques behind their work.
+							a.triplet-cta(href="https://cloud.blender.org/p/gallery")
 								| LEARN MORE
+
+				.row
+					.col-md-8.col-md-offset-2
+						p.extra.
+							Other trainings:
+							<a href="https://cloud.blender.org/p/3d-printing/">Blender for 3D Printing</a>,
+							<a href="https://cloud.blender.org/p/game-asset-creation/">Game Asset Creation</a>,
+							<a href="https://cloud.blender.org/p/blenderella/">Character Modeling</a>,
+							<a href="https://cloud.blender.org/p/character-animation/">Character Animation</a>,
+							<a href="https://cloud.blender.org/p/humane-rigging/">Introduction</a>
+							and
+							<a href="https://cloud.blender.org/p/blenrig/">Advanced Rigging</a>,
+							<a href="https://cloud.blender.org/p/track-match-2/">VFX Workflow</a>,
+							<a href="https://cloud.blender.org/p/creature-factory-2/">Creature</a>
+							and
+							<a href="https://cloud.blender.org/p/venoms-lab-2/">Cartoon Character creation</a>,
+							<a href="https://cloud.blender.org/p/chaos-evolution/">Advanced</a>
+							<a href="https://cloud.blender.org/p/blend-and-paint/">Digital Painting</a>
+							and
+							<a href="{{ url_for('main.training') }}">much more</a>!
+
+
+		.page-triplet-container-fluid.dark(
+			style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/pattern_01.jpg')}})")
+			section.page-card-header
+				h2
+					a(href="{{ url_for('main.open_projects') }}") Browse all the Open Movies
+
+			.page-triplet-container.homepage
+				.row
+					.col-md-4
+						.triplet-card(data-url="https://cloud.blender.org/p/cosmos-laundromat/")
+							.triplet-card-thumbnail
+								img(
+									alt="HDRI",
+									src="{{ url_for('static', filename='assets/img/features/open_movies_cosmos.jpg')}}")
+							.triplet-card-info
+								h3 Cosmos Laundromat
+								a.triplet-cta(href="https://cloud.blender.org/p/cosmos-laundromat/")
+									| LEARN MORE
+
+					.col-md-4
+						.triplet-card(data-url="https://cloud.blender.org/p/agent-327/")
+							.triplet-card-thumbnail
+								img(
+									alt="Textures",
+									src="{{ url_for('static', filename='assets/img/features/open_movies_agent_barbershop.jpg')}}")
+							.triplet-card-info
+								h3 Agent 327
+								a.triplet-cta(href="https://cloud.blender.org/p/agent-327/")
+									| LEARN MORE
+
+					.col-md-4
+						.triplet-card(data-url="https://cloud.blender.org/p/caminandes-3/")
+							.triplet-card-thumbnail
+								img(
+									alt="Characters",
+									src="{{ url_for('static', filename='assets/img/features/open_movies_caminandes_llamigos.jpg')}}")
+							.triplet-card-info
+								h3 Caminandes
+								a.triplet-cta(href="https://cloud.blender.org/p/caminandes-3/")
+									| LEARN MORE
+
+				.row
+					.col-md-8.col-md-offset-2
+						p.extra.
+							Other open movies:
+							<a href="https://cloud.blender.org/p/elephants-dream/">Elephants Dream</a>,
+							<a href="https://cloud.blender.org/p/sintel/">Sintel</a>,
+							<a href="https://cloud.blender.org/p/big-buck-bunny/">Big Buck Bunny</a>,
+							<a href="https://cloud.blender.org/p/tears-of-steel/">Tears of Steel</a>,
+							<a href="https://cloud.blender.org/p/glass-half/">Glass Half</a>,
+							and
+							<a href="{{ url_for('main.open_projects') }}">more</a>.
 
 
 		section.page-card-header
 			h2 Download 1000s of files and assets
 
-
 		.page-triplet-container.homepage
 			.row
-				.col-md-4
-					.triplet-card(data-url="{{ url_for('main.redir_hdri') }}")
-						.triplet-card-thumbnail
-							img(
-								alt="HDRI",
-								src="{{ url_for('static', filename='assets/img/features/hdri_01.jpg')}}")
-						.triplet-card-info
-							h3 HDRI
-							p.
-								Up to 16K and 24 EVs (extremely high) HDR images to light your renders.
-							a.triplet-cta(href="{{ url_for('main.redir_hdri') }}")
-								| LEARN MORE
-
 				.col-md-4
 					.triplet-card(data-url="{{ url_for('main.redir_textures') }}")
 						.triplet-card-thumbnail
@@ -119,6 +186,19 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 								More than 1500 texture maps.
 								Browse online or from Blender with our awesome  add-on.
 							a.triplet-cta(href="{{ url_for('main.redir_textures') }}")
+								| LEARN MORE
+
+				.col-md-4
+					.triplet-card(data-url="{{ url_for('main.redir_hdri') }}")
+						.triplet-card-thumbnail
+							img(
+								alt="HDRI",
+								src="{{ url_for('static', filename='assets/img/features/hdri_01.jpg')}}")
+						.triplet-card-info
+							h3 HDRI
+							p.
+								Up to 16K and 24 EVs (extremely high) HDR images to light your renders.
+							a.triplet-cta(href="{{ url_for('main.redir_hdri') }}")
 								| LEARN MORE
 
 				.col-md-4
@@ -145,15 +225,14 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 				h2.page-card-title Exclusive Production Insights
 				.page-card-summary
 					p.
-						Watch the original authors of shots breaking it down into a detailed
-						explanation and share their insight in the production process. Watch
-						animation reviews, narrated timelapses, shot walk-throughs.
+						Watch the original authors of shots breaking them down and share their
+						insight in the production process. Watch animation reviews,
+						narrated timelapses, shot walk-throughs and more.
 
 			.page-card-side
 				.page-card-image
-					img(
-						alt="Exclusive Production Insights",
-						src="{{ url_for('static', filename='assets/img/features/animation_review_01.gif')}}")
+					video(autoplay, loop)
+						source(src="{{ url_for('static', filename='assets/img/features/animation_review_01.mp4')}}")
 
 
 		section.page-card.right.services-projects
@@ -334,7 +413,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 									li <strong>Sync</strong> your Blender settings across devices
 									li <strong>Share</strong> images &amp; screenshots from within Blender
 									li <strong>Download</strong>&nbsp;1500+ textures &amp; HDRIs from Blender
-									li.special 1 month free
+									li.special 1 month free!
 
 							a.sign-up-now(href="https://store.blender.org/product/membership/")
 								| Subscribe Now
@@ -370,24 +449,46 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 								span Amsterdam, The Netherlands
 
 							.people-faces
-								.face(data-blenderhead='ton')
+								a.face(
+									href="https://twitter.com/tonroosendaal",
+									data-blenderhead='ton')
 									img(alt="Ton", src="{{ url_for('static', filename='assets/img/people/ton.jpg')}}")
-								.face(data-blenderhead='francesco')
+								a.face(
+									href="https://twitter.com/fsiddi",
+									data-blenderhead='francesco')
 									img(alt="Francesco", src="{{ url_for('static', filename='assets/img/people/francesco.jpg')}}")
-								.face(data-blenderhead='colin')
-									img(alt="Colin", src="{{ url_for('static', filename='assets/img/people/colin.jpg')}}")
-								.face(data-blenderhead='pablo')
-									img(alt="Pablo", src="{{ url_for('static', filename='assets/img/people/pablo.jpg')}}")
-								.face(data-blenderhead='andy')
-									img(alt="Andy", src="{{ url_for('static', filename='assets/img/people/andy.jpg')}}")
-								.face(data-blenderhead='hjalti')
+								a.face(
+									href="https://twitter.com/hjalti",
+									data-blenderhead='hjalti')
 									img(alt="Hjalti", src="{{ url_for('static', filename='assets/img/people/hjalti.jpg')}}")
-								.face(data-blenderhead='sergey')
+								a.face(
+									href="https://twitter.com/colinlevy",
+									data-blenderhead='colin')
+									img(alt="Colin", src="{{ url_for('static', filename='assets/img/people/colin.jpg')}}")
+								a.face(
+									href="https://twitter.com/PabloVazquez_",
+									data-blenderhead='pablo')
+									img(alt="Pablo", src="{{ url_for('static', filename='assets/img/people/pablo.jpg')}}")
+								a.face(
+									href="https://twitter.com/artificial3d",
+									data-blenderhead='andy')
+									img(alt="Andy", src="{{ url_for('static', filename='assets/img/people/andy.jpg')}}")
+								a.face(
+									href="https://developer.blender.org/p/sergey/",
+									data-blenderhead='sergey')
 									img(alt="Sergey", src="{{ url_for('static', filename='assets/img/people/sergey.jpg')}}")
-								.face(data-blenderhead='sybren')
+								a.face(
+									href="https://twitter.com/sastuvel",
+									data-blenderhead='sybren')
 									img(alt="Sybren", src="{{ url_for('static', filename='assets/img/people/sybren.jpg')}}")
-								.face(data-blenderhead='beau')
-									img(alt="beau", src="{{ url_for('static', filename='assets/img/people/beau.jpg')}}")
+								a.face(
+									href="https://twitter.com/dfelinto",
+									data-blenderhead='dalai')
+									img(alt="dalai", src="{{ url_for('static', filename='assets/img/people/dalai.jpg')}}")
+								a.face(
+									href="https://twitter.com/dfelinto",
+									data-blenderhead='luca')
+									img(alt="luca", src="{{ url_for('static', filename='assets/img/people/luca.jpg')}}")
 
 							.people-bio
 								.bio#ton
@@ -430,9 +531,14 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 										small Blender Cloud Developer
 									span The Netherlands
 
-								.bio#beau
-									h3 Beau Dreier Gligoor
-										small Modeling. Shading.
+								.bio#dalai
+									h3 Dalai Felinto
+										small Blender Developer
+									span Brazil
+
+								.bio#luca
+									h3 Luca Rood
+										small Blender Developer
 									span The Netherlands
 
 						.people-container.online
@@ -441,16 +547,26 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 								span Contributing to Blender Cloud from all over the globe.
 
 							.people-faces
-								.face(data-blenderhead='gleb')
-									img(alt="Gleb", src="{{ url_for('static', filename='assets/img/people/gleb.jpg')}}")
-								.face(data-blenderhead='david')
+								a.face(
+									href="https://twitter.com/davidrevoy",
+									data-blenderhead='david')
 									img(alt="David", src="{{ url_for('static', filename='assets/img/people/david.jpg')}}")
-								.face(data-blenderhead='sebastian')
+								a.face(
+									href="https://twitter.com/s_koenig",
+									data-blenderhead='sebastian')
 									img(alt="Sebastian", src="{{ url_for('static', filename='assets/img/people/sebastian.jpg')}}")
-								.face(data-blenderhead='jpbouza')
+								a.face(
+									href="https://twitter.com/gleb_alexandrov",
+									data-blenderhead='gleb')
+									img(alt="Gleb", src="{{ url_for('static', filename='assets/img/people/gleb.jpg')}}")
+								a.face(
+									href="https://twitter.com/the_mantissa",
+									data-blenderhead='midge')
+									img(alt="Midge", src="{{ url_for('static', filename='assets/img/people/midge.jpg')}}")
+								a.face(
+									href="https://twitter.com/jpbouza",
+									data-blenderhead='jpbouza')
 									img(alt="Juan Pablo", src="{{ url_for('static', filename='assets/img/people/jpbouza.jpg')}}")
-								.face(data-blenderhead='bassam')
-									img(alt="Bassam", src="{{ url_for('static', filename='assets/img/people/bassam.jpg')}}")
 
 							.people-bio
 								.bio#gleb
@@ -463,20 +579,20 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 										small Illustrator & Concept Artist
 									span France
 
-								.bio#jpbouza
-									h3 Juan Pablo Bouza
-										small Rigging
-									span Argentina
-
-								.bio#bassam
-									h3 Bassam Kurdali
-										small Rigging & Pipeline
-									span United States
+								.bio#midge
+									h3 Midge Sinnaeve
+										small Motion Graphics
+									span Belgium
 
 								.bio#sebastian
 									h3 Sebastian König
 										small VFX
 									span Germany
+
+								.bio#jpbouza
+									h3 Juan Pablo Bouza
+										small Rigging
+									span Argentina
 
 
 		section.page-card.oneofus.
@@ -487,14 +603,13 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 			img.logos(alt="Supported by", src="{{ url_for('static', filename='assets/img/support_logos.png') }}")
 
 		section.page-card.subscribe(
-			style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/background_services.jpg')}});")
+			style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/pattern_bw_01.jpg')}})")
 			.page-card-side
 				h2.page-card-title
-					| Get inspiration, knowledge, and tools in one place.
-				.page-card-summary
-					| Join us for only $9.90/month!
+					| Support Blender, get inspiration, knowledge and tools in one place.
 				a.page-card-cta(
 					href="https://store.blender.org/product/membership/")
+					i.pi-heart-filled
 					| Subscribe Now
 
 
