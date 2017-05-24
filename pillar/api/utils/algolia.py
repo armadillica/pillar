@@ -14,7 +14,7 @@ INDEX_ALLOWED_NODE_TYPES = {'asset', 'texture', 'group', 'hdri'}
 
 @skip_when_testing
 def algolia_index_user_save(user):
-    if 'service' in user['roles']:
+    if 'roles' in user and 'service' in user['roles']:
         return
     # Strip unneeded roles
     if 'roles' in user:
