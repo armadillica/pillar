@@ -41,6 +41,8 @@ def project_manage_users():
     No changes are done on the project itself.
     """
 
+    from pillar.api.utils import str2id
+
     projects_collection = current_app.data.driver.db['projects']
     users_collection = current_app.data.driver.db['users']
 
@@ -57,8 +59,8 @@ def project_manage_users():
 
     # The request is not a form, since it comes from the API sdk
     data = json.loads(request.data)
-    project_id = ObjectId(data['project_id'])
-    target_user_id = ObjectId(data['user_id'])
+    project_id = str2id(data['project_id'])
+    target_user_id = str2id(data['user_id'])
     action = data['action']
     current_user_id = g.current_user['user_id']
 
