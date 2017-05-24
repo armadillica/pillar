@@ -48,3 +48,41 @@ class UsersTest(AbstractPillarTest):
         self.assertEqual([
             self.group_map['test1'],
         ], db_user['groups'])
+
+    def test_remove_user_from_group_happy(self):
+        from pillar.api import users
+
+        user_id = bson.ObjectId(24 * '1')
+
+        self.create_user(user_id, roles={'subscriber'}, groups=[
+            self.group_map['subscriber'],
+            self.group_map['test1'],
+        ])
+
+        # Remove from existing group
+        with self.app.test_request_context():
+            users.remove_user_from_group(user_id, self.group_map['test1'])
+
+        db_user = self.fetch_user_from_db(user_id)
+        self.assertEqual([self.group_map['subscriber']], db_user['groups'])
+
+        # Remove same group again, should be no-op
+        with self.app.test_request_context():
+            users.remove_user_from_group(user_id, self.group_map['test1'])
+
+        db_user = self.fetch_user_from_db(user_id)
+        self.assertEqual([self.group_map['subscriber']], db_user['groups'])
+
+        # Remove from last group, should result in empty list.
+        with self.app.test_request_context():
+            users.remove_user_from_group(user_id, self.group_map['subscriber'])
+
+        db_user = self.fetch_user_from_db(user_id)
+        self.assertEqual([], db_user['groups'])
+
+        # Remove non-existing group from empty list, should also work.
+        with self.app.test_request_context():
+            users.remove_user_from_group(user_id, bson.ObjectId())
+
+        db_user = self.fetch_user_from_db(user_id)
+        self.assertEqual([], db_user['groups'])

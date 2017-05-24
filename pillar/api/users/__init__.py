@@ -9,34 +9,49 @@ from .routes import blueprint_api
 log = logging.getLogger(__name__)
 
 
+def remove_user_from_group(user_id: bson.ObjectId, group_id: bson.ObjectId):
+    """Removes the user from the given group.
+
+    Directly uses MongoDB, so that it doesn't require any special permissions.
+    """
+
+    log.info('Removing user %s from group %s', user_id, group_id)
+    user_group_action(user_id, group_id, '$pull')
+
+
 def add_user_to_group(user_id: bson.ObjectId, group_id: bson.ObjectId):
     """Makes the user member of the given group.
-    
+
     Directly uses MongoDB, so that it doesn't require any special permissions.
+    """
+
+    log.info('Adding user %s to group %s', user_id, group_id)
+    user_group_action(user_id, group_id, '$addToSet')
+
+
+def user_group_action(user_id: bson.ObjectId, group_id: bson.ObjectId, action: str):
+    """Performs a group action (add/remove).
+    
+    :param user_id: the user's ObjectID.
+    :param group_id: the group's ObjectID.
+    :param action: either '$pull' to remove from a group, or '$addToSet' to add to a group.
     """
 
     from pymongo.results import UpdateResult
 
     assert isinstance(user_id, bson.ObjectId)
     assert isinstance(group_id, bson.ObjectId)
-
-    log.info('Adding user %s to group %s', user_id, group_id)
+    assert action in {'$pull', '$addToSet'}
 
     users_coll = current_app.db('users')
-    db_user = users_coll.find_one(user_id, projection={'groups': 1})
-    if db_user is None:
-        raise ValueError('user %s not found', user_id, group_id)
-
-    groups = set(db_user.get('groups', []))
-    groups.add(group_id)
-
-    # Sort the groups so that we have predictable, repeatable results.
     result: UpdateResult = users_coll.update_one(
-        {'_id': db_user['_id']},
-        {'$set': {'groups': sorted(groups)}})
+        {'_id': user_id},
+        {action: {'groups': group_id}},
+    )
 
     if result.matched_count == 0:
-        raise ValueError('Unable to add user %s to group %s; user not found.')
+        raise ValueError('Unable to %s user %s membership of group %s; user not found.',
+                         action, user_id, group_id)
 
 
 def setup_app(app, api_prefix):
