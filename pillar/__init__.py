@@ -21,6 +21,18 @@ import pymongo.collection
 import pymongo.database
 from werkzeug.local import LocalProxy
 
+
+# Declare pillar.current_app before importing other Pillar modules.
+def _get_current_app():
+    """Returns the current application."""
+
+    return flask.current_app
+
+
+current_app: 'PillarServer' = LocalProxy(_get_current_app)
+"""the current app, annotated as PillarServer"""
+
+
 from pillar.api import custom_field_validation
 from pillar.api.utils import authentication
 import pillar.web.jinja
@@ -622,13 +634,3 @@ class PillarServer(Eve):
         schema = self.config['DOMAIN'][resource_name]['schema']
         validator = self.validator(schema, resource_name)
         return validator
-
-
-def _get_current_app():
-    """Returns the current application."""
-
-    return flask.current_app
-
-
-current_app: PillarServer = LocalProxy(_get_current_app)
-"""the current app, annotated as PillarServer"""
