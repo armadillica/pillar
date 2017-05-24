@@ -59,11 +59,14 @@ class ConfigurationMissingError(SystemExit):
 
 class PillarServer(Eve):
     def __init__(self, app_root, **kwargs):
+        from .extension import PillarExtension
+
         kwargs.setdefault('validator', custom_field_validation.ValidateCustomFields)
         super(PillarServer, self).__init__(settings=empty_settings, **kwargs)
 
         # mapping from extension name to extension object.
-        self.pillar_extensions = collections.OrderedDict()
+        map_type = typing.MutableMapping[str, PillarExtension]
+        self.pillar_extensions: map_type = collections.OrderedDict()
         self.pillar_extensions_template_paths = []  # list of paths
 
         self.app_root = os.path.abspath(app_root)
