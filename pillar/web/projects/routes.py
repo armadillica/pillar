@@ -6,7 +6,7 @@ from pillarsdk import Node
 from pillarsdk import Project
 from pillarsdk.exceptions import ResourceNotFound
 from pillarsdk.exceptions import ForbiddenAccess
-from flask import Blueprint, current_app
+from flask import Blueprint
 from flask import render_template
 from flask import request
 from flask import jsonify
@@ -17,6 +17,7 @@ from flask import url_for
 from flask_login import login_required, current_user
 import werkzeug.exceptions as wz_exceptions
 
+from pillar import current_app
 from pillar.web import system_util
 from pillar.web import utils
 from pillar.web.utils.jstree import jstree_get_children
