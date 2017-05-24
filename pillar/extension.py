@@ -17,10 +17,14 @@ can then be registered to the application at app creation time:
 
 import abc
 
+import flask
 import pillarsdk
 
 
 class PillarExtension(object, metaclass=abc.ABCMeta):
+    # Set to True when your extension implements the project_settings() method.
+    has_project_settings = False
+
     @property
     @abc.abstractmethod
     def name(self):
@@ -103,3 +107,11 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
         """
 
         return ''
+
+    def project_settings(self, project: pillarsdk.Project) -> flask.Response:
+        """Renders the project settings page for this extension.
+
+        Set YourExtension.has_project_settings = True and Pillar will call this function.
+
+        :returns: a Flask HTTP response
+        """

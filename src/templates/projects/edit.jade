@@ -65,7 +65,12 @@
 							a(href="{{ url_for('projects.edit_node_types', project_url=project.url) }}")
 								i.pi-puzzle
 								| Node Types
-
+						| {% for ext in ext_pages %}
+						li(class="{% if title == ext.name %}active{% endif %}")
+							a(href="{{ url_for('projects.edit_extension', project_url=project.url, extension_name=ext.name) }}")
+								i(class="pi-{{ext.icon}}")
+								| {{ext.name | title}}
+						| {% endfor %}
 				.project_split(title="Toggle Navigation [T]")
 
 	#project_context-container

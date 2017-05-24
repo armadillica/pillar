@@ -468,6 +468,10 @@ def edit(project: Project):
         status=project.status,
     )
 
+    # Collect extension pages.
+    ext_pages = [ext for ext in current_app.pillar_extensions.values()
+                 if ext.has_project_settings]
+
     if form.validate_on_submit():
         project = Project.find(project._id, api=api)
         project.name = form.name.data
@@ -506,6 +510,7 @@ def edit(project: Project):
                            form=form,
                            hidden_fields=hidden_fields,
                            project=project,
+                           ext_pages=ext_pages,
                            api=api)
 
 
@@ -778,3 +783,15 @@ def delete():
     project.delete(api=api)
     return jsonify(dict(staus='success', data=dict(
         message='Project deleted {}'.format(project['_id']))))
+
+
+@blueprint.route('/<project_url>/edit/<extension_name>', methods=['GET', 'POST'])
+@login_required
+@project_view()
+def edit_extension(project: Project, extension_name):
+    try:
+        ext = current_app.pillar_extensions[extension_name]
+    except KeyError:
+        raise wz_exceptions.NotFound()
+
+    return ext.project_settings(project)
