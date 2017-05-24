@@ -261,9 +261,9 @@ def view(project: Project):
     header_video_node = None
     if project.header_node and project.header_node.node_type == 'asset' and \
                     project.header_node.properties.content_type == 'video':
-            header_video_node = project.header_node
-            header_video_file = utils.get_file(project.header_node.properties.file)
-            header_video_node.picture = utils.get_file(header_video_node.picture)
+        header_video_node = project.header_node
+        header_video_file = utils.get_file(project.header_node.properties.file)
+        header_video_node.picture = utils.get_file(header_video_node.picture)
 
     return render_project(project, api,
                           extra_context={'header_video_file': header_video_file,
@@ -398,7 +398,8 @@ def view_node(project_url, node_id):
             raise wz_exceptions.NotFound('No such node')
 
         try:
-            project = Project.find_one({'where': {"url": project_url, '_id': node.project}}, api=api)
+            project = Project.find_one({'where': {"url": project_url, '_id': node.project}},
+                                       api=api)
         except ResourceNotFound:
             # In theatre mode, we don't need access to the project at all.
             if theatre_mode:
