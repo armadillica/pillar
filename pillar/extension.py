@@ -17,6 +17,8 @@ can then be registered to the application at app creation time:
 
 import abc
 
+import pillarsdk
+
 
 class PillarExtension(object, metaclass=abc.ABCMeta):
     @property
@@ -94,7 +96,7 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
     def setup_app(self, app):
         """Called during app startup, after all extensions have loaded."""
 
-    def sidebar_links(self, project):
+    def sidebar_links(self, project: pillarsdk.Project) -> str:
         """Returns the sidebar link(s) for the given projects.
 
         :returns: HTML as a string for the sidebar.
