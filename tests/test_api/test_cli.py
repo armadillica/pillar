@@ -287,7 +287,7 @@ class AbstractNodeReplacementTest(AbstractPillarTest):
 class ReplaceNodeTypesTest(AbstractNodeReplacementTest):
     def test_replace_pillar_node_type_schemas(self):
         from pillar.api.node_types.group import node_type_group
-        from pillar.cli import replace_pillar_node_type_schemas
+        from pillar.cli.maintenance import replace_pillar_node_type_schemas
 
         group_perms = self.add_group_permission_to_asset_node_type()
 
@@ -323,7 +323,7 @@ class UpgradeAttachmentSchemaTest(AbstractNodeReplacementTest):
                     self.ensure_file_exists({'_id': filedict['file']})
 
     def test_schema_upgrade(self):
-        from pillar.cli import upgrade_attachment_schema
+        from pillar.cli.maintenance import upgrade_attachment_schema
         from pillar.api.node_types.asset import node_type_asset
 
         group_perms = self.add_group_permission_to_asset_node_type()
@@ -354,7 +354,7 @@ class CreateBlogTest(AbstractPillarTest):
     def test_create_blog(self):
         """Very simple test to check the create_blog CLI command."""
 
-        from pillar.cli import create_blog
+        from pillar.cli.setup import create_blog
 
         with self.app.test_request_context():
             create_blog(self.proj['url'])

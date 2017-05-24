@@ -1,68 +1,17 @@
-"""Commandline interface.
-
-Run commands with 'flask <command>'
-"""
-
-import copy
 import logging
 
-from bson.objectid import ObjectId, InvalidId
+import bson.tz_util
+import copy
+from bson import ObjectId
+from bson.errors import InvalidId
 from flask_script import Manager
 
 from pillar import current_app
 
 log = logging.getLogger(__name__)
-manager = Manager(current_app)
 
 manager_maintenance = Manager(
     current_app, usage="Maintenance scripts, to update user groups")
-manager_setup = Manager(
-    current_app, usage="Setup utilities, like setup_db() or create_blog()")
-manager_operations = Manager(
-    current_app, usage="Backend operations, like moving nodes across projects")
-
-
-@manager_setup.command
-def setup_db(admin_email):
-    """Setup the database
-    - Create admin, subscriber and demo Group collection
-    - Create admin user (must use valid blender-id credentials)
-    - Create one project
-    """
-
-    # Create default groups
-    groups_list = []
-    for group in ['admin', 'subscriber', 'demo']:
-        g = {'name': group}
-        g = current_app.post_internal('groups', g)
-        groups_list.append(g[0]['_id'])
-        print("Creating group {0}".format(group))
-
-    # Create admin user
-    user = {'username': admin_email,
-            'groups': groups_list,
-            'roles': ['admin', 'subscriber', 'demo'],
-            'settings': {'email_communications': 1},
-            'auth': [],
-            'full_name': admin_email,
-            'email': admin_email}
-    result, _, _, status = current_app.post_internal('users', user)
-    if status != 201:
-        raise SystemExit('Error creating user {}: {}'.format(admin_email, result))
-    user.update(result)
-    print("Created user {0}".format(user['_id']))
-
-    # Create a default project by faking a POST request.
-    with current_app.test_request_context(data={'project_name': 'Default Project'}):
-        from flask import g
-        from pillar.api.projects import routes as proj_routes
-
-        g.current_user = {'user_id': user['_id'],
-                          'groups': user['groups'],
-                          'roles': set(user['roles'])}
-
-        proj_routes.create_project(overrides={'url': 'default-project',
-                                              'is_private': False})
 
 
 @manager_maintenance.command
@@ -296,67 +245,6 @@ def check_home_project_groups():
     return bad
 
 
-@manager_setup.command
-def badger(action, user_email, role):
-    from pillar.api import service
-
-    with current_app.app_context():
-        service.fetch_role_to_group_id_map()
-        response, status = service.do_badger(action, role, user_email=user_email)
-
-    if status == 204:
-        log.info('Done.')
-    else:
-        log.info('Response: %s', response)
-        log.info('Status  : %i', status)
-
-
-def create_service_account(email, service_roles, service_definition,
-                           *, full_name: str=None):
-    from pillar.api import service
-    from pillar.api.utils import dumps
-
-    account, token = service.create_service_account(
-        email,
-        service_roles,
-        service_definition,
-        full_name=full_name,
-    )
-
-    print('Service account information:')
-    print(dumps(account, indent=4, sort_keys=True))
-    print()
-    print('Access token: %s' % token['token'])
-    print('  expires on: %s' % token['expire_time'])
-    return account, token
-
-
-@manager_setup.command
-def create_badger_account(email, badges):
-    """
-    Creates a new service account that can give badges (i.e. roles).
-
-    :param email: email address associated with the account
-    :param badges: single space-separated argument containing the roles
-        this account can assign and revoke.
-    """
-
-    create_service_account(email, ['badger'], {'badger': badges.strip().split()})
-
-
-@manager_setup.command
-def create_urler_account(email):
-    """Creates a new service account that can fetch all project URLs."""
-
-    create_service_account(email, ['urler'], {})
-
-
-@manager_setup.command
-def create_local_user_account(email, password):
-    from pillar.api.local_auth import create_local_user
-    create_local_user(email, password)
-
-
 @manager_maintenance.command
 @manager_maintenance.option('-c', '--chunk', dest='chunk_size', default=50,
                             help='Number of links to update, use 0 to update all.')
@@ -402,119 +290,6 @@ def expire_all_project_links(project_uuid):
     )
 
     print('Expired %i links' % result.matched_count)
-
-
-@manager_operations.command
-def file_change_backend(file_id, dest_backend='gcs'):
-    """Given a file document, move it to the specified backend (if not already
-    there) and update the document to reflect that.
-    Files on the original backend are not deleted automatically.
-    """
-
-    from pillar.api.file_storage.moving import change_file_storage_backend
-    change_file_storage_backend(file_id, dest_backend)
-
-
-@manager_operations.command
-def mass_copy_between_backends(src_backend='cdnsun', dest_backend='gcs'):
-    """Copies all files from one backend to the other, updating them in Mongo.
-
-    Files on the original backend are not deleted.
-    """
-
-    import requests.exceptions
-
-    from pillar.api.file_storage import moving
-
-    logging.getLogger('pillar').setLevel(logging.INFO)
-    log.info('Mass-moving all files from backend %r to %r',
-             src_backend, dest_backend)
-
-    files_coll = current_app.data.driver.db['files']
-
-    fdocs = files_coll.find({'backend': src_backend},
-                            projection={'_id': True})
-    copied_ok = 0
-    copy_errs = 0
-    try:
-        for fdoc in fdocs:
-            try:
-                moving.change_file_storage_backend(fdoc['_id'], dest_backend)
-            except moving.PrerequisiteNotMetError as ex:
-                log.error('Error copying %s: %s', fdoc['_id'], ex)
-                copy_errs += 1
-            except requests.exceptions.HTTPError as ex:
-                log.error('Error copying %s (%s): %s',
-                          fdoc['_id'], ex.response.url, ex)
-                copy_errs += 1
-            except Exception:
-                log.exception('Unexpected exception handling file %s', fdoc['_id'])
-                copy_errs += 1
-            else:
-                copied_ok += 1
-    except KeyboardInterrupt:
-        log.error('Stopping due to keyboard interrupt')
-
-    log.info('%i files copied ok', copied_ok)
-    log.info('%i files we did not copy', copy_errs)
-
-
-@manager_operations.command
-@manager_operations.option('-p', '--project', dest='dest_proj_url',
-                           help='Destination project URL')
-@manager_operations.option('-f', '--force', dest='force', action='store_true', default=False,
-                           help='Move even when already at the given project.')
-@manager_operations.option('-s', '--skip-gcs', dest='skip_gcs', action='store_true', default=False,
-                           help='Skip file handling on GCS, just update the database.')
-def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=False):
-    """Copies all files from one project to the other, then moves the nodes.
-
-    The node and all its children are moved recursively.
-    """
-
-    from pillar.api.nodes import moving
-    from pillar.api.utils import str2id
-
-    logging.getLogger('pillar').setLevel(logging.INFO)
-
-    db = current_app.db()
-    nodes_coll = db['nodes']
-    projs_coll = db['projects']
-
-    # Parse CLI args and get the node, source and destination projects.
-    node_uuid = str2id(node_uuid)
-    node = nodes_coll.find_one({'_id': node_uuid})
-    if node is None:
-        log.error("Node %s can't be found!", node_uuid)
-        return 1
-
-    if node.get('parent', None):
-        log.error('Node cannot have a parent, it must be top-level.')
-        return 4
-
-    src_proj = projs_coll.find_one({'_id': node['project']})
-    dest_proj = projs_coll.find_one({'url': dest_proj_url})
-
-    if src_proj is None:
-        log.warning("Node's source project %s doesn't exist!", node['project'])
-    if dest_proj is None:
-        log.error("Destination project url='%s' doesn't exist.", dest_proj_url)
-        return 2
-    if src_proj['_id'] == dest_proj['_id']:
-        if force:
-            log.warning("Node is already at project url='%s'!", dest_proj_url)
-        else:
-            log.error("Node is already at project url='%s'!", dest_proj_url)
-            return 3
-
-    log.info("Mass-moving %s (%s) and children from project '%s' (%s) to '%s' (%s)",
-             node_uuid, node['name'], src_proj['url'], src_proj['_id'], dest_proj['url'],
-             dest_proj['_id'])
-
-    mover = moving.NodeMover(db=db, skip_gcs=skip_gcs)
-    mover.change_project(node, dest_proj)
-
-    log.info('Done moving.')
 
 
 @manager_maintenance.command
@@ -732,97 +507,3 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
         return 3
 
     handle_project(proj)
-
-
-@manager_setup.command
-def create_blog(proj_url):
-    """Adds a blog to the project."""
-
-    from pillar.api.utils.authentication import force_cli_user
-    from pillar.api.utils import node_type_utils
-    from pillar.api.node_types.blog import node_type_blog
-    from pillar.api.node_types.post import node_type_post
-    from pillar.api.utils import remove_private_keys
-
-    force_cli_user()
-
-    db = current_app.db()
-
-    # Add the blog & post node types to the project.
-    projects_coll = db['projects']
-    proj = projects_coll.find_one({'url': proj_url})
-    if not proj:
-        log.error('Project url=%s not found', proj_url)
-        return 3
-
-    node_type_utils.add_to_project(proj,
-                                   (node_type_blog, node_type_post),
-                                   replace_existing=False)
-
-    proj_id = proj['_id']
-    r, _, _, status = current_app.put_internal('projects', remove_private_keys(proj), _id=proj_id)
-    if status != 200:
-        log.error('Error %i storing altered project %s %s', status, proj_id, r)
-        return 4
-    log.info('Project saved succesfully.')
-
-    # Create a blog node.
-    nodes_coll = db['nodes']
-    blog = nodes_coll.find_one({'node_type': 'blog', 'project': proj_id})
-    if not blog:
-        blog = {
-            'node_type': node_type_blog['name'],
-            'name': 'Blog',
-            'description': '',
-            'properties': {},
-            'project': proj_id,
-        }
-        r, _, _, status = current_app.post_internal('nodes', blog)
-        if status != 201:
-            log.error('Error %i storing blog node: %s', status, r)
-            return 4
-        log.info('Blog node saved succesfully: %s', r)
-    else:
-        log.info('Blog node already exists: %s', blog)
-
-    return 0
-
-
-@manager_operations.command
-def index_users_rebuild():
-    """Clear users index, update settings and reindex all users."""
-
-    from pillar.api.utils.algolia import algolia_index_user_save
-
-    users_index = current_app.algolia_index_users
-
-    log.info('Dropping index: {}'.format(users_index))
-    users_index.clear_index()
-    index_users_update_settings()
-
-    db = current_app.db()
-    users = db['users'].find({'_deleted': {'$ne': False}})
-
-    log.info('Reindexing all users')
-    for user in users:
-        algolia_index_user_save(user)
-
-
-@manager_operations.command
-def index_users_update_settings():
-    """Configure indexing backend as required by the project"""
-    users_index = current_app.algolia_index_users
-
-    # Automatically creates index if it does not exist
-    users_index.set_settings({
-        'searchableAttributes': [
-            'full_name',
-            'username',
-            'email',
-            'unordered(roles)'
-        ]
-    })
-
-manager.add_command("maintenance", manager_maintenance)
-manager.add_command("setup", manager_setup)
-manager.add_command("operations", manager_operations)
