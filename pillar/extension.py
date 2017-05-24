@@ -32,6 +32,14 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
         :rtype: unicode
         """
 
+    @property
+    def icon(self) -> str:
+        """Returns the icon HTML class, for use like i.pi-{{ext.icon}}
+
+        Defaults to the extension name.
+        """
+        return self.name
+
     @abc.abstractmethod
     def flask_config(self):
         """Returns extension-specific defaults for the Flask configuration.
