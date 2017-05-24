@@ -30,6 +30,39 @@ SYNC_GROUP_NODE_NAME = 'Blender Sync'
 IMAGE_SHARING_GROUP_NODE_NAME = 'Image sharing'
 
 
+def project_view(projections: dict = None):
+    """Endpoint decorator, translates project_url into an actual project."""
+
+    import functools
+    import pillarsdk
+
+    if callable(projections):
+        raise TypeError('Use with @project_view() <-- note the parentheses')
+
+    def decorator(wrapped):
+        @functools.wraps(wrapped)
+        def wrapper(project_url, *args, **kwargs):
+            if isinstance(project_url, pillarsdk.Resource):
+                # This is already a resource, so this call probably is from one
+                # view to another. Assume the caller knows what he's doing and
+                # just pass everything along.
+                return wrapped(project_url, *args, **kwargs)
+
+            api = system_util.pillar_api()
+
+            project = pillarsdk.Project.find_by_url(
+                project_url,
+                {'projection': projections} if projections else None,
+                api=api)
+            utils.attach_project_pictures(project, api)
+
+            return wrapped(project, *args, **kwargs)
+
+        return wrapper
+
+    return decorator
+
+
 @blueprint.route('/')
 @login_required
 def index():
@@ -66,18 +99,9 @@ def index():
 
 
 @blueprint.route('/<project_url>/jstree')
-def jstree(project_url):
+@project_view()
+def jstree(project):
     """Entry point to view a project as JSTree"""
-    api = system_util.pillar_api()
-
-    try:
-        project = Project.find_one({
-            'projection': {'_id': 1},
-            'where': {'url': project_url}
-        }, api=api)
-    except ResourceNotFound:
-        raise wz_exceptions.NotFound('No such project')
-
     return jsonify(items=jstree_get_children(None, project._id))
 
 
@@ -220,19 +244,17 @@ def home_jstree():
 
 
 @blueprint.route('/<project_url>/')
-def view(project_url):
+@project_view()
+def view(project: Project):
     """Entry point to view a project"""
 
     if request.args.get('format') == 'jstree':
         log.warning('projects.view(%r) endpoint called with format=jstree, '
                     'redirecting to proper endpoint. URL is %s; referrer is %s',
-                    project_url, request.url, request.referrer)
-        return redirect(url_for('projects.jstree', project_url=project_url))
+                    project.url, request.url, request.referrer)
+        return redirect(url_for('projects.jstree', project_url=project.url))
 
     api = system_util.pillar_api()
-    project = find_project_or_404(project_url,
-                                  embedded={'header_node': 1},
-                                  api=api)
 
     # Load the header video file, if there is any.
     header_video_file = None
@@ -421,12 +443,9 @@ def find_project_or_404(project_url, embedded=None, api=None):
 
 
 @blueprint.route('/<project_url>/search')
-def search(project_url):
+@project_view()
+def search(project: Project):
     """Search into a project"""
-    api = system_util.pillar_api()
-    project = find_project_or_404(project_url, api=api)
-    project.picture_square = utils.get_file(project.picture_square, api=api)
-    project.picture_header = utils.get_file(project.picture_header, api=api)
 
     return render_template('nodes/search.html',
                            project=project,
@@ -435,15 +454,9 @@ def search(project_url):
 
 @blueprint.route('/<project_url>/edit', methods=['GET', 'POST'])
 @login_required
-def edit(project_url):
+@project_view()
+def edit(project: Project):
     api = system_util.pillar_api()
-    # Fetch the Node or 404
-    try:
-        project = Project.find_one({'where': {'url': project_url}}, api=api)
-        # project = Project.find(project_url, api=api)
-    except ResourceNotFound:
-        abort(404)
-    utils.attach_project_pictures(project, api)
     form = ProjectForm(
         project_id=project._id,
         name=project.name,
@@ -498,17 +511,9 @@ def edit(project_url):
 
 @blueprint.route('/<project_url>/edit/node-type')
 @login_required
-def edit_node_types(project_url):
+@project_view()
+def edit_node_types(project: Project):
     api = system_util.pillar_api()
-    # Fetch the project or 404
-    try:
-        project = Project.find_one({
-            'where': '{"url" : "%s"}' % (project_url)}, api=api)
-    except ResourceNotFound:
-        return abort(404)
-
-    utils.attach_project_pictures(project, api)
-
     return render_template('projects/edit_node_types.html',
                            api=api,
                            project=project)
@@ -516,15 +521,10 @@ def edit_node_types(project_url):
 
 @blueprint.route('/<project_url>/e/node-type/<node_type_name>', methods=['GET', 'POST'])
 @login_required
-def edit_node_type(project_url, node_type_name):
+@project_view()
+def edit_node_type(project: Project, node_type_name):
     api = system_util.pillar_api()
-    # Fetch the Node or 404
-    try:
-        project = Project.find_one({
-            'where': '{"url" : "%s"}' % (project_url)}, api=api)
-    except ResourceNotFound:
-        return abort(404)
-    utils.attach_project_pictures(project, api)
+
     node_type = project.get_node_type(node_type_name)
     form = NodeTypeForm()
     if form.validate_on_submit():
@@ -565,14 +565,9 @@ def edit_node_type(project_url, node_type_name):
 
 @blueprint.route('/<project_url>/edit/sharing', methods=['GET', 'POST'])
 @login_required
-def sharing(project_url):
+@project_view()
+def sharing(project: Project):
     api = system_util.pillar_api()
-    # Fetch the project or 404
-    try:
-        project = Project.find_one({
-            'where': '{"url" : "%s"}' % (project_url)}, api=api)
-    except ResourceNotFound:
-        return abort(404)
 
     # Fetch users that are part of the admin group
     users = project.get_users(api=api)
@@ -588,15 +583,13 @@ def sharing(project_url):
             elif action == 'remove':
                 user = project.remove_user(user_id, api=api)
         except ResourceNotFound:
-            log.info('/p/%s/edit/sharing: User %s not found', project_url, user_id)
+            log.info('/p/%s/edit/sharing: User %s not found', project.url, user_id)
             return jsonify({'_status': 'ERROR',
                             'message': 'User %s not found' % user_id}), 404
 
         # Add gravatar to user
         user['avatar'] = utils.gravatar(user['email'])
         return jsonify(user)
-
-    utils.attach_project_pictures(project, api)
 
     return render_template('projects/sharing.html',
                            api=api,
