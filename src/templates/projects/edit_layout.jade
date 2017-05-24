@@ -1,0 +1,87 @@
+| {% extends 'layout.html' %}
+| {% block page_title %}Edit {{ project.name }}{% endblock %}
+
+| {% block body %}
+#project-container
+	#project-side-container
+		#project_sidebar
+			ul.project-tabs
+				li.tabs-thumbnail(
+					title="About",
+					data-toggle="tooltip",
+					data-placement="left",
+					class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
+					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+						#project-loading
+							i.pi-spin
+						| {% if project.picture_square %}
+						img(src="{{ project.picture_square.thumbnail('b', api=api) }}")
+						| {% else %}
+						i.pi-home
+						| {% endif %}
+				li.tabs-browse(
+					title="Browse",
+					data-toggle="tooltip",
+					data-placement="left")
+					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+						i.pi-tree-flow
+				| {% if not project.is_private %}
+				li.tabs-search(
+					title="Search",
+					data-toggle="tooltip",
+					data-placement="left")
+					a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
+						i.pi-search
+				| {% endif %}
+
+				.project_nav-toggle-btn(
+					title="Expand Navigation [T]",
+					data-toggle="tooltip",
+					data-placement="right")
+					i.pi-angle-double-left
+
+		#project_nav
+			#project_nav-container
+				#project_nav-header
+					.project-title
+						a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+							| {{ project.name }}
+
+				// TODO - make list a macro
+				#project_tree.edit
+					ul.project_nav-edit-list
+						li(class="{% if title == 'edit' %}active{% endif %}")
+							a(href="{{ url_for('projects.edit', project_url=project.url) }}")
+								i.pi-list
+								| Overview
+						li(class="{% if title == 'sharing' %}active{% endif %}")
+							a(href="{{ url_for('projects.sharing', project_url=project.url) }}")
+								i.pi-share
+								| Sharing
+						li(class="{% if title == 'edit_node_types' %}active{% endif %}")
+							a(href="{{ url_for('projects.edit_node_types', project_url=project.url) }}")
+								i.pi-puzzle
+								| Node Types
+						| {% for ext in ext_pages %}
+						li(class="{% if title == ext.name %}active{% endif %}")
+							a(href="{{ url_for('projects.edit_extension', project_url=project.url, extension_name=ext.name) }}")
+								i(class="pi-{{ext.icon}}")
+								| {{ext.name | title}}
+						| {% endfor %}
+				.project_split(title="Toggle Navigation [T]")
+
+	#project_context-container
+		#project_context-header
+			span#status-bar
+			| {% block project_context_header %}
+			| {% endblock %}
+
+		#project_context
+			| {% block project_context %}
+			| {% endblock %}
+| {% endblock %}
+
+| {% block footer_navigation %}
+| {% endblock %}
+| {% block footer %}
+| {% endblock %}

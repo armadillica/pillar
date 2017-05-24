@@ -1,143 +1,72 @@
-| {% extends 'layout.html' %}
-
+| {% extends 'projects/edit_layout.html'  %}
 | {% set title = 'sharing' %}
-
 | {% block page_title %}Sharing: {{ project.name }}{% endblock %}
 
-| {% block body %}
-#project-container
-	#project-side-container
-		#project_sidebar
-			ul.project-tabs
-				li.tabs-thumbnail(
-					title="About",
-					data-toggle="tooltip",
-					data-placement="left",
-					class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
-					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-						#project-loading
-							i.pi-spin
-						| {% if project.picture_square %}
-						img(src="{{ project.picture_square.thumbnail('b', api=api) }}")
-						| {% else %}
-						i.pi-home
-						| {% endif %}
-				li.tabs-browse(
-					title="Browse",
-					data-toggle="tooltip",
-					data-placement="left")
-					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-						i.pi-tree-flow
-				| {% if not project.is_private %}
-				li.tabs-search(
-					title="Search",
-					data-toggle="tooltip",
-					data-placement="left")
-					a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
-						i.pi-search
-				| {% endif %}
-
-				.project_nav-toggle-btn(
-					title="Expand Navigation [T]",
-					data-toggle="tooltip",
-					data-placement="right")
-					i.pi-angle-double-left
-
-		#project_nav
-			#project_nav-container
-				#project_nav-header
-					.project-title
-						a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-							| {{ project.name }}
-
-				// TODO - make list a macro
-				#project_tree.edit
-					ul.project_nav-edit-list
-						li(class="{% if title == 'edit' %}active{% endif %}")
-							a(href="{{ url_for('projects.edit', project_url=project.url) }}")
-								i.pi-list
-								| Overview
-						li(class="{% if title == 'sharing' %}active{% endif %}")
-							a(href="{{ url_for('projects.sharing', project_url=project.url) }}")
-								i.pi-share
-								| Sharing
-						li(class="{% if title == 'edit_node_types' %}active{% endif %}")
-							a(href="{{ url_for('projects.edit_node_types', project_url=project.url) }}")
-								i.pi-puzzle
-								| Node Types
-
-				.project_split(title="Toggle Navigation [T]")
-
-	#project_context-container
-		#project_context-header
-			span#status-bar
-
-			span#project-edit-title
-				| Manage team members for this project
-
-		#project_context
-			#node-edit-container
-				#node-edit-form
-					.col-md-6
-						| {% if (project.user == current_user.objectid or current_user.has_role('admin')) %}
-						.sharing-users-search
-							.form-group
-								input#user-select.form-control(
-									name='contacts',
-									type='text',
-									placeholder='Add team members by name')
-						| {% else %}
-						.sharing-users-search
-							.disabled Only project owners &amp; admins can manage users
-						| {% endif %}
-
-
-						ul.sharing-users-list
-							| {% for user in users %}
-							li.sharing-users-item(
-								user-id="{{ user['_id'] }}",
-								class="{% if current_user.objectid == user['_id'] %}self{% endif %}")
-								.sharing-users-avatar
-									img(src="{{ user['avatar'] }}")
-								.sharing-users-details
-									span.sharing-users-name
-										| {{user['full_name']}}
-										| {% if project.user == user['_id'] and current_user.objectid == user['_id'] %}
-										small (You, owner)
-										| {% elif project.user == user['_id'] %}
-										small (Owner)
-										| {% elif current_user.objectid == user['_id'] %}
-										small (You)
-										| {% endif %}
-									span.sharing-users-extra {{user['username']}}
-								.sharing-users-action
-									| {# Only allow deletion if we are: admin, project owners, or current_user in the team #}
-									| {% if current_user.has_role('admin') or (project.user == current_user.objectid) or (current_user.objectid == user['_id']) %}
-
-									| {% if project.user == user['_id'] %}
-									span
-										i.pi-happy(title="Hi boss!")
-									| {% elif current_user.objectid == user['_id'] %}
-									button.user-remove(title="Leave this project") Leave
-									| {% else %}
-									button.user-remove(title="Remove this user from your project")
-										i.pi-trash
-									| {% endif %}
-
-									| {% endif %}
-							| {% endfor %}
-
-					.col-md-6
-						.sharing-users-info
-							h4 What can team members do?
-							p.
-								Team members are able to upload new content to the project,
-								as well as view, edit, delete, and comment on the content
-								previously created.
-
+| {% block project_context_header %}
+span#project-edit-title
+	| Manage team members for this project
 | {% endblock %}
 
-| {% block footer_navigation %}
+| {% block project_context %}
+#node-edit-container
+	#node-edit-form
+		.col-md-6
+			| {% if (project.user == current_user.objectid or current_user.has_role('admin')) %}
+			.sharing-users-search
+				.form-group
+					input#user-select.form-control(
+						name='contacts',
+						type='text',
+						placeholder='Add team members by name')
+			| {% else %}
+			.sharing-users-search
+				.disabled Only project owners &amp; admins can manage users
+			| {% endif %}
+
+
+			ul.sharing-users-list
+				| {% for user in users %}
+				li.sharing-users-item(
+					user-id="{{ user['_id'] }}",
+					class="{% if current_user.objectid == user['_id'] %}self{% endif %}")
+					.sharing-users-avatar
+						img(src="{{ user['avatar'] }}")
+					.sharing-users-details
+						span.sharing-users-name
+							| {{user['full_name']}}
+							| {% if project.user == user['_id'] and current_user.objectid == user['_id'] %}
+							small (You, owner)
+							| {% elif project.user == user['_id'] %}
+							small (Owner)
+							| {% elif current_user.objectid == user['_id'] %}
+							small (You)
+							| {% endif %}
+						span.sharing-users-extra {{user['username']}}
+					.sharing-users-action
+						| {# Only allow deletion if we are: admin, project owners, or current_user in the team #}
+						| {% if current_user.has_role('admin') or (project.user == current_user.objectid) or (current_user.objectid == user['_id']) %}
+
+						| {% if project.user == user['_id'] %}
+						span
+							i.pi-happy(title="Hi boss!")
+						| {% elif current_user.objectid == user['_id'] %}
+						button.user-remove(title="Leave this project") Leave
+						| {% else %}
+						button.user-remove(title="Remove this user from your project")
+							i.pi-trash
+						| {% endif %}
+
+						| {% endif %}
+				| {% endfor %}
+
+		.col-md-6
+			.sharing-users-info
+				h4 What can team members do?
+				p.
+					Team members are able to upload new content to the project,
+					as well as view, edit, delete, and comment on the content
+					previously created.
+
 | {% endblock %}
 
 | {% block footer_scripts %}
