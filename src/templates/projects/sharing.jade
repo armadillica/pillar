@@ -198,46 +198,58 @@ script.
 			}
 
 		});
-
-
-		function addUser(userId){
-			if (userId && userId.length > 0) {
-				$.post("{{url_for('projects.sharing', project_url=project.url)}}",
-								{user_id: userId, action: 'add'})
-					.done(function (data) {
-
-						$("ul.sharing-users-list").prepend('' +
-							'<li class="sharing-users-item" user-id="' + data._id + '">' +
-								'<div class="sharing-users-avatar">' +
-									'<img src="' + data.avatar  + '">'+
-								'</div>' +
-								'<div class="sharing-users-details">' +
-									'<span class="sharing-users-name">' + data.full_name + '</span>' +
-									'<span class="sharing-users-extra">' + data.username + '</span>' +
-								'</div>' +
-								'<div class="sharing-users-action">' +
-									'<button title="Remove this user from your project" class="user-remove">'+
-										'<i class="pi-trash"></i>'+
-									'</button>'+
-								'</div>'+
-							'</li>');
-
-						$("ul.sharing-users-list").find("[user-id='" + userId + "']").addClass('added');
-						setTimeout(function(){ $('.sharing-users-item').removeClass('added');}, 350);
-						statusBarSet('success', 'User added to this project!', 'pi-grin');
-					})
-					.fail(function (jsxhr){
-						data = jsxhr.responseJSON;
-						statusBarSet('error', 'Could not add user (' + data.message + ')', 'pi-warning');
-					});
-			} else {
-				statusBarSet('error', 'Please select a user from the list', 'pi-warning');
-			}
-		};
-
-
-
 	});
+	function addUser(userId){
+		if (!userId || userId.length == 0) {
+			statusBarSet('error', 'Please select a user from the list', 'pi-warning');
+			return;
+		}
+
+		$.post("{{url_for('projects.sharing', project_url=project.url)}}",
+				{user_id: userId, action: 'add'})
+		.done(function (data) {
+			var $ul = $("ul.sharing-users-list");
+			var $li = $('<li>')
+				.addClass('sharing-users-item added')
+				.attr('user-id', data._id)
+				.appendTo($ul);
+			var $div = $('<div>')
+				.addClass('sharing-users-avatar')
+				.appendTo($li);
+			$('<img>')
+				.attr('src', data.avatar)
+				.attr('alt', 'Avatar')
+				.appendTo($div);
+
+			$div = $('<div>')
+				.addClass('sharing-users-details')
+				.appendTo($li);
+			$('<span>')
+				.addClass('sharing-users-name')
+				.text(data.full_name)
+				.appendTo($div);
+			$('<span>')
+				.addClass('sharing-users-extra')
+				.text(data.username)
+				.appendTo($div);
+
+			$div = $('<div>')
+				.addClass('sharing-users-action')
+				.appendTo($li);
+			var $button = $('<button>')
+				.addClass('user-remove')
+				.attr('title', 'Remove this user from your project')
+				.appendTo($div);
+			$('<i>').addClass('pi-trash').appendTo($button);
+
+			setTimeout(function(){ $('.sharing-users-item').removeClass('added');}, 350);
+			statusBarSet('success', 'User added to this project!', 'pi-grin');
+		})
+		.fail(function (jsxhr){
+			data = jsxhr.responseJSON;
+			statusBarSet('error', 'Could not add user (' + data.message + ')', 'pi-warning');
+		});
+	}
 
 | {% endif %}
 script.
