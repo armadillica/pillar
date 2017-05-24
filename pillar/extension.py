@@ -19,7 +19,8 @@ import abc
 
 
 class PillarExtension(object, metaclass=abc.ABCMeta):
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def name(self):
         """The name of this extension.
 
