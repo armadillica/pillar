@@ -7,9 +7,9 @@ import copy
 import logging
 
 from bson.objectid import ObjectId, InvalidId
-
-from flask import current_app
 from flask_script import Manager
+
+from pillar import current_app
 
 log = logging.getLogger(__name__)
 manager = Manager(current_app)
@@ -787,6 +787,41 @@ def create_blog(proj_url):
 
     return 0
 
+
+@manager_operations.command
+def index_users_rebuild():
+    """Clear users index, update settings and reindex all users."""
+
+    from pillar.api.utils.algolia import algolia_index_user_save
+
+    users_index = current_app.algolia_index_users
+
+    log.info('Dropping index: {}'.format(users_index))
+    users_index.clear_index()
+    index_users_update_settings()
+
+    db = current_app.db()
+    users = db['users'].find({'_deleted': {'$ne': False}})
+
+    log.info('Reindexing all users')
+    for user in users:
+        algolia_index_user_save(user)
+
+
+@manager_operations.command
+def index_users_update_settings():
+    """Configure indexing backend as required by the project"""
+    users_index = current_app.algolia_index_users
+
+    # Automatically creates index if it does not exist
+    users_index.set_settings({
+        'searchableAttributes': [
+            'full_name',
+            'username',
+            'email',
+            'unordered(roles)'
+        ]
+    })
 
 manager.add_command("maintenance", manager_maintenance)
 manager.add_command("setup", manager_setup)
