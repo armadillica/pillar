@@ -137,7 +137,7 @@ def index_users_rebuild():
     index_users_update_settings()
 
     db = current_app.db()
-    users = db['users'].find({'_deleted': {'$ne': False}})
+    users = db['users'].find({'_deleted': {'$ne': True}})
 
     log.info('Reindexing all users')
     for user in users:
