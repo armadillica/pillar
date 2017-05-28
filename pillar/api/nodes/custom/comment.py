@@ -10,7 +10,6 @@ from pillar.api.utils import authorization, authentication, jsonify
 from . import register_patch_handler
 
 log = logging.getLogger(__name__)
-ROLES_FOR_COMMENT_VOTING = {'subscriber', 'demo'}
 COMMENT_VOTING_OPS = {'upvote', 'downvote', 'revoke'}
 VALID_COMMENT_OPERATIONS = COMMENT_VOTING_OPS.union({'edit'})
 
@@ -180,7 +179,7 @@ def assert_is_valid_patch(node_id, patch):
         return
 
     # See whether the user is allowed to patch
-    if authorization.user_matches_roles(ROLES_FOR_COMMENT_VOTING):
+    if authorization.user_matches_roles(current_app.config['ROLES_FOR_COMMENT_VOTING']):
         log.debug('User is allowed to upvote/downvote comment')
         return
 

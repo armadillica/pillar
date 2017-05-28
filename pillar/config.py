@@ -125,6 +125,7 @@ FILESIZE_LIMIT_BYTES_NONSUBS = 32 * 2 ** 20
 # Unless they have one of those roles.
 ROLES_FOR_UNLIMITED_UPLOADS = {'subscriber', 'demo', 'admin'}
 
+ROLES_FOR_COMMENT_VOTING = {'subscriber', 'demo'}
 
 #############################################
 # Old pillar-web config:
