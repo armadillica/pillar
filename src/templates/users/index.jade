@@ -55,10 +55,10 @@ script(type="text/template", id="facet-template")
 script(type="text/template", id="hit-template")
 	.search-hit.users(data-user-id='{{ objectID }}')
 		.search-hit-name
-			| {{{ _highlightResult.full_name.value }}}
-			small ({{{ username }}})
+			| {{ full_name }}
+			small ({{ username }})
 		.search-hit-roles
-			| {{{ roles }}}
+			| {{ roles }}
 
 
 // Pagination template

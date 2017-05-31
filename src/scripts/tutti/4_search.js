@@ -37,10 +37,10 @@ $(document).ready(function() {
 								hitFree +
 							'</div>' +
 							'<div class="search-hit-name" title="' + hit.name + '">' +
-								hit._highlightResult.name.value + ' ' +
+								hit.name + ' ' +
 							'</div>' +
 							'<div class="search-hit-meta">' +
-								'<span class="project">' + hit._highlightResult.project.name.value + '</span> · ' +
+								'<span class="project">' + hit.project.name + '</span> · ' +
 								'<span class="node_type">' + hit.node_type + '</span>' +
 								hitMedia +
 							'</div>' +

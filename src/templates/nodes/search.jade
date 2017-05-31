@@ -134,9 +134,9 @@ script(type="text/template", id="hit-template")
 				span free
 			| {{/is_free}}
 		.search-hit-name
-			| {{{ _highlightResult.name.value }}}
+			| {{ name }}
 		.search-hit-meta
-			span.project {{{ project.name }}} ·
+			span.project {{ project.name }}
 			span.node_type {{{ node_type }}}
 			| {{#media}}
 			span.media · {{{ media }}}
