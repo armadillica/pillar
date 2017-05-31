@@ -131,6 +131,9 @@ def index_users_rebuild():
     from pillar.api.utils.algolia import algolia_index_user_save
 
     users_index = current_app.algolia_index_users
+    if users_index is None:
+        log.error('Algolia is not configured properly, unable to do anything!')
+        return 1
 
     log.info('Dropping existing index: %s', users_index)
     users_index.clear_index()
