@@ -148,7 +148,7 @@ class AbstractPillarTest(TestMinimal):
             from_db = files_collection.find_one(file_id)
             return file_id, from_db
 
-    def ensure_project_exists(self, project_overrides=None):
+    def ensure_project_exists(self, project_overrides=None) -> typing.Tuple[ObjectId, dict]:
         self.ensure_group_exists(ctd.EXAMPLE_ADMIN_GROUP_ID, 'project admin')
         self.ensure_group_exists(ctd.EXAMPLE_PROJECT_READONLY_GROUP_ID, 'r/o group')
         self.ensure_group_exists(ctd.EXAMPLE_PROJECT_READONLY_GROUP2_ID, 'r/o group 2')
@@ -250,13 +250,14 @@ class AbstractPillarTest(TestMinimal):
 
         return token_data
 
-    def create_project_with_admin(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',)):
+    def create_project_with_admin(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',),
+                                  project_overrides=None):
         """Creates a project and a user that's member of the project's admin group.
 
         :returns: (project_id, user_id)
         :rtype: tuple
         """
-        project_id, proj = self.ensure_project_exists()
+        project_id, proj = self.ensure_project_exists(project_overrides=project_overrides)
         user_id = self.create_project_admin(proj, user_id, roles)
 
         return project_id, user_id
