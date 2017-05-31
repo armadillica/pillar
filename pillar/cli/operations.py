@@ -132,7 +132,7 @@ def index_users_rebuild():
 
     users_index = current_app.algolia_index_users
 
-    log.info('Dropping index: {}'.format(users_index))
+    log.info('Dropping existing index: %s', users_index)
     users_index.clear_index()
     index_users_update_settings()
 
