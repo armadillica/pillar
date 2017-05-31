@@ -1,6 +1,7 @@
 import json
 import logging
 import itertools
+import typing
 
 from pillarsdk import Node
 from pillarsdk import Project
@@ -21,6 +22,8 @@ from pillar import current_app
 from pillar.web import system_util
 from pillar.web import utils
 from pillar.web.utils.jstree import jstree_get_children
+import pillar.extension
+
 from .forms import ProjectForm
 from .forms import NodeTypeForm
 
@@ -469,10 +472,6 @@ def edit(project: Project):
         status=project.status,
     )
 
-    # Collect extension pages.
-    ext_pages = [ext for ext in current_app.pillar_extensions.values()
-                 if ext.has_project_settings]
-
     if form.validate_on_submit():
         project = Project.find(project._id, api=api)
         project.name = form.name.data
@@ -511,8 +510,15 @@ def edit(project: Project):
                            form=form,
                            hidden_fields=hidden_fields,
                            project=project,
-                           ext_pages=ext_pages,
+                           ext_pages=find_extension_pages(),
                            api=api)
+
+
+def find_extension_pages() -> typing.List[pillar.extension.PillarExtension]:
+    """Returns a list of Pillar extensions that have project settings pages."""
+
+    return [ext for ext in current_app.pillar_extensions.values()
+            if ext.has_project_settings]
 
 
 @blueprint.route('/<project_url>/edit/node-type')
@@ -522,6 +528,7 @@ def edit_node_types(project: Project):
     api = system_util.pillar_api()
     return render_template('projects/edit_node_types.html',
                            api=api,
+                           ext_pages=find_extension_pages(),
                            project=project)
 
 
@@ -600,6 +607,7 @@ def sharing(project: Project):
     return render_template('projects/sharing.html',
                            api=api,
                            project=project,
+                           ext_pages=find_extension_pages(),
                            users=users['_items'])
 
 
@@ -795,4 +803,5 @@ def edit_extension(project: Project, extension_name):
     except KeyError:
         raise wz_exceptions.NotFound()
 
-    return ext.project_settings(project)
+    return ext.project_settings(project,
+                                ext_pages=find_extension_pages())

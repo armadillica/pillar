@@ -5,9 +5,11 @@ unique usernames from emails. Calls out to the pillar_server.modules.blender_id
 module for Blender ID communication.
 """
 
-import logging
 import datetime
+import logging
+import typing
 
+import bson
 from bson import tz_util
 from flask import g
 from flask import request
@@ -226,7 +228,7 @@ def _delete_expired_tokens():
     # log.debug('Deleted %i expired authentication tokens', result.deleted_count)
 
 
-def current_user_id():
+def current_user_id() -> typing.Optional[bson.ObjectId]:
     """None-safe fetching of user ID. Can return None itself, though."""
 
     current_user = g.get('current_user') or {}

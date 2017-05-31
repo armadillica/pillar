@@ -108,10 +108,12 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
 
         return ''
 
-    def project_settings(self, project: pillarsdk.Project) -> flask.Response:
+    def project_settings(self, project: pillarsdk.Project, **template_args: dict) -> flask.Response:
         """Renders the project settings page for this extension.
 
         Set YourExtension.has_project_settings = True and Pillar will call this function.
 
+        :param project: the project for which to render the settings.
+        :param template_args: additional template arguments.
         :returns: a Flask HTTP response
         """
