@@ -4,12 +4,10 @@ import bson
 
 from pillar import current_app
 
-from .celery_cfg import celery_cfg
-
 log = logging.getLogger(__name__)
 
 
-@celery_cfg.task(ignore_result=True)
+@current_app.celery.task(ignore_result=True)
 def push_updated_user_to_algolia(user_id: str):
     """Push an update to the Algolia index when a user item is updated"""
 

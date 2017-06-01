@@ -155,3 +155,6 @@ EXTERNAL_SUBSCRIPTIONS_TIMEOUT_SECS = 10
 
 # Certificate file for communication with other systems.
 TLS_CERT_FILE = requests.certs.where()
+
+CELERY_BACKEND = 'redis://redis/1'
+CELERY_BROKER = 'amqp://guest:guest@rabbit//'

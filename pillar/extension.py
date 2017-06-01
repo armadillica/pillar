@@ -16,6 +16,7 @@ can then be registered to the application at app creation time:
 """
 
 import abc
+import typing
 
 import flask
 import pillarsdk
@@ -24,6 +25,9 @@ import pillarsdk
 class PillarExtension(object, metaclass=abc.ABCMeta):
     # Set to True when your extension implements the project_settings() method.
     has_project_settings = False
+
+    # List of Celery task modules introduced by this extension.
+    celery_task_modules: typing.List[str] = []
 
     @property
     @abc.abstractmethod

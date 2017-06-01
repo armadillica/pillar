@@ -178,6 +178,4 @@ def worker(args):
                            # PyMongo client and reconnect after forking.
     ] + list(args)
 
-    from pillar.celery.celery_cfg import celery_cfg
-
-    celery_cfg.worker_main([argv0] + argvother)
+    current_app.celery.worker_main([argv0] + argvother)
