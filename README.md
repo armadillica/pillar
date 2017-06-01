@@ -18,7 +18,7 @@ supplied by Fontello.
 After replacing the font files & `config.json`, edit the Fontello-supplied
 `font.css` to remove all font formats except `woff` and `woff2`. Then upload
 it to [css2sass](http://css2sass.herokuapp.com/) to convert it to SASS, and
-place it in [src/styles/_font-pillar.sass](src/styles/_font-pillar.sass).
+place it in [src/styles/font-pillar.sass](src/styles/font-pillar.sass).
 
 Don't forget to Gulp!
 
