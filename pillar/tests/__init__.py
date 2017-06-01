@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 import typing
+import unittest.mock
 
 try:
     from urllib.parse import urlencode
@@ -57,6 +58,16 @@ class PillarTestServer(pillar.PillarServer):
         logging.getLogger('pillar').setLevel(logging.DEBUG)
         logging.getLogger('werkzeug').setLevel(logging.DEBUG)
         logging.getLogger('eve').setLevel(logging.DEBUG)
+
+    def _config_celery(self):
+        """Disables Celery by entirely mocking it.
+
+        Without this, actual Celery tasks will be created while the tests are running.
+        """
+
+        from celery import Celery
+
+        self.celery = unittest.mock.MagicMock(Celery)
 
 
 class AbstractPillarTest(TestMinimal):
