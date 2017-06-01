@@ -62,14 +62,9 @@ def before_replacing_user(request, lookup):
 def push_updated_user_to_algolia(user, original):
     """Push an update to the Algolia index when a user item is updated"""
 
-    from algoliasearch.helpers import AlgoliaException
-    from pillar.api.utils.algolia import algolia_index_user_save
+    from pillar.celery import algolia_tasks
 
-    try:
-        algolia_index_user_save(user)
-    except AlgoliaException as ex:
-        log.warning('Unable to push user info to Algolia for user "%s", id=%s; %s',
-                    user.get('username'), user.get('_id'), ex)
+    algolia_tasks.push_updated_user_to_algolia.delay(str(user['_id']))
 
 
 def send_blinker_signal_roles_changed(user, original):

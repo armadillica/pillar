@@ -2,6 +2,7 @@ from celery import Celery
 
 task_modules = [
     'pillar.celery.tasks',
+    'pillar.celery.algolia_tasks',
 ]
 
 celery_cfg = Celery('proj',
