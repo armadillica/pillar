@@ -87,7 +87,6 @@ class AbstractPillarTest(TestMinimal):
         tempfile.tempdir = cls._orig_tempdir
         shutil.rmtree(cls._pillar_storage_dir)
 
-
     def setUp(self, **kwargs):
         eve_settings_file = os.path.join(MY_PATH, 'eve_test_settings.py')
         kwargs['settings_file'] = eve_settings_file
@@ -207,7 +206,7 @@ class AbstractPillarTest(TestMinimal):
             return result.inserted_id
 
     def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',),
-                    groups=None, *, token: str = None, email: str=TEST_EMAIL_ADDRESS):
+                    groups=None, *, token: str = None, email: str = TEST_EMAIL_ADDRESS):
         from pillar.api.utils.authentication import make_unique_username
         import uuid
 
