@@ -159,3 +159,25 @@ def index_users_update_settings():
             'unordered(roles)'
         ]
     })
+
+
+@manager_operations.option('args', nargs='*')
+def worker(args):
+    """Runs a Celery worker."""
+
+    import sys
+
+    argv0 = f'{sys.argv[0]} operations worker'
+    argvother = [
+        '-E',
+        '-l', 'INFO',
+        '--concurrency', '1',
+        '--pool', 'solo',  # No preforking, as PyMongo can't handle connect-before-fork.
+                           # We might get rid of this and go for the default Celery worker
+                           # preforking concurrency model, *if* we can somehow reset the
+                           # PyMongo client and reconnect after forking.
+    ] + list(args)
+
+    from pillar.celery.celery_cfg import celery_cfg
+
+    celery_cfg.worker_main([argv0] + argvother)
