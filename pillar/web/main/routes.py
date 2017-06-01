@@ -226,36 +226,6 @@ def training():
     return render_page()
 
 
-@blueprint.route('/gallery')
-def gallery():
-    return redirect('/p/gallery')
-
-
-@blueprint.route('/textures')
-def redir_textures():
-    return redirect('/p/textures')
-
-
-@blueprint.route('/hdri')
-def redir_hdri():
-    return redirect('/p/hdri')
-
-
-@blueprint.route('/caminandes')
-def caminandes():
-    return redirect('/p/caminandes-3')
-
-
-@blueprint.route('/cf2')
-def cf2():
-    return redirect('/p/creature-factory-2')
-
-
-@blueprint.route('/characters')
-def redir_characters():
-    return redirect('/p/characters')
-
-
 @blueprint.route('/vrview')
 def vrview():
     """Call this from iframes to render sperical content (video and images)"""
@@ -268,18 +238,6 @@ def vrview():
 def error_403():
     """Custom entry point to display the not allowed template"""
     return render_template('errors/403_embed.html')
-
-
-@blueprint.route('/join-agent')
-def join_agent():
-    """Custom page to support Agent 327 barbershop campaign"""
-    return render_template('join_agent.html')
-
-
-# Shameful redirects
-@blueprint.route('/p/blender-cloud/')
-def redirect_cloud_blog():
-    return redirect('/blog')
 
 
 @blueprint.route('/feeds/blogs.atom')
