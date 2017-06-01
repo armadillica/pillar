@@ -1,8 +1,6 @@
 import logging
 
-import requests.exceptions
 from flask_script import Manager
-
 from pillar import current_app
 
 log = logging.getLogger(__name__)
