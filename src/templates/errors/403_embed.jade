@@ -50,20 +50,20 @@
 
 			.row
 				.col-md-4
-					a(href="{{ url_for('main.redir_textures') }}")
+					a(href="{{ url_for('projects.view', project_url='textures') }}")
 						h3 Textures
 						p.
 							More than 1500 texture maps to browse online or within Blender via our awesome add-on.
 							Create your own Texture libraries!
 
 				.col-md-4
-					a(href="{{ url_for('main.redir_hdri') }}")
+					a(href="{{ url_for('projects.view', project_url='hdri') }}")
 						h3 HDRI
 						p.
 							Up to 8K and 18 EVs (extremely high) HDR images to light your renders.
 
 				.col-md-4
-					a(href="{{ url_for('main.redir_characters') }}")
+					a(href="{{ url_for('projects.view', project_url='characters') }}")
 						h3 Characters
 						p.
 							Production quality, fully rigged and shaded characters ready to animate.

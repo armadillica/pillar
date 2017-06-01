@@ -175,7 +175,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 		.page-triplet-container.homepage
 			.row
 				.col-md-4
-					.triplet-card(data-url="{{ url_for('main.redir_textures') }}")
+					.triplet-card(data-url="{{ url_for('projects.view', project_url='textures') }}")
 						.triplet-card-thumbnail
 							img(
 								alt="Textures",
@@ -185,11 +185,11 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							p.
 								More than 1500 texture maps.
 								Browse online or from Blender with our awesome  add-on.
-							a.triplet-cta(href="{{ url_for('main.redir_textures') }}")
+							a.triplet-cta(href="{{ url_for('projects.view', project_url='textures') }}")
 								| LEARN MORE
 
 				.col-md-4
-					.triplet-card(data-url="{{ url_for('main.redir_hdri') }}")
+					.triplet-card(data-url="{{ url_for('projects.view', project_url='hdri') }}")
 						.triplet-card-thumbnail
 							img(
 								alt="HDRI",
@@ -198,11 +198,11 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							h3 HDRI
 							p.
 								Up to 16K and 24 EVs (extremely high) HDR images to light your renders.
-							a.triplet-cta(href="{{ url_for('main.redir_hdri') }}")
+							a.triplet-cta(href="{{ url_for('projects.view', project_url='hdri') }}")
 								| LEARN MORE
 
 				.col-md-4
-					.triplet-card(data-url="{{ url_for('main.redir_characters') }}")
+					.triplet-card(data-url="{{ url_for('projects.view', project_url='characters') }}")
 						.triplet-card-thumbnail
 							img(
 								alt="Characters",
@@ -211,7 +211,7 @@ meta(property="og:image", content="{{ url_for('static', filename='assets/img/bac
 							h3 Characters
 							p.
 								Production quality, fully rigged and shaded characters ready to animate.
-							a.triplet-cta(href="{{ url_for('main.redir_characters') }}")
+							a.triplet-cta(href="{{ url_for('projects.view', project_url='characters') }}")
 								| LEARN MORE
 
 

@@ -137,7 +137,7 @@ html(lang="en")
 								ul.dropdown-menu
 									li
 										a.navbar-item(
-											href="{{ url_for('main.redir_hdri') }}",
+											href="{{ url_for('projects.view', project_url='hdri') }}",
 											title="HDRI Library",
 											data-toggle="tooltip",
 											data-placement="left")
@@ -145,7 +145,7 @@ html(lang="en")
 											| HDRI
 									li
 										a.navbar-item(
-											href="{{ url_for('main.redir_textures') }}",
+											href="{{ url_for('projects.view', project_url='textures') }}",
 											title="Textures Library",
 											data-toggle="tooltip",
 											data-placement="left")
@@ -153,7 +153,7 @@ html(lang="en")
 											| Textures
 									li
 										a.navbar-item(
-											href="{{ url_for('main.redir_characters') }}",
+											href="{{ url_for('projects.view', project_url='characters') }}",
 											title="Character Library",
 											data-toggle="tooltip",
 											data-placement="left")
@@ -161,7 +161,7 @@ html(lang="en")
 											| Characters
 									li
 										a.navbar-item(
-											href="{{ url_for('main.gallery') }}",
+											href="{{ url_for('projects.view', project_url='gallery') }}",
 											title="Curated artwork collection",
 											data-toggle="tooltip",
 											data-placement="left")
