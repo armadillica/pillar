@@ -14,23 +14,29 @@ INDEX_ALLOWED_NODE_TYPES = {'asset', 'texture', 'group', 'hdri'}
 
 @skip_when_testing
 def algolia_index_user_save(user):
-    if 'roles' in user and 'service' in user['roles']:
+    index_users = current_app.algolia_index_users
+    if not index_users:
+        log.debug('No Algolia index defined, so nothing to do.')
         return
+
+    user_roles = set(user.get('roles', ()))
+    if 'service' in user_roles:
+        return
+
     # Strip unneeded roles
-    if 'roles' in user:
-        roles = set(user['roles']).intersection(INDEX_ALLOWED_USER_ROLES)
-    else:
-        roles = set()
-    if current_app.algolia_index_users:
-        # Create or update Algolia index for the user
-        current_app.algolia_index_users.save_object({
-            'objectID': user['_id'],
-            'full_name': user['full_name'],
-            'username': user['username'],
-            'roles': list(roles),
-            'groups': user['groups'],
-            'email': user['email']
-        })
+    index_roles = user_roles.intersection(INDEX_ALLOWED_USER_ROLES)
+
+    # Create or update Algolia index for the user
+    index_users.save_object({
+        'objectID': user['_id'],
+        'full_name': user['full_name'],
+        'username': user['username'],
+        'roles': list(index_roles),
+        'groups': user['groups'],
+        'email': user['email']
+    })
+
+    log.debug('Pushed user %r to Algolia index %r', user['_id'], index_users.index_name)
 
 
 @skip_when_testing
