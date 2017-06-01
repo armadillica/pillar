@@ -1,19 +1,9 @@
 @font-face
   font-family: 'pillar-font'
-  src: url('../font/pillar-font.woff2?2276157') format('woff2')
-  src: url('../font/pillar-font.woff?2276157') format('woff')
+  src: url('../font/pillar-font.woff2?85547657') format('woff2')
+  src: url('../font/pillar-font.woff?85547657') format('woff')
   font-weight: normal
   font-style: normal
-
-/* Chrome hack: SVG is rendered more smooth in Windozze. 100% magic, uncomment if you need it.
-/* Note, that will break hinting! In other OS-es font will be not as sharp as it could be
-/*
- *@media screen and (-webkit-min-device-pixel-ratio:0) {
- *  @font-face {
- *    font-family: 'pillar-font';
- *    src: url('../font/pillar-font.svg?2276157#pillar-font') format('svg');
- *  }
- *}
 
 [class^="pi-"]:before, [class*=" pi-"]:before
   font-family: "pillar-font"
@@ -602,6 +592,11 @@
 
 /* ''
 
+.pi-link:before
+  content: '\e870'
+
+/* ''
+
 .pi-pause:before
   content: '\f00e'
 
@@ -626,6 +621,11 @@
   content: '\f0ea'
 
 /* ''
+
+.pi-unlink:before
+  content: '\f127'
+
+/* ''
 
 .pi-newspaper:before
   content: '\f1ea'
