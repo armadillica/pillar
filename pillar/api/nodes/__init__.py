@@ -13,8 +13,6 @@ from pillar.api.activities import activity_subscribe, activity_object_add
 from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
 from pillar.api.file_storage_backends.gcs import update_file_name
 from pillar.api.utils import str2id, jsonify
-from pillar.api.utils.algolia import algolia_index_node_delete
-from pillar.api.utils.algolia import algolia_index_node_save
 from pillar.api.utils.authorization import check_permissions, require_login
 
 log = logging.getLogger(__name__)
@@ -187,27 +185,20 @@ def after_replacing_node(item, original):
     project is private, prevent public indexing.
     """
 
+    from pillar.celery import algolia_tasks
+
     projects_collection = current_app.data.driver.db['projects']
     project = projects_collection.find_one({'_id': item['project']})
     if project.get('is_private', False):
         # Skip index updating and return
         return
 
-    from algoliasearch.helpers import AlgoliaException
     status = item['properties'].get('status', 'unpublished')
-
+    node_id = str(item['_id'])
     if status == 'published':
-        try:
-            algolia_index_node_save(item)
-        except AlgoliaException as ex:
-            log.warning('Unable to push node info to Algolia for node %s; %s',
-                        item.get('_id'), ex)
+        algolia_tasks.algolia_index_node_save.delay(node_id)
     else:
-        try:
-            algolia_index_node_delete(item)
-        except AlgoliaException as ex:
-            log.warning('Unable to delete node info to Algolia for node %s; %s',
-                        item.get('_id'), ex)
+        algolia_tasks.algolia_index_node_delete.delay(node_id)
 
 
 def before_inserting_nodes(items):
@@ -375,12 +366,8 @@ def nodes_set_default_picture(nodes):
 
 
 def after_deleting_node(item):
-    from algoliasearch.helpers import AlgoliaException
-    try:
-        algolia_index_node_delete(item)
-    except AlgoliaException as ex:
-        log.warning('Unable to delete node info to Algolia for node %s; %s',
-                    item.get('_id'), ex)
+    from pillar.celery import algolia_tasks
+    algolia_tasks.algolia_index_node_delete.delay(str(item['_id']))
 
 
 only_for_comments = only_for_node_type_decorator('comment')
