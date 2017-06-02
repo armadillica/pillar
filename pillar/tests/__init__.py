@@ -456,12 +456,13 @@ class AbstractPillarTest(TestMinimal):
                              expected_status, resp.status_code, resp.data
                          ))
 
-        def json():
+        def get_json():
             if resp.mimetype != 'application/json':
                 raise TypeError('Unable to load JSON from mimetype %r' % resp.mimetype)
             return mod_json.loads(resp.data)
 
-        resp.json = json
+        resp.json = get_json
+        resp.get_json = get_json
 
         return resp
 
