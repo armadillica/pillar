@@ -345,6 +345,9 @@ class PillarServer(Eve):
             result_expires=3600,
         )
 
+        self.log.info('Pinging Celery workers')
+        self.log.info('Response: %s', self.celery.control.ping())
+
     def register_static_file_endpoint(self, url_prefix, endpoint_name, static_folder):
         from pillar.web.staticfile import PillarStaticFile
 
