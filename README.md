@@ -54,3 +54,11 @@ You may also want to compare their
 When on a HDRi page with the viewer embedded, use this JavaScript code to find the current
 yaw: `vrview_window.contentWindow.yaw()`. This can be passed as `default_yaw` parameter to
 the iframe.
+
+## Celery
+
+Pillar requires [Celery](http://www.celeryproject.org/) for background task processing. This in
+turn requires a backend and a broker, for which the default Pillar configuration uses Redis and
+RabbitMQ.
+
+You can run the Celery Worker using `manage.py operations worker`.
