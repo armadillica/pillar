@@ -25,6 +25,7 @@ eve_test_settings.override_eve()
 from eve.tests import TestMinimal
 import pymongo.collection
 from flask.testing import FlaskClient
+import flask.ctx
 import responses
 
 import pillar
@@ -110,6 +111,9 @@ class AbstractPillarTest(TestMinimal):
         self.app = self.pillar_server_class(os.path.dirname(os.path.dirname(__file__)))
         self.assertEqual(self.app.config['STORAGE_DIR'], self._pillar_storage_dir)
 
+        # Run self.enter_app_context() to create this context.
+        self._app_ctx: flask.ctx.AppContext = None
+
         self.app.process_extensions()
         assert self.app.config['MONGO_DBNAME'] == 'pillar_test'
 
@@ -119,9 +123,21 @@ class AbstractPillarTest(TestMinimal):
     def tearDown(self):
         super(AbstractPillarTest, self).tearDown()
 
+        if self._app_ctx is not None:
+            self._app_ctx.__exit__(*sys.exc_info())
+
         # Not only delete self.app (like the superclass does),
         # but also un-import the application.
         self.unload_modules('pillar')
+
+    def enter_app_context(self):
+        """Globally starts an app context.
+
+        The app context is automatically exited upon testcase teardown.
+        """
+
+        self._app_ctx: flask.ctx.AppContext = self.app.app_context()
+        self._app_ctx.__enter__()
 
     def unload_modules(self, module_name):
         """Uploads the named module, and all submodules."""
