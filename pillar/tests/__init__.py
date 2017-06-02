@@ -70,6 +70,17 @@ class PillarTestServer(pillar.PillarServer):
 
         self.celery = unittest.mock.MagicMock(Celery)
 
+        def fake_task(*task_args, **task_kwargs):
+            def decorator(f):
+                def delay(*args, **kwargs):
+                    return f(*args, **kwargs)
+                f.delay = delay
+                return f
+
+            return decorator
+
+        self.celery.task = fake_task
+
 
 class AbstractPillarTest(TestMinimal):
     pillar_server_class = PillarTestServer
