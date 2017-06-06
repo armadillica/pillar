@@ -155,3 +155,4 @@ def setup_jinja_env(jinja_env):
     jinja_env.filters['markdown'] = do_markdown
     jinja_env.filters['yesno'] = do_yesno
     jinja_env.globals['url_for_node'] = do_url_for_node
+    jinja_env.globals['session'] = flask.session
