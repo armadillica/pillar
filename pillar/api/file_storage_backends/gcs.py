@@ -182,7 +182,10 @@ class GoogleCloudStorageBlob(Blob):
 
     def exists(self) -> bool:
         # Reload to get the actual file properties from Google.
-        self.gblob.reload()
+        try:
+            self.gblob.reload()
+        except NotFound:
+            return False
         return self.gblob.exists()
 
 
