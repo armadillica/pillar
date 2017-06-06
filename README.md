@@ -61,4 +61,6 @@ Pillar requires [Celery](http://www.celeryproject.org/) for background task proc
 turn requires a backend and a broker, for which the default Pillar configuration uses Redis and
 RabbitMQ.
 
-You can run the Celery Worker using `manage.py operations worker`.
+You can run the Celery Worker using `manage.py celery worker`.
+
+Find other Celery operations with the `manage.py celery` command.
