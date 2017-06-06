@@ -180,6 +180,11 @@ class GoogleCloudStorageBlob(Blob):
     def make_public(self):
         self.gblob.make_public()
 
+    def exists(self) -> bool:
+        # Reload to get the actual file properties from Google.
+        self.gblob.reload()
+        return self.gblob.exists()
+
 
 def update_file_name(node):
     """Assign to the CGS blob the same name of the asset node. This way when

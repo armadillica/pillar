@@ -94,6 +94,19 @@ class LocalStorageBackendTest(AbstractStorageBackendTest):
         self.assertEqual('512', resp.headers['Content-Length'])
         self.assertEqual(file_contents, resp.data)
 
+    def test_exists(self):
+        self.enter_app_context()
+        test_file, file_contents = self.create_test_file()
+
+        bucket_class = self.storage_backend()
+        bucket = bucket_class(24 * 'a')
+
+        blob = bucket.blob('somefile.bin')
+        blob.create_from_file(test_file, content_type='application/octet-stream')
+
+        self.assertTrue(blob.exists())
+        self.assertFalse(bucket.blob('ütﬀ-8').exists())
+
 
 class MockedGoogleCloudStorageTest(AbstractStorageBackendTest):
     def storage_backend(self):
@@ -114,6 +127,7 @@ class MockedGoogleCloudStorageTest(AbstractStorageBackendTest):
         mock_bucket.blob.return_value = mock_blob
         mock_blob.public_url = '/path/to/somefile.bin'
         mock_blob.size = 318
+        mock_blob.exists.return_value = True
 
         test_file, file_contents = self.create_test_file()
 
@@ -131,7 +145,9 @@ class MockedGoogleCloudStorageTest(AbstractStorageBackendTest):
             # Google-reported size should take precedence over reality.
             self.assertEqual(318, blob.size)
 
+            self.assertTrue(blob.exists())
+
         mock_blob.upload_from_file.assert_called_with(test_file,
                                                       size=512,
                                                       content_type='application/octet-stream')
-        mock_blob.reload.assert_called_once()
+        self.assertEqual(2, mock_blob.reload.call_count)

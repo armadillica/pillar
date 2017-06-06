@@ -100,3 +100,6 @@ class LocalBlob(Blob):
     def make_public(self):
         # No-op on this storage backend.
         pass
+
+    def exists(self) -> bool:
+        return self.abspath().exists()

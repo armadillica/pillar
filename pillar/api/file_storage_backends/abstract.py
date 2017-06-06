@@ -149,5 +149,9 @@ class Blob(metaclass=abc.ABCMeta):
         Only performs an actual action on backends that support temporary links.
         """
 
+    @abc.abstractmethod
+    def exists(self) -> bool:
+        """Returns True iff the file exists on the storage backend."""
+
 
 Bl = typing.TypeVar('Bl', bound=Blob)
