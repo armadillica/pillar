@@ -50,8 +50,8 @@ def user_group_action(user_id: bson.ObjectId, group_id: bson.ObjectId, action: s
     )
 
     if result.matched_count == 0:
-        raise ValueError('Unable to %s user %s membership of group %s; user not found.',
-                         action, user_id, group_id)
+        raise ValueError(f'Unable to {action} user {user_id} membership of group {group_id}; '
+                         f'user not found.')
 
 
 def setup_app(app, api_prefix):
