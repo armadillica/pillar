@@ -74,7 +74,10 @@ class PillarTestServer(pillar.PillarServer):
             def decorator(f):
                 def delay(*args, **kwargs):
                     return f(*args, **kwargs)
+
                 f.delay = delay
+                f.si = unittest.mock.MagicMock()
+                f.s = unittest.mock.MagicMock()
                 return f
 
             return decorator
