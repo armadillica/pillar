@@ -75,6 +75,8 @@ ZENCODER_NOTIFICATIONS_URL = 'http://zencoderfetcher/'
 
 ENCODING_BACKEND = 'zencoder'  # local, flamenco
 
+# Storage solution for uploaded files. If 'local' is selected, make sure you specify the SERVER_NAME
+# config value as well, since it will help building correct URLs when indexing.
 STORAGE_BACKEND = 'local'  # gcs
 
 # Validity period of links, per file storage backend. Expressed in seconds.
