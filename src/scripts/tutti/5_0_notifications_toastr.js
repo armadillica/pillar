@@ -474,3 +474,4 @@
         window.toastr = factory(window.jQuery);
     }
 }));
+

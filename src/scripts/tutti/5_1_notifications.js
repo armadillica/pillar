@@ -327,3 +327,8 @@ function getNotificationsLoop() {
 		getNotificationsLoop();
 	}, 30000);
 }
+
+/* Notifications: Toastr Defaults */
+toastr.options.showDuration = 50;
+toastr.options.progressBar = true;
+toastr.options.positionClass = 'toast-bottom-left';
