@@ -28,6 +28,10 @@ $(document).ready(function() {
 					hitPicture += (hit.media ? '<i class="pi-' + hit.media + '"></i>' : '<i class="dark pi-'+ hit.node_type + '"></i>');
 					hitPicture += '</div>';
 				};
+				var $span = $('<span>').addClass('project').text(hit.project.name);
+				var $searchHitName = $('<div>').addClass('search-hit-name')
+					.attr('title', hit.name)
+					.text(hit.name);
 
 				return '' +
 					'<a href="/nodes/'+ hit.objectID + '/redir" class="search-site-result" id="'+ hit.objectID + '">' +
@@ -36,11 +40,9 @@ $(document).ready(function() {
 								hitPicture +
 								hitFree +
 							'</div>' +
-							'<div class="search-hit-name" title="' + hit.name + '">' +
-								hit.name + ' ' +
-							'</div>' +
+							$searchHitName.html() +
 							'<div class="search-hit-meta">' +
-								'<span class="project">' + hit.project.name + '</span> · ' +
+								$span.html() + ' · ' +
 								'<span class="node_type">' + hit.node_type + '</span>' +
 								hitMedia +
 							'</div>' +
