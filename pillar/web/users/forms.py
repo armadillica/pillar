@@ -59,8 +59,21 @@ class UserSettingsEmailsForm(Form):
         'Notifications', choices=choices, coerce=int)
 
 
+# TODO: refactor roles to be obtainable from the Pillar application.
 class UserEditForm(Form):
-    role_choices = [('admin', 'admin'),
-                    ('subscriber', 'subscriber'),
-                    ('demo', 'demo')]
+    ROLES = [
+        'admin',
+        'badger',
+        'demo',
+        'flamenco-admin',
+        'flamenco_manager',
+        'flamenco-user',
+        'homeproject',
+        'protected',
+        'service',
+        'subscriber',
+        'svner',
+        'urler',
+    ]
+    role_choices = [(r, r) for r in ROLES]
     roles = SelectMultipleField('Roles', choices=role_choices)

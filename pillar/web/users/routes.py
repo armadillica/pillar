@@ -236,7 +236,7 @@ def users_edit(user_id):
 def _users_edit(form, user, api):
     """Performs the actual user editing."""
 
-    from pillar.api.service import role_to_group_id, ROLES_WITH_GROUPS
+    from pillar.api.service import role_to_group_id
 
     current_user_roles = set(user.roles or [])
     current_user_groups = set(user.groups or [])
@@ -244,11 +244,15 @@ def _users_edit(form, user, api):
     roles_in_form = set(form.roles.data)
 
     granted_roles = roles_in_form - current_user_roles
-    revoked_roles = ROLES_WITH_GROUPS - roles_in_form
+    revoked_roles = set(UserEditForm.ROLES) - roles_in_form
 
     # role_to_group_id contains ObjectIDs, but the SDK works with strings.
-    granted_groups = {str(role_to_group_id[role]) for role in granted_roles}
-    revoked_groups = {str(role_to_group_id[role]) for role in revoked_roles}
+    granted_groups = {str(role_to_group_id[role])
+                      for role in granted_roles
+                      if role in role_to_group_id}
+    revoked_groups = {str(role_to_group_id[role])
+                      for role in revoked_roles
+                      if role in role_to_group_id}
 
     user.roles = list((current_user_roles - revoked_roles).union(granted_roles))
     user.groups = list((current_user_groups - revoked_groups).union(granted_groups))
