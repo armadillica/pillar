@@ -102,9 +102,18 @@ def index():
 
 
 @blueprint.route('/<project_url>/jstree')
-@project_view()
-def jstree(project):
+def jstree(project_url):
     """Entry point to view a project as JSTree"""
+    api = system_util.pillar_api()
+
+    try:
+        project = Project.find_one({
+            'projection': {'_id': 1},
+            'where': {'url': project_url}
+        }, api=api)
+    except ResourceNotFound:
+        raise wz_exceptions.NotFound('No such project')
+
     return jsonify(items=jstree_get_children(None, project._id))
 
 
@@ -247,17 +256,19 @@ def home_jstree():
 
 
 @blueprint.route('/<project_url>/')
-@project_view()
-def view(project: Project):
+def view(project_url):
     """Entry point to view a project"""
 
     if request.args.get('format') == 'jstree':
         log.warning('projects.view(%r) endpoint called with format=jstree, '
                     'redirecting to proper endpoint. URL is %s; referrer is %s',
-                    project.url, request.url, request.referrer)
-        return redirect(url_for('projects.jstree', project_url=project.url))
+                    project_url, request.url, request.referrer)
+        return redirect(url_for('projects.jstree', project_url=project_url))
 
     api = system_util.pillar_api()
+    project = find_project_or_404(project_url,
+                                  embedded={'header_node': 1},
+                                  api=api)
 
     # Load the header video file, if there is any.
     header_video_file = None
@@ -447,9 +458,12 @@ def find_project_or_404(project_url, embedded=None, api=None):
 
 
 @blueprint.route('/<project_url>/search')
-@project_view()
-def search(project: Project):
+def search(project_url):
     """Search into a project"""
+    api = system_util.pillar_api()
+    project = find_project_or_404(project_url, api=api)
+    project.picture_square = utils.get_file(project.picture_square, api=api)
+    project.picture_header = utils.get_file(project.picture_header, api=api)
 
     return render_template('nodes/search.html',
                            project=project,
@@ -458,9 +472,15 @@ def search(project: Project):
 
 @blueprint.route('/<project_url>/edit', methods=['GET', 'POST'])
 @login_required
-@project_view()
-def edit(project: Project):
+def edit(project_url):
     api = system_util.pillar_api()
+    # Fetch the Node or 404
+    try:
+        project = Project.find_one({'where': {'url': project_url}}, api=api)
+        # project = Project.find(project_url, api=api)
+    except ResourceNotFound:
+        abort(404)
+    utils.attach_project_pictures(project, api)
     form = ProjectForm(
         project_id=project._id,
         name=project.name,
@@ -523,9 +543,17 @@ def find_extension_pages() -> typing.List[pillar.extension.PillarExtension]:
 
 @blueprint.route('/<project_url>/edit/node-type')
 @login_required
-@project_view()
-def edit_node_types(project: Project):
+def edit_node_types(project_url):
     api = system_util.pillar_api()
+    # Fetch the project or 404
+    try:
+        project = Project.find_one({
+            'where': '{"url" : "%s"}' % (project_url)}, api=api)
+    except ResourceNotFound:
+        return abort(404)
+
+    utils.attach_project_pictures(project, api)
+
     return render_template('projects/edit_node_types.html',
                            api=api,
                            ext_pages=find_extension_pages(),
@@ -534,10 +562,15 @@ def edit_node_types(project: Project):
 
 @blueprint.route('/<project_url>/e/node-type/<node_type_name>', methods=['GET', 'POST'])
 @login_required
-@project_view()
-def edit_node_type(project: Project, node_type_name):
+def edit_node_type(project_url, node_type_name):
     api = system_util.pillar_api()
-
+    # Fetch the Node or 404
+    try:
+        project = Project.find_one({
+            'where': '{"url" : "%s"}' % (project_url)}, api=api)
+    except ResourceNotFound:
+        return abort(404)
+    utils.attach_project_pictures(project, api)
     node_type = project.get_node_type(node_type_name)
     form = NodeTypeForm()
     if form.validate_on_submit():
@@ -578,9 +611,14 @@ def edit_node_type(project: Project, node_type_name):
 
 @blueprint.route('/<project_url>/edit/sharing', methods=['GET', 'POST'])
 @login_required
-@project_view()
-def sharing(project: Project):
+def sharing(project_url):
     api = system_util.pillar_api()
+    # Fetch the project or 404
+    try:
+        project = Project.find_one({
+            'where': '{"url" : "%s"}' % (project_url)}, api=api)
+    except ResourceNotFound:
+        return abort(404)
 
     # Fetch users that are part of the admin group
     users = project.get_users(api=api)
@@ -596,13 +634,15 @@ def sharing(project: Project):
             elif action == 'remove':
                 user = project.remove_user(user_id, api=api)
         except ResourceNotFound:
-            log.info('/p/%s/edit/sharing: User %s not found', project.url, user_id)
+            log.info('/p/%s/edit/sharing: User %s not found', project_url, user_id)
             return jsonify({'_status': 'ERROR',
                             'message': 'User %s not found' % user_id}), 404
 
         # Add gravatar to user
         user['avatar'] = utils.gravatar(user['email'])
         return jsonify(user)
+
+    utils.attach_project_pictures(project, api)
 
     return render_template('projects/sharing.html',
                            api=api,
