@@ -8,7 +8,7 @@ from . import skip_when_testing
 
 log = logging.getLogger(__name__)
 
-INDEX_ALLOWED_USER_ROLES = {'admin', 'subscriber', 'demo'}
+INDEX_ALLOWED_USER_ROLES = {'admin', 'subscriber', 'demo', 'flamenco-user'}
 INDEX_ALLOWED_NODE_TYPES = {'asset', 'texture', 'group', 'hdri'}
 
 
