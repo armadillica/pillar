@@ -1,5 +1,3 @@
-
-
 ul.sharing-users-list
 	list-style: none
 	margin: 0
@@ -42,9 +40,9 @@ ul.sharing-users-list
 				border: 2px solid $color-info
 
 		.sharing-users-avatar
-			width: 15%
 			max-width: 60px
 			text-align: center
+			margin-right: 10px
 
 			img
 				margin: 0 auto
@@ -56,7 +54,7 @@ ul.sharing-users-list
 				transition: transform 350ms ease-in-out
 
 		.sharing-users-details
-			width: 85%
+			flex: 1
 			display: flex
 			flex-direction: column
 
@@ -69,6 +67,7 @@ ul.sharing-users-list
 
 				small
 					color: $color-text-dark-hint
+					white-space: nowrap
 
 			.sharing-users-extra
 				font:
@@ -96,18 +95,11 @@ ul.sharing-users-list
 .sharing-users-intro,
 .sharing-users-info
 	h4
-		margin: 0
 		font-family: $font-body
 
 .sharing-users-info
 	padding-left: 15px
 	border-left: thin solid $color-text-dark-hint
-
-	+media-sm
-		margin-top: 25px
-
-	h4
-		padding-bottom: 10px
 
 	p
 		font:
