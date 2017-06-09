@@ -24,7 +24,7 @@
 					data-toggle="tooltip",
 					data-placement="left")
 					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-						i.pi-tree-flow
+						i.pi-folder
 				| {% if not project.is_private %}
 				li.tabs-search(
 					title="Search",
