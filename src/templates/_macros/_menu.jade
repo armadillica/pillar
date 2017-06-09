@@ -1,0 +1,125 @@
+| {% macro navigation_menu_user(current_user) %}
+
+| {% if current_user.is_authenticated %}
+
+| {% if current_user.has_role('demo') %}
+| {% set subscription = 'demo' %}
+| {% elif current_user.has_role('subscriber') %}
+| {% set subscription = 'subscriber' %}
+| {% else %}
+| {% set subscription = 'none' %}
+| {% endif %}
+
+li(class="dropdown")
+	a.navbar-item.dropdown-toggle(href="#", data-toggle="dropdown", title="{{ current_user.email }}")
+		img.gravatar(
+			src="{{ current_user.gravatar }}",
+			class="{{ subscription }}",
+			alt="Avatar")
+		.special(class="{{ subscription }}")
+			| {% if subscription == 'subscriber' %}
+			i.pi-check
+			| {% elif subscription == 'demo' %}
+			i.pi-heart-filled
+			| {% else %}
+			i.pi-attention
+			| {% endif %}
+
+	ul.dropdown-menu
+		| {% if not current_user.has_role('protected') %}
+		li.subscription-status(class="{{ subscription }}")
+			| {% if subscription == 'subscriber' %}
+			a.navbar-item(
+				href="{{url_for('users.settings_billing')}}"
+				title="View subscription info")
+				i.pi-grin
+				span Your subscription is active!
+			| {% elif subscription == 'demo' %}
+			a.navbar-item(
+				href="{{url_for('users.settings_billing')}}"
+				title="View subscription info")
+				i.pi-heart-filled
+				span You have a free account.
+			| {% else %}
+			a.navbar-item(
+				href="https://store.blender.org/product/membership/"
+				title="Renew subscription")
+				i.pi-unhappy
+				span.info Your subscription is not active.
+					span.renew Click here to renew.
+			| {% endif %}
+
+		li
+			a.navbar-item(
+				href="{{ url_for('projects.home_project') }}"
+				title="Home")
+				i.pi-home
+				| Home
+
+		li
+			a.navbar-item(
+				href="{{ url_for('projects.index') }}"
+				title="My Projects")
+				i.pi-star
+				| My Projects
+
+		li
+			a.navbar-item(
+				href="{{ url_for('users.settings_profile') }}"
+				title="Settings")
+				i.pi-cog
+				| Settings
+		li
+			a.navbar-item(
+				href="{{ url_for('users.settings_billing') }}"
+				title="Billing")
+				i.pi-credit-card
+				| Subscription
+		li.divider(role="separator")
+		| {% endif %}
+		li
+			a.navbar-item(
+				href="{{ url_for('users.logout') }}")
+				i.pi-log-out(title="Log Out")
+				| Log out
+			a.navbar-item.subitem(
+				href="{{ url_for('users.switch') }}")
+				i.pi-blank
+				| Not {{ current_user.full_name }}?
+
+| {% else %}
+
+li.nav-item-sign-in
+	a.navbar-item(href="{{ url_for('users.login') }}")
+		| Log in
+| {% endif %}
+
+| {% endmacro %}
+
+
+| {% macro navigation_menu_notifications(current_user) %}
+
+| {% if current_user.is_authenticated %}
+
+li.nav-notifications
+	a.navbar-item#notifications-toggle(
+		title="Notifications",
+		data-toggle="tooltip",
+		data-placement="bottom")
+		i.pi-notifications-none.nav-notifications-icon
+		span#notifications-count
+			span
+		.flyout-hat
+
+	#notifications.flyout.notifications
+		.flyout-content
+			span.flyout-title Notifications
+			a#notifications-markallread(
+				title="Mark All as Read",
+				href="/notifications/read-all")
+				| Mark All as Read
+
+			| {% include '_notifications.html' %}
+
+| {% endif %}
+| {% endmacro %}
