@@ -23,7 +23,9 @@ span#project-edit-title
 			| {% for node_type in project.node_types %}
 			li
 				a(href="{{ url_for('projects.edit_node_type', project_url=project.url, node_type_name=node_type.name) }}")
-					| {{ node_type.name | undertitle }} ({{ node_type.name }})
+					| {{ node_type.name | undertitle }}
+				.actions
+					span {{ node_type.name }}
 			| {% endfor %}
 		| {% endif %}
 | {% endblock %}
