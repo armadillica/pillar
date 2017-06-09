@@ -19,11 +19,11 @@ span#project-edit-title
 			allow the creation of new items (such as textures).
 
 		| {% if current_user.has_role('admin') %}
-		ul
+		ul.list-generic
 			| {% for node_type in project.node_types %}
 			li
 				a(href="{{ url_for('projects.edit_node_type', project_url=project.url, node_type_name=node_type.name) }}")
-					| {{node_type.name}}
+					| {{ node_type.name | undertitle }} ({{ node_type.name }})
 			| {% endfor %}
 		| {% endif %}
 | {% endblock %}
