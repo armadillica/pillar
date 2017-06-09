@@ -753,6 +753,18 @@ input.fileupload
 textarea
 	resize: vertical
 
+button, .btn
+	+button($color-text-dark-secondary, $color-background, false)
+
+	&-success
+		+button($color-success, $color-success, false)
+	&-warning
+		+button($color-warning, $color-warning, false)
+	&-danger
+		+button($color-danger, $color-danger, false)
+	&-info
+		+button($color-info, $color-info, false)
+
 .input-group-flex
 	display: flex
 
