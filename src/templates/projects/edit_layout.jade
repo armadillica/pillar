@@ -79,6 +79,13 @@
 		#project_context
 			| {% block project_context %}
 			| {% endblock %}
+
+script.
+	/* UI Stuff */
+	$(window).on("load resize",function(){
+		$('#project-container').css('height', $(window).height());
+		$('#project_context-header').css('width', $('#project_context-container').width());
+	});
 | {% endblock %}
 
 | {% block footer_navigation %}
