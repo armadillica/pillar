@@ -154,3 +154,39 @@ ul.sharing-users-list
 .algolia-autocomplete .aa-dropdown-menu .aa-suggestion em
 	font-style: normal
 	color: $color-primary
+
+/* Generic listing on settings */
+ul.list-generic
+	margin: 0
+	padding: 0
+	list-style: none
+	max-width: 500px
+
+	+media-xs
+		width: 100%
+
+	> li
+		padding: 5px 0
+		display: flex
+		align-items: center
+
+		.action
+			margin-right: 10px
+
+			.btn
+				font-size: .7em
+
+		a
+			padding-right: 10px
+
+.settings-footer
+	text-align: right
+	color: $color-text-dark-secondary
+	border-top: thin solid rgba(black, .1)
+	margin-top: 15px
+	padding-top: 15px
+	padding-right: 15px
+	font-size: .9em
+
+	a
+		color: $color-text-dark-secondary
