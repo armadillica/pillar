@@ -155,7 +155,7 @@ function loadComments(commentsUrl)
 		commentsContainer.html(dataHtml);
 	})
 	.fail(function(xhr) {
-		statusBarSet('error', "Couldn't load comments. Error: " + xhr.responseText, 'pi-attention', 5000);
+		toastr.error('Could not load comments', xhr.responseText);
 
 		commentsContainer.html('<a id="comments-reload"><i class="pi-refresh"></i> Reload comments</a>');
 	});
@@ -243,9 +243,9 @@ function commentEditCancel(clicked_item, reload_comment) {
 		var comment_html = data['properties']['content_html'];
 		comment_container.find('.comment-content').html(comment_html);
 	})
-	.fail(function(data) {
+	.fail(function(xhr) {
 		if (console) console.log('Error fetching comment: ', xhr);
-		statusBarSet('error', 'Error canceling.', 'pi-warning');
+		toastr.error('Error canceling', xhr.responseText);
 	});
 }
 

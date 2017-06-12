@@ -102,6 +102,7 @@ script.
 				if (console) console.log('Error saving comment:', xhr.responseText);
 				show_comment_button_error("Houston! Try again?");
 			}
+			toastr.error(xhr.responseText, 'Error saving comment');
 		})
 		.done(function(comment_node_id) {
 			$button
