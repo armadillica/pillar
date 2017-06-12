@@ -24,11 +24,11 @@
 
 @mixin button($mixin-color, $roundness, $filled: false)
 	display: inline-flex
+	align-items: center
+	justify-content: center
 	font-family: $font-body
 	text-transform: uppercase
-	padding:
-		left: 12px
-		right: 12px
+	padding: 5px 12px
 	border-radius: $roundness
 
 	@if $filled
