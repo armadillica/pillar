@@ -1,75 +1,35 @@
-#error_container.403
-	#error_box
+#error-container(class="error-403")
+	#error-box
 		.error-top-container
-			.error-top-header-overlay
-			.error-top-header(
-				style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/background_agent327_02.jpg')}})")
+			.error-title Forbidden.
+			.error-lead
+				p You don't have access to this content.
 
-			.error-title
-				span.icon
-					i.pi-lock-open
-				span.text Get this and more with your<br/> Blender Cloud subscription.
-
-			.buttons
-				a.sign-up.btn.btn-outline(href="https://store.blender.org/product/membership/")
-					i.pi-check
-					| Subscribe
-
-				| {% if not current_user.is_authenticated %}
-				a.sign-in.btn.btn-empty(href="{{ url_for('users.login') }}")
-					i.pi-log-in
-					| Log in
+				| {% if current_user.is_authenticated %}
+				| {% if current_user.has_role('demo') %}
+				| {% set subscription = 'demo' %}
+				| {% elif current_user.has_role('subscriber') %}
+				| {% set subscription = 'subscriber' %}
+				| {% else %}
+				| {% set subscription = 'none' %}
 				| {% endif %}
 
-		hr
+				| {% if subscription == 'none' %}
+				hr
+				p
+					| Support Blender and get awesome stuff.&nbsp;
+					a(href="https://store.blender.org/product/membership/") Subscribe Now
+				| {% endif %}
 
-		section.error-watchamissing
-			h2 Support Blender and get awesome stuff.
+				| {% else %}
+				p
+					a(href="{{ url_for('users.login') }}") Login
+				| {% endif %}
 
-			.row
-				.col-md-4
-					a(href="{{ url_for('main.training') }}")
-						h3 Training &amp; Tutorials
-						p.
-							Character modeling, 3D printing, VFX, rigging and more. We offer
-							12 complete training series with +100 hours of training.
-
-				.col-md-4
-					a(href="{{ url_for('main.open_projects') }}")
-						h3 Open Projects
-						p.
-							The iconic Blender Institute Open Movies,
-							featuring all the production files, assets, artwork, and never-seen-before content.
-
-				.col-md-4
-					a(href="{{ url_for('main.services') }}")
-						h3 Services & Tools
-						p.
-							Create your personal projects, collaborate with other members, store
-							and sync your Blender settings across multiple workstations.
-
-			.row
-				.col-md-4
-					a(href="{{ url_for('projects.view', project_url='textures') }}")
-						h3 Textures
-						p.
-							More than 1500 texture maps to browse online or within Blender via our awesome add-on.
-							Create your own Texture libraries!
-
-				.col-md-4
-					a(href="{{ url_for('projects.view', project_url='hdri') }}")
-						h3 HDRI
-						p.
-							Up to 8K and 18 EVs (extremely high) HDR images to light your renders.
-
-				.col-md-4
-					a(href="{{ url_for('projects.view', project_url='characters') }}")
-						h3 Characters
-						p.
-							Production quality, fully rigged and shaded characters ready to animate.
-
-		hr
-
-		.error-lead.extra.
-			If you have just subscribed, please <a href="{{ url_for('users.logout') }}">log out</a> and in again.
-			For any other issue get in touch via <a href="mailto:cloudsupport@blender.org">cloudsupport@blender.org</a>
+		.error-lead.extra
+			| {% if current_user.is_authenticated %}
+			p.
+				If you have just subscribed, please <a href="{{ url_for('users.logout') }}">log out</a> and in again.
+			| {% endif %}
+			p.
+				Need help? Get in touch via <a href="mailto:cloudsupport@blender.org">e-mail</a>.

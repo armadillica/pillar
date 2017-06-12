@@ -1,12 +1,13 @@
-#error_container.404
-	#error_box
-		.error-title 404. Not Found.
+#error-container(class="error-404")
+	#error-box
+		.error-top-container
+			.error-title Not found.
+			.error-lead
+				p {{ description | default("Whatever you're looking for, it's not here.", True) }}
 
-		.error-lead.
-			{{ description | default("Whatever you're looking for, it's not here.", True) }}
-
-		hr
-
-		.error-lead.extra.
-			Is this content missing? Let us know on <a href="https://twitter.com/Blender_Cloud">Twitter</a>
-			or email <a href="mailto:cloudsupport@blender.org">cloudsupport@blender.org</a>
+		.error-lead.extra
+			p.
+				Looking for the Open Movies? Check out <a href="https://www.youtube.com/BlenderFoundation">Blender Foundation's YouTube</a> channel. <br/> Were you looking for tutorials instead? <a href="http://www.blender.org/support/tutorials/">blender.org</a> has a good selection.
+			p.
+				Is this content missing? Let us know on <a href="https://twitter.com/Blender_Cloud">Twitter</a>
+				or <a href="mailto:cloudsupport@blender.org">e-mail</a>.
