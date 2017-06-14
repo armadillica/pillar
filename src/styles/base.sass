@@ -164,6 +164,7 @@ header.navbar-header
 	.navbar-toggle
 		color: white
 
+
 .navbar-overlay
 	display: none
 	position: absolute
@@ -211,6 +212,7 @@ header.navbar-header
 
 	+media-lg
 		display: block
+
 
 .navbar-container
 	+container-behavior
@@ -460,6 +462,12 @@ nav.navbar, nav.sidebar
 						color: $color-text-dark-primary
 						cursor: default
 
+
+nav.sidebar
+	ul li.nav-item-sign-in a.navbar-item
+		font-size: .8em
+
+
 .navbar-backdrop-container
 	width: 100%
 	height: 100%
@@ -478,6 +486,7 @@ nav.navbar, nav.sidebar
 			display: block
 		+media-lg
 			display: block
+
 
 .navbar-backdrop
 	z-index: 0
