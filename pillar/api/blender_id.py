@@ -205,7 +205,7 @@ def _compute_token_expiry(token_expires_string):
     from dateutil import parser
 
     blid_expiry = parser.parse(token_expires_string)
-    blid_expiry = blid_expiry.replace(tzinfo=tz_util.utc)
+    blid_expiry = blid_expiry.astimezone(tz_util.utc)
     our_expiry = datetime.datetime.now(tz=tz_util.utc) + datetime.timedelta(hours=1)
 
     return min(blid_expiry, our_expiry)
