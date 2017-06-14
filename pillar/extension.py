@@ -26,6 +26,9 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
     # Set to True when your extension implements the project_settings() method.
     has_project_settings = False
 
+    # Set to True when your extension implements the context_processor() method.
+    has_context_processor = False
+
     # List of Celery task modules introduced by this extension.
     celery_task_modules: typing.List[str] = []
 
@@ -121,3 +124,11 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
         :param template_args: additional template arguments.
         :returns: a Flask HTTP response
         """
+
+    def context_processor(self) -> dict:
+        """Returns a dictionary that gets injected into the Flask Jinja2 namespace.
+
+        Set has_context_processor  to True when your extension implements this method.
+        """
+
+        return {}

@@ -304,6 +304,14 @@ class PillarServer(Eve):
 
         pillar.web.jinja.setup_jinja_env(self.jinja_env)
 
+        # Register context processors from extensions
+        for ext in self.pillar_extensions.values():
+            if not ext.has_context_processor:
+                continue
+
+            self.log.debug('Registering context processor for %s', ext.name)
+            self.context_processor(ext.context_processor)
+
     def _config_static_dirs(self):
         # Setup static folder for the instanced app
         self.static_folder = os.path.join(self.app_root, 'static')
