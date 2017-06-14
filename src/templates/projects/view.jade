@@ -103,7 +103,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 						i.pi-folder
 				| {% if not project.is_private %}
-				| {% if subscription in ['demo', 'subscriber', 'admin'] %}
+				| {% if current_user_is_subscriber %}
 				li.tabs-search(
 					title="Search",
 					data-toggle="tooltip",
@@ -629,8 +629,7 @@ script.
 		}
 	});
 
-	/* NOTE: {{ subscription }} is defined in layout.jade */
-	{% if subscription in ['demo', 'subscriber', 'admin'] %}
+	{% if current_user_is_subscriber %}
 		$(projectTree).addClass('is_subscriber');
 	{% endif %}
 
