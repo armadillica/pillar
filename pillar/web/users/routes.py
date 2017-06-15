@@ -11,10 +11,9 @@ from werkzeug import exceptions as wz_exceptions
 import pillar.api.blender_cloud.subscription
 import pillar.auth
 from pillar.web import system_util
-from .forms import UserProfileForm
-from .forms import UserSettingsEmailsForm
-from .forms import UserEditForm
-from .forms import UserLoginForm
+
+from . import forms
+
 from pillarsdk import exceptions as sdk_exceptions
 from pillarsdk.users import User
 from pillarsdk.groups import Group
@@ -82,7 +81,7 @@ def login_local():
     """Login with a local account, skipping OAuth. This provides access only
     to the web application and is meant for limited access (for example in
     the case of a shared account)."""
-    form = UserLoginForm()
+    form = forms.UserLoginForm()
     # Forward credentials to server
     if form.validate_on_submit():
         payload = {
@@ -134,7 +133,7 @@ def settings_profile():
     api = system_util.pillar_api()
     user = User.find(current_user.objectid, api=api)
 
-    form = UserProfileForm(
+    form = forms.UserProfileForm(
         full_name=user.full_name,
         username=user.username)
 
@@ -173,7 +172,7 @@ def settings_emails():
         user.update(api=api)
 
     # Generate form
-    form = UserSettingsEmailsForm(
+    form = forms.UserSettingsEmailsForm(
         email_communications=user.settings.email_communications)
 
     if form.validate_on_submit():
@@ -223,7 +222,7 @@ def users_edit(user_id):
         log.warning('Non-existing user %r requested.', user_id)
         raise wz_exceptions.NotFound('Non-existing user %r requested.' % user_id)
 
-    form = UserEditForm()
+    form = forms.UserEditForm()
     if form.validate_on_submit():
         _users_edit(form, user, api)
     else:
