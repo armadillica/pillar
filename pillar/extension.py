@@ -34,6 +34,7 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
 
     # Set of user roles used/introduced by this extension.
     user_roles: typing.Set[str] = set()
+    user_roles_indexable: typing.Set[str] = set()
 
     @property
     @abc.abstractmethod

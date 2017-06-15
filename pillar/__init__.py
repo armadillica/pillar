@@ -76,6 +76,7 @@ class PillarServer(Eve):
             'protected',
             'service', 'badger', 'svner', 'urler',
         }
+        self._user_roles_indexable: typing.Set[str] = {'demo', 'admin', 'subscriber'}
 
         self.app_root = os.path.abspath(app_root)
         self._load_flask_config()
@@ -370,8 +371,16 @@ class PillarServer(Eve):
         """
 
         for extension in self.pillar_extensions.values():
+            indexed_but_not_defined = extension.user_roles_indexable - extension.user_roles
+            if indexed_but_not_defined:
+                raise ValueError('Extension %s has roles %s indexable but not in user_roles',
+                                 extension.name, indexed_but_not_defined)
+
             self._user_roles.update(extension.user_roles)
-        self.log.info('Loaded %i user roles from extensions', len(self._user_roles))
+            self._user_roles_indexable.update(extension.user_roles_indexable)
+
+        self.log.info('Loaded %i user roles from extensions, %i of which are indexable',
+                      len(self._user_roles), len(self._user_roles_indexable))
 
     def register_static_file_endpoint(self, url_prefix, endpoint_name, static_folder):
         from pillar.web.staticfile import PillarStaticFile
@@ -700,3 +709,7 @@ class PillarServer(Eve):
     @property
     def user_roles(self) -> typing.FrozenSet[str]:
         return frozenset(self._user_roles)
+
+    @property
+    def user_roles_indexable(self) -> typing.FrozenSet[str]:
+        return frozenset(self._user_roles_indexable)

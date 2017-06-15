@@ -1,14 +1,13 @@
 import logging
 
 from bson import ObjectId
-from flask import current_app
 
+from pillar import current_app
 from pillar.api.file_storage import generate_link
 from . import skip_when_testing
 
 log = logging.getLogger(__name__)
 
-INDEX_ALLOWED_USER_ROLES = {'admin', 'subscriber', 'demo', 'flamenco-user'}
 INDEX_ALLOWED_NODE_TYPES = {'asset', 'texture', 'group', 'hdri'}
 
 
@@ -24,7 +23,7 @@ def algolia_index_user_save(user):
         return
 
     # Strip unneeded roles
-    index_roles = user_roles.intersection(INDEX_ALLOWED_USER_ROLES)
+    index_roles = user_roles.intersection(current_app.user_roles_indexable)
 
     # Create or update Algolia index for the user
     index_users.save_object({
