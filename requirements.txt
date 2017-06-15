@@ -21,7 +21,7 @@ google-apitools==0.4.11
 httplib2==0.9.2
 MarkupSafe==0.23
 ndg-httpsclient==0.4.0
-Pillow==2.8.1
+Pillow==4.1.1
 pycrypto==2.6.1
 python-dateutil==2.5.3
 redis==2.10.5
@@ -44,6 +44,7 @@ jinja2==2.9.6
 kombu==4.0.2
 oauth2client==2.0.2
 oauthlib==2.0.1
+olefile==0.44
 protobuf==3.0.0b2.post2
 protorpc==0.11.1
 pyasn1-modules==0.0.8
