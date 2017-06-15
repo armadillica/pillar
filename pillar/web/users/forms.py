@@ -59,21 +59,19 @@ class UserSettingsEmailsForm(Form):
         'Notifications', choices=choices, coerce=int)
 
 
-# TODO: refactor roles to be obtainable from the Pillar application.
+class RolesField(SelectMultipleField):
+    def __init__(self, label=None, validators=None, coerce=str, **kwargs):
+        role_choices = [(r, r) for r in sorted(self.form_roles())]
+        super().__init__(label=label, validators=validators, coerce=coerce,
+                         choices=role_choices, **kwargs)
+
+    @classmethod
+    def form_roles(cls) -> set:
+        """Returns the set of roles used in this form."""
+
+        from pillar import current_app
+        return current_app.user_roles
+
+
 class UserEditForm(Form):
-    ROLES = [
-        'admin',
-        'badger',
-        'demo',
-        'flamenco-admin',
-        'flamenco_manager',
-        'flamenco-user',
-        'homeproject',
-        'protected',
-        'service',
-        'subscriber',
-        'svner',
-        'urler',
-    ]
-    role_choices = [(r, r) for r in ROLES]
-    roles = SelectMultipleField('Roles', choices=role_choices)
+    roles = RolesField('Roles')

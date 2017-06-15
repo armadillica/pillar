@@ -243,7 +243,7 @@ def _users_edit(form, user, api):
     roles_in_form = set(form.roles.data)
 
     granted_roles = roles_in_form - current_user_roles
-    revoked_roles = set(UserEditForm.ROLES) - roles_in_form
+    revoked_roles = forms.RolesField.form_roles() - roles_in_form
 
     # role_to_group_id contains ObjectIDs, but the SDK works with strings.
     granted_groups = {str(role_to_group_id[role])
