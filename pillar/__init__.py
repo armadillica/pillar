@@ -389,6 +389,8 @@ class PillarServer(Eve):
         self.add_url_rule('%s/<path:filename>' % url_prefix, view_func=view_func)
 
     def process_extensions(self):
+        """This is about Eve extensions, not Pillar extensions."""
+
         # Re-initialise Eve after we allowed Pillar submodules to be loaded.
         # EVIL STARTS HERE. It just copies part of the Eve.__init__() method.
         self.set_defaults()
