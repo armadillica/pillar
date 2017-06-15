@@ -70,6 +70,13 @@ class PillarServer(Eve):
         self.pillar_extensions: map_type = collections.OrderedDict()
         self.pillar_extensions_template_paths = []  # list of paths
 
+        # The default roles Pillar uses. Will probably all move to extensions at some point.
+        self._user_roles: typing.Set[str] = {
+            'demo', 'admin', 'subscriber', 'homeproject',
+            'protected',
+            'service', 'badger', 'svner', 'urler',
+        }
+
         self.app_root = os.path.abspath(app_root)
         self._load_flask_config()
         self._config_logging()
@@ -356,6 +363,16 @@ class PillarServer(Eve):
         self.log.info('Pinging Celery workers')
         self.log.info('Response: %s', self.celery.control.ping())
 
+    def _config_user_roles(self):
+        """Gathers all user roles from extensions.
+
+        The union of all user roles can be obtained from self.user_roles.
+        """
+
+        for extension in self.pillar_extensions.values():
+            self._user_roles.update(extension.user_roles)
+        self.log.info('Loaded %i user roles from extensions', len(self._user_roles))
+
     def register_static_file_endpoint(self, url_prefix, endpoint_name, static_folder):
         from pillar.web.staticfile import PillarStaticFile
 
@@ -526,6 +543,7 @@ class PillarServer(Eve):
 
         self._config_jinja_env()
         self._config_static_dirs()
+        self._config_user_roles()
 
         # Only enable this when debugging.
         # self._list_routes()
@@ -678,3 +696,7 @@ class PillarServer(Eve):
         schema = self.config['DOMAIN'][resource_name]['schema']
         validator = self.validator(schema, resource_name)
         return validator
+
+    @property
+    def user_roles(self) -> typing.FrozenSet[str]:
+        return frozenset(self._user_roles)

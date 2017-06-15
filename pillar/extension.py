@@ -32,6 +32,9 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
     # List of Celery task modules introduced by this extension.
     celery_task_modules: typing.List[str] = []
 
+    # Set of user roles used/introduced by this extension.
+    user_roles: typing.Set[str] = set()
+
     @property
     @abc.abstractmethod
     def name(self):
