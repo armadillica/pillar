@@ -32,7 +32,7 @@ def generate_local_thumbnails(name_base, src):
         else:
             im = Image.open(src).convert('RGB')
             im.thumbnail(settings['size'])
-            im.save(dst, "JPEG")
+            im.save(dst, format='JPEG', quality=75)
             width, height = im.size
 
         thumb_info = {'size': size,
