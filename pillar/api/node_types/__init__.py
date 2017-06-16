@@ -9,7 +9,7 @@ _file_embedded_schema = {
 
 ATTACHMENT_SLUG_REGEX = '[a-zA-Z0-9_ ]+'
 
-_attachments_embedded_schema = {
+attachments_embedded_schema = {
     'type': 'dict',
     # TODO: will be renamed to 'keyschema' in Cerberus 1.0
     'propertyschema': {

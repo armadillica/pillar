@@ -424,7 +424,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
     from pillar.api.node_types.asset import node_type_asset
     from pillar.api.node_types.page import node_type_page
     from pillar.api.node_types.post import node_type_post
-    from pillar.api.node_types import _attachments_embedded_schema
+    from pillar.api.node_types import attachments_embedded_schema
     from pillar.api.utils import remove_private_keys
 
     # Node types that support attachments
@@ -449,7 +449,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
 
             log.info('   - replacing attachment schema on node type "%s"', nt_name)
             pillar_nt = nts_by_name[nt_name]
-            proj_nt['dyn_schema']['attachments'] = copy.deepcopy(_attachments_embedded_schema)
+            proj_nt['dyn_schema']['attachments'] = copy.deepcopy(attachments_embedded_schema)
 
             # Get the form schema the same as the official Pillar one, but only for attachments.
             try:

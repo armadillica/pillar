@@ -1,4 +1,4 @@
-from pillar.api.node_types import _file_embedded_schema, _attachments_embedded_schema
+from pillar.api.node_types import _file_embedded_schema, attachments_embedded_schema
 
 node_type_asset = {
     'name': 'asset',
@@ -27,7 +27,7 @@ node_type_asset = {
         # We point to the original file (and use it to extract any relevant
         # variation useful for our scope).
         'file': _file_embedded_schema,
-        'attachments': _attachments_embedded_schema,
+        'attachments': attachments_embedded_schema,
         # Tags for search
         'tags': {
             'type': 'list',

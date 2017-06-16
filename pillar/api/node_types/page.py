@@ -1,4 +1,4 @@
-from pillar.api.node_types import _attachments_embedded_schema
+from pillar.api.node_types import attachments_embedded_schema
 
 node_type_page = {
     'name': 'page',
@@ -15,7 +15,7 @@ node_type_page = {
         'url': {
             'type': 'string'
         },
-        'attachments': _attachments_embedded_schema,
+        'attachments': attachments_embedded_schema,
     },
     'form_schema': {
         'attachments': {'visible': False},
