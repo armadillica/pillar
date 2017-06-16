@@ -297,7 +297,10 @@ def expire_all_project_links(project_uuid):
                             help='Project URL')
 @manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
                             help='Replace on all projects.')
-def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
+@manager_maintenance.option('-m', '--missing', dest='missing',
+                            action='store_true', default=False,
+                            help='Add missing node types. Note that this may add unwanted ones.')
+def replace_pillar_node_type_schemas(proj_url=None, all_projects=False, missing=False):
     """Replaces the project's node type schemas with the standard Pillar ones.
 
     Non-standard node types are left alone.
@@ -337,6 +340,14 @@ def replace_pillar_node_type_schemas(proj_url=None, all_projects=False):
             if is_public_proj:
                 proj_nt['form_schema'].pop('license_type', None)
                 proj_nt['form_schema'].pop('license_notes', None)
+
+        # Find new node types that aren't in the project yet.
+        if missing:
+            project_ntnames = set(nt['name'] for nt in project['node_types'])
+            for nt_name in set(PILLAR_NAMED_NODE_TYPES.keys()) - project_ntnames:
+                log.info('   - Adding node type "%s"', nt_name)
+                pillar_nt = PILLAR_NAMED_NODE_TYPES[nt_name]
+                project['node_types'].append(copy.deepcopy(pillar_nt))
 
         # Use Eve to PUT, so we have schema checking.
         db_proj = remove_private_keys(project)
