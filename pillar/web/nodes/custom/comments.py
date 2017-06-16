@@ -124,43 +124,6 @@ def format_comment(comment, is_reply=False, is_team=False, replies=None):
                 replies=replies)
 
 
-@blueprint.route("/comments/")
-def comments_index():
-    warnings.warn('comments_index() is deprecated in favour of comments_for_node()')
-
-    parent_id = request.args.get('parent_id')
-    # Get data only if we format it
-    api = system_util.pillar_api()
-    if request.args.get('format') == 'json':
-        nodes = Node.all({
-            'where': '{"node_type" : "comment", "parent": "%s"}' % (parent_id),
-            'embedded': '{"user":1}'}, api=api)
-
-        comments = []
-        for comment in nodes._items:
-            # Query for first level children (comment replies)
-            replies = Node.all({
-                'where': '{"node_type" : "comment", "parent": "%s"}' % (comment._id),
-                'embedded': '{"user":1}'}, api=api)
-            replies = replies._items if replies._items else None
-            if replies:
-                replies = [format_comment(reply, is_reply=True) for reply in replies]
-
-            comments.append(
-                format_comment(comment, is_reply=False, replies=replies))
-
-        return_content = jsonify(items=[c for c in comments if c is not None])
-    else:
-        parent_node = Node.find(parent_id, api=api)
-        project = Project({'_id': parent_node.project})
-        has_method_POST = project.node_type_has_method('comment', 'POST', api=api)
-        # Data will be requested via javascript
-        return_content = render_template('nodes/custom/_comments.html',
-                                         parent_id=parent_id,
-                                         has_method_POST=has_method_POST)
-    return return_content
-
-
 @blueprint.route('/<string(length=24):node_id>/comments')
 def comments_for_node(node_id):
     """Shows the comments attached to the given node."""
