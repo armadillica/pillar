@@ -62,6 +62,7 @@ class UserAdminTest(AbstractPillarTest):
 
                 form = UserEditForm()
                 form.roles.data = roles
+                form.email.data = user.email
                 pillar.web.users.routes._users_edit(form, user, api)
 
         edit_user(['subscriber', 'demo'])

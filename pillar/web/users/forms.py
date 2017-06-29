@@ -2,6 +2,7 @@ from flask_login import current_user
 from flask_wtf import Form
 from pillar.web import system_util
 from pillarsdk.users import User
+
 from wtforms import BooleanField
 from wtforms import PasswordField
 from wtforms import RadioField
@@ -10,6 +11,7 @@ from wtforms import StringField
 from wtforms.validators import DataRequired
 from wtforms.validators import Length
 from wtforms.validators import Regexp
+import wtforms.validators as wtvalid
 
 
 class UserLoginForm(Form):
@@ -75,3 +77,7 @@ class RolesField(SelectMultipleField):
 
 class UserEditForm(Form):
     roles = RolesField('Roles')
+    email = StringField(
+        validators=[wtvalid.DataRequired(), wtvalid.Email()],
+        description='Make sure this matches the Store and Blender ID email address.'
+    )

@@ -227,6 +227,7 @@ def users_edit(user_id):
         _users_edit(form, user, api)
     else:
         form.roles.data = user.roles
+        form.email.data = user.email
     return render_template('users/edit_embed.html',
         user=user,
         form=form)
@@ -255,6 +256,7 @@ def _users_edit(form, user, api):
 
     user.roles = list((current_user_roles - revoked_roles).union(granted_roles))
     user.groups = list((current_user_groups - revoked_groups).union(granted_groups))
+    user.email = form.email.data
 
     user.update(api=api)
 

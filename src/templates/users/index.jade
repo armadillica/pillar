@@ -1,5 +1,12 @@
 | {% extends 'layout.html' %}
 | {% block page_title %}Users{% endblock %}
+| {% block head %}
+style.
+	span.field-description {
+		font-size: smaller;
+		color: #999;
+	}
+| {% endblock %}
 
 | {% block body %}
 
@@ -96,9 +103,10 @@ script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.select
 
 script(type="text/javascript").
 
+	// This function is also used in edit_embed.jade.
 	function displayUser(userId) {
 		var url = '/u/' + userId + '/edit?embed=1';
-		$.get(url, function(dataHtml){
+		return $.get(url, function(dataHtml){
 			$('#search-hit-container')
 				.html(dataHtml)
 				.show();

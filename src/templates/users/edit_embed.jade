@@ -51,7 +51,7 @@
 				li {{ error }}
 				| {% endfor %}
 			| {% endif %}
-
+			span.field-description {{ field.description }}
 
 		| {% endif %}
 
@@ -77,7 +77,11 @@ script(type="text/javascript").
 		//- console.log($(this).serialize());
 		$.post($(this).attr('action'), $(this).serialize())
 		.done(function(data){
-			$('#user-edit-notification').addClass('success').html('Success!');
+			// This function is defined in index.jade.
+			displayUser('{{ user._id }}')
+			.done(function() {
+				$('#user-edit-notification').addClass('success').html('Success!');
+			});
 		})
 		.fail(function(data){
 			$('#user-edit-notification').addClass('fail').html('Houston!');
