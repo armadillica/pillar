@@ -105,7 +105,7 @@ script(type="text/javascript").
 
 	// This function is also used in edit_embed.jade.
 	function displayUser(userId) {
-		var url = '/u/' + userId + '/edit?embed=1';
+		var url = '/u/' + userId + '/edit';
 		return $.get(url, function(dataHtml){
 			$('#search-hit-container')
 				.html(dataHtml)
