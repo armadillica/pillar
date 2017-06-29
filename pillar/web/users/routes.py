@@ -228,9 +228,7 @@ def users_edit(user_id):
     else:
         form.roles.data = user.roles
         form.email.data = user.email
-    return render_template('users/edit_embed.html',
-        user=user,
-        form=form)
+    return render_template('users/edit_embed.html', user=user, form=form)
 
 
 def _users_edit(form, user, api):
