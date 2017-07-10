@@ -16,7 +16,7 @@ var cache        = require('gulp-cached');
 var enabled = {
     uglify: argv.production,
     maps: argv.production,
-    failCheck: argv.production,
+    failCheck: !argv.production,
     prettyPug: !argv.production,
     cachify: !argv.production,
     liveReload: !argv.production
