@@ -54,7 +54,14 @@ def user_group_action(user_id: bson.ObjectId, group_id: bson.ObjectId, action: s
                          f'user not found.')
 
 
+def _update_algolia_user_changed_role(sender, user: dict):
+    log.debug('Sending updated user %s to Algolia due to role change', user['_id'])
+    hooks.push_updated_user_to_algolia(user, original=None)
+
+
 def setup_app(app, api_prefix):
+    from pillar.api import service
+
     app.on_pre_GET_users += hooks.check_user_access
     app.on_post_GET_users += hooks.post_GET_user
     app.on_pre_PUT_users += hooks.check_put_access
@@ -65,3 +72,5 @@ def setup_app(app, api_prefix):
     app.on_fetched_resource_users += hooks.after_fetching_user_resource
 
     app.register_api_blueprint(blueprint_api, url_prefix=api_prefix)
+
+    service.signal_user_changed_role.connect(_update_algolia_user_changed_role)
