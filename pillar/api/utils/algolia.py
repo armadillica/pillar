@@ -80,7 +80,8 @@ def algolia_index_node_save(node):
                                 if item['size'] == 't'), None)
             if variation_t:
                 node_ob['picture'] = generate_link(picture['backend'],
-                                                   variation_t['file_path'], project_id=str(picture['project']),
+                                                   variation_t['file_path'],
+                                                   project_id=str(picture['project']),
                                                    is_public=True)
     # If the node has world permissions, compute the Free permission
     if 'permissions' in node and 'world' in node['permissions']:
