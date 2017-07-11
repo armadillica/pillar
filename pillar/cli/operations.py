@@ -126,6 +126,8 @@ def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=Fals
 def index_users_rebuild():
     """Clear users index, update settings and reindex all users."""
 
+    import concurrent.futures
+
     from pillar.api.utils.algolia import algolia_index_user_save
 
     users_index = current_app.algolia_index_users
@@ -139,10 +141,28 @@ def index_users_rebuild():
 
     db = current_app.db()
     users = db['users'].find({'_deleted': {'$ne': True}})
+    user_count = users.count()
 
-    log.info('Reindexing all users')
-    for user in users:
-        algolia_index_user_save(user)
+    log.info('Reindexing all %i users', user_count)
+
+    real_current_app = current_app._get_current_object()._get_current_object()
+
+    def do_user(user):
+        with real_current_app.app_context():
+            algolia_index_user_save(user)
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
+        future_to_user = {executor.submit(do_user, user): user
+                          for user in users}
+        for idx, future in enumerate(concurrent.futures.as_completed(future_to_user)):
+            user = future_to_user[future]
+            user_ident = user.get('email') or user.get('_id')
+            try:
+                future.result()
+            except Exception:
+                log.exception('Error updating user %i/%i %s', idx+1, user_count, user_ident)
+            else:
+                log.info('Updated user %i/%i %s', idx + 1, user_count, user_ident)
 
 
 @manager_operations.command
