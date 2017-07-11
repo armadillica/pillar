@@ -70,13 +70,16 @@ def push_updated_user_to_algolia(user, original):
 def send_blinker_signal_roles_changed(user, original):
     """Sends a Blinker signal that the user roles were changed, so others can respond."""
 
-    if user.get('roles') == original.get('roles'):
+    current_roles = set(user.get('roles', []))
+    original_roles = set(original.get('roles', []))
+
+    if current_roles == original_roles:
         return
 
     from pillar.api.service import signal_user_changed_role
 
     log.info('User %s changed roles to %s, sending Blinker signal',
-             user.get('_id'), user.get('roles'))
+             user.get('_id'), current_roles)
     signal_user_changed_role.send(current_app, user=user)
 
 
