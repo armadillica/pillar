@@ -116,14 +116,17 @@ $project-sidebar-background: lighten($color-background, 5%)
 			&.active
 				background-color: $color-background-nav-light
 
-				+media-xs
-					border-bottom: 2px solid $color-primary
-				+media-sm
-					border-bottom: 2px solid $color-primary
-				+media-md
-					border-left: 2px solid $color-primary
-				+media-lg
-					border-left: 2px solid $color-primary
+				&:after
+					content: ''
+					border: 7px solid $color-background
+					border-left-color: transparent
+					border-top-color: transparent
+					border-bottom-color: transparent
+					display: block
+					position: absolute
+					top: 50%
+					right: 0
+					transform: translateY(-50%)
 
 				a
 					color: white

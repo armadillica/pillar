@@ -62,7 +62,7 @@ $search-hit-width_grid: 100px
 
 .twitter-typeahead
 	.tt-hint
-		color: $color-text-light-hint
+		color: $color-text-dark-hint
 
 	.tt-menu
 		top: 47px !important
@@ -109,8 +109,7 @@ $search-hit-width_grid: 100px
 
 	#search-sidebar
 		width: 20%
-		background-color: $color-background-nav
-		border-right: thick solid $color-background-nav-dark
+		background-color: $color-background-light
 
 		+media-lg
 			border-top-left-radius: 3px
@@ -129,7 +128,7 @@ $search-hit-width_grid: 100px
 			transition: border 100ms ease-in-out
 
 			&::placeholder
-				color: $color-text-light-secondary
+				color: $color-text-dark-secondary
 			&:placeholder-shown
 				border-bottom-color: $color-primary
 
@@ -147,7 +146,8 @@ $search-hit-width_grid: 100px
 				margin-bottom: 10px
 				border-radius: 3px
 				border: none
-				background-color: lighten($color-background-nav, 5%)
+				background-color: white
+				box-shadow: 1px 1px 0 rgba(black, .1)
 
 			a
 				text-decoration: none
@@ -155,7 +155,7 @@ $search-hit-width_grid: 100px
 			.toggleRefine
 				display: block
 				padding-left: 7px
-				color: $color-text-light-primary
+				color: $color-text-dark
 				text-transform: capitalize
 
 				&:hover
@@ -191,11 +191,11 @@ $search-hit-width_grid: 100px
 						left: -7px
 						font-size: .9em
 			.facet_count
-				color: $color-text-light-secondary
+				color: $color-text-dark-secondary
 
 
 			.panel-title, .panel-heading
-				color: $color-text-light-secondary
+				color: $color-text-dark-secondary
 				font:
 					size: 1em
 					weight: 500
@@ -210,7 +210,7 @@ $search-hit-width_grid: 100px
 					font-family: 'pillar-font'
 					position: absolute
 					right: 0
-					color: $color-background-nav-dark
+					color: $color-text-dark-primary
 
 			.collapsed
 				.panel-title:after
@@ -218,7 +218,7 @@ $search-hit-width_grid: 100px
 
 
 		.search-list-stats
-			color: lighten($color-background-nav, 30%)
+			color: $color-text-dark-hint
 			padding: 10px 15px 0 15px
 			text-align: center
 			font-size: .9em
@@ -244,10 +244,10 @@ $search-hit-width_grid: 100px
 					a
 						font-weight: 500
 						padding: 5px 4px
-						color: $color-text-light-secondary
+						color: $color-text-dark-secondary
 
 						&:hover
-							color: $color-text-light-primary
+							color: $color-text-dark-primary
 
 					&.disabled
 						opacity: .6
@@ -757,7 +757,6 @@ $search-hit-width_grid: 100px
 
 .filter-list
 	width: 100%
-	color: $color-text-light-secondary
 	padding: 5px 0
 	margin-bottom: 10px
 	display: flex
@@ -766,10 +765,8 @@ $search-hit-width_grid: 100px
 	ul
 		margin: 0 0 0 auto
 		align-self: flex-end
-		display: inline-block
 		width: auto
 		list-style: none
-		color: white
 		border-radius: 3px
 		overflow: hidden
 		padding: 0
@@ -778,8 +775,11 @@ $search-hit-width_grid: 100px
 			display: inline-block
 			padding: 3px 10px
 			cursor: pointer
-			background-color: $color-background-nav-light
+			background-color: $color-background-dark
+			border: thin solid $color-text-dark-hint
 
 			&.active
-				background-color: $color-background-nav-dark
+				color: white
+				background-color: $color-primary
+				border-color: transparent
 
