@@ -1,16 +1,12 @@
-import itertools
 import logging
 
 from pillarsdk import Node
 from pillarsdk import Project
-from pillarsdk.exceptions import ResourceNotFound
-from flask import abort
 from flask import Blueprint
 from flask import current_app
 from flask import render_template
 from flask import redirect
 from flask import request
-from flask_login import current_user
 from werkzeug.contrib.atom import AtomFeed
 
 from pillar.web.utils import system_util
@@ -19,7 +15,6 @@ from pillar.web.nodes.custom.posts import posts_view
 from pillar.web.nodes.custom.posts import posts_create
 from pillar.web.utils import attach_project_pictures
 from pillar.web.utils import current_user_is_authenticated
-from pillar.web.utils import get_file
 
 blueprint = Blueprint('main', __name__)
 log = logging.getLogger(__name__)
@@ -27,80 +22,7 @@ log = logging.getLogger(__name__)
 
 @blueprint.route('/')
 def homepage():
-    # Workaround to cache rendering of a page if user not logged in
-    @current_app.cache.cached(timeout=3600)
-    def render_page():
-        return render_template('join.html')
-
-    if current_user.is_anonymous:
-        return render_page()
-
-    # Get latest blog posts
-    api = system_util.pillar_api()
-    latest_posts = Node.all({
-        'projection': {'name': 1, 'project': 1, 'node_type': 1,
-                       'picture': 1, 'properties.status': 1, 'properties.url': 1},
-        'where': {'node_type': 'post', 'properties.status': 'published'},
-        'embedded': {'project': 1},
-        'sort': '-_created',
-        'max_results': '5'
-        }, api=api)
-
-    # Append picture Files to last_posts
-    for post in latest_posts._items:
-        post.picture = get_file(post.picture, api=api)
-
-    # Get latest assets added to any project
-    latest_assets = Node.latest('assets', api=api)
-
-    # Append picture Files to latest_assets
-    for asset in latest_assets._items:
-        asset.picture = get_file(asset.picture, api=api)
-
-    # Get latest comments to any node
-    latest_comments = Node.latest('comments', api=api)
-
-    # Get a list of random featured assets
-    random_featured = get_random_featured_nodes()
-
-    # Parse results for replies
-    to_remove = []
-    for idx, comment in enumerate(latest_comments._items):
-        if comment.properties.is_reply:
-            try:
-                comment.attached_to = Node.find(comment.parent.parent,
-                                                {'projection': {
-                                                    '_id': 1,
-                                                    'name': 1,
-                                                }},
-                                                api=api)
-            except ResourceNotFound:
-                # Remove this comment
-                to_remove.append(idx)
-        else:
-            comment.attached_to = comment.parent
-
-    for idx in reversed(to_remove):
-        del latest_comments._items[idx]
-
-    main_project = Project.find(current_app.config['MAIN_PROJECT_ID'], api=api)
-    main_project.picture_header = get_file(main_project.picture_header, api=api)
-
-    # Merge latest assets and comments into one activity stream.
-    def sort_key(item):
-        return item._created
-
-    activities = itertools.chain(latest_assets._items,
-                                 latest_comments._items)
-    activity_stream = sorted(activities, key=sort_key, reverse=True)
-
-    return render_template(
-        'homepage.html',
-        main_project=main_project,
-        latest_posts=latest_posts._items,
-        activity_stream=activity_stream,
-        random_featured=random_featured,
-        api=api)
+    return render_template('homepage.html')
 
 
 # @blueprint.errorhandler(500)
@@ -117,17 +39,6 @@ def homepage():
 # def error_404(e):
 #     return render_template('errors/403_embed.html'), 403
 #
-
-@blueprint.route('/join')
-def join():
-    """Join page"""
-    return redirect('https://store.blender.org/product/membership/')
-
-
-@blueprint.route('/services')
-def services():
-    """Services page"""
-    return render_template('services.html')
 
 
 @blueprint.route('/blog/')
@@ -165,37 +76,6 @@ def get_projects(category):
     for project in projects._items:
         attach_project_pictures(project, api)
     return projects
-
-
-def get_random_featured_nodes():
-
-    import random
-
-    api = system_util.pillar_api()
-    projects = Project.all({
-        'projection': {'nodes_featured': 1},
-        'where': {'is_private': False},
-        'max_results': '15'
-        }, api=api)
-
-    featured_nodes = (p.nodes_featured for p in projects._items if p.nodes_featured)
-    featured_nodes = [item for sublist in featured_nodes for item in sublist]
-    if len(featured_nodes) > 3:
-        featured_nodes = random.sample(featured_nodes, 3)
-
-    featured_node_documents = []
-
-    for node in featured_nodes:
-        node_document = Node.find(node, {
-                'projection': {'name': 1, 'project': 1, 'picture': 1,
-                                'properties.content_type': 1, 'properties.url': 1},
-                'embedded': {'project': 1}
-            }, api=api)
-
-        node_document.picture = get_file(node_document.picture, api=api)
-        featured_node_documents.append(node_document)
-
-    return featured_node_documents
 
 
 @blueprint.route('/open-projects')

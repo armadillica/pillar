@@ -2,31 +2,31 @@ doctype
 html(lang="en")
 	head
 		meta(charset="utf-8")
-		title {% if self.page_title() %}{% block page_title %}{% endblock %} — {% endif %}Blender Cloud
+		title {% if self.page_title() %}{% block page_title %}{% endblock %} — {% endif %}Pillar
 		meta(name="viewport", content="width=device-width, initial-scale=1.0")
-		meta(name="description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
-		meta(name="author", content="Blender Institute")
+		meta(name="description", content="")
+		meta(name="author", content="")
 		meta(name="theme-color", content="#3e92aa")
 
 		| {% if config['GOOGLE_SITE_VERIFICATION'] %}
 		meta(name="google-site-verification" content="{{ config['GOOGLE_SITE_VERIFICATION'] }}")
 		| {% endif %}
 
-		meta(property="og:site_name", content="Blender Cloud")
+		meta(property="og:site_name", content="")
 		meta(property="og:locale", content="en_US")
 		meta(name="twitter:card", content="summary_large_image")
-		meta(name="twitter:site", content="@Blender_Cloud")
+		meta(name="twitter:site", content="")
 
 		| {% block og %}
-		meta(property="og:title", content="Blender Cloud")
-		meta(property="og:url", content="https://cloud.blender.org")
-		meta(property="og:type", content="website")
-		meta(property="og:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_gleb_locomotive.jpg')}}")
-		meta(property="og:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
+		meta(property="og:title", content="")
+		meta(property="og:url", content="")
+		meta(property="og:type", content="")
+		meta(property="og:image", content="")
+		meta(property="og:description", content="")
 
-		meta(name="twitter:title", content="Blender Cloud")
-		meta(name="twitter:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
-		meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/backgrounds/background_gleb_locomotive.jpg')}}")
+		meta(name="twitter:title", content="")
+		meta(name="twitter:description", content="")
+		meta(name="twitter:image", content="")
 		| {% endblock %}
 
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery-3.1.0.min.js')}}")
@@ -67,150 +67,7 @@ html(lang="en")
 
 	body(class="{{ title }}")
 		.container-page
-			header.navbar-backdrop-container
-				| {% block header_backdrop %}
-				img(src="{{ url_for('static', filename='assets/img/backgrounds/pattern_02_blur.jpg')}}")
-				| {% endblock %}
-
-			| {% with messages = get_flashed_messages(with_categories=True) %}
-			|		{% if messages %}
-
-			|	{% for (category, message) in messages %}
-			.alert(role="alert", class="alert-{{ category }}")
-				i.alert-icon(class="{{ category }}")
-				span {{ message }}
-				button.close(type="button", data-dismiss="alert")
-					i.pi-cancel
-			|	{% endfor %}
-
-			|		{% endif %}
-			| {% endwith %}
-
-			nav.navbar.navbar-transparent.navbar-fixed-top
-				.navbar-overlay
-
-				.navbar-container
-					header.navbar-header
-						button.navbar-toggle(data-target=".navbar-collapse", data-toggle="collapse", type="button")
-							span.sr-only Toggle navigation
-							i.pi-menu
-						a.navbar-brand(
-							href="{{ url_for('main.homepage') }}",
-							title="Blender Cloud")
-							span.app-logo
-								i.pi-blender-cloud
-
-					| {% block navigation_search %}
-					.search-input
-						input#cloud-search(
-							type="text",
-							placeholder="Search assets, tutorials...")
-						i.search-icon.pi-search
-					| {% endblock %}
-
-					nav.collapse.navbar-collapse
-						ul.nav.navbar-nav.navbar-right
-							| {% if node and node.properties and node.properties.category %}
-							| {% set category = node.properties.category %}
-							| {% else %}
-							| {% set category = title %}
-							| {% endif %}
-
-							| {% block navigation_sections %}
-							li
-								a.navbar-item(
-									href="{{ url_for('main.main_blog') }}",
-									title="Blender Cloud Blog",
-									data-toggle="tooltip",
-									data-placement="bottom",
-									class="{% if category == 'blog' %}active{% endif %}")
-									span Blog
-
-							li(class="dropdown libraries")
-								a.navbar-item.dropdown-toggle(
-									href="",
-									data-toggle="dropdown",
-									title="Libraries")
-									span Libraries
-									i.pi-angle-down
-
-								ul.dropdown-menu
-									li
-										a.navbar-item(
-											href="{{ url_for('projects.view', project_url='hdri') }}",
-											title="HDRI Library",
-											data-toggle="tooltip",
-											data-placement="left")
-											i.pi-globe
-											| HDRI
-									li
-										a.navbar-item(
-											href="{{ url_for('projects.view', project_url='textures') }}",
-											title="Textures Library",
-											data-toggle="tooltip",
-											data-placement="left")
-											i.pi-folder-texture
-											| Textures
-									li
-										a.navbar-item(
-											href="{{ url_for('projects.view', project_url='characters') }}",
-											title="Character Library",
-											data-toggle="tooltip",
-											data-placement="left")
-											i.pi-character
-											| Characters
-									li
-										a.navbar-item(
-											href="{{ url_for('projects.view', project_url='gallery') }}",
-											title="Curated artwork collection",
-											data-toggle="tooltip",
-											data-placement="left")
-											i.pi-image
-											| Art Gallery
-
-							li
-								a.navbar-item(
-									href="{{ url_for('main.training') }}",
-									title="Training & Tutorials",
-									data-toggle="tooltip",
-									data-placement="bottom",
-									class="{% if category == 'training' %}active{% endif %}")
-									span Training
-							li
-								a.navbar-item(
-									href="{{ url_for('main.open_projects') }}",
-									title="Browse all the Open Projects",
-									data-toggle="tooltip",
-									data-placement="bottom",
-									class="{% if category in ['open-projects', 'film'] %}active{% endif %}")
-									span Open Projects
-							li
-								a.navbar-item(
-									href="{{ url_for('main.services') }}",
-									title="Blender Cloud Services",
-									data-toggle="tooltip",
-									data-placement="bottom",
-									class="{% if category == 'services' %}active{% endif %}")
-									span Services
-							| {% endblock %}
-
-							| {% if current_user.is_anonymous %}
-							li
-								a.navbar-item(
-									href="https://store.blender.org/product/membership/",
-									title="Sign up") Sign up
-							| {% endif %}
-
-							| {% from '_macros/_menu.html' import navigation_menu_notifications, navigation_menu_user %}
-							| {{ navigation_menu_notifications(current_user) }}
-							| {{ navigation_menu_user(current_user) }}
-
-
 			.page-content
-				#search-overlay
-				| {% block page_overlay %}
-				#page-overlay
-				| {% endblock %}
 				.page-body
 					| {% block body %}{% endblock %}
 
@@ -218,105 +75,17 @@ html(lang="en")
 		#footer-container
 			| {% block footer_navigation %}
 			#footer-navigation
-				.container
-					.row
-						.col-md-4.col-xs-6
-							.footer-support
-								h4 Support & Feedback
-								p.
-									Let us know what you think or if you have any issues
-									just write to cloudsupport at blender dot org
-
-						.col-md-2.col-xs-6
-							ul.footer-social
-								li
-									a(href="https://www.facebook.com/BlenderCloudOfficial/",
-										title="Follow us on Facebook")
-										i.pi-social-facebook
-								li
-									a(href="https://twitter.com/Blender_Cloud",
-										title="Follow us on Twitter")
-										i.pi-social-twitter
-
-						.col-md-2.col-xs-6
-							h4
-								a(href="{{ url_for('main.homepage') }}")
-									| Blender Cloud
-							ul.footer-links
-								li
-									a(href="{{ url_for('main.main_blog') }}",
-										title="Blender Cloud Blog")
-										| Blog
-
-								li
-									a(href="{{ url_for('main.services') }}",
-										title="Blender Cloud Services")
-										| Services
-
-								li
-									a(href="https://cloud.blender.org/blog/blender-cloud-v3",
-										title="About Blender Cloud")
-										| About
-
-						.col-md-2.col-xs-6
-							h4
-								a(href="https://www.blender.org",
-									title="Blender official Website")
-									| Blender
-							ul.footer-links
-								li
-									a(href="https://www.blender.org",
-										title="Blender official Website")
-										| Blender.org
-								li
-									a(href="https://store.blender.org/",
-										title="The official Blender Store")
-										| Blender Store
-
-						.col-md-2.col-xs-6.special
-							| With the support of the <br/> MEDIA Programme of the European Union<br/><br/>
-							img(alt="MEDIA Programme of the European Union",
-									src="https://gooseberry.blender.org/wp-content/uploads/2014/01/media_programme.png")
-			| {% endblock %}
+			| {% endblock footer_navigation %}
 
 			| {% block footer %}
 			footer.container
 				#hop(title="Be awesome in space")
 					i.pi-angle-up
-			| {% endblock %}
-		| {% endblock %}
-
-		#notification-pop(data-url="", data-read-toggle="")
-			.nc-progress
-			a#pop-close(href="#", title="Dismiss")
-				i.pi-cancel
-			.nc-item
-				.nc-avatar
-				.nc-text
-					span.nc-date
-						a(href="")
-
-		noscript
-			link(href='//fonts.googleapis.com/css?family=Roboto:300,400', rel='stylesheet', type='text/css')
+			| {% endblock footer %}
+		| {% endblock footer_container%}
 
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.bootstrap-3.3.7.min.js', v=17320171) }}")
 
-		script.
-			$(document).ready(function() {
-				{% if current_user.is_authenticated %}
-					getNotificationsLoop(); // Check for new notifications in the background
-
-					// Resize #notifications and change overflow for scrollbars
-					$(window).on("resize", function() { notificationsResize(); });
-				{% endif %}
-			});
-
-			if (typeof $().tooltip != 'undefined'){
-				$('[data-toggle="tooltip"]').tooltip({'delay' : {'show': 0, 'hide': 0}});
-			}
-			if(typeof($.fn.popover) != 'undefined'){
-				$('[data-toggle="popover"]').popover();
-			}
 
 		| {% block footer_scripts_pre %}{% endblock %}
 		| {% block footer_scripts %}{% endblock %}
