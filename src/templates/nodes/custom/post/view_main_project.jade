@@ -1,4 +1,21 @@
 | {% extends 'layout.html' %}
+
+| {% block og %}
+meta(property="og:title", content="{{ node.name }}")
+meta(property="og:url", content="{{ url_for('main.main_blog', url=node.properties.url, _external=True)}}")
+meta(property="og:type", content="website")
+| {% if node.picture %}
+meta(property="og:image", content="{{ node.picture.thumbnail('l', api=api) }}")
+| {% endif %}
+meta(property="og:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
+
+meta(name="twitter:title", content="{{ node.name }}")
+meta(name="twitter:description", content="Blender Cloud is a web based service developed by Blender Institute that allows people to access the training videos and all the data from the open projects.")
+| {% if node.picture %}
+meta(property="og:image", content="{{ node.picture.thumbnail('l', api=api) }}")
+| {% endif %}
+| {% endblock %}
+
 | {% block page_title %}{{node.name}} - Blog{% endblock%}
 
 | {% set title = 'blog' %}
