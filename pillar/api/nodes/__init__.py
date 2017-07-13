@@ -365,6 +365,10 @@ def nodes_set_default_picture(nodes):
         node_set_default_picture(node)
 
 
+def before_deleting_node(node: dict):
+    check_permissions('nodes', node, 'DELETE')
+
+
 def after_deleting_node(item):
     from pillar.celery import algolia_tasks
     algolia_tasks.algolia_index_node_delete.delay(str(item['_id']))
@@ -415,6 +419,7 @@ def setup_app(app, url_prefix):
 
     app.on_update_nodes += convert_markdown
 
+    app.on_delete_item_nodes += before_deleting_node
     app.on_deleted_item_nodes += after_deleting_node
 
     app.register_api_blueprint(blueprint, url_prefix=url_prefix)

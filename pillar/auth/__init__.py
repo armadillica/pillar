@@ -80,7 +80,7 @@ def config_login_manager(app):
     return login_manager
 
 
-def login_user(oauth_token, *, load_from_db=False):
+def login_user(oauth_token: str, *, load_from_db=False):
     """Log in the user identified by the given token."""
 
     if load_from_db:

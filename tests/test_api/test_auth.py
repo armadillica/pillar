@@ -484,6 +484,45 @@ class PermissionComputationTest(AbstractPillarTest):
                  'world': ['GET']},
                 self.sort(compute_aggr_permissions('nodes', node, None)))
 
+    def test_delete_node(self):
+        self.enter_app_context()
+
+        proj_id, proj = self.ensure_project_exists()
+        self.create_user(user_id=24 * 'a', roles={'subscriber'},
+                         groups=[ctd.EXAMPLE_PROJECT_OWNER_ID])
+
+        node = copy.deepcopy(ctd.EXAMPLE_NODE)
+        node['project'] = proj_id
+        node_id = self.create_node(node)
+
+        # Try deletion by a user who is not part of the project.
+        self.create_user(user_id=6 * 'dafe', roles={'subscriber'}, token='dafe-token')
+        self.delete(f'/api/nodes/{node_id}',
+                    auth_token='dafe-token',
+                    etag=node['_etag'],
+                    expected_status=403)
+
+        found = self.app.db('nodes').find_one(node_id)
+        self.assertFalse(found.get('_deleted', False))
+
+    def test_delete_project(self):
+        self.enter_app_context()
+
+        proj_id, proj = self.ensure_project_exists()
+        self.create_user(user_id=24 * 'a', roles={'subscriber'},
+                         groups=[ctd.EXAMPLE_PROJECT_OWNER_ID])
+
+        # Try deletion by a user who is not part of the project.
+        self.create_user(user_id=6 * 'dafe', roles={'subscriber'}, token='dafe-token')
+        self.delete(f'/api/projects/{proj_id}',
+                    auth_token='dafe-token',
+                    etag=proj['_etag'],
+                    expected_status=403)
+
+        found = self.app.db('projects').find_one(proj_id)
+        self.assertIsNotNone(found)
+        self.assertFalse(found.get('_deleted', False))
+
 
 class RequireRolesTest(AbstractPillarTest):
     def test_no_roles_required(self):
