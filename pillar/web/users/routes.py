@@ -2,8 +2,8 @@ import json
 import logging
 import requests
 
-from flask import (abort, Blueprint, current_app, flash, redirect,
-                   render_template, request, session, url_for)
+from flask import abort, Blueprint, current_app, flash, redirect, render_template, request, session,\
+    url_for
 from flask_login import login_required, logout_user, current_user
 from flask_oauthlib.client import OAuthException
 from werkzeug import exceptions as wz_exceptions
@@ -11,6 +11,7 @@ from werkzeug import exceptions as wz_exceptions
 import pillar.api.blender_cloud.subscription
 import pillar.auth
 from pillar.web import system_util
+from pillar.api.local_auth import generate_and_store_token, get_local_user
 
 from . import forms
 
@@ -78,23 +79,15 @@ def blender_id_authorized():
 
 @blueprint.route('/login/local', methods=['GET', 'POST'])
 def login_local():
-    """Login with a local account, skipping OAuth. This provides access only
-    to the web application and is meant for limited access (for example in
-    the case of a shared account)."""
+    """Login with a local account, as an alternative to OAuth.
+
+    This provides access only to the web application."""
     form = forms.UserLoginForm()
     # Forward credentials to server
     if form.validate_on_submit():
-        payload = {
-            'username': form.username.data,
-            'password': form.password.data
-            }
-        r = requests.post("{0}auth/make-token".format(
-            system_util.pillar_server_endpoint()), data=payload)
-        if r.status_code != 200:
-            return abort(r.status_code)
-        res = r.json()
-        # If correct, receive token and log in the user
-        pillar.auth.login_user(res['token'])
+        user = get_local_user(form.username.data, form.password.data)
+        token = generate_and_store_token(user['_id'])
+        pillar.auth.login_user(token['token'])
         return redirect(url_for('main.homepage'))
     return render_template('users/login.html', form=form)
 

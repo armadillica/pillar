@@ -37,17 +37,7 @@ def create_local_user(email, password):
     return r['_id']
 
 
-@blueprint.route('/make-token', methods=['POST'])
-def make_token():
-    """Direct login for a user, without OAuth, using local database. Generates
-    a token that is passed back to Pillar Web and used in subsequent
-    transactions.
-
-    :return: a token string
-    """
-    username = request.form['username']
-    password = request.form['password']
-
+def get_local_user(username, password):
     # Look up user in db
     users_collection = current_app.data.driver.db['users']
     user = users_collection.find_one({'username': username})
@@ -62,6 +52,21 @@ def make_token():
     hashed_password = hash_password(password, salt)
     if hashed_password != credentials['token']:
         return abort(403)
+    return user
+
+
+@blueprint.route('/make-token', methods=['POST'])
+def make_token():
+    """Direct login for a user, without OAuth, using local database. Generates
+    a token that is passed back to Pillar Web and used in subsequent
+    transactions.
+
+    :return: a token string
+    """
+    username = request.form['username']
+    password = request.form['password']
+
+    user = get_local_user(username, password)
 
     token = generate_and_store_token(user['_id'])
     return jsonify(token=token['token'])
