@@ -17,6 +17,10 @@ from . import gcs
 
 
 def default_storage_backend(name: str) -> Bucket:
+    """Returns an instance of a Bucket, based on the default backend.
+
+    Depending on the backend this may actually create the bucket.
+    """
     from flask import current_app
 
     backend_name = current_app.config['STORAGE_BACKEND']

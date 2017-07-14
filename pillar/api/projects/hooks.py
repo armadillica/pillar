@@ -9,6 +9,7 @@ from pillar.api.node_types.comment import node_type_comment
 from pillar.api.node_types.group import node_type_group
 from pillar.api.node_types.group_texture import node_type_group_texture
 from pillar.api.node_types.texture import node_type_texture
+from pillar.api.file_storage_backends import default_storage_backend
 from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket
 from pillar.api.utils import authorization, authentication
 from pillar.api.utils import remove_private_keys
@@ -167,19 +168,8 @@ def after_inserting_project(project, db_user):
         else:
             project['url'] = "p-{!s}".format(project_id)
 
-    # Initialize storage page (defaults to GCS)
-    if current_app.config.get('TESTING'):
-        log.warning('Not creating Google Cloud Storage bucket while running unit tests!')
-    else:
-        try:
-            gcs_storage = GoogleCloudStorageBucket(str(project_id))
-            # FIXME: don't use internal property, but use our bucket/blob API.
-            if gcs_storage._gcs_bucket.exists():
-                log.info('Created GCS instance for project %s', project_id)
-            else:
-                log.warning('Unable to create GCS instance for project %s', project_id)
-        except gcs_exceptions.Forbidden as ex:
-            log.warning('GCS forbids me to create CGS instance for project %s: %s', project_id, ex)
+    # Initialize storage using the default specified in STORAGE_BACKEND
+    default_storage_backend(str(project_id))
 
     # Commit the changes directly to the MongoDB; a PUT is not allowed yet,
     # as the project doesn't have a valid permission structure.

@@ -6,7 +6,7 @@ import typing
 from bson import ObjectId
 from gcloud.storage.client import Client
 import gcloud.storage.blob
-from gcloud.exceptions import NotFound
+import gcloud.exceptions as gcloud_exc
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
@@ -58,7 +58,7 @@ class GoogleCloudStorageBucket(Bucket):
 
         try:
             self._gcs_bucket = gcs.get_bucket(name)
-        except NotFound:
+        except gcloud_exc.NotFound:
             self._gcs_bucket = gcs.bucket(name)
             # Hardcode the bucket location to EU
             self._gcs_bucket.location = 'EU'
@@ -72,6 +72,7 @@ class GoogleCloudStorageBucket(Bucket):
             #     }
             # ]
             self._gcs_bucket.create()
+            log.info('Created GCS instance for project %s', name)
 
         self.subdir = subdir
 
@@ -115,7 +116,7 @@ class GoogleCloudStorageBucket(Bucket):
         try:
             gblob.delete()
             return True
-        except NotFound:
+        except gcloud_exc.NotFound:
             return False
 
     def copy_blob(self, blob: Blob, to_bucket: Bucket):
@@ -184,7 +185,7 @@ class GoogleCloudStorageBlob(Blob):
         # Reload to get the actual file properties from Google.
         try:
             self.gblob.reload()
-        except NotFound:
+        except gcloud_exc.NotFound:
             return False
         return self.gblob.exists()
 
