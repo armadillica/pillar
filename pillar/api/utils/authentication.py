@@ -11,9 +11,12 @@ import typing
 
 import bson
 from bson import tz_util
-from flask import g
+from flask import g, current_app
 from flask import request
 from flask import current_app
+from werkzeug import exceptions as wz_exceptions
+
+from pillar.api.utils import remove_private_keys
 
 log = logging.getLogger(__name__)
 
@@ -47,6 +50,56 @@ def force_cli_user():
     log.warning('Logging in as CLI_USER (%s) of type %s, circumventing authentication.',
                 id(CLI_USER), id(type(CLI_USER)))
     g.current_user = CLI_USER
+
+
+def find_user_in_db(user_info: dict, provider='blender-id'):
+    """Find the user in our database, creating/updating the returned document where needed.
+
+    First, search for the user using its id from the provider, then try to look the user up via the
+    email address.
+
+    Does NOT update the user in the database.
+    
+    :param user_info: Information (id, email and full_name) from the auth provider
+    :param provider: One of the supported providers
+    """
+
+    users = current_app.data.driver.db['users']
+
+    query = {'$or': [
+        {'auth': {'$elemMatch': {
+            'user_id': str(user_info['id']),
+            'provider': provider}}},
+        {'email': user_info['email']},
+        ]}
+    log.debug('Querying: %s', query)
+    db_user = users.find_one(query)
+
+    if db_user:
+        log.debug('User with {provider} id {user_id} already in our database, '
+                  'updating with info from {provider}.'.format(
+                   provider=provider, user_id=user_info['id']))
+        db_user['email'] = user_info['email']
+
+        # Find out if an auth entry for the current provider already exists
+        provider_entry = [element for element in db_user['auth'] if element['provider'] == provider]
+        if not provider_entry:
+            db_user['auth'].append({
+                'provider': provider,
+                'user_id': str(user_info['id']),
+                'token': ''})
+    else:
+        log.debug('User %r not yet in our database, create a new one.', user_info['id'])
+        db_user = create_new_user_document(
+            email=user_info['email'],
+            user_id=user_info['id'],
+            username=user_info['full_name'],
+            provider=provider)
+        db_user['username'] = make_unique_username(user_info['email'])
+        if not db_user['full_name']:
+            db_user['full_name'] = db_user['username']
+
+    return db_user
 
 
 def validate_token():
@@ -270,3 +323,64 @@ def setup_app(app):
     def validate_token_at_each_request():
         validate_token()
         return None
+
+
+def upsert_user(db_user):
+    """Inserts/updates the user in MongoDB.
+
+    Retries a few times when there are uniqueness issues in the username.
+
+    :returns: the user's database ID and the status of the PUT/POST.
+        The status is 201 on insert, and 200 on update.
+    :type: (ObjectId, int)
+    """
+
+    if 'subscriber' in db_user.get('groups', []):
+        log.error('Non-ObjectID string found in user.groups: %s', db_user)
+        raise wz_exceptions.InternalServerError(
+            'Non-ObjectID string found in user.groups: %s' % db_user)
+
+    r = {}
+    for retry in range(5):
+        if '_id' in db_user:
+            # Update the existing user
+            attempted_eve_method = 'PUT'
+            db_id = db_user['_id']
+            r, _, _, status = current_app.put_internal('users', remove_private_keys(db_user),
+                                                       _id=db_id)
+            if status == 422:
+                log.error('Status %i trying to PUT user %s with values %s, should not happen! %s',
+                          status, db_id, remove_private_keys(db_user), r)
+        else:
+            # Create a new user, retry for non-unique usernames.
+            attempted_eve_method = 'POST'
+            r, _, _, status = current_app.post_internal('users', db_user)
+
+            if status not in {200, 201}:
+                log.error('Status %i trying to create user with values %s: %s',
+                          status, db_user, r)
+                raise wz_exceptions.InternalServerError()
+
+            db_id = r['_id']
+            db_user.update(r)  # update with database/eve-generated fields.
+
+        if status == 422:
+            # Probably non-unique username, so retry a few times with different usernames.
+            log.info('Error creating new user: %s', r)
+            username_issue = r.get('_issues', {}).get('username', '')
+            if 'not unique' in username_issue:
+                # Retry
+                db_user['username'] = make_unique_username(db_user['email'])
+                continue
+
+        # Saving was successful, or at least didn't break on a non-unique username.
+        break
+    else:
+        log.error('Unable to create new user %s: %s', db_user, r)
+        raise wz_exceptions.InternalServerError()
+
+    if status not in (200, 201):
+        log.error('internal response from %s to Eve: %r %r', attempted_eve_method, status, r)
+        raise wz_exceptions.InternalServerError()
+
+    return db_id, status

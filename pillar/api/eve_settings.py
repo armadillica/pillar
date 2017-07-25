@@ -88,8 +88,8 @@ users_schema = {
         }
     },
     'auth': {
-        # Storage of authentication credentials (one will be able to auth with
-        # multiple providers on the same account)
+        # Storage of authentication credentials (one will be able to auth with multiple providers on
+        # the same account)
         'type': 'list',
         'required': True,
         'schema': {
@@ -97,13 +97,12 @@ users_schema = {
             'schema': {
                 'provider': {
                     'type': 'string',
-                    'allowed': ["blender-id", "local"],
+                    'allowed': ['blender-id', 'local', 'facebook'],
                 },
                 'user_id': {
                     'type': 'string'
                 },
-                # A token is considered a "password" in case the provider is
-                # "local".
+                # A token is considered a "password" in case the provider is "local".
                 'token': {
                     'type': 'string'
                 }

@@ -2,22 +2,22 @@ import json
 import logging
 import requests
 
+from werkzeug import exceptions as wz_exceptions
 from flask import abort, Blueprint, current_app, flash, redirect, render_template, request, session,\
     url_for
 from flask_login import login_required, logout_user, current_user
 from flask_oauthlib.client import OAuthException
-from werkzeug import exceptions as wz_exceptions
-
-import pillar.api.blender_cloud.subscription
-import pillar.auth
-from pillar.web import system_util
-from pillar.api.local_auth import generate_and_store_token, get_local_user
-
-from . import forms
 
 from pillarsdk import exceptions as sdk_exceptions
 from pillarsdk.users import User
 from pillarsdk.groups import Group
+import pillar.api.blender_cloud.subscription
+import pillar.auth
+from pillar.web import system_util
+from pillar.api.local_auth import generate_and_store_token, get_local_user
+from pillar.api.utils.authentication import find_user_in_db, upsert_user
+from pillar.auth.oauth import OAuthSignIn
+from . import forms
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('users', __name__)
@@ -26,6 +26,33 @@ blueprint = Blueprint('users', __name__)
 def check_oauth_provider(provider):
     if not provider:
         return abort(404)
+
+
+@blueprint.route('/authorize/<provider>')
+def oauth_authorize(provider):
+    if not current_user.is_anonymous:
+        return redirect(url_for('main.homepage'))
+    oauth = OAuthSignIn.get_provider(provider)
+    return oauth.authorize()
+
+
+@blueprint.route('/callback/<provider>')
+def oauth_callback(provider):
+    if not current_user.is_anonymous:
+        return redirect(url_for('main.homepage'))
+    oauth = OAuthSignIn.get_provider(provider)
+    social_id, email = oauth.callback()
+    if social_id is None:
+        flash('Authentication failed.')
+        return redirect(url_for('main.homepage'))
+    # Find or create user
+    user_info = {'id': social_id, 'email': email, 'full_name': ''}
+    db_user = find_user_in_db(user_info, provider=provider)
+    db_id, status = upsert_user(db_user)
+    token = generate_and_store_token(db_id)
+    # Login user
+    pillar.auth.login_user(token['token'])
+    return redirect(url_for('main.homepage'))
 
 
 @blueprint.route('/login')
