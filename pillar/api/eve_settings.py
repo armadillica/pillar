@@ -534,8 +534,9 @@ projects_schema = {
     'category': {
         'type': 'string',
         'allowed': [
-            'training',
+            'course',
             'film',
+            'workshop',
             'assets',
             'software',
             'game',
