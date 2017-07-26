@@ -13,8 +13,6 @@ from pillar.web.utils import system_util
 from pillar.web.nodes.routes import url_for_node
 from pillar.web.nodes.custom.posts import posts_view
 from pillar.web.nodes.custom.posts import posts_create
-from pillar.web.utils import attach_project_pictures
-from pillar.web.utils import current_user_is_authenticated
 
 blueprint = Blueprint('main', __name__)
 log = logging.getLogger(__name__)
@@ -60,50 +58,6 @@ def main_posts_create():
 def project_blog(project_url, url=None):
     """View project blog"""
     return posts_view(project_url=project_url, url=url)
-
-
-def get_projects(category):
-    """Utility to get projects based on category. Should be moved on the API
-    and improved with more extensive filtering capabilities.
-    """
-    api = system_util.pillar_api()
-    projects = Project.all({
-        'where': {
-            'category': category,
-            'is_private': False},
-        'sort': '-_created',
-        }, api=api)
-    for project in projects._items:
-        attach_project_pictures(project, api)
-    return projects
-
-
-@blueprint.route('/open-projects')
-def open_projects():
-    @current_app.cache.cached(timeout=3600, unless=current_user_is_authenticated)
-    def render_page():
-        projects = get_projects('film')
-        return render_template(
-            'projects/index_collection.html',
-            title='open-projects',
-            projects=projects._items,
-            api=system_util.pillar_api())
-
-    return render_page()
-
-
-@blueprint.route('/training')
-def training():
-    @current_app.cache.cached(timeout=3600, unless=current_user_is_authenticated)
-    def render_page():
-        projects = get_projects('training')
-        return render_template(
-            'projects/index_collection.html',
-            title='training',
-            projects=projects._items,
-            api=system_util.pillar_api())
-
-    return render_page()
 
 
 @blueprint.route('/vrview')
