@@ -997,6 +997,18 @@
       "src": "fontawesome"
     },
     {
+      "uid": "ef74ff62feda486fd414410e782b598a",
+      "css": "graduation-cap",
+      "code": 59505,
+      "src": "entypo"
+    },
+    {
+      "uid": "fb3ee9c192c946342e0cdd12f06d7774",
+      "css": "lightbulb",
+      "code": 59506,
+      "src": "linecons"
+    },
+    {
       "uid": "03e6e1bfe72275c6eaa0d0898fde6c1d",
       "css": "chatbubble-working",
       "code": 59407,
