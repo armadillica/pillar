@@ -1,0 +1,17 @@
+| {% extends 'layout.html' %}
+| {% block page_title %}Login{% endblock %}
+
+| {% block body %}
+h1 Logins
+| {% for login_provider, login_provider_conf in config['OAUTH_CREDENTIALS'].items() %}
+| {% if login_provider == 'blender_id' %}
+| {{login_provider}} button
+| {% elif login_provider == 'facebook' %}
+| {{login_provider}} button
+| {% elif login_provider == 'google' %}
+| {% endif %}
+p
+	a(href="{{url_for('users.oauth_authorize', provider=login_provider)}}") Login
+
+| {% endfor %}
+| {% endblock body %}

@@ -57,16 +57,8 @@ def oauth_callback(provider):
 
 @blueprint.route('/login')
 def login():
-    check_oauth_provider(current_app.oauth_blender_id)
-
     session['next_after_login'] = request.args.get('next') or request.referrer
-
-    callback = url_for(
-        'users.blender_id_authorized',
-        _external=True,
-        _scheme=current_app.config['SCHEME']
-    )
-    return current_app.oauth_blender_id.authorize(callback=callback)
+    return render_template('login.html')
 
 
 @blueprint.route('/oauth/blender-id/authorized')
