@@ -21,7 +21,8 @@ class ProjectForm(Form):
     is_private = BooleanField('Private')
     category = SelectField('Category', choices=[
         ('film', 'Film'),
-        ('training', 'Training'),
+        ('course', 'Course'),
+        ('workshop', 'Workshop'),
         ('assets', 'Assets')])
     status = SelectField('Status', choices=[
         ('published', 'Published'),
