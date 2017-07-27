@@ -2,16 +2,30 @@
 | {% block page_title %}Login{% endblock %}
 
 | {% block body %}
-h1 Logins
-| {% for login_provider, login_provider_conf in config['OAUTH_CREDENTIALS'].items() %}
-| {% if login_provider == 'blender_id' %}
-| {{login_provider}} button
-| {% elif login_provider == 'facebook' %}
-| {{login_provider}} button
-| {% elif login_provider == 'google' %}
-| {% endif %}
-p
-	a(href="{{url_for('users.oauth_authorize', provider=login_provider)}}") Login
 
-| {% endfor %}
+.login-container
+	.login-box
+		.login-title Welcome
+
+		.login-info
+			| Login using one of the following providers:
+
+		.login-providers
+			| {% for login_provider, login_provider_conf in config['OAUTH_CREDENTIALS'].items() %}
+
+			| 	{% set login_provider_name = login_provider | undertitle %}
+
+			| 	{% if 'name' in login_provider_conf %}
+			| 	{% set login_provider_name = login_provider_conf['name'] %}
+			| 	{% endif %}
+
+			a(class="{{login_provider}} login-provider-button",
+				title="Login using {{ login_provider_name }}",
+				href="{{url_for('users.oauth_authorize', provider=login_provider)}}")
+				| {{ login_provider_name }}
+
+			| 	{% endfor %}
+
 | {% endblock body %}
+
+| {% block footer_container %}{% endblock footer_container %}

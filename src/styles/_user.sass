@@ -1,206 +1,206 @@
-#login-container
-	width: 60%
-	margin: 40px auto
-	padding: 15px 35px 25px 35px
+.login-container
+  align-items: center
+  display: flex
+  // height: 100%
+  justify-content: center
+  // width: 100%
+  position: fixed
+  top: 0
+  bottom: 0
+  left: 0
+  right: 0
 
-	+container-box
+.login-box
+  +container-box
+  margin: 15px
+  max-width: 600px
+  min-width: 300px
+  padding: 15px 35px
 
-	.login-title,
-	.settings-title
-		text-align: center
-		color: $color-primary
-		font:
-			size: 2.2em
-			weight: 300
+  .login-title,
+  .settings-title
+    color: $color-primary
+    font:
+      size: 2.2em
+      weight: 300
+    padding: 15px
+    text-align: center
 
-		padding: 15px 0
+  .login-info
+    color: $color-text-dark-primary
+    font-weight: 300
+    text-align: center
 
-	.login-info
-		font:
-			weight: 300
+  .login-providers
+    align-items: center
+    display: flex
+    flex-direction: column
+    justify-content: center
+    margin: 15px
 
-		color: $color-text-dark-primary
-		text-align: center
-		padding-bottom: 25px
+    .login-provider-button
+      background-color: $color-primary
+      border: thin solid $color-primary
+      border-radius: 3px
+      color: #fff
+      display: block
+      margin-bottom: 10px
+      min-width: 200px
+      padding: 5px 10px
+      text-align: center
 
-	.buttons
-		display: flex
-		margin: 35px auto 35px auto
-		width: 100%
-		align-items: center
-		justify-content: center
-
-		.login-button-container
-			margin: 0 25px
-			text-align: center
-			position: relative
-
-			a.forgot
-				width: 100%
-				position: absolute
-				bottom: -25px
-				left: 50%
-				transform: translateX(-50%)
-				display: block
-				font-size: .8em
-				color: $color-text-dark-secondary
-
-		.button-login,
-		.button-submit
-			min-width: 200px
-			+button($color-primary, 3px, true)
-
-		.button-register
-			min-width: 150px
-			+button($color-primary, 3px)
+      &.facebook
+        background-color: #3b5998
+        border-color: transparent
+        color: #fff
 
 #settings
-	display: flex
-	align-items: stretch
-	margin: 25px auto
+  display: flex
+  align-items: stretch
+  margin: 25px auto
 
-	#settings-sidebar
-		width: 30%
-		+container-box
-		margin-right: 15px
+  #settings-sidebar
+    width: 30%
+    +container-box
+    margin-right: 15px
 
-		.settings-content
-			padding: 0
-			ul
-				padding: 0
-				margin: 0
-				list-style: none
+    .settings-content
+      padding: 0
+      ul
+        padding: 0
+        margin: 0
+        list-style: none
 
-			a
-				&:hover
-					text-decoration: none
-					li
-						background-color: lighten($color-background, 5%)
-				li
-					padding: 25px
-					margin: 0
-					border-bottom: thin solid $color-background
-					border-left: thick solid transparent
-					transition: all 100ms ease-in-out
+      a
+        &:hover
+          text-decoration: none
+          li
+            background-color: lighten($color-background, 5%)
+        li
+          padding: 25px
+          margin: 0
+          border-bottom: thin solid $color-background
+          border-left: thick solid transparent
+          transition: all 100ms ease-in-out
 
-					i
-						font-size: 1.1em
-						padding-right: 15px
+          i
+            font-size: 1.1em
+            padding-right: 15px
 
-			.active
-				li
-					background-color: lighten($color-background, 5%)
-					border-left: thick solid $color-info
-
-
-	#settings-container
-		width: 70%
-		+container-box
+      .active
+        li
+          background-color: lighten($color-background, 5%)
+          border-left: thick solid $color-info
 
 
-	.settings-header
-		background-color: $color-background
-		border-top-left-radius: 3px
-		border-top-right-radius: 3px
+  #settings-container
+    width: 70%
+    +container-box
 
-		.settings-title
-			padding: 25px 15px 5px 15px
-			font:
-				size: 2em
-				weight: 300
 
-	.settings-content
-		padding: 25px
+  .settings-header
+    background-color: $color-background
+    border-top-left-radius: 3px
+    border-top-right-radius: 3px
 
-		p
-			color: $color-text-dark-primary
+    .settings-title
+      padding: 25px 15px 5px 15px
+      font:
+        size: 2em
+        weight: 300
 
-		.settings-billing-info
-			font-size: 1.2em
+  .settings-content
+    padding: 25px
 
-		.subscription-active
-			color: $color-success
-			padding-bottom: 20px
-		.subscription-demo
-			color: $color-info
-			margin-top: 0
-		.subscription-missing
-			color: $color-danger
-			margin-top: 0
+    p
+      color: $color-text-dark-primary
 
-	.button-submit
-		display: block
-		clear: both
-		min-width: 200px
-		margin: 0 auto
-		+button($color-primary, 3px, true)
+    .settings-billing-info
+      font-size: 1.2em
+
+    .subscription-active
+      color: $color-success
+      padding-bottom: 20px
+    .subscription-demo
+      color: $color-info
+      margin-top: 0
+    .subscription-missing
+      color: $color-danger
+      margin-top: 0
+
+  .button-submit
+    display: block
+    clear: both
+    min-width: 200px
+    margin: 0 auto
+    +button($color-primary, 3px, true)
 
 
 #settings-container
-	#settings-form
-		width: 100%
-	.settings-form
-		display: flex
-		align-items: center
-		justify-content: center
+  #settings-form
+    width: 100%
+  .settings-form
+    display: flex
+    align-items: center
+    justify-content: center
 
-		.left, .right
-			padding: 25px 0
+    .left, .right
+      padding: 25px 0
 
-		.left
-			width: 60%
-			float: left
+    .left
+      width: 60%
+      float: left
 
-		.right
-			width: 40%
-			float: right
-			text-align: center
+    .right
+      width: 40%
+      float: right
+      text-align: center
 
-		.settings-avatar
-			img
-				border-radius: 3px
-			span
-				display: block
-				padding: 15px 0
-				font:
-					size: .9em
+    .settings-avatar
+      img
+        border-radius: 3px
+      span
+        display: block
+        padding: 15px 0
+        font:
+          size: .9em
 
-		.settings-password
-			color: $color-text-dark-primary
+    .settings-password
+      color: $color-text-dark-primary
 
 
 #user-edit-container
-	padding: 15px
+  padding: 15px
 
-	#user-edit-header
-		.user-edit-name
-			font-size: 1.5em
-		.user-edit-username,
-		.user-edit-email,
-		.user-edit-id
-			color: $color-text-dark-secondary
-			padding: 3px 0
+  #user-edit-header
+    .user-edit-name
+      font-size: 1.5em
+    .user-edit-username,
+    .user-edit-email,
+    .user-edit-id
+      color: $color-text-dark-secondary
+      padding: 3px 0
 
-			i
-				margin-right: 5px
+      i
+        margin-right: 5px
 
-	#user-edit-form
-		padding: 10px 0
+  #user-edit-form
+    padding: 10px 0
 
-		#submit_edit_user
-			+button($color-success, 3px, true)
+    #submit_edit_user
+      +button($color-success, 3px, true)
 
-		#button-cancel
-			+button(#aaa, 3px)
-			margin: 0 10px
+    #button-cancel
+      +button(#aaa, 3px)
+      margin: 0 10px
 
-		#user-edit-notification
-			float: right
-			color: $color-text-dark-secondary
-			padding: 10px 0
+    #user-edit-notification
+      float: right
+      color: $color-text-dark-secondary
+      padding: 10px 0
 
-			&.success
-				color: $color-success
-			&.fail
-				color: $color-danger
+      &.success
+        color: $color-success
+      &.fail
+        color: $color-danger
 
