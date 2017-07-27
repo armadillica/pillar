@@ -36,22 +36,38 @@ def oauth_authorize(provider):
     return oauth.authorize()
 
 
-@blueprint.route('/callback/<provider>')
+@blueprint.route('/oauth/<provider>/authorized')
 def oauth_callback(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('main.homepage'))
     oauth = OAuthSignIn.get_provider(provider)
-    social_id, email = oauth.callback()
+    social_id, email, access_token = oauth.callback()
     if social_id is None:
-        flash('Authentication failed.')
+        log.debug('Authentication failed for user with {}'.format(provider))
         return redirect(url_for('main.homepage'))
-    # Find or create user
-    user_info = {'id': social_id, 'email': email, 'full_name': ''}
-    db_user = find_user_in_db(user_info, provider=provider)
-    db_id, status = upsert_user(db_user)
-    token = generate_and_store_token(db_id)
-    # Login user
-    pillar.auth.login_user(token['token'])
+    # If login from Blender ID we use the token to create the user
+    if provider == 'blender-id':
+        session['blender_id_oauth_token'] = (access_token, '')
+        pillar.auth.login_user(access_token)
+
+        if current_user is not None:
+            # Check with the store for user roles. If the user has an active
+            # subscription, we apply the 'subscriber' role
+            api = system_util.pillar_api(token=access_token)
+            api.get('bcloud/update-subscription')
+    else:
+        # Find or create user
+        user_info = {'id': social_id, 'email': email, 'full_name': ''}
+        db_user = find_user_in_db(user_info, provider=provider)
+        db_id, status = upsert_user(db_user)
+        token = generate_and_store_token(db_id)
+        # Login user
+        pillar.auth.login_user(token['token'])
+
+    next_after_login = session.pop('next_after_login', None)
+    if next_after_login:
+        log.debug('Redirecting user to %s', next_after_login)
+        return redirect(next_after_login)
     return redirect(url_for('main.homepage'))
 
 
@@ -59,41 +75,6 @@ def oauth_callback(provider):
 def login():
     session['next_after_login'] = request.args.get('next') or request.referrer
     return render_template('login.html')
-
-
-@blueprint.route('/oauth/blender-id/authorized')
-def blender_id_authorized():
-    check_oauth_provider(current_app.oauth_blender_id)
-    try:
-        oauth_resp = current_app.oauth_blender_id.authorized_response()
-        if isinstance(oauth_resp, OAuthException):
-            raise oauth_resp
-    except OAuthException as ex:
-        log.warning('Error parsing BlenderID OAuth response. data=%s; message=%s',
-                    ex.data, ex.message)
-        raise wz_exceptions.Forbidden('Access denied, sorry!')
-
-    if oauth_resp is None:
-        msg = 'Access denied: reason=%s error=%s' % (
-            request.args.get('error_reason'), request.args.get('error_description'))
-        log.warning('Access denied to user because oauth_resp=None: %s', msg)
-        return wz_exceptions.Forbidden(msg)
-
-    session['blender_id_oauth_token'] = (oauth_resp['access_token'], '')
-
-    pillar.auth.login_user(oauth_resp['access_token'])
-
-    if current_user is not None:
-        # Check with the store for user roles. If the user has an active
-        # subscription, we apply the 'subscriber' role
-        api = system_util.pillar_api(token=oauth_resp['access_token'])
-        api.get('bcloud/update-subscription')
-
-    next_after_login = session.pop('next_after_login', None)
-    if next_after_login:
-        log.debug('Redirecting user to %s', next_after_login)
-        return redirect(next_after_login)
-    return redirect(url_for('main.homepage'))
 
 
 @blueprint.route('/login/local', methods=['GET', 'POST'])

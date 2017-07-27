@@ -97,7 +97,7 @@ users_schema = {
             'schema': {
                 'provider': {
                     'type': 'string',
-                    'allowed': ['blender-id', 'local', 'facebook'],
+                    'allowed': ['local', 'blender-id', 'facebook', 'google'],
                 },
                 'user_id': {
                     'type': 'string'
