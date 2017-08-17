@@ -28,13 +28,14 @@
     var iframe_youtube = /^(<iframe(\swidth="\d{1,3}")?(\sheight="\d{1,3}")\ssrc="((https?):\/\/|\/)[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)*[\]$]+"(\sframeborder="\d{1,3}")?(\sallowfullscreen)\s?>|<\/iframe>)$/i;
     var iframe_vimeo = /^(<iframe(\ssrc="((https?):\/\/|\/)[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)*[\]$]+"?\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\sframeborder="\d{1,3}")?(\swebkitallowfullscreen)\s?(\smozallowfullscreen)\s?(\sallowfullscreen)\s?>|<\/iframe>)$/i;
     var iframe_soundcloud = /^(<iframe(\swidth="\d{1,3}\%")?(\sheight="\d{1,3}")?(\sscrolling="(?:yes|no)")?(\sframeborder="(?:yes|no)")\ssrc="((https?):\/\/|\/)[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)*[\]$]+"\s?>|<\/iframe>)$/i;
+    var iframe_googlestorage = /^(<iframe\ssrc="https:\/\/storage.googleapis.com\/institute-storage\/.+"\sstyle=".*"\s?>|<\/iframe>)$/i;
 
     // <img src="url..." optional width  optional height  optional alt  optional title
     var img_white = /^(<img\ssrc="(https?:\/\/|\/)[-A-Za-z0-9+&@#\/%?=~_|!:,.;\(\)*[\]$]+"(\swidth="\d{1,3}")?(\sheight="\d{1,3}")?(\salt="[^"<>]*")?(\stitle="[^"<>]*")?\s?\/?>)$/i;
     var video_white =  /<video(.*?)>/;
 
     function sanitizeTag(tag) {
-        if (tag.match(basic_tag_whitelist) || tag.match(a_white) || tag.match(img_white) || tag.match(iframe_youtube) || tag.match(iframe_vimeo) || tag.match(iframe_soundcloud) || tag.match(video_white)) {
+        if (tag.match(basic_tag_whitelist) || tag.match(a_white) || tag.match(img_white) || tag.match(iframe_youtube) || tag.match(iframe_vimeo) || tag.match(iframe_soundcloud) || tag.match(iframe_googlestorage) || tag.match(video_white)) {
             return tag;
         } else {
             return "";
