@@ -61,6 +61,9 @@ class UserClass(flask_login.UserMixin):
 
         return user
 
+    def __str__(self):
+        return f'UserClass(user_id={self.user_id})'
+
     def __getitem__(self, item):
         """Compatibility layer with old dict-based g.current_user object."""
 

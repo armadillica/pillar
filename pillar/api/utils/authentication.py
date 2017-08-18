@@ -15,17 +15,9 @@ from flask import g
 from flask import request
 from flask import current_app
 
-from pillar.auth import UserClass
-
 log = logging.getLogger(__name__)
 
-CLI_USER = UserClass.construct('CLI', {
-    '_id': 'CLI',
-    'groups': [],
-    'roles': {'admin'},
-    'email': 'local@nowhere',
-    'username': 'CLI',
-})
+CLI_USER = ...
 
 
 def force_cli_user():
@@ -34,7 +26,22 @@ def force_cli_user():
     This is used as a marker to avoid authorization checks and just allow everything.
     """
 
-    log.warning('Logging in as CLI_USER, circumventing authentication.')
+    global CLI_USER
+
+    from pillar.auth import UserClass
+
+    if CLI_USER is ...:
+        CLI_USER = UserClass.construct('CLI', {
+            '_id': 'CLI',
+            'groups': [],
+            'roles': {'admin'},
+            'email': 'local@nowhere',
+            'username': 'CLI',
+        })
+        log.warning('CONSTRUCTED CLI USER %s of type %s', id(CLI_USER), id(type(CLI_USER)))
+
+    log.warning('Logging in as CLI_USER (%s) of type %s, circumventing authentication.',
+                id(CLI_USER), id(type(CLI_USER)))
     g.current_user = CLI_USER
 
 

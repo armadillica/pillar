@@ -7,8 +7,6 @@ from flask import abort
 from flask import current_app
 from werkzeug.exceptions import Forbidden
 
-from pillar.auth import UserClass
-
 CHECK_PERMISSIONS_IMPLEMENTED_FOR = {'projects', 'nodes', 'flamenco_jobs'}
 
 log = logging.getLogger(__name__)
@@ -355,8 +353,10 @@ def ab_testing(require_roles=set(),
     return decorator
 
 
-def user_has_role(role, user: UserClass=None):
+def user_has_role(role, user=None):
     """Returns True iff the user is logged in and has the given role."""
+
+    from pillar.auth import UserClass
 
     if user is None:
         user = g.get('current_user')
@@ -371,8 +371,10 @@ def user_has_role(role, user: UserClass=None):
     return user.has_role(role)
 
 
-def user_has_cap(capability: str, user: UserClass=None) -> bool:
+def user_has_cap(capability: str, user=None) -> bool:
     """Returns True iff the user is logged in and has the given capability."""
+
+    from pillar.auth import UserClass
 
     assert capability
 
@@ -399,6 +401,8 @@ def user_matches_roles(require_roles=set(),
         When True: require the user to have all given roles before
         returning True.
     """
+
+    from pillar.auth import UserClass
 
     current_user: UserClass = g.get('current_user')
     if current_user is None:
