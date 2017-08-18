@@ -9,7 +9,8 @@ import logging
 
 import requests
 from bson import tz_util
-from flask import Blueprint, request, current_app, jsonify
+from rauth import OAuth2Session
+from flask import Blueprint, request, current_app, jsonify, session
 from requests.adapters import HTTPAdapter
 
 from pillar.api.utils import authentication
@@ -175,23 +176,26 @@ def fetch_blenderid_user() -> dict:
 
     bid_url = '%s/api/user' % blender_id_endpoint()
     log.debug('Fetching user info from %s', bid_url)
-
     try:
-        bid_resp = current_app.oauth_blender_id.get(bid_url)
+        client_id = current_app.config['OAUTH_CREDENTIALS']['blender-id']['id']
+        client_secret = current_app.config['OAUTH_CREDENTIALS']['blender-id']['secret']
+        oauth_session = OAuth2Session(
+            client_id, client_secret, access_token=session['blender_id_oauth_token'])
+        bid_resp = oauth_session.get(bid_url)
     except httplib2.HttpLib2Error:
         log.exception('Error getting %s from BlenderID', bid_url)
         return {}
 
-    if bid_resp.status != 200:
-        log.warning('Error %i from BlenderID %s: %s', bid_resp.status, bid_url, bid_resp.data)
+    if bid_resp.status_code != 200:
+        log.warning('Error %i from BlenderID %s: %s', bid_resp.status_code, bid_url, bid_resp.data)
         return {}
 
-    if not bid_resp.data:
+    if not bid_resp.json():
         log.warning('Empty data returned from BlenderID %s', bid_url)
         return {}
 
-    log.debug('BlenderID returned %s', bid_resp.data)
-    return bid_resp.data
+    log.debug('BlenderID returned %s', bid_resp.json())
+    return bid_resp.json()
 
 
 def setup_app(app, url_prefix):

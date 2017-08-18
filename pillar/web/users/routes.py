@@ -1,12 +1,10 @@
 import json
 import logging
-import requests
 
 from werkzeug import exceptions as wz_exceptions
 from flask import abort, Blueprint, current_app, flash, redirect, render_template, request, session,\
     url_for
 from flask_login import login_required, logout_user, current_user
-from flask_oauthlib.client import OAuthException
 
 from pillarsdk import exceptions as sdk_exceptions
 from pillarsdk.users import User
@@ -16,6 +14,7 @@ import pillar.auth
 from pillar.web import system_util
 from pillar.api.local_auth import generate_and_store_token, get_local_user
 from pillar.api.utils.authentication import find_user_in_db, upsert_user
+from pillar.api.blender_cloud.subscription import update_subscription
 from pillar.auth.oauth import OAuthSignIn
 from . import forms
 
@@ -45,24 +44,20 @@ def oauth_callback(provider):
     if social_id is None:
         log.debug('Authentication failed for user with {}'.format(provider))
         return redirect(url_for('main.homepage'))
-    # If login from Blender ID we use the token to create the user
-    if provider == 'blender-id':
-        session['blender_id_oauth_token'] = (access_token, '')
-        pillar.auth.login_user(access_token)
 
-        if current_user is not None:
-            # Check with the store for user roles. If the user has an active
-            # subscription, we apply the 'subscriber' role
-            api = system_util.pillar_api(token=access_token)
-            api.get('bcloud/update-subscription')
-    else:
-        # Find or create user
-        user_info = {'id': social_id, 'email': email, 'full_name': ''}
-        db_user = find_user_in_db(user_info, provider=provider)
-        db_id, status = upsert_user(db_user)
-        token = generate_and_store_token(db_id)
-        # Login user
-        pillar.auth.login_user(token['token'])
+    # Find or create user
+    user_info = {'id': social_id, 'email': email, 'full_name': ''}
+    db_user = find_user_in_db(user_info, provider=provider)
+    db_id, status = upsert_user(db_user)
+    token = generate_and_store_token(db_id)
+
+    # Login user
+    pillar.auth.login_user(token['token'], load_from_db=True)
+
+    if provider == 'blender-id' and current_user is not None:
+        # Check with the store for user roles. If the user has an active subscription, we apply
+        # the 'subscriber' role
+        update_subscription()
 
     next_after_login = session.pop('next_after_login', None)
     if next_after_login:

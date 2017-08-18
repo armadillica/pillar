@@ -6,7 +6,6 @@ import typing
 
 from flask import session, g
 import flask_login
-import flask_oauthlib.client
 from werkzeug.local import LocalProxy
 
 from pillar import current_app
@@ -220,35 +219,6 @@ def get_blender_id_oauth_token():
         return request.authorization.username, ''
 
     return None
-
-
-def config_oauth_login(app):
-    config = app.config
-    if not config.get('SOCIAL_BLENDER_ID'):
-        log.info('OAuth Blender-ID login not set up, no app config SOCIAL_BLENDER_ID.')
-        return None
-    if not config.get('BLENDER_ID_OAUTH_URL'):
-        log.error('Unable to use Blender ID, missing configuration BLENDER_ID_OAUTH_URL.')
-        return None
-
-    oauth = flask_oauthlib.client.OAuth(app)
-    social_blender_id = config.get('SOCIAL_BLENDER_ID')
-
-    oauth_blender_id = oauth.remote_app(
-        'blender_id',
-        consumer_key=social_blender_id['app_id'],
-        consumer_secret=social_blender_id['app_secret'],
-        request_token_params={'scope': 'email'},
-        base_url=config['BLENDER_ID_OAUTH_URL'],
-        request_token_url=None,
-        access_token_url=config['BLENDER_ID_BASE_ACCESS_TOKEN_URL'],
-        authorize_url=config['BLENDER_ID_AUTHORIZE_URL']
-    )
-
-    oauth_blender_id.tokengetter(get_blender_id_oauth_token)
-    log.info('OAuth Blender-ID login setup as %s', social_blender_id['app_id'])
-
-    return oauth_blender_id
 
 
 def _get_current_user() -> UserClass:

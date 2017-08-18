@@ -1,10 +1,10 @@
 import json
 
 from rauth import OAuth2Service
-from flask import current_app, url_for, request, redirect
+from flask import current_app, url_for, request, redirect, session
 
 
-class OAuthSignIn(object):
+class OAuthSignIn:
     providers = None
 
     def __init__(self, provider_name):
@@ -27,6 +27,7 @@ class OAuthSignIn(object):
     def get_provider(cls, provider_name):
         if cls.providers is None:
             cls.providers = {}
+            # TODO convert to the new __init_subclass__
             for provider_class in cls.__subclasses__():
                 provider = provider_class()
                 cls.providers[provider.provider_name] = provider
@@ -35,7 +36,7 @@ class OAuthSignIn(object):
 
 class BlenderIdSignIn(OAuthSignIn):
     def __init__(self):
-        super(BlenderIdSignIn, self).__init__('blender-id')
+        super().__init__('blender-id')
 
         base_url = current_app.config['OAUTH_CREDENTIALS']['blender-id'].get(
             'base_url', 'https://www.blender.org/id/')
@@ -73,6 +74,7 @@ class BlenderIdSignIn(OAuthSignIn):
 
         me = oauth_session.get('user').json()
         # TODO handle case when user chooses not to disclose en email
+        session['blender_id_oauth_token'] = oauth_session.access_token
         return (
             me['id'],
             me.get('email'),
@@ -82,7 +84,7 @@ class BlenderIdSignIn(OAuthSignIn):
 
 class FacebookSignIn(OAuthSignIn):
     def __init__(self):
-        super(FacebookSignIn, self).__init__('facebook')
+        super().__init__('facebook')
         self.service = OAuth2Service(
             name='facebook',
             client_id=self.consumer_id,
@@ -122,7 +124,7 @@ class FacebookSignIn(OAuthSignIn):
 
 class GoogleSignIn(OAuthSignIn):
     def __init__(self):
-        super(GoogleSignIn, self).__init__('google')
+        super().__init__('google')
         self.service = OAuth2Service(
             name='google',
             client_id=self.consumer_id,
