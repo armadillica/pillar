@@ -93,6 +93,14 @@ FULL_FILE_ACCESS_ROLES = {'admin', 'subscriber', 'demo'}
 BLENDER_ID_CLIENT_ID = 'SPECIAL-SNOWFLAKE-57'
 BLENDER_ID_SUBCLIENT_ID = 'PILLAR'
 
+# Collection of supported OAuth providers (Blender ID, Facebook and Google). Example entry:
+# 'blender-id': {
+#    'id': 'CLOUD-OF-SNOWFLAKES-43',
+#    'secret': 'thesecret',
+#    'base_url': 'http://blender_id:8000/'
+#  }
+
+OAUTH_CREDENTIALS = {}
 
 # See https://docs.python.org/2/library/logging.config.html#configuration-dictionary-schema
 LOGGING = {
