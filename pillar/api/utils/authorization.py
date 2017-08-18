@@ -302,7 +302,7 @@ def require_login(require_roles=set(),
                 # We don't need to log at a higher level, as this is very common.
                 # Many browsers first try to see whether authentication is needed
                 # at all, before sending the password.
-                log.debug('Unauthenticated acces to %s attempted.', func)
+                log.debug('Unauthenticated access to %s attempted.', func)
                 abort(403)
 
             if require_roles and not g.current_user.matches_roles(require_roles, require_all):
