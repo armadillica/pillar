@@ -177,7 +177,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 						i.pi-more-vertical
 
 					ul.dropdown-menu
-						| {% if current_user.has_role('admin') %}
+						| {% if current_user.has_cap('admin') %}
 						li.button-featured
 							a#item_featured(
 								href="javascript:void(0);",

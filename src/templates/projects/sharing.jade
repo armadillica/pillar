@@ -11,7 +11,7 @@ span#project-edit-title
 #node-edit-container
 	#node-edit-form
 		.col-md-6
-			| {% if (project.user == current_user.objectid or current_user.has_role('admin')) %}
+			| {% if (project.user == current_user.objectid or current_user.has_cap('admin')) %}
 			.sharing-users-search
 				.form-group
 					input#user-select.form-control(
@@ -44,7 +44,7 @@ span#project-edit-title
 						span.sharing-users-extra {{user['username']}}
 					.sharing-users-action
 						| {# Only allow deletion if we are: admin, project owners, or current_user in the team #}
-						| {% if current_user.has_role('admin') or (project.user == current_user.objectid) or (current_user.objectid == user['_id']) %}
+						| {% if current_user.has_cap('admin') or (project.user == current_user.objectid) or (current_user.objectid == user['_id']) %}
 
 						| {% if project.user == user['_id'] %}
 						span
@@ -70,7 +70,7 @@ span#project-edit-title
 | {% endblock %}
 
 | {% block footer_scripts %}
-| {% if (project.user == current_user.objectid or current_user.has_role('admin')) %}
+| {% if (project.user == current_user.objectid or current_user.has_cap('admin')) %}
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.autocomplete-0.22.0.min.js') }}", async=true)
 script.
 	$(document).ready(function() {

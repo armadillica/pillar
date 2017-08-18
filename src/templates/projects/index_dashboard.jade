@@ -39,7 +39,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 						span ({{ projects_shared|length }})
 						| {% endif %}
 
-					| {% if (current_user.has_role('subscriber') or current_user.has_role('admin')) %}
+					| {% if current_user.has_cap('subscriber') %}
 					li.create(
 						data-url="{{ url_for('projects.create') }}")
 						a#project-create(
@@ -73,7 +73,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 								li.when(title="{{ project._created }}") {{ project._created | pretty_date }}
 								li.edit
 									a(href="{{ url_for('projects.edit', project_url=project.url) }}") Edit
-								| {% if project.status == 'pending' and current_user.is_authenticated and current_user.has_role('admin') %}
+								| {% if project.status == 'pending' and current_user.has_cap('view-pending-nodes') %}
 								li.pending Not Published
 								| {% endif %}
 
@@ -113,7 +113,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 								li.who by {{ project.user.full_name }}
 								li.edit
 									a(href="{{ url_for('projects.edit', project_url=project.url) }}") Edit
-								| {% if project.status == 'pending' and current_user.is_authenticated and current_user.has_role('admin') %}
+								| {% if project.status == 'pending' and current_user.has_cap('view-pending-nodes') %}
 								li.pending Not Published
 								| {% endif %}
 

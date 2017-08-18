@@ -44,7 +44,7 @@
 			| {# * User is authenticated, but has no subscription or 'POST' permission #}
 			.comment-reply-form
 				.comment-reply-field.sign-in
-					| {% if current_user.has_role('subscriber') or current_user.has_role('demo') %}
+					| {% if current_user.has_cap('subscriber') %}
 					i.pi-lock
 					|  Only project members can comment.
 					| {% else %}

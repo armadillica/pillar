@@ -4,7 +4,7 @@
 
 | {% if current_user.has_role('demo') %}
 | {% set subscription = 'demo' %}
-| {% elif current_user.has_role('subscriber') %}
+| {% elif current_user.has_cap('subscriber') %}
 | {% set subscription = 'subscriber' %}
 | {% else %}
 | {% set subscription = 'none' %}

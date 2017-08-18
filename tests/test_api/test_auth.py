@@ -526,7 +526,6 @@ class PermissionComputationTest(AbstractPillarTest):
 
 class RequireRolesTest(AbstractPillarTest):
     def test_no_roles_required(self):
-        from flask import g
         from pillar.api.utils.authorization import require_login
 
         called = [False]
@@ -603,6 +602,40 @@ class RequireRolesTest(AbstractPillarTest):
             self.assertFalse(user_has_role('admin', make_user([])))
             self.assertFalse(user_has_role('admin', make_user(None)))
             self.assertFalse(user_has_role('admin', None))
+
+    def test_cap_required(self):
+        from pillar.api.utils.authorization import require_login
+
+        called = [False]
+
+        @require_login(require_cap='subscriber')
+        def call_me():
+            called[0] = True
+
+        with self.app.test_request_context():
+            self.login_api_as(ObjectId(24 * 'a'), ['succubus'])
+            self.assertRaises(Forbidden, call_me)
+        self.assertFalse(called[0])
+
+        with self.app.test_request_context():
+            self.login_api_as(ObjectId(24 * 'a'), ['admin'])
+            call_me()
+        self.assertTrue(called[0])
+
+    def test_invalid_combinations(self):
+        from pillar.api.utils.authorization import require_login
+
+        with self.assertRaises(TypeError):
+            require_login(require_roles=['abc', 'def'])
+
+        with self.assertRaises(TypeError):
+            require_login(require_cap={'multiple', 'caps'})
+
+        with self.assertRaises(ValueError):
+            require_login(require_roles=set(), require_all=True)
+
+        with self.assertRaises(ValueError):
+            require_login(require_roles={'admin'}, require_cap='hey')
 
 
 class UserCreationTest(AbstractPillarTest):

@@ -16,6 +16,14 @@ from ..api.utils import authentication
 
 log = logging.getLogger(__name__)
 
+# Mapping from user role to capabilities obtained by users with that role.
+CAPABILITIES = collections.defaultdict(**{
+    'subscriber': {'subscriber', 'home-project'},
+    'demo': {'subscriber', 'home-project'},
+    'admin': {'subscriber', 'home-project', 'video-encoding', 'admin',
+              'view-pending-nodes', 'edit-project-node-types'},
+}, default_factory=frozenset)
+
 
 class UserClass(flask_login.UserMixin):
     def __init__(self, token: typing.Optional[str]):
@@ -30,6 +38,7 @@ class UserClass(flask_login.UserMixin):
         self.roles: typing.List[str] = []
         self.groups: typing.List[str] = []  # NOTE: these are stringified object IDs.
         self.group_ids: typing.List[bson.ObjectId] = []
+        self.capabilities: typing.Set[str] = set()
 
     @classmethod
     def construct(cls, token: str, db_user: dict) -> 'UserClass':
@@ -48,6 +57,7 @@ class UserClass(flask_login.UserMixin):
         user.objectid = str(db_user['_id'])
         user.gravatar = utils.gravatar(user.email)
         user.groups = [str(g) for g in user.group_ids]
+        user.collect_capabilities()
 
         return user
 
@@ -71,6 +81,12 @@ class UserClass(flask_login.UserMixin):
         except KeyError:
             return default
 
+    def collect_capabilities(self):
+        """Constructs the capabilities set given the user's current roles."""
+
+        self.capabilities = set().union(*(CAPABILITIES.get(role, frozenset())
+                                          for role in self.roles))
+
     def has_role(self, *roles):
         """Returns True iff the user has one or more of the given roles."""
 
@@ -78,6 +94,14 @@ class UserClass(flask_login.UserMixin):
             return False
 
         return bool(set(self.roles).intersection(set(roles)))
+
+    def has_cap(self, *capabilities: typing.Iterable[str]) -> bool:
+        """Returns True iff the user has one or more of the given capabilities."""
+
+        if not self.capabilities:
+            return False
+
+        return bool(set(self.capabilities).intersection(set(capabilities)))
 
     def matches_roles(self,
                       require_roles=set(),
@@ -113,6 +137,8 @@ class AnonymousUser(flask_login.AnonymousUserMixin, UserClass):
     def has_role(self, *roles):
         return False
 
+    def has_cap(self, *capabilities):
+        return False
 
 
 def _load_user(token) -> typing.Union[UserClass, AnonymousUser]:

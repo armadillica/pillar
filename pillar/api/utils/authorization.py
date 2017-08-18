@@ -265,12 +265,19 @@ def merge_permissions(*args):
 
 
 def require_login(require_roles=set(),
+                  require_cap='',
                   require_all=False):
     """Decorator that enforces users to authenticate.
 
-    Optionally only allows access to users with a certain role.
+    Optionally only allows access to users with a certain role and/or capability.
+
+    Either check on roles or on a capability, but never on both. There is no
+    require_all check for capabilities; if you need to check for multiple
+    capabilities at once, it's a sign that you need to add another capability
+    and give it to everybody that needs it.
 
     :param require_roles: set of roles.
+    :param require_cap: a capability.
     :param require_all:
         When False (the default): if the user's roles have a
         non-empty intersection with the given roles, access is granted.
@@ -279,7 +286,13 @@ def require_login(require_roles=set(),
     """
 
     if not isinstance(require_roles, set):
-        raise TypeError('require_roles param should be a set, but is a %r' % type(require_roles))
+        raise TypeError(f'require_roles param should be a set, but is {type(require_roles)!r}')
+
+    if not isinstance(require_cap, str):
+        raise TypeError(f'require_caps param should be a str, but is {type(require_cap)!r}')
+
+    if require_roles and require_cap:
+        raise ValueError('either use require_roles or require_cap, but not both')
 
     if require_all and not require_roles:
         raise ValueError('require_login(require_all=True) cannot be used with empty require_roles.')
@@ -287,15 +300,21 @@ def require_login(require_roles=set(),
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            if not user_matches_roles(require_roles, require_all):
-                if g.current_user is None:
-                    # We don't need to log at a higher level, as this is very common.
-                    # Many browsers first try to see whether authentication is needed
-                    # at all, before sending the password.
-                    log.debug('Unauthenticated acces to %s attempted.', func)
-                else:
-                    log.warning('User %s is authenticated, but does not have required roles %s to '
-                                'access %s', g.current_user['user_id'], require_roles, func)
+            if g.current_user is None:
+                # We don't need to log at a higher level, as this is very common.
+                # Many browsers first try to see whether authentication is needed
+                # at all, before sending the password.
+                log.debug('Unauthenticated acces to %s attempted.', func)
+                abort(403)
+
+            if require_roles and not g.current_user.matches_roles(require_roles, require_all):
+                log.warning('User %s is authenticated, but does not have required roles %s to '
+                            'access %s', g.current_user['user_id'], require_roles, func)
+                abort(403)
+
+            if require_cap and not g.current_user.has_cap(require_cap):
+                log.warning('User %s is authenticated, but does not have required capability %s to '
+                            'access %s', g.current_user.user_id, require_cap, func)
                 abort(403)
 
             return func(*args, **kwargs)
@@ -350,6 +369,23 @@ def user_has_role(role, user: UserClass=None):
         return False
 
     return user.has_role(role)
+
+
+def user_has_cap(capability: str, user: UserClass=None) -> bool:
+    """Returns True iff the user is logged in and has the given capability."""
+
+    assert capability
+
+    if user is None:
+        user = g.get('current_user')
+
+    if user is None:
+        return False
+
+    if not isinstance(user, UserClass):
+        raise TypeError(f'user should be instance of UserClass, not {type(user)}')
+
+    return user.has_cap(capability)
 
 
 def user_matches_roles(require_roles=set(),

@@ -205,6 +205,8 @@ def settings_billing():
 @blueprint.route('/u/<user_id>/edit', methods=['GET', 'POST'])
 @login_required
 def users_edit(user_id):
+    from pillar.auth import UserClass
+
     if not current_user.has_role('admin'):
         return abort(403)
     api = system_util.pillar_api()
@@ -221,7 +223,9 @@ def users_edit(user_id):
     else:
         form.roles.data = user.roles
         form.email.data = user.email
-    return render_template('users/edit_embed.html', user=user, form=form)
+
+    user_ob = UserClass.construct('', db_user=user.to_dict())
+    return render_template('users/edit_embed.html', user=user_ob, form=form)
 
 
 def _users_edit(form, user, api):

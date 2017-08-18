@@ -18,7 +18,7 @@ span#project-edit-title
 			When we add support for new node types in the future, it means we
 			allow the creation of new items (such as textures).
 
-		| {% if current_user.has_role('admin') %}
+		| {% if current_user.has_cap('edit-project-node-types') %}
 		ul.list-generic
 			| {% for node_type in project.node_types %}
 			li

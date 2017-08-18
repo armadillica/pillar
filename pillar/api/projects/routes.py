@@ -16,7 +16,7 @@ blueprint_api = Blueprint('projects_api', __name__)
 
 
 @blueprint_api.route('/create', methods=['POST'])
-@authorization.require_login(require_roles={'admin', 'subscriber', 'demo'})
+@authorization.require_login(require_cap='subscriber')
 def create_project(overrides=None):
     """Creates a new project."""
 

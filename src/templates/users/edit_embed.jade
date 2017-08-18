@@ -59,6 +59,18 @@
 
 		| {% endfor %}
 
+		.form-group.capabilities
+			label Capabilities
+			| {% if user.capabilities %}
+			ul
+				| {% for cap in user.capabilities|sort %}
+				li {{ cap }}
+				| {% endfor %}
+			| {% else %}
+			p
+				i.pi-cancel
+				| none
+			| {% endif %}
 
 		a#button-cancel.btn.btn-default(href="#", data-user-id='{{user._id}}') Cancel
 
