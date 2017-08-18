@@ -7,6 +7,8 @@ from flask import abort
 from flask import current_app
 from werkzeug.exceptions import Forbidden
 
+from pillar.auth import UserClass
+
 CHECK_PERMISSIONS_IMPLEMENTED_FOR = {'projects', 'nodes', 'flamenco_jobs'}
 
 log = logging.getLogger(__name__)
@@ -334,17 +336,20 @@ def ab_testing(require_roles=set(),
     return decorator
 
 
-def user_has_role(role, user=None):
+def user_has_role(role, user: UserClass=None):
     """Returns True iff the user is logged in and has the given role."""
 
     if user is None:
         user = g.get('current_user')
+        if user is not None and not isinstance(user, UserClass):
+            raise TypeError(f'g.current_user should be instance of UserClass, not {type(user)}')
+    elif not isinstance(user, UserClass):
+        raise TypeError(f'user should be instance of UserClass, not {type(user)}')
 
     if user is None:
         return False
 
-    roles = user.get('roles') or ()
-    return role in roles
+    return user.has_role(role)
 
 
 def user_matches_roles(require_roles=set(),
@@ -359,22 +364,14 @@ def user_matches_roles(require_roles=set(),
         returning True.
     """
 
-    if not isinstance(require_roles, set):
-        raise TypeError('require_roles param should be a set, but is a %r' % type(require_roles))
-
-    if require_all and not require_roles:
-        raise ValueError('require_login(require_all=True) cannot be used with empty require_roles.')
-
-    current_user = g.get('current_user')
-
+    current_user: UserClass = g.get('current_user')
     if current_user is None:
         return False
 
-    intersection = require_roles.intersection(current_user['roles'])
-    if require_all:
-        return len(intersection) == len(require_roles)
+    if not isinstance(current_user, UserClass):
+        raise TypeError(f'g.current_user should be instance of UserClass, not {type(current_user)}')
 
-    return not bool(require_roles) or bool(intersection)
+    return current_user.matches_roles(require_roles, require_all)
 
 
 def is_admin(user):

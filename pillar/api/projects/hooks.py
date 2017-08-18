@@ -110,6 +110,8 @@ def after_inserting_projects(projects):
 
 
 def after_inserting_project(project, db_user):
+    from pillar.auth import UserClass
+
     project_id = project['_id']
     user_id = db_user['_id']
 
@@ -135,7 +137,8 @@ def after_inserting_project(project, db_user):
     log.debug('Made user %s member of group %s', user_id, admin_group_id)
 
     # Assign the group to the project with admin rights
-    is_admin = authorization.is_admin(db_user)
+    owner_user = UserClass.construct('', db_user)
+    is_admin = authorization.is_admin(owner_user)
     world_permissions = ['GET'] if is_admin else []
     permissions = {
         'world': world_permissions,

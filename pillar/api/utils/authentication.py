@@ -15,13 +15,17 @@ from flask import g
 from flask import request
 from flask import current_app
 
+from pillar.auth import UserClass
+
 log = logging.getLogger(__name__)
 
-CLI_USER = {
-    'user_id': 'CLI',
+CLI_USER = UserClass.construct('CLI', {
+    '_id': 'CLI',
     'groups': [],
     'roles': {'admin'},
-}
+    'email': 'local@nowhere',
+    'username': 'CLI',
+})
 
 
 def force_cli_user():
@@ -74,6 +78,8 @@ def validate_this_token(token, oauth_subclient=None):
     :rtype: dict
     """
 
+    from pillar.auth import UserClass
+
     g.current_user = None
     _delete_expired_tokens()
 
@@ -98,9 +104,7 @@ def validate_this_token(token, oauth_subclient=None):
         log.debug('Validation failed, user not logged in')
         return None
 
-    g.current_user = {'user_id': db_user['_id'],
-                      'groups': db_user['groups'],
-                      'roles': set(db_user.get('roles', []))}
+    g.current_user = UserClass.construct(token, db_user)
 
     return db_user
 

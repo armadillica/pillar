@@ -536,14 +536,12 @@ class RequireRolesTest(AbstractPillarTest):
             called[0] = True
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': ['succubus']}
+            self.login_api_as(ObjectId(24 * 'a'), roles=['succubus'])
             call_me()
 
         self.assertTrue(called[0])
 
     def test_some_roles_required(self):
-        from flask import g
         from pillar.api.utils.authorization import require_login
 
         called = [False]
@@ -553,19 +551,16 @@ class RequireRolesTest(AbstractPillarTest):
             called[0] = True
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': ['succubus']}
+            self.login_api_as(ObjectId(24 * 'a'), ['succubus'])
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': ['admin']}
+            self.login_api_as(ObjectId(24 * 'a'), ['admin'])
             call_me()
         self.assertTrue(called[0])
 
     def test_all_roles_required(self):
-        from flask import g
         from pillar.api.utils.authorization import require_login
 
         called = [False]
@@ -576,39 +571,38 @@ class RequireRolesTest(AbstractPillarTest):
             called[0] = True
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': ['admin']}
+            self.login_api_as(ObjectId(24 * 'a'), ['admin'])
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': ['service']}
+            self.login_api_as(ObjectId(24 * 'a'), ['service'])
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': ['badger']}
+            self.login_api_as(ObjectId(24 * 'a'), ['badger'])
             self.assertRaises(Forbidden, call_me)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            g.current_user = {'user_id': ObjectId(24 * 'a'),
-                              'roles': ['service', 'badger']}
+            self.login_api_as(ObjectId(24 * 'a'), ['service', 'badger'])
             call_me()
         self.assertTrue(called[0])
 
     def test_user_has_role(self):
         from pillar.api.utils.authorization import user_has_role
 
+        def make_user(roles):
+            return self.create_user_object(ObjectId(), roles=roles)
+
         with self.app.test_request_context():
-            self.assertTrue(user_has_role('subscriber', {'roles': ['aap', 'noot', 'subscriber']}))
-            self.assertTrue(user_has_role('subscriber', {'roles': ['aap', 'subscriber']}))
-            self.assertFalse(user_has_role('admin', {'roles': ['aap', 'noot', 'subscriber']}))
-            self.assertFalse(user_has_role('admin', {'roles': []}))
-            self.assertFalse(user_has_role('admin', {'roles': None}))
-            self.assertFalse(user_has_role('admin', {}))
+            self.assertTrue(user_has_role('subscriber', make_user(['aap', 'noot', 'subscriber'])))
+            self.assertTrue(user_has_role('subscriber', make_user(['aap', 'subscriber'])))
+            self.assertFalse(user_has_role('admin', make_user(['aap', 'noot', 'subscriber'])))
+            self.assertFalse(user_has_role('admin', make_user([])))
+            self.assertFalse(user_has_role('admin', make_user(None)))
+            self.assertFalse(user_has_role('admin', None))
 
 
 class UserCreationTest(AbstractPillarTest):

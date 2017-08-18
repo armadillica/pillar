@@ -71,7 +71,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
         with self.app.test_request_context(headers={'Authorization': auth_header}):
             self.assertTrue(auth.validate_token())
             self.assertIsNotNone(g.current_user)
-            self.assertEqual(db_user['_id'], g.current_user['user_id'])
+            self.assertEqual(db_user['_id'], g.current_user.user_id)
 
     def _common_user_test(self, expected_status_code, scst=TEST_SUBCLIENT_TOKEN,
                           expected_full_name=TEST_FULL_NAME,

@@ -278,6 +278,38 @@ class AbstractPillarTest(TestMinimal):
 
         return user_id
 
+    def create_user_object(self, user_id=ObjectId(), roles=frozenset(), group_ids=None):
+        """Creates a pillar.auth.UserClass object.
+
+        :rtype: pillar.auth.UserClass
+        """
+
+        from pillar.auth import UserClass
+
+        db_user = copy.deepcopy(ctd.EXAMPLE_USER)
+        db_user['_id'] = user_id
+        db_user['roles'] = list(roles) if roles is not None else None
+
+        if group_ids is not None:
+            db_user['groups'] = list(group_ids)
+
+        return UserClass.construct('', db_user)
+
+    def login_api_as(self, user_id=ObjectId(), roles=frozenset(), group_ids=None):
+        """Creates a pillar.auth.UserClass object and sets it as g.current_user
+
+        Requires an active request context!
+
+        :rtype: pillar.auth.UserClass
+        """
+
+        from flask import g
+
+        user = self.create_user_object(user_id, roles, group_ids)
+        g.current_user = user
+
+        return user
+
     def create_valid_auth_token(self, user_id, token='token'):
         now = datetime.datetime.now(tz_util.utc)
         future = now + datetime.timedelta(days=1)

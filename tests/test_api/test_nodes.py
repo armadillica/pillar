@@ -38,10 +38,9 @@ class NodeContentTypeTest(AbstractPillarTest):
                         'name': 'My first test node'}
 
             with self.app.test_request_context():
-                g.current_user = {'user_id': user_id,
+                self.login_api_as(user_id, roles={'subscriber', 'admin'},
                                   # This group is hardcoded in the EXAMPLE_PROJECT.
-                                  'groups': [ObjectId('5596e975ea893b269af85c0e')],
-                                  'roles': {'subscriber', 'admin'}}
+                                  group_ids=[ObjectId('5596e975ea893b269af85c0e')])
                 nodes = self.app.data.driver.db['nodes']
 
                 # Create the node.
