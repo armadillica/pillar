@@ -13,6 +13,8 @@ import bson.tz_util
 import eve.utils
 import pymongo
 import werkzeug.exceptions as wz_exceptions
+import werkzeug.datastructures
+
 from bson import ObjectId
 from flask import Blueprint
 from flask import current_app
@@ -673,7 +675,7 @@ def assert_file_size_allowed(file_size: int):
 
 @file_storage.route('/stream/<string:project_id>', methods=['POST', 'OPTIONS'])
 @require_login()
-def stream_to_storage(project_id):
+def stream_to_storage(project_id: str):
     project_oid = utils.str2id(project_id)
 
     projects = current_app.data.driver.db['projects']
@@ -717,30 +719,38 @@ def stream_to_storage(project_id):
             dir=current_app.config['STORAGE_DIR'])
         uploaded_file.save(local_file)
         local_file.seek(0)  # Make sure that re-read starts from the beginning.
-        stream_for_gcs = local_file
     else:
-        local_file = None
-        stream_for_gcs = uploaded_file.stream
+        local_file = uploaded_file.stream
 
+    result = upload_and_process(local_file, uploaded_file, project_id)
+    resp = jsonify(result)
+    resp.status_code = result['status_code']
+    add_access_control_headers(resp)
+    return resp
+
+
+def upload_and_process(local_file: typing.Union[io.BytesIO, typing.BinaryIO],
+                       uploaded_file: werkzeug.datastructures.FileStorage,
+                       project_id: str):
     # Figure out the file size, as we need to pass this in explicitly to GCloud.
     # Otherwise it always uses os.fstat(file_obj.fileno()).st_size, which isn't
     # supported by a BytesIO object (even though it does have a fileno
     # attribute).
-    if isinstance(stream_for_gcs, io.BytesIO):
-        file_size = len(stream_for_gcs.getvalue())
+    if isinstance(local_file, io.BytesIO):
+        file_size = len(local_file.getvalue())
     else:
-        file_size = os.fstat(stream_for_gcs.fileno()).st_size
+        file_size = os.fstat(local_file.fileno()).st_size
 
     # Check the file size again, now that we know its size for sure.
     assert_file_size_allowed(file_size)
 
     # Create file document in MongoDB.
-    file_id, internal_fname, status = create_file_doc_for_upload(project_oid, uploaded_file)
+    file_id, internal_fname, status = create_file_doc_for_upload(project_id, uploaded_file)
 
     # Copy the file into storage.
     bucket = default_storage_backend(project_id)
     blob = bucket.blob(internal_fname)
-    blob.create_from_file(stream_for_gcs,
+    blob.create_from_file(local_file,
                           file_size=file_size,
                           content_type=uploaded_file.mimetype)
 
@@ -767,10 +777,7 @@ def stream_to_storage(project_id):
     # Status is 200 if the file already existed, and 201 if it was newly
     # created.
     # TODO: add a link to a thumbnail in the response.
-    resp = jsonify(status='ok', file_id=str(file_id))
-    resp.status_code = status
-    add_access_control_headers(resp)
-    return resp
+    return dict(status='ok', file_id=str(file_id), status_code=status)
 
 
 from ..file_storage_backends.abstract import FileType
