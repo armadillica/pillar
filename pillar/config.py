@@ -160,3 +160,12 @@ TLS_CERT_FILE = requests.certs.where()
 
 CELERY_BACKEND = 'redis://redis/1'
 CELERY_BROKER = 'amqp://guest:guest@rabbit//'
+
+
+# Mapping from user role to capabilities obtained by users with that role.
+USER_CAPABILITIES = defaultdict(**{
+    'subscriber': {'subscriber', 'home-project'},
+    'demo': {'subscriber', 'home-project'},
+    'admin': {'subscriber', 'home-project', 'video-encoding', 'admin',
+              'view-pending-nodes', 'edit-project-node-types'},
+}, default_factory=frozenset)

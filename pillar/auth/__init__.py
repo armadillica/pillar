@@ -9,6 +9,8 @@ import flask_login
 import flask_oauthlib.client
 from werkzeug.local import LocalProxy
 
+from pillar import current_app
+
 import bson
 
 from ..api import utils
@@ -85,10 +87,14 @@ class UserClass(flask_login.UserMixin):
             return default
 
     def collect_capabilities(self):
-        """Constructs the capabilities set given the user's current roles."""
+        """Constructs the capabilities set given the user's current roles.
 
-        self.capabilities = set().union(*(CAPABILITIES.get(role, frozenset())
-                                          for role in self.roles))
+        Requires an application context to be active.
+        """
+
+        app_caps = current_app.user_caps
+
+        self.capabilities = set().union(*(app_caps[role] for role in self.roles))
 
     def has_role(self, *roles):
         """Returns True iff the user has one or more of the given roles."""

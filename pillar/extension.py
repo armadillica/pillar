@@ -36,6 +36,10 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
     user_roles: typing.Set[str] = set()
     user_roles_indexable: typing.Set[str] = set()
 
+    # User capabilities introduced by this extension. The final set of
+    # capabilities is the union of all app-level and extension-level caps.
+    user_caps: typing.Mapping[str, typing.FrozenSet] = {}
+
     @property
     @abc.abstractmethod
     def name(self):

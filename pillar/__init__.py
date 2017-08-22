@@ -32,7 +32,6 @@ def _get_current_app():
 current_app: 'PillarServer' = LocalProxy(_get_current_app)
 """the current app, annotated as PillarServer"""
 
-
 from pillar.api import custom_field_validation
 from pillar.api.utils import authentication
 import pillar.web.jinja
@@ -77,6 +76,10 @@ class PillarServer(Eve):
             'service', 'badger', 'svner', 'urler',
         }
         self._user_roles_indexable: typing.Set[str] = {'demo', 'admin', 'subscriber'}
+
+        # Mapping from role name to capabilities given to that role.
+        self._user_caps: typing.MutableMapping[str, typing.FrozenSet[str]] = \
+            collections.defaultdict(frozenset)
 
         self.app_root = os.path.abspath(app_root)
         self._load_flask_config()
@@ -382,6 +385,24 @@ class PillarServer(Eve):
         self.log.info('Loaded %i user roles from extensions, %i of which are indexable',
                       len(self._user_roles), len(self._user_roles_indexable))
 
+    def _config_user_caps(self):
+        """Merges all capability settings from app config and extensions."""
+
+        app_caps = collections.defaultdict(frozenset, **self.config['USER_CAPABILITIES'])
+
+        for extension in self.pillar_extensions.values():
+            ext_caps = extension.user_caps
+
+            for role, caps in ext_caps.items():
+                union_caps = frozenset(app_caps[role] | caps)
+                app_caps[role] = union_caps
+
+        self._user_caps = app_caps
+
+        if self.log.isEnabledFor(logging.INFO):
+            import pprint
+            self.log.info('Configured user capabilities: %s', pprint.pformat(self._user_caps))
+
     def register_static_file_endpoint(self, url_prefix, endpoint_name, static_folder):
         from pillar.web.staticfile import PillarStaticFile
 
@@ -555,6 +576,7 @@ class PillarServer(Eve):
         self._config_jinja_env()
         self._config_static_dirs()
         self._config_user_roles()
+        self._config_user_caps()
 
         # Only enable this when debugging.
         # self._list_routes()
@@ -715,3 +737,7 @@ class PillarServer(Eve):
     @property
     def user_roles_indexable(self) -> typing.FrozenSet[str]:
         return frozenset(self._user_roles_indexable)
+
+    @property
+    def user_caps(self) -> typing.Mapping[str, typing.FrozenSet[str]]:
+        return self._user_caps

@@ -17,6 +17,10 @@ from flask import current_app
 
 log = logging.getLogger(__name__)
 
+# Construction is done when requested, since constructing a UserClass instance
+# requires an application context to look up capabilities. We set the initial
+# value to a not-None singleton to be able to differentiate between
+# g.current_user set to "not logged in" or "uninitialised CLI_USER".
 CLI_USER = ...
 
 
