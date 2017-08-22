@@ -10,6 +10,7 @@ import typing
 
 import attr
 import bson
+import werkzeug.exceptions as wz_exceptions
 
 from pillar import attrs_extra, current_app
 from pillar.api.utils import remove_private_keys
@@ -157,6 +158,9 @@ class OrgManager:
             if user_doc is not None:
                 user_id = user_doc['_id']
 
+        if user_id and not users_coll.count({'_id': user_id}):
+            raise wz_exceptions.UnprocessableEntity('User does not exist')
+
         self._log.info('Removing user %s / %s from organization %s', user_id, email, org_id)
 
         org_doc = self._get_org(org_id)
@@ -185,13 +189,13 @@ class OrgManager:
 
         return org_doc
 
-    def _get_org(self, org_id: bson.ObjectId):
+    def _get_org(self, org_id: bson.ObjectId, *, projection=None):
         """Returns the organization, or raises a ValueError."""
 
         assert isinstance(org_id, bson.ObjectId)
 
         org_coll = current_app.db('organizations')
-        org = org_coll.find_one(org_id)
+        org = org_coll.find_one(org_id, projection=projection)
         if org is None:
             raise ValueError(f'Organization {org_id} not found')
         return org
@@ -236,9 +240,20 @@ class OrgManager:
         if revoke_roles:
             do_badger('revoke', roles=revoke_roles, user_id=user_id)
 
-# def setup_app(app):
-#     from . import eve_hooks, api, patch
-#
-#     eve_hooks.setup_app(app)
-#     api.setup_app(app)
-#     patch.setup_app(app)
+    def user_is_admin(self, org_id: bson.ObjectId) -> bool:
+        """Returns whether the currently logged in user is the admin of the organization."""
+
+        from pillar.api.utils.authentication import current_user_id
+
+        uid = current_user_id()
+        if uid is None:
+            return False
+
+        org = self._get_org(org_id, projection={'admin_uid': 1})
+        return org['admin_uid'] == uid
+
+
+def setup_app(app):
+    from . import patch
+
+    patch.setup_app(app)

@@ -138,10 +138,6 @@ organizations_schema = {
         'maxlength': 128,
         'required': True
     },
-    'url': {
-        'type': 'string',
-        'maxlength': 128,
-    },
     'description': {
         'type': 'string',
         'maxlength': 256,
