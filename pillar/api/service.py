@@ -79,12 +79,15 @@ def badger():
                     action, user_email, role, action, role)
         return 'Role not allowed', 403
 
-    return do_badger(action, role, user_email=user_email)
+    return do_badger(action, role=role, user_email=user_email)
 
 
-def do_badger(action: str, role: str, *, user_email: str = '', user_id: bson.ObjectId = None):
+def do_badger(action: str, *,
+              role: str=None, roles: typing.Iterable[str]=None,
+              user_email: str = '', user_id: bson.ObjectId = None):
     """Performs a badger action, returning a HTTP response.
 
+    Either role or roles must be given.
     Either user_email or user_id must be given.
     """
 
@@ -98,9 +101,16 @@ def do_badger(action: str, role: str, *, user_email: str = '', user_id: bson.Obj
                   action, role, user_email, user_id)
         raise wz_exceptions.BadRequest('User email not given')
 
-    if not role:
-        log.error('do_badger(%r, %r, %r, %r): no role given.', action, role, user_email, user_id)
-        raise wz_exceptions.BadRequest('Role not given')
+    if bool(role) == bool(roles):
+        log.error('do_badger(%r, role=%r, roles=%r, %r, %r): '
+                  'either "role" or "roles" must be given.',
+                  action, role, roles, user_email, user_id)
+        raise wz_exceptions.BadRequest('Invalid role(s) given')
+
+    # If only a single role was given, handle it as a set of one role.
+    if not roles:
+        roles = {role}
+    del role
 
     users_coll = current_app.data.driver.db['users']
 
@@ -111,20 +121,29 @@ def do_badger(action: str, role: str, *, user_email: str = '', user_id: bson.Obj
         query = user_id
     db_user = users_coll.find_one(query, projection={'roles': 1, 'groups': 1})
     if db_user is None:
-        log.warning('badger(%s, %s, user_email=%s, user_id=%s): user not found',
-                    action, role, user_email, user_id)
+        log.warning('badger(%s, roles=%s, user_email=%s, user_id=%s): user not found',
+                    action, roles, user_email, user_id)
         return 'User not found', 404
 
     # Apply the action
-    roles = set(db_user.get('roles') or [])
+    user_roles = set(db_user.get('roles') or [])
     if action == 'grant':
-        roles.add(role)
+        user_roles |= roles
     else:
-        roles.discard(role)
+        user_roles -= roles
 
-    groups = manage_user_group_membership(db_user, role, action)
+    groups = None
+    for role in roles:
+        groups = manage_user_group_membership(db_user, role, action)
 
-    updates = {'roles': list(roles)}
+        if groups is None:
+            # No change for this role
+            continue
+
+        # Also update db_user for the next iteration.
+        db_user['groups'] = groups
+
+    updates = {'roles': list(user_roles)}
     if groups is not None:
         updates['groups'] = list(groups)
 

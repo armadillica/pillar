@@ -85,7 +85,7 @@ def badger(action, user_email, role):
 
     with current_app.app_context():
         service.fetch_role_to_group_id_map()
-        response, status = service.do_badger(action, role, user_email=user_email)
+        response, status = service.do_badger(action, role=role, user_email=user_email)
 
     if status == 204:
         log.info('Done.')
