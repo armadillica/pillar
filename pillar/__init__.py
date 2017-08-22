@@ -39,6 +39,7 @@ import pillar.web.jinja
 from . import api
 from . import web
 from . import auth
+import pillar.api.organizations
 
 empty_settings = {
     # Use a random URL prefix when booting Eve, to ensure that any
@@ -120,6 +121,8 @@ class PillarServer(Eve):
 
         # Celery itself is configured after all extensions have loaded.
         self.celery: Celery = None
+
+        self.org_manager = pillar.api.organizations.OrgManager()
 
         self.before_first_request(self.setup_db_indices)
 

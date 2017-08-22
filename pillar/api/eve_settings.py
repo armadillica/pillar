@@ -138,14 +138,9 @@ organizations_schema = {
         'maxlength': 128,
         'required': True
     },
-    'email': {
-        'type': 'string'
-    },
     'url': {
         'type': 'string',
-        'minlength': 1,
         'maxlength': 128,
-        'required': True
     },
     'description': {
         'type': 'string',
@@ -162,7 +157,15 @@ organizations_schema = {
     'picture': dict(
         nullable=True,
         **_file_embedded_schema),
-    'users': {
+    'admin_uid': {
+        'type': 'objectid',
+        'data_relation': {
+            'resource': 'users',
+            'field': '_id',
+        },
+        'required': True,
+    },
+    'members': {
         'type': 'list',
         'default': [],
         'schema': {
@@ -170,50 +173,37 @@ organizations_schema = {
             'data_relation': {
                 'resource': 'users',
                 'field': '_id',
-                'embeddable': True
             }
         }
     },
-    'teams': {
+    'unknown_members': {
+        'type': 'list',  # of email addresses of yet-to-register users.
+        'default': [],
+        'schema': {
+            'type': 'string',
+        },
+    },
+
+    # Maximum size of the organization, i.e. len(members) + len(unknown_members) may
+    # not exceed this.
+    'seat_count': {
+        'type': 'integer',
+        'required': True,
+    },
+
+    # Roles that the members of this organization automatically get.
+    'org_roles': {
         'type': 'list',
         'default': [],
         'schema': {
-            'type': 'dict',
-            'schema': {
-                # Team name
-                'name': {
-                    'type': 'string',
-                    'minlength': 1,
-                    'maxlength': 128,
-                    'required': True
-                },
-                # List of user ids for the team
-                'users': {
-                    'type': 'list',
-                    'default': [],
-                    'schema': {
-                        'type': 'objectid',
-                        'data_relation': {
-                            'resource': 'users',
-                            'field': '_id',
-                        }
-                    }
-                },
-                # List of groups assigned to the team (this will automatically
-                # update the groups property of each user in the team)
-                'groups': {
-                    'type': 'list',
-                    'default': [],
-                    'schema': {
-                        'type': 'objectid',
-                        'data_relation': {
-                            'resource': 'groups',
-                            'field': '_id',
-                        }
-                    }
-                }
-            }
-        }
+            'type': 'string',
+        },
+    },
+
+    # Identification of the subscription that pays for this organisation
+    # in an external subscription/payment management system.
+    'payment_subscription_id': {
+        'type': 'string',
     }
 }
 
@@ -751,8 +741,6 @@ groups = {
 
 organizations = {
     'schema': organizations_schema,
-    'public_item_methods': ['GET'],
-    'public_methods': ['GET']
 }
 
 projects = {
