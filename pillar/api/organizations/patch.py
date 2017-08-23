@@ -108,6 +108,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
             'name': patch['name'].strip(),
             'description': patch.get('description', '').strip(),
             'website': patch.get('website', '').strip(),
+            'location': patch.get('location', '').strip(),
         }
         self.log.info('User %s edits Organization %s: %s', current_user_id, org_id, update)
 
