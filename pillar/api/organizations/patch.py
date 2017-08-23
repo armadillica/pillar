@@ -88,6 +88,10 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
     def _assert_is_admin(self, org_id):
         om = current_app.org_manager
 
+        if current_user().has_cap('admin'):
+            # Always allow admins to edit every organization.
+            return
+
         if not om.user_is_admin(org_id):
             log.warning('User %s uses PATCH to edit organization %s, '
                         'but is not admin of that Organization. Request denied.',
