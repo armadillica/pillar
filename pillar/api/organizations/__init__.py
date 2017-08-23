@@ -92,6 +92,21 @@ class OrgManager:
         unknown_users = set(emails) - {user['email'] for user in existing_user_docs}
         existing_users = {user['_id'] for user in existing_user_docs}
 
+        return self._assign_users(org_id, unknown_users, existing_users)
+
+    def assign_single_user(self, org_id: bson.ObjectId, *, user_id: bson.ObjectId) -> dict:
+        """Assigns a single, known user to the organization.
+
+        :returns: the new organization document.
+        """
+
+        self._log.info('Adding new member %s to organization %s', user_id, org_id)
+        return self._assign_users(org_id, set(), {user_id})
+
+    def _assign_users(self, org_id: bson.ObjectId,
+                      unknown_users: typing.Set[str],
+                      existing_users: typing.Set[bson.ObjectId]) -> dict:
+
         if self._log.isEnabledFor(logging.INFO):
             self._log.info('  - found users: %s', ', '.join(str(uid) for uid in existing_users))
             self._log.info('  - unknown users: %s', ', '.join(unknown_users))

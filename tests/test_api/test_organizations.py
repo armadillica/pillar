@@ -193,6 +193,31 @@ class OrganizationPatchTest(AbstractPillarTest):
         self.assertEqual([str(member1_uid)], new_org_doc['members'])
         self.assertEqual(['member2@example.com'], new_org_doc['unknown_members'])
 
+    def test_assign_single_user(self):
+        self.enter_app_context()
+
+        admin_uid = self.create_user(24 * 'a', token='admin-token')
+        member1_uid = self.create_user(24 * 'b', email='member1@example.com')
+
+        om = self.app.org_manager
+        org_doc = om.create_new_org('Хакеры', admin_uid, 25)
+        org_id = org_doc['_id']
+
+        # Try the PATCH
+        resp = self.patch(f'/api/organizations/{org_id}',
+                          json={
+                              'op': 'assign-user',
+                              'user_id': str(member1_uid),
+                          },
+                          auth_token='admin-token')
+        new_org_doc = resp.get_json()
+
+        db = self.app.db('organizations')
+        db_org = db.find_one(org_id)
+
+        self.assertEqual([member1_uid], db_org['members'])
+        self.assertEqual([str(member1_uid)], new_org_doc['members'])
+
     def test_assign_users_access_denied(self):
         self.enter_app_context()
 

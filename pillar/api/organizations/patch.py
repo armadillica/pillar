@@ -44,6 +44,27 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         return jsonify(org_doc)
 
     @authorization.require_login()
+    def patch_assign_user(self, org_id: bson.ObjectId, patch: dict):
+        """Assigns a single user by User ID to an organization.
+
+        The calling user must be admin of the organization.
+        """
+
+        self._assert_is_admin(org_id)
+
+        # Do some basic validation.
+        try:
+            user_id = patch['user_id']
+        except KeyError:
+            raise wz_exceptions.BadRequest('No key "user_id" in patch.')
+
+        user_oid = str2id(user_id)
+        log.info('User %s uses PATCH to add user %s to organization %s',
+                 current_user().user_id, user_oid, org_id)
+        org_doc = current_app.org_manager.assign_single_user(org_id, user_id=user_oid)
+        return jsonify(org_doc)
+
+    @authorization.require_login()
     def patch_remove_user(self, org_id: bson.ObjectId, patch: dict):
         """Removes a user from an organization.
 
