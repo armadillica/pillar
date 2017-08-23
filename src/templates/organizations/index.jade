@@ -3,56 +3,57 @@
 | {% block page_title %}Organizations{% endblock %}
 
 | {% block body %}
-#col_main.organization-index
-	#col_main-content
-		.col_header.item-list-header
-			i.pi-cloud
-			| Your organizations
+#app-main
+	#col_main.organization-index
+		#col_main-content
+			.col_header.item-list-header
+				i.pi-cloud
+				| Your organizations
 
-		.item-list.col-scrollable
-			.table
-				.table-head
-					.table-row
-						.table-cell.item-name
-							span.collapser(title="Collapse name column") Name
-						.table-cell.item-priority
-							span.collapser(title="Collapse priority column") Members
-						.table-cell.item-priority
-							span.collapser(title="Collapse priority column") Unknown Members
+			.item-list.col-scrollable
+				.table
+					.table-head
+						.table-row
+							.table-cell.item-name
+								span.collapser(title="Collapse name column") Name
+							.table-cell.item-priority
+								span.collapser(title="Collapse priority column") Members
+							.table-cell.item-priority
+								span.collapser(title="Collapse priority column") Pending Members
 
-				.table-body
-					| {% for organization in organizations['_items'] %}
-					| {% set link_url = url_for('pillar.web.organizations.view_embed', organization_id=organization._id) %}
-					.table-row(id="organization-{{ organization._id }}")
-						.table-cell.item-name
-							a(data-organization-id="{{ organization._id }}",
-								href="{{ link_url }}",
-								class="organization-link")
-								span(class="organization-name-{{ organization._id }}") {{ organization.name }}
-						.table-cell.item-members
-							a(data-organization-id="{{ organization._id }}",
-								href="{{ link_url }}",
-								class="organization-link")
-								span(class="organization-projects-{{ organization._id }}") {{ organization.members|hide_none|count }}
-						.table-cell.item-unknown-members
-							a(data-organization-id="{{ organization._id }}",
-								href="{{ link_url }}",
-								class="organization-link")
-								span(class="organization-projects-{{ organization._id }}") {{ organization.unknown_members|hide_none|count }}
-					| {% endfor %}
+					.table-body
+						| {% for organization in organizations['_items'] %}
+						| {% set link_url = url_for('pillar.web.organizations.view_embed', organization_id=organization._id) %}
+						.table-row(id="organization-{{ organization._id }}")
+							.table-cell.item-name
+								a(data-organization-id="{{ organization._id }}",
+									href="{{ link_url }}",
+									class="organization-link")
+									span(class="organization-name-{{ organization._id }}") {{ organization.name }}
+							.table-cell.item-members
+								a(data-organization-id="{{ organization._id }}",
+									href="{{ link_url }}",
+									class="organization-link")
+									span(class="organization-projects-{{ organization._id }}") {{ organization.members|hide_none|count }}
+							.table-cell.item-pending-members
+								a(data-organization-id="{{ organization._id }}",
+									href="{{ link_url }}",
+									class="organization-link")
+									span(class="organization-projects-{{ organization._id }}") {{ organization.unknown_members|hide_none|count }}
+						| {% endfor %}
 
-			#item-action-panel
-				| {% if can_create_organization %}
-				button.btn(onclick='createNewOrganization(this)') Create new organization
-				#create_organization_result_panel
-				| {% endif %}
+				#item-action-panel
+					| {% if can_create_organization %}
+					button.btn(onclick='createNewOrganization(this)') Create new organization
+					#create_organization_result_panel
+					| {% endif %}
 
-#col_right
-	.col_header
-		span.header_text
-	#item-details.col-scrollable
-		.item-details-empty
-			| Select an organization
+	#col_right
+		.col_header
+			span.header_text
+		#item-details.col-scrollable
+			.item-details-empty
+				| Select an organization
 | {% endblock %}
 
 

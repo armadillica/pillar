@@ -1,4 +1,4 @@
-.flamenco-box.organization
+.organization
 	form#item_form(onsubmit="return editOrganization()")
 		| {% if can_edit %}
 		.input-group
@@ -27,13 +27,13 @@
 				value="{{ organization.location | hide_none }}")
 		| {% if can_super_edit %}
 		.input-group
-			input.item-location.input-transparent(
+			input.item-location.input-transparent.text-danger(
 				name="seat_count",
 				type="text",
 				placeholder="Seat count",
 				value="{{ organization.seat_count | hide_none }}")
 		.input-group
-			input.item-location.input-transparent(
+			input.item-location.input-transparent.text-danger(
 				name="org_roles",
 				type="text",
 				placeholder="Organization roles",
@@ -68,76 +68,73 @@
 				.table-cell(title='Unable to edit, determined by subscription')
 					| {{ organization.org_roles | hide_none | sort | join(', ') }}
 
-.flamenco-box.manager
+.members
 	h4 Organization members
 		| {% if can_edit %}
-		.row
-			.sharing-users-search
-				.form-group
-					input#user-select.form-control(
-						name='contacts',
-						type='text',
-						placeholder='Add member by name')
+		.sharing-users-search
+			.form-group
+				input#user-select.form-control(
+					name='contacts',
+					type='text',
+					placeholder='Add member by name')
 		| {% endif %}
-		.row
-			ul.sharing-users-list
-				| {% for member in members %}
-				li.sharing-users-item(
-					data-user-id="{{ member['_id'] }}",
-					class="{% if current_user.objectid == member['_id'] %}self{% endif %}")
-					.sharing-users-avatar
-						img(src="{{ member['avatar'] }}")
-					.sharing-users-details
-						span.sharing-users-name
-							| {{ member['full_name'] }}
-							| {% if current_user.objectid == member['_id'] %}
-							small (You)
-							| {% endif %}
-							| {% if organization['admin_uid'] == member['_id'] %}
-							small (admin)
-							| {% endif %}
-						span.sharing-users-extra {{ member['username'] }}
-					.sharing-users-action
-						| {% if can_edit %}
-						| {%     if current_user.objectid == member['_id'] %}
-						button.user-remove(title="Leave as member of this organization")
-							i.pi-trash
-						| {%     else %}
-						button.user-remove(title="Remove this user from this organization")
-							i.pi-trash
-						| {%     endif %}
+		ul.sharing-users-list
+			| {% for member in members %}
+			li.sharing-users-item(
+				data-user-id="{{ member['_id'] }}",
+				class="{% if current_user.objectid == member['_id'] %}self{% endif %}")
+				.sharing-users-avatar
+					img(src="{{ member['avatar'] }}")
+				.sharing-users-details
+					span.sharing-users-name
+						| {{ member['full_name'] }}
+						| {% if current_user.objectid == member['_id'] %}
+						small (You)
 						| {% endif %}
-				| {% endfor %}
-		.row
-			h5 Users without Blender Cloud account
-			ul.sharing-users-list.unknown-members
-				| {% for email in organization.unknown_members %}
-				li.sharing-users-item.unknown-member(data-user-email='{{ email }}')
-					.sharing-users-avatar
-						img(src="{{ email | gravatar }}")
-					.sharing-users-details
-						span.sharing-users-email {{ email }}
-					.sharing-users-action
-						| {% if can_edit %}
-						button.user-remove(title="Remove this user from this organization")
-							i.pi-trash
+						| {% if organization['admin_uid'] == member['_id'] %}
+						small (admin)
 						| {% endif %}
-				| {% endfor %}
+					span.sharing-users-extra {{ member['username'] }}
+				.sharing-users-action
+					| {% if can_edit %}
+					| {%     if current_user.objectid == member['_id'] %}
+					button.user-remove(title="Leave as member of this organization")
+						i.pi-trash
+					| {%     else %}
+					button.user-remove(title="Remove this user from this organization")
+						i.pi-trash
+					| {%     endif %}
+					| {% endif %}
+			| {% endfor %}
+		h5 Pending members (i.e. without Blender Cloud account)
+		ul.sharing-users-list.unknown-members
+			| {% for email in organization.unknown_members %}
+			li.sharing-users-item.unknown-member(data-user-email='{{ email }}')
+				.sharing-users-avatar
+					img(src="{{ email | gravatar }}")
+				.sharing-users-details
+					span.sharing-users-email {{ email }}
+				.sharing-users-action
+					| {% if can_edit %}
+					button.user-remove(title="Remove this user from this organization")
+						i.pi-trash
+					| {% endif %}
+			| {% endfor %}
 
-			| {% if can_edit %}
-			h5 Batch-add members by email address
-			form#batch_add_form(onsubmit="return batchAddUsers()")
-				.input-group
-					textarea.item-description.input-transparent(
-						name="emails",
-						type="text",
-						rows=1,
-						placeholder="Email addresses, separated by space/enter")
-				.input-group
-					button.btn.btn-default.btn-block(type='submit')
-						i.pi-check
-						| Add members
-			| {% endif %}
+		| {% if can_edit %}
+		h5 Batch-add members by email address
+		form#batch_add_form(onsubmit="return batchAddUsers()")
+			.input-group
+				textarea.item-description.input-transparent(
+					name="emails",
+					type="text",
+					rows=1,
+					placeholder="Email addresses, separated by space/enter")
+			.input-group
+				button.btn.btn-default.btn-block(type='submit')
+					i.pi-check
+					| Add members
+		| {% endif %}
 
 .action-result-panel
 
