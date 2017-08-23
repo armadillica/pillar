@@ -52,9 +52,8 @@
 			.table-row.properties-org-roles
 				.table-cell User roles
 				.table-cell(title='Unable to edit, determined by subscription')
-					| {{ organization.org_roles | sort | join(', ') }}
+					| {{ organization.org_roles | hide_none | sort | join(', ') }}
 
-					
 .flamenco-box.manager
 	h4 Organization members
 		| {% if can_edit %}

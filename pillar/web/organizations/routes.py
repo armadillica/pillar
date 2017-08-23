@@ -55,6 +55,9 @@ def view_embed(organization_id: str):
         member['avatar'] = gravatar(member.get('email'))
         member['_id'] = str(member['_id'])
 
+    # Make sure it's never None
+    organization.unknown_members = organization.unknown_members or []
+
     can_edit = om.user_is_admin(organization_oid)
 
     csrf = flask_wtf.csrf.generate_csrf()

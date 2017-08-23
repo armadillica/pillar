@@ -43,7 +43,7 @@
 
 			#item-action-panel
 				| {% if can_create_organization %}
-				button.btn(onclick='createNewOrganization(this)') Create new organization (max {{max_organizations}})
+				button.btn(onclick='createNewOrganization(this)') Create new organization
 				#create_organization_result_panel
 				| {% endif %}
 
@@ -151,7 +151,7 @@ script.
 
 		// TODO: create a form to get the initial info from the user.
 		$.post(
-			'{{ url_for('pillar.organizations.create_new') }}',
+			'{{ url_for('pillar.web.organizations.create_new') }}',
 			{
 				name: 'New Organization',
 				seat_count: 1,

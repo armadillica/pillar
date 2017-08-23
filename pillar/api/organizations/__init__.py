@@ -115,7 +115,7 @@ class OrgManager:
 
         # Compute the new members.
         members = set(org_doc.get('members') or []) | existing_users
-        unknown_members = set(org_doc.get('unknown_members')) | unknown_users
+        unknown_members = set(org_doc.get('unknown_members') or []) | unknown_users
 
         # Make sure we don't exceed the current seat count.
         new_seat_count = len(members) + len(unknown_members)
@@ -270,7 +270,7 @@ class OrgManager:
             return False
 
         org = self._get_org(org_id, projection={'admin_uid': 1})
-        return org['admin_uid'] == uid
+        return org.get('admin_uid') == uid
 
     def unknown_member_roles(self, member_email: str) -> typing.Set[str]:
         """Returns the set of organization roles for this user.
@@ -320,6 +320,9 @@ class OrgManager:
         organizations without giving 'mortal' users access to /api/users.
         """
         from pillar.api.utils import str2id
+
+        if not member_sting_ids:
+            return []
 
         member_ids = [str2id(uid) for uid in member_sting_ids]
         users_coll = current_app.db('users')
