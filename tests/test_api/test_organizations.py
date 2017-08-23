@@ -357,6 +357,54 @@ class OrganizationPatchTest(AbstractPillarTest):
         self.assertEqual('Open Source animation studio', db_org['description'])
         self.assertEqual('https://blender.institute/', db_org['website'])
 
+    def test_assign_admin(self):
+        self.enter_app_context()
+        om = self.app.org_manager
+
+        admin_uid = self.create_user(24 * 'a', token='admin-token')
+        new_admin_uid = self.create_user(24 * 'b', token='other-admin-token')
+
+        org_doc = om.create_new_org('Хакеры', admin_uid, 25)
+        org_id = org_doc['_id']
+
+        # Try the PATCH to assign the other user as admin
+        self.patch(f'/api/organizations/{org_id}',
+                   json={
+                       'op': 'assign-admin',
+                       'user_id': str(new_admin_uid),
+                   },
+                   auth_token='admin-token',
+                   expected_status=204)
+
+        db = self.app.db('organizations')
+        db_org = db.find_one(org_id)
+
+        self.assertEqual(new_admin_uid, db_org['admin_uid'])
+
+    def test_assign_admin_as_nonadmin(self):
+        self.enter_app_context()
+        om = self.app.org_manager
+
+        admin_uid = self.create_user(24 * 'a', token='admin-token')
+        new_admin_uid = self.create_user(24 * 'b', token='other-admin-token')
+
+        org_doc = om.create_new_org('Хакеры', admin_uid, 25)
+        org_id = org_doc['_id']
+
+        # Try the PATCH to assign the other user as admin
+        self.patch(f'/api/organizations/{org_id}',
+                   json={
+                       'op': 'assign-admin',
+                       'user_id': str(new_admin_uid),
+                   },
+                   auth_token='other-admin-token',
+                   expected_status=403)
+
+        db = self.app.db('organizations')
+        db_org = db.find_one(org_id)
+
+        self.assertEqual(admin_uid, db_org['admin_uid'])
+
 
 class OrganizationResourceEveTest(AbstractPillarTest):
     """Test GET/POST/PUT access to Organization resource"""

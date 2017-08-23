@@ -9,8 +9,7 @@ from pillar import current_app
 from pillar.api.utils import authorization, str2id, gravatar
 from pillar.web.system_util import pillar_api
 
-
-from pillarsdk import Organization
+from pillarsdk import Organization, User
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('pillar.web.organizations', __name__, url_prefix='/organizations')
@@ -51,6 +50,8 @@ def view_embed(organization_id: str):
         member['avatar'] = gravatar(member.get('email'))
         member['_id'] = str(member['_id'])
 
+    admin_user = User.find(organization.admin_uid, api=api)
+
     # Make sure it's never None
     organization.unknown_members = organization.unknown_members or []
 
@@ -61,6 +62,7 @@ def view_embed(organization_id: str):
 
     return render_template('organizations/view_embed.html',
                            organization=organization,
+                           admin_user=admin_user,
                            members=members,
                            can_edit=can_edit,
                            can_super_edit=can_super_edit,

@@ -40,6 +40,12 @@
 				value="{{ organization.org_roles | hide_none | sort | join(' ') }}")
 		| {% endif %}
 		.input-group
+			input#admin-select.form-control(
+				name='admin_user',
+				type='text',
+				placeholder='Administrator',
+				value='{{ admin_user.full_name }}')
+		.input-group
 			button#item-save.btn.btn-default.btn-block(type='submit')
 				i.pi-check
 				| Save Organization
@@ -49,6 +55,7 @@
 		p.item-description {{ organization.description | hide_none }}
 		p.item-website {{ organization.website | hide_none }}
 		p.item-location {{ organization.location | hide_none }}
+		p.item-admin-user {{ admin_user.full_name }}
 		| {% endif %}
 		| {% endif %}
 
@@ -201,6 +208,14 @@ script.
 				}
 			}
 		);
+		$('#admin-select').userSearch(
+			'{{config.ALGOLIA_USER}}',
+			'{{config.ALGOLIA_PUBLIC_KEY}}',
+			'{{config.ALGOLIA_INDEX_USERS}}',
+			function (event, hit, dataset) {
+				setAdmin(hit.objectID);
+			}
+		);
 
 		function addUser(userId) {
 			if (!userId || userId.length == 0) {
@@ -218,6 +233,25 @@ script.
 
 				// TODO fsiddi: avoid the reloading of the entire page?
 				window.location.reload();
+			})
+			.fail(function (err) {
+				var msg = xhrErrorResponseMessage(err);
+				toastr.error('Could not add member: ' + msg);
+			});
+		};
+
+		function setAdmin(userId) {
+			if (!userId || userId.length == 0) {
+				toastr.error('Please select a user from the list');
+				return;
+			}
+			patchOrganization({
+				op: 'assign-admin',
+				user_id: userId
+			})
+			.done(function (data) {
+				window.location.reload();
+				toastr.info('Updated admin user');
 			})
 			.fail(function (err) {
 				var msg = xhrErrorResponseMessage(err);

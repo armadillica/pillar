@@ -144,6 +144,22 @@ class OrgManager:
 
         return org_doc
 
+    def assign_admin(self, org_id: bson.ObjectId, *, user_id: bson.ObjectId):
+        """Assigns a user as admin user for this organization."""
+
+        assert isinstance(org_id, bson.ObjectId)
+        assert isinstance(user_id, bson.ObjectId)
+
+        org_coll = current_app.db('organizations')
+        users_coll = current_app.db('users')
+
+        if users_coll.count({'_id': user_id}) == 0:
+            raise ValueError('User not found')
+
+        self._log.info('Updating organization %s, setting admin user to %s', org_id, user_id)
+        org_coll.update_one({'_id': org_id},
+                            {'$set': {'admin_uid': user_id}})
+
     def remove_user(self,
                     org_id: bson.ObjectId,
                     *,
