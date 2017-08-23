@@ -737,6 +737,11 @@ groups = {
 
 organizations = {
     'schema': organizations_schema,
+    'resource_methods': ['GET', 'POST'],
+    'item_methods': ['GET'],
+    'public_item_methods': [],
+    'public_methods': [],
+    'soft_delete': True,
 }
 
 projects = {

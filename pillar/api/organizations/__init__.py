@@ -254,6 +254,7 @@ class OrgManager:
 
 
 def setup_app(app):
-    from . import patch
+    from . import patch, hooks
 
+    hooks.setup_app(app)
     patch.setup_app(app)
