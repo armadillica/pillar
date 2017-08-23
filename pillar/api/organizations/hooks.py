@@ -18,7 +18,7 @@ def pre_get_organizations(request, lookup):
 
 def pre_post_organizations(request):
     user = current_user()
-    if user.is_anonymous or not user.has_cap('admin'):
+    if not user.has_cap('create-organization'):
         raise wz_exceptions.Forbidden()
 
 
