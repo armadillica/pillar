@@ -1,10 +1,22 @@
+import abc
+import attr
 import json
 
 from rauth import OAuth2Service
 from flask import current_app, url_for, request, redirect, session
 
 
-class OAuthSignIn:
+@attr.s
+class OAuthUserResponse:
+    """Represents user information requested to an OAuth provider after
+    authenticating.
+    """
+
+    id = attr.ib(validator=attr.validators.instance_of(str))
+    email = attr.ib(validator=attr.validators.instance_of(str))
+
+
+class OAuthSignIn(metaclass=abc.ABCMeta):
     providers = None
 
     def __init__(self, provider_name):
@@ -13,10 +25,22 @@ class OAuthSignIn:
         self.consumer_id = credentials['id']
         self.consumer_secret = credentials['secret']
 
-    def authorize(self):
+    @abc.abstractmethod
+    def authorize(self) -> redirect:
+        """Redirect to the corret authorization endpoint for the current provider
+
+        Depending on the provider, we sometimes have to specify a different
+        'scope'.
+        """
         pass
 
-    def callback(self):
+    @abc.abstractmethod
+    def callback(self) -> OAuthUserResponse:
+        """Callback performed after authorizing the user
+
+        This is usually a request to a protected /me endpoint to query for
+        user information, such as user id and email address.
+        """
         pass
 
     def get_callback_url(self):
@@ -72,14 +96,9 @@ class BlenderIdSignIn(OAuthSignIn):
         
         # TODO handle exception for failed oauth or not authorized
 
-        me = oauth_session.get('user').json()
-        # TODO handle case when user chooses not to disclose en email
         session['blender_id_oauth_token'] = oauth_session.access_token
-        return (
-            me['id'],
-            me.get('email'),
-            oauth_session.access_token
-        )
+        me = oauth_session.get('user').json()
+        return OAuthUserResponse(str(me['id']), me['email'])
 
 
 class FacebookSignIn(OAuthSignIn):
@@ -115,11 +134,8 @@ class FacebookSignIn(OAuthSignIn):
         )
         me = oauth_session.get('me?fields=id,email').json()
         # TODO handle case when user chooses not to disclose en email
-        return (
-            me['id'],
-            me.get('email'),
-            None
-        )
+        # see https://developers.facebook.com/docs/graph-api/reference/user/
+        return OAuthUserResponse(me['id'], me.get('email'))
 
 
 class GoogleSignIn(OAuthSignIn):
@@ -154,9 +170,4 @@ class GoogleSignIn(OAuthSignIn):
             decoder=decode_json
         )
         me = oauth_session.get('userinfo').json()
-        # TODO handle case when user chooses not to disclose en email
-        return (
-            me['id'],
-            me.get('email'),
-            None
-        )
+        return OAuthUserResponse(str(me['id']), me['email'])

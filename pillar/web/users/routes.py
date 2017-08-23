@@ -40,13 +40,13 @@ def oauth_callback(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('main.homepage'))
     oauth = OAuthSignIn.get_provider(provider)
-    social_id, email, access_token = oauth.callback()
-    if social_id is None:
+    oauth_user = oauth.callback()
+    if oauth_user.id is None:
         log.debug('Authentication failed for user with {}'.format(provider))
         return redirect(url_for('main.homepage'))
 
     # Find or create user
-    user_info = {'id': social_id, 'email': email, 'full_name': ''}
+    user_info = {'id': oauth_user.id, 'email': oauth_user.email, 'full_name': ''}
     db_user = find_user_in_db(user_info, provider=provider)
     db_id, status = upsert_user(db_user)
     token = generate_and_store_token(db_id)
