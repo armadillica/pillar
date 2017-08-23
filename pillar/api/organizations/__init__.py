@@ -203,6 +203,8 @@ class OrgManager:
     def refresh_roles(self, user_id: bson.ObjectId):
         """Refreshes the user's roles to own roles + organizations' roles."""
 
+        assert isinstance(user_id, bson.ObjectId)
+
         from pillar.api.service import do_badger
 
         org_coll = current_app.db('organizations')
@@ -227,6 +229,9 @@ class OrgManager:
 
         users_coll = current_app.db('users')
         user_doc = users_coll.find_one(user_id, projection={'roles': 1})
+        if not user_doc:
+            self._log.warning('Trying refresh roles of non-existing user %s, ignoring', user_id)
+            return
 
         all_user_roles = set(user_doc.get('roles') or [])
         existing_org_roles = {role for role in all_user_roles
