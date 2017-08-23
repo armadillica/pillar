@@ -6,7 +6,7 @@ import bson
 from flask import Blueprint, jsonify
 import werkzeug.exceptions as wz_exceptions
 
-from pillar.api.utils.authentication import current_user_id
+from pillar.api.utils.authentication import current_user
 from pillar.api.utils import authorization, str2id, jsonify
 from pillar.api import patch_handler
 from pillar import current_app
@@ -36,7 +36,8 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         if not all(isinstance(email, str) for email in emails):
             raise wz_exceptions.BadRequest('Invalid list of email addresses')
 
-        log.info('User %s uses PATCH to add users to organization %s', current_user_id(), org_id)
+        log.info('User %s uses PATCH to add users to organization %s',
+                 current_user().user_id, org_id)
         org_doc = current_app.org_manager.assign_users(org_id, emails)
         return jsonify(org_doc)
 
@@ -56,7 +57,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         user_oid = str2id(user_id) if user_id else None
 
         log.info('User %s uses PATCH to remove user from organization %s',
-                 current_user_id(), org_id)
+                 current_user().user_id, org_id)
 
         org_doc = current_app.org_manager.remove_user(org_id, user_id=user_oid, email=email)
         return jsonify(org_doc)
@@ -67,7 +68,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         if not om.user_is_admin(org_id):
             log.warning('User %s uses PATCH to edit organization %s, '
                         'but is not admin of that Organization. Request denied.',
-                        current_user_id(), org_id)
+                        current_user().user_id, org_id)
             raise wz_exceptions.Forbidden()
 
     @authorization.require_login()
@@ -77,6 +78,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         from pymongo.results import UpdateResult
 
         self._assert_is_admin(org_id)
+        current_user_id = current_user().user_id
 
         # Only take known fields from the patch, don't just copy everything.
         update = {
@@ -84,7 +86,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
             'description': patch.get('description', '').strip(),
             'website': patch.get('website', '').strip(),
         }
-        self.log.info('User %s edits Organization %s: %s', current_user_id(), org_id, update)
+        self.log.info('User %s edits Organization %s: %s', current_user_id, org_id, update)
 
         validator = current_app.validator_for_resource('organizations')
         if not validator.validate_update(update, org_id):
@@ -104,7 +106,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
 
         if result.matched_count != 1:
             self.log.warning('User %s edits Organization %s but update matched %i items',
-                             current_user_id(), org_id, result.matched_count)
+                             current_user_id, org_id, result.matched_count)
             raise wz_exceptions.BadRequest()
 
         return '', 204
