@@ -33,8 +33,10 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         except KeyError:
             raise wz_exceptions.BadRequest('No key "email" in patch.')
 
-        if not all(isinstance(email, str) for email in emails):
-            raise wz_exceptions.BadRequest('Invalid list of email addresses')
+        # Skip empty emails.
+        emails = [stripped
+                  for stripped in (email.strip() for email in emails)
+                  if stripped]
 
         log.info('User %s uses PATCH to add users to organization %s',
                  current_user().user_id, org_id)
