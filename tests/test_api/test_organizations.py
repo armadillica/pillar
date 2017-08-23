@@ -1,6 +1,7 @@
 import typing
 
 import bson
+import responses
 
 from pillar.tests import AbstractPillarTest
 from pillar.api.utils import remove_private_keys
@@ -575,3 +576,54 @@ class OrganizationItemEveTest(AbstractPillarTest):
 
     def test_delete_anonymous(self):
         self._delete_test(None)
+
+
+class UserCreationTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+
+        self.enter_app_context()
+        self.om = self.app.org_manager
+
+        # Create an organization with admin who is not organization member.
+        self.admin_uid = self.create_user(24 * 'a', token='admin-token')
+        org_doc = self.om.create_new_org('Хакеры', self.admin_uid, 25,
+                                         org_roles={'org-크툴루'})
+        self.org_id = org_doc['_id']
+
+        self.om.assign_users(self.org_id, ['newmember@example.com'])
+
+        # Re-fetch the organization so that self.org_doc has the correct etag.
+        self.org_doc = self._from_db()
+
+    def _from_db(self) -> dict:
+        return self.om._get_org(self.org_id)
+
+    @responses.activate
+    def test_member_joins_later(self, **kwargs):
+        # Mock a Blender ID response for this user.
+        blender_id_response = {'status': 'success',
+                               'user': {'email': 'newmember@example.com',
+                                        'full_name': 'Our lord and saviour Cthulhu',
+                                        'id': 9999},
+                               'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
+
+        responses.add(responses.POST,
+                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      json=blender_id_response,
+                      status=200)
+
+        # Create a user by authenticating
+        resp = self.get('/api/users/me', auth_token='user-token')
+        user_info = resp.get_json()
+        my_id = bson.ObjectId(user_info['_id'])
+
+        # Check that the user has the organization roles.
+        users_coll = self.app.db('users')
+        db_user = users_coll.find_one(my_id)
+        self.assertEqual({'org-크툴루'}, set(db_user['roles']))
+
+        # Check that the user is moved from 'unknown_members' to 'members' in the org.
+        db_org = self._from_db()
+        self.assertEqual([], db_org['unknown_members'])
+        self.assertEqual([my_id], db_org['members'])

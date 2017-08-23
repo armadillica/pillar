@@ -1,11 +1,14 @@
 import copy
 import json
 
+import bson
 from eve.utils import parse_request
-from flask import current_app, g
+from flask import g
+from werkzeug import exceptions as wz_exceptions
+
+from pillar import current_app
 from pillar.api.users.routes import log
 from pillar.api.utils.authorization import user_has_role
-from werkzeug import exceptions as wz_exceptions
 
 USER_EDITABLE_FIELDS = {'full_name', 'username', 'email', 'settings'}
 
@@ -152,3 +155,45 @@ def post_GET_user(request, payload):
     # json_data['computed_permissions'] = \
     #     compute_permissions(json_data['_id'], app.data.driver)
     payload.data = json.dumps(json_data)
+
+
+def grant_org_roles(user_doc):
+    """Handle any organization this user may be part of."""
+
+    email = user_doc.get('email')
+    if not email:
+        log.warning('Unable to check new user for organization membership, no email address! %r',
+                    user_doc)
+        return
+
+    org_roles = current_app.org_manager.unknown_member_roles(email)
+    if not org_roles:
+        log.debug('No organization roles for user %r', email)
+        return
+
+    log.info('Granting organization roles %r to user %r', org_roles, email)
+    new_roles = set(user_doc.get('roles') or []) | org_roles
+    user_doc['roles'] = list(new_roles)
+
+
+def before_inserting_users(user_docs):
+    """Grants organization roles to the created users."""
+
+    for user_doc in user_docs:
+        grant_org_roles(user_doc)
+
+
+def after_inserting_users(user_docs):
+    """Moves the users from the unknown_members to the members list of their organizations."""
+
+    om = current_app.org_manager
+    for user_doc in user_docs:
+        user_id = user_doc.get('_id')
+        user_email = user_doc.get('email')
+
+        if not user_id or not user_email:
+            log.warning('User created with _id=%r and email=%r, unable to check organizations',
+                        user_id, user_email)
+            continue
+
+        om.make_member_known(user_id, user_email)

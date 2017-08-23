@@ -252,6 +252,47 @@ class OrgManager:
         org = self._get_org(org_id, projection={'admin_uid': 1})
         return org['admin_uid'] == uid
 
+    def unknown_member_roles(self, member_email: str) -> typing.Set[str]:
+        """Returns the set of organization roles for this user.
+
+        Assumes the user is not yet known, i.e. part of the unknown_members lists.
+        """
+
+        org_coll = current_app.db('organizations')
+
+        # Aggregate all org-given roles for this user.
+        query = org_coll.aggregate([
+            {'$match': {'unknown_members': member_email}},
+            {'$project': {'org_roles': 1}},
+            {'$unwind': {'path': '$org_roles'}},
+            {'$group': {
+                '_id': None,
+                'org_roles': {'$addToSet': '$org_roles'},
+            }}])
+
+        # If the user has no organizations at all, the query will have no results.
+        try:
+            org_roles_doc = query.next()
+        except StopIteration:
+            return set()
+
+        return set(org_roles_doc['org_roles'])
+
+    def make_member_known(self, member_uid: bson.ObjectId, member_email: str):
+        """Moves the given member from the unknown_members to the members lists."""
+
+        # This uses a direct PyMongo query rather than using Eve's put_internal,
+        # to prevent simultaneous updates from dropping users.
+
+        org_coll = current_app.db('organizations')
+        for org in org_coll.find({'unknown_members': member_email}):
+            self._log.info('Updating organization %s, marking member %s/%s as known',
+                           org['_id'], member_uid, member_email)
+            org_coll.update_one({'_id': org['_id']},
+                                {'$addToSet': {'members': member_uid},
+                                 '$pull': {'unknown_members': member_email}
+                                 })
+
 
 def setup_app(app):
     from . import patch, hooks

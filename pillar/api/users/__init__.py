@@ -71,6 +71,9 @@ def setup_app(app, api_prefix):
     app.on_fetched_item_users += hooks.after_fetching_user
     app.on_fetched_resource_users += hooks.after_fetching_user_resource
 
+    app.on_insert_users += hooks.before_inserting_users
+    app.on_inserted_users += hooks.after_inserting_users
+
     app.register_api_blueprint(blueprint_api, url_prefix=api_prefix)
 
     service.signal_user_changed_role.connect(_update_algolia_user_changed_role)
