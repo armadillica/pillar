@@ -105,7 +105,8 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         from pymongo.results import UpdateResult
 
         self._assert_is_admin(org_id)
-        current_user_id = current_user().user_id
+        user = current_user()
+        current_user_id = user.user_id
 
         # Only take known fields from the patch, don't just copy everything.
         update = {
@@ -114,6 +115,19 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
             'website': patch.get('website', '').strip(),
             'location': patch.get('location', '').strip(),
         }
+
+        if user.has_cap('admin'):
+            if 'seat_count' in patch:
+                update['seat_count'] = int(patch['seat_count'])
+            if 'org_roles' in patch:
+                org_roles = [stripped for stripped in (role.strip() for role in patch['org_roles'])
+                             if stripped]
+                if not all(role.startswith('org-') for role in org_roles):
+                    raise wz_exceptions.UnprocessableEntity(
+                        'Invalid role given, all roles must start with "org-"')
+
+                update['org_roles'] = org_roles
+
         self.log.info('User %s edits Organization %s: %s', current_user_id, org_id, update)
 
         validator = current_app.validator_for_resource('organizations')

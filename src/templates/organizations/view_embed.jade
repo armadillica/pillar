@@ -25,6 +25,20 @@
 				type="text",
 				placeholder="Organization's location",
 				value="{{ organization.location | hide_none }}")
+		| {% if can_super_edit %}
+		.input-group
+			input.item-location.input-transparent(
+				name="seat_count",
+				type="text",
+				placeholder="Seat count",
+				value="{{ organization.seat_count | hide_none }}")
+		.input-group
+			input.item-location.input-transparent(
+				name="org_roles",
+				type="text",
+				placeholder="Organization roles",
+				value="{{ organization.org_roles | hide_none | sort | join(' ') }}")
+		| {% endif %}
 		.input-group
 			button#item-save.btn.btn-default.btn-block(type='submit')
 				i.pi-check
@@ -281,15 +295,26 @@ script.
 		var $form = $('#item_form');
 		var new_name = $form.find('*[name="name"]').val();
 
+		{% if can_super_edit %}
+		var org_roles_str = $form.find('*[name="org_roles"]').val().trim();
+		var org_roles = Array();
+		if (org_roles_str.length) org_roles = org_roles_str.split(/\s/);
+		{% endif %}
+
 		patchOrganization({
 			op: 'edit-from-web',
 			name: new_name,
 			description: $form.find('*[name="description"]').val(),
 			website: $form.find('*[name="website"]').val(),
 			location: $form.find('*[name="location"]').val(),
+			{% if can_super_edit %}
+			seat_count: parseInt($form.find('*[name="seat_count"]').val()),
+			org_roles: org_roles,
+			{% endif %}
 		})
 		.done(function() {
 			$('span.organization-name-{{ organization._id }}').text(new_name);
+			item_open('{{ organization._id }}', false);
 		})
 		.fail(function(err) {
 			var msg = xhrErrorResponseMessage(err);

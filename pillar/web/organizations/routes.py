@@ -54,7 +54,8 @@ def view_embed(organization_id: str):
     # Make sure it's never None
     organization.unknown_members = organization.unknown_members or []
 
-    can_edit = om.user_is_admin(organization_oid)
+    can_super_edit = current_user.has_cap('admin')
+    can_edit = can_super_edit or om.user_is_admin(organization_oid)
 
     csrf = flask_wtf.csrf.generate_csrf()
 
@@ -62,6 +63,7 @@ def view_embed(organization_id: str):
                            organization=organization,
                            members=members,
                            can_edit=can_edit,
+                           can_super_edit=can_super_edit,
                            seats_used=len(members) + len(organization.unknown_members),
                            csrf=csrf)
 
