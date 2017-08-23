@@ -1,17 +1,13 @@
 import logging
 
-import attr
 from flask import Blueprint, render_template, request, jsonify
 import flask_wtf.csrf
-import werkzeug.exceptions as wz_exceptions
-
-from pillarsdk import User
+from flask_login import current_user
 
 import pillar.flask_extra
 from pillar import current_app
 from pillar.api.utils import authorization, str2id, gravatar
 from pillar.web.system_util import pillar_api
-from pillar.api.utils.authentication import current_user
 
 
 from pillarsdk import Organization
@@ -29,7 +25,7 @@ def index(organization_id: str = None):
     if not organization_id and organizations['_items']:
         organization_id = organizations['_items'][0]._id
 
-    can_create_organization = current_user().has_cap('create-organization')
+    can_create_organization = current_user.has_cap('create-organization')
 
     return render_template('organizations/index.html',
                            can_create_organization=can_create_organization,
@@ -75,7 +71,7 @@ def view_embed(organization_id: str):
 def create_new():
     """Creates a new Organization, owned by the currently logged-in user."""
 
-    user_id = current_user().user_id
+    user_id = current_user.user_id
     log.info('Creating new organization for user %s', user_id)
 
     name = request.form['name']
