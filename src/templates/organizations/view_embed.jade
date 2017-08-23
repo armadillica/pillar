@@ -1,0 +1,325 @@
+.flamenco-box.organization
+	form#item_form(onsubmit="return editOrganization()")
+		| {% if can_edit %}
+		.input-group
+			input.item-name.input-transparent(
+				name="name",
+				type="text",
+				placeholder="Organization's name",
+				value="{{ organization.name | hide_none }}")
+		.input-group
+			textarea.item-description.input-transparent(
+				name="description",
+				type="text",
+				rows=1,
+				placeholder="Organization's description") {{ organization.description | hide_none }}
+		.input-group
+			input.item-website.input-transparent(
+				name="website",
+				type="text",
+				placeholder="Organization's website",
+				value="{{ organization.website | hide_none }}")
+		.input-group
+			input.item-location.input-transparent(
+				name="location",
+				type="text",
+				placeholder="Organization's location",
+				value="{{ organization.location | hide_none }}")
+		.input-group
+			button#item-save.btn.btn-default.btn-block(type='submit')
+				i.pi-check
+				| Save Organization
+		| {% else %}
+		p.item-name {{ organization.name | hide_none }}
+		| {% if organization.description %}
+		p.item-description {{ organization.description | hide_none }}
+		p.item-website {{ organization.website | hide_none }}
+		p.item-location {{ organization.location | hide_none }}
+		| {% endif %}
+		| {% endif %}
+
+	h4 Properties
+	.table.item-properties
+		.table-body
+			.table-row.properties-last-updated
+				.table-cell Last Updated
+				.table-cell(title='Unable to edit, set by Organization')
+					| {{ organization._updated | hide_none | pretty_date_time }}
+			.table-row.properties-seat-count
+				.table-cell Seat Count
+				.table-cell(title='Unable to edit, determined by subscription')
+					| {{ organization.seat_count }} ({{ seats_used }} used)
+			.table-row.properties-org-roles
+				.table-cell User roles
+				.table-cell(title='Unable to edit, determined by subscription')
+					| {{ organization.org_roles | sort | join(', ') }}
+
+					
+.flamenco-box.manager
+	h4 Organization members
+		| {% if can_edit %}
+		.row
+			.sharing-users-search
+				.form-group
+					input#user-select.form-control(
+						name='contacts',
+						type='text',
+						placeholder='Add member by name')
+		| {% endif %}
+		.row
+			ul.sharing-users-list
+				| {% for member in members %}
+				li.sharing-users-item(
+					data-user-id="{{ member['_id'] }}",
+					class="{% if current_user.objectid == member['_id'] %}self{% endif %}")
+					.sharing-users-avatar
+						img(src="{{ member['avatar'] }}")
+					.sharing-users-details
+						span.sharing-users-name
+							| {{ member['full_name'] }}
+							| {% if current_user.objectid == member['_id'] %}
+							small (You)
+							| {% endif %}
+							| {% if organization['admin_uid'] == member['_id'] %}
+							small (admin)
+							| {% endif %}
+						span.sharing-users-extra {{ member['username'] }}
+					.sharing-users-action
+						| {% if can_edit %}
+						| {%     if current_user.objectid == member['_id'] %}
+						button.user-remove(title="Leave as member of this organization")
+							i.pi-trash
+						| {%     else %}
+						button.user-remove(title="Remove this user from this organization")
+							i.pi-trash
+						| {%     endif %}
+						| {% endif %}
+				| {% endfor %}
+		.row
+			h5 Users without Blender Cloud account
+			ul.sharing-users-list.unknown-members
+				| {% for email in organization.unknown_members %}
+				li.sharing-users-item.unknown-member(data-user-email='{{ email }}')
+					.sharing-users-avatar
+						img(src="{{ email | gravatar }}")
+					.sharing-users-details
+						span.sharing-users-email {{ email }}
+					.sharing-users-action
+						| {% if can_edit %}
+						button.user-remove(title="Remove this user from this organization")
+							i.pi-trash
+						| {% endif %}
+				| {% endfor %}
+
+			| {% if can_edit %}
+			h5 Batch-add members by email address
+			form#batch_add_form(onsubmit="return batchAddUsers()")
+				.input-group
+					textarea.item-description.input-transparent(
+						name="emails",
+						type="text",
+						rows=1,
+						placeholder="Email addresses, separated by space/enter")
+				.input-group
+					button.btn.btn-default.btn-block(type='submit')
+						i.pi-check
+						| Add members
+			| {% endif %}
+
+.action-result-panel
+
+#item-view-feed
+	| {% if config.DEBUG %}
+	.debug-info
+		a.debug-info-toggle(role='button',
+			data-toggle='collapse',
+			href='#debug-content-organization',
+			aria-expanded='false',
+			aria-controls='debug-content-organization')
+			i.pi-info
+			| Debug Info
+		#debug-content-organization.collapse
+			pre.
+				{{ organization.to_dict() | pprint }}
+	| {% endif %}
+
+| {% block footer_scripts %}
+
+| {% if can_edit %}
+script.
+
+	function patchOrganization(patch) {
+	    if (typeof patch == 'undefined') {
+	        throw 'patchOrganization(undefined) called';
+	    }
+
+	    if (console) console.log('patchOrganization', patch);
+
+	    var promise = $.ajax({
+	        url: '/api/organizations/{{ organization._id }}',
+	        method: 'PATCH',
+	        contentType: 'application/json',
+	        data: JSON.stringify(patch),
+	    })
+	    .fail(function(err) {
+	        if (console) console.log('Error patching: ', err);
+	    })
+	    ;
+
+	    return promise;
+	}
+
+	$(document).ready(function() {
+		var APPLICATION_ID = '{{config.ALGOLIA_USER}}'
+		var SEARCH_ONLY_API_KEY = '{{config.ALGOLIA_PUBLIC_KEY}}';
+		var INDEX_NAME = '{{config.ALGOLIA_INDEX_USERS}}';
+		var client = algoliasearch(APPLICATION_ID, SEARCH_ONLY_API_KEY);
+		var index = client.initIndex(INDEX_NAME);
+
+		$('#user-select').autocomplete({hint: false}, [
+			{
+				source: function (q, cb) {
+					index.search(q, {hitsPerPage: 5}, function (error, content) {
+						if (error) {
+							cb([]);
+							return;
+						}
+						cb(content.hits, content);
+					});
+				},
+				displayKey: 'full_name',
+				minLength: 2,
+				limit: 10,
+				templates: {
+					suggestion: function (hit) {
+						var suggestion = hit.full_name + ' (' + hit.username + ')';
+						var $p = $('<p>').text(suggestion);
+						return $p.html();
+					}
+				}
+			}
+		]).on('autocomplete:selected', function (event, hit, dataset) {
+			var $existing = $('li.sharing-users-item[data-user-id="' + hit.objectID + '"]');
+			if ($existing.length) {
+				$existing
+					.addClass('active')
+					.delay(1000)
+					.queue(function() {
+						console.log('no');
+						$existing.removeClass('active');
+						$existing.dequeue();
+					});
+				toastr.info('User is already member of this organization');
+			}
+			else {
+				addUser('{{ organization["_id"] }}', hit.objectID);
+			}
+		});
+
+
+		function addUser(organizationId, userId){
+			if (!userId || userId.length == 0) {
+				toastr.error('Please select a user from the list');
+				return;
+			}
+
+			patchOrganization({
+				op: 'assign-user',
+				user_id: userId
+			})
+			.done(function (data) {
+				setTimeout(function(){ $('.sharing-users-item').removeClass('added');}, 350);
+				statusBarSet('success', 'Member added to this organization!', 'pi-grin');
+
+				// TODO fsiddi: avoid the reloading of the entire page?
+				window.location.reload();
+			})
+			.fail(function (err) {
+				var msg = xhrErrorResponseMessage(err);
+				toastr.error('Could not add member: ' + msg);
+			});
+		};
+
+	});
+
+| {% endif %}
+script.
+	$(document).ready(function() {
+		$('body').off('click', '.user-remove');  // remove previous handlers.
+		$('body').on('click', '.user-remove', function(e) {
+			var user_id = $(this).closest('*[data-user-id]').data('user-id');
+			var user_email = $(this).closest('*[data-user-email]').data('user-email');
+			removeUser(user_id, user_email);
+		});
+
+		function removeUser(user_id, email) {
+			if (typeof user_id == 'undefined' && typeof email == 'undefined') {
+				throw "removeUser(undefined, undefined) called";
+			}
+			var organization_id = '{{ organization._id }}';
+			var patch = {op: 'remove-user'};
+			
+			if (typeof user_id !== 'undefined') {
+				patch.user_id = user_id;
+			}
+			if (typeof email !== 'undefined') {
+				patch.email = String(email);
+			}
+
+			patchOrganization(patch)
+			.done(function() {
+				$("ul.sharing-users-list").find("[data-user-id='" + user_id + "']").remove();
+				item_open('{{ organization._id }}', false);
+				toastr.success('User removed from this organization');
+			}).fail(function (data) {
+				var msg = xhrErrorResponseMessage(data);
+				toastr.error('Error removing user: ' + msg);
+			});
+		}
+	});
+
+	function editOrganization() {
+		var $form = $('#item_form');
+		var new_name = $form.find('*[name="name"]').val();
+
+		patchOrganization({
+			op: 'edit-from-web',
+			name: new_name,
+			description: $form.find('*[name="description"]').val(),
+			website: $form.find('*[name="website"]').val(),
+			location: $form.find('*[name="location"]').val(),
+		})
+		.done(function() {
+			$('span.organization-name-{{ organization._id }}').text(new_name);
+		})
+		.fail(function(err) {
+			var msg = xhrErrorResponseMessage(err);
+			toastr.error('Error editing organization: ' + msg);
+		})
+		;
+
+		return false;
+	}
+
+	function batchAddUsers() {
+		var $form = $('#batch_add_form');
+		var emails = $form.find('*[name="emails"]').val().split(/\s/);
+		console.log(emails);
+		
+		patchOrganization({
+			op: 'assign-users',
+			emails: emails,
+		})
+		.done(function() {
+			item_open('{{ organization._id }}', false);
+		})
+		.fail(function(err) {
+			var msg = xhrErrorResponseMessage(err);
+			toastr.error('Error adding members: ' + msg);
+		})
+		;
+
+		return false;
+	}
+
+| {% endblock %}

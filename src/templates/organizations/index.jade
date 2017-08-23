@@ -1,0 +1,182 @@
+| {% extends 'layout.html' %}
+| {% block bodyattrs %}{{ super() }} data-context='organizations'{% endblock %}
+| {% block page_title %}Organizations{% endblock %}
+
+| {% block body %}
+#col_main.organization-index
+	#col_main-content
+		.col_header.item-list-header
+			i.pi-cloud
+			| Your organizations
+
+		.item-list.col-scrollable
+			.table
+				.table-head
+					.table-row
+						.table-cell.item-name
+							span.collapser(title="Collapse name column") Name
+						.table-cell.item-priority
+							span.collapser(title="Collapse priority column") Members
+						.table-cell.item-priority
+							span.collapser(title="Collapse priority column") Unknown Members
+
+				.table-body
+					| {% for organization in organizations['_items'] %}
+					| {% set link_url = url_for('pillar.web.organizations.view_embed', organization_id=organization._id) %}
+					.table-row(id="organization-{{ organization._id }}")
+						.table-cell.item-name
+							a(data-organization-id="{{ organization._id }}",
+								href="{{ link_url }}",
+								class="organization-link")
+								span(class="organization-name-{{ organization._id }}") {{ organization.name }}
+						.table-cell.item-members
+							a(data-organization-id="{{ organization._id }}",
+								href="{{ link_url }}",
+								class="organization-link")
+								span(class="organization-projects-{{ organization._id }}") {{ organization.members|hide_none|count }}
+						.table-cell.item-unknown-members
+							a(data-organization-id="{{ organization._id }}",
+								href="{{ link_url }}",
+								class="organization-link")
+								span(class="organization-projects-{{ organization._id }}") {{ organization.unknown_members|hide_none|count }}
+					| {% endfor %}
+
+			#item-action-panel
+				| {% if can_create_organization %}
+				button.btn(onclick='createNewOrganization(this)') Create new organization (max {{max_organizations}})
+				#create_organization_result_panel
+				| {% endif %}
+
+#col_right
+	.col_header
+		span.header_text
+	#item-details.col-scrollable
+		.item-details-empty
+			| Select an organization
+| {% endblock %}
+
+
+| {% block footer_scripts %}
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.typeahead-0.11.1.min.js')}}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/algoliasearch-3.19.0.min.js')}}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.autocomplete-0.22.0.min.js') }}", async=true)
+
+script.
+
+	/* Returns a more-or-less reasonable message given an error response object. */
+	function xhrErrorResponseMessage(err) {
+		if (typeof err.responseJSON == 'undefined')
+			return err.statusText;
+
+		if (typeof err.responseJSON._error != 'undefined' && typeof err.responseJSON._error.message != 'undefined')
+			return err.responseJSON._error.message;
+
+		if (typeof err.responseJSON._message != 'undefined')
+			return err.responseJSON._message
+
+		return err.statusText;
+	}
+
+	/**
+	 * Open an organization in the #item-details div.
+	 */
+	function item_open(item_id, pushState)
+	{
+		if (item_id === undefined ) {
+			throw new ReferenceError("item_open(" + item_id + ") called.");
+		}
+
+		// Style elements starting with item_type and dash, e.g. "#job-uuid"
+		var clean_classes = 'active processing';
+		var current_item = $('#organization-' + item_id);
+
+		$('[id^="organization-"]').removeClass(clean_classes);
+		current_item
+			.removeClass(clean_classes)
+			.addClass('processing');
+
+		var item_url = '/orgs/' + item_id;
+		statusBarSet('default', 'Loading organization…');
+
+		$.get(item_url, function(item_data) {
+			statusBarClear();
+			$('#item-details').html(item_data);
+			$('#col_right .col_header span.header_text').text('Organization details');
+
+			current_item
+				.removeClass(clean_classes)
+				.addClass('active');
+
+		}).fail(function(xhr) {
+			if (console) {
+				console.log('Error fetching organization', item_id, 'from', item_url);
+				console.log('XHR:', xhr);
+			}
+
+			current_item.removeClass(clean_classes);
+			statusBarSet('error', 'Failed to open organization', 'pi-warning');
+
+			if (xhr.status) {
+				$('#item-details').html(xhr.responseText);
+			} else {
+				$('#item-details').html('<p class="text-danger">Opening ' + item_type + ' failed. There possibly was ' +
+				'an error connecting to the server. Please check your network connection and ' +
+				'try again.</p>');
+			}
+		});
+
+		// Determine whether we should push the new state or not.
+		pushState = (typeof pushState !== 'undefined') ? pushState : true;
+		if (!pushState) return;
+
+		// Push the correct URL onto the history.
+		var push_state = {itemId: item_id};
+
+		window.history.pushState(
+				push_state,
+				'Organization: ' + item_id,
+				item_url
+		);
+	}
+
+	{% if open_organization_id %}
+		$(function() { item_open('{{ open_organization_id }}', false); });
+	{% endif %}
+	{% if can_create_organization %}
+	function createNewOrganization(button) {
+		$(button)
+			.attr('disabled', 'disabled')
+			.fadeTo(200, 0.1);
+		$('#create_organization_result_panel').html('');
+
+		// TODO: create a form to get the initial info from the user.
+		$.post(
+			'{{ url_for('pillar.organizations.create_new') }}',
+			{
+				name: 'New Organization',
+				seat_count: 1,
+			}
+		)
+		.done(function() {
+			var $p = $('<p>').text('organization created, reloading list.')
+			$('#create_organization_result_panel').html($p);
+
+			window.location.reload();
+		})
+		.fail(function(err) {
+			var msg = xhrErrorResponseMessage(err);
+			$('#create_organization_result_panel').html('Error creating organization: ' + msg);
+
+			$(button)
+				.fadeTo(1000, 1.0)
+				.queue(function() {
+					$(this)
+						.removeAttr('disabled')
+						.dequeue()
+					;
+				})
+		})
+		;
+	}
+	{% endif %}
+| {% endblock %}

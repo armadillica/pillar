@@ -313,6 +313,20 @@ class OrgManager:
                                  '$pull': {'unknown_members': member_email}
                                  })
 
+    def org_members(self, member_sting_ids: typing.Iterable[str]) -> typing.List[dict]:
+        """Returns the user documents of the organization members.
+
+        This is a workaround to provide membership information for
+        organizations without giving 'mortal' users access to /api/users.
+        """
+        from pillar.api.utils import str2id
+
+        member_ids = [str2id(uid) for uid in member_sting_ids]
+        users_coll = current_app.db('users')
+        users = users_coll.find({'_id': {'$in': member_ids}},
+                                projection={'_id': 1, 'full_name': 1, 'email': 1})
+        return list(users)
+
 
 def setup_app(app):
     from . import patch, hooks
