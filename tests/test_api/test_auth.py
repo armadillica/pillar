@@ -700,3 +700,35 @@ class UserCreationTest(AbstractPillarTest):
                  auth_token='admin-token', expected_status=422)
         self.put(f'/api/users/{user_id}', json=without_email, etag=etag,
                  auth_token='admin-token', expected_status=422)
+
+
+class CurrentUserTest(AbstractPillarTest):
+
+    def test_current_user_logged_in(self):
+        self.enter_app_context()
+
+        from flask import g
+        from pillar.auth import UserClass
+        from pillar.api.utils.authentication import current_user
+
+        with self.app.test_request_context():
+            g.current_user = UserClass.construct('the token', ctd.EXAMPLE_USER)
+
+            user = current_user()
+            self.assertIs(g.current_user, user)
+
+    def test_current_user_anonymous(self):
+        self.enter_app_context()
+
+        from flask import g
+        from pillar.auth import AnonymousUser
+        from pillar.api.utils.authentication import current_user
+
+        with self.app.test_request_context():
+            g.current_user = None
+
+            user = current_user()
+            self.assertIsInstance(user, AnonymousUser)
+            self.assertIsNone(user.user_id)
+            self.assertTrue(user.is_anonymous)
+            self.assertFalse(user.is_authenticated)

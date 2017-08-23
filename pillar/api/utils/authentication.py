@@ -246,8 +246,23 @@ def _delete_expired_tokens():
 def current_user_id() -> typing.Optional[bson.ObjectId]:
     """None-safe fetching of user ID. Can return None itself, though."""
 
-    current_user = g.get('current_user') or {}
-    return current_user.get('user_id')
+    user = current_user()
+    return user.user_id
+
+
+def current_user():
+    """Returns the current user, or an AnonymousUser if not logged in.
+
+    :rtype: pillar.auth.UserClass
+    """
+
+    import pillar.auth
+
+    user: pillar.auth.UserClass = g.get('current_user')
+    if user is None:
+        return pillar.auth.AnonymousUser()
+
+    return user
 
 
 def setup_app(app):
