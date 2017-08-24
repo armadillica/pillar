@@ -4,7 +4,7 @@ import collections
 import logging
 import typing
 
-from flask import session
+from flask import session, g
 import flask_login
 import flask_oauthlib.client
 from werkzeug.local import LocalProxy
@@ -55,7 +55,7 @@ class UserClass(flask_login.UserMixin):
         user.roles = db_user.get('roles') or []
         user.group_ids = db_user.get('groups') or []
         user.email = db_user.get('email') or ''
-        user.username = db_user['username']
+        user.username = db_user.get('username') or ''
         user.full_name = db_user.get('full_name') or ''
 
         # Derived properties
@@ -251,11 +251,16 @@ def config_oauth_login(app):
     return oauth_blender_id
 
 
-def _get_current_web_user() -> UserClass:
-    """Returns the current web user as a UserClass instance."""
+def _get_current_user() -> UserClass:
+    """Returns the current user as a UserClass instance.
 
-    return flask_login.current_user
+    Never returns None; returns an AnonymousUser() instance instead.
+    """
+
+    from ..api.utils.authentication import current_user
+
+    return current_user()
 
 
-current_web_user: UserClass = LocalProxy(_get_current_web_user)
-"""The current web user."""
+current_user: UserClass = LocalProxy(_get_current_user)
+"""The current user."""
