@@ -136,6 +136,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
             'location': patch.get('location', '').strip(),
         }
 
+        refresh_user_roles = False
         if user.has_cap('admin'):
             if 'seat_count' in patch:
                 update['seat_count'] = int(patch['seat_count'])
@@ -147,6 +148,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
                         'Invalid role given, all roles must start with "org-"')
 
                 update['org_roles'] = org_roles
+                refresh_user_roles = True
 
         self.log.info('User %s edits Organization %s: %s', current_user_id, org_id, update)
 
@@ -170,6 +172,10 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
             self.log.warning('User %s edits Organization %s but update matched %i items',
                              current_user_id, org_id, result.matched_count)
             raise wz_exceptions.BadRequest()
+
+        if refresh_user_roles:
+            self.log.info('Organization roles set for org %s, refreshing users', org_id)
+            current_app.org_manager.refresh_all_user_roles(org_id)
 
         return '', 204
 

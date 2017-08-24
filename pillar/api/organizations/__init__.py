@@ -4,7 +4,6 @@ Assumes role names that are given to users by organization membership
 start with the string "org-".
 """
 
-import enum
 import logging
 import typing
 
@@ -231,12 +230,28 @@ class OrgManager:
             raise ValueError(f'Organization {org_id} not found')
         return org
 
+    def refresh_all_user_roles(self, org_id: bson.ObjectId):
+        """Refreshes the roles of all members."""
+
+        assert isinstance(org_id, bson.ObjectId)
+
+        org = self._get_org(org_id, projection={'members': 1})
+        members = org.get('members')
+        if not members:
+            self._log.info('Organization %s has no members, nothing to refresh.', org_id)
+            return
+
+        for uid in members:
+            self.refresh_roles(uid)
+
     def refresh_roles(self, user_id: bson.ObjectId):
         """Refreshes the user's roles to own roles + organizations' roles."""
 
         assert isinstance(user_id, bson.ObjectId)
 
         from pillar.api.service import do_badger
+
+        self._log.info('Refreshing roles for user %s', user_id)
 
         org_coll = current_app.db('organizations')
 

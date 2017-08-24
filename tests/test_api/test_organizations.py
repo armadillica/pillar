@@ -357,6 +357,36 @@ class OrganizationPatchTest(AbstractPillarTest):
         self.assertEqual('Open Source animation studio', db_org['description'])
         self.assertEqual('https://blender.institute/', db_org['website'])
 
+    def test_change_roles(self):
+        self.enter_app_context()
+        om = self.app.org_manager
+
+        self.create_user(24 * '1', roles={'admin'}, token='uberadmin')
+
+        admin_uid = self.create_user(24 * 'a', token='admin-token')
+        org_doc = om.create_new_org('Хакеры', admin_uid, 25, org_roles={'org-subscriber'})
+        org_id = org_doc['_id']
+
+        # First assign the user, then change the organization's roles.
+        # This should refresh the roles on all its members.
+        member1_uid = self.create_user(24 * 'b', email='member1@example.com', roles={'betatester'})
+        om.assign_single_user(org_id, user_id=member1_uid)
+
+        # Try the PATCH to change the roles
+        self.patch(f'/api/organizations/{org_id}',
+                   json={
+                       'op': 'edit-from-web',
+                       'name': '  Blender Institute ',
+                       'description': '\nOpen Source animation studio ',
+                       'website': '   https://blender.institute/  ',
+                       'org_roles': ['org-subscriber', 'org-flamenco'],
+                   },
+                   auth_token='uberadmin',
+                   expected_status=204)
+
+        db_user = self.fetch_user_from_db(member1_uid)
+        self.assertEqual({'betatester', 'org-subscriber', 'org-flamenco'}, set(db_user['roles']))
+
     def test_assign_admin(self):
         self.enter_app_context()
         om = self.app.org_manager
