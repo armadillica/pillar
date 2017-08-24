@@ -16,3 +16,19 @@ STORAGE_BACKEND = 'local'
 EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER = "http://store.localhost/api"
 
 SECRET_KEY = '12345'
+
+OAUTH_CREDENTIALS = {
+    'blender-id': {
+        'id': 'blender-id-app-id',
+        'secret': 'blender-id–secret',
+        'base_url': 'http://blender_id:8000/'
+    },
+    'facebook': {
+        'id': 'fb-app-id',
+        'secret': 'facebook-secret'
+    },
+    'google': {
+        'id': 'google-app-id',
+        'secret': 'google-secret'
+    }
+}

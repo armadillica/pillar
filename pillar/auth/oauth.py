@@ -3,7 +3,7 @@ import attr
 import json
 
 from rauth import OAuth2Service
-from flask import current_app, url_for, request, redirect, session
+from flask import current_app, url_for, request, redirect, session, Response
 
 
 @attr.s
@@ -16,18 +16,29 @@ class OAuthUserResponse:
     email = attr.ib(validator=attr.validators.instance_of(str))
 
 
+class ProviderConfigurationMissing(ValueError):
+    """Raised when an OAuth provider is used but not configured."""
+
+
+class ProviderNotImplemented(ValueError):
+    """Raised when a provider is requested that does not exist."""
+
+
 class OAuthSignIn(metaclass=abc.ABCMeta):
-    providers = None
+    _providers = None  # initialized in get_provider()
 
     def __init__(self, provider_name):
         self.provider_name = provider_name
-        credentials = current_app.config['OAUTH_CREDENTIALS'][provider_name]
+        try:
+            credentials = current_app.config['OAUTH_CREDENTIALS'][provider_name]
+        except KeyError:
+            raise ProviderConfigurationMissing(f'Missing OAuth credentials for {provider_name}')
         self.consumer_id = credentials['id']
         self.consumer_secret = credentials['secret']
 
     @abc.abstractmethod
-    def authorize(self) -> redirect:
-        """Redirect to the corret authorization endpoint for the current provider
+    def authorize(self) -> Response:
+        """Redirect to the correct authorization endpoint for the current provider.
 
         Depending on the provider, we sometimes have to specify a different
         'scope'.
@@ -36,7 +47,7 @@ class OAuthSignIn(metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def callback(self) -> OAuthUserResponse:
-        """Callback performed after authorizing the user
+        """Callback performed after authorizing the user.
 
         This is usually a request to a protected /me endpoint to query for
         user information, such as user id and email address.
@@ -48,14 +59,17 @@ class OAuthSignIn(metaclass=abc.ABCMeta):
                        _external=True)
 
     @classmethod
-    def get_provider(cls, provider_name):
-        if cls.providers is None:
-            cls.providers = {}
+    def get_provider(cls, provider_name) -> 'OAuthSignIn':
+        if cls._providers is None:
+            cls._providers = {}
             # TODO convert to the new __init_subclass__
             for provider_class in cls.__subclasses__():
                 provider = provider_class()
-                cls.providers[provider.provider_name] = provider
-        return cls.providers[provider_name]
+                cls._providers[provider.provider_name] = provider
+        try:
+            return cls._providers[provider_name]
+        except KeyError:
+            raise ProviderNotImplemented(f'No such OAuth provider {provider_name}')
 
 
 class BlenderIdSignIn(OAuthSignIn):
@@ -93,7 +107,7 @@ class BlenderIdSignIn(OAuthSignIn):
                   'redirect_uri': self.get_callback_url()},
             decoder=decode_json
         )
-        
+
         # TODO handle exception for failed oauth or not authorized
 
         session['blender_id_oauth_token'] = oauth_session.access_token
