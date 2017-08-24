@@ -24,6 +24,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
 
         The calling user must be admin of the organization.
         """
+        from . import NotEnoughSeats
 
         self._assert_is_admin(org_id)
 
@@ -40,7 +41,13 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
 
         log.info('User %s uses PATCH to add users to organization %s',
                  current_user().user_id, org_id)
-        org_doc = current_app.org_manager.assign_users(org_id, emails)
+        try:
+            org_doc = current_app.org_manager.assign_users(org_id, emails)
+        except NotEnoughSeats:
+            resp = jsonify({'_message': f'Not enough seats to assign {len(emails)} users'})
+            resp.status_code = 422
+            return resp
+
         return jsonify(org_doc)
 
     @authorization.require_login()
@@ -49,7 +56,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
 
         The calling user must be admin of the organization.
         """
-
+        from . import NotEnoughSeats
         self._assert_is_admin(org_id)
 
         # Do some basic validation.
@@ -61,7 +68,13 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         user_oid = str2id(user_id)
         log.info('User %s uses PATCH to add user %s to organization %s',
                  current_user().user_id, user_oid, org_id)
-        org_doc = current_app.org_manager.assign_single_user(org_id, user_id=user_oid)
+        try:
+            org_doc = current_app.org_manager.assign_single_user(org_id, user_id=user_oid)
+        except NotEnoughSeats:
+            resp = jsonify({'_message': f'Not enough seats to assign this user'})
+            resp.status_code = 422
+            return resp
+
         return jsonify(org_doc)
 
     @authorization.require_login()
