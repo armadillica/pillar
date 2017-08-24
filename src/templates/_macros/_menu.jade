@@ -62,7 +62,14 @@ li(class="dropdown")
 				title="My Projects")
 				i.pi-star
 				| My Projects
-
+		| {% if current_user.has_organizations() %}
+		li
+			a.navbar-item(
+				href="{{ url_for('pillar.web.organizations.index') }}"
+				title="My Organizations")
+				i.pi-users
+				| My Organizations
+		| {% endif %}
 		li
 			a.navbar-item(
 				href="{{ url_for('users.settings_profile') }}"

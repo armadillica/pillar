@@ -4,6 +4,7 @@ import logging
 import typing
 
 import flask
+import flask_login
 import jinja2.filters
 import jinja2.utils
 import werkzeug.exceptions as wz_exceptions
@@ -157,3 +158,4 @@ def setup_jinja_env(jinja_env):
     jinja_env.filters['repr'] = repr
     jinja_env.globals['url_for_node'] = do_url_for_node
     jinja_env.globals['session'] = flask.session
+    jinja_env.globals['current_user'] = flask_login.current_user

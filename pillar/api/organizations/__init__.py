@@ -361,6 +361,21 @@ class OrgManager:
                                 projection={'_id': 1, 'full_name': 1, 'email': 1})
         return list(users)
 
+    def user_has_organizations(self, user_id: bson.ObjectId) -> bool:
+        """Returns True iff the user has anything to do with organizations.
+
+        That is, if the user is admin for and/or member of any organization.
+        """
+
+        org_coll = current_app.db('organizations')
+
+        org_count = org_coll.count({'$or': [
+            {'admin_uid': user_id},
+            {'members': user_id}
+        ]})
+
+        return bool(org_count)
+
 
 def setup_app(app):
     from . import patch, hooks

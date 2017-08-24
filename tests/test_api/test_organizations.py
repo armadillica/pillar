@@ -203,6 +203,8 @@ class OrganizationPatchTest(AbstractPillarTest):
         org_doc = om.create_new_org('Хакеры', admin_uid, 25)
         org_id = org_doc['_id']
 
+        self.assertFalse(om.user_has_organizations(member1_uid))
+
         # Try the PATCH
         resp = self.patch(f'/api/organizations/{org_id}',
                           json={
@@ -217,6 +219,9 @@ class OrganizationPatchTest(AbstractPillarTest):
 
         self.assertEqual([member1_uid], db_org['members'])
         self.assertEqual([str(member1_uid)], new_org_doc['members'])
+
+        # The user should now have an organization
+        self.assertTrue(om.user_has_organizations(member1_uid))
 
     def test_assign_users_access_denied(self):
         self.enter_app_context()
@@ -299,6 +304,7 @@ class OrganizationPatchTest(AbstractPillarTest):
         org_id = org_doc['_id']
 
         om.assign_users(org_id, ['member1@example.com', 'member2@example.com'])
+        self.assertTrue(om.user_has_organizations(member_uid))
 
         # Try the PATCH to remove a known user
         resp = self.patch(f'/api/organizations/{org_id}',
@@ -317,6 +323,8 @@ class OrganizationPatchTest(AbstractPillarTest):
 
         self.assertEqual([], new_org_doc['members'])
         self.assertEqual(['member2@example.com'], new_org_doc['unknown_members'])
+
+        self.assertFalse(om.user_has_organizations(member_uid))
 
         # Try the PATCH to remove an unknown user
         resp = self.patch(f'/api/organizations/{org_id}',

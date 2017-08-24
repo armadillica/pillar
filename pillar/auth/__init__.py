@@ -42,11 +42,14 @@ class UserClass(flask_login.UserMixin):
         self.group_ids: typing.List[bson.ObjectId] = []
         self.capabilities: typing.Set[str] = set()
 
+        # Lazily evaluated
+        self._has_organizations: typing.Optional[bool] = None
+
     @classmethod
     def construct(cls, token: str, db_user: dict) -> 'UserClass':
         """Constructs a new UserClass instance from a Mongo user document."""
 
-        user = UserClass(token)
+        user = cls(token)
 
         user.user_id = db_user['_id']
         user.roles = db_user.get('roles') or []
@@ -63,7 +66,7 @@ class UserClass(flask_login.UserMixin):
 
         return user
 
-    def __str__(self):
+    def __repr__(self):
         return f'UserClass(user_id={self.user_id})'
 
     def __getitem__(self, item):
@@ -138,6 +141,15 @@ class UserClass(flask_login.UserMixin):
 
         return not bool(require_roles) or bool(intersection)
 
+    def has_organizations(self) -> bool:
+        """Returns True iff this user administers or is member of any organization."""
+
+        if self._has_organizations is None:
+            assert self.user_id
+            self._has_organizations = current_app.org_manager.user_has_organizations(self.user_id)
+
+        return bool(self._has_organizations)
+
 
 class AnonymousUser(flask_login.AnonymousUserMixin, UserClass):
     def __init__(self):
@@ -147,6 +159,9 @@ class AnonymousUser(flask_login.AnonymousUserMixin, UserClass):
         return False
 
     def has_cap(self, *capabilities):
+        return False
+
+    def has_organizations(self) -> bool:
         return False
 
 
