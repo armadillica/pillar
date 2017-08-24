@@ -53,7 +53,7 @@
 				input#admin-select.form-control(
 					name='admin_user',
 					type='text',
-					placeholder='Administrator')
+					placeholder='Search for a new administrator')
 				a(href='javascript:hideAdminPicker()')
 					i.pi-cancel.text-danger
 			script $('#admin-picker').hide();
@@ -65,10 +65,10 @@
 		p.item-name {{ organization.name | hide_none }}
 		| {% if organization.description %}
 		p.item-description {{ organization.description | hide_none }}
+		| {% endif %}
 		p.item-website {{ organization.website | hide_none }}
 		p.item-location {{ organization.location | hide_none }}
-		p.item-admin-user {{ admin_user.full_name }}
-		| {% endif %}
+		p.item-admin-user Organization administrator: {{ admin_user.full_name }}
 		| {% endif %}
 
 	h4 Properties
