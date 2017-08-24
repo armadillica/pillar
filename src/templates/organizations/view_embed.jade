@@ -2,44 +2,51 @@
 	form#item_form(onsubmit="return editOrganization()")
 		| {% if can_edit %}
 		.input-group
-			input.item-name.input-transparent(
+			label(for='org-name-field') Name
+			input.item-name.input-transparent#org-name-field(
 				name="name",
 				type="text",
 				placeholder="Organization's name",
 				value="{{ organization.name | hide_none }}")
 		.input-group
-			textarea.item-description.input-transparent(
+			label(for='org-description-field') Description
+			textarea.item-description.input-transparent#org-description-field(
 				name="description",
 				type="text",
 				rows=1,
 				placeholder="Organization's description") {{ organization.description | hide_none }}
 		.input-group
-			input.item-website.input-transparent(
+			label(for='org-website-field') Website
+			input.item-website.input-transparent#org-website-field(
 				name="website",
 				type="text",
 				placeholder="Organization's website",
 				value="{{ organization.website | hide_none }}")
 		.input-group
-			input.item-location.input-transparent(
+			label(for='org-location-field') Location
+			input.item-location.input-transparent#org-location-field(
 				name="location",
 				type="text",
 				placeholder="Organization's location",
 				value="{{ organization.location | hide_none }}")
 		| {% if can_super_edit %}
-		.input-group
-			input.item-location.input-transparent.text-danger(
+		.input-group.text-danger
+			label(for='org-seat-count-field') Seat count
+			input.item-location.input-transparent#org-seat-count-field(
 				name="seat_count",
 				type="text",
 				placeholder="Seat count",
 				value="{{ organization.seat_count | hide_none }}")
-		.input-group
-			input.item-location.input-transparent.text-danger(
+		.input-group.text-danger
+			label(for='org-roles-field') Roles
+			input.item-location.input-transparent#org-roles-field(
 				name="org_roles",
 				type="text",
 				placeholder="Organization roles",
 				value="{{ organization.org_roles | hide_none | sort | join(' ') }}")
 		| {% endif %}
 		.input-group
+			label.item-admin-user Org admin
 			input#admin-select.form-control(
 				name='admin_user',
 				type='text',
