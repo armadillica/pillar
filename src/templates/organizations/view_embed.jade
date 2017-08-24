@@ -66,8 +66,13 @@
 		| {% if organization.description %}
 		p.item-description {{ organization.description | hide_none }}
 		| {% endif %}
-		p.item-website {{ organization.website | hide_none }}
+		| {% if organization.website %}
+		p.item-website
+			a(href='{{ organization.website }}', target='_blank') {{ organization.website }}
+		| {% endif %}
+		| {% if organization.location %}
 		p.item-location {{ organization.location | hide_none }}
+		| {% endif %}
 		p.item-admin-user Organization administrator: {{ admin_user.full_name }}
 		| {% endif %}
 
