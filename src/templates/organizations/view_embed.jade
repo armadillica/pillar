@@ -124,7 +124,11 @@
 						i.pi-trash
 					| {%     endif %}
 					| {% endif %}
+			| {% else %}
+			li
+				p.small No members yet
 			| {% endfor %}
+		| {% if organization.unknown_members %}
 		h5 Pending members (i.e. without Blender Cloud account)
 		ul.sharing-users-list.unknown-members
 			| {% for email in organization.unknown_members %}
@@ -139,7 +143,7 @@
 						i.pi-trash
 					| {% endif %}
 			| {% endfor %}
-
+		| {% endif %}
 		| {% if can_edit %}
 		h5 Batch-add members by email address
 		form#batch_add_form(onsubmit="return batchAddUsers()")
