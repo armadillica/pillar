@@ -233,92 +233,87 @@ script.
 			}
 		);
 
-		function addUser(userId) {
-			if (!userId || userId.length == 0) {
-				toastr.error('Please select a user from the list');
-				return;
-			}
-
-			patchOrganization({
-				op: 'assign-user',
-				user_id: userId
-			})
-			.done(function (data) {
-				setTimeout(function(){ $('.sharing-users-item').removeClass('added');}, 350);
-				statusBarSet('success', 'Member added to this organization!', 'pi-grin');
-
-				// TODO fsiddi: avoid the reloading of the entire page?
-				window.location.reload();
-			})
-			.fail(function (err) {
-				var msg = xhrErrorResponseMessage(err);
-				toastr.error('Could not add member: ' + msg);
-			});
-		};
-
-		function setAdmin(user_id, full_name) {
-			if (!user_id || user_id.length == 0) {
-				toastr.error('Please select a user from the list');
-				return;
-			}
-
-			if (!confirm("Are you sure you want to transfer administrator privileges to " + full_name + "?")) {
-				hideAdminPicker();
-				toastr.warning('Cancelled administrative transfer.');
-				return;
-			}
-
-			patchOrganization({
-				op: 'assign-admin',
-				user_id: user_id
-			})
-			.done(function (data) {
-				window.location.reload();
-				toastr.info('Updated admin user');
-			})
-			.fail(function (err) {
-				var msg = xhrErrorResponseMessage(err);
-				toastr.error('Could not add member: ' + msg);
-			});
-		};
-
-	});
-
-| {% endif %}
-script.
-	$(document).ready(function() {
 		$('body').off('click', '.user-remove');  // remove previous handlers.
 		$('body').on('click', '.user-remove', function(e) {
 			var user_id = $(this).closest('*[data-user-id]').data('user-id');
 			var user_email = $(this).closest('*[data-user-email]').data('user-email');
 			removeUser(user_id, user_email);
 		});
-
-		function removeUser(user_id, email) {
-			if (typeof user_id == 'undefined' && typeof email == 'undefined') {
-				throw "removeUser(undefined, undefined) called";
-			}
-			var organization_id = '{{ organization._id }}';
-			var patch = {op: 'remove-user'};
-			
-			if (typeof user_id !== 'undefined') {
-				patch.user_id = user_id;
-			}
-			if (typeof email !== 'undefined') {
-				patch.email = String(email);
-			}
-
-			patchOrganization(patch)
-			.done(function() {
-				$("ul.sharing-users-list").find("[data-user-id='" + user_id + "']").remove();
-				item_open('{{ organization._id }}', false);
-				toastr.success('User removed from this organization');
-			}).fail(function (data) {
-				var msg = xhrErrorResponseMessage(data);
-				toastr.error('Error removing user: ' + msg);
-			});
-		}
 	});
+
+	function addUser(userId) {
+		if (!userId || userId.length == 0) {
+			toastr.error('Please select a user from the list');
+			return;
+		}
+
+		patchOrganization({
+			op: 'assign-user',
+			user_id: userId
+		})
+		.done(function (data) {
+			setTimeout(function(){ $('.sharing-users-item').removeClass('added');}, 350);
+			statusBarSet('success', 'Member added to this organization!', 'pi-grin');
+
+			// TODO fsiddi: avoid the reloading of the entire page?
+			window.location.reload();
+		})
+		.fail(function (err) {
+			var msg = xhrErrorResponseMessage(err);
+			toastr.error('Could not add member: ' + msg);
+		});
+	};
+
+	function removeUser(user_id, email) {
+		if (typeof user_id == 'undefined' && typeof email == 'undefined') {
+			throw "removeUser(undefined, undefined) called";
+		}
+		var organization_id = '{{ organization._id }}';
+		var patch = {op: 'remove-user'};
+
+		if (typeof user_id !== 'undefined') {
+			patch.user_id = user_id;
+		}
+		if (typeof email !== 'undefined') {
+			patch.email = String(email);
+		}
+
+		patchOrganization(patch)
+		.done(function() {
+			$("ul.sharing-users-list").find("[data-user-id='" + user_id + "']").remove();
+			item_open('{{ organization._id }}', false);
+			toastr.success('User removed from this organization');
+		}).fail(function (data) {
+			var msg = xhrErrorResponseMessage(data);
+			toastr.error('Error removing user: ' + msg);
+		});
+	}
+
+	function setAdmin(user_id, full_name) {
+		if (!user_id || user_id.length == 0) {
+			toastr.error('Please select a user from the list');
+			return;
+		}
+
+		if (!confirm("Are you sure you want to transfer administrator privileges to " + full_name + "?")) {
+			hideAdminPicker();
+			toastr.warning('Cancelled administrative transfer.');
+			return;
+		}
+
+		patchOrganization({
+			op: 'assign-admin',
+			user_id: user_id
+		})
+		.done(function (data) {
+			window.location.reload();
+			toastr.info('Updated admin user');
+		})
+		.fail(function (err) {
+			var msg = xhrErrorResponseMessage(err);
+			toastr.error('Could not add member: ' + msg);
+		});
+	};
 
 	function editOrganization() {
 		var $form = $('#item_form');
@@ -358,7 +353,7 @@ script.
 		var $form = $('#batch_add_form');
 		var emails = $form.find('*[name="emails"]').val().split(/\s/);
 		console.log(emails);
-		
+
 		patchOrganization({
 			op: 'assign-users',
 			emails: emails,
@@ -386,4 +381,5 @@ script.
 		$('#admin-name').show();
 	}
 
+| {% endif %}
 | {% endblock %}
