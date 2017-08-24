@@ -115,7 +115,7 @@
 						| {% endif %}
 					span.sharing-users-extra {{ member['username'] }}
 				.sharing-users-action
-					| {% if can_edit %}
+					| {% if can_edit or current_user.objectid == member['_id'] %}
 					| {%     if current_user.objectid == member['_id'] %}
 					button.user-remove(title="Leave as member of this organization")
 						i.pi-trash
@@ -180,28 +180,6 @@
 
 | {% if can_edit %}
 script.
-
-	function patchOrganization(patch) {
-		if (typeof patch == 'undefined') {
-			throw 'patchOrganization(undefined) called';
-		}
-
-		if (console) console.log('patchOrganization', patch);
-
-		var promise = $.ajax({
-			url: '/api/organizations/{{ organization._id }}',
-			method: 'PATCH',
-			contentType: 'application/json',
-			data: JSON.stringify(patch),
-		})
-		.fail(function(err) {
-			if (console) console.log('Error patching: ', err);
-		})
-		;
-
-		return promise;
-	}
-
 	$(document).ready(function() {
 		$('#user-select').userSearch(
 			'{{config.ALGOLIA_USER}}',
@@ -232,13 +210,6 @@ script.
 				setAdmin(hit.objectID, hit.full_name);
 			}
 		);
-
-		$('body').off('click', '.user-remove');  // remove previous handlers.
-		$('body').on('click', '.user-remove', function(e) {
-			var user_id = $(this).closest('*[data-user-id]').data('user-id');
-			var user_email = $(this).closest('*[data-user-email]').data('user-email');
-			removeUser(user_id, user_email);
-		});
 	});
 
 	function addUser(userId) {
@@ -263,31 +234,6 @@ script.
 			toastr.error('Could not add member: ' + msg);
 		});
 	};
-
-	function removeUser(user_id, email) {
-		if (typeof user_id == 'undefined' && typeof email == 'undefined') {
-			throw "removeUser(undefined, undefined) called";
-		}
-		var organization_id = '{{ organization._id }}';
-		var patch = {op: 'remove-user'};
-
-		if (typeof user_id !== 'undefined') {
-			patch.user_id = user_id;
-		}
-		if (typeof email !== 'undefined') {
-			patch.email = String(email);
-		}
-
-		patchOrganization(patch)
-		.done(function() {
-			$("ul.sharing-users-list").find("[data-user-id='" + user_id + "']").remove();
-			item_open('{{ organization._id }}', false);
-			toastr.success('User removed from this organization');
-		}).fail(function (data) {
-			var msg = xhrErrorResponseMessage(data);
-			toastr.error('Error removing user: ' + msg);
-		});
-	}
 
 	function setAdmin(user_id, full_name) {
 		if (!user_id || user_id.length == 0) {
@@ -382,4 +328,66 @@ script.
 	}
 
 | {% endif %}
+script.
+	$(document).ready(function() {
+		$('body').off('click', '.user-remove');  // remove previous handlers.
+		$('body').on('click', '.user-remove', function(e) {
+			var user_id = $(this).closest('*[data-user-id]').data('user-id');
+			var user_email = $(this).closest('*[data-user-email]').data('user-email');
+			removeUser(user_id, user_email);
+		});
+	});
+
+	function patchOrganization(patch) {
+		if (typeof patch == 'undefined') {
+			throw 'patchOrganization(undefined) called';
+		}
+
+		if (console) console.log('patchOrganization', patch);
+
+		var promise = $.ajax({
+			url: '/api/organizations/{{ organization._id }}',
+			method: 'PATCH',
+			contentType: 'application/json',
+			data: JSON.stringify(patch),
+		})
+		.fail(function(err) {
+			if (console) console.log('Error patching: ', err);
+		})
+		;
+
+		return promise;
+	}
+
+	function removeUser(user_id, email) {
+		if (typeof user_id == 'undefined' && typeof email == 'undefined') {
+			throw "removeUser(undefined, undefined) called";
+		}
+		var organization_id = '{{ organization._id }}';
+		var patch = {op: 'remove-user'};
+
+		if (typeof user_id !== 'undefined') {
+			patch.user_id = user_id;
+		}
+		if (typeof email !== 'undefined') {
+			patch.email = String(email);
+		}
+
+		patchOrganization(patch)
+		.done(function() {
+			$("ul.sharing-users-list").find("[data-user-id='" + user_id + "']").remove();
+			if ('{{ current_user.user_id }}' == user_id) {
+				// User removed self, so we cannot open this organization again.
+				$('#organization-{{ organization._id}}').remove();
+				toastr.success('You left the organization.')
+			} else {
+				item_open('{{ organization._id }}', false);
+				toastr.success('User removed from this organization');
+			}
+		}).fail(function (data) {
+			var msg = xhrErrorResponseMessage(data);
+			toastr.error('Error removing user: ' + msg);
+		});
+	}
+
 | {% endblock %}

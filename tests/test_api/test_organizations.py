@@ -331,6 +331,32 @@ class OrganizationPatchTest(AbstractPillarTest):
         self.assertEqual([], db_org['members'])
         self.assertEqual(['member2@example.com'], db_org['unknown_members'])
 
+    def test_remove_self(self):
+        self.enter_app_context()
+        om = self.app.org_manager
+
+        admin_uid = self.create_user(24 * 'a', token='admin-token')
+        member_uid = self.create_user(24 * 'b', email='member1@example.com', token='member-token')
+        org_doc = om.create_new_org('Хакеры', admin_uid, 25)
+        org_id = org_doc['_id']
+
+        om.assign_users(org_id, ['member1@example.com'])
+
+        # Try the PATCH to remove self.
+        resp = self.patch(f'/api/organizations/{org_id}',
+                          json={
+                              'op': 'remove-user',
+                              'user_id': str(member_uid),
+                          },
+                          auth_token='member-token')
+        new_org_doc = resp.get_json()
+
+        db = self.app.db('organizations')
+        db_org = db.find_one(org_id)
+
+        self.assertEqual([], db_org['members'])
+        self.assertEqual([], new_org_doc['members'])
+
     def test_edit_from_web(self):
         self.enter_app_context()
         om = self.app.org_manager

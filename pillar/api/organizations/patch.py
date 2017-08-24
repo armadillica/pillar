@@ -104,16 +104,18 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         The calling user must be admin of the organization.
         """
 
-        self._assert_is_admin(org_id)
-
         # Do some basic validation.
         email = patch.get('email') or None
         user_id = patch.get('user_id')
-
         user_oid = str2id(user_id) if user_id else None
 
-        log.info('User %s uses PATCH to remove user from organization %s',
-                 current_user().user_id, org_id)
+        # Users require admin rights on the org, except when removing themselves.
+        current_user_id = current_user().user_id
+        if user_oid is None or user_oid != current_user_id:
+            self._assert_is_admin(org_id)
+
+        log.info('User %s uses PATCH to remove user %s from organization %s',
+                 current_user_id, user_oid, org_id)
 
         org_doc = current_app.org_manager.remove_user(org_id, user_id=user_oid, email=email)
         return jsonify(org_doc)
