@@ -178,24 +178,24 @@
 script.
 
 	function patchOrganization(patch) {
-	    if (typeof patch == 'undefined') {
-	        throw 'patchOrganization(undefined) called';
-	    }
+		if (typeof patch == 'undefined') {
+			throw 'patchOrganization(undefined) called';
+		}
 
-	    if (console) console.log('patchOrganization', patch);
+		if (console) console.log('patchOrganization', patch);
 
-	    var promise = $.ajax({
-	        url: '/api/organizations/{{ organization._id }}',
-	        method: 'PATCH',
-	        contentType: 'application/json',
-	        data: JSON.stringify(patch),
-	    })
-	    .fail(function(err) {
-	        if (console) console.log('Error patching: ', err);
-	    })
-	    ;
+		var promise = $.ajax({
+			url: '/api/organizations/{{ organization._id }}',
+			method: 'PATCH',
+			contentType: 'application/json',
+			data: JSON.stringify(patch),
+		})
+		.fail(function(err) {
+			if (console) console.log('Error patching: ', err);
+		})
+		;
 
-	    return promise;
+		return promise;
 	}
 
 	$(document).ready(function() {
