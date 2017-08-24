@@ -1,12 +1,12 @@
 import logging
 
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, url_for
 import flask_wtf.csrf
 from flask_login import current_user
 
 import pillar.flask_extra
 from pillar import current_app
-from pillar.api.utils import authorization, str2id, gravatar
+from pillar.api.utils import authorization, str2id, gravatar, jsonify
 from pillar.web.system_util import pillar_api
 
 from pillarsdk import Organization, User
@@ -83,4 +83,9 @@ def create_new():
 
     org_doc = current_app.org_manager.create_new_org(name, user_id, seat_count)
 
-    return jsonify({'_id': org_doc['_id']}), 201
+    org_id = str(org_doc['_id'])
+    url = url_for('.view_embed', organization_id=org_id)
+    resp = jsonify({'_id': org_id, 'location': url})
+    resp.headers['Location'] = url
+
+    return resp, 201

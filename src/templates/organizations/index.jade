@@ -158,11 +158,11 @@ script.
 				seat_count: 1,
 			}
 		)
-		.done(function() {
+		.done(function(result) {
 			var $p = $('<p>').text('organization created, reloading list.')
 			$('#create_organization_result_panel').html($p);
 
-			window.location.reload();
+			window.location.href = result.location;
 		})
 		.fail(function(err) {
 			var msg = xhrErrorResponseMessage(err);
@@ -178,6 +178,7 @@ script.
 				})
 		})
 		;
+		return false;
 	}
 	{% endif %}
 | {% endblock %}
