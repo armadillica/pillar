@@ -168,4 +168,5 @@ USER_CAPABILITIES = defaultdict(**{
     'demo': {'subscriber', 'home-project'},
     'admin': {'subscriber', 'home-project', 'video-encoding', 'admin',
               'view-pending-nodes', 'edit-project-node-types', 'create-organization'},
+    'org-subscriber': {'subscriber', 'home-project'},
 }, default_factory=frozenset)
