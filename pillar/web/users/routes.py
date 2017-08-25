@@ -15,7 +15,8 @@ from pillar.web import system_util
 from pillar.api.local_auth import generate_and_store_token, get_local_user
 from pillar.api.utils.authentication import find_user_in_db, upsert_user
 from pillar.api.blender_cloud.subscription import update_subscription
-from pillar.auth.oauth import OAuthSignIn
+from pillar.auth.oauth import OAuthSignIn, ProviderConfigurationMissing, ProviderNotImplemented, \
+    OAuthCodeNotProvided
 from . import forms
 
 log = logging.getLogger(__name__)
@@ -31,7 +32,16 @@ def check_oauth_provider(provider):
 def oauth_authorize(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('main.homepage'))
-    oauth = OAuthSignIn.get_provider(provider)
+
+    try:
+        oauth = OAuthSignIn.get_provider(provider)
+    except ProviderConfigurationMissing as e:
+        log.error('Login with OAuth failed: %s', e)
+        raise wz_exceptions.NotFound()
+    except ProviderNotImplemented as e:
+        log.error('Login with OAuth failed: %s', e)
+        raise wz_exceptions.NotFound()
+
     return oauth.authorize()
 
 
@@ -40,7 +50,11 @@ def oauth_callback(provider):
     if not current_user.is_anonymous:
         return redirect(url_for('main.homepage'))
     oauth = OAuthSignIn.get_provider(provider)
-    oauth_user = oauth.callback()
+    try:
+        oauth_user = oauth.callback()
+    except OAuthCodeNotProvided as e:
+        log.error(e)
+        raise wz_exceptions.Forbidden()
     if oauth_user.id is None:
         log.debug('Authentication failed for user with {}'.format(provider))
         return redirect(url_for('main.homepage'))

@@ -93,8 +93,13 @@ class OAuthSignIn(metaclass=abc.ABCMeta):
             cls._providers = {}
             # TODO convert to the new __init_subclass__
             for provider_class in cls.__subclasses__():
-                provider = provider_class()
-                cls._providers[provider.provider_name] = provider
+                try:
+                    provider = provider_class()
+                except ProviderConfigurationMissing:
+                    # TODO: log this at info level
+                    pass
+                else:
+                    cls._providers[provider.provider_name] = provider
         try:
             return cls._providers[provider_name]
         except KeyError:
