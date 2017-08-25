@@ -61,6 +61,7 @@ class OAuthTests(AbstractPillarTest):
             # We override the call to blender-id
             cb = oauth_provider.callback()
             self.assertEqual(cb.id, '7')
+            self.assertEqual(cb.email, 'harry@blender.org')
 
     @responses.activate
     def test_provider_callback_missing_code(self):
