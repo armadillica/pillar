@@ -2,6 +2,8 @@
 
 BLENDER_ID_ENDPOINT = 'http://127.0.0.1:8001'  # nonexistant server, no trailing slash!
 
+SERVER_NAME = 'localhost:5000'
+
 DEBUG = False
 TESTING = True
 

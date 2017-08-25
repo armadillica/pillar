@@ -102,7 +102,12 @@ BLENDER_ID_SUBCLIENT_ID = 'PILLAR'
 #        'base_url': 'http://blender_id:8000/'
 #     }
 # }
-OAUTH_CREDENTIALS = {}
+# OAuth providers are defined in pillar.auth.oauth
+OAUTH_CREDENTIALS = {
+    'blender-id': {},
+    'facebook': {},
+    'google': {},
+}
 
 # See https://docs.python.org/2/library/logging.config.html#configuration-dictionary-schema
 LOGGING = {

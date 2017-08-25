@@ -16,12 +16,20 @@ class OAuthUserResponse:
     email = attr.ib(validator=attr.validators.instance_of(str))
 
 
-class ProviderConfigurationMissing(ValueError):
+class OAuthError(Exception):
+    """Superclass of all exceptions raised by this module."""
+
+
+class ProviderConfigurationMissing(OAuthError):
     """Raised when an OAuth provider is used but not configured."""
 
 
-class ProviderNotImplemented(ValueError):
+class ProviderNotImplemented(OAuthError):
     """Raised when a provider is requested that does not exist."""
+
+
+class OAuthCodeNotProvided(OAuthError):
+    """Raised when the 'code' arg is not provided in the OAuth callback."""
 
 
 class OAuthSignIn(metaclass=abc.ABCMeta):
@@ -29,12 +37,14 @@ class OAuthSignIn(metaclass=abc.ABCMeta):
 
     def __init__(self, provider_name):
         self.provider_name = provider_name
-        try:
-            credentials = current_app.config['OAUTH_CREDENTIALS'][provider_name]
-        except KeyError:
+        credentials = current_app.config['OAUTH_CREDENTIALS'].get(provider_name)
+        if not credentials:
             raise ProviderConfigurationMissing(f'Missing OAuth credentials for {provider_name}')
         self.consumer_id = credentials['id']
         self.consumer_secret = credentials['secret']
+
+        # Set in a subclass
+        self.service: OAuth2Service = None
 
     @abc.abstractmethod
     def authorize(self) -> Response:
@@ -57,6 +67,25 @@ class OAuthSignIn(metaclass=abc.ABCMeta):
     def get_callback_url(self):
         return url_for('users.oauth_callback', provider=self.provider_name,
                        _external=True)
+
+    @staticmethod
+    def auth_code_from_request() -> str:
+        try:
+            return request.args['code']
+        except KeyError:
+            raise OAuthCodeNotProvided('A code argument was not provided in the request')
+
+    @staticmethod
+    def decode_json(payload):
+        return json.loads(payload.decode('utf-8'))
+
+    def make_oauth_session(self):
+        return self.service.get_auth_session(
+            data={'code': self.auth_code_from_request(),
+                  'grant_type': 'authorization_code',
+                  'redirect_uri': self.get_callback_url()},
+            decoder=self.decode_json
+        )
 
     @classmethod
     def get_provider(cls, provider_name) -> 'OAuthSignIn':
@@ -96,20 +125,9 @@ class BlenderIdSignIn(OAuthSignIn):
         )
 
     def callback(self):
-        def decode_json(payload):
-            return json.loads(payload.decode('utf-8'))
-
-        if 'code' not in request.args:
-            return None, None, None
-        oauth_session = self.service.get_auth_session(
-            data={'code': request.args['code'],
-                  'grant_type': 'authorization_code',
-                  'redirect_uri': self.get_callback_url()},
-            decoder=decode_json
-        )
+        oauth_session = self.make_oauth_session()
 
         # TODO handle exception for failed oauth or not authorized
-
         session['blender_id_oauth_token'] = oauth_session.access_token
         me = oauth_session.get('user').json()
         return OAuthUserResponse(str(me['id']), me['email'])
@@ -135,17 +153,8 @@ class FacebookSignIn(OAuthSignIn):
         )
 
     def callback(self):
-        def decode_json(payload):
-            return json.loads(payload.decode('utf-8'))
+        oauth_session = self.make_oauth_session()
 
-        if 'code' not in request.args:
-            return None, None, None
-        oauth_session = self.service.get_auth_session(
-            data={'code': request.args['code'],
-                  'grant_type': 'authorization_code',
-                  'redirect_uri': self.get_callback_url()},
-            decoder=decode_json
-        )
         me = oauth_session.get('me?fields=id,email').json()
         # TODO handle case when user chooses not to disclose en email
         # see https://developers.facebook.com/docs/graph-api/reference/user/
@@ -172,16 +181,7 @@ class GoogleSignIn(OAuthSignIn):
         )
 
     def callback(self):
-        def decode_json(payload):
-            return json.loads(payload.decode('utf-8'))
+        oauth_session = self.make_oauth_session()
 
-        if 'code' not in request.args:
-            return None, None, None
-        oauth_session = self.service.get_auth_session(
-            data={'code': request.args['code'],
-                  'grant_type': 'authorization_code',
-                  'redirect_uri': self.get_callback_url()},
-            decoder=decode_json
-        )
         me = oauth_session.get('userinfo').json()
         return OAuthUserResponse(str(me['id']), me['email'])

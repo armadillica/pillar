@@ -11,7 +11,7 @@
 			| Login using one of the following providers:
 
 		.login-providers
-			| {% for login_provider, login_provider_conf in config['OAUTH_CREDENTIALS'].items() %}
+			| {% for login_provider, login_provider_conf in config['OAUTH_CREDENTIALS'].items() if config['OAUTH_CREDENTIALS'].get(login_provider) %}
 
 			| 	{% set login_provider_name = login_provider | undertitle %}
 
