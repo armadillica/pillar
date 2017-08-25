@@ -1,6 +1,7 @@
 import abc
 import attr
 import json
+import logging
 
 from rauth import OAuth2Service
 from flask import current_app, url_for, request, redirect, session, Response
@@ -32,14 +33,22 @@ class OAuthCodeNotProvided(OAuthError):
     """Raised when the 'code' arg is not provided in the OAuth callback."""
 
 
-class OAuthSignIn(metaclass=abc.ABCMeta):
-    _providers = None  # initialized in get_provider()
+class ProviderNotConfigured:
+    """Dummy class that indicates a provider isn't configured."""
 
-    def __init__(self, provider_name):
-        self.provider_name = provider_name
-        credentials = current_app.config['OAUTH_CREDENTIALS'].get(provider_name)
+
+class OAuthSignIn(metaclass=abc.ABCMeta):
+    provider_name: str = None  # set in each subclass.
+
+    _providers = None  # initialized in get_provider()
+    _log = logging.getLogger(f'{__name__}.OAuthSignIn')
+
+    def __init__(self):
+        credentials = current_app.config['OAUTH_CREDENTIALS'].get(self.provider_name)
         if not credentials:
-            raise ProviderConfigurationMissing(f'Missing OAuth credentials for {provider_name}')
+            raise ProviderConfigurationMissing(
+                f'Missing OAuth credentials for {self.provider_name}')
+
         self.consumer_id = credentials['id']
         self.consumer_secret = credentials['secret']
 
@@ -90,25 +99,37 @@ class OAuthSignIn(metaclass=abc.ABCMeta):
     @classmethod
     def get_provider(cls, provider_name) -> 'OAuthSignIn':
         if cls._providers is None:
-            cls._providers = {}
-            # TODO convert to the new __init_subclass__
-            for provider_class in cls.__subclasses__():
-                try:
-                    provider = provider_class()
-                except ProviderConfigurationMissing:
-                    # TODO: log this at info level
-                    pass
-                else:
-                    cls._providers[provider.provider_name] = provider
+            cls._init_providers()
+
         try:
-            return cls._providers[provider_name]
+            provider = cls._providers[provider_name]
         except KeyError:
             raise ProviderNotImplemented(f'No such OAuth provider {provider_name}')
 
+        if provider is ProviderNotConfigured:
+            raise ProviderConfigurationMissing(f'OAuth provider {provider_name} not configured')
+
+        return provider
+
+    @classmethod
+    def _init_providers(cls):
+        cls._providers = {}
+
+        for provider_class in cls.__subclasses__():
+            try:
+                provider = provider_class()
+            except ProviderConfigurationMissing:
+                cls._log.info('OAuth provider %s not configured',
+                              provider_class.provider_name)
+                provider = ProviderNotConfigured
+            cls._providers[provider_class.provider_name] = provider
+
 
 class BlenderIdSignIn(OAuthSignIn):
+    provider_name = 'blender-id'
+
     def __init__(self):
-        super().__init__('blender-id')
+        super().__init__()
 
         base_url = current_app.config['OAUTH_CREDENTIALS']['blender-id'].get(
             'base_url', 'https://www.blender.org/id/')
@@ -139,8 +160,10 @@ class BlenderIdSignIn(OAuthSignIn):
 
 
 class FacebookSignIn(OAuthSignIn):
+    provider_name = 'facebook'
+
     def __init__(self):
-        super().__init__('facebook')
+        super().__init__()
         self.service = OAuth2Service(
             name='facebook',
             client_id=self.consumer_id,
@@ -167,8 +190,10 @@ class FacebookSignIn(OAuthSignIn):
 
 
 class GoogleSignIn(OAuthSignIn):
+    provider_name = 'google'
+
     def __init__(self):
-        super().__init__('google')
+        super().__init__()
         self.service = OAuth2Service(
             name='google',
             client_id=self.consumer_id,
