@@ -448,9 +448,8 @@ def edit(node_id):
     else:
         attach_project_pictures(project, api)
 
-    template = '{0}/edit{1}.html'.format(node_type['name'], embed_string)
-    # We should more simply check if the template file actually exsists on
-    # the filesystem level
+    template = 'nodes/custom/{0}/edit{1}.html'.format(node_type['name'], embed_string)
+    # We should more simply check if the template file actually exists on the filesystem
     try:
         return render_template(
             template,
@@ -459,7 +458,8 @@ def edit(node_id):
             form=form,
             errors=form.errors,
             error=error,
-            api=api)
+            api=api,
+            project=project,)
     except TemplateNotFound:
         template = 'nodes/edit{1}.html'.format(node_type['name'], embed_string)
         is_embedded_edit = True if embed_string else False
