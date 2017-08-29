@@ -43,11 +43,10 @@ def setup_db(admin_email):
     # Create a default project by faking a POST request.
     with current_app.test_request_context(data={'project_name': 'Default Project'}):
         from flask import g
+        from pillar.auth import UserClass
         from pillar.api.projects import routes as proj_routes
 
-        g.current_user = {'user_id': user['_id'],
-                          'groups': user['groups'],
-                          'roles': set(user['roles'])}
+        g.current_user = UserClass.construct('', user)
 
         proj_routes.create_project(overrides={'url': 'default-project',
                                               'is_private': False})
