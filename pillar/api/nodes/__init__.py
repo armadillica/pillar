@@ -6,7 +6,7 @@ import urllib.parse
 import pymongo.errors
 import werkzeug.exceptions as wz_exceptions
 from bson import ObjectId
-from flask import current_app, g, Blueprint, request
+from flask import current_app, Blueprint, request
 
 import pillar.markdown
 from pillar.api.activities import activity_subscribe, activity_object_add
@@ -205,6 +205,8 @@ def before_inserting_nodes(items):
     """Before inserting a node in the collection we check if the user is allowed
     and we append the project id to it.
     """
+    from pillar.auth import current_user
+
     nodes_collection = current_app.data.driver.db['nodes']
 
     def find_parent_project(node):
@@ -226,7 +228,7 @@ def before_inserting_nodes(items):
                 item['project'] = project['_id']
 
         # Default the 'user' property to the current user.
-        item.setdefault('user', g.current_user['user_id'])
+        item.setdefault('user', current_user.user_id)
 
 
 def after_inserting_nodes(items):

@@ -2,9 +2,9 @@ import json
 import logging
 
 from werkzeug import exceptions as wz_exceptions
-from flask import abort, Blueprint, current_app, flash, redirect, render_template, request, session,\
+from flask import abort, Blueprint, flash, redirect, render_template, request, session,\
     url_for
-from flask_login import login_required, logout_user, current_user
+from flask_login import login_required, logout_user
 
 from pillarsdk import exceptions as sdk_exceptions
 from pillarsdk.users import User
@@ -15,6 +15,7 @@ from pillar.web import system_util
 from pillar.api.local_auth import generate_and_store_token, get_local_user
 from pillar.api.utils.authentication import find_user_in_db, upsert_user
 from pillar.api.blender_cloud.subscription import update_subscription
+from pillar.auth import current_user
 from pillar.auth.oauth import OAuthSignIn, ProviderConfigurationMissing, ProviderNotImplemented, \
     OAuthCodeNotProvided
 from . import forms
@@ -47,8 +48,9 @@ def oauth_authorize(provider):
 
 @blueprint.route('/oauth/<provider>/authorized')
 def oauth_callback(provider):
-    if not current_user.is_anonymous:
+    if current_user.is_authenticated:
         return redirect(url_for('main.homepage'))
+
     oauth = OAuthSignIn.get_provider(provider)
     try:
         oauth_user = oauth.callback()
@@ -68,7 +70,7 @@ def oauth_callback(provider):
     # Login user
     pillar.auth.login_user(token['token'], load_from_db=True)
 
-    if provider == 'blender-id' and current_user is not None:
+    if provider == 'blender-id' and current_user.is_authenticated:
         # Check with the store for user roles. If the user has an active subscription, we apply
         # the 'subscriber' role
         update_subscription()

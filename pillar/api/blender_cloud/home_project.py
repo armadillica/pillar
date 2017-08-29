@@ -4,7 +4,7 @@ import logging
 import datetime
 from bson import ObjectId, tz_util
 from eve.methods.get import get
-from flask import Blueprint, g, current_app, request
+from flask import Blueprint, current_app, request
 from pillar.api import utils
 from pillar.api.utils import authentication, authorization
 from werkzeug import exceptions as wz_exceptions
@@ -201,8 +201,10 @@ def home_project():
     Eve projections are supported, but at least the following fields must be present:
         'permissions', 'category', 'user'
     """
-    user_id = g.current_user['user_id']
-    roles = g.current_user.get('roles', ())
+    from pillar.auth import current_user
+
+    user_id = current_user.user_id
+    roles = current_user.roles
 
     log.debug('Possibly creating home project for user %s with roles %s', user_id, roles)
     if HOME_PROJECT_USERS and not HOME_PROJECT_USERS.intersection(roles):

@@ -3,12 +3,12 @@ import json
 
 import bson
 from eve.utils import parse_request
-from flask import g
 from werkzeug import exceptions as wz_exceptions
 
 from pillar import current_app
 from pillar.api.users.routes import log
 from pillar.api.utils.authorization import user_has_role
+import pillar.auth
 
 USER_EDITABLE_FIELDS = {'full_name', 'username', 'email', 'settings'}
 
@@ -33,7 +33,7 @@ def before_replacing_user(request, lookup):
 
     # Reset fields that shouldn't be edited to their original values. This is only
     # needed when users are editing themselves; admins are allowed to edit much more.
-    if not user_has_role('admin'):
+    if not pillar.auth.current_user.has_cap('admin'):
         for db_key, db_value in original.items():
             if db_key[0] == '_' or db_key in USER_EDITABLE_FIELDS:
                 continue
@@ -89,33 +89,31 @@ def send_blinker_signal_roles_changed(user, original):
 def check_user_access(request, lookup):
     """Modifies the lookup dict to limit returned user info."""
 
-    # No access when not logged in.
-    current_user = g.get('current_user')
-    current_user_id = current_user['user_id'] if current_user else None
+    user = pillar.auth.get_current_user()
 
     # Admins can do anything and get everything, except the 'auth' block.
-    if user_has_role('admin'):
+    if user.has_cap('admin'):
         return
 
-    if not lookup and not current_user:
+    if not lookup and user.is_anonymous:
         raise wz_exceptions.Forbidden()
 
     # Add a filter to only return the current user.
     if '_id' not in lookup:
-        lookup['_id'] = current_user['user_id']
+        lookup['_id'] = user.user_id
 
 
 def check_put_access(request, lookup):
     """Only allow PUT to the current user, or all users if admin."""
 
-    if user_has_role('admin'):
+    user = pillar.auth.get_current_user()
+    if user.has_cap('admin'):
         return
 
-    current_user = g.get('current_user')
-    if not current_user:
+    if user.is_anonymous:
         raise wz_exceptions.Forbidden()
 
-    if str(lookup['_id']) != str(current_user['user_id']):
+    if str(lookup['_id']) != str(user.user_id):
         raise wz_exceptions.Forbidden()
 
 
@@ -124,15 +122,14 @@ def after_fetching_user(user):
     # custom end-points.
     user.pop('auth', None)
 
-    current_user = g.get('current_user')
-    current_user_id = current_user['user_id'] if current_user else None
+    current_user = pillar.auth.get_current_user()
 
     # Admins can do anything and get everything, except the 'auth' block.
-    if user_has_role('admin'):
+    if current_user.has_cap('admin'):
         return
 
     # Only allow full access to the current user.
-    if str(user['_id']) == str(current_user_id):
+    if current_user.is_authenticated and str(user['_id']) == str(current_user.user_id):
         return
 
     # Remove all fields except public ones.

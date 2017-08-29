@@ -1,7 +1,8 @@
 import logging
 
-from flask import g, request, current_app
+from flask import request, current_app
 from pillar.api.utils import gravatar
+from pillar.auth import current_user
 
 log = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ def notification_parse(notification):
     object_name = ''
     object_id = activity['object']
 
-    if node['parent']['user'] == g.current_user['user_id']:
+    if node['parent']['user'] == current_user.user_id:
         owner = "your {0}".format(node['parent']['node_type'])
     else:
         parent_comment_user = users_collection.find_one(
@@ -52,7 +53,7 @@ def notification_parse(notification):
         action = activity['verb']
 
     lookup = {
-        'user': g.current_user['user_id'],
+        'user': current_user.user_id,
         'context_object_type': 'node',
         'context_object': context_object_id,
     }

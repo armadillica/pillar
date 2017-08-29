@@ -12,9 +12,6 @@ from pillar import current_app
 
 import bson
 
-from ..api import utils
-from ..api.utils import authentication
-
 log = logging.getLogger(__name__)
 
 # Mapping from user role to capabilities obtained by users with that role.
@@ -47,6 +44,8 @@ class UserClass(flask_login.UserMixin):
     @classmethod
     def construct(cls, token: str, db_user: dict) -> 'UserClass':
         """Constructs a new UserClass instance from a Mongo user document."""
+
+        from ..api import utils
 
         user = cls(token)
 
@@ -170,6 +169,8 @@ def _load_user(token) -> typing.Union[UserClass, AnonymousUser]:
     :returns: returns a UserClass instance if logged in, or an AnonymousUser() if not.
     """
 
+    from ..api.utils import authentication
+
     db_user = authentication.validate_this_token(token)
     if not db_user:
         return AnonymousUser()
@@ -206,6 +207,15 @@ def login_user(oauth_token: str, *, load_from_db=False):
     g.current_user = user
 
 
+def force_logout_user():
+    """Resets the current user to an AnonymousUser instance."""
+
+    from flask import g
+
+    flask_login.logout_user()
+    g.current_user = flask_login.current_user._get_current_object()
+
+
 def get_blender_id_oauth_token():
     """Returns a tuple (token, ''), for use with flask_oauthlib."""
 
@@ -221,10 +231,15 @@ def get_blender_id_oauth_token():
     return None
 
 
-def _get_current_user() -> UserClass:
+def get_current_user() -> UserClass:
     """Returns the current user as a UserClass instance.
 
     Never returns None; returns an AnonymousUser() instance instead.
+
+    This function is intended to be used when pillar.auth.current_user is
+    accessed many times in the same scope. Calling this function is then
+    more efficient, since it doesn't have to resolve the LocalProxy for
+    each access to the returned object.
     """
 
     from ..api.utils.authentication import current_user
@@ -232,5 +247,5 @@ def _get_current_user() -> UserClass:
     return current_user()
 
 
-current_user: UserClass = LocalProxy(_get_current_user)
+current_user: UserClass = LocalProxy(get_current_user)
 """The current user."""

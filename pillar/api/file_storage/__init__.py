@@ -18,7 +18,6 @@ import werkzeug.datastructures
 from bson import ObjectId
 from flask import Blueprint
 from flask import current_app
-from flask import g
 from flask import jsonify
 from flask import request
 from flask import send_from_directory
@@ -34,6 +33,7 @@ from pillar.api.utils.cdn import hash_file_path
 from pillar.api.utils.encoding import Encoder
 from pillar.api.utils.imaging import generate_local_thumbnails
 from pillar.api.file_storage_backends import default_storage_backend, Bucket
+from pillar.auth import current_user
 
 log = logging.getLogger(__name__)
 
@@ -387,10 +387,11 @@ def before_returning_file(response):
 
 def strip_link_and_variations(response):
     # Check the access level of the user.
-    if g.current_user is None:
+    if current_user.is_anonymous:
         has_full_access = False
     else:
-        user_roles = g.current_user['roles']
+        user_roles = current_user.roles
+        # TODO: convert to a capability and check for that.
         access_roles = current_app.config['FULL_FILE_ACCESS_ROLES']
         has_full_access = bool(user_roles.intersection(access_roles))
 
@@ -598,12 +599,10 @@ def create_file_doc(name, filename, content_type, length, project,
     if backend is None:
         backend = current_app.config['STORAGE_BACKEND']
 
-    current_user = g.get('current_user')
-
     file_doc = {'name': name,
                 'filename': filename,
                 'file_path': '',
-                'user': current_user['user_id'],
+                'user': current_user.user_id,
                 'backend': backend,
                 'md5': '',
                 'content_type': content_type,
@@ -666,7 +665,7 @@ def assert_file_size_allowed(file_size: int):
     filesize_limit_mb = filesize_limit / 2.0 ** 20
     log.info('User %s tried to upload a %.3f MiB file, but is only allowed '
              '%.3f MiB.',
-             authentication.current_user_id(), file_size / 2.0 ** 20,
+             current_user.user_id, file_size / 2.0 ** 20,
              filesize_limit_mb)
     raise wz_exceptions.RequestEntityTooLarge(
         'To upload files larger than %i MiB, subscribe to Blender Cloud' %
@@ -685,7 +684,7 @@ def stream_to_storage(project_id: str):
         raise wz_exceptions.NotFound('Project %s does not exist' % project_id)
 
     log.info('Streaming file to bucket for project=%s user_id=%s', project_id,
-             authentication.current_user_id())
+             current_user.user_id)
     log.info('request.headers[Origin] = %r', request.headers.get('Origin'))
     log.info('request.content_length = %r', request.content_length)
 

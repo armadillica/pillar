@@ -45,6 +45,8 @@ def compute_allowed_methods(collection_name, resource, check_node_type=None):
     :rtype: set
     """
 
+    import pillar.auth
+
     # Check some input values.
     if collection_name not in CHECK_PERMISSIONS_IMPLEMENTED_FOR:
         raise ValueError('compute_allowed_methods only implemented for %s, not for %s',
@@ -62,18 +64,18 @@ def compute_allowed_methods(collection_name, resource, check_node_type=None):
 
     # Accumulate allowed methods from the user, group and world level.
     allowed_methods = set()
-    current_user = getattr(g, 'current_user', None)
+    user = pillar.auth.get_current_user()
 
-    if current_user:
-        user_is_admin = is_admin(current_user)
+    if user.is_authenticated:
+        user_is_admin = is_admin(user)
 
         # If the user is authenticated, proceed to compare the group permissions
         for permission in computed_permissions.get('groups', ()):
-            if user_is_admin or permission['group'] in current_user['groups']:
+            if user_is_admin or permission['group'] in user.group_ids:
                 allowed_methods.update(permission['methods'])
 
         for permission in computed_permissions.get('users', ()):
-            if user_is_admin or current_user['user_id'] == permission['user']:
+            if user_is_admin or user.user_id == permission['user']:
                 allowed_methods.update(permission['methods'])
 
     # Check if the node is public or private. This must be set for non logged
@@ -298,21 +300,24 @@ def require_login(require_roles=set(),
     def decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
-            if g.current_user is None:
+            import pillar.auth
+
+            current_user = pillar.auth.get_current_user()
+            if current_user.is_anonymous:
                 # We don't need to log at a higher level, as this is very common.
                 # Many browsers first try to see whether authentication is needed
                 # at all, before sending the password.
                 log.debug('Unauthenticated access to %s attempted.', func)
                 abort(403)
 
-            if require_roles and not g.current_user.matches_roles(require_roles, require_all):
+            if require_roles and not current_user.matches_roles(require_roles, require_all):
                 log.warning('User %s is authenticated, but does not have required roles %s to '
-                            'access %s', g.current_user['user_id'], require_roles, func)
+                            'access %s', current_user.user_id, require_roles, func)
                 abort(403)
 
-            if require_cap and not g.current_user.has_cap(require_cap):
+            if require_cap and not current_user.has_cap(require_cap):
                 log.warning('User %s is authenticated, but does not have required capability %s to '
-                            'access %s', g.current_user.user_id, require_cap, func)
+                            'access %s', current_user.user_id, require_cap, func)
                 abort(403)
 
             return func(*args, **kwargs)
@@ -356,16 +361,17 @@ def ab_testing(require_roles=set(),
 def user_has_role(role, user=None):
     """Returns True iff the user is logged in and has the given role."""
 
-    from pillar.auth import UserClass
+    import pillar.auth
 
     if user is None:
-        user = g.get('current_user')
-        if user is not None and not isinstance(user, UserClass):
-            raise TypeError(f'g.current_user should be instance of UserClass, not {type(user)}')
-    elif not isinstance(user, UserClass):
+        user = pillar.auth.get_current_user()
+        if user is not None and not isinstance(user, pillar.auth.UserClass):
+            raise TypeError(f'pillar.auth.current_user should be instance of UserClass, '
+                            f'not {type(user)}')
+    elif not isinstance(user, pillar.auth.UserClass):
         raise TypeError(f'user should be instance of UserClass, not {type(user)}')
 
-    if user is None:
+    if user.is_anonymous:
         return False
 
     return user.has_role(role)
@@ -374,17 +380,14 @@ def user_has_role(role, user=None):
 def user_has_cap(capability: str, user=None) -> bool:
     """Returns True iff the user is logged in and has the given capability."""
 
-    from pillar.auth import UserClass
+    import pillar.auth
 
     assert capability
 
     if user is None:
-        user = g.get('current_user')
+        user = pillar.auth.get_current_user()
 
-    if user is None:
-        return False
-
-    if not isinstance(user, UserClass):
+    if not isinstance(user, pillar.auth.UserClass):
         raise TypeError(f'user should be instance of UserClass, not {type(user)}')
 
     return user.has_cap(capability)
@@ -402,19 +405,16 @@ def user_matches_roles(require_roles=set(),
         returning True.
     """
 
-    from pillar.auth import UserClass
+    import pillar.auth
 
-    current_user: UserClass = g.get('current_user')
-    if current_user is None:
-        return False
+    user = pillar.auth.get_current_user()
+    if not isinstance(user, pillar.auth.UserClass):
+        raise TypeError(f'user should be instance of UserClass, not {type(user)}')
 
-    if not isinstance(current_user, UserClass):
-        raise TypeError(f'g.current_user should be instance of UserClass, not {type(current_user)}')
-
-    return current_user.matches_roles(require_roles, require_all)
+    return user.matches_roles(require_roles, require_all)
 
 
 def is_admin(user):
-    """Returns True iff the given user has the admin role."""
+    """Returns True iff the given user has the admin capability."""
 
-    return user_has_role('admin', user)
+    return user_has_cap('admin', user)

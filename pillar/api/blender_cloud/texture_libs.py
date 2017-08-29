@@ -3,12 +3,14 @@ import logging
 
 from eve.methods.get import get
 from eve.utils import config as eve_config
-from flask import Blueprint, request, current_app, g
+from flask import Blueprint, request, current_app
+from werkzeug.datastructures import MultiDict
+from werkzeug.exceptions import InternalServerError
+
 from pillar.api import utils
 from pillar.api.utils.authentication import current_user_id
 from pillar.api.utils.authorization import require_login
-from werkzeug.datastructures import MultiDict
-from werkzeug.exceptions import InternalServerError
+from pillar.auth import current_user
 
 FIRST_ADDON_VERSION_WITH_HDRI = (1, 4, 0)
 TL_PROJECTION = utils.dumps({'name': 1, 'url': 1, 'permissions': 1,})
@@ -25,8 +27,8 @@ log = logging.getLogger(__name__)
 
 
 def keep_fetching_texture_libraries(proj_filter):
-    groups = g.current_user['groups']
-    user_id = g.current_user['user_id']
+    groups = current_user.group_ids
+    user_id = current_user.user_id
 
     page = 1
     max_page = float('inf')

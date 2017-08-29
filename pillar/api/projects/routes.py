@@ -2,11 +2,13 @@ import json
 import logging
 
 from bson import ObjectId
-from flask import Blueprint, g, request, current_app, make_response, url_for
+from flask import Blueprint, request, current_app, make_response, url_for
+from werkzeug import exceptions as wz_exceptions
+
 from pillar.api.utils import authorization, jsonify, str2id
 from pillar.api.utils import mongo
 from pillar.api.utils.authorization import require_login, check_permissions
-from werkzeug import exceptions as wz_exceptions
+from pillar.auth import current_user
 
 from . import utils
 
@@ -24,7 +26,7 @@ def create_project(overrides=None):
         project_name = request.json['name']
     else:
         project_name = request.form['project_name']
-    user_id = g.current_user['user_id']
+    user_id = current_user.user_id
 
     project = utils.create_new_project(project_name, user_id, overrides)
 
@@ -62,7 +64,7 @@ def project_manage_users():
     project_id = str2id(data['project_id'])
     target_user_id = str2id(data['user_id'])
     action = data['action']
-    current_user_id = g.current_user['user_id']
+    current_user_id = current_user.user_id
 
     project = projects_collection.find_one({'_id': project_id})
 
