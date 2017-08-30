@@ -1,23 +1,21 @@
-import json
 import logging
 
-from werkzeug import exceptions as wz_exceptions
-from flask import abort, Blueprint, flash, redirect, render_template, request, session,\
+from flask import abort, Blueprint, redirect, render_template, request, session, \
     url_for
 from flask_login import login_required, logout_user
+from werkzeug import exceptions as wz_exceptions
 
-from pillarsdk import exceptions as sdk_exceptions
-from pillarsdk.users import User
-from pillarsdk.groups import Group
 import pillar.api.blender_cloud.subscription
 import pillar.auth
-from pillar.web import system_util
+from pillar.api.blender_cloud.subscription import update_subscription
 from pillar.api.local_auth import generate_and_store_token, get_local_user
 from pillar.api.utils.authentication import find_user_in_db, upsert_user
-from pillar.api.blender_cloud.subscription import update_subscription
 from pillar.auth import current_user
 from pillar.auth.oauth import OAuthSignIn, ProviderConfigurationMissing, ProviderNotImplemented, \
     OAuthCodeNotProvided
+from pillar.web import system_util
+from pillarsdk import exceptions as sdk_exceptions
+from pillarsdk.users import User
 from . import forms
 
 log = logging.getLogger(__name__)
@@ -127,92 +125,6 @@ def switch():
     return redirect(blender_id.switch_user_url(next_url=next_url_after_bid_login))
 
 
-@blueprint.route('/settings/profile', methods=['GET', 'POST'])
-@login_required
-def settings_profile():
-    """Profile view and edit page. This is a temporary implementation.
-    """
-    if current_user.has_role('protected'):
-        return abort(404)  # TODO: make this 403, handle template properly
-    api = system_util.pillar_api()
-    user = User.find(current_user.objectid, api=api)
-
-    form = forms.UserProfileForm(
-        full_name=user.full_name,
-        username=user.username)
-
-    if form.validate_on_submit():
-        try:
-            user.full_name = form.full_name.data
-            user.username = form.username.data
-            user.update(api=api)
-            flash("Profile updated", 'success')
-        except sdk_exceptions.ResourceInvalid as e:
-            message = json.loads(e.content)
-            flash(message)
-
-    return render_template('users/settings/profile.html', form=form, title='profile')
-
-
-@blueprint.route('/settings/emails', methods=['GET', 'POST'])
-@login_required
-def settings_emails():
-    """Main email settings.
-    """
-    if current_user.has_role('protected'):
-        return abort(404)  # TODO: make this 403, handle template properly
-    api = system_util.pillar_api()
-    user = User.find(current_user.objectid, api=api)
-
-    # Force creation of settings for the user (safely remove this code once
-    # implemented on account creation level, and after adding settings to all
-    # existing users)
-    if not user.settings:
-        user.settings = dict(email_communications=1)
-        user.update(api=api)
-
-    if user.settings.email_communications is None:
-        user.settings.email_communications = 1
-        user.update(api=api)
-
-    # Generate form
-    form = forms.UserSettingsEmailsForm(
-        email_communications=user.settings.email_communications)
-
-    if form.validate_on_submit():
-        try:
-            user.settings.email_communications = form.email_communications.data
-            user.update(api=api)
-            flash("Profile updated", 'success')
-        except sdk_exceptions.ResourceInvalid as e:
-            message = json.loads(e.content)
-            flash(message)
-
-    return render_template('users/settings/emails.html', form=form, title='emails')
-
-
-@blueprint.route('/settings/billing')
-@login_required
-def settings_billing():
-    """View the subscription status of a user
-    """
-    if current_user.has_role('protected'):
-        return abort(404)  # TODO: make this 403, handle template properly
-    api = system_util.pillar_api()
-    user = User.find(current_user.objectid, api=api)
-    groups = []
-    if user.groups:
-        for group_id in user.groups:
-            group = Group.find(group_id, api=api)
-            groups.append(group.name)
-
-    store_user = pillar.api.blender_cloud.subscription.fetch_subscription_info(user.email)
-
-    return render_template(
-        'users/settings/billing.html',
-        store_user=store_user, groups=groups, title='billing')
-
-
 @blueprint.route('/u/<user_id>/edit', methods=['GET', 'POST'])
 @login_required
 def users_edit(user_id):
@@ -273,3 +185,5 @@ def users_index():
     if not current_user.has_role('admin'):
         return abort(403)
     return render_template('users/index.html')
+
+

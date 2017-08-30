@@ -30,13 +30,13 @@ li(class="dropdown")
 		li.subscription-status(class="{{ subscription }}")
 			| {% if subscription == 'subscriber' %}
 			a.navbar-item(
-				href="{{url_for('users.settings_billing')}}"
+				href="{{url_for('settings.billing')}}"
 				title="View subscription info")
 				i.pi-grin
 				span Your subscription is active!
 			| {% elif subscription == 'demo' %}
 			a.navbar-item(
-				href="{{url_for('users.settings_billing')}}"
+				href="{{url_for('settings.billing')}}"
 				title="View subscription info")
 				i.pi-heart-filled
 				span You have a free account.
@@ -72,13 +72,13 @@ li(class="dropdown")
 		| {% endif %}
 		li
 			a.navbar-item(
-				href="{{ url_for('users.settings_profile') }}"
+				href="{{ url_for('settings.profile') }}"
 				title="Settings")
 				i.pi-cog
 				| Settings
 		li
 			a.navbar-item(
-				href="{{ url_for('users.settings_billing') }}"
+				href="{{ url_for('settings.billing') }}"
 				title="Billing")
 				i.pi-credit-card
 				| Subscription

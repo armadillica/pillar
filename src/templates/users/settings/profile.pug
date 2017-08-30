@@ -2,14 +2,14 @@
 | {% block body %}
 .container
 	#settings
-		include _sidebar
+		| {% include 'users/settings/_sidebar.html'%}
 		#settings-container
 			.settings-header
 				.settings-title Profile
 
 			.settings-content
 				.settings-form
-					form#settings-form(method='POST', action="{{url_for('users.settings_profile')}}")
+					form#settings-form(method='POST', action="{{url_for('settings.profile')}}")
 						.left
 							.form-group
 								| {{ form.full_name.label }}
