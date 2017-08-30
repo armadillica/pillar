@@ -18,8 +18,7 @@ var enabled = {
     maps: argv.production,
     failCheck: !argv.production,
     prettyPug: !argv.production,
-    cachify: !argv.production,
-    liveReload: !argv.production
+    cachify: !argv.production
 };
 
 
@@ -34,7 +33,7 @@ gulp.task('styles', function() {
         .pipe(autoprefixer("last 3 versions"))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(gulp.dest('pillar/web/static/assets/css'))
-        .pipe(gulpif(enabled.liveReload, livereload()));
+        .pipe(gulpif(argv.livereload, livereload()));
 });
 
 
@@ -47,7 +46,7 @@ gulp.task('templates', function() {
             pretty: enabled.prettyPug
         }))
         .pipe(gulp.dest('pillar/web/templates/'))
-        .pipe(gulpif(enabled.liveReload, livereload()));
+        .pipe(gulpif(argv.livereload, livereload()));
 });
 
 
@@ -62,7 +61,7 @@ gulp.task('scripts', function() {
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(chmod(644))
         .pipe(gulp.dest('pillar/web/static/assets/js/'))
-        .pipe(gulpif(enabled.liveReload, livereload()));
+        .pipe(gulpif(argv.livereload, livereload()));
 });
 
 
@@ -77,7 +76,7 @@ gulp.task('scripts_concat_tutti', function() {
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(chmod(644))
         .pipe(gulp.dest('pillar/web/static/assets/js/'))
-        .pipe(gulpif(enabled.liveReload, livereload()));
+        .pipe(gulpif(argv.livereload, livereload()));
 });
 
 gulp.task('scripts_concat_markdown', function() {
@@ -89,7 +88,7 @@ gulp.task('scripts_concat_markdown', function() {
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(chmod(644))
         .pipe(gulp.dest('pillar/web/static/assets/js/'))
-        .pipe(gulpif(enabled.liveReload, livereload()));
+        .pipe(gulpif(argv.livereload, livereload()));
 });
 
 
