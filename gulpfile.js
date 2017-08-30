@@ -4,7 +4,7 @@ var chmod        = require('gulp-chmod');
 var concat       = require('gulp-concat');
 var gulp         = require('gulp');
 var gulpif       = require('gulp-if');
-var jade         = require('gulp-jade');
+var pug          = require('gulp-pug');
 var livereload   = require('gulp-livereload');
 var plumber      = require('gulp-plumber');
 var rename       = require('gulp-rename');
@@ -38,12 +38,12 @@ gulp.task('styles', function() {
 });
 
 
-/* Templates - Jade */
+/* Templates - Pug */
 gulp.task('templates', function() {
-    gulp.src('src/templates/**/*.jade')
+    gulp.src('src/templates/**/*.pug')
         .pipe(gulpif(enabled.failCheck, plumber()))
         .pipe(gulpif(enabled.cachify, cache('templating')))
-        .pipe(jade({
+        .pipe(pug({
             pretty: enabled.prettyPug
         }))
         .pipe(gulp.dest('pillar/web/templates/'))
@@ -101,7 +101,7 @@ gulp.task('watch',function() {
     }
 
     gulp.watch('src/styles/**/*.sass',['styles']);
-    gulp.watch('src/templates/**/*.jade',['templates']);
+    gulp.watch('src/templates/**/*.pug',['templates']);
     gulp.watch('src/scripts/*.js',['scripts']);
     gulp.watch('src/scripts/tutti/**/*.js',['scripts_concat_tutti']);
     gulp.watch('src/scripts/markdown/**/*.js',['scripts_concat_markdown']);

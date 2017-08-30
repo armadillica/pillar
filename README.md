@@ -49,7 +49,7 @@ and place them in `pillar/web/static/assets/vrview`. Replace `images/loading.gif
 
 You may also want to compare their
 [index.html](https://raw.githubusercontent.com/googlevr/vrview/master/index.html) to our
-`src/templates/vrview.jade`.
+`src/templates/vrview.pug`.
 
 When on a HDRi page with the viewer embedded, use this JavaScript code to find the current
 yaw: `vrview_window.contentWindow.yaw()`. This can be passed as `default_yaw` parameter to

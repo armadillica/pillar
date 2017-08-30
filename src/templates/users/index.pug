@@ -103,7 +103,7 @@ script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.select
 
 script(type="text/javascript").
 
-	// This function is also used in edit_embed.jade.
+	// This function is also used in edit_embed.pug.
 	function displayUser(userId) {
 		var url = '/u/' + userId + '/edit';
 		return $.get(url, function(dataHtml){

@@ -1,6 +1,6 @@
 /*
 * == Search ==
-* index and algolia settings are defined in layout.jade
+* index and algolia settings are defined in layout.pug
 */
 
 $(document).ready(function() {
