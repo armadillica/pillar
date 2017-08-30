@@ -1,13 +1,17 @@
 /* Pages (services, about, etc) */
 
 #page-header
-	display: flex
 	align-items: center
-	justify-content: center
-	flex-direction: column
-	min-height: 350px
-	color: white
+	background-position: center
+	background-size: cover
 	border-bottom: 2px solid $color-background-light
+	color: white
+	display: flex
+	flex-direction: column
+	justify-content: center
+	min-height: 350px
+	overflow: hidden
+	position: relative
 
 	.page-title-icons
 		font-size: 3em
@@ -37,7 +41,9 @@
 			weight: 300
 
 		padding: 15px
+		position: relative
 		text-shadow: 0 0 30px black, 0 0 50px black, 2px 2px 1px rgba(black, .2)
+		z-index: 1
 
 		+media-xs
 			font-size: 2.5em
@@ -51,9 +57,11 @@
 
 
 	.page-title-summary
-		text-align: center
-		padding: 10px 15px
 		font-size: 1.2em
+		padding: 10px 15px
+		position: relative
+		text-align: center
+		z-index: 1
 
 	.page-header-cta-container
 		display: flex

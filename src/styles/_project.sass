@@ -1,12 +1,12 @@
 $project-sidebar-background: lighten($color-background, 5%)
 
 #project-container
+	+container-behavior
 	display: flex
 	flex-direction: row
 	min-height: 800px
-	z-index: $z-index-base
 	position: relative
-	+container-behavior
+	z-index: $z-index-base
 
 	+media-xs
 		flex-direction: column-reverse
