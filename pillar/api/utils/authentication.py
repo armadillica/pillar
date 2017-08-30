@@ -113,7 +113,7 @@ def validate_token():
     @returns True iff the user is logged in with a valid Blender ID token.
     """
 
-    from pillar.auth import force_logout_user
+    from pillar.auth import AnonymousUser
 
     if request.authorization:
         token = request.authorization.username
@@ -131,7 +131,7 @@ def validate_token():
         # If no authorization headers are provided, we are getting a request
         # from a non logged in user. Proceed accordingly.
         log.debug('No authentication headers, so not logged in.')
-        force_logout_user()
+        g.current_user = AnonymousUser()
         return False
 
     return validate_this_token(token, oauth_subclient) is not None
@@ -144,9 +144,9 @@ def validate_this_token(token, oauth_subclient=None):
     :rtype: dict
     """
 
-    from pillar.auth import UserClass, force_logout_user
+    from pillar.auth import UserClass, AnonymousUser
 
-    force_logout_user()
+    g.current_user = None
     _delete_expired_tokens()
 
     # Check the users to see if there is one with this Blender ID token.
@@ -168,6 +168,7 @@ def validate_this_token(token, oauth_subclient=None):
 
     if db_user is None:
         log.debug('Validation failed, user not logged in')
+        g.current_user = AnonymousUser()
         return None
 
     g.current_user = UserClass.construct(token, db_user)

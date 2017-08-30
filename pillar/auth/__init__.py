@@ -207,21 +207,6 @@ def login_user(oauth_token: str, *, load_from_db=False):
     g.current_user = user
 
 
-def force_logout_user():
-    """Resets the current user to an AnonymousUser instance."""
-
-    from flask import g
-
-    # Force the current user to be the anonymous user. Calling
-    # flask_login.logout_user() here would cause infinite recursion, because
-    # that calls _load_user(), which in turn tries to validate the current
-    # token, which in turn starts by calling force_logout_user() just to be
-    # safe.
-    anon_user = AnonymousUser()
-    flask_login.current_user = anon_user
-    g.current_user = anon_user
-
-
 def get_blender_id_oauth_token():
     """Returns a tuple (token, ''), for use with flask_oauthlib."""
 
