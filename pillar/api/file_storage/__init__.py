@@ -364,8 +364,7 @@ def generate_link(backend, file_path: str, project_id=None, is_public=False) -> 
         return blob.get_url(is_public=is_public)
 
     if backend == 'pillar':
-        return url_for('file_storage.index', file_name=file_path,
-                       _external=True, _scheme=current_app.config['SCHEME'])
+        return url_for('file_storage.index', file_name=file_path, _external=True)
     if backend == 'cdnsun':
         return hash_file_path(file_path, None)
     if backend == 'unittest':

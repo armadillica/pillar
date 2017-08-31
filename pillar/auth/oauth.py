@@ -74,8 +74,7 @@ class OAuthSignIn(metaclass=abc.ABCMeta):
         pass
 
     def get_callback_url(self):
-        return url_for('users.oauth_callback', provider=self.provider_name,
-                       _external=True, _scheme=current_app.config['SCHEME'])
+        return url_for('users.oauth_callback', provider=self.provider_name, _external=True)
 
     @staticmethod
     def auth_code_from_request() -> str:
