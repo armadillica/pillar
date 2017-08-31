@@ -1,59 +1,74 @@
 | {% extends 'layout.html' %}
-| {% block bodyattrs %}{{ super() }} data-context='organizations'{% endblock %}
+| {% from '_macros/_navigation.html' import navigation_tabs %}
+
+| {% set title = 'organizations' %}
 | {% block page_title %}Organizations{% endblock %}
 
+| {% block og %}
+meta(property="og:title", content="Dashboard")
+meta(name="twitter:title", content="Blender Cloud")
+
+meta(property="og:url", content="https://cloud.blender.org/{{ request.path }}")
+meta(property="og:type", content="website")
+
+meta(property="og:image", content="{{ url_for('static', filename='assets/img/backgrounds/cloud_services_oti.jpg')}}")
+meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/backgrounds/cloud_services_oti.jpg')}}")
+| {% endblock %}
+
 | {% block body %}
-#app-main
-	#col_main.organization-index
-		#col_main-content
-			.col_header.item-list-header
-				i.pi-cloud
-				| Your organizations
+.dashboard-container
+	section#main
+		| {{ navigation_tabs(title) }}
 
-			.item-list.col-scrollable
-				.table
-					.table-head
-						.table-row
-							.table-cell.item-name
-								span.collapser(title="Collapse name column") Name
-							.table-cell.item-priority
-								span.collapser(title="Collapse priority column") Members
-							.table-cell.item-priority
-								span.collapser(title="Collapse priority column") Pending Members
+		section#projects
 
-					.table-body
-						| {% for organization in organizations['_items'] %}
-						| {% set link_url = url_for('pillar.web.organizations.view_embed', organization_id=organization._id) %}
-						.table-row(id="organization-{{ organization._id }}")
-							.table-cell.item-name
-								a(data-organization-id="{{ organization._id }}",
-									href="{{ link_url }}",
-									class="organization-link")
-									span(class="organization-name-{{ organization._id }}") {{ organization.name }}
-							.table-cell.item-members
-								a(data-organization-id="{{ organization._id }}",
-									href="{{ link_url }}",
-									class="organization-link")
-									span(class="organization-projects-{{ organization._id }}") {{ organization.members|hide_none|count }}
-							.table-cell.item-pending-members
-								a(data-organization-id="{{ organization._id }}",
-									href="{{ link_url }}",
-									class="organization-link")
-									span(class="organization-projects-{{ organization._id }}") {{ organization.unknown_members|hide_none|count }}
-						| {% endfor %}
+			| {% if can_create_organization %}
+			section#sub-nav-tabs.projects
+				ul#sub-nav-tabs__list
+					li.result#create_organization_result_panel
+					li.create
+						button.btn.btn-success(onclick='createNewOrganization(this)')
+							i.pi-plus
+							| Create Organization
+			| {% endif %}
 
-				#item-action-panel
-					| {% if can_create_organization %}
-					button.btn(onclick='createNewOrganization(this)') Create new organization
-					#create_organization_result_panel
+			section.nav-tabs__tab.active#own_projects
+				ul.projects__list
+					| {% if organizations %}
+					| {% for organization in organizations['_items']  %}
+					| {% set link_url = url_for('pillar.web.organizations.view_embed', organization_id=organization._id) %}
+					li.projects__list-item(
+						data-url="{{ link_url }}",
+						id="organization-{{ organization._id }}")
+						a.projects__list-thumbnail(
+							href="{{ link_url }}")
+							i.pi-users
+						.projects__list-details
+							a.title(href="{{ link_url }}")
+								| {{ organization.name }}
+
+							ul.meta
+								li(title="Members")
+									| {{ organization.members|hide_none|count }} Member{{ organization.members|hide_none|count|pluralize }}
+									| {% if (organization.unknown_members|count) != 0 %}
+									| ({{ organization.unknown_members|hide_none|count }} pending)
+									| {% endif %}
+								li(title="Seats")
+									| {{ organization.seat_count }} Seat{{ organization.seat_count|pluralize }}
+
+					| {% endfor %}
+					| {% else %}
+					li.projects__list-item
+						a.projects__list-thumbnail
+							i.pi-blender-cloud
+						.projects__list-details
+							span Create an Organization to get started!
 					| {% endif %}
 
-	#col_right
-		.col_header
-			span.header_text
-		#item-details.col-scrollable
-			.item-details-empty
-				| Select an organization
+	section#side
+		section.box
+			#item-details
+
 | {% endblock %}
 
 
@@ -102,7 +117,6 @@ script.
 		$.get(item_url, function(item_data) {
 			statusBarClear();
 			$('#item-details').html(item_data);
-			$('#col_right .col_header span.header_text').text('Organization details');
 
 			current_item
 				.removeClass(clean_classes)
@@ -143,6 +157,7 @@ script.
 	{% if open_organization_id %}
 		$(function() { item_open('{{ open_organization_id }}', false); });
 	{% endif %}
+
 	{% if can_create_organization %}
 	function createNewOrganization(button) {
 		$(button)

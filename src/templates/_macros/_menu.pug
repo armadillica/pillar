@@ -62,6 +62,7 @@ li(class="dropdown")
 				title="My Projects")
 				i.pi-star
 				| My Projects
+
 		| {% if current_user.has_organizations() %}
 		li
 			a.navbar-item(
@@ -70,20 +71,24 @@ li(class="dropdown")
 				i.pi-users
 				| My Organizations
 		| {% endif %}
+
 		li
 			a.navbar-item(
 				href="{{ url_for('settings.profile') }}"
 				title="Settings")
 				i.pi-cog
 				| Settings
+
 		li
 			a.navbar-item(
 				href="{{ url_for('settings.billing') }}"
 				title="Billing")
 				i.pi-credit-card
 				| Subscription
+
 		li.divider(role="separator")
 		| {% endif %}
+
 		li
 			a.navbar-item(
 				href="{{ url_for('users.logout') }}")

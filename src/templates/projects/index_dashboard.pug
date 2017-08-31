@@ -42,7 +42,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 					| {% if current_user.has_cap('subscriber') %}
 					li.create(
 						data-url="{{ url_for('projects.create') }}")
-						a#project-create(
+						a.btn.btn-success#project-create(
 							href="{{ url_for('projects.create') }}")
 							i.pi-plus
 							| Create Project
