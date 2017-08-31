@@ -1,7 +1,12 @@
 $project-sidebar-background: lighten($color-background, 5%)
 
+body.open-projects,
+body.courses,
+body.workshops
+	#project-container
+		+container-behavior
+
 #project-container
-	+container-behavior
 	display: flex
 	flex-direction: row
 	min-height: 800px
