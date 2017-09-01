@@ -8,5 +8,5 @@ def setup_app(app):
     nodes.setup_app(app, url_prefix='/nodes')
     notifications.setup_app(app, url_prefix='/notifications')
     subquery.setup_app(app)
-    organizations.setup_app(app, url_prefix='/orgs')
+    organizations.setup_app(app, url_prefix='/o')
     settings.setup_app(app, url_prefix='/settings')

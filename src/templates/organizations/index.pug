@@ -111,7 +111,7 @@ script.
 			.removeClass(clean_classes)
 			.addClass('processing');
 
-		var item_url = '/orgs/' + item_id;
+		var item_url = '/o/' + item_id;
 		statusBarSet('default', 'Loading organization…');
 
 		$.get(item_url, function(item_data) {
