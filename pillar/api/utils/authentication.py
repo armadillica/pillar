@@ -152,7 +152,7 @@ def validate_this_token(token, oauth_subclient=None):
     # Check the users to see if there is one with this Blender ID token.
     db_token = find_token(token, oauth_subclient)
     if not db_token:
-        log.debug('Token %s not found in our local database.', token)
+        log.debug('Token %r not found in our local database.', token)
 
         # If no valid token is found in our local database, we issue a new
         # request to the Blender ID server to verify the validity of the token
