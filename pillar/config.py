@@ -12,7 +12,7 @@ import requests.certs
 RFC1123_DATE_FORMAT = '%a, %d %b %Y %H:%M:%S GMT'
 PILLAR_SERVER_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-PREFERRED_URL_SCHEME = 'https'
+SCHEME = 'https'
 STORAGE_DIR = getenv('PILLAR_STORAGE_DIR', '/data/storage/pillar')
 PORT = 5000
 HOST = '0.0.0.0'

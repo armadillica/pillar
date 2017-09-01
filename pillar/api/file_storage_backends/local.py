@@ -34,7 +34,7 @@ class LocalBucket(Bucket):
 
     def copy_blob(self, blob: Blob, to_bucket: Bucket):
         """Copies a blob from the current bucket to the other bucket.
-
+        
         Implementations only need to support copying between buckets of the
         same storage backend.
         """
@@ -73,7 +73,8 @@ class LocalBlob(Blob):
         from flask import url_for
 
         path = self.bucket.bucket_path / self.partial_path
-        url = url_for('file_storage.index', file_name=str(path), _external=True)
+        url = url_for('file_storage.index', file_name=str(path), _external=True,
+                      _scheme=current_app.config['SCHEME'])
         return url
 
     def create_from_file(self, file_obj: FileType, *,

@@ -412,7 +412,8 @@ def edit(node_id):
             else:
                 project_update_nodes_list(node, project_id=project._id)
             return redirect(url_for('nodes.view', node_id=node_id, embed=1,
-                                    _external=True))
+                                    _external=True,
+                                    _scheme=current_app.config['SCHEME']))
         else:
             log.debug('Error sending data to Pillar, see Pillar logs.')
             error = 'Server error'
