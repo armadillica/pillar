@@ -154,6 +154,20 @@ script.
 		);
 	}
 
+	$('li.projects__list-item').click(function(e){
+		url = $(this).data('url');
+		if (typeof url === 'undefined') return;
+
+		window.location.href = url;
+		if (console) console.log(url);
+
+		$(this).addClass('active');
+		$(this).find('.projects__list-thumbnail i')
+			.removeAttr('class')
+			.addClass('pi-spin spin');
+	});
+
+
 	{% if open_organization_id %}
 		$(function() { item_open('{{ open_organization_id }}', false); });
 	{% endif %}
