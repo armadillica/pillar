@@ -579,6 +579,7 @@ def edit_node_type(project_url, node_type_name):
         node_type.dyn_schema = dyn_schema
         form_schema = json.loads(form.form_schema.data)
         node_type.form_schema = form_schema
+        node_type.description = form.description.data
 
         # Update permissions
         permissions = json.loads(form.permissions.data)
