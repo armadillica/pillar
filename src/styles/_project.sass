@@ -289,49 +289,6 @@ span#project-edit-title
 	span#project-edit-title
 		left: 0
 
-/* Breadcrumbs */
-ul.breadcrumb
-	position: relative
-	padding: 0
-	margin: 0 0 0 15px
-	background-color: transparent
-	display: inline-block
-	font-weight: 300
-
-	&.context
-		visibility: hidden
-		opacity: 0
-		transition: opacity 250ms ease-in-out
-
-		+media-xs
-			display: none
-
-		&.active
-			visibility: visible
-			opacity: 1
-
-	li
-		margin: 0
-		padding: 2px
-		float: left
-
-		a
-			color: $color-text-dark-hint
-
-	/* The > separating each breadcrumb */
-	li+li:before
-		color: lighten($color-text, 15%)
-		content: '\e83a'
-		font:
-			family: 'pillar-font'
-
-	&:before
-		position: absolute
-		left: -13px
-		top: 2px
-
-/* // Breadcrumbs */
-
 
 /* Edit Asset buttons */
 .project-mode-view,

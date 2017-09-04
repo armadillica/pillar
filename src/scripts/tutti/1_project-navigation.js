@@ -1,13 +1,9 @@
 function projectNavCollapse() {
-
 	$("#project-side-container").addClass('collapsed');
-	$("ul.breadcrumb.context").addClass('active');
 };
 
 function projectNavExpand() {
-
 	$("#project-side-container").removeClass('collapsed');
-	$("ul.breadcrumb.context").removeAttr('class');
 };
 
 function projectNavCheck(){
