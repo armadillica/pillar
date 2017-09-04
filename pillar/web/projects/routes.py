@@ -603,7 +603,8 @@ def edit_node_type(project_url, node_type_name):
             form.form_schema.data = json.dumps(form_schema, indent=4)
             form.dyn_schema.data = json.dumps(dyn_schema, indent=4)
             form.permissions.data = json.dumps(permissions, indent=4)
-    return render_template('projects/edit_node_type.html',
+
+    return render_template('projects/edit_node_type_embed.html',
                            form=form,
                            project=project,
                            api=api,

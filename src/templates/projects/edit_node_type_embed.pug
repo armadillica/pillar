@@ -1,0 +1,94 @@
+form(
+	id="node-type-form",
+	method='POST',
+	action="{{url_for('projects.edit_node_type', project_url=project.url, node_type_name=node_type['name'])}}")
+
+	| {% with errors = errors %}
+	| {% if errors %}
+	| {% for field in errors %}
+	.alert.alert-danger(role='alert')
+		strong {{field}}
+		| 						{% for message in errors[field] %}
+		| 								{{message}}|
+		| 						{% endfor %}
+	| 				{% endfor %}
+	| 		{% endif %}
+	| 		{% endwith %}
+
+	.row
+		.col-md-9
+			h3 Editing: {{ node_type['name'] }}
+		.col-md-3
+			button.js-form-save.btn.btn-success.pull-right(style="margin-top: 15px;")
+				| Save Changes
+
+	.row
+		.col-md-12
+			| {% for field in form %}
+			| {% if field.name == 'csrf_token' %}
+			| {{ field }}
+			| {% else %}
+			| {% if field.type == 'HiddenField' %}
+			| {{ field }}
+			| {% else %}
+			.form-group(class="{{field.name}}{% if field.errors %} error{% endif %}")
+				| {{ field.label }}
+				| {{ field(class='form-control') }}
+
+				| {% if field.errors %}
+				ul.error
+					| {% for error in field.errors %}
+					li {{ error }}
+					| {% endfor %}
+				| {% endif %}
+
+			| {% endif %}
+			| {% endif %}
+			| {% endfor %}
+
+			button.js-form-save.btn.btn-success.pull-right
+				| Save Changes
+
+
+script.
+	$(document).ready(function(){
+		var dynSchemaEditorContainer = $("<div>", {id: "dyn_schema_editor"});
+		$(".form-group.dyn_schema").before(dynSchemaEditorContainer);
+		var dynSchemaEditor = ace.edit("dyn_schema_editor");
+		dynSchemaEditor.getSession().setValue($("#dyn_schema").val());
+
+		var formSchemaEditorContainer = $("<div>", {id: "form_schema_editor"});
+		$(".form-group.form_schema").before(formSchemaEditorContainer);
+		var formSchemaEditor = ace.edit("form_schema_editor");
+		formSchemaEditor.getSession().setValue($("#form_schema").val());
+
+		var permissionsEditorContainer = $("<div>", {id: "permissions_editor"});
+		$(".form-group.permissions").before(permissionsEditorContainer);
+		var permissionsEditor = ace.edit("permissions_editor");
+		permissionsEditor.getSession().setValue($("#permissions").val());
+
+
+		$('.js-form-save').on('click', function(e){
+			e.preventDefault();
+
+			var $node_type_form = $('#node-type-form');
+			var url = $node_type_form.attr('action');
+
+			// Update the hidden textareas by reading content of the editor
+			// before serializing the form
+			$("#dyn_schema").val(dynSchemaEditor.getSession().getValue());
+			$("#form_schema").val(formSchemaEditor.getSession().getValue());
+			$("#permissions").val(permissionsEditor.getSession().getValue());
+
+			var data = $node_type_form.serialize();
+
+			$.post(url, data, function(datata) {
+			})
+			.done(function(){
+				toastr.success("Node Type: {{ node_type['name'] | undertitle }}", "Saved")
+			})
+			.fail(function(){
+				toastr.error("Node Type: {{ node_type['name'] | undertitle }}", "Could not save")
+			});
+		});
+	});

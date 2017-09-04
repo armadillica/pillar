@@ -6,7 +6,7 @@
 	#project-side-container
 		#project_sidebar
 			ul.project-tabs
-				li.tabs-thumbnail(
+				li.tabs-thumbnail.active(
 					title="About",
 					data-toggle="tooltip",
 					data-placement="left",
@@ -83,9 +83,9 @@
 script.
 	/* UI Stuff */
 	$(window).on("load resize",function(){
-		$('#project-container').css('height', $(window).height());
-		$('#project_context-header').css('width', $('#project_context-container').width());
+		containerResizeY($(window).height());
 	});
+
 | {% endblock %}
 
 | {% block footer_navigation %}

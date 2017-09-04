@@ -80,22 +80,20 @@ ul.project-edit-tools
 
 		| {% endfor %}
 
+		ul.project-edit-tools.bottom
+			li.button-cancel
+				a#item_cancel.project-mode-edit(
+					href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
+					title="Cancel changes")
+					i.button-cancel-icon.pi-back
+					| Go to Project
 
-	ul.project-edit-tools.bottom
-		li.button-cancel
-			a#item_cancel.project-mode-edit(
-				href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
-				title="Cancel changes")
-				i.button-cancel-icon.pi-back
-				| Go to Project
-
-		li.button-save
-			a#item_save.project-mode-edit(
-				href="#",
-				title="Save changes")
-				i.button-save-icon.pi-check
-				| Save Changes
-
+			li.button-save
+				a#item_save.project-mode-edit(
+					href="#",
+					title="Save changes")
+					i.button-save-icon.pi-check
+					| Save Changes
 
 | {% endblock %}
 

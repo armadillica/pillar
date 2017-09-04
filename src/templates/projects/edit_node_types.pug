@@ -10,22 +10,49 @@ span#project-edit-title
 | {% block project_context %}
 #node-edit-container
 	div(id="node-edit-form")
-		h3 Node Types
-		p.
-			Nodes are all the items that can be found in a project.
-			Everything is a node: a file, a folder, a comment. They are
-			defined with custom properties and properly presented to you.
-			When we add support for new node types in the future, it means we
-			allow the creation of new items (such as textures).
+		.row
+			.col-md-9
+				p.
+					Nodes are all the items that can be found in a project.
+					Everything is a node: a file, a folder, a comment. They are
+					defined with custom properties to be properly displayed.
+		.row
+			.col-md-4.col-sm-6
+				h3 Node Types
 
-		| {% if current_user.has_cap('edit-project-node-types') %}
-		ul.list-generic
-			| {% for node_type in project.node_types %}
-			li
-				a(href="{{ url_for('projects.edit_node_type', project_url=project.url, node_type_name=node_type.name) }}")
-					| {{ node_type.name | undertitle }}
-				.actions
-					span {{ node_type.name }}
-			| {% endfor %}
-		| {% endif %}
+				| {% if current_user.has_cap('edit-project-node-types') %}
+				ul.list-generic
+					| {% for node_type in project.node_types %}
+					li
+						a.js-item-open(
+							href="{{ url_for('projects.edit_node_type', project_url=project.url, node_type_name=node_type.name) }}",
+							data-url="{{ url_for('projects.edit_node_type', project_url=project.url, node_type_name=node_type.name) }}")
+							| {{ node_type.name | undertitle }}
+						.actions
+							span {{ node_type.name }}
+					| {% endfor %}
+				| {% endif %}
+
+			.col-md-8.col-sm-6
+				#node-edit-embed
+
 | {% endblock %}
+
+| {% block footer_scripts %}
+script(src="//cdn.jsdelivr.net/g/ace@1.2.3(noconflict/ace.js+noconflict/mode-json.js)")
+script.
+
+	$('.js-item-open').on('click', function(e){
+		e.preventDefault();
+
+		var item_url = $(this).data('url');
+
+		$.get(item_url, function(item_data) {
+			$('#node-edit-embed').html(item_data);
+		})
+		.fail(function(xhr){
+			toastr.error('Failed to open<br/>' + xhr);
+		});
+	});
+
+| {% endblock footer_scripts %}
