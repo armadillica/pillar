@@ -1044,13 +1044,15 @@ section.node-preview
 							color: $color-warning
 							margin-right: 10px
 
-	&.group, &.project
-		position: relative
-
 	&.group
 		align-items: center
 		display: flex
 		padding: 20px
+		position: relative
+
+	&.project
+		img
+			max-width: 100%
 
 
 section.node-details-container
@@ -2352,10 +2354,6 @@ section.node-children
 
 				+markdown-preview-container
 
-				margin:
-					left: -20px
-					right: -20px
-
 				padding:
 					top: 20px
 					left: 0
@@ -2365,7 +2363,6 @@ section.node-children
 					content: 'Live Preview'
 					position: absolute
 					top: -25px
-					left: 20px
 					font-size: .7em
 					color: $color-text-dark-secondary
 					transition: color 150ms ease-in-out
@@ -2374,7 +2371,7 @@ section.node-children
 					content: 'Markdown Supported'
 					position: absolute
 					top: -25px
-					right: 20px
+					right: 0
 					font-size: .7em
 					color: $color-text-dark-hint
 					transition: color 150ms ease-in-out
