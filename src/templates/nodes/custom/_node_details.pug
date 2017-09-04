@@ -1,0 +1,94 @@
+.node-details-meta
+	ul
+		| {% if node.has_method('PUT') and (node.properties.status != 'published') %}
+		li(class="status-{{ node.properties.status }}")
+			| {{ node.properties.status | undertitle }}
+		| {% endif %}
+
+		li {{ node.user.full_name }}
+
+		li.dim(
+			title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
+			| {{ node._created | pretty_date }}
+
+		| {% if node.short_link %}
+		li.shared
+			a(href="{{ node.short_link }}")
+				i.pi-share
+				| Shared
+		| {% endif %}
+
+		li.left-side
+
+		| {% if node.file %}
+		li.dim
+			| {{ node.file.length | filesizeformat }}
+		li.dim
+			| {{ node.file.content_type }}
+		| {% endif %}
+
+		| {% if node.permissions.world %}
+		li.public(
+			data-toggle="tooltip",
+			data-placement="bottom",
+			title="Anybody can download. Share it!")
+			i.pi-lock-open
+			span Public
+		| {% endif %}
+
+		| {% if node.file %}
+		li.download
+			| {% if node.properties.content_type == 'video' %}
+			| {% if node.file_variations %}
+			button.btn.btn-default.dropdown-toggle(
+				type="button",
+				data-toggle="dropdown",
+				aria-haspopup="true",
+				aria-expanded="false")
+				i.pi-download
+				| Download
+				i.pi-angle-down.icon-dropdown-menu
+
+			ul.dropdown-menu
+				| {% for child in node.file_variations %}
+				li
+					a(href="{{ child.link }}",
+						title="Download this format",
+						download)
+						span.length {{ child.length | filesizeformat }}
+
+						span.format {{ child.format }}
+						span.size {{ child.size }}
+
+				| {% endfor %}
+			| {% endif %}
+			| {% else %}
+			a(
+				title="Download {{ node.properties.content_type | undertitle }}",
+				href="{{ node.file.link }}",
+				download="{{ node.file.filename }}")
+				button.btn(type="button")
+					i.pi-download
+					| Download
+			| {% endif %}
+
+		| {% else %}
+		a.btn(
+			title="Login to download {{ node.properties.content_type | undertitle }}",
+			href="{{ url_for('users.login') }}")
+			i.pi-lock
+			| Download
+
+		| {% endif %}
+
+| {% if node.properties.license_type %}
+a.node-details-license(
+	href="https://creativecommons.org/licenses/",
+	target="_blank")
+	span.type
+		i(class="pi-license-{{ node.properties.license_type }}")
+		| License <span>{{ node.properties.license_type }}</span>
+	| {% if node.properties.license_notes %}
+	| &mdash; {{ node.properties.license_notes }}
+	| {% endif %}
+| {% endif %}

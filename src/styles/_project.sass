@@ -9,7 +9,7 @@ body.workshops
 #project-container
 	display: flex
 	flex-direction: row
-	min-height: 800px
+	min-height: 300px
 	position: relative
 	z-index: $z-index-base
 
@@ -123,10 +123,8 @@ body.workshops
 
 				&:after
 					content: ''
-					border: 7px solid $color-background
-					border-left-color: transparent
-					border-top-color: transparent
-					border-bottom-color: transparent
+					border: 7px solid transparent
+					border-right-color: $project-sidebar-background
 					display: block
 					position: absolute
 					top: 50%
@@ -186,14 +184,14 @@ body.workshops
 	+media-xs
 		width: initial
 
-/* Header with name, breadcrumbs and node edit tools */
+
+/* Header with name and node edit tools */
 #project_nav-header,
 #project_context-header
-	display: flex
 	align-items: center
-
-	position: relative
 	color: white
+	display: flex
+	position: relative
 
 #project_context-header
 	z-index: $z-index-base + 3
@@ -582,33 +580,32 @@ ul.project_nav-edit-list
 	margin: $project_header-height 0 0 0
 
 	li
+		background-color: $color-background
+		border-bottom: 1px solid $color-background-dark
 		font:
-			size: .9em
 			weight: 400
 			family: $font-body
-		text-transform: uppercase
-		border-bottom: thin solid lighten($color-background-nav, 8%)
-		color: $color-text-light-primary
-		background-color: $color-background-nav-light
+		color: $color-text-dark
+		position: relative
 
 		&:hover
-			color: $color-text-light
 			cursor: pointer
-			background-color: lighten($color-background-nav, 5%)
-
+			background-color: $color-background-light
 		a
 			padding: 10px 15px
 			display: inline-block
 			width: 100%
 			text-decoration: none
-			color: $color-text-light-primary
+			color: $color-text-dark
 
 		i
 			padding-right: 15px
 
 		&.active
-			border-right: 5px solid $color-primary
-			background-color: lighten($color-background-nav, 5%)
+			background-color: white
+
+			a
+				color: $color-primary-dark
 
 .project_nav-toggle-btn
 	position: absolute
@@ -656,7 +653,7 @@ ul.project_nav-edit-list
 			display: block !important
 
 	#comments-embed
-		padding: 5px 20px 20px 20px
+		padding: 0 20px 20px 20px
 
 /* Project context on the right of the navigation */
 /* Contains #project_context */
@@ -674,11 +671,11 @@ ul.project_nav-edit-list
 			content: '\e827'
 
 		.project_split
-			background-color: $color-background-nav
+			background-color: $project-sidebar-background
 			cursor: e-resize
 			right: 0
 			left: 8px
-			width: 10px
+			width: 5px
 
 		#project_nav
 			width: 5px
@@ -735,9 +732,8 @@ ul.project_nav-edit-list
 =project-node-title
 	font:
 		family: $font-body
-		size: 2em
-		weight: 300
-	color: lighten($color-background-nav, 15%)
+		size: 1.5em
+	color: $color-text-dark-primary
 
 $node-preview-max-height-sm: 300px
 $node-preview-max-height-md: 500px
@@ -1049,56 +1045,12 @@ section.node-preview
 							margin-right: 10px
 
 	&.group, &.project
-		background-color: $color-background
-		@include overlay(rgba($color-background, .3), 0%, transparent, 100%)
 		position: relative
-		overflow: hidden
-
-		.header
-			max-width: 100%
-			width: 100%
-
-		.backdrop
-			width: 105%
-			left: -5px
-			position: relative
-			z-index: 0
-			// We can't have nice things because of Edge
-			// filter: blur(10px)
-
-		.overlay
-			@include overlay(rgba($color-background-nav, .1), 0%, rgba(white, .6), 100%)
-			width: 100%
-			height: 100%
-			z-index: 1
-
-
-		.node-title
-			position: absolute
-			z-index: 2
-			color: lighten($color-background-nav, 15%)
-			text-shadow: 1px 1px 0 rgba(white, .2)
-			left: 20px
-			padding: 20px 20px 20px 0
-			font:
-				size: 2em
-				weight: 300
-
-		.author
-			color: $color-text-dark-secondary
 
 	&.group
-		height: 80px
-
-		.node-title
-			max-width: 80%
-
-		.backdrop
-			opacity: .25
-			position: absolute
-			top: 50%
-			left: 50%
-			transform: translate(-50%, -50%)
+		align-items: center
+		display: flex
+		padding: 20px
 
 
 section.node-details-container
@@ -1114,28 +1066,22 @@ body.about
 			max-width: $screen-lg / 1.4
 			margin: 0 auto
 
+.node-title
+	+project-node-title
 
 section.node-details-container,
 section.node-preview.group
 	position: relative
 
 	.node-details-header
-		width: 55%
-		max-width: 55%
-		float: left
+		align-items: center
 		display: flex
-		align-items: baseline
-		min-height: 50px
-		padding: 20px 20px 5px 20px
+		padding: 15px 20px
 
 		+media-xs
 			font-size: .7em
 			width: 100%
 			max-width: 100%
-
-		.node-title
-			+project-node-title
-			color: $color-text-dark-primary
 
 		.node-title-details
 			margin-left: auto
@@ -1156,26 +1102,8 @@ section.node-preview.group
 				border-radius: 3px
 				cursor: default
 
-	.node-details-description
-		+node-details-description
-
-	&.group, &.project
-		.node-details-header
-			max-width: 35%
-			float: right
-		.node-details-description
-			max-width: 75%
-			padding: 0
-
-
 	&.group
-		.node-details-description
-			padding-top: 15px
-
 		.node-details-meta.preview
-			top: -45px
-			bottom: initial
-
 			.node-details-meta-list
 				display: inline-block
 
@@ -1198,61 +1126,6 @@ section.node-preview.group
 	&.project
 		.node-details-title
 			padding: 10px 20px 0 20px
-
-	.node-details-meta
-		font-weight: 400
-		padding: 15px 20px 25px 20px
-
-		span.updated
-			color: $color-text-dark-hint
-			font-size: .8em
-			float: right
-
-		&.preview
-			padding: 0
-			color: $color-text-light-primary
-			position: absolute
-			right: 10px
-			bottom: 20px
-			z-index: 1
-
-			ul.node-details-meta-list
-				li.node-details-meta-list-item
-					&.date
-						&:before
-							content: ''
-					&.author
-						color: lighten($color-background-nav, 25%)
-
-					&.status
-						color: $color-text-dark
-
-		&.footer
-			+clearfix
-
-		&.header
-			float: left
-			width: 45%
-			max-width: 45%
-			padding:
-				top: 25px
-				left: 0
-
-			+media-xs
-				width: 100%
-				max-width: 100%
-				padding-top: 15px
-
-			ul.node-details-meta-list
-				> li:first-child
-					margin-left: auto
-				> li:not(:last-child)
-					margin-right: 10px
-
-		&.license
-			+clearfix
-			padding-bottom: 5px
-			color: $color-text-dark-secondary
 
 		ul.node-details-meta-list
 			display: flex
@@ -1415,56 +1288,160 @@ section.node-preview.group
 					&.texture.download
 						width: 100%
 
-					/* Download dropdown options */
-					ul.dropdown-menu
-						width: auto
-						min-width: 240px
-						padding: 0
-						margin: 0
-						top: initial
-						left: initial
-						right: 0
-						bottom: 35px
-						border: thin solid rgba(darken($color-background, 5%), .3)
-						border-top-left-radius: 3px
-						border-top-right-radius: 3px
-						border-bottom-left-radius: 0
-						border-bottom-right-radius: 0
-
-						li
-							padding: 0
-							text-align: right
-							clear: both
-							display: flex
-							align-items: center
-
-							a
-								padding: 10px 15px
-								width: 100%
-
-								&:hover
-									color: $color-primary
-									background-color: transparent
-
-									span
-										&.length
-											color: lighten($color-primary, 10%)
-
-								span
-									&.length
-										float: left
-										color: $color-text-dark-hint
-										padding-right: 15px
-									&.format
-										text-transform: uppercase
-										align-self: flex-end
-										margin-left: auto
-									&.size
-										display: inline-block
-										padding-left: 15px
 					&.open
 						button
 							box-shadow: none
+
+.node-details-description
+	+node-details-description
+	padding-left: 20px
+	padding-right: 20px
+
+.node-details-meta
+	background-color: $color-background-light
+	border-bottom: thin solid $color-background
+	display: flex
+	flex-direction: column
+	font-weight: lighter
+	padding: 10px 20px
+
+	> ul
+		align-items: center
+		display: flex
+		list-style-type: none
+		margin: 0
+		padding: 0
+
+		> li
+			align-items: baseline
+			display: flex
+			padding-left: 10px
+			margin-left: 10px
+
+			&:first-child
+				margin-left: 0
+				padding-left: 0
+
+			&.status-pending
+				color: $color-danger
+
+			&.public
+				color: $color-success
+
+			&.download
+				position: relative
+
+				button
+					+button($color-success, 3px)
+
+				.dropdown-toggle
+					padding-right: 0
+
+				i.icon-dropdown-menu
+					padding-left: 10px
+
+				/* Download dropdown options */
+				ul.dropdown-menu
+					width: auto
+					min-width: 240px
+					padding: 0
+					margin: 0
+					top: initial
+					left: initial
+					right: 0
+					bottom: 35px
+					border: thin solid rgba(darken($color-background, 5%), .3)
+					border-top-left-radius: 3px
+					border-top-right-radius: 3px
+					border-bottom-left-radius: 0
+					border-bottom-right-radius: 0
+
+					li
+						padding: 0
+						text-align: right
+						clear: both
+						display: flex
+						align-items: center
+
+						a
+							padding: 10px 15px
+							width: 100%
+
+							&:hover
+								color: $color-primary
+								background-color: transparent
+
+								span
+									&.length
+										color: lighten($color-primary, 10%)
+
+							span
+								&.length
+									float: left
+									color: $color-text-dark-hint
+									padding-right: 15px
+								&.format
+									text-transform: uppercase
+									align-self: flex-end
+									margin-left: auto
+								&.size
+									display: inline-block
+									padding-left: 15px
+
+
+			&.dim
+				color: $color-text-dark-secondary
+
+			&.left-side
+				margin-left: auto
+
+	&.preview
+		padding: 0
+		color: $color-text-light-primary
+		position: absolute
+		right: 10px
+		bottom: 20px
+		z-index: 1
+
+		ul.node-details-meta-list
+			li.node-details-meta-list-item
+				&.date
+					&:before
+						content: ''
+				&.author
+					color: lighten($color-background-nav, 25%)
+
+				&.status
+					color: $color-text-dark
+
+.node-details-license
+	align-items: center
+	border-bottom: thin solid $color-background
+	color: $color-text-dark
+	display: flex
+	font-weight: lighter
+	padding: 10px 20px
+
+	&:hover
+		color: $color-text-dark
+
+	span.type
+		i
+			color: $color-text-dark-primary
+			font-size: 1.8rem
+			margin-left: -5px
+			padding-right: 10px
+
+			&:after
+				top: 2px
+				left: -22px
+				position: relative
+			&:before
+				top: 2px
+				position: relative
+
+		span
+			text-transform: uppercase
 
 section.node-details-container
 	&.storage

@@ -16,87 +16,12 @@
 			.node-title#node-title
 				| {{node.name}}
 
-		.node-details-meta.header
-			ul.node-details-meta-list
-				| {% if node.permissions.world %}
-				li.node-details-meta-list-item.access.public(
-					data-toggle="tooltip",
-					data-placement="left",
-					title="Anybody can download. Share it!")
-					i.pi-lock-open
-					span Public
-				| {% endif %}
-
-				| {% if node.file %}
-				li.node-details-meta-list-item.type
-					| {{ node.file.content_type }}
-
-				li.node-details-meta-list-item.file.length
-					| {{ node.file.length | filesizeformat }}
-				| {% endif %}
-
-				| {% if node.properties.license_type %}
-				| {% if node.properties.license_notes %}
-				li.node-details-meta-list-item.license(
-					id="asset-license",
-					data-toggle="popover",
-					data-placement="left",
-					data-trigger="hover",
-					data-content="{{ node.properties.license_notes }}",
-					title="{{ node.properties.license_type }}")
-
-					i(class="pi-license-{{ node.properties.license_type }}")
-				| {% else %}
-				li.node-details-meta-list-item.license(
-					id="asset-license",
-					data-toggle="tooltip",
-					data-placement="bottom",
-					title="{{ node.properties.license_type }}")
-
-					i(class="pi-license-{{ node.properties.license_type }}")
-				| {% endif %}
-				| {% endif %}
-
-				| {% if node.file %}
-				li.node-details-meta-list-item.file.download(title="Download File")
-					| {% if node.file.link %}
-					a(href="{{ node.file.link }}",
-						title="Download file",
-						download="{{ node.file.filename }}")
-						button.btn.btn-default(type="button")
-							i.pi-download
-					| {% else %}
-					button.btn.btn-default.disabled.sorry(type="button")
-						i.pi-lock
-						i.pi-download
-					| {% endif %}
-				| {% endif %}
-
-
 		| {% if node.description %}
 		.node-details-description#node-description
 			| {{node.description}}
 		| {% endif %}
 
-		| {% if node.properties.license_notes %}
-		.node-details-meta.license
-			| {{ node.properties.license_notes }}
-		| {% endif %}
-
-		.node-details-meta.footer
-			ul.node-details-meta-list
-				li.node-details-meta-list-item.status
-					| {{ node.properties.status | undertitle }}
-
-				li.node-details-meta-list-item.author
-					| {{ node.user.full_name }}
-
-				li.node-details-meta-list-item.date(title="Created {{ node._created }}")
-					| {{ node._created | pretty_date }}
-					| {% if (node._created | pretty_date) != (node._updated | pretty_date) %}
-					span(title="Updated {{ node._updated }}") (updated {{ node._updated | pretty_date }})
-					| {% endif %}
-
+		include ../../node_details
 
 		#comments-embed
 			#comments-list-items-loading
