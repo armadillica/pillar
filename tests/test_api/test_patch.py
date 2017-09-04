@@ -48,6 +48,20 @@ class AbstractPatchCommentTest(AbstractPillarTest):
 
 
 class VoteCommentTest(AbstractPatchCommentTest):
+    def test_upvote_self_comment(self):
+        # It should fail since we don't allow users to vote on own comment.
+        self.patch(self.node_url,
+                   json={'op': 'upvote'},
+                   auth_token='owner-token',
+                   expected_status=403)
+
+    def test_downvote_self_comment(self):
+        # It should fail since we don't allow users to vote on own comment.
+        self.patch(self.node_url,
+                   json={'op': 'downvote'},
+                   auth_token='owner-token',
+                   expected_status=403)
+
     def test_upvote_other_comment(self):
         # Patch the node
         res = self.patch(self.node_url,

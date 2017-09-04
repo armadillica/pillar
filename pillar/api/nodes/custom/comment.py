@@ -41,10 +41,14 @@ def vote_comment(user_id, node_id, patch):
                   '$or': [{'properties.ratings.$.user': {'$exists': False}},
                           {'properties.ratings.$.user': user_id}]}
     node = nodes_coll.find_one(node_query,
-                               projection={'properties': 1})
+                               projection={'properties': 1, 'user': 1})
     if node is None:
         log.warning('User %s wanted to patch non-existing node %s' % (user_id, node_id))
         raise wz_exceptions.NotFound('Node %s not found' % node_id)
+
+    # We don't allow the user to down/upvote their own nodes.
+    if user_id == node['user']:
+        raise wz_exceptions.Forbidden('You cannot vote on your own node')
 
     props = node['properties']
 
