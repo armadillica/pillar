@@ -1039,8 +1039,18 @@ section.node-preview
 
 	&.video
 		background-color: black
-		min-height: 320px
 		position: relative
+		padding-bottom: 56.25%
+		padding-top: 35px
+		height: 0
+		overflow: hidden
+
+		.video-js
+			position: absolute
+			top: 0
+			left: 0
+			width: 100%
+			height: 100%
 
 		.video-dummy
 			min-height: 320px
