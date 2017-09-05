@@ -50,15 +50,15 @@
 				i.pi-angle-down.icon-dropdown-menu
 
 			ul.dropdown-menu
-				| {% for child in node.file_variations %}
+				| {% for variation in node.file_variations %}
 				li
-					a(href="{{ child.link }}",
+					a(href="{{ variation.link }}",
 						title="Download this format",
 						download)
-						span.length {{ child.length | filesizeformat }}
+						span.length {{ variation.length | filesizeformat }}
 
-						span.format {{ child.format }}
-						span.size {{ child.size }}
+						span.format {{ variation.format }}
+						span.size {{ variation.size }}
 
 				| {% endfor %}
 			| {% endif %}
