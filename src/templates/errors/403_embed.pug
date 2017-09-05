@@ -4,7 +4,12 @@
 		.error-top-container
 			.error-title Forbidden.
 			.error-lead
+				| {% if current_user.is_authenticated %}
 				p You don't have access to this content.
+				| {% else %}
+				p You don't have access to this content. Or maybe you do once you <a href="{{ login_url }}">log in</a>.
+				| {% endif %}
+
 
 				| {% if current_user.is_authenticated %}
 				| {% if current_user.has_role('demo') %}
