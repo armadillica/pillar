@@ -196,6 +196,10 @@ def view(node_id):
     if 'description' in node:
         node['description'] = attachments.render_attachments(node, node['description'])
 
+    # Overwrite the file length by the biggest variation, if any.
+    if node.file and node.file_variations:
+        node.file.length = max(var.length for var in node.file_variations)
+
     if request.args.get('format') == 'json':
         node = node.to_dict()
         node['url_edit'] = url_for('nodes.edit', node_id=node['_id'])
