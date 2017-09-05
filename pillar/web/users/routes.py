@@ -130,7 +130,7 @@ def switch():
 def users_edit(user_id):
     from pillar.auth import UserClass
 
-    if not current_user.has_role('admin'):
+    if not current_user.has_cap('admin'):
         return abort(403)
     api = system_util.pillar_api()
 
