@@ -266,7 +266,8 @@ def merge_permissions(*args):
 
 def require_login(require_roles=set(),
                   require_cap='',
-                  require_all=False):
+                  require_all=False,
+                  redirect_to_login=False):
     """Decorator that enforces users to authenticate.
 
     Optionally only allows access to users with a certain role and/or capability.
@@ -283,7 +284,14 @@ def require_login(require_roles=set(),
         non-empty intersection with the given roles, access is granted.
         When True: require the user to have all given roles before access is
         granted.
+    :param redirect_to_login: Determines the behaviour when the user is not
+        logged in. When False (the default), a 403 Forbidden response is
+        returned; this is suitable for API calls. When True, the user is
+        redirected to the login page; this is suitable for user-facing web
+        requests, and mimicks the flask_login behaviour.
     """
+
+    from flask import request, redirect, url_for
 
     if not isinstance(require_roles, set):
         raise TypeError(f'require_roles param should be a set, but is {type(require_roles)!r}')
@@ -308,6 +316,10 @@ def require_login(require_roles=set(),
                 # Many browsers first try to see whether authentication is needed
                 # at all, before sending the password.
                 log.debug('Unauthenticated access to %s attempted.', func)
+                if redirect_to_login:
+                    # Redirect using a 303 See Other, since even a POST
+                    # request should cause a GET on the login page.
+                    return redirect(url_for('users.login', next=request.url), 303)
                 abort(403)
 
             if require_roles and not current_user.matches_roles(require_roles, require_all):
