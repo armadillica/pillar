@@ -9,7 +9,7 @@ setuptools.setup(
     version='2.0',
     packages=setuptools.find_packages('.', exclude=['test']),
     install_requires=[
-        'Flask>0.12',
+        'Flask>=0.12',
         'Eve>=0.7.3',
         'Flask-Cache>=0.13.1',
         'Flask-Script>=2.0.5',
