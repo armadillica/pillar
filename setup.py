@@ -9,8 +9,8 @@ setuptools.setup(
     version='2.0',
     packages=setuptools.find_packages('.', exclude=['test']),
     install_requires=[
-        'Flask>0.10,<0.11',  # Flask 0.11 is incompatible with Eve 0.6.4
-        'Eve>=0.6.3',
+        'Flask>0.12',
+        'Eve>=0.7.3',
         'Flask-Cache>=0.13.1',
         'Flask-Script>=2.0.5',
         'Flask-Login>=0.3.2',
