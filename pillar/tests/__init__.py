@@ -6,6 +6,7 @@ import datetime
 import json
 import logging
 import os
+import pathlib
 import sys
 import typing
 import unittest.mock
@@ -122,7 +123,7 @@ class AbstractPillarTest(TestMinimal):
         from eve.utils import config
         config.DEBUG = True
 
-        self.app = self.pillar_server_class(os.path.dirname(os.path.dirname(__file__)))
+        self.app = self.pillar_server_class(pathlib.Path(__file__).parents[2])
         self.assertEqual(self.app.config['STORAGE_DIR'], self._pillar_storage_dir)
 
         # Run self.enter_app_context() to create this context.
