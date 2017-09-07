@@ -543,9 +543,16 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
          }).sort([('link_expires', pymongo.ASCENDING)]).limit(
         chunk_size).batch_size(5)
 
-    if to_refresh.count() == 0:
+    document_count = to_refresh.count()
+    if document_count == 0:
         log.info('No links to refresh.')
         return
+
+    if 0 < chunk_size == document_count:
+        log.info('Found %d documents to refresh, probably limited by the chunk size.',
+                 document_count)
+    else:
+        log.info('Found %d documents to refresh.', document_count)
 
     refreshed = 0
     for file_doc in to_refresh:
