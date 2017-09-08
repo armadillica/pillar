@@ -701,6 +701,11 @@ class PillarServer(Eve):
         coll.create_index([('short_code', pymongo.ASCENDING)],
                           sparse=True, unique=True)
 
+        coll = db['projects']
+        # This index is used for statistics, and for fetching public projects.
+        coll.create_index([('is_private', pymongo.ASCENDING)])
+        coll.create_index([('category', pymongo.ASCENDING)])
+
     def register_api_blueprint(self, blueprint, url_prefix):
         # TODO: use Eve config variable instead of hard-coded '/api'
         self.register_blueprint(blueprint, url_prefix='/api' + url_prefix)
