@@ -3,15 +3,24 @@
 #error-container(class="error-404")
 	#error-box
 		.error-top-container
-			.error-title Not found.
+			.error-title {{ _("Not found.") }}
 			.error-lead
-				p Whatever you're looking for, it's not here.
+				p {{ _("Whatever you're looking for, it's not here.") }}
 
 		.error-lead.extra
 			p.
-				Looking for the Open Movies? Check out <a href="https://www.youtube.com/BlenderFoundation">Blender Foundation's YouTube</a> channel. <br/> Were you looking for tutorials instead? <a href="http://www.blender.org/support/tutorials/">blender.org</a> has a good selection.
+				{% autoescape false %}
+				{{ gettext("Looking for the Open Movies? Check out %(link_start)s Blender Foundation's Youtube %(link_end)s channel.",
+				link_start='<a href="https://www.youtube.com/BlenderFoundation">', link_end='</a>') }} <br/>
+				{{ gettext("Were you looking for tutorials instead? %(blender_org)s has a good selection.",
+				blender_org='<a href="http://www.blender.org/support/tutorials/">blender.org</a>') }}
+				{% endautoescape %}
 			p.
-				Is this content missing? Let us know on <a href="https://twitter.com/Blender_Cloud">Twitter</a>
-				or <a href="mailto:cloudsupport@blender.org">e-mail</a>.
+				{% autoescape false %}
+				{{ gettext("Is this content missing? Let us know on %(twitter)s or %(email_start)s e-mail %(email_end)s",
+				twitter='<a href="https://twitter.com/Blender_Cloud">Twitter</a>',
+				email_start='<a href="mailto:cloudsupport@blender.org">',
+				email_end='</a>') }}
+				{% endautoescape %}
 
 | {% endblock %}

@@ -64,3 +64,15 @@ RabbitMQ.
 You can run the Celery Worker using `manage.py celery worker`.
 
 Find other Celery operations with the `manage.py celery` command.
+
+## Translations
+
+If the language you want to support doesn't exist, you need to run: `translations init es_AR`.
+
+Every time a new string is marked for translation you need to update the entire catalog: `translations update`
+
+And once more strings are translated, you need to compile the translations: `translations compile`
+
+*To mark strings strings for translations in Python scripts you need to
+wrap them with the `flask_babel.gettext` function.
+For .pug templates wrap them with `_()`.*

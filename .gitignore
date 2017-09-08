@@ -22,6 +22,8 @@ profile.stats
 *.css.map
 *.js.map
 
+/translations/*/LC_MESSAGES/*.mo
+
 pillar/web/static/assets/css/*.css
 pillar/web/static/assets/js/*.min.js
 pillar/web/static/storage/

@@ -16,6 +16,8 @@ can then be registered to the application at app creation time:
 """
 
 import abc
+import inspect
+import pathlib
 import typing
 
 import flask
@@ -111,6 +113,23 @@ class PillarExtension(object, metaclass=abc.ABCMeta):
         static files.
         """
         return None
+
+    @property
+    def translations_path(self) -> typing.Union[pathlib.Path, None]:
+        """Returns the path where the translations for this extension are stored.
+
+        This is top folder that contains a "translations" sub-folder
+
+        May return None, in which case English will always be used for this extension.
+        """
+        class_filename = pathlib.Path(inspect.getfile(self.__class__))
+
+        # Pillar extensions instantiate the PillarExtension from a sub-folder in
+        # the main project (e.g. //blender_cloud/blender_cloud/__init__.py), but
+        # the translations folders is in the main project folder.
+        translations_path = class_filename.parents[1] / 'translations'
+
+        return translations_path if translations_path.is_dir() else None
 
     def setup_app(self, app):
         """Called during app startup, after all extensions have loaded."""

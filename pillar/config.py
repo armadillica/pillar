@@ -187,3 +187,23 @@ USER_CAPABILITIES = defaultdict(**{
               'view-pending-nodes', 'edit-project-node-types', 'create-organization'},
     'org-subscriber': {'subscriber', 'home-project'},
 }, default_factory=frozenset)
+
+
+# Internationalization and localization
+
+# The default locale is US English.
+# A locale can include a territory, a codeset and a modifier.
+# We only support locale strings with or without territories though.
+# For example, nl_NL and pt_BR are not the same language as nl_BE, and pt_PT.
+# However we can have a nl, or a pt translation, to be used as a common
+# translation when no territorial specific locale is available.
+# All translations should be in UTF-8.
+# This setting is used as a fallback when there is no good match between the
+# browser language and the available translations.
+DEFAULT_LOCALE = 'en_US'
+# All the available languages will be determined based on available translations
+# in the //translations/ folder. The exception is English, since all the text is
+# originally in English already. That said, if rare occasions we may want to
+# never show the site in English.
+SUPPORT_ENGLISH = True
+

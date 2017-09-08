@@ -11,11 +11,13 @@ import tempfile
 import typing
 import os
 import os.path
+import pathlib
 
 import jinja2
 from eve import Eve
 import flask
-from flask import render_template, request
+from flask import g, render_template, request
+from flask_babel import Babel, gettext as _
 from flask.templating import TemplateNotFound
 import pymongo.collection
 import pymongo.database
@@ -117,6 +119,8 @@ class PillarServer(Eve):
         self.login_manager = auth.config_login_manager(self)
 
         self._config_caching()
+
+        self._config_translations()
 
         # Celery itself is configured after all extensions have loaded.
         self.celery: Celery = None
@@ -234,6 +238,74 @@ class PillarServer(Eve):
         from flask_cache import Cache
         self.cache = Cache(self)
 
+    def set_languages(self, translations_folder: pathlib.Path):
+        """Set the supported languages based on translations folders
+
+        English is an optional language included by default, since we will
+        never have a translations folder for it.
+        """
+        self.default_locale = self.config['DEFAULT_LOCALE']
+        self.config['BABEL_DEFAULT_LOCALE'] = self.default_locale
+
+        # Determine available languages.
+        languages = list()
+
+        # The available languages will be determined based on available
+        # translations in the //translations/ folder. The exception is (American) English
+        # since all the text is originally in English already.
+        # That said, if rare occasions we may want to never show
+        # the site in English.
+
+        if self.config['SUPPORT_ENGLISH']:
+            languages.append('en_US')
+
+        base_path = pathlib.Path(self.app_root) / 'translations'
+
+        if not base_path.is_dir():
+            self.log.debug('Project has no translations folder: %s', base_path)
+        else:
+            languages.extend(i.name for i in base_path.iterdir() if i.is_dir())
+
+        # Use set for quicker lookup
+        self.languages = set(languages)
+
+        self.log.info('Available languages: %s' % ', '.join(self.languages))
+
+    def _config_translations(self):
+        """
+        Initialize translations variable.
+
+        The BABEL_TRANSLATION_DIRECTORIES has the folder for the compiled
+        translations files. It uses ; separation for the extension folders.
+        """
+        self.log.info('Configure translations')
+        translations_path = pathlib.Path(__file__).parents[1].joinpath('translations')
+
+        self.config['BABEL_TRANSLATION_DIRECTORIES'] = str(translations_path)
+        babel = Babel(self)
+
+        self.set_languages(translations_path)
+
+        # get_locale() is registered as a callback for locale selection.
+        # That prevents the function from being garbage collected.
+        @babel.localeselector
+        def get_locale() -> str:
+            """
+            Callback runs before each request to give us a chance to choose the
+            language to use when producing its response.
+
+            We set g.locale to be able to access it from the template pages.
+            We still need to return it explicitly, since this function is
+            called as part of the babel translation framework.
+
+            We are using the 'Accept-Languages' header to match the available
+            translations with the user supported languages.
+            """
+            locale = request.accept_languages.best_match(
+                self.languages, self.default_locale)
+            g.locale = locale
+            return locale
+
     def load_extension(self, pillar_extension, url_prefix):
         from .extension import PillarExtension
 
@@ -292,6 +364,19 @@ class PillarServer(Eve):
                 collection.setdefault('url', url)
 
             self.config['DOMAIN'].update(eve_settings['DOMAIN'])
+
+        # Configure the extension translations
+        trpath = pillar_extension.translations_path
+        if not trpath:
+            self.log.debug('Extension %s does not have a translations folder',
+                           pillar_extension.name)
+            return
+
+        self.log.info('Extension %s: adding translations path %s',
+                      pillar_extension.name, trpath)
+
+        # Babel requires semi-colon string separation
+        self.config['BABEL_TRANSLATION_DIRECTORIES'] += ';' + str(trpath)
 
     def _config_jinja_env(self):
         # Start with the extensions...
@@ -512,7 +597,7 @@ class PillarServer(Eve):
         self.log.info('Forwarding ResourceInvalid exception to client: %s', error, exc_info=True)
 
         # Raising a Werkzeug 422 exception doens't work, as Flask turns it into a 500.
-        return 'The submitted data could not be validated.', 422
+        return _('The submitted data could not be validated.'), 422
 
     def handle_sdk_method_not_allowed(self, error):
         """Forwards 405 Method Not Allowed to the client.

@@ -3,6 +3,30 @@
 """Setup file for testing, not for packaging/distribution."""
 
 import setuptools
+from setuptools.command.develop import develop
+from setuptools.command.install import install
+
+
+def translations_compile():
+    """Compile any existent translation.
+    """
+    from pillar import cli
+    cli.translations.compile()
+
+
+class PostDevelopCommand(develop):
+    """Post-installation for develop mode."""
+    def run(self):
+        super().run()
+        translations_compile()
+
+
+class PostInstallCommand(install):
+    """Post-installation for installation mode."""
+    def run(self):
+        super().run()
+        translations_compile()
+
 
 setuptools.setup(
     name='pillar',
@@ -36,5 +60,12 @@ setuptools.setup(
         'pytest-cov>=2.2.1',
         'mock>=2.0.0',
     ],
+    entry_points = {'console_scripts': [
+        'translations = pillar.cli.translations:main',
+    ]},
+    cmdclass={
+        'install': PostInstallCommand,
+        'develop': PostDevelopCommand,
+    },
     zip_safe=False,
 )
