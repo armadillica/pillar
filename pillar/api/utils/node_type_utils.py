@@ -27,9 +27,11 @@ def assign_permissions(project, node_types, permission_callback):
         permissions = {}
 
         for key in ('users', 'groups'):
-            perms = proj_perms[key]
-            singular = key.rstrip('s')
+            perms = proj_perms.get(key)
+            if not perms:
+                continue
 
+            singular = key.rstrip('s')
             for perm in perms:
                 assert isinstance(perm, dict), 'perm should be dict, but is %r' % perm
                 ident = perm[singular]  # group or user ID.
