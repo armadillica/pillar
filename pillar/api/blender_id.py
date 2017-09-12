@@ -114,8 +114,18 @@ def validate_token(user_id, token, oauth_subclient_id):
     try:
         r = s.post(url, data=payload, timeout=5,
                    verify=current_app.config['TLS_CERT_FILE'])
-    except requests.exceptions.ConnectionError as e:
+    except requests.exceptions.ConnectionError:
         log.error('Connection error trying to POST to %s, handling as invalid token.', url)
+        return None, None
+    except requests.exceptions.ReadTimeout:
+        log.error('Read timeout trying to POST to %s, handling as invalid token.', url)
+        return None, None
+    except requests.exceptions.RequestException as ex:
+        log.error('Requests error "%s" trying to POST to %s, handling as invalid token.', ex, url)
+        return None, None
+    except IOError as ex:
+        log.error('Unknown I/O error "%s" trying to POST to %s, handling as invalid token.',
+                  ex, url)
         return None, None
 
     if r.status_code != 200:
