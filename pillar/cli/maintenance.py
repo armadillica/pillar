@@ -616,6 +616,10 @@ def find_orphan_files(proj_url):
 
         orphans = _find_orphan_files(project['_id'])
 
+    if not orphans:
+        log.info('No orphan files found, congratulations.')
+        return 0
+
     aggr = files_coll.aggregate([
         {'$match': {'_id': {'$in': list(orphans)}}},
         {'$group': {
