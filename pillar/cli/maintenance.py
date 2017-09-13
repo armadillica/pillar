@@ -647,3 +647,7 @@ def find_orphan_files(proj_url):
     end_timestamp = datetime.datetime.now()
     duration = end_timestamp - start_timestamp
     log.info('Finding orphans took %s', duration)
+
+    log.info('Writing Object IDs to orphan-files.txt')
+    with open('orphan-files.txt', 'w') as outfile:
+        outfile.write('\n'.join(str(oid) for oid in sorted(orphans)) + '\n')
