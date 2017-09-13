@@ -1,4 +1,5 @@
 import copy
+import datetime
 import logging
 import typing
 
@@ -599,6 +600,8 @@ def find_orphan_files(proj_url):
     """
     from jinja2.filters import do_filesizeformat
 
+    start_timestamp = datetime.datetime.now()
+
     projects_coll = current_app.db('projects')
     files_coll = current_app.db('files')
 
@@ -640,3 +643,7 @@ def find_orphan_files(proj_url):
         log.info('Total nr of orphan files: %d', orphan_count)
         log.info('Total nr of files       : %d', total_count)
         log.info('Orphan percentage       : %d%%', 100 * orphan_count / total_count)
+
+    end_timestamp = datetime.datetime.now()
+    duration = end_timestamp - start_timestamp
+    log.info('Finding orphans took %s', duration)
