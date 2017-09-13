@@ -534,25 +534,24 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
     handle_project(proj)
 
 
-def _find_orphan_files(project_id: bson.ObjectId) -> typing.Set[bson.ObjectId]:
+def _find_orphan_files() -> typing.Set[bson.ObjectId]:
     """Finds all non-referenced files for the given project.
 
     Returns an iterable of all orphan file IDs.
     """
 
-    log.debug('Finding orphan files for project %s', project_id)
+    log.debug('Finding orphan files')
 
     # Get all file IDs that belong to this project.
     files_coll = current_app.db('files')
-    file_filter = {'project': project_id, '_deleted': {'$ne': True}}
-    cursor = files_coll.find(file_filter, projection={'_id': 1})
+    cursor = files_coll.find({'_deleted': {'$ne': True}}, projection={'_id': 1})
     file_ids = {doc['_id'] for doc in cursor}
     if not file_ids:
-        log.debug('Project %s has no files', project_id)
+        log.debug('No files found')
         return set()
 
     total_file_count = len(file_ids)
-    log.debug('Project %s has %d files in total', project_id, total_file_count)
+    log.debug('Found %d files in total', total_file_count)
 
     def find_object_ids(something: typing.Any) -> typing.Iterable[bson.ObjectId]:
         if isinstance(something, bson.ObjectId):
@@ -572,11 +571,6 @@ def _find_orphan_files(project_id: bson.ObjectId) -> typing.Set[bson.ObjectId]:
             continue
 
         doc_filter = {'_deleted': {'$ne': True}}
-        if coll_name == 'projects':
-            doc_filter['_id'] = project_id
-        else:
-            doc_filter['project'] = project_id
-
         log.debug('   - inspecting collection %r with filter %r', coll_name, doc_filter)
         coll = db[coll_name]
         for doc in coll.find(doc_filter):
@@ -585,16 +579,14 @@ def _find_orphan_files(project_id: bson.ObjectId) -> typing.Set[bson.ObjectId]:
                 file_ids.discard(obj_id)
 
     orphan_count = len(file_ids)
-    log.info('Project %s has %d files or which %d are orphaned (%d%%)',
-             project_id, total_file_count, orphan_count, 100 * orphan_count / total_file_count)
+    log.info('Found %d files or which %d are orphaned (%d%%)',
+             total_file_count, orphan_count, 100 * orphan_count / total_file_count)
 
     return file_ids
 
 
 @manager_maintenance.command
-@manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
-                            help='Project URL, use "all" to check all projects')
-def find_orphan_files(proj_url):
+def find_orphan_files():
     """Finds unused files in the given project.
 
     This is a heavy operation that inspects *everything* in MongoDB. Use with care.
@@ -608,32 +600,12 @@ def find_orphan_files(proj_url):
         return 1
 
     start_timestamp = datetime.datetime.now()
-
-    projects_coll = current_app.db('projects')
-    files_coll = current_app.db('files')
-
-    if proj_url == 'all':
-        log.warning('Iterating over ALL projects, may take a while')
-        orphans = set()
-        try:
-            for project in projects_coll.find({'_deleted': {'$ne': True}}, projection={'_id': 1}):
-                proj_orphans = _find_orphan_files(project['_id'])
-                orphans.update(proj_orphans)
-        except KeyboardInterrupt:
-            log.warning('Keyboard interrupt received, stopping now '
-                        'and showing intermediary results.')
-    else:
-        project = projects_coll.find_one({'url': proj_url}, projection={'_id': 1})
-        if not project:
-            log.error('Project url=%r not found', proj_url)
-            return 1
-
-        orphans = _find_orphan_files(project['_id'])
-
+    orphans = _find_orphan_files()
     if not orphans:
         log.info('No orphan files found, congratulations.')
         return 0
 
+    files_coll = current_app.db('files')
     aggr = files_coll.aggregate([
         {'$match': {'_id': {'$in': list(orphans)}}},
         {'$group': {
@@ -644,12 +616,11 @@ def find_orphan_files(proj_url):
 
     total_size = list(aggr)[0]['size']
     log.info('Total orphan file size: %s', do_filesizeformat(total_size, binary=True))
-    if proj_url == 'all':
-        orphan_count = len(orphans)
-        total_count = files_coll.count()
-        log.info('Total nr of orphan files: %d', orphan_count)
-        log.info('Total nr of files       : %d', total_count)
-        log.info('Orphan percentage       : %d%%', 100 * orphan_count / total_count)
+    orphan_count = len(orphans)
+    total_count = files_coll.count()
+    log.info('Total nr of orphan files: %d', orphan_count)
+    log.info('Total nr of files       : %d', total_count)
+    log.info('Orphan percentage       : %d%%', 100 * orphan_count / total_count)
 
     end_timestamp = datetime.datetime.now()
     duration = end_timestamp - start_timestamp

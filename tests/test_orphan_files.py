@@ -91,6 +91,6 @@ class OrphanFilesTest(AbstractPillarTest):
 
         from pillar.cli.maintenance import _find_orphan_files
 
-        for pid in project_ids:
-            orphans = _find_orphan_files(pid)
-            self.assertEqual({file_ids[pid][3]}, orphans)
+        expect_orphans = {file_ids[pid][3] for pid in project_ids}
+        found_orphans = _find_orphan_files()
+        self.assertEqual(expect_orphans, found_orphans)
