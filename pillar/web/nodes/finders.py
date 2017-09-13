@@ -3,6 +3,7 @@
 import logging
 
 from flask import current_app, url_for
+import werkzeug.exceptions as wz_exceptions
 
 import pillarsdk
 from pillarsdk import Node
@@ -105,8 +106,13 @@ def project_url(project_id, project):
 
     urler_api = system_util.pillar_api(
         token=current_app.config['URLER_SERVICE_AUTH_TOKEN'])
-    return pillarsdk.Project.find_from_endpoint(
-        '/service/urler/%s' % project_id, api=urler_api)
+
+    try:
+        return pillarsdk.Project.find_from_endpoint(
+            '/service/urler/%s' % project_id, api=urler_api)
+    except pillarsdk.ForbiddenAccess as ex:
+        log.error('URLER request to find URL for project %s failed: %s', project_id, ex)
+        raise wz_exceptions.NotFound()
 
 
 # Cache the actual URL based on the node ID, for the duration of the request.
