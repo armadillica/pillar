@@ -80,7 +80,7 @@ EXAMPLE_PROJECT = {
     'picture_square': ObjectId('5673f256c379cf0007b31bc3'),
     'status': 'published',
     'summary': 'Texture collection from all Blender Institute open projects.',
-    'url': 'textures',
+    'url': 'default-project',
     'user': EXAMPLE_PROJECT_OWNER_ID}
 
 EXAMPLE_NODE = {
