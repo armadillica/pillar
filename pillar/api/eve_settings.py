@@ -720,11 +720,12 @@ tokens = {
 }
 
 files = {
+    'schema': files_schema,
     'resource_methods': ['GET', 'POST'],
     'item_methods': ['GET', 'PATCH'],
     'public_methods': ['GET'],
     'public_item_methods': ['GET'],
-    'schema': files_schema
+    'soft_delete': True,
 }
 
 groups = {

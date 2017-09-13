@@ -544,7 +544,8 @@ def _find_orphan_files(project_id: bson.ObjectId) -> typing.Set[bson.ObjectId]:
 
     # Get all file IDs that belong to this project.
     files_coll = current_app.db('files')
-    cursor = files_coll.find({'project': project_id}, projection={'_id': 1})
+    file_filter = {'project': project_id, '_deleted': {'$ne': True}}
+    cursor = files_coll.find(file_filter, projection={'_id': 1})
     file_ids = {doc['_id'] for doc in cursor}
     if not file_ids:
         log.debug('Project %s has no files', project_id)
