@@ -176,7 +176,8 @@ class PillarServer(Eve):
 
     def _config_bugsnag(self):
         # Configure Bugsnag
-        if self.config.get('TESTING') or not self.config.get('BUGSNAG_API_KEY'):
+        bugsnag_api_key = self.config.get('BUGSNAG_API_KEY')
+        if self.config.get('TESTING') or not bugsnag_api_key:
             self.log.info('Bugsnag NOT configured.')
             return
 
@@ -185,7 +186,7 @@ class PillarServer(Eve):
         from bugsnag.handlers import BugsnagHandler
 
         bugsnag.configure(
-            api_key=self.config['BUGSNAG_API_KEY'],
+            api_key=bugsnag_api_key,
             project_root="/data/git/pillar/pillar",
         )
         handle_exceptions(self)
@@ -193,6 +194,8 @@ class PillarServer(Eve):
         bs_handler = BugsnagHandler()
         bs_handler.setLevel(logging.ERROR)
         self.log.addHandler(bs_handler)
+
+        self.log.info('Bugsnag setup complete')
 
     def _config_google_cloud_storage(self):
         # Google Cloud project
