@@ -499,9 +499,9 @@ class PillarServer(Eve):
 
         self._user_caps = app_caps
 
-        if self.log.isEnabledFor(logging.INFO):
+        if self.log.isEnabledFor(logging.DEBUG):
             import pprint
-            self.log.info('Configured user capabilities: %s', pprint.pformat(self._user_caps))
+            self.log.debug('Configured user capabilities: %s', pprint.pformat(self._user_caps))
 
     def register_static_file_endpoint(self, url_prefix, endpoint_name, static_folder):
         from pillar.web.staticfile import PillarStaticFile
