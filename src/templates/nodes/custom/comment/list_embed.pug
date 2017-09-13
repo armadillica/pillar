@@ -78,6 +78,15 @@
 
 | {% block comment_scripts %}
 script.
+	function scrollToLinkedComment() {
+		var scrollToId = location.hash;
+		if (scrollToId.length <= 1) return;
+
+		$(scrollToId)
+			.addClass('comment-linked')
+			.scrollHere();
+	}
+	$(scrollToLinkedComment);
 
 	// Markdown initialization
 	var convert = new Markdown.getSanitizingConverter();
