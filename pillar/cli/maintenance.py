@@ -600,6 +600,12 @@ def find_orphan_files(proj_url):
     This is a heavy operation that inspects *everything* in MongoDB. Use with care.
     """
     from jinja2.filters import do_filesizeformat
+    from pathlib import Path
+
+    output_fpath = Path('orphan-files.txt')
+    if output_fpath.exists():
+        log.error('Output filename %s already exists, remove it first.', output_fpath)
+        return 1
 
     start_timestamp = datetime.datetime.now()
 
@@ -650,5 +656,5 @@ def find_orphan_files(proj_url):
     log.info('Finding orphans took %s', duration)
 
     log.info('Writing Object IDs to orphan-files.txt')
-    with open('orphan-files.txt', 'w') as outfile:
+    with output_fpath.open('w', encoding='ascii') as outfile:
         outfile.write('\n'.join(str(oid) for oid in sorted(orphans)) + '\n')
