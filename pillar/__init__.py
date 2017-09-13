@@ -175,27 +175,37 @@ class PillarServer(Eve):
         self.log.info('Git revision %r', self.config['GIT_REVISION'])
 
     def _config_bugsnag(self):
-        # Configure Bugsnag
         bugsnag_api_key = self.config.get('BUGSNAG_API_KEY')
         if self.config.get('TESTING') or not bugsnag_api_key:
             self.log.info('Bugsnag NOT configured.')
             return
 
         import bugsnag
-        from bugsnag.flask import handle_exceptions
         from bugsnag.handlers import BugsnagHandler
 
         bugsnag.configure(
             api_key=bugsnag_api_key,
             project_root="/data/git/pillar/pillar",
         )
-        handle_exceptions(self)
 
         bs_handler = BugsnagHandler()
         bs_handler.setLevel(logging.ERROR)
         self.log.addHandler(bs_handler)
 
+        # This is what bugsnag.flask.handle_exceptions also tries to do,
+        # but it passes the app to the connect() call, which causes an
+        # error. Since we only have one app, we can do without.
+        from flask import got_request_exception
+        from bugsnag.flask import add_flask_request_to_notification
+
+        bugsnag.before_notify(add_flask_request_to_notification)
+        got_request_exception.connect(self.__notify_bugsnag)
+
         self.log.info('Bugsnag setup complete')
+
+    def __notify_bugsnag(self, sender, exception, **extra):
+        import bugsnag
+        bugsnag.auto_notify(exception)
 
     def _config_google_cloud_storage(self):
         # Google Cloud project
