@@ -42,7 +42,7 @@ setuptools.setup(
         'Flask-WTF>=0.12',
         'algoliasearch>=1.12.0',
         'attrs>=16.2.0',
-        'bugsnag>=2.3.1,<3.0',  # latest version on PyPi is beta of 3.0
+        'bugsnag>=2.3.1',
         'gcloud>=0.12.0',
         'google-apitools>=0.4.11',
         'MarkupSafe>=0.23',
