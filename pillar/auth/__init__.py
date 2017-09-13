@@ -171,8 +171,13 @@ def _load_user(token) -> typing.Union[UserClass, AnonymousUser]:
 
     from ..api.utils import authentication
 
+    if not token:
+        return AnonymousUser()
+
     db_user = authentication.validate_this_token(token)
     if not db_user:
+        # There is a token, but it's not valid. We should reset the user's session.
+        session.clear()
         return AnonymousUser()
 
     user = UserClass.construct(token, db_user)
