@@ -658,3 +658,41 @@ def find_orphan_files(proj_url):
     log.info('Writing Object IDs to orphan-files.txt')
     with output_fpath.open('w', encoding='ascii') as outfile:
         outfile.write('\n'.join(str(oid) for oid in sorted(orphans)) + '\n')
+
+
+@manager_maintenance.command
+def delete_orphan_files():
+    """Deletes orphan files mentioned in orphan-files.txt
+
+    Use 'find_orphan_files' first to generate orphan-files.txt.
+    """
+    import pymongo.results
+
+    with open('orphan-files.txt', 'r', encoding='ascii') as infile:
+        oids = [bson.ObjectId(oid.strip()) for oid in infile]
+
+    log.info('Found %d Object IDs to remove', len(oids))
+
+    # Ensure that the list of Object IDs actually matches files.
+    # I hope this works as a security measure against deleting from obsolete orphan-files.txt files.
+    files_coll = current_app.db('files')
+    oid_filter = {'_id': {'$in': oids},
+                  '_deleted': {'$ne': True}}
+    file_count = files_coll.count(oid_filter)
+    if file_count == len(oids):
+        log.info('Found %d matching files', file_count)
+    else:
+        log.warning("Found %d matching files, which doesn't match the number of Object IDs. "
+                    "Refusing to continue.", file_count)
+        return 1
+
+    res: pymongo.results.UpdateResult = files_coll.update_many(
+        oid_filter,
+        {'$set': {'_deleted': True}}
+    )
+    if res.matched_count != file_count:
+        log.warning('Soft-deletion matched %d of %d files', res.matched_count, file_count)
+    elif res.modified_count != file_count:
+        log.warning('Soft-deletion modified %d of %d files', res.modified_count, file_count)
+
+    log.info('%d files have been soft-deleted', res.modified_count)
