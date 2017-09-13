@@ -605,7 +605,7 @@ def find_orphan_files(proj_url):
     if proj_url == 'all':
         log.warning('Iterating over ALL projects, may take a while')
         orphans = set()
-        for project in projects_coll.find({'_deleted': False}, projection={'_id': 1}):
+        for project in projects_coll.find({'_deleted': {'$ne': True}}, projection={'_id': 1}):
             proj_orphans = _find_orphan_files(project['_id'])
             orphans.update(proj_orphans)
     else:
