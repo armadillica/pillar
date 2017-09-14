@@ -83,6 +83,9 @@ def find_for_other(project, node):
     Hard-coded fallback, so doesn't need @register_node_finder() decoration.
     """
 
+    if not project:
+        raise ValueError(f'project={project}')
+
     the_project = project_url(project['_id'], project=project)
 
     return url_for('projects.view_node',
