@@ -535,11 +535,11 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
     expire_before = now + datetime.timedelta(seconds=expiry_seconds)
     log.info('Limiting to links that expire before %s', expire_before)
 
+    base_query = {'backend': backend_name, '_deleted': {'$ne': True}}
     to_refresh = files_collection.find(
-        {'$or': [{'backend': backend_name, 'link_expires': None},
-                 {'backend': backend_name, 'link_expires': {
-                     '$lt': expire_before}},
-                 {'backend': backend_name, 'link': None}]
+        {'$or': [{'link_expires': None, **base_query},
+                 {'link_expires': {'$lt': expire_before}, **base_query},
+                 {'link': None, **base_query}]
          }).sort([('link_expires', pymongo.ASCENDING)]).limit(
         chunk_size).batch_size(5)
 
