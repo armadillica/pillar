@@ -555,6 +555,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
         log.info('Found %d documents to refresh.', document_count)
 
     refreshed = 0
+    report_chunks = min(max(5, document_count // 25), 100)
     for file_doc in to_refresh:
         try:
             file_id = file_doc['_id']
@@ -587,6 +588,9 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
                             'project %s bucket.', file_id, project_id)
                 continue
             refreshed += 1
+
+            if refreshed % report_chunks == 0:
+                log.info('Refreshed %i links', refreshed)
         except KeyboardInterrupt:
             log.warning('Aborting due to KeyboardInterrupt after refreshing %i '
                         'links', refreshed)
