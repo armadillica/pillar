@@ -284,6 +284,20 @@ def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
 
 
 @manager_maintenance.command
+@manager_maintenance.option('-c', '--chunk', dest='chunk_size', default=50,
+                            help='Number of links to update, use 0 to update all.')
+def refresh_backend_links_celery(backend_name, chunk_size=50):
+    """Starts a Celery task that refreshes all file links that are using a certain storage backend.
+    """
+    from pillar.celery import file_link_tasks
+
+    chunk_size = int(chunk_size)  # CLI parameters are passed as strings
+    file_link_tasks.regenerate_all_expired_links.delay(backend_name, chunk_size)
+
+    log.info('File link regeneration task has been queued for execution.')
+
+
+@manager_maintenance.command
 def expire_all_project_links(project_uuid):
     """Expires all file links for a certain project without refreshing.
 

@@ -449,6 +449,7 @@ class PillarServer(Eve):
         celery_task_modules = [
             'pillar.celery.tasks',
             'pillar.celery.algolia_tasks',
+            'pillar.celery.file_link_tasks',
         ]
 
         # Allow Pillar extensions from defining their own Celery tasks.

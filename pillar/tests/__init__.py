@@ -164,7 +164,10 @@ class AbstractPillarTest(TestMinimal):
         for modname in remove:
             del sys.modules[modname]
 
-    def ensure_file_exists(self, file_overrides=None):
+    def ensure_file_exists(self, file_overrides=None, *, example_file=None) -> (ObjectId, dict):
+        if example_file is None:
+            example_file = ctd.EXAMPLE_FILE
+
         if file_overrides and file_overrides.get('project'):
             self.ensure_project_exists({'_id': file_overrides['project']})
         else:
@@ -174,7 +177,7 @@ class AbstractPillarTest(TestMinimal):
             files_collection = self.app.data.driver.db['files']
             assert isinstance(files_collection, pymongo.collection.Collection)
 
-            file = copy.deepcopy(ctd.EXAMPLE_FILE)
+            file = copy.deepcopy(example_file)
             if file_overrides is not None:
                 file.update(file_overrides)
             if '_id' in file and file['_id'] is None:
