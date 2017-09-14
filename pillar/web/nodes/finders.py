@@ -125,6 +125,8 @@ def find_url_for_node(node):
         project = node.project
     else:
         project = project_url(node.project, None)
+        if not project:
+            raise ValueError(f'Project {node.project} not found')
 
     # Determine which function to use to find the correct URL.
     finder = node_url_finders.get(node.node_type, find_for_other)
