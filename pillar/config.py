@@ -178,6 +178,16 @@ TLS_CERT_FILE = requests.certs.where()
 CELERY_BACKEND = 'redis://redis/1'
 CELERY_BROKER = 'amqp://guest:guest@rabbit//'
 
+# This configures the Celery task scheduler in such a way that we don't
+# have to import the pillar.celery.XXX modules. Remember to run
+# 'manage.py celery beat' too, otherwise those will never run.
+CELERY_BEAT_SCHEDULE = {
+    'regenerate-expired-links': {
+        'task': 'pillar.celery.file_link_tasks.regenerate_all_expired_links',
+        'schedule': 600.0,
+        'args': ('gcs', 100)
+    },
+}
 
 # Mapping from user role to capabilities obtained by users with that role.
 USER_CAPABILITIES = defaultdict(**{

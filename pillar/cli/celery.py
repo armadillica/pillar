@@ -58,3 +58,12 @@ def purge():
 
     log.warning('Purging all pending Celery tasks.')
     current_app.celery.control.purge()
+
+
+@manager_celery.option('args', nargs='*')
+def beat(args):
+    """Runs the Celery beat."""
+
+    from celery.bin.beat import beat
+
+    return beat(app=current_app.celery).run_from_argv('je moeder', args, command='beat')

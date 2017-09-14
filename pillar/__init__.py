@@ -465,6 +465,13 @@ class PillarServer(Eve):
             result_expires=3600,
         )
 
+        # This configures the Celery task scheduler in such a way that we don't
+        # have to import the pillar.celery.XXX modules. Remember to run
+        # 'manage.py celery beat' too, otherwise those will never run.
+        beat_schedule = self.config.get('CELERY_BEAT_SCHEDULE')
+        if beat_schedule:
+            self.celery.conf.beat_schedule = beat_schedule
+
         self.log.info('Pinging Celery workers')
         self.log.info('Response: %s', self.celery.control.ping())
 
