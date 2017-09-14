@@ -184,7 +184,7 @@ CELERY_BROKER = 'amqp://guest:guest@rabbit//'
 CELERY_BEAT_SCHEDULE = {
     'regenerate-expired-links': {
         'task': 'pillar.celery.file_link_tasks.regenerate_all_expired_links',
-        'schedule': 600.0,
+        'schedule': 600,  # every N seconds
         'args': ('gcs', 100)
     },
 }
