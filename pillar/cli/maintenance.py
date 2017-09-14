@@ -608,7 +608,7 @@ def find_orphan_files():
     from jinja2.filters import do_filesizeformat
     from pathlib import Path
 
-    output_fpath = Path('orphan-files.txt')
+    output_fpath = Path(current_app.config['STORAGE_DIR']) / 'orphan-files.txt'
     if output_fpath.exists():
         log.error('Output filename %s already exists, remove it first.', output_fpath)
         return 1
@@ -640,7 +640,7 @@ def find_orphan_files():
     duration = end_timestamp - start_timestamp
     log.info('Finding orphans took %s', duration)
 
-    log.info('Writing Object IDs to orphan-files.txt')
+    log.info('Writing Object IDs to %s', output_fpath)
     with output_fpath.open('w', encoding='ascii') as outfile:
         outfile.write('\n'.join(str(oid) for oid in sorted(orphans)) + '\n')
 
@@ -652,8 +652,10 @@ def delete_orphan_files():
     Use 'find_orphan_files' first to generate orphan-files.txt.
     """
     import pymongo.results
+    from pathlib import Path
 
-    with open('orphan-files.txt', 'r', encoding='ascii') as infile:
+    output_fpath = Path(current_app.config['STORAGE_DIR']) / 'orphan-files.txt'
+    with output_fpath.open('r', encoding='ascii') as infile:
         oids = [bson.ObjectId(oid.strip()) for oid in infile]
 
     log.info('Found %d Object IDs to remove', len(oids))
