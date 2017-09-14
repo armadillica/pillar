@@ -256,22 +256,22 @@ class AbstractPillarTest(TestMinimal):
             users = self.app.data.driver.db['users']
             assert isinstance(users, pymongo.collection.Collection)
 
-            result = users.insert_one({
-                '_id': ObjectId(user_id),
-                '_updated': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
-                '_created': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
-                '_etag': 'unittest-%s' % uuid.uuid4().hex,
-                'username': make_unique_username('tester'),
-                'groups': groups or [],
-                'roles': list(roles),
-                'settings': {'email_communications': 1},
-                'auth': [{'token': '',
-                          'user_id': str(ctd.BLENDER_ID_TEST_USERID),
-                          'provider': 'blender-id'}],
-                'full_name': 'คนรักของผัดไทย',
-                'email': email
-            })
+            user = {'_id': ObjectId(user_id),
+                    '_updated': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
+                    '_created': datetime.datetime(2016, 4, 15, 13, 15, 11, tzinfo=tz_util.utc),
+                    '_etag': 'unittest-%s' % uuid.uuid4().hex,
+                    'username': make_unique_username('tester'),
+                    'groups': groups or [],
+                    'settings': {'email_communications': 1},
+                    'auth': [{'token': '',
+                              'user_id': str(ctd.BLENDER_ID_TEST_USERID),
+                              'provider': 'blender-id'}],
+                    'full_name': 'คนรักของผัดไทย',
+                    'email': email}
+            if roles:
+                user['roles'] = list(roles)
 
+            result = users.insert_one(user)
             user_id = result.inserted_id
 
         if token:

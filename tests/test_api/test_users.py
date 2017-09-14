@@ -86,3 +86,19 @@ class UsersTest(AbstractPillarTest):
 
         db_user = self.fetch_user_from_db(user_id)
         self.assertEqual([], db_user['groups'])
+
+    def test_replace_user_without_roles(self):
+        from pillar.api.utils import remove_private_keys
+
+        self.enter_app_context()
+
+        user_id = bson.ObjectId(24 * '1')
+        self.create_user(user_id, roles=(), token='token')
+
+        user_doc = self.get(f'/api/users/{user_id}', auth_token='token').get_json()
+        self.assertNotIn('roles', user_doc)
+
+        self.put(f'/api/users/{user_id}',
+                 auth_token='token',
+                 json=remove_private_keys(user_doc),
+                 etag=user_doc['_etag'])

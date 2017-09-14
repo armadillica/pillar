@@ -26,6 +26,8 @@ def before_replacing_user(request, lookup):
 
     # Make sure that the replacement has a valid auth field.
     put_data = request.get_json()
+    if put_data is None:
+        raise wz_exceptions.BadRequest('No JSON data received')
 
     # We should get a ref to the cached JSON, and not a copy. This will allow us to
     # modify the cached JSON so that Eve sees our modifications.
@@ -57,7 +59,7 @@ def before_replacing_user(request, lookup):
             del put_data[db_key]
 
     # Regular users should always have an email address
-    if 'service' not in put_data['roles']:
+    if 'service' not in put_data.get('roles', ()):
         if not put_data.get('email'):
             raise wz_exceptions.UnprocessableEntity('email field must be given')
 
