@@ -1,3 +1,5 @@
+import logging
+
 from flask import Markup
 
 from pillarsdk import Node
@@ -8,6 +10,7 @@ from flask_login import current_user
 from pillar.web import system_util
 
 GROUP_NODES = {'group', 'storage', 'group_texture', 'group_hdri'}
+log = logging.getLogger(__name__)
 
 
 def jstree_parse_node(node, children=None):
@@ -17,7 +20,10 @@ def jstree_parse_node(node, children=None):
     node_type = node.node_type
     # Define better the node type
     if node_type == 'asset':
-        node_type = node.properties.content_type
+        if not node.properties or not node.properties.content_type:
+            log.warning('Asset node %s has no node.properties.content_type: %s', node._id, node)
+        else:
+            node_type = node.properties.content_type
 
     parsed_node = dict(
         id="n_{0}".format(node._id),
