@@ -271,13 +271,13 @@ def refresh_backend_links(backend_name, chunk_size=50, quiet=False, window=12):
     Use `--chunk 0` to refresh all links.
     """
 
-    chunk_size = int(chunk_size)
-    window = int(window)
-
     loglevel = logging.WARNING if quiet else logging.DEBUG
     logging.getLogger('pillar.api.file_storage').setLevel(loglevel)
 
-    chunk_size = int(chunk_size)  # CLI parameters are passed as strings
+    # CLI parameters are passed as strings
+    chunk_size = int(chunk_size)
+    window = int(window)
+
     from pillar.api import file_storage
 
     file_storage.refresh_links_for_backend(backend_name, chunk_size, window * 3600)
