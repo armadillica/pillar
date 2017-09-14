@@ -25,7 +25,7 @@ class OrphanFilesTest(AbstractPillarTest):
         project_ids = (public1, public2, private1, private2)
         file_ids = collections.defaultdict(list)
         for pidx, pid in enumerate(project_ids):
-            for filenum in range(5):
+            for filenum in range(6):
                 generated_file_id = ObjectId(f'{pidx}{filenum}' + 22 * 'a')
                 file_id, _ = self.ensure_file_exists({
                     '_id': generated_file_id,
@@ -88,6 +88,24 @@ class OrphanFilesTest(AbstractPillarTest):
                 'random': {'field': [fids[2]]}
             })
             # fids[3] is an orphan.
+            # fids[5] is converted to a string and then used.
+            self.create_node({
+                '_id': ObjectId(),
+                'project': pid,
+                'picture': ObjectId('572761f39837730efe8e1210'),
+                'description': '',
+                'node_type': 'totally-unknown',
+                'user': ObjectId(24 * 'a'),
+                'properties': {
+                    'status': 'published',
+                    'content_type': 'image',
+                    'file': str(fids[5]),
+                },
+                'name': 'Image random field',
+                '_updated': datetime.datetime(2016, 5, 2, 14, 19, 58, 0, tzinfo=tz_util.utc),
+                '_created': datetime.datetime(2016, 5, 2, 14, 19, 37, 0, tzinfo=tz_util.utc),
+                '_etag': '6b8589b42c880e3626f43f3e82a5c5b946742687'
+            })
 
         from pillar.cli.maintenance import _find_orphan_files
 

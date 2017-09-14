@@ -553,6 +553,7 @@ def _find_orphan_files() -> typing.Set[bson.ObjectId]:
 
     Returns an iterable of all orphan file IDs.
     """
+    from pillar.api.utils import str2id
 
     log.debug('Finding orphan files')
 
@@ -570,6 +571,12 @@ def _find_orphan_files() -> typing.Set[bson.ObjectId]:
     def find_object_ids(something: typing.Any) -> typing.Iterable[bson.ObjectId]:
         if isinstance(something, bson.ObjectId):
             yield something
+        elif isinstance(something, str) and len(something) == 24:
+            try:
+                yield bson.ObjectId(something)
+            except (bson.objectid.InvalidId, TypeError):
+                # It apparently wasn't an ObjectID after all.
+                pass
         elif isinstance(something, (list, set, tuple)):
             for item in something:
                 yield from find_object_ids(item)
