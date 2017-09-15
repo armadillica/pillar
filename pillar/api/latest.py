@@ -74,7 +74,6 @@ def latest_nodes(db_filter, projection, limit):
         {'$project': proj},
     ]
 
-    print('QUERY: db.nodes.aggregate(%r)' % pipeline)
     latest = nodes_coll.aggregate(pipeline)
     return list(latest)
 
