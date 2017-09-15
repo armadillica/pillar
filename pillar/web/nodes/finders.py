@@ -66,6 +66,9 @@ def find_for_comment(project, node):
 def find_for_post(project, node):
     """Returns the URL for a blog post."""
 
+    if not node.properties:
+        raise ValueError(f'Node must have properties.url, but is {node}')
+
     project_id = project['_id']
     if str(project_id) == current_app.config['MAIN_PROJECT_ID']:
         return url_for('main.main_blog',
