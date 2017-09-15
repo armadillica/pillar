@@ -94,8 +94,9 @@ class FlaskInternalApi(pillarsdk.Api):
             return response
 
         exception = exceptions.exception_for_status(response.status_code)
+        text = getattr(response, 'text', '')
         if exception:
-            raise exception(response, response.text)
+            raise exception(response, text)
 
-        raise exceptions.ConnectionError(response, response.text,
+        raise exceptions.ConnectionError(response, text,
                                          "Unknown response code: %s" % response.status_code)
