@@ -721,6 +721,10 @@ class PillarServer(Eve):
         coll.create_index([('parent', pymongo.ASCENDING)])
         coll.create_index([('short_code', pymongo.ASCENDING)],
                           sparse=True, unique=True)
+        # Used for latest assets & comments
+        coll.create_index([('properties.status', pymongo.ASCENDING),
+                           ('node_type', pymongo.ASCENDING),
+                           ('_created', pymongo.DESCENDING)])
 
         coll = db['projects']
         # This index is used for statistics, and for fetching public projects.
