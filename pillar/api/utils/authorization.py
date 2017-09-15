@@ -216,6 +216,8 @@ def merge_permissions(*args):
     :returns: combined list of permissions.
     """
 
+    from pillar.auth import current_user
+
     if not args:
         return {}
 
@@ -237,8 +239,18 @@ def merge_permissions(*args):
         from0 = args[0].get(plural_name, [])
         from1 = args[1].get(plural_name, [])
 
-        asdict0 = {permission[field_name]: permission['methods'] for permission in from0}
-        asdict1 = {permission[field_name]: permission['methods'] for permission in from1}
+        try:
+            asdict0 = {permission[field_name]: permission['methods'] for permission in from0}
+        except KeyError:
+            log.exception('KeyError creating asdict0 for %r permissions; user=%s; args[0]=%r',
+                          field_name, current_user.user_id, args[0])
+            asdict0 = {}
+        try:
+            asdict1 = {permission[field_name]: permission['methods'] for permission in from1}
+        except KeyError:
+            log.exception('KeyError creating asdict1 for %r permissions; user=%s; args[1]=%r',
+                          field_name, current_user.user_id, args[1])
+            asdict1 = {}
 
         keys = set(asdict0.keys()).union(set(asdict1.keys()))
         for key in maybe_sorted(keys):
