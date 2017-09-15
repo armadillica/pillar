@@ -1,6 +1,4 @@
 import datetime
-import hashlib
-import urllib.request, urllib.parse, urllib.error
 import logging
 import traceback
 import sys
