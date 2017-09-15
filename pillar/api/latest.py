@@ -1,5 +1,3 @@
-import functools
-import itertools
 import typing
 
 import bson
@@ -9,19 +7,6 @@ from flask import Blueprint, current_app
 from pillar.api.utils import jsonify
 
 blueprint = Blueprint('latest', __name__)
-
-
-def keep_fetching(collection, db_filter, projection, sort, py_filter,
-                  batch_size=12):
-    """Yields results for which py_filter returns True"""
-
-    db_filter['_deleted'] = {'$ne': True}
-    curs = collection.find(db_filter, projection).sort(sort)
-    curs.batch_size(batch_size)
-
-    for doc in curs:
-        if py_filter(doc):
-            yield doc
 
 
 def _public_project_ids() -> typing.List[bson.ObjectId]:
