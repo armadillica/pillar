@@ -66,10 +66,10 @@
 
 			| {% endif %}
 
-		| {% if show_comments %}
+		| {% if show_comments and (nr_of_comments > 0) %}
 		section#comments-list-header
 			#comments-list-title
-				| {% if nr_of_comments == 0 %}No{% else %}{{ nr_of_comments }}{% endif %} comment{{ nr_of_comments|pluralize }}
+				| {{ nr_of_comments }} comment{{ nr_of_comments|pluralize }}
 			#comments-list-items
 				| {% for comment in comments['_items'] %}
 				| {{ macros.render_comment(comment, False) }}
