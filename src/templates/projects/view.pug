@@ -121,6 +121,15 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 				| {% endif %}
 				| {{ extension_sidebar_links }}
 
+				| {% if project.has_method('PUT') %}
+				li(
+					title="Edit Project",
+					data-toggle="tooltip",
+					data-placement="right")
+					a(href="{{ url_for('projects.edit', project_url=project.url) }}")
+						i.pi-cog
+				| {% endif %}
+
 				.project_nav-toggle-btn(
 					title="Toggle navigation [T]",
 					data-toggle="tooltip",

@@ -6,7 +6,7 @@
 	#project-side-container
 		#project_sidebar
 			ul.project-tabs
-				li.tabs-thumbnail.active(
+				li.tabs-thumbnail(
 					title="About",
 					data-toggle="tooltip",
 					data-placement="left",
@@ -32,6 +32,15 @@
 					data-placement="left")
 					a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
 						i.pi-search
+				| {% endif %}
+
+				| {% if project.has_method('PUT') %}
+				li.active(
+					title="Edit Project",
+					data-toggle="tooltip",
+					data-placement="right")
+					a(href="{{ url_for('projects.edit', project_url=project.url) }}")
+						i.pi-cog
 				| {% endif %}
 
 				.project_nav-toggle-btn(
