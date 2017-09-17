@@ -245,7 +245,6 @@ header.navbar-header
 nav.navbar, nav.sidebar
 	z-index: $z-index-base + 5 /* Flowplayer seems to take up to 11, project container is 12 */
 	border: none
-	border-width: 0
 	display: flex
 	align-items: center
 	background-color: $color-background-nav
@@ -262,45 +261,33 @@ nav.navbar, nav.sidebar
 
 	li
 		user-select: none
+
 		a.navbar-item
-			user-select: none
-			color: $color-text-light-secondary
-			height: $navbar-height
-			display: flex
 			align-items: center
-			padding:
-				top: 3px
-				bottom: 0
-				left: 20px
-				right: 20px
+			color: $color-text-light-secondary
+			display: flex
+			height: $navbar-height
+			transition: color 150ms ease-in-out, box-shadow 100ms ease-in-out
+			user-select: none
 
-			font-weight: 400
-			text-transform: uppercase
-			border-bottom: 3px solid transparent
-			transition: color 200ms ease-in-out, border-bottom 100ms ease-in-out
-
-			+media-md
-				padding-left: 15px
-				padding-right: 15px
 			+media-sm
 				padding-left: 10px
 				padding-right: 10px
 
 			&:hover, &:focus
 				color: $color-text-light
-				background-color: rgba($color-background-nav, .4)
-				border-bottom-color: $color-primary
+				background-color: initial
+				box-shadow: inset 0 -3px 0 $color-primary
 
 			&:focus
-				border-bottom-color: $color-primary
+				box-shadow: inset 0 -3px 0 $color-primary
 
 			&.active
 				color: $color-text-light
-				background-color: $color-background-nav
-				border-bottom-color: lighten($color-secondary, 10%)
+				box-shadow: inset 0 -3px 0 lighten($color-secondary, 10%)
 
 				&:hover
-					border-bottom-color: lighten($color-secondary, 20%)
+					box-shadow: inset 0 -3px 0 lighten($color-secondary, 20%)
 
 			.pi-angle-down
 				position: relative
@@ -349,15 +336,13 @@ nav.navbar, nav.sidebar
 				+position-center-translate
 
 	.navbar-brand
-		height: $navbar-height
 		display: flex
 		align-items: center
-		margin-left: 0 !important
 		color: white
 		padding:
 			top: 8px
 			left: 5px
-			right: 20px // overrides bs
+			right: 20px // overrides bootstrap
 
 		&:hover
 			span.app-logo
@@ -386,14 +371,13 @@ nav.navbar, nav.sidebar
 			transform: translate(-50%, -50%)
 
 		ul.dropdown-menu
-			padding-top: 0
+			padding: 0
 
 			li
 				a
 					background-color: rgba(white, .3)
 					text-shadow: none
 					height: initial
-					border-bottom: none
 					font:
 						family: $font-body
 						size: .9em
@@ -402,6 +386,7 @@ nav.navbar, nav.sidebar
 
 					&:hover
 						color: $color-primary
+						box-shadow: none
 
 					&.subitem
 						font-size: .8em
@@ -447,7 +432,6 @@ nav.navbar, nav.sidebar
 			ul.dropdown-menu
 				background-color: lighten($color-background-nav, 5%)
 				color: white
-				padding-top: 5px
 				left: 0
 				right: auto
 
@@ -459,7 +443,12 @@ nav.navbar, nav.sidebar
 						color: $color-text-light-primary
 
 						&:hover
-							color: $color-primary
+							background-color: lighten($color-background-nav, 15%)
+
+					&:last-child a
+						border-bottom-left-radius: 3px
+						border-bottom-right-radius: 3px
+
 					&.disabled a
 						color: $color-text-dark-primary
 						cursor: default
@@ -1091,10 +1080,9 @@ button, .btn
 
 	#cloud-search, .tt-hint
 		+text-overflow-ellipsis
-		background-color: transparent
 		outline: none
-		border: thin solid transparent
-		border-bottom: 3px solid transparent
+		border: thin solid $color-background-nav-light
+		border-radius: 3px
 		font:
 			size: 1em
 			weight: 400
@@ -1106,8 +1094,7 @@ button, .btn
 		transition: border 100ms ease-in-out
 
 		&:focus
-			border: thin solid transparent
-			border-bottom: 3px solid lighten($color-primary, 5%)
+			background-color: $color-background-nav-light
 			outline: none
 
 		&::placeholder

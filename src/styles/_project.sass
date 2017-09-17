@@ -1,4 +1,5 @@
 $project-sidebar-background: lighten($color-background, 5%)
+$node-latest-thumbnail-size: 160px
 
 body.open-projects,
 body.courses,
@@ -197,17 +198,20 @@ body.blog
 	position: relative
 
 #project_context-header
-	z-index: $z-index-base + 3
-	position: fixed
-	top: $project_header-height
+	align-items: center
+	background-color: white
+	background-color: $color-background-light
+	border-bottom: thin solid lighten($color-text-dark-hint, 10%)
+	box-shadow: none
+	color: $color-text-dark-secondary
+	display: flex
 	height: $project_header-height
 	min-height: $project_header-height
-	width: auto
-	color: $color-text-dark-secondary
-	border-bottom: thin solid lighten($color-text-dark-hint, 10%)
-	background-color: $color-background-light
-	box-shadow: none
+	position: fixed
+	top: $project_header-height
 	transition: box-shadow 250ms ease-in-out
+	width: auto
+	z-index: $z-index-base + 3
 
 	&.is-offset
 		box-shadow: 0 0 25px rgba(black, .2)
@@ -786,8 +790,7 @@ $node-preview-max-height-lg: 700px
 		height: 250px
 		top: -10px
 		left: -10px
-		// We can't have nice things because of Edge
-		// filter: blur(10px)
+		filter: blur(10px)
 
 		&:after
 			content: ''
@@ -971,8 +974,6 @@ section.node-preview
 
 		cursor: zoom-in
 
-		+media-sm
-			max-height: $node-preview-max-height-sm
 		+media-md
 			max-height: $node-preview-max-height-md
 		+media-lg
@@ -981,13 +982,12 @@ section.node-preview
 		img
 			display: block
 			max-height: $node-preview-max-height-lg
-			margin: 0 auto
+			max-width: 100%
+			object-fit: scale-down
 
 			+media-xs
 				width: 100%
 
-			+media-sm
-				max-height: $node-preview-max-height-sm
 			+media-md
 				max-height: $node-preview-max-height-md
 			+media-lg
@@ -1585,7 +1585,6 @@ a.learn-more
 					border-color: $node-type-asset_video
 					background-color: hsl(hue($node-type-asset_video), 20%, 55%)
 
-				$node-latest-thumbnail-size: 160px
 				.image
 					width: 100%
 					height: $node-latest-thumbnail-size
@@ -1799,9 +1798,9 @@ section.node-children
 			background-color: black
 
 	.cloud-logo
-		font-size: 4em
-		color: darken($color-background, 60%)
 		+position-center-translate
+		font-size: 4em
+		color: $color-background-dark
 		left: $list-node-children-item-width / 2 - 10
 
 	/* Browse group as list */
@@ -1913,14 +1912,14 @@ section.node-children
 					margin-right: 5px
 
 
-	& .list-node-children-item-thumbnail
+	.list-node-children-item-thumbnail
 		display: flex
 		align-items: center
 		justify-content: center
 
 		width: $list-node-children-item-width
 		height: $list-node-children-item-width / 1.69
-		background-color: darken($color-background, 55%)
+		background-color: $color-background
 		position: relative
 		overflow: hidden
 
@@ -1928,7 +1927,7 @@ section.node-children
 			height: 100%
 			+position-center-translate
 
-		& .list-node-children-item-thumbnail-icon
+		.list-node-children-item-thumbnail-icon
 			position: absolute
 			top: 0
 			left: 0
@@ -1965,12 +1964,10 @@ section.node-children
 
 		display: flex
 		align-items: center
-		color: $color-text-light
-		text-shadow: 1px 1px 0 rgba(black, .2)
-		background-color: darken($color-background, 60%)
+		background-color: $color-background
 
-		padding: 5px 10px
-		font-size: .85em
+		padding: 5px 12px
+		font-size: .9em
 		width: $list-node-children-item-width
 		max-width: $list-node-children-item-width
 
