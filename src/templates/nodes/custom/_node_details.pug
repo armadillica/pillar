@@ -36,7 +36,7 @@
 			span Public
 		| {% endif %}
 
-		| {% if node.file %}
+		| {% if node.file and node.file.link %}
 		li.download
 			| {% if node.properties.content_type == 'video' %}
 			| {% if node.file_variations %}
@@ -63,21 +63,23 @@
 				| {% endfor %}
 			| {% endif %}
 			| {% else %}
-			a(
-				title="Download {{ node.properties.content_type | undertitle }}",
-				href="{{ node.file.link }}",
-				download="{{ node.file.filename }}")
-				button.btn(type="button")
-					i.pi-download
-					| Download
+			li.download
+				a(
+					title="Download {{ node.properties.content_type | undertitle }}",
+					href="{{ node.file.link }}",
+					download="{{ node.file.filename }}")
+					button.btn(type="button")
+						i.pi-download
+						| Download
 			| {% endif %}
 
 		| {% else %}
-		a.btn(
-			title="Login to download {{ node.properties.content_type | undertitle }}",
-			href="{{ url_for('users.login') }}")
-			i.pi-lock
-			| Download
+		li.download
+			a.btn(
+				title="Login to download {{ node.properties.content_type | undertitle }}",
+				href="{{ url_for('users.login') }}")
+				i.pi-lock
+				| Download
 
 		| {% endif %}
 
