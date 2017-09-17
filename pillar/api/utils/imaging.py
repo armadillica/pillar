@@ -30,9 +30,15 @@ def generate_local_thumbnails(name_base, src):
             resize_and_crop(src, dst, settings['size'])
             width, height = settings['size']
         else:
-            im = Image.open(src).convert('RGB')
-            im.thumbnail(settings['size'])
-            im.save(dst, format='JPEG', quality=75)
+            im = Image.open(src)
+            im.thumbnail(settings['size'], resample=Image.LANCZOS)
+
+            # If the source image has transparency, save as PNG
+            if im.mode == 'RGBA':
+                im.save(dst, format='PNG', optimize=True)
+            else:
+                im.save(dst, format='JPEG', optimize=True, quality=95)
+
             width, height = im.size
 
         thumb_info = {'size': size,
