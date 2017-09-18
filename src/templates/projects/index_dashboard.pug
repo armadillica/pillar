@@ -50,7 +50,6 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 
 			section.nav-tabs__tab.active#own_projects
 				ul.projects__list
-					| {% if projects_user %}
 					| {% for project in projects_user %}
 					li.projects__list-item(
 						data-url="{{ url_for('projects.view', project_url=project.url) }}")
@@ -76,16 +75,23 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 								| {% if project.status == 'pending' and current_user.has_cap('view-pending-nodes') %}
 								li.pending Not Published
 								| {% endif %}
-
-					| {% endfor %}
 					| {% else %}
-					li.projects__list-item
+					| {% if current_user.has_cap('subscriber') %}
+					li.projects__list-item(data-url="{{ url_for('projects.create') }}")
 						a.projects__list-thumbnail
 							i.pi-plus
 						.projects__list-details
 							a.title(href="{{ url_for('projects.create') }}")
 								| Create a project to get started!
+					| {% else %}
+					li.projects__list-item(data-url="/join")
+						a.projects__list-thumbnail
+							i.pi-plus
+						.projects__list-details
+							a.title(href="/join")
+								| Join Blender Cloud to create your own projects!
 					| {% endif %}
+					| {% endfor %}
 
 			section.nav-tabs__tab#shared
 				ul.projects__list
