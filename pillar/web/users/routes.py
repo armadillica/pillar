@@ -82,6 +82,11 @@ def oauth_callback(provider):
 
 @blueprint.route('/login')
 def login():
+    if request.args.get('force'):
+        log.debug('Forcing logout of user before rendering login page.')
+        logout_user()
+        session.clear()
+
     session['next_after_login'] = request.args.get('next') or request.referrer
     return render_template('login.html')
 
@@ -120,6 +125,7 @@ def switch():
     # back to the Cloud after switching users.
     next_url_after_bid_login = url_for('users.login',
                                        next=next_url_after_cloud_login,
+                                       force='yes',
                                        _external=True)
 
     return redirect(blender_id.switch_user_url(next_url=next_url_after_bid_login))
