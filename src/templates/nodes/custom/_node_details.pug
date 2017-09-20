@@ -36,7 +36,7 @@
 			span Public
 		| {% endif %}
 
-		| {% if node.file and current_user.has_cap('subscriber') %}
+		| {% if node.file and (current_user.has_cap('subscriber') or node.permissions.world) %}
 		li.download
 			| {% if node.properties.content_type == 'video' %}
 			| {% if node.file_variations %}
