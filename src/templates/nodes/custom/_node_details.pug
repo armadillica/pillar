@@ -36,7 +36,7 @@
 			span Public
 		| {% endif %}
 
-		| {% if node.file and node.file.link %}
+		| {% if node.file and current_user.has_cap('subscriber') %}
 		li.download
 			| {% if node.properties.content_type == 'video' %}
 			| {% if node.file_variations %}
@@ -73,6 +73,13 @@
 						| Download
 			| {% endif %}
 
+		| {% elif current_user.is_authenticated %}
+		li.download
+			a.btn(
+				title="Join Blender Cloud",
+				href="{{ url_for('cloud.join') }}")
+				i.pi-lock
+				| Download
 		| {% else %}
 		li.download
 			a.btn(
@@ -80,7 +87,6 @@
 				href="{{ url_for('users.login') }}")
 				i.pi-lock
 				| Download
-
 		| {% endif %}
 
 | {% if node.properties.license_type %}
