@@ -1,8 +1,6 @@
 | {% import 'nodes/custom/comment/_macros.html' as macros %}
-#comments-container
-	a(name="comments")
-
-	section#comments-list
+#comments.comments-container
+	section#comments-list.comments-list
 		.comment-reply-container
 			| {% if can_post_comments %}
 			.comment-reply-avatar
@@ -59,7 +57,7 @@
 						disabled,
 						id="comment_field",
 						data-parent-id="{{ node_id }}",
-						placeholder="")
+						placeholder="Join the conversation...")
 					.sign-in
 						a(href="{{ url_for('users.login') }}") Log in
 						| to comment.
@@ -67,8 +65,8 @@
 			| {% endif %}
 
 		| {% if show_comments and (nr_of_comments > 0) %}
-		section#comments-list-header
-			#comments-list-title
+		section.comments-list-header
+			.comments-list-title
 				| {{ nr_of_comments }} comment{{ nr_of_comments|pluralize }}
 			#comments-list-items
 				| {% for comment in comments['_items'] %}

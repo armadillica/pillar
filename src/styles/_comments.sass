@@ -1,6 +1,6 @@
 $comments-width-max: 710px
 
-#comments-container
+.comments-container
 	position: relative
 
 	&.texture
@@ -12,12 +12,11 @@ $comments-width-max: 710px
 		padding: 15px 0
 		display: block
 
-	#comments-list-header
-		#comments-list-title
-			padding: 15px 0 10px 0
-			font-size: 1.3em
-			font-weight: 300
-			color: $color-text-dark-primary
+	.comments-list-title
+		padding: 15px 0 10px 0
+		font-size: 1.3em
+		font-weight: 300
+		color: $color-text-dark-primary
 
 	#comments-list-items-loading
 		font-size: 2em
@@ -32,22 +31,13 @@ $comments-width-max: 710px
 	.comment-reply-container
 		position: relative
 
-		+media-xs
-			max-width: 100%
-		+media-sm
-			max-width: 100%
-		+media-md
-			max-width: $comments-width-max
-		+media-lg
-			max-width: $comments-width-max
-
 		.nocomments
 			color: $color-text-dark-hint
 			text-align: center
 			cursor: default
 			padding: 8px 0
 
-	#comments-list
+	.comments-list
 
 		/* Each comment on the list*/
 		.comment-container,
@@ -56,7 +46,7 @@ $comments-width-max: 710px
 			flex-direction: column
 
 			position: relative
-			padding: 15px 0 25px 0
+			padding: 15px 0 20px 0
 			transition: background-color 150ms ease-in-out, padding 150ms ease-in-out, margin 150ms ease-in-out
 
 			&.comment-linked
@@ -94,8 +84,9 @@ $comments-width-max: 710px
 
 					img
 						border-radius: 50%
-						width: 20px
-						height: 20px
+						height: 24px
+						margin-top: 5px
+						width: 24px
 
 				.comment-author
 					position: relative
@@ -128,8 +119,16 @@ $comments-width-max: 710px
 			.comment-content,
 			.comment-reply-form
 				+node-details-description
+				+media-xs
+					max-width: 100%
+				+media-sm
+					max-width: 100%
+				+media-md
+					max-width: $comments-width-max
+				+media-lg
+					max-width: $comments-width-max
 
-				padding: 10px 0 0 10px
+				padding: 0 0 0 34px
 				color: darken($color-text-dark, 10%)
 				font:
 					size: 1em
@@ -144,12 +143,17 @@ $comments-width-max: 710px
 						top: 15px
 
 				p
-					line-height: 1.5em
-
 					+media-xs
 						padding:
 							left: 0
 							right: 0
+
+					line-height: 1.5em
+					margin-top: 5px
+
+					&:last-child
+						margin-bottom: 10px
+
 
 				strong, b
 					font-weight: 500
@@ -157,7 +161,7 @@ $comments-width-max: 710px
 
 				textarea
 					+node-details-description
-					background-color: transparent
+					background-color: white
 					padding: 0 0 0 5px
 					margin-left: 15px
 					width: 100%
@@ -224,9 +228,14 @@ $comments-width-max: 710px
 
 			/* Rating, and actions such as reply */
 			.comment-meta
+				+media-xs
+					padding:
+						left: 0
+						right: 0
+
 				display: flex
 				align-items: center
-				padding: 5px 0 0 30px
+				padding-left: 35px
 				color: $color-text-dark-secondary
 
 				/* Small container for rating buttons and value */
@@ -255,10 +264,12 @@ $comments-width-max: 710px
 						cursor: default
 
 					.comment-action-rating
+						cursor: pointer
 						font-family: 'pillar-font'
 						height: 25px
+						position: relative
+						top: 4px
 						width: 16px
-						cursor: pointer
 
 					.comment-action-rating.up
 						&:hover
@@ -369,6 +380,8 @@ $comments-width-max: 710px
 					color: $color-success
 
 		.comment-reply-container
+			background-color: $color-background
+
 			// It's flex, like the others, but different direction
 			flex-direction: row
 
@@ -378,6 +391,7 @@ $comments-width-max: 710px
 					border-radius: 50%
 					width: 25px
 					height: 25px
+					box-shadow: 0 0 0 3px $color-background-light
 
 			/* textarea field, submit button and reply details */
 			.comment-reply-form
@@ -412,9 +426,6 @@ $comments-width-max: 710px
 					&.sign-in
 						display: block
 						padding: 10px
-						border-radius: 3px
-						border: thin solid $color-background
-						background-color: rgba(white, .5)
 						color: $color-text-dark-primary
 						cursor: default
 
