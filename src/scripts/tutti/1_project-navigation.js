@@ -152,9 +152,14 @@ function containerResizeY(window_height){
 	$('#project_context-header').width($('#project_context-container').width());
 
 	if ($(window).width() > 768) {
-		$('#project-container, #project_nav-container, #project_tree, .project_split').css(
+		$('#project-container').css(
 			{'max-height': window_height_minus_nav + 'px',
 			 'height': window_height_minus_nav + 'px'}
+		);
+
+		$('#project_nav-container, #project_tree, .project_split').css(
+			{'max-height': (window_height_minus_nav - 50) + 'px',
+			 'height': (window_height_minus_nav - 50) + 'px'}
 		);
 
 		if (container_height > parseInt($('#project-container').css("min-height"))) {
