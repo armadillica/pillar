@@ -22,10 +22,13 @@
 		.video-dummy.sorry(
 			style="{% if node.picture %}background-image: url({{ node.picture.thumbnail('l', api=api) }});{% endif %}")
 			.video-dummy-content
-				i.pi-lock.video-dummy-content-icon
 				.video-dummy-content-text
-					span Only available to Blender Cloud subscribers.
-					a(href="{{ url_for('cloud.join') }}") Support Blender and get awesome stuff. <em>Subscribe now!</em>
+					span Available to Blender Cloud subscribers
+					span
+						small Support Blender and get awesome stuff!
+					hr
+					a.subscribe(href="{{ url_for('cloud.join') }}") <em>Subscribe</em>
+					a(href="{{ url_for('users.login') }}") Already a subscriber? Log in
 		| {% endif %}
 
 
@@ -75,13 +78,6 @@ script(type="text/javascript").
 		var content_type = $("li.node-details-meta-list-item.type").text();
 		$("li.node-details-meta-list-item.type").text(content_type.substring(content_type.indexOf("/") + 1));
 
-		{% if not node.video_sources %}
-		$('.sorry').click(function() {
-			$.get('/403', function(data) {
-				$('#node-overlay').html(data).addClass('active');
-			})
-		});
-		{% endif %}
 	});
 
 include ../../_scripts

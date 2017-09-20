@@ -1011,26 +1011,23 @@ section.node-preview
 			height: 100%
 
 		.video-dummy
-			min-height: 320px
-			display: flex
-			width: 100%
-			align-items: center
-			justify-content: center
-			color: white
-			background:
-				repeat: no-repeat
-				size: cover
-				position: center
-			height: 100%
+			position: absolute
+			top: 0
+			bottom: 0
+			left: 0
+			right: 0
 
 			&-content
-				background-color: rgba(black, .8)
-				padding: 15px
-				border-radius: 3px
-				position: relative
-				z-index: 2
-				display: flex
+				+position-center-translate
 				align-items: center
+				background-color: rgba(darken($color-primary, 25%), .8)
+				color: $color-text-light
+				display: flex
+				height: 100%
+				justify-content: center
+				padding: 15px
+				width: 100%
+				z-index: 2
 
 				&-icon
 					font-size: 4em
@@ -1039,10 +1036,13 @@ section.node-preview
 					font-size: 1.6em
 					span
 						display: block
+
+					hr
+						border-color: rgba(white, .5)
 					a
 						display: inline-block
 						color: white
-						font-size: .8em
+						font-size: .7em
 
 						em
 							font-style: normal
