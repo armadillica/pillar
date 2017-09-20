@@ -17,11 +17,12 @@ from flask import request
 from flask import jsonify
 from flask import abort
 from flask_login import current_user
-from werkzeug.exceptions import NotFound
+import werkzeug.exceptions as wz_exceptions
 from wtforms import SelectMultipleField
 from flask_login import login_required
 from jinja2.exceptions import TemplateNotFound
 
+from pillar.api.utils.authorization import check_permissions
 from pillar.web.utils import caching
 from pillar.web.nodes.forms import get_node_form
 from pillar.web.nodes.forms import process_node_form
@@ -322,10 +323,10 @@ def _view_handler_hdri(node, template_path, template_action, link_allowed):
     return template_path, template_action
 
 
-@blueprint.route("/<node_id>/edit", methods=['GET', 'POST'])
+@blueprint.route('/<node_id>/edit', methods=['GET', 'POST'])
 @login_required
 def edit(node_id):
-    """Generic node editing form
+    """Generic node editing form, displayed only if the user is allowed.
     """
 
     def set_properties(dyn_schema, form_schema, node_properties, form, set_data,
@@ -395,6 +396,11 @@ def edit(node_id):
 
     api = system_util.pillar_api()
     node = Node.find(node_id, api=api)
+
+    # We do not want to display the page to users who can't PUT
+    if 'PUT' not in node.allowed_methods:
+        raise wz_exceptions.Forbidden()
+
     project = Project.find(node.project, api=api)
     node_type = project.get_node_type(node.node_type)
     form = get_node_form(node_type)
@@ -558,14 +564,14 @@ def redirect_to_context(node_id):
         log.warning("JavaScript should have filled in the ObjectID placeholder, but didn't. "
                     "URL=%s and referrer=%s",
                     request.url, request.referrer)
-        raise NotFound('Invalid ObjectID')
+        raise wz_exceptions.NotFound('Invalid ObjectID')
 
     try:
         url = url_for_node(node_id)
     except ValueError as ex:
         log.warning("%s: URL=%s and referrer=%s",
                     str(ex), request.url, request.referrer)
-        raise NotFound('Invalid ObjectID')
+        raise wz_exceptions.NotFound('Invalid ObjectID')
 
     return redirect(url)
 
@@ -585,7 +591,7 @@ def url_for_node(node_id=None, node=None):
             log.warning(
                 'url_for_node(node_id=%r, node=None): Unable to find node.',
                 node_id)
-            raise NotFound('Unable to find node %r' % node_id)
+            raise wz_exceptions.NotFound('Unable to find node %r' % node_id)
 
     return finders.find_url_for_node(node)
 
