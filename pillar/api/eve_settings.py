@@ -321,6 +321,10 @@ tokens_schema = {
     },
     'token': {
         'type': 'string',
+        'required': False,
+    },
+    'token_hashed': {
+        'type': 'string',
         'required': True,
     },
     'expire_time': {

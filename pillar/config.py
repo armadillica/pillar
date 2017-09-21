@@ -24,6 +24,9 @@ DEBUG = False
 # python3 -c 'import secrets; print(secrets.token_urlsafe(128))'
 SECRET_KEY = ''
 
+# Authentication token hashing key. If empty falls back to UTF8-encoded SECRET_KEY with a warning.
+AUTH_TOKEN_HMAC_KEY = b''
+
 # Authentication settings
 BLENDER_ID_ENDPOINT = 'http://blender_id:8000/'
 

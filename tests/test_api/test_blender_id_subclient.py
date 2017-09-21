@@ -42,6 +42,8 @@ class BlenderIdSubclientTest(AbstractPillarTest):
 
     @responses.activate
     def test_store_multiple_tokens(self):
+        from pillar.api.utils.authentication import hash_auth_token
+
         scst1 = '%s-1' % TEST_SUBCLIENT_TOKEN
         scst2 = '%s-2' % TEST_SUBCLIENT_TOKEN
         db_user1 = self._common_user_test(201, scst=scst1)
@@ -51,8 +53,10 @@ class BlenderIdSubclientTest(AbstractPillarTest):
         # Now there should be two tokens.
         with self.app.test_request_context():
             tokens = self.app.data.driver.db['tokens']
-            self.assertIsNotNone(tokens.find_one({'user': db_user1['_id'], 'token': scst1}))
-            self.assertIsNotNone(tokens.find_one({'user': db_user1['_id'], 'token': scst2}))
+            self.assertIsNotNone(tokens.find_one(
+                {'user': db_user1['_id'], 'token_hashed': hash_auth_token(scst1)}))
+            self.assertIsNotNone(tokens.find_one(
+                {'user': db_user1['_id'], 'token_hashed': hash_auth_token(scst2)}))
 
         # There should still be only one auth element for blender-id in the user doc.
         self.assertEqual(1, len(db_user1['auth']))
@@ -76,6 +80,8 @@ class BlenderIdSubclientTest(AbstractPillarTest):
     def _common_user_test(self, expected_status_code, scst=TEST_SUBCLIENT_TOKEN,
                           expected_full_name=TEST_FULL_NAME,
                           mock_happy_blender_id=True):
+        from pillar.api.utils.authentication import hash_auth_token
+
         if mock_happy_blender_id:
             self.mock_blenderid_validate_happy()
 
@@ -104,7 +110,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
             # Check that the token was succesfully stored.
             tokens = self.app.data.driver.db['tokens']
             db_token = tokens.find_one({'user': db_user['_id'],
-                                        'token': scst})
+                                        'token_hashed': hash_auth_token(scst)})
             self.assertIsNotNone(db_token)
 
         return db_user

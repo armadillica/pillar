@@ -72,13 +72,16 @@ def make_token():
     return jsonify(token=token['token'])
 
 
-def generate_and_store_token(user_id, days=15, prefix=b''):
+def generate_and_store_token(user_id, days=15, prefix=b'') -> dict:
     """Generates token based on random bits.
+
+    NOTE: the returned document includes the plain-text token.
+    DO NOT STORE OR LOG THIS unless there is a good reason to.
 
     :param user_id: ObjectId of the owning user.
     :param days: token will expire in this many days.
     :param prefix: the token will be prefixed by these bytes, for easy identification.
-    :return: the token document.
+    :return: the token document with the token in plain text as well as hashed.
     """
 
     if not isinstance(prefix, bytes):
@@ -90,10 +93,17 @@ def generate_and_store_token(user_id, days=15, prefix=b''):
 
     # Use 'xy' as altargs to prevent + and / characters from appearing.
     # We never have to b64decode the string anyway.
-    token = prefix + base64.b64encode(random_bits, altchars=b'xy').strip(b'=')
+    token_bytes = prefix + base64.b64encode(random_bits, altchars=b'xy').strip(b'=')
+    token = token_bytes.decode('ascii')
 
     token_expiry = datetime.datetime.now(tz=tz_util.utc) + datetime.timedelta(days=days)
-    return store_token(user_id, token.decode('ascii'), token_expiry)
+    token_data = store_token(user_id, token, token_expiry)
+
+    # Include the token in the returned document so that it can be stored client-side,
+    # in configuration, etc.
+    token_data['token'] = token
+
+    return token_data
 
 
 def hash_password(password: str, salt: typing.Union[str, bytes]) -> str:

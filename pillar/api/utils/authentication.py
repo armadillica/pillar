@@ -5,7 +5,10 @@ unique usernames from emails. Calls out to the pillar_server.modules.blender_id
 module for Blender ID communication.
 """
 
+import base64
 import datetime
+import hmac
+import hashlib
 import logging
 import typing
 
@@ -181,14 +184,29 @@ def find_token(token, is_subclient_token=False, **extra_filters):
 
     tokens_collection = current_app.data.driver.db['tokens']
 
-    # TODO: remove expired tokens from collection.
-    lookup = {'token': token,
+    token_hashed = hash_auth_token(token)
+
+    # TODO: remove matching on unhashed tokens once all tokens have been hashed.
+    lookup = {'$or': [{'token': token}, {'token_hashed': token_hashed}],
               'is_subclient_token': True if is_subclient_token else {'$in': [False, None]},
               'expire_time': {"$gt": datetime.datetime.now(tz=tz_util.utc)}}
     lookup.update(extra_filters)
 
     db_token = tokens_collection.find_one(lookup)
     return db_token
+
+
+def hash_auth_token(token: str) -> str:
+    """Returns the hashed authentication token.
+
+    The token is hashed using HMAC and then base64-encoded.
+    """
+
+    hmac_key = current_app.config['AUTH_TOKEN_HMAC_KEY']
+    token_hmac = hmac.new(hmac_key, msg=token.encode('utf8'), digestmod=hashlib.sha256)
+    digest = token_hmac.digest()
+
+    return base64.b64encode(digest).decode('ascii')
 
 
 def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False):
@@ -201,7 +219,7 @@ def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False):
 
     token_data = {
         'user': user_id,
-        'token': token,
+        'token_hashed': hash_auth_token(token),
         'expire_time': token_expiry,
     }
     if oauth_subclient_id:

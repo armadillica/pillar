@@ -91,6 +91,7 @@ class PillarServer(Eve):
         self.log = logging.getLogger('%s.%s' % (__name__, self.__class__.__name__))
         self.log.info('Creating new instance from %r', self.app_root)
 
+        self._config_auth_token_hmac_key()
         self._config_tempdirs()
         self._config_git()
         self._config_bugsnag()
@@ -148,6 +149,18 @@ class PillarServer(Eve):
         log = logging.getLogger(__name__)
         if self.config['DEBUG']:
             log.info('Pillar starting, debug=%s', self.config['DEBUG'])
+
+    def _config_auth_token_hmac_key(self):
+        """Load AUTH_TOKEN_HMAC_KEY, falling back to SECRET_KEY."""
+
+        hmac_key = self.config.get('AUTH_TOKEN_HMAC_KEY')
+        if not hmac_key:
+            self.log.warning('AUTH_TOKEN_HMAC_KEY not set, falling back to SECRET_KEY')
+            hmac_key = self.config['AUTH_TOKEN_HMAC_KEY'] = self.config['SECRET_KEY']
+
+        if isinstance(hmac_key, str):
+            self.log.warning('Converting AUTH_TOKEN_HMAC_KEY to bytes')
+            self.config['AUTH_TOKEN_HMAC_KEY'] = hmac_key.encode('utf8')
 
     def _config_tempdirs(self):
         storage_dir = self.config['STORAGE_DIR']

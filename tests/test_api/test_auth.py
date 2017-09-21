@@ -78,6 +78,8 @@ class AuthenticationTests(AbstractPillarTest):
 
         from pillar.api.utils import authentication as auth
 
+        self.enter_app_context()
+
         user_id = self.create_user()
 
         now = datetime.datetime.now(tz_util.utc)
@@ -85,10 +87,15 @@ class AuthenticationTests(AbstractPillarTest):
         past = now - datetime.timedelta(days=1)
         subclient = self.app.config['BLENDER_ID_SUBCLIENT_ID']
 
-        with self.app.test_request_context():
-            auth.store_token(user_id, 'nonexpired-main', future, None)
-            auth.store_token(user_id, 'nonexpired-sub', future, subclient)
-            token3 = auth.store_token(user_id, 'expired-sub', past, subclient)
+        auth.store_token(user_id, 'nonexpired-main', future, None)
+        auth.store_token(user_id, 'nonexpired-sub', future, subclient)
+        token3 = auth.store_token(user_id, 'expired-sub', past, subclient)
+
+        # We should not find the given tokens as unhashed tokens.
+        tokens_coll = self.app.db('tokens')
+        self.assertIsNone(tokens_coll.find_one({'token': 'nonespired-main'}))
+        self.assertIsNone(tokens_coll.find_one({'token': 'nonespired-sub'}))
+        self.assertIsNone(tokens_coll.find_one({'token': 'expired-sub'}))
 
         with self.app.test_request_context(
                 headers={'Authorization': self.make_header('nonexpired-main')}):
@@ -172,19 +179,19 @@ class AuthenticationTests(AbstractPillarTest):
         with self.app.test_request_context():
             from pillar.api.utils import authentication as auth
 
-            auth.store_token(user_id, 'long-expired',
-                             now - datetime.timedelta(days=365), None)
-            auth.store_token(user_id, 'short-expired',
-                             now - datetime.timedelta(seconds=5), None)
-            auth.store_token(user_id, 'not-expired',
-                             now + datetime.timedelta(days=1), None)
+            tokdat_le = auth.store_token(user_id, 'long-expired',
+                                         now - datetime.timedelta(days=365), None)
+            tokdat_se = auth.store_token(user_id, 'short-expired',
+                                         now - datetime.timedelta(seconds=5), None)
+            tokdat_ne = auth.store_token(user_id, 'not-expired',
+                                         now + datetime.timedelta(days=1), None)
 
             # Validation should clean up old tokens.
             auth.validate_this_token('je', 'moeder')
 
             token_coll = self.app.data.driver.db['tokens']
-            self.assertEqual({'short-expired', 'not-expired'},
-                             {item['token'] for item in token_coll.find()})
+            self.assertEqual({tokdat_se['token_hashed'], tokdat_ne['token_hashed']},
+                             {item['token_hashed'] for item in token_coll.find()})
 
 
 class UserListTests(AbstractPillarTest):
@@ -703,7 +710,6 @@ class UserCreationTest(AbstractPillarTest):
 
 
 class CurrentUserTest(AbstractPillarTest):
-
     def test_current_user_logged_in(self):
         self.enter_app_context()
 

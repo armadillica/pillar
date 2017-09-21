@@ -38,6 +38,8 @@ class LocalAuthTest(AbstractPillarTest):
         self.assertEqual(200, resp.status_code, resp.data)
 
     def test_login_expired_token(self):
+        from pillar.api.utils.authentication import hash_auth_token
+
         user_id = self.create_test_user()
 
         resp = self.client.post('/api/auth/make-token',
@@ -52,7 +54,7 @@ class LocalAuthTest(AbstractPillarTest):
             tokens = self.app.data.driver.db['tokens']
 
             exp = datetime.datetime.now(tz=tz_util.utc) - datetime.timedelta(1)
-            result = tokens.update_one({'token': token},
+            result = tokens.update_one({'token_hashed': hash_auth_token(token)},
                                        {'$set': {'expire_time': exp}})
             self.assertEqual(1, result.modified_count)
 
