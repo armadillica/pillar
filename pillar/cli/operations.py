@@ -179,3 +179,29 @@ def index_users_update_settings():
             'unordered(roles)'
         ]
     })
+
+
+@manager_operations.command
+def hash_auth_tokens():
+    """Hashes all unhashed authentication tokens."""
+
+    from pymongo.results import UpdateResult
+    from pillar.api.utils.authentication import hash_auth_token
+
+    tokens_coll = current_app.db('tokens')
+    query = {'token': {'$exists': True}}
+    cursor = tokens_coll.find(query, projection={'token': 1, '_id': 1})
+    log.info('Updating %d tokens', cursor.count())
+
+    for token_doc in cursor:
+        hashed_token = hash_auth_token(token_doc['token'])
+        token_id = token_doc['_id']
+        res: UpdateResult = tokens_coll.update_one(
+            {'_id': token_id},
+            {'$set': {'token_hashed': hashed_token},
+             '$unset': {'token': 1}},
+        )
+        if res.modified_count != 1:
+            raise ValueError(f'Unable to update token {token_id}!')
+
+    log.info('Done')
