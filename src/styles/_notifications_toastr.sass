@@ -1,3 +1,5 @@
+$color-text-notification: white
+
 .toast-title
 	font-weight: bold
 
@@ -6,10 +8,10 @@
 
 	a,
 	label
-		color: $color-text-light
+		color: rgba($color-text-notification, .8)
 
 		a:hover
-			color: $color-text-light-primary
+			color: $color-text-notification
 			text-decoration: none
 
 	button
@@ -29,7 +31,7 @@
 	float: right
 	font-size: 20px
 	font-weight: bold
-	color: $color-text-light
+	color: $color-text-notification
 	-webkit-text-shadow: 0 1px 0 rgba(255,255,255,1)
 	text-shadow: 0 1px 0 rgba(255,255,255,1)
 	opacity: .8
@@ -37,7 +39,7 @@
 
 	&:hover,
 	&:focus
-		color: $color-text
+		color: $color-text-notification
 		text-decoration: none
 		cursor: pointer
 		opacity: .4
@@ -118,7 +120,7 @@ button.toast-close-button
 		background-position: 15px center
 		background-repeat: no-repeat
 		box-shadow: 1px 1px 0 rgba(black, .2)
-		color: $color-text-light
+		color: $color-text-notification
 
 		&:before
 			position: absolute
@@ -159,7 +161,6 @@ button.toast-close-button
 		width: 96%
 		margin-left: auto
 		margin-right: auto
-
 
 
 .toast
