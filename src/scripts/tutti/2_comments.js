@@ -303,3 +303,33 @@ function save_comment(is_new_comment, $commentContainer)
 
 	return promise;
 }
+
+/* Used when clicking the .comment-action-submit button or by a shortcut */
+function post_comment($submit_button){
+
+	save_comment(true)
+	.progress(function() {
+		$submit_button
+			.addClass('submitting')
+			.html('<i class="pi-spin spin"></i> Posting...');
+	})
+	.fail(function(xhr){
+		if (typeof xhr === 'string') {
+			show_comment_button_error(xhr);
+		} else {
+			// If it's not a string, we assume it's a jQuery XHR object.
+			if (console) console.log('Error saving comment:', xhr.responseText);
+			show_comment_button_error("Houston! Try again?");
+		}
+		toastr.error(xhr.responseText, 'Error saving comment');
+	})
+	.done(function(comment_node_id) {
+		$submit_button
+			.removeClass('submitting')
+			.html('Post Comment');
+		$('#comment_field').val('');
+		$('body').trigger('pillar:comment-posted', [comment_node_id]);
+
+		toastr.success('Comment posted!');
+	});
+}
