@@ -169,7 +169,7 @@ script.
 		})
 		.fail(function(xhr) {
 			if (console) console.log('Error fetching comment: ', xhr);
-			statusBarSet('error', 'Error ' + xhr.status + ' entering edit mode.', 'pi-warning');
+			toastr.error('Error ' + xhr.status + ' entering edit mode.');
 		});
 	});
 
