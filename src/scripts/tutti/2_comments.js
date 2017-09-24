@@ -27,16 +27,13 @@ $(document).on('click','body .comment-action-reply',function(e){
 	commentField.dataset.parentId = parentNodeId;
 
 	// Start the comment field with @authorname:
-	var replyAuthor = parentDiv.find('.comment-author:first span').html();
-	$(commentField).val("**@" + replyAuthor.slice(1, -1) + ":** ");
+	var replyAuthor = parentDiv.find('.comment-author:first').html();
+
+	$(commentField).val("**@" + replyAuthor + ":** ");
 
 	// Add class for styling
 	$('.comment-container').removeClass('is-replying');
 	parentDiv.addClass('is-replying');
-
-	// Rename Post Comment button to Reply
-	var commentSubmitButton = document.getElementById('comment_submit');
-	$(commentSubmitButton).text('Post Reply');
 
 	// Move comment-reply container field after the parent container
 	var commentForm = $('.comment-reply-container').detach();
@@ -46,9 +43,9 @@ $(document).on('click','body .comment-action-reply',function(e){
 
 	// Convert Markdown
 	var convert = new Markdown.getSanitizingConverter().makeHtml;
-	var preview = $('.comment-reply-preview');
+	var preview = $('.comment-reply-preview-md');
 	preview.html(convert($(commentField).val()));
-	$('.comment-reply-form').addClass('filled');
+	$('.comment-reply-field').addClass('filled');
 });
 
 
@@ -64,13 +61,10 @@ $(document).on('click','body .comment-action-cancel',function(e){
 	$(commentField).val('');
 	// Convert Markdown
 	var convert = new Markdown.getSanitizingConverter().makeHtml;
-	var preview = $('.comment-reply-preview');
+	var preview = $('.comment-reply-preview-md');
 	preview.html(convert($(commentField).val()));
 
-	var commentSubmitButton = document.getElementById('comment_submit');
-	$(commentSubmitButton).text('Post Comment');
-
-	$('.comment-reply-form').removeClass('filled');
+	$('.comment-reply-field').removeClass('filled');
 	$('.comment-container').removeClass('is-replying');
 });
 
@@ -169,14 +163,14 @@ function show_comment_button_error(msg) {
 	var $button = $('.comment-action-submit');
 	var $textarea = $('#comment_field');
 
-	$button.addClass('button-field-error');
-	$textarea.addClass('field-error');
+	$button.addClass('error');
+	$textarea.addClass('error');
 	$button.html(msg);
 
 	setTimeout(function(){
-		$button.html('Post Comment');
-		$button.removeClass('button-field-error');
-		$textarea.removeClass('field-error');
+		$button.html('<i class="pi-paper-plane"></i> Send');
+		$button.removeClass('error');
+		$textarea.removeClass('error');
 	}, 2500);
 }
 
@@ -218,8 +212,7 @@ function comment_mode(clicked_item, mode)
 		$edit_buttons.find('.edit_cancel').hide();
 		$edit_buttons.find('.edit_save').hide();
 
-		$container.find('.comment-content').removeClass('editing');
-		$container.find('.comment-content-preview').html('').hide();
+		$container.find('.comment-body').removeClass('editing');
 	}
 }
 
@@ -241,7 +234,7 @@ function commentEditCancel(clicked_item, reload_comment) {
 	return loadComment(comment_id, {'properties.content': 1})
 	.done(function(data) {
 		var comment_html = data['properties']['content_html'];
-		comment_container.find('.comment-content').html(comment_html);
+		comment_container.find('.comment-body').html(comment_html);
 	})
 	.fail(function(xhr) {
 		if (console) console.log('Error fetching comment: ', xhr);
@@ -311,22 +304,22 @@ function post_comment($submit_button){
 	.progress(function() {
 		$submit_button
 			.addClass('submitting')
-			.html('<i class="pi-spin spin"></i> Posting...');
+			.html('<i class="pi-spin spin"></i> Sending...');
 	})
 	.fail(function(xhr){
 		if (typeof xhr === 'string') {
 			show_comment_button_error(xhr);
 		} else {
 			// If it's not a string, we assume it's a jQuery XHR object.
-			if (console) console.log('Error saving comment:', xhr.responseText);
+			if (console) console.log('Error posting comment: ', xhr.responseText);
 			show_comment_button_error("Houston! Try again?");
 		}
-		toastr.error(xhr.responseText, 'Error saving comment');
+		toastr.error(xhr.responseText, 'Error posting comment');
 	})
 	.done(function(comment_node_id) {
 		$submit_button
 			.removeClass('submitting')
-			.html('Post Comment');
+			.html('<i class="pi-paper-plane"></i> Send');
 		$('#comment_field').val('');
 		$('body').trigger('pillar:comment-posted', [comment_node_id]);
 

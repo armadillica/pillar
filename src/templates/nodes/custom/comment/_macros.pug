@@ -4,41 +4,45 @@
 	data-node-id="{{ comment._id }}",
 	class="{% if is_reply %}is-reply{% else %}is-first{% endif %}")
 
-	.comment-header
-		.comment-avatar
-			img(src="{{ comment._user.email | gravatar }}")
+	.comment-avatar
+		img(src="{{ comment._user.email | gravatar }}")
 
-		.comment-author(class="{% if comment._is_own %}own{% endif %}")
-			| {{ comment._user.full_name }}
-			span.username ({{ comment._user.username }})
+	.comment-content
+		.comment-body
+			p.comment-author {{ comment._user.full_name }}
 
-		.comment-time {{ comment._created | pretty_date_time }} {% if comment._created != comment._updated %} (edited {{ comment._updated | pretty_date_time }}){% endif %}
+			| {{comment.properties.content_html | safe }}
 
-	.comment-content {{comment.properties.content_html | safe }}
-	| {% if comment._is_own %}
-	.comment-content-preview
-	| {% endif %}
+		// TODO: Markdown preview when editing
 
-	.comment-meta
-		.comment-rating(
-			class="{% if comment._current_user_rating is not none %}rated{% if comment._current_user_rating %} positive{% endif %}{% endif %}")
-			.comment-rating-value(title="Number of likes") {{ comment._rating }}
-			| {% if not comment._is_own %}
-			.comment-action-rating.up(title="Like comment")
+		.comment-meta
+			.comment-rating(
+				class="{% if comment._current_user_rating is not none %}rated{% if comment._current_user_rating %} positive{% endif %}{% endif %}")
+				.comment-rating-value(title="Number of likes") {{ comment._rating }}
+
+				| {% if not comment._is_own %}
+				.comment-action-rating.up(title="Like comment")
+				| {% endif %}
+
+			.comment-action-reply(title="Reply to this comment")
+				span reply
+
+			| {% if comment._is_own %}
+			.comment-action-edit
+				span.edit_mode(title="Edit comment") edit
+				span.edit_save(title="Save comment")
+					i.pi-check
+					| save changes
+				span.edit_cancel(title="Cancel changes")
+					i.pi-cancel
+					| cancel
 			| {% endif %}
 
-		.comment-action-reply(title="Reply to this comment")
-			span reply
-		| {% if comment._is_own %}
-		.comment-action-edit
-			span.edit_mode(title="Edit comment") edit
-			span.edit_save(title="Save comment")
-				i.pi-check
-				| save changes
-			span.edit_cancel(title="Cancel changes")
-				i.pi-cancel
-				| cancel
-		| {% endif %}
+			.comment-time
+				| {{ comment._created | pretty_date_time }}
+				| {% if comment._created != comment._updated %}
+				span(title="edited {{ comment._updated | pretty_date_time }})") *
+				| {% endif %}
 
 | {% for reply in comment['_replies']['_items'] %}
 | {{ render_comment(reply, True) }}

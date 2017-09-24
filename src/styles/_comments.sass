@@ -3,9 +3,6 @@ $comments-width-max: 710px
 .comments-container
 	position: relative
 
-	&.texture
-		border-top: none
-
 	#comments-reload
 		text-align: center
 		cursor: pointer
@@ -16,7 +13,7 @@ $comments-width-max: 710px
 		padding: 15px 0 10px 0
 		font-size: 1.3em
 		font-weight: 300
-		color: $color-text-dark-primary
+		color: $color-text-dark-hint
 
 	#comments-list-items-loading
 		font-size: 2em
@@ -43,7 +40,6 @@ $comments-width-max: 710px
 		.comment-container,
 		.comment-reply-container
 			display: flex
-			flex-direction: column
 
 			position: relative
 			padding: 15px 0 20px 0
@@ -67,52 +63,43 @@ $comments-width-max: 710px
 				&.is-replying
 					margin-bottom: 15px !important
 
-				.comment-header .comment-avatar
+				.comment-avatar
 					padding-right: 5px
 					padding-left: 5px
 
 			&.comment-linked+.comment-container.is-first
 				border-top: none
 
-			/* Header containing author, time, and badges if any*/
-			.comment-header
-				display: flex
-				align-items: center
+			.comment-avatar
+				padding-right: 10px
 
-				.comment-avatar
-					padding-right: 10px
+				img
+					border-radius: 50%
+					height: 24px
+					margin-top: 5px
+					width: 24px
 
-					img
-						border-radius: 50%
-						height: 24px
-						margin-top: 5px
-						width: 24px
+			p.comment-author
+				color: $color-text-dark
+				display: inline-block
+				float: left
+				font-weight: bold
+				margin-right: 10px
+				white-space: nowrap
 
-				.comment-author
+				&.op
+					color: $color-primary-dark
+
+			.comment-time
+				padding-left: 10px
+				margin-left: 10px
+				color: $color-text-dark-hint
+
+				&:before
+					content: '·'
 					position: relative
-					color: $color-background-nav
-					font:
-						weight: 500
-
-					&.own
-						color: $color-success
-					&.op
-						color: $color-primary-dark
-
-					.username
-						padding-left: 5px
-						color: $color-text-dark-secondary
-
-				.comment-time
-					padding-left: 10px
-					margin-left: 10px
-					color: $color-text-dark-hint
-
-					&:before
-						content: '·'
-						position: relative
-						left: -10px
-						font-weight: 600
+					left: -10px
+					font-weight: 600
 
 			/* The actual comment body. */
 			/* Here we style both the preview comment and posted comments */
@@ -128,7 +115,6 @@ $comments-width-max: 710px
 				+media-lg
 					max-width: $comments-width-max
 
-				padding: 0 0 0 34px
 				color: darken($color-text-dark, 10%)
 				font:
 					size: 1em
@@ -148,43 +134,34 @@ $comments-width-max: 710px
 							left: 0
 							right: 0
 
-					line-height: 1.5em
+					line-height: 1.4em
 					margin-top: 5px
 
 					&:last-child
 						margin-bottom: 10px
 
+					&.comment-author
+						margin-bottom: 0
 
 				strong, b
 					font-weight: 500
 					color: $color-info
 
-				textarea
-					+node-details-description
-					background-color: white
-					padding: 0 0 0 5px
-					margin-left: 15px
-					width: 100%
-					color: $color-text-dark-primary
-					border: none
-					border-radius: 3px
-					font:
-						size: 1em
-						weight: normal
-
-					&:focus
-						outline: none
-						border: none
-						color: $color-text-dark
-
-				&.editing
+				.editing
 					background-color: $color-background-light
-					margin: 10px 0
+					margin-bottom: 10px
 					border-color: $color-background-dark
 					border-radius: 3px
 
-					&.empty
-						border-color: $color-danger
+					textarea
+						box-shadow: none
+						width: 100%
+
+			.comment-content
+				display: flex
+				flex-direction: column
+				padding-bottom: 0
+				width: 100%
 
 			.comment-content-preview
 				display: none
@@ -233,16 +210,15 @@ $comments-width-max: 710px
 						left: 0
 						right: 0
 
-				display: flex
 				align-items: center
-				padding-left: 35px
 				color: $color-text-dark-secondary
+				display: flex
+				font-size: .9em
 
 				/* Small container for rating buttons and value */
 				.comment-rating
 					display: flex
 					align-items: center
-
 
 					&.rated
 						color: $color-text-dark-secondary
@@ -327,10 +303,10 @@ $comments-width-max: 710px
 
 			&.is-reply
 				padding:
-					top: 20px
-					left: 15px
-				margin-left: 30px
-				border-left: 3px solid $color-background-dark
+					left: 20px
+					top: 5px
+				margin-left: 35px
+				box-shadow: inset 3px 0 0 $color-background-dark
 
 				+media-xs
 					padding-left: 15px
@@ -340,6 +316,10 @@ $comments-width-max: 710px
 					border-top: thin solid $color-background-dark !important
 					border-bottom: thin solid $color-background-dark !important
 
+				&.is-replying+.comment-reply-container
+					margin-left: 35px
+					padding-left: 25px
+
 			&.is-first
 				border-top: 1px solid lighten($color-text-dark-hint, 15%)
 
@@ -348,14 +328,12 @@ $comments-width-max: 710px
 					color: $color-success
 
 			&.is-replying
-				border-left: 3px solid $color-primary
-				padding-left: 10px
+				box-shadow: inset 5px 0 0 $color-primary
 
-			// &.is-replying.is-first+.comment-reply-container
 			&.is-replying+.comment-reply-container
-				border-left: 3px solid $color-primary
+				box-shadow: inset 5px 0 0 $color-primary
 				margin-left: 0
-				padding-left: 30px
+				padding-left: 55px
 
 			.comment-badge
 				display: inline-block
@@ -382,9 +360,6 @@ $comments-width-max: 710px
 		.comment-reply-container
 			background-color: $color-background
 
-			// It's flex, like the others, but different direction
-			flex-direction: row
-
 			/* Little gravatar icon on the left */
 			.comment-reply-avatar
 				img
@@ -395,33 +370,66 @@ $comments-width-max: 710px
 
 			/* textarea field, submit button and reply details */
 			.comment-reply-form
-				width: 100%
 				padding:
 					top: 0
 					left: 10px
+				width: 100%
 
 				.comment-reply-field
+					background-color: white
+					border-radius: 3px
+					box-shadow: 1px 2px 2px rgba($color-background-dark, .5)
+					display: flex
 					position: relative
+					transition: border-color 300ms ease-in-out
 
 					textarea
-						width: 100%
-						height: 45px
-
-						line-height: 1.5em
-						border: 1px solid $color-background-dark
-						border-radius: 3px
-						margin: 0 auto 5px auto
-						padding: 10px 0 10px 10px
+						+node-details-description
 						color: $color-text-dark
+						border: none
+						border-bottom-right-radius: 0
+						border-top-right-radius: 0
+						box-shadow: none
+						flex: 1
+						font:
+							size: 1em
+							weight: normal
+						line-height: 1.5em
+						margin: 0
+						min-height: 45px
+						padding: 10px 0 10px 10px
 						resize: vertical
-						transition: border-color 300ms ease-in-out
+						width: 100%
+						transition: box-shadow 250ms ease-in-out
 
 						&:focus
-							border: 1px solid $color-success
+							box-shadow: inset 2px 0 0 0 $color-success, inset 0 2px 0 0 $color-success, inset 0 -2px 0 0 $color-success
+							border: none
+							color: $color-text-dark
 							outline: none
 
-						&.field-error
-							border-color: $color-danger
+							&+.comment-reply-meta button.comment-action-submit
+								box-shadow: inset -2px 0 0 0 $color-success, inset 0 2px 0 0 $color-success, inset 0 -2px 0 0 $color-success
+
+						&.error
+							box-shadow: inset 2px 0 0 0 $color-danger, inset 0 2px 0 0 $color-danger, inset 0 -2px 0 0 $color-danger
+
+					&.filled
+						textarea:focus
+							border-bottom-left-radius: 0
+
+						&+.comment-reply-preview
+							display: flex
+
+						.comment-reply-meta
+							background-color: $color-success
+
+							.comment-action-submit
+								color: white
+								border-bottom-right-radius: 0
+
+								span.hotkey
+									display: block
 
 					&.sign-in
 						display: block
@@ -433,31 +441,23 @@ $comments-width-max: 710px
 							margin-right: 4px
 
 
-					.comment-reply-preview
-						position: relative
-						margin: 10px auto 5px auto
-						padding: 10px
-						color: $color-text-dark-primary
-						border-top: thin solid $color-background-dark
-						border-bottom: thin solid $color-background
-						transition: all 150ms ease-in-out
+				.comment-reply-preview
+					background-color: $color-background-light
+					border-bottom-left-radius: 3px
+					border-bottom-right-radius: 3px
+					box-shadow: 1px 2px 2px rgba($color-background-dark, .5)
+					color: $color-text-dark-primary
+					display: none // flex when comment-reply-field has .filled class
+					position: relative
+					transition: all 150ms ease-in-out
 
-						&:before
-							content: 'Live Preview'
-							position: absolute
-							top: -20px
-							font-size: .9em
-							color: $color-text-dark-hint
-							transition: color 150ms ease-in-out
+					p
+						padding-left: 0
+						padding-right: 0
 
-							+media-md
-								visibility: visible
-							+media-sm
-								visibility: hidden
-
-						p
-							padding-left: 0
-							padding-right: 0
+					&-md
+						flex: 1
+						padding: 5px 10px
 
 					.comment-reply-preview:empty
 						color: transparent
@@ -469,120 +469,65 @@ $comments-width-max: 710px
 							content: ''
 							color: transparent
 
+					.comment-reply-info
+						background-color: $color-background-dark
+						display: flex
+						flex-direction: column
+						font-size: .8em
+						padding-bottom: 10px
+						text-align: center
+						width: 100px
+
+					.comment-action-cancel
+						cursor: pointer
+						padding: 10px
+						text-decoration: underline
+
+						&:hover
+							color: $color-primary
+
 				.comment-reply-meta
 					display: flex
 					align-items: center
-
-					.comment-details
-						opacity: 0
-						font-size: .9em
-
-						display: flex
-						align-items: center
-						justify-content: flex-end
-						width: 100%
-
-						transition: opacity 300ms ease-in-out
-
-						.comment-author
-							padding:
-								right: 15px
-							color: $color-text-dark
-							font:
-								weight: 300
-
-							.author-name
-								padding-left: 3px
-								font:
-									weight: 500
-
-						.comment-rules
-							padding-right: 8px
-							margin-right: 8px
-
-							a
-								color: $color-text-dark-hint
-
-								&:hover
-									color: $color-primary
-
-								i
-									font-size: 1.5em
-									position: relative
-									top: 2px
-
+					border-bottom-right-radius: 3px
+					border-top-right-radius: 3px
+					transition: background-color 150ms ease-in-out, color 150ms ease-in-out
+					width: 100px
 
 					button.comment-action-submit
-						margin-left: auto
-						min-width: 180px
-						transition: all 200ms ease-in-out
-
-						+button($color-success, 3px)
+						border: none
+						border-top-left-radius: 0
+						border-bottom-left-radius: 0
+						color: $color-success
+						flex-direction: column
+						height: 100%
 						position: relative
+						transition: all 200ms ease-in-out
+						white-space: nowrap
+						width: 100%
 
-						span.hint
-							position: absolute
-							top: 35px
-							left: 50%
-							transform: translateX(-50%)
-							font-size: .7em
-							text-transform: initial
-							display: block
-							color: $color-text-dark-hint
+						&:focus
+							background-color: white
+
 
 						&.submitting
-							background: linear-gradient(to left, transparent 50%, #7AC29A 50%)
-							background-size: 200% 100%
+							color: $color-info
+
+						&.error
+							background-color: $color-danger
 							color: white
-							animation:
-								name: background-fill-left-right
-								duration: .5s
-								delay: 0
-								fill-mode: forwards
-								iteration-count: 1
-								timing-function: ease-out
 
-							i
-								+spin
-
-
-						&.button-field-error
-							+button($color-danger, 3px)
-							background: transparent
-
-							pointer-events: none
-
-							i
-								position: relative
-								right: 2px
-
-					button.comment-action-cancel
-						display: none
-						margin-left: auto
-						margin-right: 5px
-						padding:
-							left: 15px
-							right: 15px
-
-						+button($color-text-dark-secondary, 3px)
-						border-color: transparent
-
-						i
-							margin-right: 0
-
-				&.filled
-					.comment-reply-field
-						textarea
-							height: 120px
-					.comment-reply-meta
-						.comment-details
-							opacity: 1
+						span.hotkey
+							color: white
+							display: none
+							font-weight: normal
+							font-size: .9em
 
 
 		/* Style the comment container when we're replying */
 		.comment-container + .comment-reply-container
 			margin-left: 30px
-			padding-top: 0
+			padding-top: 10px
 
 			.comment-reply-form
 				.comment-reply-meta

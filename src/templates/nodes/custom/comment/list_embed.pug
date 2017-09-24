@@ -17,25 +17,29 @@
 						placeholder="Join the conversation...")
 
 					.comment-reply-meta
-						.comment-details
-							.comment-rules
-								a(
-									title="Markdown Supported",
-									target="_blank",
-									href="https://guides.github.com/features/mastering-markdown/")
-									i.pi-markdown
 
-						button.comment-action-cancel.btn.btn-outline(
-							type="button",
-							title="Cancel")
-							i.pi-cancel
-						button.comment-action-submit.btn.btn-outline(
+						button.comment-action-submit(
 							id="comment_submit",
 							type="button",
 							title="Post Comment (Ctrl+Enter)")
-							| Post Comment
+							span
+								i.pi-paper-plane
+								| Send
+							span.hotkey Ctrl + Enter
 
-					.comment-reply-preview
+				.comment-reply-preview
+					.comment-reply-preview-md
+					.comment-reply-info
+						.comment-action-cancel(
+							type="button",
+							title="Cancel")
+							span cancel
+
+						a(
+							title="Handy guide of Markdown syntax",
+							target="_blank",
+							href="https://guides.github.com/features/mastering-markdown/")
+							span markdown cheatsheet
 
 			| {% elif current_user.is_authenticated %}
 
@@ -119,7 +123,7 @@ script.
 		.on( 'keyup','body .comment-reply-field textarea',function(e){
 		var $textarea = $(this);
 		var $container = $(this).parent();
-		var $preview = $textarea.next().next();
+		var $preview = $container.parent().find('.comment-reply-preview-md');
 
 		// TODO: communicate with back-end to do the conversion,
 		// rather than relying on our JS-converted Markdown.
@@ -149,13 +153,14 @@ script.
 
 		comment_mode(this, 'edit');
 
-		var parent_div = $(this).closest('.comment-container');
-		var comment_id = parent_div.data('node-id');
+		var $parent_div = $(this).closest('.comment-container');
+		var comment_id = $parent_div.data('node-id');
 
-		var comment_content = parent_div.find('.comment-content');
+		var comment_content = $parent_div.find('.comment-body');
 		var height = comment_content.height();
 
 		loadComment(comment_id, {'properties.content': 1})
+
 		.done(function(data) {
 			var comment_raw = data['properties']['content'];
 			comment_content.html($('<textarea>').text(comment_raw));
@@ -165,7 +170,6 @@ script.
 				.height(Math.max(150, height + 30))
 				.focus()
 				.trigger('keyup');
-			comment_content.siblings('.comment-content-preview').show();
 		})
 		.fail(function(xhr) {
 			if (console) console.log('Error fetching comment: ', xhr);
@@ -205,7 +209,7 @@ script.
 		.done(function(comment_id, comment_html) {
 			commentEditCancel($button, false)
 
-			$container.find('.comment-content')
+			$container.find('.comment-body')
 				.html(comment_html)
 				.flashOnce();
 
