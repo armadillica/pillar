@@ -262,17 +262,20 @@ $comments-width-max: 710px
 							content: '\e838'
 
 				/* Reply button */
+				.comment-action-reply
+					color: $color-primary
+
 				.comment-action-reply,
 				.comment-action-edit
 					padding-left: 10px
 					margin-left: 10px
-					color: $color-text-dark-secondary
 
 					&:before
+						color: $color-text-dark-secondary
 						content: '·'
-						position: relative
-						left: -10px
 						font-weight: 600
+						left: -10px
+						position: relative
 
 					span
 						cursor: pointer

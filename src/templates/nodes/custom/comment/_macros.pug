@@ -25,17 +25,18 @@
 				| {% endif %}
 
 			.comment-action-reply(title="Reply to this comment")
-				span reply
+				span Reply
 
 			| {% if comment._is_own %}
 			.comment-action-edit
-				span.edit_mode(title="Edit comment") edit
+				span.edit_mode(title="Edit comment")
+					| Edit
 				span.edit_save(title="Save comment")
 					i.pi-check
-					| save changes
+					| Save Changes
 				span.edit_cancel(title="Cancel changes")
 					i.pi-cancel
-					| cancel
+					| Cancel
 			| {% endif %}
 
 			.comment-time
