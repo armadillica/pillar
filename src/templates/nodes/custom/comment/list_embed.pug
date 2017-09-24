@@ -76,6 +76,8 @@
 
 | {% block comment_scripts %}
 script.
+
+	// If there's a comment link in the URL, scroll there
 	function scrollToLinkedComment() {
 		var scrollToId = location.hash;
 		if (scrollToId.length <= 1) return;
@@ -86,13 +88,16 @@ script.
 	}
 	$(scrollToLinkedComment);
 
-	// Markdown initialization
+	// Initialize Markdown to later convert comment as we type
 	var convert = new Markdown.getSanitizingConverter();
 	Markdown.Extra.init(convert);
 	convert = convert.makeHtml;
 
-	/* Submit new comment */
-	$(document).on('click', 'body .comment-action-submit', function(e){
+
+	// Submit new comment
+	$(document)
+		.off('click','body .comment-action-submit')
+		.on( 'click','body .comment-action-submit', function(e){
 		post_comment($(this));
 	});
 
@@ -106,10 +111,12 @@ script.
 	});
 	{% endif %}
 
-	/* Edit comment */
 
+	// Writing comment
 	// Markdown convert as we type in the textarea
-	$(document).on('keyup','body .comment-reply-field textarea',function(e){
+	$(document)
+		.off('keyup','body .comment-reply-field textarea')
+		.on( 'keyup','body .comment-reply-field textarea',function(e){
 		var $textarea = $(this);
 		var $container = $(this).parent();
 		var $preview = $textarea.next().next();
@@ -134,8 +141,12 @@ script.
 	});
 
 
-	/* Enter edit mode */
-	$(document).on('click','body .comment-action-edit span.edit_mode',function(){
+	// Edit comment
+	// Enter edit mode
+	$(document)
+		.off('click','body .comment-action-edit span.edit_mode')
+		.on( 'click','body .comment-action-edit span.edit_mode',function(){
+
 		comment_mode(this, 'edit');
 
 		var parent_div = $(this).closest('.comment-container');
@@ -162,12 +173,17 @@ script.
 		});
 	});
 
-	$(document).on('click','body .comment-action-edit span.edit_cancel',function(e){
+	// Abort, abort
+	$(document)
+		.off('click','body .comment-action-edit span.edit_cancel')
+		.on( 'click','body .comment-action-edit span.edit_cancel',function(e){
 		commentEditCancel(this, true);
 	});
 
-	/* Save edited comment */
-	$(document).on('click','body .comment-action-edit span.edit_save',function(e){
+	// Save edited comment
+	$(document)
+		.off('click','body .comment-action-edit span.edit_save')
+		.on( 'click','body .comment-action-edit span.edit_save',function(e){
 		var $button = $(this);
 		var $container = $button.closest('.comment-container');
 
