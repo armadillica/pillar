@@ -323,6 +323,14 @@
 			.comment-reply-container
 				background-color: transparent
 
+				.comment-reply-field
+					textarea, .comment-reply-meta
+						background-color: $color-background-light
+
+					&.filled
+						.comment-reply-meta
+							background-color: $color-success
+
 			.comment-reply-form
 				+media-xs
 					padding:
