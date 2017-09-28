@@ -183,9 +183,14 @@ class PillarServer(Eve):
         import bugsnag
         from bugsnag.handlers import BugsnagHandler
 
+        release_stage = self.config.get('BUGSNAG_RELEASE_STAGE', 'unconfigured')
+        if self.config.get('DEBUG'):
+            release_stage += '-debug'
+
         bugsnag.configure(
             api_key=bugsnag_api_key,
             project_root="/data/git/pillar/pillar",
+            release_stage=release_stage
         )
 
         bs_handler = BugsnagHandler()
@@ -196,9 +201,9 @@ class PillarServer(Eve):
         # but it passes the app to the connect() call, which causes an
         # error. Since we only have one app, we can do without.
         from flask import got_request_exception
-        from bugsnag.flask import add_flask_request_to_notification
+        from . import bugsnag_extra
 
-        bugsnag.before_notify(add_flask_request_to_notification)
+        bugsnag.before_notify(bugsnag_extra.add_pillar_request_to_notification)
         got_request_exception.connect(self.__notify_bugsnag)
 
         self.log.info('Bugsnag setup complete')
