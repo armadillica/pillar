@@ -19,7 +19,8 @@ var enabled = {
     maps: argv.production,
     failCheck: !argv.production,
     prettyPug: !argv.production,
-    cachify: !argv.production
+    cachify: !argv.production,
+    cleanup: argv.production,
 };
 
 var destination = {
@@ -128,4 +129,12 @@ gulp.task('cleanup', function() {
 
 
 // Run 'gulp' to build everything at once
-gulp.task('default', ['styles', 'templates', 'scripts', 'scripts_concat_tutti', 'scripts_concat_markdown']);
+var tasks = [];
+if (enabled.cleanup) tasks.push('cleanup');
+gulp.task('default', tasks.concat([
+    'styles',
+    'templates',
+    'scripts',
+    'scripts_concat_tutti',
+    'scripts_concat_markdown',
+]));
