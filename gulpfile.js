@@ -21,6 +21,12 @@ var enabled = {
     cachify: !argv.production
 };
 
+var destination = {
+    css: 'pillar/web/static/assets/css',
+    pug: 'pillar/web/templates',
+    js: 'pillar/web/static/assets/js',
+}
+
 
 /* CSS */
 gulp.task('styles', function() {
@@ -32,7 +38,7 @@ gulp.task('styles', function() {
             ))
         .pipe(autoprefixer("last 3 versions"))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
-        .pipe(gulp.dest('pillar/web/static/assets/css'))
+        .pipe(gulp.dest(destination.css))
         .pipe(gulpif(argv.livereload, livereload()));
 });
 
@@ -45,7 +51,7 @@ gulp.task('templates', function() {
         .pipe(pug({
             pretty: enabled.prettyPug
         }))
-        .pipe(gulp.dest('pillar/web/templates/'))
+        .pipe(gulp.dest(destination.pug))
         .pipe(gulpif(argv.livereload, livereload()));
 });
 
@@ -60,7 +66,7 @@ gulp.task('scripts', function() {
         .pipe(rename({suffix: '.min'}))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(chmod(644))
-        .pipe(gulp.dest('pillar/web/static/assets/js/'))
+        .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
 });
 
@@ -75,7 +81,7 @@ gulp.task('scripts_concat_tutti', function() {
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(chmod(644))
-        .pipe(gulp.dest('pillar/web/static/assets/js/'))
+        .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
 });
 
@@ -87,7 +93,7 @@ gulp.task('scripts_concat_markdown', function() {
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(chmod(644))
-        .pipe(gulp.dest('pillar/web/static/assets/js/'))
+        .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
 });
 
