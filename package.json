@@ -1,11 +1,11 @@
 {
   "name": "pillar",
+  "license": "GPL-2.0+",
+  "author": "Blender Institute",
   "repository": {
     "type": "git",
     "url": "https://github.com/armadillica/pillar.git"
   },
-  "author": "Blender Institute",
-  "license": "GPL",
   "devDependencies": {
     "gulp": "~3.9.1",
     "gulp-autoprefixer": "~2.3.1",
