@@ -14,7 +14,6 @@ from pillar.web.utils import current_user_is_authenticated
 from pillar.web.nodes.routes import blueprint
 from pillar.web.nodes.routes import url_for_node
 from pillar.web.nodes.forms import get_node_form
-from pillar.web.nodes.forms import process_node_form
 import pillar.web.nodes.attachments
 from pillar.web.projects.routes import project_update_nodes_list
 
