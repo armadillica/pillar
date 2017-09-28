@@ -62,6 +62,18 @@ def find_for_comment(project, node):
     return parent_url + '#{}'.format(node['_id'])
 
 
+@register_node_finder('blog')
+def find_for_blog(project, _):
+    """Returns the URL for a blog."""
+
+    project_id = project['_id']
+    if str(project_id) == current_app.config['MAIN_PROJECT_ID']:
+        return url_for('main.main_blog')
+
+    the_project = project_url(project_id, project=project)
+    return url_for('main.project_blog', project_url=the_project.url)
+
+
 @register_node_finder('post')
 def find_for_post(project, node):
     """Returns the URL for a blog post."""
