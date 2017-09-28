@@ -10,6 +10,12 @@ from flask_login import current_user
 from pillar.web import system_util
 
 GROUP_NODES = {'group', 'storage', 'group_texture', 'group_hdri'}
+
+# Node types that shouldn't be embedded in the project view.
+# Rather those nodes have their own end point for viewing.
+# Such nodes should implement a finder in web/nodes/finders.py.
+CUSTOM_VIEW_NODE_TYPES = {'blog'}
+
 log = logging.getLogger(__name__)
 
 
@@ -29,6 +35,7 @@ def jstree_parse_node(node, children=None):
         id="n_{0}".format(node._id),
         a_attr={"href": url_for_node(node=node)},
         li_attr={"data-node-type": node.node_type},
+        custom_view=node_type in CUSTOM_VIEW_NODE_TYPES,
         text=Markup.escape(node.name),
         type=node_type,
         children=False)

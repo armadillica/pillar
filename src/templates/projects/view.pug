@@ -605,8 +605,8 @@ script.
 				}
 
 				// Check the type of node and act accordingly
-				if (data.node.original.type == 'blog') {
-					window.location.replace('blog');
+				if (data.node.original.custom_view) {
+					window.location = data.node.a_attr.href;
 				} else {
 					var currentNodeId = ProjectUtils.nodeId();
 					if (currentNodeId != selectedNodeId) {
