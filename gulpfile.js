@@ -3,6 +3,7 @@ var autoprefixer = require('gulp-autoprefixer');
 var cache        = require('gulp-cached');
 var chmod        = require('gulp-chmod');
 var concat       = require('gulp-concat');
+var git          = require('gulp-git');
 var gulpif       = require('gulp-if');
 var gulp         = require('gulp');
 var livereload   = require('gulp-livereload');
@@ -110,6 +111,19 @@ gulp.task('watch',function() {
     gulp.watch('src/scripts/*.js',['scripts']);
     gulp.watch('src/scripts/tutti/**/*.js',['scripts_concat_tutti']);
     gulp.watch('src/scripts/markdown/**/*.js',['scripts_concat_markdown']);
+});
+
+// Erases all generated files in output directories.
+gulp.task('cleanup', function() {
+    var paths = [];
+    for (attr in destination) {
+        paths.push(destination[attr]);
+    }
+
+    git.clean({ args: '-f -X ' + paths.join(' ') }, function (err) {
+        if(err) throw err;
+    });
+
 });
 
 
