@@ -40,10 +40,10 @@ def posts_view(project_id=None, project_url=None, url=None):
         'where': {'node_type': 'blog', 'project': project_id},
     }, api=api)
 
-    status_query = "" if blog.has_method('PUT') else ', "properties.status": "published"'
+    status_query = {} if blog.has_method('PUT') else {'properties.status': 'published'}
     posts = Node.all({
-        'where': '{"parent": "%s" %s}' % (blog._id, status_query),
-        'embedded': '{"user": 1}',
+        'where': {'parent': blog._id, **status_query},
+        'embedded': {'user': 1},
         'sort': '-_created'
     }, api=api)
 
