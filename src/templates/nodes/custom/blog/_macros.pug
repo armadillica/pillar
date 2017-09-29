@@ -35,18 +35,12 @@ a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id
 | {% endif %}
 
 | {% if posts %}
+| {{ render_blog_post(posts[0]) }}
 
-| {% for node in posts %}
-
+| {% for node in posts[1:] %}
 | {% if loop.first %}
-| {{ render_blog_post(node) }}
-
-| {% else %}
-
-| {% if loop.index == 2 %}
 h4.blog_index-title Blasts from the past
 | {% endif %}
-
 .blog_index-item.list
 	| {% if node.picture %}
 	.item-header
@@ -67,9 +61,6 @@ h4.blog_index-title Blasts from the past
 		{% if node.properties.category %}| {{node.properties.category}}{% endif %}
 		| by {{node.user.full_name}}
 		{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
-
-| {% endif %} {# loop #}
-
 | {% endfor %} {# posts #}
 
 | {% else %}
