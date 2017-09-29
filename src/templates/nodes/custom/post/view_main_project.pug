@@ -21,10 +21,8 @@ meta(property="og:image", content="{{ node.picture.thumbnail('l', api=api) }}")
 | {% set title = 'blog' %}
 
 | {% block body %}
-
 .container
 	| {% include 'nodes/custom/post/view_embed.html' %}
-
 | {% endblock %}
 
 

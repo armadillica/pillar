@@ -1,90 +1,14 @@
 | {% extends 'layout.html' %}
-
+| {% import 'nodes/custom/blog/_macros.html' as blogmacros %}
 | {% set title = 'blog' %}
 
 | {% block page_title %}Blog{% endblock%}
 
 | {% block body %}
-
 .container
 	#blog_container.cloud-blog
-
 		#blog_index-container
-
-			| {% if project.node_type_has_method('post', 'POST', api=api) %}
-			a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
-				i.pi-plus
-				| Create New Post
-			| {% endif %}
-
-			| {% if posts %}
-
-			| {% for node in posts %}
-
-			| {% if loop.first %}
-			| {% if node.picture %}
-			.blog_index-header
-				img(src="{{ node.picture.thumbnail('l', api=api) }}")
-			| {% endif %}
-			.blog_index-item
-				a.item-title(
-					href="{{ url_for_node(node=node) }}")
-					| {{node.name}}
-
-				.item-info.
-					<span title="{{node._created}}">{{node._created | pretty_date }}</span>
-					{% if node._created != node._updated %}
-					<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
-					{% endif %}
-					{% if node.properties.category %}| {{node.properties.category}}{% endif %}
-					| by {{node.user.full_name}}
-					| <a href="{{ url_for_node(node=node) }}#comments">Leave a comment</a>
-					{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
-
-				.item-content
-					| {{node.properties.content}}
-
-				.item-meta
-					a(href="{{ url_for_node(node=node) }}#comments") Leave a comment
-
-			| {% else %}
-
-			| {% if loop.index == 2 %}
-			h4.blog_index-title Blasts from the past
-			| {% endif %}
-
-			.blog_index-item.list
-				| {% if node.picture %}
-				.item-header
-					img.image(src="{{ node.picture.thumbnail('s', api=api) }}")
-				| {% else %}
-				.item-header.nothumb
-					i.pi-document-text
-				| {% endif %}
-				a.item-title(
-					href="{{ url_for_node(node=node) }}")
-					| {{node.name}}
-
-				.item-info.
-					<span title="{{node._created}}">{{node._created | pretty_date }}</span>
-					{% if node._created != node._updated %}
-					<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
-					{% endif %}
-					{% if node.properties.category %}| {{node.properties.category}}{% endif %}
-					| by {{node.user.full_name}}
-					{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
-
-			| {% endif %} {# loop #}
-
-			| {% endfor %} {# posts #}
-
-			| {% else %}
-
-			.blog_index-item
-				.item-content No posts yet.
-
-			| {% endif %} {# posts #}
-
+			| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api) }}
 | {% endblock %}
 
 | {% block footer_scripts %}

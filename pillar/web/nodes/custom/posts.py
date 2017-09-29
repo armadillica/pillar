@@ -88,6 +88,8 @@ def posts_view(project_id=None, project_url=None, url=None):
             post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
                 post, post_contents)
 
+    can_create_blog_posts = project.node_type_has_method('post', 'POST', api=api)
+
     return render_template(
         template_path,
         blog=blog,
@@ -98,6 +100,7 @@ def posts_view(project_id=None, project_url=None, url=None):
         project=project,
         title='blog',
         node_type_post=project.get_node_type('post'),
+        can_create_blog_posts=can_create_blog_posts,
         api=api)
 
 
