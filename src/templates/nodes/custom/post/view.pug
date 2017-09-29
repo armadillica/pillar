@@ -58,27 +58,8 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=1732017
 | {% endblock %}
 
 | {% block footer_scripts %}
-
 script.
 	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: false, nodeId: '{{node._id}}'});
-	/* Expand images when their link points to a jpg/png/gif */
-	/* TODO: De-duplicate code from blog index */
-	var page_overlay = document.getElementById('page-overlay');
-	$('.blog_index-item .item-content a img').on('click', function (e) {
-		e.preventDefault();
-
-		var href = $(this).parent().attr('href').split("?")[0];
-		var src = $(this).attr('src');
-
-		if (href.match("jpg$") || href.match("png$") || href.match("gif$")) {
-
-			$(page_overlay)
-				.addClass('active')
-				.html('<img src="' + src + '"/>');
-		} else {
-			window.location.href = href;
-		}
-	});
 
 	/* UI Stuff */
 	var project_container = document.getElementById('project-container');

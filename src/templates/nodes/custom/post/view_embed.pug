@@ -2,7 +2,7 @@
 
 #blog_container(class="{% if project and project._id == config.MAIN_PROJECT_ID %}cloud-blog{% endif %}")
 
-	#blog_post-container
+	#blog_post-container.expand-image-links
 		| {% if project and project._id == config.MAIN_PROJECT_ID %}
 		a.btn.btn-default.button-back(href="{{ url_for('projects.view', project_url=project.url) }}blog")
 			| Back to Blog

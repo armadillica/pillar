@@ -10,7 +10,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=1732017
 
 | {% block project_context %}
 #blog_container
-	#blog_index-container
+	#blog_index-container.expand-image-links
 		| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api) }}
 | {% endblock %}
 
@@ -45,22 +45,6 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=1732017
 | {% block footer_scripts %}
 include ../_scripts
 script.
-	/* Expand images when their link points to a jpg/png/gif */
-	$('.blog_index-item .item-content a img').on('click', function(e){
-		e.preventDefault();
-
-		var href = $(this).parent().attr('href');
-		var src = $(this).attr('src');
-
-		if (href.match("jpg$") || href.match("png$") || href.match("gif$")) {
-			$(page_overlay)
-						.addClass('active')
-						.html('<img src="' + src + '"/>');
-		} else {
-			window.location.href = href;
-		}
-	});
-
 	/* UI Stuff */
 	var project_container = document.getElementById('project-container');
 
