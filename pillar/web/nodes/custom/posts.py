@@ -1,3 +1,5 @@
+import logging
+
 from pillarsdk import Node
 from pillarsdk import Project
 from pillarsdk.exceptions import ResourceNotFound
@@ -16,6 +18,8 @@ from pillar.web.nodes.routes import url_for_node
 from pillar.web.nodes.forms import get_node_form
 import pillar.web.nodes.attachments
 from pillar.web.projects.routes import project_update_nodes_list
+
+log = logging.getLogger(__name__)
 
 
 # Cached, see setup_app() below.
@@ -44,53 +48,57 @@ def posts_view(project_id=None, project_url=None, url=None):
     posts = Node.all({
         'where': {'parent': blog._id, **status_query},
         'embedded': {'user': 1},
-        'sort': '-_created'
+        'sort': '-_created',
     }, api=api)
 
     for post in posts._items:
         post.picture = get_file(post.picture, api=api)
 
-        post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
-            post, post['properties']['content'])
-
     # Use the *_main_project.html template for the main blog
     main_project_template = '_main_project' if project_id == current_app.config['MAIN_PROJECT_ID'] else ''
+    template_path = f'nodes/custom/blog/index{main_project_template}.html',
 
     if url:
+        template_path = f'nodes/custom/post/view{main_project_template}.html',
+
         post = Node.find_one({
             'where': {'parent': blog._id, 'properties.url': url},
             'embedded': {'node_type': 1, 'user': 1},
         }, api=api)
+
         if post.picture:
             post.picture = get_file(post.picture, api=api)
+    elif posts._items:
+        post = posts._items[0]
+    else:
+        post = None
 
+    if post is not None:
         # If post is not published, check that the user is also the author of
         # the post. If not, return 404.
         if post.properties.status != "published":
             if not (current_user.is_authenticated and post.has_method('PUT')):
                 abort(403)
 
-        post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
-            post, post['properties']['content'])
-        return render_template(
-            'nodes/custom/post/view{0}.html'.format(main_project_template),
-            blog=blog,
-            node=post,
-            posts=posts._items,
-            project=project,
-            title='blog',
-            api=api)
-    else:
-        node_type_post = project.get_node_type('post')
-        template_path = 'nodes/custom/blog/index.html'
+        try:
+            post_contents = post['properties']['content']
+        except KeyError:
+            log.warning('Blog post %s has no content', post._id)
+        else:
+            post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
+                post, post_contents)
 
-        return render_template(
-            'nodes/custom/blog/index{0}.html'.format(main_project_template),
-            node_type_post=node_type_post,
-            posts=posts._items,
-            project=project,
-            title='blog',
-            api=api)
+    return render_template(
+        template_path,
+        blog=blog,
+        node=post,
+        posts=posts._items,
+        posts_meta=posts._meta,
+        more_posts_available=posts._meta['total'] > posts._meta['max_results'],
+        project=project,
+        title='blog',
+        node_type_post=project.get_node_type('post'),
+        api=api)
 
 
 @blueprint.route("/posts/<project_id>/create", methods=['GET', 'POST'])
