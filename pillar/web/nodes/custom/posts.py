@@ -1,9 +1,10 @@
+import functools
 import logging
 
 from pillarsdk import Node
 from pillarsdk import Project
 from pillarsdk.exceptions import ResourceNotFound
-from flask import abort
+from flask import abort, url_for
 from flask import current_app
 from flask import render_template
 from flask import redirect
@@ -23,11 +24,14 @@ log = logging.getLogger(__name__)
 
 
 # Cached, see setup_app() below.
-def posts_view(project_id=None, project_url=None, url=None):
+def posts_view(project_id=None, project_url=None, url=None, *, archive=False, page=1):
     """View individual blogpost"""
 
     if bool(project_id) == bool(project_url):
         raise ValueError('posts_view(): pass either project_id or project_url')
+
+    if url and archive:
+        raise ValueError('posts_view(): cannot pass both url and archive')
 
     api = system_util.pillar_api()
 
@@ -49,14 +53,18 @@ def posts_view(project_id=None, project_url=None, url=None):
         'where': {'parent': blog._id, **status_query},
         'embedded': {'user': 1},
         'sort': '-_created',
+        'max_results': 20 if archive else 5,
+        'page': page,
     }, api=api)
 
     for post in posts._items:
         post.picture = get_file(post.picture, api=api)
 
     # Use the *_main_project.html template for the main blog
-    main_project_template = '_main_project' if project_id == current_app.config['MAIN_PROJECT_ID'] else ''
-    template_path = f'nodes/custom/blog/index{main_project_template}.html',
+    is_main_project = project_id == current_app.config['MAIN_PROJECT_ID']
+    main_project_template = '_main_project' if is_main_project else ''
+    index_arch = 'archive' if archive else 'index'
+    template_path = f'nodes/custom/blog/{index_arch}{main_project_template}.html',
 
     if url:
         template_path = f'nodes/custom/post/view{main_project_template}.html',
@@ -90,13 +98,31 @@ def posts_view(project_id=None, project_url=None, url=None):
 
     can_create_blog_posts = project.node_type_has_method('post', 'POST', api=api)
 
+    # Use functools.partial so we can later pass page=X.
+    if is_main_project:
+        url_func = functools.partial(url_for, 'main.main_blog_archive')
+    else:
+        url_func = functools.partial(url_for, 'main.project_blog_archive', project_url=project.url)
+
+    project.blog_archive_url = url_func()
+    pmeta = posts._meta
+    seen_now = pmeta['max_results'] * pmeta['page']
+    if pmeta['total'] > seen_now:
+        project.blog_archive_next = url_func(page=pmeta['page'] + 1)
+    else:
+        project.blog_archive_next = None
+    if pmeta['page'] > 1:
+        project.blog_archive_prev = url_func(page=pmeta['page'] - 1)
+    else:
+        project.blog_archive_prev = None
+
     return render_template(
         template_path,
         blog=blog,
         node=post,
         posts=posts._items,
-        posts_meta=posts._meta,
-        more_posts_available=posts._meta['total'] > posts._meta['max_results'],
+        posts_meta=pmeta,
+        more_posts_available=pmeta['total'] > pmeta['max_results'],
         project=project,
         title='blog',
         node_type_post=project.get_node_type('post'),

@@ -8,7 +8,7 @@
 .container
 	#blog_container.cloud-blog
 		#blog_index-container.expand-image-links
-			| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api) }}
+			| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta) }}
 | {% endblock %}
 
 | {% block footer_scripts %}

@@ -60,6 +60,18 @@ def project_blog(project_url, url=None):
     return posts_view(project_url=project_url, url=url)
 
 
+@blueprint.route('/blog-archive/')
+@blueprint.route('/blog-archive/<int:page>')
+def main_blog_archive(page=1):
+    project_id = current_app.config['MAIN_PROJECT_ID']
+    return posts_view(project_id, archive=True, page=page)
+
+
+@blueprint.route('/p/<project_url>/blog-archive/')
+def project_blog_archive(project_url):
+    return posts_view(project_url=project_url, archive=True)
+
+
 @blueprint.route('/vrview')
 def vrview():
     """Call this from iframes to render sperical content (video and images)"""

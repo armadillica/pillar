@@ -27,20 +27,7 @@
 | {% endmacro %}
 
 //- ******************************************************* -//
-| {% macro render_blog_index(project, posts, can_create_blog_posts, api) %}
-| {% if can_create_blog_posts %}
-a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
-	i.pi-plus
-	| Create New Post
-| {% endif %}
-
-| {% if posts %}
-| {{ render_blog_post(posts[0]) }}
-
-| {% for node in posts[1:] %}
-| {% if loop.first %}
-h4.blog_index-title Blasts from the past
-| {% endif %}
+| {% macro render_blog_list_item(node) %}
 .blog_index-item.list
 	| {% if node.picture %}
 	.item-header
@@ -61,7 +48,32 @@ h4.blog_index-title Blasts from the past
 		{% if node.properties.category %}| {{node.properties.category}}{% endif %}
 		| by {{node.user.full_name}}
 		{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
-| {% endfor %} {# posts #}
+| {% endmacro %}
+
+
+//- ******************************************************* -//
+| {% macro render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta) %}
+| {% if can_create_blog_posts %}
+a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
+	i.pi-plus
+	| Create New Post
+| {% endif %}
+
+| {% if posts %}
+| {{ render_blog_post(posts[0]) }}
+
+| {% for node in posts[1:] %}
+| {% if loop.first %}
+h4.blog_index-title Blasts from the past
+| {% endif %}
+| {{ render_blog_list_item(node) }}
+| {% endfor %}
+
+| {% if more_posts_available %}
+.blog_index-item
+	a.item-title.blog-archive(href="{{ project.blog_archive_url }}")
+		| {{posts_meta.total - posts|length}} more blog posts live here
+| {% endif %}
 
 | {% else %}
 
@@ -69,4 +81,22 @@ h4.blog_index-title Blasts from the past
 	.item-content No posts yet.
 
 | {% endif %} {# posts #}
+| {% endmacro %}
+
+//- ******************************************************* -//
+| {% macro render_archive(project, posts, posts_meta) %}
+| {% if project.blog_archive_prev %}
+.blog_index-item.list
+	a(href="{{ project.blog_archive_prev }}", rel="prev") Previous page
+| {% endif %}
+
+| {% for node in posts %}
+| {{ render_blog_list_item(node) }}
+| {% endfor %}
+
+| {% if project.blog_archive_next %}
+.blog_index-item.list
+	a(href="{{ project.blog_archive_next }}", rel="next") Next page
+| {% endif %}
+
 | {% endmacro %}
