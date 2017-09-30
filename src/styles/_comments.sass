@@ -9,32 +9,21 @@ $comments-width-max: 710px
 		padding: 15px 0
 		display: block
 
-	.comments-list-title
-		padding: 15px 0 10px 0
-		font-size: 1.3em
-		font-weight: 300
-		color: $color-text-dark-hint
-
-	#comments-list-items-loading
-		font-size: 2em
-		color: $color-background
-		text-align: center
-		position: relative
-		top: 25px
-		margin-bottom: 10px
-		+spin
-
-	#comments-list-items,
-	.comment-reply-container
-		position: relative
-
-		.nocomments
-			color: $color-text-dark-hint
-			text-align: center
-			cursor: default
-			padding: 8px 0
-
 	.comments-list
+		&-loading
+			+spin
+			color: $color-background
+			font-size: 2em
+			margin-bottom: 10px
+			position: relative
+			text-align: center
+			top: 25px
+
+		&-title
+			padding: 15px 0 10px 0
+			font-size: 1.3em
+			font-weight: 300
+			color: $color-text-dark-hint
 
 		/* Each comment on the list*/
 		.comment-container,
@@ -84,7 +73,7 @@ $comments-width-max: 710px
 				display: inline-block
 				float: left
 				font-weight: bold
-				margin-right: 10px
+				margin-right: 8px
 				white-space: nowrap
 
 				&.op
@@ -147,6 +136,10 @@ $comments-width-max: 710px
 					font-weight: 500
 					color: $color-info
 
+				img.emoji
+					padding-top: inherit
+					padding-bottom: inherit
+
 				.editing
 					background-color: $color-background-light
 					margin-bottom: 10px
@@ -162,46 +155,6 @@ $comments-width-max: 710px
 				flex-direction: column
 				padding-bottom: 0
 				width: 100%
-
-			.comment-content-preview
-				display: none
-				+node-details-description
-				padding: 10px 0 0 10px
-				font:
-					size: 1em
-					weight: normal
-
-				position: relative
-				margin-top: 15px
-
-				&:empty
-					margin: 0
-					padding: 0
-					&:before, &:after
-						display: none
-
-				&:before
-					content: 'Live Preview'
-					position: absolute
-					top: -20px
-					left: 30px
-					font-size: .9em
-					color: $color-text-dark-hint
-					transition: color 150ms ease-in-out
-
-					+media-md
-						visibility: visible
-					+media-sm
-						visibility: hidden
-
-				&:after
-					content: 'Markdown Supported'
-					position: absolute
-					top: -20px
-					right: 20px
-					font-size: .9em
-					color: $color-text-dark-hint
-					transition: color 150ms ease-in-out
 
 			/* Rating, and actions such as reply */
 			.comment-meta
@@ -339,15 +292,15 @@ $comments-width-max: 710px
 				padding-left: 55px
 
 			.comment-badge
-				display: inline-block
+				border-radius: 3px
 				border: 1px solid $color-text-dark-hint
 				color: $color-text-dark-hint
-				padding: 1px 4px
-				margin: 0 5px 0 10px
-				border-radius: 3px
+				display: inline-block
 				font:
 					size: .7em
 					weight: 400
+				margin: 0 5px 0 10px
+				padding: 1px 4px
 				text-transform: uppercase
 
 				&.badge-team
@@ -360,181 +313,179 @@ $comments-width-max: 710px
 					border-color: $color-success
 					color: $color-success
 
-		.comment-reply-container
-			background-color: $color-background
+.comment-reply
+	&-container
+		background-color: $color-background
 
-			/* Little gravatar icon on the left */
-			.comment-reply-avatar
-				img
-					border-radius: 50%
-					width: 25px
-					height: 25px
-					box-shadow: 0 0 0 3px $color-background-light
+	/* Little gravatar icon on the left */
+	&-avatar
+		img
+			border-radius: 50%
+			width: 25px
+			height: 25px
+			box-shadow: 0 0 0 3px $color-background-light
 
-			/* textarea field, submit button and reply details */
-			.comment-reply-form
-				padding:
-					top: 0
-					left: 10px
-				width: 100%
+	/* textarea field, submit button and reply details */
+	&-form
+		padding:
+			top: 0
+			left: 10px
+		width: 100%
 
-				.comment-reply-field
-					background-color: white
-					border-radius: 3px
-					box-shadow: 1px 2px 2px rgba($color-background-dark, .5)
-					display: flex
-					position: relative
-					transition: border-color 300ms ease-in-out
+	&-field
+		background-color: white
+		border-radius: 3px
+		box-shadow: 1px 2px 2px rgba($color-background-dark, .5)
+		display: flex
+		position: relative
+		transition: border-color 300ms ease-in-out
 
-					textarea
-						+node-details-description
-						color: $color-text-dark
-						border: none
-						border-bottom-right-radius: 0
-						border-top-right-radius: 0
-						box-shadow: none
-						flex: 1
-						font:
-							size: 1em
-							weight: normal
-						line-height: 1.5em
-						margin: 0
-						min-height: 45px
-						padding: 10px 0 10px 10px
-						resize: vertical
-						width: 100%
-						transition: box-shadow 250ms ease-in-out
+		textarea
+			+node-details-description
+			border-bottom-right-radius: 0
+			border-top-right-radius: 0
+			border: none
+			box-shadow: none
+			color: $color-text-dark
+			flex: 1
+			font:
+				size: 1em
+				weight: normal
+			line-height: 1.5em
+			margin: 0
+			min-height: 45px
+			padding: 10px 0 10px 10px
+			resize: vertical
+			transition: box-shadow 250ms ease-in-out
+			width: 100%
 
-						&:focus
-							box-shadow: inset 2px 0 0 0 $color-success, inset 0 2px 0 0 $color-success, inset 0 -2px 0 0 $color-success
-							border: none
-							color: $color-text-dark
-							outline: none
+			&:focus
+				box-shadow: inset 2px 0 0 0 $color-success, inset 0 2px 0 0 $color-success, inset 0 -2px 0 0 $color-success
+				border: none
+				color: $color-text-dark
+				outline: none
 
-							&+.comment-reply-meta button.comment-action-submit
-								box-shadow: inset -2px 0 0 0 $color-success, inset 0 2px 0 0 $color-success, inset 0 -2px 0 0 $color-success
+				&+.comment-reply-meta button.comment-action-submit
+					box-shadow: inset -2px 0 0 0 $color-success, inset 0 2px 0 0 $color-success, inset 0 -2px 0 0 $color-success
 
-						&.error
-							box-shadow: inset 2px 0 0 0 $color-danger, inset 0 2px 0 0 $color-danger, inset 0 -2px 0 0 $color-danger
+			&.error
+				box-shadow: inset 2px 0 0 0 $color-danger, inset 0 2px 0 0 $color-danger, inset 0 -2px 0 0 $color-danger
 
-					&.filled
-						textarea:focus
-							border-bottom-left-radius: 0
+		&.filled
+			textarea:focus
+				border-bottom-left-radius: 0
 
-						&+.comment-reply-preview
-							display: flex
+			&+.comment-reply-preview
+				display: flex
 
-						.comment-reply-meta
-							background-color: $color-success
+			.comment-reply-meta
+				background-color: $color-success
 
-							.comment-action-submit
-								color: white
-								border-bottom-right-radius: 0
+				.comment-action-submit
+					color: white
+					border-bottom-right-radius: 0
 
-								span.hotkey
-									display: block
-
-					&.sign-in
+					span.hotkey
 						display: block
-						padding: 10px
-						color: $color-text-dark-primary
-						cursor: default
 
-						a
-							margin-right: 4px
+		&.sign-in
+			display: block
+			padding: 10px
+			color: $color-text-dark-primary
+			cursor: default
 
+			a
+				margin-right: 4px
 
-				.comment-reply-preview
-					background-color: $color-background-light
-					border-bottom-left-radius: 3px
-					border-bottom-right-radius: 3px
-					box-shadow: 1px 2px 2px rgba($color-background-dark, .5)
-					color: $color-text-dark-primary
-					display: none // flex when comment-reply-field has .filled class
-					position: relative
-					transition: all 150ms ease-in-out
+	&-preview
+		background-color: $color-background-light
+		border-bottom-left-radius: 3px
+		border-bottom-right-radius: 3px
+		box-shadow: 1px 2px 2px rgba($color-background-dark, .5)
+		color: $color-text-dark-primary
+		display: none // flex when comment-reply-field has .filled class
+		position: relative
+		transition: all 150ms ease-in-out
 
-					p
-						padding-left: 0
-						padding-right: 0
+		p
+			padding-left: 0
+			padding-right: 0
 
-					&-md
-						flex: 1
-						padding: 5px 10px
+		&-md
+			flex: 1
+			padding: 5px 10px
 
-					.comment-reply-preview:empty
-						color: transparent
-						margin: 0 auto
-						padding: 0 10px
-						border: none
+		&:empty
+			color: transparent
+			margin: 0 auto
+			padding: 0 10px
+			border: none
 
-						&:before
-							content: ''
-							color: transparent
+			&:before
+				content: ''
+				color: transparent
 
-					.comment-reply-info
-						background-color: $color-background-dark
-						display: flex
-						flex-direction: column
-						font-size: .8em
-						padding-bottom: 10px
-						text-align: center
-						width: 100px
+	&-info
+		background-color: $color-background-dark
+		display: flex
+		flex-direction: column
+		font-size: .8em
+		padding-bottom: 10px
+		text-align: center
+		width: 100px
 
-					.comment-action-cancel
-						cursor: pointer
-						padding: 10px
-						text-decoration: underline
+	.comment-action-cancel
+		cursor: pointer
+		padding: 10px
+		text-decoration: underline
 
-						&:hover
-							color: $color-primary
+		&:hover
+			color: $color-primary
 
-				.comment-reply-meta
-					display: flex
-					align-items: center
-					border-bottom-right-radius: 3px
-					border-top-right-radius: 3px
-					transition: background-color 150ms ease-in-out, color 150ms ease-in-out
-					width: 100px
+	&-meta
+		display: flex
+		align-items: center
+		border-bottom-right-radius: 3px
+		border-top-right-radius: 3px
+		transition: background-color 150ms ease-in-out, color 150ms ease-in-out
+		width: 100px
 
-					button.comment-action-submit
-						border: none
-						border-top-left-radius: 0
-						border-bottom-left-radius: 0
-						color: $color-success
-						flex-direction: column
-						height: 100%
-						position: relative
-						transition: all 200ms ease-in-out
-						white-space: nowrap
-						width: 100%
+		button.comment-action-submit
+			border: none
+			border-top-left-radius: 0
+			border-bottom-left-radius: 0
+			color: $color-success
+			flex-direction: column
+			height: 100%
+			position: relative
+			transition: all 200ms ease-in-out
+			white-space: nowrap
+			width: 100%
 
-						&:focus
-							background-color: white
-
-
-						&.submitting
-							color: $color-info
-
-						&.error
-							background-color: $color-danger
-							color: white
-
-						span.hotkey
-							color: white
-							display: none
-							font-weight: normal
-							font-size: .9em
+			&:focus
+				background-color: white
 
 
-		/* Style the comment container when we're replying */
-		.comment-container + .comment-reply-container
-			margin-left: 30px
-			padding-top: 10px
+			&.submitting
+				color: $color-info
 
-			.comment-reply-form
-				.comment-reply-meta
-					button.comment-action-cancel
-						display: inline-block
+			&.error
+				background-color: $color-danger
+				color: white
 
-// @import plugins/_ckeditor
+			span.hotkey
+				color: white
+				display: none
+				font-weight: normal
+				font-size: .9em
+
+
+/* Style the comment container when we're replying */
+.comment-container + .comment-reply-container
+	margin-left: 30px
+	padding-top: 10px
+
+	.comment-reply-form
+		.comment-reply-meta
+			button.comment-action-cancel
+				display: inline-block

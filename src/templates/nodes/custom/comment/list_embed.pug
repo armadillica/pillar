@@ -72,7 +72,7 @@
 		section.comments-list-header
 			.comments-list-title
 				| {{ nr_of_comments }} comment{{ nr_of_comments|pluralize }}
-			#comments-list-items
+			.comments-list-items
 				| {% for comment in comments['_items'] %}
 				| {{ macros.render_comment(comment, False) }}
 				| {% endfor %}
