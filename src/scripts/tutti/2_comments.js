@@ -147,6 +147,7 @@ function loadComments(commentsUrl)
 	.done(function(dataHtml) {
 		// Update the DOM injecting the generate HTML into the page
 		commentsContainer.html(dataHtml);
+		$('body').trigger('pillar:comments-loaded');
 	})
 	.fail(function(xhr) {
 		toastr.error('Could not load comments', xhr.responseText);
