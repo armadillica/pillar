@@ -36,18 +36,17 @@ $comments-width-max: 710px
 
 			&.comment-linked
 				background-color: $color-background-light !important
-				border-top: 3px solid $color-info !important
-				border-bottom: 2px solid $color-background-dark
-				border-bottom-left-radius: 3px
-				border-bottom-right-radius: 3px
+				box-shadow: inset 3px 0 0 $color-info
+				padding-right: 20px
 
 				&:before
+					bottom: 25px
+					color: $color-info
 					content: 'Linked Comment'
+					font-size: .8em
 					position: absolute
 					right: 20px
-					color: $color-info
 					text-transform: uppercase
-					font-size: .8em
 
 				&.is-replying
 					margin-bottom: 15px !important
@@ -55,9 +54,6 @@ $comments-width-max: 710px
 				.comment-avatar
 					padding-right: 5px
 					padding-left: 5px
-
-			&.comment-linked+.comment-container.is-first
-				border-top: none
 
 			.comment-avatar
 				padding-right: 10px
@@ -268,9 +264,7 @@ $comments-width-max: 710px
 					padding-left: 15px
 
 				&.comment-linked
-					border-left: 3px solid $color-info
-					border-top: thin solid $color-background-dark !important
-					border-bottom: thin solid $color-background-dark !important
+					box-shadow: inset 3px 0 0 $color-info
 
 				&.is-replying+.comment-reply-container
 					margin-left: 35px
