@@ -1,12 +1,9 @@
 | {% extends 'layout.html' %}
 
 | {% block body %}
-.container
-	#login-container
+.login-container
+	.login-box
 		.login-title Welcome back!
-
-		.login-info
-			| Log in using your shared username and password.
 
 		.login-form
 			form#login-form(method="POST", action="{{url_for('users.login_local')}}")
@@ -21,7 +18,7 @@
 				.buttons
 					.login-button-container
 						//a.forgot(href="https://blender.org/id/reset") forgot your password?
-						button.btn.btn-default.button-login(type="submit")
+						button.btn.btn-success.btn-block.button-login(type="submit")
 							i.pi-log-in
 							| Login
 
