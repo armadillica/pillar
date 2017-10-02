@@ -341,9 +341,9 @@ script.
 		updateToggleProjHeaderMenuItem();
 
 		var nodeTitle = document.getElementById('node-title');
-		var nodeTitleText = $(nodeTitle).text() + " - {{ project.name }} - Blender Cloud";
+		page_title = $(nodeTitle).text() + " - {{ project.name }} - Blender Cloud";
 
-		document.title = nodeTitleText;
+		updateTitle(unread_on_load, page_title);
 
 		// TODO: Maybe remove this, now it's also in loadNodeContent(), but double-check
 		// it's done like that in all users of updateUi().
