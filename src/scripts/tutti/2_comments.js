@@ -169,7 +169,7 @@ function show_comment_button_error(msg) {
 	$button.html(msg);
 
 	setTimeout(function(){
-		$button.html('<i class="pi-paper-plane"></i> Send');
+		$button.html('<span><i class="pi-paper-plane"></i> Send</span>');
 		$button.removeClass('error');
 		$textarea.removeClass('error');
 	}, 2500);
