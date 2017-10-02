@@ -112,10 +112,8 @@ script.
 			.addClass('processing');
 
 		var item_url = '/o/' + item_id;
-		statusBarSet('default', 'Loading organization…');
 
 		$.get(item_url, function(item_data) {
-			statusBarClear();
 			$('#item-details').html(item_data);
 
 			current_item
@@ -129,7 +127,7 @@ script.
 			}
 
 			current_item.removeClass(clean_classes);
-			statusBarSet('error', 'Failed to open organization', 'pi-warning');
+			toastr.error('Failed to open organization');
 
 			if (xhr.status) {
 				$('#item-details').html(xhr.responseText);

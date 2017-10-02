@@ -79,7 +79,7 @@ script.
 			if ($found.length) {
 				$found.addClass('active');
 				setTimeout(function(){ $('.sharing-users-item').removeClass('active');}, 350);
-				statusBarSet('info', 'User is already part of the project', 'pi-info');
+				toastr.info('User is already part of the project');
 				return;
 			}
 
@@ -95,7 +95,7 @@ script.
 	});
 	function addUser(userId){
 		if (!userId || userId.length == 0) {
-			statusBarSet('error', 'Please select a user from the list', 'pi-warning');
+			toastr.warning('Please select a user from the list');
 			return;
 		}
 
@@ -137,11 +137,11 @@ script.
 			$('<i>').addClass('pi-trash').appendTo($button);
 
 			setTimeout(function(){ $('.sharing-users-item').removeClass('added');}, 350);
-			statusBarSet('success', 'User added to this project!', 'pi-grin');
+			toastr.success('User added to this project!');
 		})
 		.fail(function (jsxhr){
 			data = jsxhr.responseJSON;
-			statusBarSet('error', 'Could not add user (' + data.message + ')', 'pi-warning');
+			toastr.error(data.message, 'Could not add user');
 		});
 	}
 
@@ -158,10 +158,10 @@ script.
 							{user_id: userId, action: 'remove'})
 				.done(function (data) {
 					$("ul.sharing-users-list").find("[user-id='" + userId + "']").remove();
-					statusBarSet('success', 'User removed from this project', 'pi-trash');
+					toastr.success('User removed from this project');
 				})
 				.fail(function (data){
-					statusBarSet('error', 'Could not remove user (' + data._status + ')', 'pi-warning');
+					toastr.error(data._status, 'Could not remove user');
 				});
 		}
 	});

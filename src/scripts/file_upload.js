@@ -53,7 +53,7 @@ function setup_file_uploader(index, upload_element) {
         beforeSend: function (xhr, data) {
             var token = this.fileInput.attr('data-token');
             xhr.setRequestHeader('Authorization', 'basic ' + btoa(token + ':'));
-            statusBarSet('info', 'Uploading File...', 'pi-upload-cloud');
+            toastr.info('Uploading file...');
 
             // console.log('Uploading from', upload_element, upload_element.value);
 
@@ -114,7 +114,7 @@ function setup_file_uploader(index, upload_element) {
                 $('.node-edit-title').html(filename);
             }
 
-            statusBarSet('success', 'File Uploaded Successfully', 'pi-check');
+            toastr.success('File uploaded!');
             set_progress_bar(100);
 
             $('body').trigger('file-upload:finished');
@@ -131,9 +131,7 @@ function setup_file_uploader(index, upload_element) {
                 uploadErrors.push(fileupload.messages[key]);
             }
 
-            statusBarSet('error',
-                         'Upload error: ' + uploadErrors.join("; "),
-                         'pi-attention', 16000);
+            toastr.error(uploadErrors.join("; "), 'Upload error');
 
             set_progress_bar(100, 'progress-error');
 
@@ -166,9 +164,9 @@ $(function () {
 
             if (slug) {
                 document.getElementById('description').value += widget;
-                statusBarSet('success', 'Attachment appended to description', 'pi-check');
+                toastr.success('Attachment appended to description');
             } else {
-                statusBarSet('error', 'Slug is empty, upload something first', 'pi-warning');
+                toastr.error('Slug is empty, upload something first');
             }
         })
     ;

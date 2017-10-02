@@ -41,7 +41,7 @@ function addNode(nodeTypeName, parentId) {
 		$('.button-add-group-icon').addClass('pi-collection-plus').removeClass('pi-spin spin');
 	})
 	.fail(function(data){
-		statusBarSet('error', 'Error creating node (' + data.status + ' - ' + data.statusText + ')', 'pi-warning', 5000);
+		toastr.error(data.status + ' - ' + data.statusText, 'Error creating node');
 	});
 }
 
@@ -122,13 +122,13 @@ $( document ).ready(function() {
 		$.post(urlNodeMove, moveNodeParams,
 			function(data){
 		}).done(function() {
-			statusBarSet('success', 'Moved just fine');
+			toastr.success('Moved!');
 			Cookies.remove('bcloud_moving_node');
 			moveModeExit();
 			$('#project_tree').jstree("refresh");
 		})
 		.fail(function(data){
-			statusBarSet('error', 'Error moving node (' + data.status + ' - ' + data.statusText + ')', 'pi-warning', 6000);
+			toastr.error(data.status + ' - ' + data.statusText, 'Error moving node');
 			$(this).html('<i class="pi-check"></i> Move Here');
 		});
 	});
@@ -149,10 +149,10 @@ $( document ).ready(function() {
 			// Feedback logic
 		})
 		.done(function(){
-			statusBarSet('success', 'Featured status toggled successfully', 'pi-star-filled');
+			toastr.success('Featured status toggled');
 		})
 		.fail(function(data){
-			statusBarSet('error', 'Error toggling feature (' + data.status + ' - ' + data.statusText + ')', 'pi-warning', 6000);
+			toastr.error(data.status + ' - ' + data.statusText, 'Error toggling featured status');
 		});
 	});
 
@@ -163,16 +163,16 @@ $( document ).ready(function() {
 
 		$.post(urlNodeToggleProjHeader, {node_id: ProjectUtils.nodeId()})
 			.done(function (data) {
-				statusBarSet('success', 'Project Header ' + data.action + ' successfully', 'pi-star-filled');
+				toastr.success('Project header ' + data.action + '!');
 			})
 			.fail(function (jsxhr) {
 				var content_type = jsxhr.getResponseHeader('Content-Type');
 
 				if(content_type.startsWith('application/json')) {
 					var data = jsxhr.responseJSON;
-					statusBarSet('error', 'Error toggling (' + data.messsage + ')', 'pi-warning', 6000);
+					toastr.error(data.message, 'Error toggling header');
 				} else {
-					statusBarSet('error', 'Error toggling (' + jsxhr.responseText + ')', 'pi-warning', 6000);
+					toastr.error(jsxhr.responseText, 'Error toggling header');
 				}
 			});
 	});
@@ -196,7 +196,7 @@ $( document ).ready(function() {
 					// Feedback logic
 				})
 				.done(function () {
-					statusBarSet('success', 'Deleted successfully', 'pi-trash');
+					toastr.success('Deleted!');
 
 					if (ProjectUtils.parentNodeId() != '') {
 						displayNode(ProjectUtils.parentNodeId());
@@ -211,7 +211,7 @@ $( document ).ready(function() {
 
 				})
 				.fail(function (data) {
-					statusBarSet('error', 'Error deleting (' + data.status + ' - ' + data.statusText + ')', 'pi-warning', 6000);
+					toastr.error(data.status + ' - ' + data.statusText, 'Error deleting');
 				});
 		}
 	});
@@ -226,11 +226,11 @@ $( document ).ready(function() {
 			// Feedback logic
 		})
 		.done(function(data){
-			statusBarSet('success', data.data.message);
+			toastr.success(data.data.message);
 			displayNode(currentNodeId);
 		})
 		.fail(function(data){
-			statusBarSet('error', 'Error toggling status (' + data.status + ' - ' + data.statusText + ')', 'pi-warning', 6000);
+			toastr.error(data.status + ' - ' + data.statusText, 'Error toggling status');
 		});
 	});
 

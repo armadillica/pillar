@@ -155,7 +155,7 @@ script(type="text/javascript").
 		var $file = $('.form-group.file #file');
 		if ($file.val() == '') {
 			$file.addClass('error');
-			statusBarSet('error', 'No File Selected', 'pi-warning', 5000);
+			toastr.error('No file selected');
 			return jQuery.Deferred().reject("nofile");
 		}
 
@@ -173,10 +173,9 @@ script(type="text/javascript").
 		.fail(function(data){
 			/* Something went wrong, print it */
 			if (data.status == 422) {
-				statusBarSet('error', 'The submitted data could not be validated.', 'pi-warning', 8000);
+				toastr.error('The submitted data could not be validated');
 			} else {
-				statusBarSet('error', "Error! We've been notified and are working on it - "
-						+ data.status + ' ' + data.statusText, 'pi-warning', 8000);
+				toastr.error(data.status + ' ' + data.statusText, 'Error saving');
 			}
 
 			$("li.button-save").addClass('field-error');
@@ -196,7 +195,7 @@ script(type="text/javascript").
 			{% if is_embedded_edit %}
 			/* Load content*/
 			$('#project_context').html(dataHtml);
-			statusBarSet('success', 'Saved Successfully', 'pi-check');
+			toastr.success('Saved!');
 
 			/* Style button */
 			$("li.button-save").removeClass('saving field-error');

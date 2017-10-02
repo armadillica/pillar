@@ -245,7 +245,7 @@ script.
 		})
 		.done(function (data) {
 			setTimeout(function(){ $('.sharing-users-item').removeClass('added');}, 350);
-			statusBarSet('success', 'Member added to this organization!', 'pi-grin');
+			toastr.success('Member added to this organization!');
 
 			// TODO fsiddi: avoid the reloading of the entire page?
 			window.location.reload();
