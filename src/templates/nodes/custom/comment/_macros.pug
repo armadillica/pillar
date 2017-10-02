@@ -42,7 +42,7 @@
 			.comment-time
 				| {{ comment._created | pretty_date_time }}
 				| {% if comment._created != comment._updated %}
-				span(title="edited {{ comment._updated | pretty_date_time }})") *
+				span(title="edited {{ comment._updated | pretty_date_time }}") *
 				| {% endif %}
 
 | {% for reply in comment['_replies']['_items'] %}
