@@ -1,8 +1,5 @@
 
-// Store the title, to later append notifications count
-var page_title = document.title;
-
-var unread_on_load = 0;
+var unread_on_load = false;
 var unread_new = 0;
 var first_load = false;
 
@@ -83,13 +80,15 @@ function getNotifications(){
 			}); // each
 
 			if (unread_new > 0) {
-				// Set page title, display notifications and set counter
-				document.title = '(' + unread_new + ') ' + page_title;
+				unread_on_load = unread_new;
+
+				// Display notifications count
 				$('#notifications-count').addClass('bloom');
 				$('#notifications-count').html('<span>' + unread_new + '</span>');
 				$('#notifications-toggle i').removeClass('pi-notifications-none').addClass('pi-notifications-active');
+
+				$('body').trigger('pillar:notifications-total-updated', unread_new);
 			} else {
-				document.title = page_title;
 				$('#notifications-count').removeAttr('class');
 				$('#notifications-toggle i').removeClass('pi-notifications-active').addClass('pi-notifications-none');
 			};
@@ -167,6 +166,8 @@ function checkPopNotification(id,username,username_avatar,action,date,context_ob
 
 			// pop in!
 			popNotification();
+
+			$('body').trigger('pillar:notifications-total-updated', unread_new);
 		};
 	};
 
@@ -311,11 +312,12 @@ $(function() {
 			$(this).addClass('is_read');
 		});
 
-		document.title = page_title;
 		$('#notifications-count').removeAttr('class');
 		$('#notifications-toggle i').removeClass('pi-notifications-active').addClass('pi-notifications-none');
 
-		unread_on_load = unread_new;
+		unread_on_load = 0;
+
+		$('body').trigger('pillar:notifications-total-updated', unread_on_load);
 	});
 });
 
