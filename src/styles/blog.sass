@@ -614,11 +614,27 @@
 					padding-left: 70px
 
 		h4.blog_index-title
+			color: $color-text-dark-secondary
 			margin-left: 80px
 			padding-top: 25px
-			font:
-				family: $font-body
-			color: $color-text-dark-secondary
+
+			&.blog-archive
+				display: flex
+				font-size: 1em
+				margin-left: 0
+				padding: 0
+				text-align: center
+
+				a
+					flex: 1
+					padding: 15px
+
+					&.disabled
+						color: $color-text-dark-hint
+						pointer-events: none
+
+		h3.blog-archive-title
+			text-align: center
 
 
 	#blog_index-container,

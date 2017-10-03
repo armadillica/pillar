@@ -4,8 +4,9 @@
 | {% block body %}
 .container.blog-archive
 	#blog_container.cloud-blog
-		#blog_index-container.expand-image-links
+		#blog_index-container
 			.blog_index-header
-				h1 Blog Archive
+				h3.blog-archive-title
+					| Blog Archive
 			| {{ blogmacros.render_archive(project, posts, posts_meta) }}
 | {% endblock %}
