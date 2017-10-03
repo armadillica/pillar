@@ -68,8 +68,9 @@ def main_blog_archive(page=1):
 
 
 @blueprint.route('/p/<project_url>/blog-archive/')
-def project_blog_archive(project_url):
-    return posts_view(project_url=project_url, archive=True)
+@blueprint.route('/p/<project_url>/blog-archive/<int:page>')
+def project_blog_archive(project_url, page=1):
+    return posts_view(project_url=project_url, archive=True, page=page)
 
 
 @blueprint.route('/vrview')
