@@ -86,14 +86,14 @@ script(type="text/javascript").
 
 	$(function () {
 		$('#tags').select2();
-	});
 
-	var convert = new Markdown.getSanitizingConverter();
-	Markdown.Extra.init(convert);
-	convert = convert.makeHtml;
+		page_title = 'Edit: {{ node.name }} — {{ project.name }}';
+		updateTitle(unread_on_load, page_title);
 
-	/* Build the markdown preview when typing in textarea */
-	$(function() {
+		/* Build the markdown preview when typing in textarea */
+		var convert = new Markdown.getSanitizingConverter();
+		Markdown.Extra.init(convert);
+		convert = convert.makeHtml;
 
 		var $textarea = $('.form-group.description textarea'),
 				$loader = $('<div class="md-preview-loading"><i class="pi-spin spin"></i></div>').insertAfter($textarea),
@@ -125,9 +125,7 @@ script(type="text/javascript").
 				$preview.html(convert($textarea.val()));
 			}
 		}).trigger('keyup');
-	});
 
-	$(function() {
 		$('input, textarea').keypress(function () {
 			// Unused: save status of the page as 'edited'
 			ProjectUtils.setProjectAttributes({isModified: true});
