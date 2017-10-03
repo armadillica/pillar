@@ -3,6 +3,18 @@ var unread_on_load = false;
 var unread_new = 0;
 var first_load = false;
 
+var $notifications = $('#notifications');
+var $notification_pop = $('#notification-pop');
+var $notifications_count = $('#notifications-count');
+var $notifications_toggle = $('#notifications-toggle');
+
+
+function clearNotificationIcon(){
+	$notifications_count.html('');
+	$notifications_toggle.removeClass('has-notifications');
+}
+
+
 // getNotifications by fetching json every X seconds
 function getNotifications(){
 	$.getJSON( "/notifications/", function( data ) {
@@ -83,14 +95,15 @@ function getNotifications(){
 				unread_on_load = unread_new;
 
 				// Display notifications count
-				$('#notifications-count').addClass('bloom');
-				$('#notifications-count').html('<span>' + unread_new + '</span>');
-				$('#notifications-toggle i').removeClass('pi-notifications-none').addClass('pi-notifications-active');
+				$notifications_count.html('<span>' + unread_new + '</span>');
+				$notifications_toggle.addClass('has-notifications');
 
+				// Let Pillar know the notifications total has been updated.
+				// Used for example to update of the page title via updateTitle();
 				$('body').trigger('pillar:notifications-total-updated', unread_new);
+
 			} else {
-				$('#notifications-count').removeAttr('class');
-				$('#notifications-toggle i').removeClass('pi-notifications-active').addClass('pi-notifications-none');
+				clearNotificationIcon();
 			};
 
 			checkPopNotification(
@@ -111,7 +124,7 @@ function getNotifications(){
 		}; // if items
 
 		// Populate the list
-		$('ul#notifications-list').html( items.join(''));
+		$('ul#notifications-list').html(items.join(''));
 	})
 	.done(function(){
 		// clear the counter
@@ -122,22 +135,22 @@ function getNotifications(){
 
 // Used when we click somewhere in the page
 function hideNotifications(){
-	$('#notifications').hide();
-	$('#notifications-toggle').removeClass('active');
+	$notifications.hide();
+	$notifications_toggle.removeClass('active');
 };
 
 function popNotification(){
 
 	// pop in!
-	$("#notification-pop").addClass('in');
+	$notification_pop.addClass('in');
 
 	// After 10s, add a class to make it pop out
 	setTimeout(function(){
-		$("#notification-pop").addClass('out');
+		$notification_pop.addClass('out');
 
 		// And a second later, remove all classes
 		setTimeout(function(){
-			$("#notification-pop").removeAttr('class');
+			$notification_pop.removeAttr('class');
 		}, 1000);
 
 	}, 10000);
@@ -152,8 +165,8 @@ function checkPopNotification(id,username,username_avatar,action,date,context_ob
 		// If there's new content
 		if (unread_new > unread_on_load){
 			// Fill in the urls for redirect on click, and mark-read
-			$("#notification-pop").attr('data-url', object_url);
-			$("#notification-pop").attr('data-read-toggle', '/notifications/' + id + '/read-toggle');
+			$notification_pop.attr('data-url', object_url);
+			$notification_pop.attr('data-read-toggle', '/notifications/' + id + '/read-toggle');
 			// The text in the pop
 			var text = '<span class="nc-author">' + username + '</span> ';
 			text += action + ' ';
@@ -161,8 +174,8 @@ function checkPopNotification(id,username,username_avatar,action,date,context_ob
 			text += '<span class="nc-date">' + date + '</span>';
 
 			// Fill the html
-			$('#notification-pop .nc-text').html(text);
-			$('#notification-pop .nc-avatar img').attr('src', username_avatar);
+			$notification_pop.find('.nc-text').html(text);
+			$notification_pop.find('.nc-avatar img').attr('src', username_avatar);
 
 			// pop in!
 			popNotification();
@@ -176,14 +189,14 @@ function checkPopNotification(id,username,username_avatar,action,date,context_ob
 function notificationsResize(){
 	var height = $(window).height() - 80;
 
-	if ($('#notifications').height() > height){
-		$('#notifications').css({
+	if ($notifications.height() > height){
+		$notifications.css({
 				'max-height' : height / 2,
 				'overflow-y' : 'scroll'
 			}
 		);
 	} else {
-		$('#notifications').css({
+		$notifications.css({
 				'max-height' : '1000%',
 				'overflow-y' : 'initial'
 			}
@@ -193,20 +206,21 @@ function notificationsResize(){
 
 
 $(function() {
+
 	// Click anywhere in the page to hide #notifications
 	$(document).click(function () {
 		hideNotifications();
 	});
 	// ...but clicking inside #notifications shouldn't hide itself
-	$('#notifications').on('click', function (e) {
+	$notifications.on('click', function (e) {
 		e.stopPropagation();
 	});
 
 	// Toggle the #notifications flyout
-	$('#notifications-toggle').on('click', function (e) {
+	$notifications_toggle.on('click', function (e) {
 		e.stopPropagation();
 
-		$('#notifications').toggle();
+		$notifications.toggle();
 		$(this).toggleClass("active");
 
 		notificationsResize();
@@ -214,25 +228,25 @@ $(function() {
 		// Hide other dropdowns
 		$('nav .dropdown').removeClass('open');
 
-		var navbarCollapse = $('nav.navbar-collapse');
+		var $navbarCollapse = $('nav.navbar-collapse');
 
-		if ($(navbarCollapse).hasClass('in')){
-			$(navbarCollapse).addClass('show-notifications').removeClass('in');
+		if ($navbarCollapse.hasClass('in')){
+			$navbarCollapse.addClass('show-notifications').removeClass('in');
 			$('.nav-notifications-icon').removeClass('pi-notifications-none').addClass('pi-cancel');
 		} else {
-			$(navbarCollapse).removeClass('show-notifications');
+			$navbarCollapse.removeClass('show-notifications');
 			$('.nav-notifications-icon').addClass('pi-notifications-none').removeClass('pi-cancel');
 		}
 	});
 
 	// Hide flyout when clicking other dropdowns
 	$('nav').on('click', '.dropdown', function (e) {
-		$('#notifications').hide();
-		$('#notifications-toggle').removeClass('active');
+		$notifications.hide();
+		$notifications_toggle.removeClass('active');
 	});
 
 
-	$('#notification-pop').on('click', function (e) {
+	$notification_pop.on('click', function (e) {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -312,11 +326,12 @@ $(function() {
 			$(this).addClass('is_read');
 		});
 
-		$('#notifications-count').removeAttr('class');
-		$('#notifications-toggle i').removeClass('pi-notifications-active').addClass('pi-notifications-none');
+		clearNotificationIcon();
 
 		unread_on_load = 0;
 
+		// Let Pillar know the notifications total has been updated.
+		// Used for example to update of the page title via updateTitle();
 		$('body').trigger('pillar:notifications-total-updated', unread_on_load);
 	});
 });

@@ -30,6 +30,18 @@
 	position: relative
 	user-select: none
 
+	> i:before
+		content: '\e815'
+
+	&.has-notifications
+		> i:before
+			content: '\e813'
+
+		#notifications-count
+			opacity: 1
+			transform: scale(1) !important
+			-webkit-transform: scale(1) !important
+
 	.flyout-hat
 		border-color: transparent transparent white transparent
 		border-style: solid
@@ -68,10 +80,6 @@
 		user-select: none
 		width: 18px
 
-		&.bloom
-			opacity: 1
-			transform: scale(1) !important
-			-webkit-transform: scale(1) !important
 
 #notifications-list
 	list-style-type: none
