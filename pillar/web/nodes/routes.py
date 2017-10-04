@@ -108,7 +108,7 @@ def jstree(node_id):
 
 
 @blueprint.route("/<node_id>/view")
-def view(node_id):
+def view(node_id, extra_template_args: dict=None):
     api = system_util.pillar_api()
 
     # Get node, we'll embed linked objects later.
@@ -201,9 +201,6 @@ def view(node_id):
     if node.file and node.file_variations:
         node.file.length = max(var.length for var in node.file_variations)
 
-    if request.args.get('embed_project') == '1':
-        node.project = Project.find(node.project, api=api)
-
     if request.args.get('format') == 'json':
         node = node.to_dict()
         node['url_edit'] = url_for('nodes.edit', node_id=node['_id'])
@@ -225,6 +222,8 @@ def view(node_id):
 
     write_access = 'PUT' in (node.allowed_methods or set())
 
+    if extra_template_args is None:
+        extra_template_args = {}
     try:
         return render_template(template_path,
                                node_id=node._id,
@@ -233,7 +232,8 @@ def view(node_id):
                                children=children,
                                config=current_app.config,
                                write_access=write_access,
-                               api=api)
+                               api=api,
+                               **extra_template_args)
     except TemplateNotFound:
         log.error('Template %s does not exist for node type %s', template_path, node_type_name)
         return render_template('nodes/error_type_not_found.html',
@@ -243,7 +243,8 @@ def view(node_id):
                                children=children,
                                config=current_app.config,
                                write_access=write_access,
-                               api=api)
+                               api=api,
+                               **extra_template_args)
 
 
 def _view_handler_asset(node, template_path, template_action, link_allowed):
