@@ -724,6 +724,7 @@ class PillarServer(Eve):
         coll = db['tokens']
         coll.create_index([('user', pymongo.ASCENDING)])
         coll.create_index([('token', pymongo.ASCENDING)])
+        coll.create_index([('token_hashed', pymongo.ASCENDING)])
 
         coll = db['notifications']
         coll.create_index([('user', pymongo.ASCENDING)])
