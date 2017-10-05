@@ -1,3 +1,36 @@
+/**
+ * Little API for managing the document title.
+ *
+ * This allows the document title to be composed of individually adjustable
+ * properties.
+ */
+var DocumentTitleAPI = {
+	// Properties that make up the document title:
+	page_title: document.title,
+	notification_count: 0,
+
+	// Updates the page title given the current state.
+	update: function() {
+		if (this.notification_count > 0){
+			document.title = '(' + this.notification_count + ') ' + this.page_title;
+		} else {
+			document.title = this.page_title;
+		}
+	},
+
+	// Sets just the notification count and updates the document title.
+	set_notification_count: function(new_notif_count) {
+		this.notification_count = new_notif_count;
+		this.update();
+	},
+
+	// Sets just the page title and updates the document title.
+	set_page_title: function(new_page_title) {
+		this.page_title = new_page_title;
+		this.update();
+	},
+};
+
 var page_title = document.title;
 
 function updateTitle(unread_on_load, page_title){
