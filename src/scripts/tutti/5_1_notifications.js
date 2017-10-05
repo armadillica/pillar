@@ -1,21 +1,25 @@
 
-var unread_on_load = false;
-var unread_new = 0;
+
+/**
+ * Store the number of unread notifications on load.
+ * That way, if the number got higher while the page was
+ * still open, we can announce it by popping a nice dialog.
+ */
+var unread_on_load = 0;
 var first_load = false;
+var unread_new = 0;
 
-var $notifications = $('#notifications');
-var $notification_pop = $('#notification-pop');
-var $notifications_count = $('#notifications-count');
-var $notifications_toggle = $('#notifications-toggle');
-
-
+/**
+ * Clear notifications by emptying the count number
+ * and removing the has-notification class that styles the toggle
+ */
 function clearNotificationIcon(){
-	$notifications_count.html('');
-	$notifications_toggle.removeClass('has-notifications');
+	$('#notifications-count').html('');
+	$('#notifications-toggle').removeClass('has-notifications');
 }
 
 
-// getNotifications by fetching json every X seconds
+// Get notifications by fetching /notifications/ JSON every 30 seconds
 function getNotifications(){
 	$.getJSON( "/notifications/", function( data ) {
 
@@ -95,8 +99,8 @@ function getNotifications(){
 				unread_on_load = unread_new;
 
 				// Display notifications count
-				$notifications_count.html('<span>' + unread_new + '</span>');
-				$notifications_toggle.addClass('has-notifications');
+				$('#notifications-count').html('<span>' + unread_new + '</span>');
+				$('#notifications-toggle').addClass('has-notifications');
 
 				// Update notifications count on the document title
 				DocumentTitleAPI.set_notification_count(unread_new);
@@ -134,20 +138,22 @@ function getNotifications(){
 
 // Used when we click somewhere in the page
 function hideNotifications(){
-	$notifications.hide();
-	$notifications_toggle.removeClass('active');
+	$('#notifications').hide();
+	$('#notifications-toggle').removeClass('active');
 };
 
 function popNotification(){
 
-	// pop in!
+	var $notification_pop = $('#notification-pop');
+
+	// Pop in!
 	$notification_pop.addClass('in');
 
-	// After 10s, add a class to make it pop out
+	// After 10s, add a class to make it pop out...
 	setTimeout(function(){
 		$notification_pop.addClass('out');
 
-		// And a second later, remove all classes
+		// ...and a second later, remove all classes
 		setTimeout(function(){
 			$notification_pop.removeAttr('class');
 		}, 1000);
@@ -161,11 +167,16 @@ function popNotification(){
 
 function checkPopNotification(id,username,username_avatar,action,date,context_object_name,object_url)
 	{
+
+		var $notification_pop = $('#notification-pop');
+
 		// If there's new content
 		if (unread_new > unread_on_load){
+
 			// Fill in the urls for redirect on click, and mark-read
 			$notification_pop.attr('data-url', object_url);
 			$notification_pop.attr('data-read-toggle', '/notifications/' + id + '/read-toggle');
+
 			// The text in the pop
 			var text = '<span class="nc-author">' + username + '</span> ';
 			text += action + ' ';
@@ -176,10 +187,8 @@ function checkPopNotification(id,username,username_avatar,action,date,context_ob
 			$notification_pop.find('.nc-text').html(text);
 			$notification_pop.find('.nc-avatar img').attr('src', username_avatar);
 
-			// pop in!
+			// Pop in!
 			popNotification();
-
-			$('body').trigger('pillar:notifications-total-updated', unread_new);
 		};
 	};
 
@@ -188,14 +197,14 @@ function checkPopNotification(id,username,username_avatar,action,date,context_ob
 function notificationsResize(){
 	var height = $(window).height() - 80;
 
-	if ($notifications.height() > height){
-		$notifications.css({
+	if ($('#notifications').height() > height){
+		$('#notifications').css({
 				'max-height' : height / 2,
 				'overflow-y' : 'scroll'
 			}
 		);
 	} else {
-		$notifications.css({
+		$('#notifications').css({
 				'max-height' : '1000%',
 				'overflow-y' : 'initial'
 			}
@@ -211,15 +220,18 @@ $(function() {
 		hideNotifications();
 	});
 	// ...but clicking inside #notifications shouldn't hide itself
-	$notifications.on('click', function (e) {
+	$('#notifications').on('click', function (e) {
 		e.stopPropagation();
 	});
 
 	// Toggle the #notifications flyout
-	$notifications_toggle.on('click', function (e) {
+	$('#notifications-toggle').on('click', function (e) {
 		e.stopPropagation();
 
-		$notifications.toggle();
+		var $navbarCollapse = $('nav.navbar-collapse');
+		var $notificationIcon = $('.nav-notifications-icon');
+
+		$('#notifications').toggle();
 		$(this).toggleClass("active");
 
 		notificationsResize();
@@ -227,25 +239,33 @@ $(function() {
 		// Hide other dropdowns
 		$('nav .dropdown').removeClass('open');
 
-		var $navbarCollapse = $('nav.navbar-collapse');
-
 		if ($navbarCollapse.hasClass('in')){
-			$navbarCollapse.addClass('show-notifications').removeClass('in');
-			$('.nav-notifications-icon').removeClass('pi-notifications-none').addClass('pi-cancel');
+
+			$navbarCollapse
+				.addClass('show-notifications')
+				.removeClass('in');
+
+			$notificationIcon
+				.removeClass('pi-notifications-none')
+				.addClass('pi-cancel');
+
 		} else {
+
 			$navbarCollapse.removeClass('show-notifications');
-			$('.nav-notifications-icon').addClass('pi-notifications-none').removeClass('pi-cancel');
+			$notificationIcon
+				.addClass('pi-notifications-none')
+				.removeClass('pi-cancel');
 		}
 	});
 
 	// Hide flyout when clicking other dropdowns
 	$('nav').on('click', '.dropdown', function (e) {
-		$notifications.hide();
-		$notifications_toggle.removeClass('active');
+		$('#notifications').hide();
+		$('#notifications-toggle').removeClass('active');
 	});
 
 
-	$notification_pop.on('click', function (e) {
+	$('#notification-pop').on('click', function (e) {
 		e.preventDefault();
 		e.stopPropagation();
 
@@ -329,7 +349,6 @@ $(function() {
 
 		// Update notifications count on the document title
 		DocumentTitleAPI.set_notification_count(0);
-
 	});
 });
 
