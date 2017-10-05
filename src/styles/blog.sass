@@ -201,12 +201,13 @@
 			width: 75%
 
 		.blog_index-header
-			width: 100%
-			overflow: hidden
-			position: relative
-			display: block
 			border-top-left-radius: 3px
 			border-top-right-radius: 3px
+			display: block
+			overflow: hidden
+			position: relative
+			text-align: center
+			width: 100%
 
 			img
 				width: 100%
@@ -588,7 +589,6 @@
 						left: 25px
 						right: 25px
 
-
 				.item-header
 					width: 50px
 					height: 50px
@@ -613,30 +613,6 @@
 				a.item-title, .item-info
 					padding-left: 70px
 
-		h4.blog_index-title
-			color: $color-text-dark-secondary
-			margin-left: 80px
-			padding-top: 25px
-
-			&.blog-archive
-				display: flex
-				font-size: 1em
-				margin-left: 0
-				padding: 0
-				text-align: center
-
-				a
-					flex: 1
-					padding: 15px
-
-					&.disabled
-						color: $color-text-dark-hint
-						pointer-events: none
-
-		h3.blog-archive-title
-			text-align: center
-
-
 	#blog_index-container,
 	#blog_post-container
 		.blog_index-item
@@ -655,17 +631,38 @@
 					padding: 15px 10px
 					margin: 0
 
-		h4.blog_index-title
-			margin-left: 35px
-
 	&.cloud-blog #blog_post-container,
 	#blog_post-container
 		.blog_index-item
 			padding-top: 55px
 			font-size: .9em
 
-.blog-archive h1
-	border-bottom: thin solid $color-background
-	padding-bottom: 0.3ex
+
+.blog-archive-navigation
+	+media-xs
+		font-size: 1em
+		max-width: initial
+
+	border-bottom: thin solid $color-background-dark
+	display: flex
+	font:
+		size: 1.2em
+		weight: 300
+	margin: 0 auto
+	max-width: 90%
 	text-align: center
-	color: $color-text-dark-secondary
+	+text-overflow-ellipsis
+
+	&:last-child
+		border: none
+
+	a, span
+		+media-xs
+			padding: 10px
+
+		flex: 1
+		padding: 25px 15px
+
+	span
+		color: $color-text-dark-secondary
+		pointer-events: none

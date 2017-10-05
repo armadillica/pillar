@@ -2,7 +2,7 @@
 | {% import 'nodes/custom/blog/_macros.html' as blogmacros %}
 
 | {% block project_context %}
-#blog_container.blog-archive
+#blog_container
 	#blog_index-container.expand-image-links
 		| {{ blogmacros.render_archive(project, posts, posts_meta) }}
-| {% endblock %}
+| {% endblock project_context%}
