@@ -129,11 +129,17 @@ users_schema = {
         }
     },
 
-    # Properties defined by extensions. Extensions should use their name
-    # (see the PillarExtension.name property) as the key, and are free to
-    # use whatever they want as value (but we suggest a dict for future
-    # extendability).
-    'extension_props': {
+    # Properties defined by extensions. Extensions should use their name (see the
+    # PillarExtension.name property) as the key, and are free to use whatever they want as value,
+    # but we suggest a dict for future extendability.
+    # Properties can be of two types:
+    # - public: they will be visible to the world (for example as part of the User.find() query)
+    # - private: visible only to their user
+    'extension_props_public': {
+        'type': 'dict',
+        'required': False,
+    },
+    'extension_props_private': {
         'type': 'dict',
         'required': False,
     },

@@ -135,7 +135,7 @@ def after_fetching_user(user):
         return
 
     # Remove all fields except public ones.
-    public_fields = {'full_name', 'username', 'email'}
+    public_fields = {'full_name', 'username', 'email', 'extension_props_public'}
     for field in list(user.keys()):
         if field not in public_fields:
             del user[field]
