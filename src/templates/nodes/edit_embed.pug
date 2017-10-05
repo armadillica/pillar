@@ -87,8 +87,9 @@ script(type="text/javascript").
 	$(function () {
 		$('#tags').select2();
 
-		page_title = 'Edit: {{ node.name }} — {{ project.name }}';
-		updateTitle(unread_on_load, page_title);
+		// Set the page title on the document
+		var page_title = 'Edit: {{ node.name }} - {{ project.name }} — Blender Cloud';
+		DocumentTitleAPI.set_page_title(page_title);
 
 		/* Build the markdown preview when typing in textarea */
 		var convert = new Markdown.getSanitizingConverter();

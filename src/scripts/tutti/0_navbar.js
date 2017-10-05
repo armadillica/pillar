@@ -31,16 +31,6 @@ var DocumentTitleAPI = {
 	},
 };
 
-var page_title = document.title;
-
-function updateTitle(unread_on_load, page_title){
-
-	if (unread_on_load > 0){
-		document.title = '(' + unread_on_load + ') ' + page_title;
-	} else {
-		document.title = page_title;
-	}
-}
 
 /* Status Bar */
 function statusBarClear(delay_class, delay_html){

@@ -98,9 +98,8 @@ function getNotifications(){
 				$notifications_count.html('<span>' + unread_new + '</span>');
 				$notifications_toggle.addClass('has-notifications');
 
-				// Let Pillar know the notifications total has been updated.
-				// Used for example to update of the page title via updateTitle();
-				$('body').trigger('pillar:notifications-total-updated', unread_new);
+				// Update notifications count on the document title
+				DocumentTitleAPI.set_notification_count(unread_new);
 
 			} else {
 				clearNotificationIcon();
@@ -328,11 +327,9 @@ $(function() {
 
 		clearNotificationIcon();
 
-		unread_on_load = 0;
+		// Update notifications count on the document title
+		DocumentTitleAPI.set_notification_count(0);
 
-		// Let Pillar know the notifications total has been updated.
-		// Used for example to update of the page title via updateTitle();
-		$('body').trigger('pillar:notifications-total-updated', unread_on_load);
 	});
 });
 
