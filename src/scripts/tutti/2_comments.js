@@ -187,7 +187,7 @@ function show_comment_edit_button_error($button, msg) {
 	$button.html(msg);
 
 	setTimeout(function(){
-		$button.html('<i class="pi-check"></i> save changes');
+		$button.html('<i class="pi-check"></i> Save Changes');
 		$button.removeClass('button-field-error');
 		$textarea.removeClass('field-error');
 	}, 2500);
@@ -305,7 +305,7 @@ function post_comment($submit_button){
 	.progress(function() {
 		$submit_button
 			.addClass('submitting')
-			.html('<i class="pi-spin spin"></i> Sending...');
+			.html('<span><i class="pi-spin spin"></i> Sending...</span>');
 	})
 	.fail(function(xhr){
 		if (typeof xhr === 'string') {
@@ -313,7 +313,7 @@ function post_comment($submit_button){
 		} else {
 			// If it's not a string, we assume it's a jQuery XHR object.
 			if (console) console.log('Error posting comment: ', xhr.responseText);
-			show_comment_button_error("Houston! Try again?");
+			show_comment_button_error("Try again?");
 		}
 		toastr.error(xhr.responseText, 'Error posting comment');
 	})
