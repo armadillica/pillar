@@ -58,11 +58,17 @@
         border-color: transparent
 
 #settings
+  +media-xs
+    flex-direction: column
+
   display: flex
   align-items: stretch
   margin: 25px auto
 
   #settings-sidebar
+    +media-xs
+      width: 100%
+
     width: 30%
     +container-box
     margin-right: 15px
@@ -97,6 +103,9 @@
 
 
   #settings-container
+    +media-xs
+      width: 100%
+
     width: 70%
     +container-box
 
