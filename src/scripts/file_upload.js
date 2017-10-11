@@ -114,6 +114,7 @@ function setup_file_uploader(index, upload_element) {
                 $('.node-edit-title').html(filename);
             }
 
+            toastr.clear();
             toastr.success('File uploaded!');
             set_progress_bar(100);
 
@@ -131,6 +132,7 @@ function setup_file_uploader(index, upload_element) {
                 uploadErrors.push(fileupload.messages[key]);
             }
 
+            toastr.clear();
             toastr.error(uploadErrors.join("; "), 'Upload error');
 
             set_progress_bar(100, 'progress-error');
