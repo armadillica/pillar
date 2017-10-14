@@ -100,7 +100,7 @@ $comments-width-max: 710px
 				+media-lg
 					max-width: $comments-width-max
 
-				color: darken($color-text-dark, 10%)
+				color: darken($color-text, 10%)
 				font:
 					size: 1em
 					weight: normal
@@ -270,7 +270,7 @@ $comments-width-max: 710px
 					padding-left: 25px
 
 			&.is-first
-				border-top: 1px solid lighten($color-text-dark-hint, 15%)
+				border-top: 1px solid $color-background
 
 			&.is-team
 				.comment-author
@@ -326,9 +326,9 @@ $comments-width-max: 710px
 		width: 100%
 
 	&-field
-		background-color: white
+		background-color: $color-background-dark
 		border-radius: 3px
-		box-shadow: 1px 2px 2px rgba($color-background-dark, .5)
+		box-shadow: inset 0 0 2px 0 rgba(darken($color-background-dark, 20%), .5)
 		display: flex
 		position: relative
 		transition: border-color 300ms ease-in-out
@@ -364,9 +364,16 @@ $comments-width-max: 710px
 			&.error
 				box-shadow: inset 2px 0 0 0 $color-danger, inset 0 2px 0 0 $color-danger, inset 0 -2px 0 0 $color-danger
 
+				&+.comment-reply-meta button.comment-action-submit
+					box-shadow: inset -2px 0 0 0 $color-danger, inset 0 2px 0 0 $color-danger, inset 0 -2px 0 0 $color-danger
+
 		&.filled
-			textarea:focus
-				border-bottom-left-radius: 0
+			textarea
+				background-color: $color-background-light
+				border-bottom: thin solid $color-background
+
+				&:focus
+					border-bottom-left-radius: 0
 
 			&+.comment-reply-preview
 				display: flex
@@ -395,7 +402,6 @@ $comments-width-max: 710px
 		border-bottom-left-radius: 3px
 		border-bottom-right-radius: 3px
 		box-shadow: 1px 2px 2px rgba($color-background-dark, .5)
-		color: $color-text-dark-primary
 		display: none // flex when comment-reply-field has .filled class
 		position: relative
 		transition: all 150ms ease-in-out
@@ -456,8 +462,7 @@ $comments-width-max: 710px
 			width: 100%
 
 			&:focus
-				background-color: white
-
+				background-color: $color-background-light
 
 			&.submitting
 				color: $color-info
