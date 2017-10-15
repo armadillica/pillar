@@ -57,15 +57,7 @@
 			| {# * User is not autenticated #}
 			.comment-reply-form
 				.comment-reply-field.sign-in
-					textarea(
-						disabled,
-						id="comment_field",
-						data-parent-id="{{ node_id }}",
-						placeholder="Join the conversation...")
-					.sign-in
-						a(href="{{ url_for('users.login') }}") Log in
-						| to comment.
-
+					a(href="{{ url_for('users.login') }}") Log in to comment
 			| {% endif %}
 
 		| {% if show_comments and (nr_of_comments > 0) %}
