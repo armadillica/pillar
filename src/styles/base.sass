@@ -926,30 +926,29 @@ button, .btn
 
 /* Flyouts (only used on notifications for now) */
 .flyout
-	display: block
-	font-size: .9em
-	background-color: white
+	background-color: $color-background
 	border-radius: 3px
 	border: thin solid darken($color-background, 3%)
 	box-shadow: 1px 2px 2px rgba(black, .2)
+	display: block
+	font-size: .9em
 
 	& .flyout-title
-		font-weight: 600
-		display: block
-		padding: 8px 10px 5px 10px
-		font-size: 1.1em
-		float: left
 		cursor: default
+		display: block
+		float: left
+		font-size: 1.1em
+		font-weight: 600
+		padding: 8px 10px 5px 10px
 
 	&.notifications
+		max-height: 1000%
+		overflow-x: hidden
 		position: absolute
 		right: 0
 		top: 60px
-		z-index: 9999
 		width: 420px
-		max-height: 1000%
-		border-top-color: white
-		overflow-x: hidden
+		z-index: 9999
 
 
 /* Font aliases */
