@@ -21,15 +21,14 @@ $comments-width-max: 710px
 
 		&-title
 			padding: 15px 0 10px 0
-			font-size: 1.3em
+			font-size: 1.1em
 			font-weight: 300
-			color: $color-text-dark-hint
+			color: rgba($color-text, .5)
 
 		/* Each comment on the list*/
 		.comment-container,
 		.comment-reply-container
 			display: flex
-
 			position: relative
 			padding: 15px 0 20px 0
 			transition: background-color 150ms ease-in-out, padding 150ms ease-in-out, margin 150ms ease-in-out
@@ -128,8 +127,8 @@ $comments-width-max: 710px
 						margin-bottom: 0
 
 				strong, b
-					font-weight: 500
-					color: $color-info
+					font-weight: bold
+					color: $color-text
 
 				img.emoji
 					padding-top: inherit
@@ -213,6 +212,9 @@ $comments-width-max: 710px
 				.comment-action-reply
 					color: $color-primary
 
+					&:hover
+						text-decoration: underline
+
 				.comment-action-reply,
 				.comment-action-edit
 					padding-left: 10px
@@ -224,6 +226,7 @@ $comments-width-max: 710px
 						font-weight: 600
 						left: -10px
 						position: relative
+						text-decoration: none
 
 					span
 						cursor: pointer
@@ -257,7 +260,7 @@ $comments-width-max: 710px
 					left: 20px
 					top: 5px
 				margin-left: 35px
-				box-shadow: inset 3px 0 0 $color-background-dark
+				box-shadow: inset 3px 0 0 $color-background
 
 				+media-xs
 					padding-left: 15px
@@ -394,9 +397,6 @@ $comments-width-max: 710px
 			color: $color-text-dark-primary
 			cursor: default
 
-			a
-				margin-right: 4px
-
 	&-preview
 		background-color: $color-background-light
 		border-bottom-left-radius: 3px
@@ -450,6 +450,7 @@ $comments-width-max: 710px
 		width: 100px
 
 		button.comment-action-submit
+			background: transparent
 			border: none
 			border-top-left-radius: 0
 			border-bottom-left-radius: 0
@@ -462,7 +463,7 @@ $comments-width-max: 710px
 			width: 100%
 
 			&:focus
-				background-color: $color-background-light
+				background: lighten($color-success, 10%)
 
 			&.submitting
 				color: $color-info
