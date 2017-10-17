@@ -212,8 +212,8 @@ def login_user(oauth_token: str, *, load_from_db=False):
     g.current_user = user
 
 
-def get_blender_id_oauth_token():
-    """Returns a tuple (token, ''), for use with flask_oauthlib."""
+def get_blender_id_oauth_token() -> str:
+    """Returns the Blender ID auth token, or an empty string if there is none."""
 
     from flask import request
 
@@ -221,10 +221,10 @@ def get_blender_id_oauth_token():
     if token:
         return token
 
-    if request.authorization:
-        return request.authorization.username, ''
+    if request.authorization and request.authorization.username:
+        return request.authorization.username
 
-    return None
+    return ''
 
 
 def get_current_user() -> UserClass:

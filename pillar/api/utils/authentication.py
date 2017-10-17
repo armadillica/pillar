@@ -126,8 +126,6 @@ def validate_token():
         from pillar import auth
 
         token = auth.get_blender_id_oauth_token()
-        if token and isinstance(token, (tuple, list)):
-            token = token[0]
         oauth_subclient = None
 
     if not token:
