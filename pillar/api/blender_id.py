@@ -202,7 +202,7 @@ def fetch_blenderid_user() -> dict:
         return {}
 
     if bid_resp.status_code != 200:
-        log.warning('Error %i from BlenderID %s: %s', bid_resp.status_code, bid_url, bid_resp.data)
+        log.warning('Error %i from BlenderID %s: %s', bid_resp.status_code, bid_url, bid_resp.text)
         return {}
 
     if not bid_resp.json():
