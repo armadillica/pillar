@@ -186,11 +186,14 @@ def fetch_blenderid_user() -> dict:
 
     bid_url = '%s/api/user' % blender_id_endpoint()
     log.debug('Fetching user info from %s', bid_url)
+
+    credentials = current_app.config['OAUTH_CREDENTIALS']['blender-id']
+    oauth_token = session['blender_id_oauth_token']
+    oauth_session = OAuth2Session(
+        credentials['id'], credentials['secret'],
+        access_token=oauth_token)
+
     try:
-        client_id = current_app.config['OAUTH_CREDENTIALS']['blender-id']['id']
-        client_secret = current_app.config['OAUTH_CREDENTIALS']['blender-id']['secret']
-        oauth_session = OAuth2Session(
-            client_id, client_secret, access_token=session['blender_id_oauth_token'])
         bid_resp = oauth_session.get(bid_url)
     except httplib2.HttpLib2Error:
         log.exception('Error getting %s from BlenderID', bid_url)
