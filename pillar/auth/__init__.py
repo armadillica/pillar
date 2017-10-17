@@ -219,6 +219,13 @@ def get_blender_id_oauth_token() -> str:
 
     token = session.get('blender_id_oauth_token')
     if token:
+        if isinstance(token, (tuple, list)):
+            # In a past version of Pillar we accidentally stored tuples in the session.
+            # Such sessions should be actively fixed.
+            # TODO(anyone, after 2017-12-01): refactor this if-block so that it just converts
+            # the token value to a string and use that instead.
+            token = token[0]
+            session['blender_id_oauth_token'] = token
         return token
 
     if request.authorization and request.authorization.username:
