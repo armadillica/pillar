@@ -41,6 +41,7 @@ def add_pillar_request_to_notification(notification):
         remote_addr = f'{forwarded_for} (proxied via {remote_addr})'
 
     notification.add_tab("request", {
+        "method": request.method,
         "url": request.base_url,
         "headers": dict(request.headers),
         "params": dict(request.form),
