@@ -181,7 +181,7 @@ class JSONRequired(validators.DataRequired):
         try:
             json.loads(field.data)
         except ValueError as ex:
-            message = self.message or ex.message
+            message = self.message or str(ex)
 
             field.errors[:] = []
             raise validators.StopValidation(message)
