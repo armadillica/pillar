@@ -154,7 +154,10 @@ class BlenderIdSignIn(OAuthSignIn):
         oauth_session = self.make_oauth_session()
 
         # TODO handle exception for failed oauth or not authorized
-        session['blender_id_oauth_token'] = oauth_session.access_token
+        access_token = oauth_session.access_token
+        assert isinstance(access_token, str), f'oauth token must be str, not {type(access_token)}'
+
+        session['blender_id_oauth_token'] = access_token
         me = oauth_session.get('user').json()
         return OAuthUserResponse(str(me['id']), me['email'])
 

@@ -189,6 +189,8 @@ def fetch_blenderid_user() -> dict:
 
     credentials = current_app.config['OAUTH_CREDENTIALS']['blender-id']
     oauth_token = session['blender_id_oauth_token']
+    assert isinstance(oauth_token, str), f'oauth token must be str, not {type(oauth_token)}'
+
     oauth_session = OAuth2Session(
         credentials['id'], credentials['secret'],
         access_token=oauth_token)
