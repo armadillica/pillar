@@ -65,10 +65,10 @@ strong, b
 		+container-box
 
 
-.navbar-fixed-top+.page-content
+.navbar+.page-content
 	padding-top: $navbar-height
 
-.alert+.navbar-fixed-top+.page-content
+.alert+.navbar+.page-content
 	padding-top: 0
 
 .alert
@@ -242,7 +242,17 @@ header.navbar-header
 						padding: 0 10px
 
 
-nav.navbar, nav.sidebar
+nav
+	&.navbar
+		border-radius: 0
+		left: 0
+		position: fixed
+		right: 0
+		top: 0
+
+
+nav.navbar,
+nav.sidebar
 	z-index: $z-index-base + 5 /* Flowplayer seems to take up to 11, project container is 12 */
 	border: none
 	display: flex
