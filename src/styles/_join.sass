@@ -14,6 +14,9 @@
 			+container-behavior
 
 	#page-header
+		+media-xs
+			background-size: cover
+			background-position: right
 		min-height: 500px
 
 		.page-title,
@@ -93,7 +96,6 @@
 
 			.learn
 				color: white
-				font-size: .8em
 				text-decoration: underline
 
 			.page-card
@@ -113,17 +115,24 @@
 					p
 						font-size: .9em
 
+						&.summary-action
+							font-size: .8em
+
+							a.page-card-cta
+								font-size: .9em
+
 					a
 						color: white
 						text-decoration: underline
+
 
 			a.page-card-cta
 				background: #ff4970
 				border-radius: 3px
 				border: none
 				box-shadow: 1px 1px 0 rgba(black, .2)
-				font-size: .8em
 				font-weight: bold
+				margin-right: 15px
 				margin-top: 25px
 				padding: 7px 20px
 				text-decoration: none
@@ -204,6 +213,10 @@
 
 		a
 			color: $color-text-dark-secondary
+			text-decoration: underline
+
+			&:hover
+				color: $color-text-dark-primary
 
 	.pricing
 		+media-xs
