@@ -27,10 +27,6 @@ $videoplayer-background-color: $color-background-nav
 	width: 100%
 	height: 100%
 
-@font-face
-	font-family: VideoJS
-	src: url("../font/1.5.1/VideoJS.eot?#iefix") format("eot")
-
 
 @font-face
 	font-family: VideoJS
@@ -211,8 +207,27 @@ $videoplayer-background-color: $color-background-nav
 	font-weight: normal
 	font-style: normal
 
+
+.vjs-loop-button
+	&:before
+		font-family: 'pillar-font'
+		content: '\e864'
+		opacity: .7
+
+.vjs-control-active
+	text-shadow: 0 0 1em #FFF
+
+	&:before
+		opacity: 1
+
+
 .video-js
-	.vjs-mouse-display, .vjs-play-progress, .vjs-volume-level
+	.vjs-play-progress, .vjs-time-tooltip
+		font-family: $font-body
+		position: absolute
+		top: -30px
+
+	.vjs-mouse-display, .vjs-volume-level
 		font-family: VideoJS
 		font-weight: normal
 		font-style: normal
@@ -613,10 +628,10 @@ body.vjs-full-window
 	&.vjs-user-inactive.vjs-playing .vjs-control-bar
 		visibility: hidden
 		opacity: 0
-		-webkit-transition: visibility 1s, opacity 1s
-		-moz-transition: visibility 1s, opacity 1s
-		-o-transition: visibility 1s, opacity 1s
-		transition: visibility 1s, opacity 1s
+		-webkit-transition: visibility 1s, opacity .5s
+		-moz-transition: visibility 1s, opacity .5s
+		-o-transition: visibility 1s, opacity .5s
+		transition: visibility 1s, opacity .5s
 
 .vjs-controls-disabled .vjs-control-bar, .vjs-using-native-controls .vjs-control-bar, .vjs-error .vjs-control-bar
 	display: none !important
@@ -646,11 +661,14 @@ body.vjs-full-window
 		-webkit-flex: none
 		-ms-flex: none
 		flex: none
+
 		&:before
 			font-size: 1.8em
 			line-height: 1.67
+
 		&:focus:before, &:hover:before, &:focus
 			text-shadow: 0em 0em 1em white
+
 	.vjs-control-text
 		border: 0
 		clip: rect(0 0 0 0)
@@ -661,13 +679,9 @@ body.vjs-full-window
 		position: absolute
 		width: 1px
 
-.vjs-no-flex .vjs-control
-	display: table-cell
-	vertical-align: middle
-
-.video-js
 	.vjs-custom-control-spacer
 		display: none
+
 	.vjs-progress-control
 		-webkit-box-flex: auto
 		-moz-box-flex: auto
@@ -684,10 +698,6 @@ body.vjs-full-window
 		align-items: center
 		min-width: 4em
 
-.vjs-live .vjs-progress-control
-	display: none
-
-.video-js
 	.vjs-progress-holder
 		-webkit-box-flex: auto
 		-moz-box-flex: auto
@@ -699,13 +709,7 @@ body.vjs-full-window
 		-o-transition: all 0.2s
 		transition: all 0.2s
 		height: 0.3em
-	.vjs-progress-control:hover
-		.vjs-progress-holder
-			font-size: 1.666666666666666666em
-		.vjs-mouse-display:after, .vjs-play-progress:after
-			display: block
-			font-size: 0.6em
-	.vjs-progress-holder
+
 		.vjs-play-progress
 			position: absolute
 			display: block
@@ -715,6 +719,7 @@ body.vjs-full-window
 			width: 0
 			left: 0
 			top: 0
+
 		.vjs-load-progress
 			position: absolute
 			display: block
@@ -724,6 +729,7 @@ body.vjs-full-window
 			width: 0
 			left: 0
 			top: 0
+
 			div
 				position: absolute
 				display: block
@@ -733,36 +739,24 @@ body.vjs-full-window
 				width: 0
 				left: 0
 				top: 0
+
 	.vjs-mouse-display:before
 		display: none
+
 	.vjs-play-progress
 		background-color: white
+
 		&:before
 			position: absolute
 			top: -0.333333333333333em
 			right: -0.5em
-			font-size: 0.9em
-	.vjs-mouse-display:after
-		display: none
-		position: absolute
-		top: -3.4em
-		right: -1.5em
-		font-size: 0.9em
-		color: black
-		content: attr(data-current-time)
-		padding: 6px 8px 8px 8px
-		background-color: white
-		background-color: rgba(255, 255, 255, 0.8)
-		-webkit-border-radius: 0.3em
-		-moz-border-radius: 0.3em
-		border-radius: 0.3em
+
 	.vjs-play-progress
 		&:after
 			display: none
 			position: absolute
 			top: -3.4em
 			right: -1.5em
-			font-size: 0.9em
 			color: black
 			content: attr(data-current-time)
 			padding: 6px 8px 8px 8px
@@ -771,27 +765,49 @@ body.vjs-full-window
 			-webkit-border-radius: 0.3em
 			-moz-border-radius: 0.3em
 			border-radius: 0.3em
+
 		&:before, &:after
 			z-index: 1
+
 	.vjs-load-progress
 		background: #bfc7d3
 		background: rgba(115, 133, 159, 0.5)
+
 		div
 			background: white
 			background: rgba(115, 133, 159, 0.75)
 	&.vjs-no-flex .vjs-progress-control
 		width: auto
+
+	// Little marker when you mouse over
 	.vjs-progress-control .vjs-mouse-display
 		display: none
 		position: absolute
-		width: 1px
-		height: 100%
-		background-color: black
+		width: 2px
+		height: 10px
+		border: thick solid transparent
+		border-top-color: white
+		bottom: 0
 		z-index: 1
+
+		.vjs-time-tooltip
+			background-color: white
+			color: $color-background-nav
+			border-radius: 3px
+			font-size: 1.3em
+			padding: 3px 8px
+			top: -24px
+
+.vjs-live .vjs-progress-control
+	display: none
+
+.vjs-no-flex .vjs-control
+	display: table-cell
+	vertical-align: middle
 
 /* If we let the font size grow as much as everything else, the current time tooltip ends up
  *ginormous. If you'd like to enable the current time tooltip all the time, this should be disabled
- *to avoid a weird hitch when you roll off the hover.
+ *to avoid a weird hitch when you roll off the hover. */
 
 .vjs-no-flex .vjs-progress-control .vjs-mouse-display
 	z-index: 0
@@ -803,17 +819,17 @@ body.vjs-full-window
 		.vjs-progress-control .vjs-mouse-display
 			visibility: hidden
 			opacity: 0
-			-webkit-transition: visibility 1s, opacity 1s
-			-moz-transition: visibility 1s, opacity 1s
-			-o-transition: visibility 1s, opacity 1s
-			transition: visibility 1s, opacity 1s
+			-webkit-transition: visibility 1s, opacity .5s
+			-moz-transition: visibility 1s, opacity .5s
+			-o-transition: visibility 1s, opacity .5s
+			transition: visibility 1s, opacity .5s
 			&:after
 				visibility: hidden
 				opacity: 0
-				-webkit-transition: visibility 1s, opacity 1s
-				-moz-transition: visibility 1s, opacity 1s
-				-o-transition: visibility 1s, opacity 1s
-				transition: visibility 1s, opacity 1s
+				-webkit-transition: visibility 1s, opacity .5s
+				-moz-transition: visibility 1s, opacity .5s
+				-o-transition: visibility 1s, opacity .5s
+				transition: visibility 1s, opacity .5s
 		&.vjs-no-flex .vjs-progress-control .vjs-mouse-display
 			display: none
 			&:after
@@ -844,11 +860,6 @@ body.vjs-full-window
 		flex: none
 	.vjs-volume-control
 		width: 5em
-		-webkit-box-flex: none
-		-moz-box-flex: none
-		-webkit-flex: none
-		-ms-flex: none
-		flex: none
 		display: -webkit-box
 		display: -webkit-flex
 		display: -ms-flexbox
@@ -857,6 +868,9 @@ body.vjs-full-window
 		-webkit-align-items: center
 		-ms-flex-align: center
 		align-items: center
+
+
+
 	.vjs-volume-bar
 		margin: 1.35em 0.45em
 
@@ -864,10 +878,19 @@ body.vjs-full-window
 	&.vjs-slider-horizontal
 		width: 5em
 		height: 0.3em
+
 	&.vjs-slider-vertical
 		width: 0.3em
 		height: 5em
 		margin: 1.35em auto
+
+		.vjs-volume-level
+			height: 100%
+			width: 0.3em
+
+			&:before
+				top: -0.5em
+				left: -0.3em
 
 .video-js .vjs-volume-level
 	position: absolute
@@ -878,12 +901,6 @@ body.vjs-full-window
 		position: absolute
 		font-size: 0.9em
 
-.vjs-slider-vertical .vjs-volume-level
-	width: 0.3em
-	&:before
-		top: -0.5em
-		left: -0.3em
-
 .vjs-slider-horizontal .vjs-volume-level
 	height: 0.3em
 	&:before
@@ -891,8 +908,7 @@ body.vjs-full-window
 		right: -0.5em
 
 .vjs-volume-bar
-	&.vjs-slider-vertical .vjs-volume-level
-		height: 100%
+
 	&.vjs-slider-horizontal .vjs-volume-level
 		width: 100%
 
@@ -1271,3 +1287,133 @@ video::-webkit-media-text-track-display
 	line-height: 1.5
 	padding: 20px 24px
 	z-index: 1
+
+
+
+.video-js
+	.vjs-volume-vertical
+		width: 3em
+		height: 8em
+		bottom: 8em
+		background-color: #2B333F
+		background-color: rgba(43, 51, 63, 0.7)
+
+	.vjs-volume-panel
+		display: -webkit-box
+		display: -webkit-flex
+		display: -ms-flexbox
+		display: flex
+		-webkit-transition: width .5s
+		-moz-transition: width .5s
+		-ms-transition: width .5s
+		-o-transition: width .5s
+		transition: width .5s
+
+		&:hover .vjs-volume-control, &:active .vjs-volume-control, &:focus .vjs-volume-control
+			visibility: visible
+			opacity: 1
+			position: relative
+			-webkit-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+			-moz-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+			-ms-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+			-o-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+			transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+
+		.vjs-volume-control
+			visibility: visible
+			opacity: 0
+			width: 1px
+			height: 1px
+			margin-left: -1px
+
+			&:hover, &:active, &:focus
+				visibility: visible
+				opacity: 1
+				position: relative
+				-webkit-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+				-moz-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+				-ms-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+				-o-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+				transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+
+		.vjs-mute-control
+			&:hover ~ .vjs-volume-control, &:active ~ .vjs-volume-control, &:focus ~ .vjs-volume-control
+				visibility: visible
+				opacity: 1
+				position: relative
+				-webkit-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+				-moz-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+				-ms-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+				-o-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+				transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+
+		.vjs-volume-control.vjs-slider-active
+			visibility: visible
+			opacity: 1
+			position: relative
+			-webkit-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+			-moz-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+			-ms-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+			-o-transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+			transition: visibility 0.1s, opacity 0.1s, height 0.1s, width 0.1s, left 0s, top 0s
+
+		&:hover .vjs-volume-control.vjs-volume-horizontal, &:active .vjs-volume-control.vjs-volume-horizontal, &:focus .vjs-volume-control.vjs-volume-horizontal
+			width: 5em
+			height: 3em
+
+		.vjs-volume-control
+			&:hover.vjs-volume-horizontal, &:active.vjs-volume-horizontal, &:focus.vjs-volume-horizontal
+				width: 5em
+				height: 3em
+
+		.vjs-mute-control
+			&:hover ~ .vjs-volume-control.vjs-volume-horizontal, &:active ~ .vjs-volume-control.vjs-volume-horizontal, &:focus ~ .vjs-volume-control.vjs-volume-horizontal
+				width: 5em
+				height: 3em
+
+		.vjs-volume-control.vjs-slider-active.vjs-volume-horizontal
+			width: 5em
+			height: 3em
+
+		&.vjs-volume-panel-horizontal
+			&:hover, &:focus, &:active, &.vjs-slider-active
+				width: 9em
+				-webkit-transition: width 0.1s
+				-moz-transition: width 0.1s
+				-ms-transition: width 0.1s
+				-o-transition: width 0.1s
+				transition: width 0.1s
+		.vjs-volume-control
+			&.vjs-volume-vertical
+				height: 8em
+				width: 3em
+				left: -3.5em
+				-webkit-transition: visibility 1s, opacity .5s, height 1s 1s, width 1s 1s, left 1s 1s, top 1s 1s
+				-moz-transition: visibility 1s, opacity .5s, height 1s 1s, width 1s 1s, left 1s 1s, top 1s 1s
+				-ms-transition: visibility 1s, opacity .5s, height 1s 1s, width 1s 1s, left 1s 1s, top 1s 1s
+				-o-transition: visibility 1s, opacity .5s, height 1s 1s, width 1s 1s, left 1s 1s, top 1s 1s
+				transition: visibility 1s, opacity .5s, height 1s 1s, width 1s 1s, left 1s 1s, top 1s 1s
+			&.vjs-volume-horizontal
+				-webkit-transition: visibility 1s, opacity .5s, height 1s 1s, width 1s, left 1s 1s, top 1s 1s
+				-moz-transition: visibility 1s, opacity .5s, height 1s 1s, width 1s, left 1s 1s, top 1s 1s
+				-ms-transition: visibility 1s, opacity .5s, height 1s 1s, width 1s, left 1s 1s, top 1s 1s
+				-o-transition: visibility 1s, opacity .5s, height 1s 1s, width 1s, left 1s 1s, top 1s 1s
+				transition: visibility 1s, opacity .5s, height 1s 1s, width 1s, left 1s 1s, top 1s 1s
+
+	&.vjs-no-flex
+		.vjs-volume-panel .vjs-volume-control.vjs-volume-horizontal
+			width: 5em
+			height: 3em
+			visibility: visible
+			opacity: 1
+			position: relative
+			-webkit-transition: none
+			-moz-transition: none
+			-ms-transition: none
+			-o-transition: none
+			transition: none
+
+		.vjs-volume-control.vjs-volume-vertical, .vjs-volume-panel .vjs-volume-control.vjs-volume-vertical
+			position: absolute
+			bottom: 3em
+			left: 0.5em

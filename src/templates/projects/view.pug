@@ -71,8 +71,9 @@ link(href="{{ url_for('static_pillar', filename='assets/jstree/themes/default/st
 link(rel="amphtml", href="{{ url_for('nodes.view', node_id=node._id, _external=True, format='amp') }}")
 | {% endif %}
 
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-5.8.8.min.js', v=17320171) }}")
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-ga-0.4.2.min.js', v=17320171) }}")
+script(src="{{ url_for('static', filename='assets/js/vendor/videojs-6.2.8.min.js', v=17320171) }}")
+script(src="{{ url_for('static', filename='assets/js/vendor/videojs-ga-0.4.2.min.js', v=17320171) }}")
+script(src="{{ url_for('static', filename='assets/js/vendor/videojs-hotkeys-0.2.20.min.js', v=17320171) }}")
 | {% endblock %}
 
 | {% block css %}
