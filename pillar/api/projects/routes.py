@@ -72,6 +72,8 @@ def project_manage_users():
     if not authorization.user_has_role('admin'):
         remove_self = target_user_id == current_user_id and action == 'remove'
         if project['user'] != current_user_id and not remove_self:
+            log.warning('User %s tries to %s %s to/from project %s, but is not allowed',
+                        current_user_id, action, target_user_id, project_id)
             utils.abort_with_error(403)
 
     admin_group = utils.get_admin_group(project)
