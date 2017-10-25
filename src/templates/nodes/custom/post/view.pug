@@ -42,7 +42,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=1732017
 
 		| {% for post in posts %}
 		li.jstree-node
-			a.jstree-anchor(
+			a.jstree-anchor.tree-item(
 			href="{{ url_for_node(node=post) }}",
 			class="{% if post._id == node._id %}jstree-clicked{% endif %}")
 				.tree-item-thumbnail
@@ -52,8 +52,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=1732017
 					i.pi-document-text
 					| {% endif %}
 				span.tree-item-title {{ post.name }}
-				span.tree-item-info
-					| {{ post._created | pretty_date }} · {{ post.user.full_name }}
+				span.tree-item-info {{ post._created | pretty_date }}
 		| {% endfor %}
 | {% endblock %}
 
