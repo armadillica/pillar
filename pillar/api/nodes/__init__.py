@@ -167,7 +167,8 @@ def create_short_code(node) -> str:
 def short_link_info(short_code):
     """Returns the short link info in a dict."""
 
-    short_link = urllib.parse.urljoin(current_app.config['SHORT_LINK_BASE_URL'], short_code)
+    short_link = urllib.parse.urljoin(
+        current_app.config['SHORT_LINK_BASE_URL'], short_code)
 
     return {
         'short_code': short_code,
@@ -185,7 +186,7 @@ def after_replacing_node(item, original):
     project is private, prevent public indexing.
     """
 
-    from pillar.celery import algolia_tasks
+    from pillar.celery import search_index_tasks as index
 
     projects_collection = current_app.data.driver.db['projects']
     project = projects_collection.find_one({'_id': item['project']})
@@ -195,10 +196,11 @@ def after_replacing_node(item, original):
 
     status = item['properties'].get('status', 'unpublished')
     node_id = str(item['_id'])
+
     if status == 'published':
-        algolia_tasks.algolia_index_node_save.delay(node_id)
+        index.node_save.delay(node_id)
     else:
-        algolia_tasks.algolia_index_node_delete.delay(node_id)
+        index.node_delete.delay(node_id)
 
 
 def before_inserting_nodes(items):
@@ -372,8 +374,8 @@ def before_deleting_node(node: dict):
 
 
 def after_deleting_node(item):
-    from pillar.celery import algolia_tasks
-    algolia_tasks.algolia_index_node_delete.delay(str(item['_id']))
+    from pillar.celery import search_index_tasks as index
+    index.node_delete.delay(str(item['_id']))
 
 
 only_for_comments = only_for_node_type_decorator('comment')

@@ -466,7 +466,7 @@ class PillarServer(Eve):
         # Pillar-defined Celery task modules:
         celery_task_modules = [
             'pillar.celery.tasks',
-            'pillar.celery.algolia_tasks',
+            'pillar.celery.search_index_tasks',
             'pillar.celery.file_link_tasks',
         ]
 

@@ -21,6 +21,7 @@ $(document).ready(function() {
     var sliderTemplate = Hogan.compile($('#slider-template').text());
     var paginationTemplate = Hogan.compile($('#pagination-template').text());
 
+    // replace with something elasticy!
     // Client initialization
     var algolia = algoliasearch(APPLICATION_ID, SEARCH_ONLY_API_KEY);
 
@@ -36,6 +37,7 @@ $(document).ready(function() {
         })
     };
 
+    // replace with something elastici!
     // Setup the search helper
     var helper = algoliasearchHelper(algolia, INDEX_NAME, params);
 
@@ -43,6 +45,7 @@ $(document).ready(function() {
     var result = $.grep(FACET_CONFIG, function(e) {
         return e.hidden && e.hidden == true;
     });
+
     for (var i = 0; i < result.length; i++) {
         var f = result[i];
         helper.addFacetRefinement(f.name, f.value);
@@ -60,9 +63,11 @@ $(document).ready(function() {
     helper.on('change', function(state) {
         setURLParams(state);
     });
+
     helper.on('error', function(error) {
         console.log(error);
     });
+
     helper.on('result', function(content, state) {
         renderStats(content);
         renderHits(content);
