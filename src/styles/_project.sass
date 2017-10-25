@@ -10,6 +10,12 @@ body.workshops
 body.blog
 	background-color: white
 
+	#project_nav,
+	#project_nav-container
+		+media-xs
+			width: 100%
+		width: $project_nav-width * 1.5
+
 #project-container
 	display: flex
 	flex-direction: row
@@ -40,15 +46,19 @@ body.blog
 		text-align: left
 
 #project_nav-container
-	position: fixed
-	z-index: $z-index-base + 5
-	width: $project_nav-width
+	+media-lg
+		width: $project_nav-width * 1.33
 
 	+media-xs
 		display: block
 		width: 100%
 		position: relative
 		height: initial !important
+
+	position: fixed
+	z-index: $z-index-base + 5
+	width: $project_nav-width
+
 
 #project_sidebar
 	width: $project-sidebar-width
@@ -125,14 +135,23 @@ body.blog
 			&.active
 				background-color: $color-background-nav-light
 
+				// The tiny triangle
 				&:after
-					content: ''
+					+media-xs
+						border-top-color: $project-sidebar-background
+						border-right-color: transparent
+						left: 50%
+						right: initial
+						transform: translateX(-50%)
+						top: 0
+
 					border: 7px solid transparent
 					border-right-color: $project-sidebar-background
+					content: ''
 					display: block
 					position: absolute
-					top: 50%
 					right: 0
+					top: 50%
 					transform: translateY(-50%)
 
 				a
@@ -174,19 +193,22 @@ body.blog
 
 /* Container for navigation on the left */
 #project_nav
+	+media-lg
+		width: $project_nav-width * 1.33
+
+	+media-xs
+		width: initial
+
+	background-color: $project-sidebar-background
 	display: block
+	left: 0
+	position: relative
 	visibility: visible
 	width: $project_nav-width
-	position: relative
-	background-color: $project-sidebar-background
-	left: 0
 
 	&.about
 		display: none
 		visibility: hidden
-
-	+media-xs
-		width: initial
 
 
 /* Header with name and node edit tools */
@@ -714,12 +736,15 @@ ul.project_nav-edit-list
 
 /* The actual navigation tree container */
 #project_tree
-	padding: 0 0 5px 0// some padding on top/bottom of jstree
-	position: relative
-	margin-top: $project_header-height
+	+media-xs
+		margin-top: 0
+
 	background-color: $project-sidebar-background
 	border-right: thin solid $color-background
+	margin-top: $project_header-height
 	overflow-y: auto
+	padding: 0 0 5px 0// some padding on top/bottom of jstree
+	position: relative
 
 	&.edit
 		margin-top: 0
@@ -2669,8 +2694,7 @@ section.node-children
 #project_context
 	#blog_container
 		padding: 0
-		#blog_index-container,
-		#blog_post-container
+		#blog_index-container
 			width: 100%
 			padding: 0
 			border: none

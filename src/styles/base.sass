@@ -158,32 +158,31 @@ strong, b
 header.navbar-header
 	position: relative
 	margin: 0
-	z-index: 1 // to be on top of the overlay
 	height: 100%
+	z-index: 1 // to be on top of the overlay
 
 	.navbar-toggle
 		color: white
+		float: none
+		margin: 5px 0 0 10px
 
+		i
+			margin: 0
 
 .navbar-overlay
-	display: none
-	position: absolute
-	top: 0
-	left: 0
-	right: 0
 	bottom: 0
-	z-index: 0
-	width: 100%
+	display: none
+	left: 0
 	height: 100%
-
+	position: absolute
+	right: 0
+	top: 0
 	transition: background-color 350ms ease-in-out
+	width: 100%
+	z-index: 0
 
 	&+.navbar-container
 		.search-input
-			margin: 8px 0
-			border-radius: 3px
-			border: thin solid transparent
-
 			+media-lg
 				border: thin solid rgba(white, .2)
 
@@ -191,6 +190,9 @@ header.navbar-header
 					&::placeholder
 						color: rgba(white, .8)
 
+			border: thin solid transparent
+			border-radius: 3px
+			margin: 8px 0
 
 	&.is-active
 		background-color: $color-background-nav
@@ -346,8 +348,10 @@ nav.sidebar
 				+position-center-translate
 
 	.navbar-brand
-		display: flex
+		+media-xs
+			padding-left: 10px
 		align-items: center
+		display: flex
 		color: white
 		padding:
 			top: 8px
@@ -1037,11 +1041,6 @@ button, .btn
 		background-color: rgba($color-background-nav, .7)
 
 .search-input
-	position: relative
-	float: left
-	padding: 0
-	margin: 0
-
 	+media-lg
 		max-width: 350px
 	+media-md
@@ -1051,11 +1050,14 @@ button, .btn
 	+media-xs
 		display: block
 		margin: 0 10px
-		width: 75%
 		position: absolute
 		z-index: $z-index-base
-		top: 2px
-		left: 40px
+		right: 5px
+	position: relative
+	float: left
+	padding: 0
+	margin: 0
+
 
 	.search-icon
 		position: absolute
@@ -1089,17 +1091,17 @@ button, .btn
 
 	#cloud-search, .tt-hint
 		+text-overflow-ellipsis
-		outline: none
 		border: thin solid $color-background-nav-light
 		border-radius: 3px
+		color: white
 		font:
 			size: 1em
 			weight: 400
 			family: $font-body
 		margin: 0
-		padding: 0 20px 0 40px
 		min-height: 32px
-		color: white
+		outline: none
+		padding: 0 20px 0 40px
 		transition: border 100ms ease-in-out
 
 		&:focus
