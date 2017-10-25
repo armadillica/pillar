@@ -133,9 +133,7 @@ def create_blog(proj_url):
             'node_type': node_type_blog['name'],
             'name': 'Blog',
             'description': '',
-            'properties': {
-                'status': 'published',
-            },
+            'properties': {},
             'project': proj_id,
         }
         r, _, _, status = current_app.post_internal('nodes', blog)
