@@ -61,19 +61,26 @@ def before_replacing_user(request, lookup):
     # Regular users should always have an email address
     if 'service' not in put_data.get('roles', ()):
         if not put_data.get('email'):
-            raise wz_exceptions.UnprocessableEntity('email field must be given')
+            raise wz_exceptions.UnprocessableEntity(
+                'email field must be given')
 
 
 def push_updated_user_to_algolia(user, original):
-    """Push an update to the Algolia index when a user item is updated"""
+    """
+    Push an update to the Algolia index when a user
+    item is updated
+    """
 
-    from pillar.celery import algolia_tasks
+    from pillar.celery import search_index_tasks as index
 
-    algolia_tasks.push_updated_user_to_algolia.delay(str(user['_id']))
+    index.updated_user.delay(str(user['_id']))
 
 
 def send_blinker_signal_roles_changed(user, original):
-    """Sends a Blinker signal that the user roles were changed, so others can respond."""
+    """
+    Sends a Blinker signal that the user roles were
+    changed, so others can respond.
+    """
 
     current_roles = set(user.get('roles', []))
     original_roles = set(original.get('roles', []))

@@ -35,7 +35,31 @@ def algolia_index_user_save(user):
         'email': user['email']
     })
 
-    log.debug('Pushed user %r to Algolia index %r', user['_id'], index_users.index_name)
+    log.debug(
+        'Pushed user %r to Algolia index %r',
+        user['_id'], index_users.index_name)
+
+
+def _handle_picture(node, doc):
+    """
+    add picture fields to be indexed
+    """
+
+    if 'picture' in node and node['picture']:
+        files_collection = current_app.data.driver.db['files']
+        lookup = {'_id': ObjectId(node['picture'])}
+        picture = files_collection.find_one(lookup)
+
+        img_variation_t = next(
+            (item for item in picture['variations']
+             if item['size'] == 't'), None)
+
+        if img_variation_t:
+            doc['picture'] = generate_link(
+                picture['backend'],
+                img_variation_t['file_path'],
+                project_id=str(picture['project']),
+                is_public=True)
 
 
 @skip_when_testing
@@ -54,7 +78,7 @@ def algolia_index_node_save(node):
     users_collection = current_app.data.driver.db['users']
     user = users_collection.find_one({'_id': ObjectId(node['user'])})
 
-    node_ob = {
+    doc = {
         'objectID': node['_id'],
         'name': node['name'],
         'project': {
@@ -69,35 +93,27 @@ def algolia_index_node_save(node):
             'full_name': user['full_name']
         },
     }
+
     if 'description' in node and node['description']:
-        node_ob['description'] = node['description']
-    if 'picture' in node and node['picture']:
-        files_collection = current_app.data.driver.db['files']
-        lookup = {'_id': ObjectId(node['picture'])}
-        picture = files_collection.find_one(lookup)
-        if picture['backend'] == 'gcs':
-            variation_t = next((item for item in picture['variations'] \
-                                if item['size'] == 't'), None)
-            if variation_t:
-                node_ob['picture'] = generate_link(picture['backend'],
-                                                   variation_t['file_path'],
-                                                   project_id=str(picture['project']),
-                                                   is_public=True)
+        doc['description'] = node['description']
+
+    _handle_picture(node, doc)
+
     # If the node has world permissions, compute the Free permission
     if 'permissions' in node and 'world' in node['permissions']:
         if 'GET' in node['permissions']['world']:
-            node_ob['is_free'] = True
+            doc['is_free'] = True
 
     # Append the media key if the node is of node_type 'asset'
     if node['node_type'] == 'asset':
-        node_ob['media'] = node['properties']['content_type']
+        doc['media'] = node['properties']['content_type']
 
     # Add extra properties
     for prop in ('tags', 'license_notes'):
         if prop in node['properties']:
-            node_ob[prop] = node['properties'][prop]
+            doc[prop] = node['properties'][prop]
 
-    current_app.algolia_index_nodes.save_object(node_ob)
+    current_app.algolia_index_nodes.save_object(doc)
 
 
 @skip_when_testing
