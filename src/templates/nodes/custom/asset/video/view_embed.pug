@@ -80,6 +80,7 @@ script(type="text/javascript").
 
 		newButton.className = 'vjs-control vjs-button ' + data.class;
 		buttonContent.className = 'vjs-icon-placeholder';
+		newButton.setAttribute('title', data.title);
 
 		newButton.appendChild(buttonContent);
 		controlBar = document.getElementsByClassName('vjs-control-bar')[0];
@@ -92,7 +93,8 @@ script(type="text/javascript").
 	var videoPlayerLoopButton = addVideoPlayerButton({
 		player: videoPlayer,
 		class: 'vjs-loop-button',
-		icon: "pi-replay"
+		icon: 'pi-replay',
+		title: 'Loop'
 	});
 
 	videoPlayerLoopButton.onclick = function() {
