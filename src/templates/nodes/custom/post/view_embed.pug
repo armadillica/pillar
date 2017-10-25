@@ -2,19 +2,15 @@
 
 #blog_container(class="{% if project and project._id == config.MAIN_PROJECT_ID %}cloud-blog{% endif %}")
 
-	#blog_post-container.expand-image-links
-		| {% if project and project._id == config.MAIN_PROJECT_ID %}
-		a.btn.btn-default.button-back(href="{{ url_for('projects.view', project_url=project.url) }}blog")
-			| Back to Blog
-
-		| {% if node.has_method('PUT') %}
-		a.btn.btn-default.button-edit(href="{{url_for('nodes.edit', node_id=node._id)}}")
-			i.pi-edit
-			| Edit Post
-		| {% endif %}
-
-		.clearfix
-		| {% endif %}
+	#blog_index-container.expand-image-links
+		.blog-action
+			| {% if project and project._id == config.MAIN_PROJECT_ID %}
+			| {% if node.has_method('PUT') %}
+			a.btn.btn-default.button-edit(href="{{url_for('nodes.edit', node_id=node._id)}}")
+				i.pi-edit
+				| Edit Post
+			| {% endif %}
+			| {% endif %}
 
 		| {{ blogmacros.render_blog_post(node) }}
 

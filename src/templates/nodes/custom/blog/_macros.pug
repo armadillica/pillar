@@ -1,62 +1,65 @@
 //- ******************************************************* -//
 | {% macro render_blog_post(node) %}
 | {% if node.picture %}
-.blog_index-header
+a.blog_index-header(href="{{ url_for_node(node=node) }}")
 	img(src="{{ node.picture.thumbnail('l', api=api) }}")
 | {% endif %}
+
 .blog_index-item
 	a.item-title(
 		href="{{ url_for_node(node=node) }}")
 		| {{node.name}}
 
 	.item-info.
-		<span title="{{node._created}}">{{node._created | pretty_date }}</span>
+		#[span(title="{{node._created}}") {{node._created | pretty_date }}]
 		{% if node._created != node._updated %}
-		<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
+		#[span(title="{{node._updated}}") (updated {{node._updated | pretty_date }})]
 		{% endif %}
 		{% if node.properties.category %}| {{node.properties.category}}{% endif %}
-		| by {{node.user.full_name}}
-		| <a href="{{ url_for_node(node=node) }}#comments">Leave a comment</a>
+		· {{node.user.full_name}}
+		· #[a(href="{{ url_for_node(node=node) }}#comments") comment]
 		{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
 
 	.item-content
-		| {{node.properties.content}}
+		| {{ node.properties.content }}
 
-	.item-meta
-		a(href="{{ url_for_node(node=node) }}#comments") Leave a comment
 | {% endmacro %}
 
 //- ******************************************************* -//
 | {% macro render_blog_list_item(node) %}
 .blog_index-item.list
+
 	| {% if node.picture %}
-	.item-header
+	a.item-header(href="{{ url_for_node(node=node) }}")
 		img.image(src="{{ node.picture.thumbnail('s', api=api) }}")
 	| {% else %}
-	.item-header.nothumb
+	a.item-header.nothumb(href="{{ url_for_node(node=node) }}")
 		i.pi-document-text
 	| {% endif %}
+
 	a.item-title(
 		href="{{ url_for_node(node=node) }}")
 		| {{node.name}}
 
 	.item-info.
-		<span title="{{node._created}}">{{node._created | pretty_date }}</span>
+		#[span(title="{{node._created}}") {{node._created | pretty_date }}]
 		{% if node._created != node._updated %}
-		<span title="{{node._updated}}">(updated {{node._updated | pretty_date }})</span>
+		#[span(title="{{node._updated}}") (updated {{node._updated | pretty_date }})]
 		{% endif %}
-		{% if node.properties.category %}| {{node.properties.category}}{% endif %}
-		| by {{node.user.full_name}}
-		{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
+		{% if node.properties.category %} · {{node.properties.category}}{% endif %}
+		· {{node.user.full_name}}
+		{% if node.properties.status != 'published' %} · {{ node.properties.status}} {% endif %}
+
 | {% endmacro %}
 
 
 //- ******************************************************* -//
 | {% macro render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta) %}
 | {% if can_create_blog_posts %}
-a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
-	i.pi-plus
-	| Create New Post
+.blog-action
+	a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
+		i.pi-plus
+		| Create New Post
 | {% endif %}
 
 | {% if posts %}
@@ -80,7 +83,7 @@ a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id
 | {% else %}
 
 .blog_index-item
-	.item-content No posts yet.
+	.item-content No posts... yet!
 
 | {% endif %} {# posts #}
 | {% endmacro %}
