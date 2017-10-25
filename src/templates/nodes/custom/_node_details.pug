@@ -5,7 +5,8 @@
 			| {{ node.properties.status | undertitle }}
 		| {% endif %}
 
-		li {{ node.user.full_name }}
+		li(title="Author")
+			| {{ node.user.full_name }}
 
 		li.dim(
 			title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
@@ -21,9 +22,9 @@
 		li.left-side
 
 		| {% if node.file %}
-		li.dim
+		li.dim(title="File size")
 			| {{ node.file.length | filesizeformat }}
-		li.dim
+		li.dim(title="File format")
 			| {{ node.file.content_type }}
 		| {% endif %}
 
