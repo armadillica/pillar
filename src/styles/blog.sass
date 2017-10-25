@@ -611,6 +611,8 @@
 	top: 0
 	z-index: 1
 
+
+// Specific tweaks for blogs in the context of a project
 #project_context
 	.blog_index-item
 		+media-xs
@@ -618,6 +620,16 @@
 		padding: 0
 		margin-left: 10px
 
+		&.list
+			margin-left: 35px !important
+
+		.item-title,
+		.item-info
+			padding-left: 25px
+
 	#blog_container
 		.comments-container
 			margin-left: 30px
+
+	.blog-archive-navigation
+		margin-left: 35px
