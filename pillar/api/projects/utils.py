@@ -5,6 +5,8 @@ from flask import current_app
 from werkzeug import exceptions as wz_exceptions
 from werkzeug.exceptions import abort
 
+from pillar.auth import current_user
+
 log = logging.getLogger(__name__)
 
 
@@ -58,6 +60,9 @@ def get_admin_group(project: dict) -> dict:
         raise ValueError('Unable to handle project without admin group.')
 
     if group['name'] != str(project['_id']):
+        log.error('User %s tries to get admin group for project %s, '
+                  'but that does not have the project ID as group name: %s',
+                  current_user.user_id, project.get('_id', '-unknown-'), group)
         return abort_with_error(403)
 
     return group
