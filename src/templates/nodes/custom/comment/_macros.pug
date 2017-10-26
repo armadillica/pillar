@@ -18,31 +18,31 @@
 		.comment-meta
 			.comment-rating(
 				class="{% if comment._current_user_rating is not none %}rated{% if comment._current_user_rating %} positive{% endif %}{% endif %}")
-				.comment-rating-value(title="Number of likes") {{ comment._rating }}
+				.comment-rating-value(title="{{ _('Number of likes') }}") {{ comment._rating }}
 
 				| {% if not comment._is_own %}
-				.comment-action-rating.up(title="Like comment")
+				.comment-action-rating.up(title="{{ _('Like comment') }}")
 				| {% endif %}
 
-			.comment-action-reply(title="Reply to this comment")
-				span Reply
+			.comment-action-reply(title="{{ _('Reply to this comment') }}")
+				span {{ _("Reply") }}
 
 			| {% if comment._is_own %}
 			.comment-action-edit
-				span.edit_mode(title="Edit comment")
-					| Edit
-				span.edit_save(title="Save comment")
+				span.edit_mode(title="{{ _('Edit comment') }}")
+					| {{ _("Edit") }}
+				span.edit_save(title="{{ _('Save comment') }}")
 					i.pi-check
-					| Save Changes
-				span.edit_cancel(title="Cancel changes")
+					| {{ _("Save Changes") }}
+				span.edit_cancel(title="{{ _('Cancel changes') }}")
 					i.pi-cancel
-					| Cancel
+					| {{ _("Cancel") }}
 			| {% endif %}
 
 			.comment-time
 				| {{ comment._created | pretty_date_time }}
 				| {% if comment._created != comment._updated %}
-				span(title="edited {{ comment._updated | pretty_date_time }}") *
+				span(title="{{ _('edited') }} {{ comment._updated | pretty_date_time }}") *
 				| {% endif %}
 
 | {% for reply in comment['_replies']['_items'] %}

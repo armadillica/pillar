@@ -5,7 +5,7 @@
 			| {% if can_post_comments %}
 			.comment-reply-avatar
 				img(
-					title="Commenting as {{ current_user.full_name }}",
+					title="{{ _('Commenting as') }} {{ current_user.full_name }}",
 					src="{{ current_user.gravatar }}")
 
 			.comment-reply-form
@@ -14,7 +14,7 @@
 					textarea(
 						id="comment_field",
 						data-parent-id="{{ node_id }}",
-						placeholder="Join the conversation...")
+						placeholder="{{ _('Join the conversation...') }}")
 
 					.comment-reply-meta
 
@@ -24,7 +24,7 @@
 							title="Post Comment (Ctrl+Enter)")
 							span
 								i.pi-paper-plane
-								| Send
+								| {{ _('Send') }}
 							span.hotkey Ctrl + Enter
 
 				.comment-reply-preview
@@ -32,14 +32,14 @@
 					.comment-reply-info
 						.comment-action-cancel(
 							type="button",
-							title="Cancel")
-							span cancel
+							title="{{ _('cancel') }}")
+							span {{ _('cancel') }}
 
 						a(
-							title="Handy guide of Markdown syntax",
+							title="{{ _('Handy guide of Markdown syntax') }}",
 							target="_blank",
 							href="https://guides.github.com/features/mastering-markdown/")
-							span markdown cheatsheet
+							span {{ _('markdown cheatsheet') }}
 
 			| {% elif current_user.is_authenticated %}
 
@@ -57,13 +57,13 @@
 			| {# * User is not autenticated #}
 			.comment-reply-form
 				.comment-reply-field.sign-in
-					a(href="{{ url_for('users.login') }}") Log in to comment
+					a(href="{{ url_for('users.login') }}") {{ _('Log in to comment') }}
 			| {% endif %}
 
 		| {% if show_comments and (nr_of_comments > 0) %}
 		section.comments-list-header
 			.comments-list-title
-				| {{ nr_of_comments }} comment{{ nr_of_comments|pluralize }}
+				| {{ nr_of_comments }} {{ _('comment') }}{{ nr_of_comments|pluralize }}
 			.comments-list-items
 				| {% for comment in comments['_items'] %}
 				| {{ macros.render_comment(comment, False) }}

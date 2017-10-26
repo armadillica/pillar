@@ -5,7 +5,7 @@
 		| {% include 'users/settings/_sidebar.html'%}
 		#settings-container
 			.settings-header
-				.settings-title Profile
+				.settings-title {{ _("Profile") }}
 
 			.settings-content
 				.settings-form
@@ -25,21 +25,18 @@
 								| {% for error in form.username.errors %}{{ error|e }}{% endfor %}
 								| {% endif %}
 
-
 							.form-group.settings-password
-								| Change your password at the
-								a(href="https://blender.org/id/change")  Blender ID
+								| {{ _("Change your password at") }} #[a(href="https://blender.org/id/change") Blender ID]
 
 						.right
 							.settings-avatar
 								a(href="https://gravatar.com/")
 									img(src="{{ current_user.gravatar }}")
-									span Change Gravatar
+									span {{ _("Change Gravatar") }}
 
 						.buttons
 							button.btn.btn-default.button-submit(type='submit')
 								i.pi-check
-								| Save Changes
-
+								| {{ _("Save Changes") }}
 
 | {% endblock %}
