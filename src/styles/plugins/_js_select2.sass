@@ -1,4 +1,5 @@
 @import ../config
+
 .select2-container
 	width: 100% !important
 	box-sizing: border-box
@@ -6,6 +7,7 @@
 	margin: 0
 	position: relative
 	vertical-align: middle
+
 	.select2-selection--single
 		box-sizing: border-box
 		cursor: pointer
@@ -13,6 +15,7 @@
 		height: 28px
 		user-select: none
 		-webkit-user-select: none
+
 		.select2-selection__rendered
 			display: block
 			padding-left: 8px
@@ -20,8 +23,10 @@
 			overflow: hidden
 			text-overflow: ellipsis
 			white-space: nowrap
+
 		.select2-selection__clear
 			position: relative
+
 	.select2-selection--multiple
 		box-sizing: border-box
 		cursor: pointer
@@ -29,26 +34,30 @@
 		min-height: 40px
 		user-select: none
 		-webkit-user-select: none
+
 		.select2-selection__rendered
 			display: inline-block
 			overflow: hidden
 			padding-left: 8px
 			text-overflow: ellipsis
 			white-space: nowrap
+
 	.select2-search--inline
 		float: left
+
 		.select2-search__field
 			box-sizing: border-box
 			border: none
 			font-size: 100%
 			margin-top: 5px
 			padding: 0
+
 			&::-webkit-search-cancel-button
 				-webkit-appearance: none
 
 .select2-dropdown
-	background-color: $color-background-light
-	border: 1px solid $color-background-dark
+	background-color: $color-background-dark
+	border: 1px solid $color-background
 	box-shadow: 0 3px 15px rgba(black, .2)
 	box-sizing: border-box
 	display: block
@@ -112,7 +121,7 @@
 	width: auto
 	opacity: 0
 	z-index: 99
-	background-color: #fff
+	background-color: $color-background-light
 	filter: alpha(opacity = 0)
 
 .select2-hidden-accessible
@@ -130,25 +139,31 @@
 		border-bottom: 1px solid $color-background-dark
 		cursor: text
 		transition: all 150ms ease-in-out
+
 		&:hover
 			border-color: $color-text-dark-secondary
+
 		.select2-selection__rendered
-			color: #444
+			color: $color-text
 			line-height: 28px
+
 		.select2-selection__clear
 			cursor: pointer
 			float: right
 			font-weight: bold
+
 		.select2-selection__placeholder
-			color: #999
+			color: $color-text-dark-secondary
+
 		.select2-selection__arrow
 			height: 26px
 			position: absolute
 			top: 1px
 			right: 1px
 			width: 20px
+
 			b
-				border-color: #888 transparent transparent transparent
+				border-color: $color-text transparent transparent transparent
 				border-style: solid
 				border-width: 5px 4px 0 4px
 				height: 0
@@ -158,18 +173,23 @@
 				position: absolute
 				top: 50%
 				width: 0
+
 	&.select2-container--disabled .select2-selection--single
-		background-color: #eee
+		background-color: $color-background
 		cursor: default
+
 		.select2-selection__clear
 			display: none
+
 	&.select2-container--open .select2-selection--single .select2-selection__arrow b
 		border-color: transparent transparent #888 transparent
 		border-width: 0 4px 5px 4px
+
 	.select2-selection--multiple
 		border-bottom: 1px solid $color-background-dark
 		cursor: text
 		transition: all 150ms ease-in-out
+
 		&:hover
 			border-color: $color-text-dark-secondary
 
@@ -179,10 +199,12 @@
 			margin: 0
 			padding: 0 5px
 			width: 100%
+
 		.select2-selection__placeholder
 			color: #999
 			margin-top: 5px
 			float: left
+
 		.select2-selection__clear
 			cursor: pointer
 			float: right
@@ -200,7 +222,8 @@
 			margin-right: 5px
 			margin-top: 5px
 			padding: 3px 10px
-			color: $color-text-dark-primary
+			color: $color-text
+
 		.select2-selection__choice__remove
 			color: $color-text-dark-hint
 			cursor: pointer
@@ -209,6 +232,7 @@
 			margin-right: 8px
 			&:hover
 				color: $color-danger
+
 	&.select2-container--focus .select2-selection--multiple
 		border-bottom: 1px solid $color-primary
 		box-shadow: 0 1px 0 0 $color-primary
@@ -218,28 +242,37 @@
 		.select2-selection--multiple
 			background-color: #eee
 			cursor: default
+
 		.select2-selection__choice__remove
 			display: none
+
 	&.select2-container--open
 		&.select2-container--above
-			.select2-selection--single, .select2-selection--multiple
+			.select2-selection--single,
+			.select2-selection--multiple
 				border-top-left-radius: 0
 				border-top-right-radius: 0
+
 		&.select2-container--below
-			.select2-selection--single, .select2-selection--multiple
+			.select2-selection--single,
+			.select2-selection--multiple
 				border-bottom-left-radius: 0
 				border-bottom-right-radius: 0
+
 	.select2-search--dropdown .select2-search__field
 		border: 1px solid $color-background-dark
+
 	.select2-search--inline .select2-search__field
 		background: transparent
 		border: none
 		outline: 0
 		box-shadow: none
 		-webkit-appearance: textfield
+
 	.select2-results > .select2-results__options
 		max-height: 250px
 		overflow-y: auto
+
 	.select2-results__option
 		&:last-child
 			border-bottom-left-radius: 3px
@@ -247,40 +280,44 @@
 
 		&[role=group]
 			padding: 0
+
 		&[aria-disabled=true]
 			background-color: $color-background
 			color: $color-text-dark-hint
+
 		&[aria-selected=true]
-			background-color: $color-background-light
-			color: $color-text-dark-primary
+			background-color: rgba($color-primary, .25)
+			color: $color-text
+
 		.select2-results__option
 			padding-left: 1em
+
 			.select2-results__group
 				padding-left: 0
+
 			.select2-results__option
 				margin-left: -1em
 				padding-left: 2em
+
 				.select2-results__option
 					margin-left: -2em
 					padding-left: 3em
+
 					.select2-results__option
 						margin-left: -3em
 						padding-left: 4em
+
 						.select2-results__option
 							margin-left: -4em
 							padding-left: 5em
+
 							.select2-results__option
 								margin-left: -5em
 								padding-left: 6em
 
 	/* Hovered item from the dropdown */
 	.select2-results__option--highlighted[aria-selected]
-		background-color: white
-		color: $color-primary
-
-		&:last-child
-			border-bottom-left-radius: 3px
-			border-bottom-right-radius: 3px
+		color: lighten($color-text, 15%)
 
 	.select2-results__group
 		cursor: default
