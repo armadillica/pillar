@@ -39,7 +39,7 @@
 					| {{ _("Cancel") }}
 			| {% endif %}
 
-			.comment-time
+			.comment-time(title='{{ comment._created }}')
 				| {{ comment._created | pretty_date_time }}
 				| {% if comment._created != comment._updated %}
 				span(title="{{ _('edited') }} {{ comment._updated | pretty_date_time }}") *
