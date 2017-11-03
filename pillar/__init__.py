@@ -241,7 +241,7 @@ class PillarServer(Eve):
 
     def _config_algolia(self):
         # Algolia search
-        if self.config['SEARCH_BACKEND'] != 'algolia':
+        if 'algolia' not in self.config['SEARCH_BACKENDS']:
             return
 
         from algoliasearch import algoliasearch
