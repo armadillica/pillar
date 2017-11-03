@@ -144,3 +144,35 @@ def project_id(project_url: str) -> ObjectId:
     if not proj:
         raise ValueError(f'project with url={project_url!r} not found')
     return proj['_id']
+
+
+def get_project(project_url: str) -> dict:
+    """Find a project in the database, raises ValueError if not found.
+
+    :param project_url: URL of the project
+    """
+
+    proj_coll = current_app.db('projects')
+    project = proj_coll.find_one({'url': project_url, '_deleted': {'$ne': True}})
+    if not project:
+        raise ValueError(f'project url={project_url!r} does not exist')
+
+    return project
+
+
+def put_project(project: dict):
+    """Puts a project into the database via Eve.
+
+    :param project: the project data, should be the entire project document
+    :raises ValueError: if the project cannot be saved.
+    """
+
+    from pillar.api.utils import remove_private_keys
+
+    pid = ObjectId(project['_id'])
+    proj_no_priv = remove_private_keys(project)
+    result, _, _, status_code = current_app.put_internal('projects', proj_no_priv, _id=pid)
+
+    if status_code != 200:
+        raise ValueError(f"Can't update project {pid}, "
+                         f"status {status_code} with issues: {result}")
