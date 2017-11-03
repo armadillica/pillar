@@ -75,6 +75,7 @@ ALGOLIA_INDEX_NODES = 'dev_Nodes'
 
 SEARCH_BACKEND = 'algolia'  # algolia, elastic
 
+
 ZENCODER_API_KEY = '-SECRET-'
 ZENCODER_NOTIFICATIONS_SECRET = '-SECRET-'
 ZENCODER_NOTIFICATIONS_URL = 'http://zencoderfetcher/'

@@ -65,15 +65,15 @@ def before_replacing_user(request, lookup):
                 'email field must be given')
 
 
-def push_updated_user_to_algolia(user, original):
+def push_updated_user_to_search(user, original):
     """
-    Push an update to the Algolia index when a user
+    Push an update to the Search index when a user
     item is updated
     """
 
-    from pillar.celery import search_index_tasks as index
+    from pillar.celery import search_index_tasks as searchindex
 
-    index.updated_user.delay(str(user['_id']))
+    searchindex.updated_user.delay(str(user['_id']))
 
 
 def send_blinker_signal_roles_changed(user, original):

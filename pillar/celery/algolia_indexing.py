@@ -8,7 +8,7 @@ from pillar import current_app
 log = logging.getLogger(__name__)
 
 
-def push_updated_user_to_algolia(user_id: str):
+def push_updated_user(user_id: str):
     """Push an update to the Algolia index when a user item is updated"""
 
     from pillar.api.utils.algolia import algolia_index_user_save
@@ -48,6 +48,7 @@ def index_node_save(node_id: str):
 
 
 def index_node_delete(node_id: str):
+
     from pillar.api.utils.algolia import algolia_index_node_delete
 
     # Deleting a node takes nothing more than the ID anyway.

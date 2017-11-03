@@ -40,26 +40,28 @@ def algolia_index_user_save(user):
         user['_id'], index_users.index_name)
 
 
-def _handle_picture(node, doc):
+def _handle_picture(node: dict, to_index: dict):
     """
     add picture fields to be indexed
     """
 
-    if 'picture' in node and node['picture']:
-        files_collection = current_app.data.driver.db['files']
-        lookup = {'_id': ObjectId(node['picture'])}
-        picture = files_collection.find_one(lookup)
+    if not node.get('picture'):
+        return
 
-        img_variation_t = next(
-            (item for item in picture['variations']
-             if item['size'] == 't'), None)
+    files_collection = current_app.data.driver.db['files']
+    lookup = {'_id': ObjectId(node['picture'])}
+    picture = files_collection.find_one(lookup)
 
-        if img_variation_t:
-            doc['picture'] = generate_link(
-                picture['backend'],
-                img_variation_t['file_path'],
-                project_id=str(picture['project']),
-                is_public=True)
+    img_variation_t = next(
+        (item for item in picture['variations']
+         if item['size'] == 't'), None)
+
+    if img_variation_t:
+        to_index['picture'] = generate_link(
+            picture['backend'],
+            img_variation_t['file_path'],
+            project_id=str(picture['project']),
+            is_public=True)
 
 
 @skip_when_testing
@@ -78,7 +80,7 @@ def algolia_index_node_save(node):
     users_collection = current_app.data.driver.db['users']
     user = users_collection.find_one({'_id': ObjectId(node['user'])})
 
-    doc = {
+    to_index = {
         'objectID': node['_id'],
         'name': node['name'],
         'project': {
@@ -95,25 +97,25 @@ def algolia_index_node_save(node):
     }
 
     if 'description' in node and node['description']:
-        doc['description'] = node['description']
+        to_index['description'] = node['description']
 
-    _handle_picture(node, doc)
+    _handle_picture(node, to_index)
 
     # If the node has world permissions, compute the Free permission
-    if 'permissions' in node and 'world' in node['permissions']:
+    if 'world' in node.get('permissions', {}):
         if 'GET' in node['permissions']['world']:
-            doc['is_free'] = True
+            to_index['is_free'] = True
 
     # Append the media key if the node is of node_type 'asset'
     if node['node_type'] == 'asset':
-        doc['media'] = node['properties']['content_type']
+        to_index['media'] = node['properties']['content_type']
 
     # Add extra properties
     for prop in ('tags', 'license_notes'):
         if prop in node['properties']:
-            doc[prop] = node['properties'][prop]
+            to_index[prop] = node['properties'][prop]
 
-    current_app.algolia_index_nodes.save_object(doc)
+    current_app.algolia_index_nodes.save_object(to_index)
 
 
 @skip_when_testing
