@@ -1,10 +1,10 @@
 import logging
 
 from bson import ObjectId
-from flask import current_app
 from werkzeug import exceptions as wz_exceptions
 from werkzeug.exceptions import abort
 
+from pillar import current_app
 from pillar.auth import current_user
 
 log = logging.getLogger(__name__)
@@ -133,3 +133,14 @@ def get_node_type(project, node_type_name):
 
     return next((nt for nt in project['node_types']
                  if nt['name'] == node_type_name), None)
+
+
+def project_id(project_url: str) -> ObjectId:
+    """Returns the object ID, or raises a ValueError when not found."""
+
+    proj_coll = current_app.db('projects')
+    proj = proj_coll.find_one({'url': project_url}, projection={'_id': True})
+
+    if not proj:
+        raise ValueError(f'project with url={project_url!r} not found')
+    return proj['_id']
