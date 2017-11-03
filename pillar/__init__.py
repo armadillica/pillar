@@ -355,7 +355,7 @@ class PillarServer(Eve):
         self.pillar_extensions[pillar_extension.name] = pillar_extension
 
         # Load extension Flask configuration
-        for key, value in pillar_extension.flask_config():
+        for key, value in pillar_extension.flask_config().items():
             self.config.setdefault(key, value)
 
         # Load extension blueprint(s)
