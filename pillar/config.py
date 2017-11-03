@@ -73,7 +73,7 @@ ALGOLIA_API_KEY = '-SECRET-'
 ALGOLIA_INDEX_USERS = 'dev_Users'
 ALGOLIA_INDEX_NODES = 'dev_Nodes'
 
-SEARCH_BACKEND = 'algolia'  # algolia, elastic
+SEARCH_BACKENDS = ['algolia', 'elastic']
 
 
 ZENCODER_API_KEY = '-SECRET-'
