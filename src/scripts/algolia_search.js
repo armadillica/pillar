@@ -2,6 +2,8 @@ $(document).ready(function() {
 
     /********************
      * INITIALIZATION
+     *
+     * TODO (stephan)
      * *******************/
 
     var HITS_PER_PAGE = 25;
