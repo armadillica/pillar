@@ -84,11 +84,13 @@ script.
 	}
 	$(scrollToLinkedComment);
 
+
+	$('#comment_field').autoResize();
+
 	// Initialize Markdown to later convert comment as we type
 	var convert = new Markdown.getSanitizingConverter();
 	Markdown.Extra.init(convert);
 	convert = convert.makeHtml;
-
 
 	// Submit new comment
 	$(document)
