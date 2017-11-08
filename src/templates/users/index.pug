@@ -6,6 +6,12 @@ style.
 		font-size: smaller;
 		color: #999;
 	}
+	#search-container {
+		min-height: 800px !important;
+	}
+	#search-details, #search-list {
+		overflow: auto;
+	}
 | {% endblock %}
 
 | {% block body %}
@@ -137,3 +143,6 @@ script(type="text/javascript").
 	});
 
 | {% endblock %}
+
+| {% block footer_navigation %}{% endblock %}
+| {% block footer %}{% endblock %}
