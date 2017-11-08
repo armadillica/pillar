@@ -235,7 +235,7 @@ function commentEditCancel(clicked_item, reload_comment) {
 	return loadComment(comment_id, {'properties.content': 1})
 	.done(function(data) {
 		var comment_html = data['properties']['content_html'];
-		comment_container.find('.comment-body').html(comment_html);
+		comment_container.find('.comment-body span').html(comment_html);
 	})
 	.fail(function(xhr) {
 		if (console) console.log('Error fetching comment: ', xhr);

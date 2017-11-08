@@ -154,7 +154,7 @@ script.
 		var $parent_div = $(this).closest('.comment-container');
 		var comment_id = $parent_div.data('node-id');
 
-		var comment_content = $parent_div.find('.comment-body');
+		var comment_content = $parent_div.find('.comment-body span');
 		var height = comment_content.height();
 
 		loadComment(comment_id, {'properties.content': 1})
@@ -207,7 +207,7 @@ script.
 		.done(function(comment_id, comment_html) {
 			commentEditCancel($button, false)
 
-			$container.find('.comment-body')
+			$container.find('.comment-body span')
 				.html(comment_html)
 				.flashOnce();
 
