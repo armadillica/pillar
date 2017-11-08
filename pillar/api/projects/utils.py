@@ -168,10 +168,12 @@ def put_project(project: dict):
     """
 
     from pillar.api.utils import remove_private_keys
+    from pillarsdk.utils import remove_none_attributes
 
     pid = ObjectId(project['_id'])
     proj_no_priv = remove_private_keys(project)
-    result, _, _, status_code = current_app.put_internal('projects', proj_no_priv, _id=pid)
+    proj_no_none = remove_none_attributes(proj_no_priv)
+    result, _, _, status_code = current_app.put_internal('projects', proj_no_none, _id=pid)
 
     if status_code != 200:
         raise ValueError(f"Can't update project {pid}, "
