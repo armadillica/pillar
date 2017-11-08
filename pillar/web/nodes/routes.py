@@ -424,7 +424,12 @@ def edit(node_id):
             if node_type.name == 'post':
                 project_update_nodes_list(node, project_id=project._id, list_name='blog')
             else:
-                project_update_nodes_list(node, project_id=project._id)
+                try:
+                    project_update_nodes_list(node, project_id=project._id)
+                except ForbiddenAccess:
+                    # TODO (fsiddi): Implement this as a blender-cloud-only hook
+                    log.debug('User %s not allowed to update latest_nodes in %s' %
+                              (user_id, project._id))
             return redirect(url_for('nodes.view', node_id=node_id, embed=1,
                                     _external=True,
                                     _scheme=current_app.config['SCHEME']))
