@@ -351,6 +351,7 @@
 
 
 =node-details-description
+	+clearfix
 	color: darken($color-text-dark, 5%)
 	font:
 		family: $font-body
@@ -358,14 +359,9 @@
 		size: 1.2em
 
 	word-break: break-word
-	clear: both
-	+clearfix
 
 	+media-xs
 		font-size: 1.1em
-
-	strong, b
-		font-weight: 400
 
 	a:not([class])
 		color: $color-text-dark-primary
@@ -453,31 +449,9 @@
 				padding-left: 20px
 
 	code, kbd, pre, samp
-		font-size: 1.3rem
-
-	pre
-		background-color: lighten($color-background, 5%)
-		border-color: $color-background
-		border-radius: 3px
-		color: $color-text
-
-		/* when <pre> is outside <p> */
-		margin:
-			left: 20px
-			right: 20px
-	pre+p
-		margin-top: 30px
-
-	p+pre
-		/* a <pre> right after a <p> usually are related, remove some spacing */
-		margin-top: -10px
-
-	p
-		pre
-			/* We already have spacing on the sides inside <p> */
-			margin:
-				left: 0
-				right: 0
+		background-color: rgba($color-primary, .05)
+		color: darken($color-primary, 10%)
+		font-size: inherit
 
 
 =markdown-preview-container

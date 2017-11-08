@@ -165,7 +165,7 @@ script.
 			comment_content
 				.addClass('editing')
 				.find('textarea')
-				.height(Math.max(150, height + 30))
+				.autoResize()
 				.focus()
 				.trigger('keyup');
 		})
@@ -209,6 +209,7 @@ script.
 
 			$container.find('.comment-body span')
 				.html(comment_html)
+				.removeClass('editing')
 				.flashOnce();
 
 			$button
