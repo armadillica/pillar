@@ -100,8 +100,12 @@ script.
 	});
 
 	{% if show_comments %}
-	$('body').on('pillar:comment-posted', function(e, comment_node_id) {
+	$('body')
+		.off('pillar:comment-posted')
+		.on('pillar:comment-posted', function(e, comment_node_id) {
+
 		var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node_id) }}";
+
 		loadComments(commentsUrl)
 		.done(function() {
 			$('#' + comment_node_id).scrollHere();
