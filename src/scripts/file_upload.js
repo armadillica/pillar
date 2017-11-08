@@ -165,8 +165,11 @@ $(function () {
             var widget = '@[' + slug + ']\n';
 
             if (slug) {
-                document.getElementById('description').value += widget;
-                toastr.success('Attachment appended to description');
+                var textarea_description = document.getElementById('description').value;
+                if (textarea_description) {
+                    textarea_description.value += widget;
+                    toastr.success('Attachment appended to description');
+                }
             } else {
                 toastr.error('Slug is empty, upload something first');
             }
