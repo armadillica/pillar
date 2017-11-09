@@ -276,7 +276,7 @@ def merge_permissions(*args):
     return effective
 
 
-def require_login(require_roles=set(),
+def require_login(*, require_roles=set(),
                   require_cap='',
                   require_all=False,
                   redirect_to_login=False):
