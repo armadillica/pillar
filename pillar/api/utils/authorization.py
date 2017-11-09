@@ -279,7 +279,8 @@ def merge_permissions(*args):
 def require_login(*, require_roles=set(),
                   require_cap='',
                   require_all=False,
-                  redirect_to_login=False):
+                  redirect_to_login=False,
+                  error_view=None):
     """Decorator that enforces users to authenticate.
 
     Optionally only allows access to users with a certain role and/or capability.
@@ -301,9 +302,11 @@ def require_login(*, require_roles=set(),
         returned; this is suitable for API calls. When True, the user is
         redirected to the login page; this is suitable for user-facing web
         requests, and mimicks the flask_login behaviour.
+    :param error_view: Callable that returns a Flask response object. This is
+        sent back to the client instead of the default 403 Forbidden.
     """
 
-    from flask import request, redirect, url_for
+    from flask import request, redirect, url_for, Response
 
     if not isinstance(require_roles, set):
         raise TypeError(f'require_roles param should be a set, but is {type(require_roles)!r}')
@@ -316,6 +319,13 @@ def require_login(*, require_roles=set(),
 
     if require_all and not require_roles:
         raise ValueError('require_login(require_all=True) cannot be used with empty require_roles.')
+
+    def render_error() -> Response:
+        if error_view is None:
+            abort(403)
+        resp: Response = error_view()
+        resp.status_code = 403
+        return resp
 
     def decorator(func):
         @functools.wraps(func)
@@ -332,17 +342,17 @@ def require_login(*, require_roles=set(),
                     # Redirect using a 303 See Other, since even a POST
                     # request should cause a GET on the login page.
                     return redirect(url_for('users.login', next=request.url), 303)
-                abort(403)
+                return render_error()
 
             if require_roles and not current_user.matches_roles(require_roles, require_all):
                 log.warning('User %s is authenticated, but does not have required roles %s to '
                             'access %s', current_user.user_id, require_roles, func)
-                abort(403)
+                return render_error()
 
             if require_cap and not current_user.has_cap(require_cap):
                 log.warning('User %s is authenticated, but does not have required capability %s to '
                             'access %s', current_user.user_id, require_cap, func)
-                abort(403)
+                return render_error()
 
             return func(*args, **kwargs)
 
