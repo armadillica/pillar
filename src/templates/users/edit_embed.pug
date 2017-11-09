@@ -22,6 +22,11 @@
 				data-clipboard-text="{{ user.user_id }}",
 				title="Copy ID to clipboard")
 				| (copy to clipboard)
+		p This user on:
+			=' '
+			a(href="https://store.blender.org/wp-admin/users.php?s={{ user.email | urlencode }}") Blender Store
+			=' | '
+			a(href="https://www.blender.org/id/admin/users/?flt1_4={{ user.email | urlencode }}") Blender ID
 
 	form(
 		id="user-edit-form",
