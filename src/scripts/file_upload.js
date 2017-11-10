@@ -35,6 +35,7 @@ function setup_file_uploader(index, upload_element) {
     var $upload_element = $(upload_element);
     var container = $upload_element.parent().parent();
     var progress_bar = container.find('div.form-upload-progress-bar');
+    var toastrUpload;
 
     function set_progress_bar(progress, html_class) {
         progress_bar.css({
@@ -53,7 +54,9 @@ function setup_file_uploader(index, upload_element) {
         beforeSend: function (xhr, data) {
             var token = this.fileInput.attr('data-token');
             xhr.setRequestHeader('Authorization', 'basic ' + btoa(token + ':'));
-            toastr.info('Uploading file...');
+
+            toastrUpload = toastr.info('Uploading file...', '', {'timeOut': 0});
+            toastrUpload;
 
             // console.log('Uploading from', upload_element, upload_element.value);
 
@@ -114,8 +117,8 @@ function setup_file_uploader(index, upload_element) {
                 $('.node-edit-title').html(filename);
             }
 
-            toastr.clear();
-            toastr.success('File uploaded!');
+            toastr.clear(toastrUpload);
+            toastr.success('File uploaded!', '', {'progressBar': false});
             set_progress_bar(100);
 
             $('body').trigger('file-upload:finished');
@@ -132,7 +135,7 @@ function setup_file_uploader(index, upload_element) {
                 uploadErrors.push(fileupload.messages[key]);
             }
 
-            toastr.clear();
+            toastr.clear(toastrUpload);
             toastr.error(uploadErrors.join("; "), 'Upload error');
 
             set_progress_bar(100, 'progress-error');
