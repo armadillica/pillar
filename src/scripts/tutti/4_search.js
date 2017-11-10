@@ -7,16 +7,44 @@ $(document).ready(function() {
 
 	if (typeof algoliaIndex === 'undefined') return;
 
+	var elasticSearch = function() {
+
+		console.log('yay');
+
+		return function findMatches(q, cb, async){
+			let newhits = [];
+			// do a query
+			console.log(q);
+			$.getJSON("/api/newsearch?q=" + q, function( data ) {
+				console.log(data.hits.hits);
+				let hits = data.hits.hits;
+				newhits = hits.map(function(hit){
+					console.log(hit._source);
+					return hit._source;
+				});
+				console.log(newhits);
+				cb(newhits);
+				console.log(cb);
+				async();
+			});
+			//api/newsearch?q=test%20dji
+			// return the matches..
+			//cb(matches);
+		};
+
+	};
 	var searchInput = $('#cloud-search');
 
 	var tu = searchInput.typeahead({hint: true}, {
-		source: algoliaIndex.ttAdapter(),
+		//source: algoliaIndex.ttAdapter(),
+		source: elasticSearch(),
 		displayKey: 'name',
 		limit: 10,
 		minLength: 0,
 		templates: {
 			suggestion: function(hit) {
-
+				console.log('hit2');
+				console.log(hit);
 				var hitMedia = (hit.media ? ' · <span class="media">'+hit.media+'</span>' : '');
 				var hitFree = (hit.is_free ? '<div class="search-hit-ribbon"><span>free</span></div>' : '');
 				var hitPicture;
@@ -76,6 +104,7 @@ $(document).ready(function() {
 	});
 
 	searchInput.keyup(function(e) {
+		console.log('upupup');
 		if ( $('.tt-dataset').is(':empty') ){
 			if(e.keyCode == 13){
 				window.location.href = '/search#q='+ $("#cloud-search").val() + '&page=1';
@@ -84,6 +113,9 @@ $(document).ready(function() {
 	});
 
 	searchInput.bind('typeahead:render', function(event, suggestions, async, dataset) {
+		console.log('woot');
+		console.log(suggestions);
+		console.log(dataset);
 		if( suggestions != undefined && $('.tt-all-results').length <= 0){
 			$('.tt-dataset').append(
 				'<a id="search-advanced" href="/search#q='+ $("#cloud-search").val() + '&page=1" class="search-site-result advanced tt-suggestion">' +
