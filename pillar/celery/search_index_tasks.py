@@ -3,7 +3,6 @@ from bson import ObjectId
 from pillar import current_app
 from pillar.api.file_storage import generate_link
 
-# TODO WIP (stephan) make index backend conditional on settings.
 from pillar.api.search import elastic_indexing
 
 from pillar.api.search import algolia_indexing
@@ -57,11 +56,12 @@ def _handle_picture(node: dict, to_index: dict):
             is_public=True)
 
 
-def prepare_node_data(node_id: str):
+def prepare_node_data(node_id: str, node=None) -> dict:
     """
     Given node build data object with fields to index
     """
-    node = _get_node_from_id(node_id)
+    if node_id:
+        node = _get_node_from_id(node_id)
 
     if node is None:
         log.warning('Unable to find node %s, not updating Algolia.', node_id)
@@ -117,7 +117,7 @@ def prepare_node_data(node_id: str):
     return to_index
 
 
-def prepare_user_data(user_id: str):
+def prepare_user_data(user_id: str) -> dict:
     """
     Prepare data to index for user node
     """
@@ -158,8 +158,8 @@ def updated_user(user_id: str):
     user_to_index = prepare_user_data(user_id)
 
     for searchoption in current_app.config['SEARCH_BACKENDS']:
-        for searchmodule in SEARCH_BACKENDS[searchoption]:
-            searchmodule.push_updated_user(user_to_index)
+        searchmodule = SEARCH_BACKENDS[searchoption]
+        searchmodule.push_updated_user(user_to_index)
 
 
 @current_app.celery.task(ignore_result=True)
@@ -167,7 +167,9 @@ def node_save(node_id: str):
 
     to_index = prepare_node_data(node_id)
 
-    algolia_indexing.index_node_save(to_index)
+    for searchoption in current_app.config['SEARCH_BACKENDS']:
+        searchmodule = SEARCH_BACKENDS[searchoption]
+        searchmodule.index_node_save(to_index)
 
 
 @current_app.celery.task(ignore_result=True)
@@ -177,3 +179,7 @@ def node_delete(node_id: str):
     # No need to fetch anything from Mongo.
     delete_id = ObjectId(node_id)
     algolia_indexing.index_node_delete(delete_id)
+
+    for searchoption in current_app.config['SEARCH_BACKENDS']:
+        searchmodule = SEARCH_BACKENDS[searchoption]
+        searchmodule.index_node_delete(delete_id)

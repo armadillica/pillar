@@ -75,6 +75,12 @@ ALGOLIA_INDEX_NODES = 'dev_Nodes'
 
 SEARCH_BACKENDS = ['algolia', 'elastic']
 
+ELASTIC_SEARCH_HOSTS = ['elasticsearch']
+ELASTIC_INDICES = {
+    'NODE': 'nodes',
+    'USER': 'users',
+}
+
 
 ZENCODER_API_KEY = '-SECRET-'
 ZENCODER_NOTIFICATIONS_SECRET = '-SECRET-'

@@ -16,7 +16,7 @@ def index_user_save(to_index_user: dict):
         return
 
     # Create or update Algolia index for the user
-    index_users.save_object()
+    index_users.save_object(to_index_user)
 
 
 @skip_when_testing

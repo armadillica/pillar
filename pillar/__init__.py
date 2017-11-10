@@ -693,6 +693,7 @@ class PillarServer(Eve):
 
         api.setup_app(self)
         web.setup_app(self)
+
         authentication.setup_app(self)
 
         for ext in self.pillar_extensions.values():
