@@ -5,46 +5,38 @@
 
 $(document).ready(function() {
 
-	if (typeof algoliaIndex === 'undefined') return;
+	var getSearch = function(q, cb, async){
+		let newhits = [];
+		$.getJSON("/api/newsearch?q=" + q, function( data ) {
+			let hits = data.hits.hits;
+			newhits = hits.map(function(hit){
+				return hit._source;
+			});
+			cb(newhits.slice(0));
+			async(newhits.slice(0));
+		});
+	};
 
-	var elasticSearch = function() {
-
-		console.log('yay');
+	var elasticSearch = (function() {
 
 		return function findMatches(q, cb, async){
-			let newhits = [];
-			// do a query
-			console.log(q);
-			$.getJSON("/api/newsearch?q=" + q, function( data ) {
-				console.log(data.hits.hits);
-				let hits = data.hits.hits;
-				newhits = hits.map(function(hit){
-					console.log(hit._source);
-					return hit._source;
-				});
-				console.log(newhits);
-				cb(newhits);
-				console.log(cb);
-				async();
-			});
-			//api/newsearch?q=test%20dji
-			// return the matches..
-			//cb(matches);
+	        	if (!cb) { return; }
+			getSearch(q, cb, async);
 		};
+	});
 
-	};
 	var searchInput = $('#cloud-search');
 
 	var tu = searchInput.typeahead({hint: true}, {
 		//source: algoliaIndex.ttAdapter(),
 		source: elasticSearch(),
+		//source: elkBlood(),
+		async: true,
 		displayKey: 'name',
 		limit: 10,
 		minLength: 0,
 		templates: {
 			suggestion: function(hit) {
-				console.log('hit2');
-				console.log(hit);
 				var hitMedia = (hit.media ? ' · <span class="media">'+hit.media+'</span>' : '');
 				var hitFree = (hit.is_free ? '<div class="search-hit-ribbon"><span>free</span></div>' : '');
 				var hitPicture;
@@ -55,7 +47,7 @@ $(document).ready(function() {
 					hitPicture = '<div class="search-hit-thumbnail-icon">';
 					hitPicture += (hit.media ? '<i class="pi-' + hit.media + '"></i>' : '<i class="dark pi-'+ hit.node_type + '"></i>');
 					hitPicture += '</div>';
-				};
+				}
 				var $span = $('<span>').addClass('project').text(hit.project.name);
 				var $searchHitName = $('<div>').addClass('search-hit-name')
 					.attr('title', hit.name)
@@ -104,18 +96,14 @@ $(document).ready(function() {
 	});
 
 	searchInput.keyup(function(e) {
-		console.log('upupup');
 		if ( $('.tt-dataset').is(':empty') ){
 			if(e.keyCode == 13){
 				window.location.href = '/search#q='+ $("#cloud-search").val() + '&page=1';
-			};
-		};
+			}
+		}
 	});
 
 	searchInput.bind('typeahead:render', function(event, suggestions, async, dataset) {
-		console.log('woot');
-		console.log(suggestions);
-		console.log(dataset);
 		if( suggestions != undefined && $('.tt-all-results').length <= 0){
 			$('.tt-dataset').append(
 				'<a id="search-advanced" href="/search#q='+ $("#cloud-search").val() + '&page=1" class="search-site-result advanced tt-suggestion">' +
@@ -130,7 +118,7 @@ $(document).ready(function() {
 						'</div>' +
 					'</div>'+
 				'</a>');
-		};
+		}
 	});
 
 });

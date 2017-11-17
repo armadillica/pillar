@@ -24,8 +24,10 @@ def do_search(query: str) -> dict:
     """
     should = [
         Q('match', name=query),
-        Q('match', user_name=query),
-        Q('match', project_name=query),
+
+        {"match": {"project.name": query}},
+        {"match": {"user.name": query}},
+
         Q('match', description=query),
         Q('term', media=query),
         Q('term', tags=query),
