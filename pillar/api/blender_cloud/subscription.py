@@ -83,13 +83,19 @@ def update_subscription():
     """
 
     import pprint
+    from pillar import auth
     from pillar.api import blender_id, service
     from pillar.api.utils import authentication
 
     my_log: logging.Logger = log.getChild('update_subscription')
     user_id = authentication.current_user_id()
 
-    bid_user = blender_id.fetch_blenderid_user()
+    try:
+        bid_user = blender_id.fetch_blenderid_user()
+    except blender_id.LogoutUser:
+        auth.logout_user()
+        return '', 204
+
     if not bid_user:
         my_log.warning('Logged in user %s has no BlenderID account! '
                        'Unable to update subscription status.', user_id)

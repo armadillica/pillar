@@ -2,7 +2,7 @@ import logging
 
 from flask import abort, Blueprint, redirect, render_template, request, session, \
     url_for
-from flask_login import login_required, logout_user
+from flask_login import login_required
 from werkzeug import exceptions as wz_exceptions
 
 import pillar.api.blender_cloud.subscription
@@ -108,8 +108,7 @@ def login_local():
 
 @blueprint.route('/logout')
 def logout():
-    logout_user()
-    session.clear()
+    pillar.auth.logout_user()
     return redirect('/')
 
 

@@ -20,6 +20,13 @@ blender_id = Blueprint('blender_id', __name__)
 log = logging.getLogger(__name__)
 
 
+class LogoutUser(Exception):
+    """Raised when Blender ID tells us the current user token is invalid.
+
+    This indicates the user should be immediately logged out.
+    """
+
+
 @blender_id.route('/store_scst', methods=['POST'])
 def store_subclient_token():
     """Verifies & stores a user's subclient-specific token."""
@@ -180,6 +187,8 @@ def fetch_blenderid_user() -> dict:
          }
     }
 
+    :raises LogoutUser: when Blender ID tells us the current token is
+        invalid, and the user should be logged out.
     """
 
     import httplib2  # used by the oauth2 package
@@ -200,6 +209,10 @@ def fetch_blenderid_user() -> dict:
     except httplib2.HttpLib2Error:
         log.exception('Error getting %s from BlenderID', bid_url)
         return {}
+
+    if bid_resp.status_code == 403:
+        log.warning('Error %i from BlenderID %s, logging out user', bid_resp.status_code, bid_url)
+        raise LogoutUser()
 
     if bid_resp.status_code != 200:
         log.warning('Error %i from BlenderID %s: %s', bid_resp.status_code, bid_url, bid_resp.text)

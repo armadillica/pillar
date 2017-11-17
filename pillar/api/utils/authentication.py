@@ -177,11 +177,23 @@ def validate_this_token(token, oauth_subclient=None):
     return db_user
 
 
+def remove_token(token: str):
+    """Removes the token from the database."""
+
+
+    tokens_coll = current_app.db('tokens')
+    token_hashed = hash_auth_token(token)
+
+    # TODO: remove matching on unhashed tokens once all tokens have been hashed.
+    lookup = {'$or': [{'token': token}, {'token_hashed': token_hashed}]}
+    del_res = tokens_coll.delete_many(lookup)
+    log.debug('Removed token %r, matched %d documents', token, del_res.deleted_count)
+
+
 def find_token(token, is_subclient_token=False, **extra_filters):
     """Returns the token document, or None if it doesn't exist (or is expired)."""
 
-    tokens_collection = current_app.data.driver.db['tokens']
-
+    tokens_coll = current_app.db('tokens')
     token_hashed = hash_auth_token(token)
 
     # TODO: remove matching on unhashed tokens once all tokens have been hashed.
@@ -190,7 +202,7 @@ def find_token(token, is_subclient_token=False, **extra_filters):
               'expire_time': {"$gt": datetime.datetime.now(tz=tz_util.utc)}}
     lookup.update(extra_filters)
 
-    db_token = tokens_collection.find_one(lookup)
+    db_token = tokens_coll.find_one(lookup)
     return db_token
 
 

@@ -202,14 +202,26 @@ def config_login_manager(app):
 def login_user(oauth_token: str, *, load_from_db=False):
     """Log in the user identified by the given token."""
 
-    from flask import g
-
     if load_from_db:
         user = _load_user(oauth_token)
     else:
         user = UserClass(oauth_token)
     flask_login.login_user(user, remember=True)
     g.current_user = user
+
+
+def logout_user():
+    """Forces a logout of the current user."""
+
+    from ..api.utils import authentication
+
+    token = get_blender_id_oauth_token()
+    if token:
+        authentication.remove_token(token)
+
+    session.clear()
+    flask_login.logout_user()
+    g.current_user = AnonymousUser()
 
 
 def get_blender_id_oauth_token() -> str:
@@ -230,6 +242,9 @@ def get_blender_id_oauth_token() -> str:
 
     if request.authorization and request.authorization.username:
         return request.authorization.username
+
+    if current_user.is_authenticated and current_user.id:
+        return current_user.id
 
     return ''
 
