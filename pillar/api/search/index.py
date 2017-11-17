@@ -64,6 +64,21 @@ class ResetNodeIndex(ResetIndexTask):
     doc_types = [documents.Node]
 
 
+class ResetUserIndex(ResetIndexTask):
+    index = current_app.config['ELASTIC_INDICES']['USER']
+    doc_types = [documents.User]
+
+
 def reset_node_index():
     resettask = ResetNodeIndex()
     resettask.execute()
+
+
+def reset_index(indexnames):
+    if 'users' in indexnames:
+        resettask = ResetUserIndex()
+        resettask.execute()
+    if 'nodes' in indexnames:
+        resettask = ResetUserIndex()
+        resettask.execute()
+

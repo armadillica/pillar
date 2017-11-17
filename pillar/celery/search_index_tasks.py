@@ -117,20 +117,23 @@ def prepare_node_data(node_id: str, node=None) -> dict:
     return to_index
 
 
-def prepare_user_data(user_id: str) -> dict:
+def prepare_user_data(user_id: str, user=None) -> dict:
     """
     Prepare data to index for user node
     """
 
-    user_oid = ObjectId(user_id)
-    log.info('Retrieving user %s', user_oid)
-    users_coll = current_app.db('users')
-    user = users_coll.find_one({'_id': user_oid})
+    if not user:
+        user_oid = ObjectId(user_id)
+        log.info('Retrieving user %s', user_oid)
+        users_coll = current_app.db('users')
+        user = users_coll.find_one({'_id': user_oid})
+
     if user is None:
         log.warning('Unable to find user %s, not updating Algolia.', user_oid)
         return
 
     user_roles = set(user.get('roles', ()))
+
     if 'service' in user_roles:
         return
 
