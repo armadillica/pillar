@@ -3,11 +3,25 @@
 * index and algolia settings are defined in layout.pug
 */
 
-$(document).ready(function() {
+var elasticSearch = (function($, url) {
+    console.log(url);
+		return function findMatches(q, cb, async){
+			if (!cb) { return; }
+			$.fn.getSearch(q, cb, async, url);
+		};
+});
 
-	var getSearch = function(q, cb, async){
+
+(function( $ ){
+
+	$.fn.getSearch = function(q, cb, async, url){
+
 		let newhits = [];
-		$.getJSON("/api/newsearch?q=" + q, function( data ) {
+		if(url === undefined){
+			url = '';
+		}
+    console.log('searching! '+ url + q);
+		$.getJSON("/api/newsearch" + url + "?q=" + q, function( data ) {
 			let hits = data.hits.hits;
 			newhits = hits.map(function(hit){
 				return hit._source;
@@ -17,19 +31,17 @@ $(document).ready(function() {
 		});
 	};
 
-	var elasticSearch = (function() {
 
-		return function findMatches(q, cb, async){
-	        	if (!cb) { return; }
-			getSearch(q, cb, async);
-		};
-	});
+}(jQuery));
+
+
+$(document).ready(function() {
 
 	var searchInput = $('#cloud-search');
 
 	var tu = searchInput.typeahead({hint: true}, {
 		//source: algoliaIndex.ttAdapter(),
-		source: elasticSearch(),
+		source: elasticSearch($),
 		async: true,
 		displayKey: 'name',
 		limit: 10,

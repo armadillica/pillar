@@ -1,23 +1,14 @@
 (function ( $ ) {
     // See organizations/view_embed.pug for example use.
     $.fn.userSearch = function(algolia_application_id, algolia_public_key, algolia_index_users, on_selected) {
-        var client = algoliasearch(algolia_application_id, algolia_public_key);
-        var index = client.initIndex(algolia_index_users);
 
         var target = this;
         this.autocomplete({hint: false}, [
             {
-                source: function (q, cb) {
-                    index.search(q, {hitsPerPage: 5}, function (error, content) {
-                        if (error) {
-                            cb([]);
-                            return;
-                        }
-                        cb(content.hits, content);
-                    });
-                },
-                displayKey: 'full_name',
-                minLength: 2,
+                source: elasticSearch($, '/user'),
+	        displayKey: 'full_name',
+		async: true,
+                minLength: 1,
                 limit: 10,
                 templates: {
                     suggestion: function (hit) {
