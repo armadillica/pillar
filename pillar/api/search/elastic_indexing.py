@@ -1,7 +1,8 @@
 import logging
-from pillar import current_app
+
 from elasticsearch_dsl.connections import connections
 
+from pillar import current_app
 from . import documents
 
 

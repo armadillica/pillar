@@ -19,57 +19,43 @@ blueprint_search = Blueprint('elksearch', __name__)
 from . import queries
 
 
-def _valid_search() -> [str, str]:
+def _valid_search() -> str:
     """
-    Validate search parameters
+    Returns search parameters, raising error when missing.
     """
 
     searchword = request.args.get('q', '')
-
     if not searchword:
-        return '', 'You are forgetting a "?q=whatareyoulookingfor"'
+        raise wz_exceptions.BadRequest('You are forgetting a "?q=whatareyoulookingfor"')
+    return searchword
 
-    return searchword, ''
 
-
-@blueprint_search.route('/', methods=['GET'])
+@blueprint_search.route('/')
 def search_nodes():
-
-    searchword, err = _valid_search()
-    if err:
-        return err
-
+    searchword = _valid_search()
     data = queries.do_search(searchword)
-
-    resp = Response(json.dumps(data), mimetype='application/json')
-    return resp
+    return jsonify(data)
 
 
-@blueprint_search.route('/user', methods=['GET'])
+@blueprint_search.route('/user')
 def search_user():
 
-    searchword, err = _valid_search()
-    if err:
-        return err
+    searchword = _valid_search()
 
     data = queries.do_user_search(searchword)
 
-    resp = Response(json.dumps(data), mimetype='application/json')
-    return resp
+    return jsonify(data)
 
 
+@blueprint_search.route('/admin/user')
 @authorization.require_login(require_cap='admin')
-@blueprint_search.route('/admin/user', methods=['GET'])
 def search_user_admin():
     """
     User search over all fields.
     """
 
-    searchword, err = _valid_search()
-    if err:
-        return err
+    searchword = _valid_search()
 
     data = queries.do_user_search_admin(searchword)
 
-    resp = Response(json.dumps(data), mimetype='application/json')
-    return resp
+    return jsonify(data)
