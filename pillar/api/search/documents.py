@@ -28,7 +28,22 @@ autocomplete = es.analyzer(
 class User(es.DocType):
     """Elastic document describing user."""
 
-    name = es.String(
+    objectID = es.Keyword()
+
+    username = es.String(
+        fielddata=True,
+        analyzer=autocomplete,
+    )
+
+    full_name = es.String(
+        fielddata=True,
+        analyzer=autocomplete,
+    )
+
+    roles = es.Keyword(multi=True)
+    groups = es.Keyword(multi=True)
+
+    email = es.String(
         fielddata=True,
         analyzer=autocomplete,
     )
@@ -86,8 +101,14 @@ class Node(es.DocType):
 
 
 def create_doc_from_user_data(user_to_index):
-    doc_id = user_to_index['objectID']
+    doc_id = str(user_to_index['objectID'])
     doc = User(_id=doc_id)
+    doc.objectID = str(user_to_index['objectID'])
+    doc.username = user_to_index['username']
+    doc.full_name = user_to_index['full_name']
+    doc.roles = list(map(str, user_to_index['roles']))
+    doc.groups = list(map(str, user_to_index['groups']))
+    doc.email = user_to_index['email']
     return doc
 
 
@@ -95,8 +116,10 @@ def create_doc_from_node_data(node_to_index):
 
     # node stuff
     doc_id = str(node_to_index['objectID'])
+
     doc = Node(_id=doc_id)
 
+    doc.objectID = str(node_to_index['objectID'])
     doc.node_type = node_to_index['node_type']
     doc.name = node_to_index['name']
     doc.user.id = str(node_to_index['user']['_id'])
@@ -114,5 +137,22 @@ def create_doc_from_node_data(node_to_index):
 
     doc.created_at = node_to_index['created']
     doc.updated_at = node_to_index['updated']
+
+    return doc
+
+
+def create_doc_from_user(user_to_index: dict) -> User:
+    """
+    Create a user document from user
+    """
+
+    doc_id = str(user_to_index['objectID'])
+    doc = User(_id=doc_id)
+    doc.objectID = str(user_to_index['objectID'])
+    doc.full_name = user_to_index['full_name']
+    doc.username = user_to_index['username']
+    doc.roles = user_to_index['roles']
+    doc.groups = user_to_index['groups']
+    doc.email = user_to_index['email']
 
     return doc

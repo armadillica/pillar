@@ -26,6 +26,10 @@ def push_updated_user(user_to_index: dict):
         user_to_index.get('username'),
         user_to_index.get('objectID'))
 
+    doc = documents.create_doc_from_user_data(user_to_index)
+    doc.save()
+    log.warning('CREATED ELK USER DOC')
+
 
 def index_node_save(node_to_index: dict):
 
@@ -37,7 +41,7 @@ def index_node_save(node_to_index: dict):
 
     doc = documents.create_doc_from_node_data(node_to_index)
 
-    log.warning('CREATED ELK DOC')
+    log.warning('CREATED ELK NODE DOC')
     doc.save()
 
 

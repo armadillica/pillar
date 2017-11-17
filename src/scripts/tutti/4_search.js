@@ -30,7 +30,6 @@ $(document).ready(function() {
 	var tu = searchInput.typeahead({hint: true}, {
 		//source: algoliaIndex.ttAdapter(),
 		source: elasticSearch(),
-		//source: elkBlood(),
 		async: true,
 		displayKey: 'name',
 		limit: 10,
