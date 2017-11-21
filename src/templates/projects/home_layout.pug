@@ -27,11 +27,11 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 
 			section#sub-nav-tabs.home
 				ul#sub-nav-tabs__list
-					li.nav-tabs__list-tab#subtab-blender_sync(data-tab-url='.')
+					li.nav-tabs__list-tab#subtab-blender_sync(data-tab-url="{{ url_for('projects.home_project')}}")
 						i.pi-blender
 						| Blender Sync
 
-					li.nav-tabs__list-tab#subtab-images(data-tab-url='images')
+					li.nav-tabs__list-tab#subtab-images(data-tab-url="{{ url_for('projects.home_project_shared_images')}}")
 						i.pi-picture
 						| Images
 			| {% block currenttab %}{% endblock %}
