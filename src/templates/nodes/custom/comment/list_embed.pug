@@ -73,32 +73,6 @@
 | {% block comment_scripts %}
 script.
 
-	// If there's a comment link in the URL, scroll there
-	function scrollToLinkedComment() {
-		var scrollToId = location.hash;
-		if (scrollToId.length <= 1) return;
-
-		$(scrollToId)
-			.addClass('comment-linked')
-			.scrollHere();
-	}
-	$(scrollToLinkedComment);
-
-
-	$('#comment_field').autoResize();
-
-	// Initialize Markdown to later convert comment as we type
-	var convert = new Markdown.getSanitizingConverter();
-	Markdown.Extra.init(convert);
-	convert = convert.makeHtml;
-
-	// Submit new comment
-	$(document)
-		.off('click','body .comment-action-submit')
-		.on( 'click','body .comment-action-submit', function(e){
-		post_comment($(this));
-	});
-
 	{% if show_comments %}
 	$('body')
 		.off('pillar:comment-posted')
@@ -111,8 +85,36 @@ script.
 			$('#' + comment_node_id).scrollHere();
 		});
 	});
+
+	// If there's a comment link in the URL, scroll there
+	function scrollToLinkedComment() {
+		var scrollToId = location.hash;
+		if (scrollToId.length <= 1) return;
+
+		$(scrollToId)
+			.addClass('comment-linked')
+			.scrollHere();
+	}
+	$(scrollToLinkedComment);
+
 	{% endif %}
 
+
+	{% if can_post_comments %}
+
+	// If we can actually comment, load the tools to do it
+
+	// Initialize Markdown to later convert comment as we type
+	var convert = new Markdown.getSanitizingConverter();
+	Markdown.Extra.init(convert);
+	convert = convert.makeHtml;
+
+	// Submit new comment
+	$(document)
+		.off('click','body .comment-action-submit')
+		.on( 'click','body .comment-action-submit', function(e){
+		post_comment($(this));
+	});
 
 	// Writing comment
 	// Markdown convert as we type in the textarea
@@ -141,6 +143,9 @@ script.
 			}
 		}
 	});
+
+	// Autoresize the textarea as we type
+	$('#comment_field').autoResize();
 
 
 	// Edit comment
@@ -217,5 +222,7 @@ script.
 				.removeClass('saving');
 		});
 	});
+
+	{% endif %}
 
 | {% endblock %}
