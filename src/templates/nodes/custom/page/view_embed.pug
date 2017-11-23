@@ -17,7 +17,7 @@
 
 		| {% if node.description %}
 		.node-details-description#node-description
-			| {{node.description}}
+			| {{ node.description | markdown }}
 		| {% endif %}
 
 		.node-details-meta.footer
@@ -32,7 +32,7 @@ script.
 	// Push the correct URL onto the history. This push happens after the id has
 	// been pushed to the history already. We should probably keep only this and
 	// skip the project-level displayNode push.
-	
+
 	var url = '{{ node.properties.url }}'
 	var replace_state = {nodeId: '{{node._id}}', url: url};
 	window.history.replaceState(

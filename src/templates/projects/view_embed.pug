@@ -39,7 +39,7 @@
 
 		| {% if project.description %}
 		.node-details-description
-			| {{ project.description }}
+			| {{ project.description | markdown }}
 		| {% endif %}
 
 		| {# Until we implement urls for pages
