@@ -17,13 +17,13 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 
 | {% block body %}
 .dashboard-container
-	section#main
+	section.dashboard-main
 		| {{ navigation_tabs(title) }}
 
 		section#projects
 
 			| {% if can_create_organization %}
-			section#sub-nav-tabs.projects
+			nav#sub-nav-tabs.projects
 				ul#sub-nav-tabs__list
 					li.result#create_organization_result_panel
 					li.create
@@ -32,7 +32,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 							| Create Organization
 			| {% endif %}
 
-			section.nav-tabs__tab.active#own_projects
+			nav.nav-tabs__tab.active#own_projects
 				ul.projects__list
 					| {% if organizations %}
 					| {% for organization in organizations['_items']  %}
@@ -65,7 +65,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 							span Create an Organization to get started!
 					| {% endif %}
 
-	section#side
+	section.dashboard-secondary
 		section.box
 			#item-details
 

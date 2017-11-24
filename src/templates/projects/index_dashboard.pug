@@ -20,12 +20,12 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 
 | {% block body %}
 .dashboard-container
-	section#main
+	section.dashboard-main
 		| {{ navigation_tabs(title) }}
 
 		section#projects
 
-			section#sub-nav-tabs.projects
+			nav#sub-nav-tabs.projects
 				ul#sub-nav-tabs__list
 					li.nav-tabs__list-tab.active(data-tab-toggle='own_projects')
 						| Own Projects
@@ -48,7 +48,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 							| Create Project
 					| {% endif %}
 
-			section.nav-tabs__tab.active#own_projects
+			nav.nav-tabs__tab.active#own_projects
 				ul.projects__list
 					| {% for project in projects_user %}
 					li.projects__list-item(
@@ -148,7 +148,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 								| No projects shared with you... yet!
 					| {% endif %}
 
-	section#side
+	section.dashboard-secondary
 		section.announcement
 			img.header(
 				src="{{ url_for('static', filename='assets/img/backgrounds/services_projects.jpg')}}")
