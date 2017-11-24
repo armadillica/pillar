@@ -1,6 +1,6 @@
 (function ( $ ) {
     // See organizations/view_embed.pug for example use.
-    $.fn.userSearch = function(algolia_application_id, algolia_public_key, algolia_index_users, on_selected) {
+    $.fn.userSearch = function(on_selected) {
 
         var target = this;
         this.autocomplete({hint: false}, [

@@ -18,7 +18,20 @@ client = Elasticsearch()
 log = logging.getLogger(__name__)
 
 
-def do_search(query: str) -> dict:
+
+def add_aggs_to_search(search):
+    """
+    """
+
+    agg_terms = ['node_type', 'media', 'tags', 'is_free']
+
+    for term in agg_terms:
+        search.aggs.bucket(term, 'terms', field=term)
+
+    #search.aggs.bucket('project', 'terms', field='project.name')
+
+
+def do_search(query: str, terms: dict) -> dict:
     """
     Given user input search for node/stuff
     """
@@ -32,14 +45,25 @@ def do_search(query: str) -> dict:
         Q('term', media=query),
         Q('term', tags=query),
     ]
+
+    #must = []
+
+    #for field, value in terms.items():
+    #    must.append(
+
     bool_query = Q('bool', should=should)
     search = Search(using=client)
     search.query = bool_query
 
+    add_aggs_to_search(search)
+
     if current_app.config['DEBUG']:
-        log.debug(json.dumps(search.to_dict(), indent=4))
+        print(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()
+
+    if current_app.config['DEBUG']:
+        print(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()
 
@@ -61,6 +85,9 @@ def do_user_search(query: str) -> dict:
 
     response = search.execute()
 
+    if current_app.config['DEBUG']:
+        log.debug('%s', json.dumps(response.to_dict(), indent=4))
+
     return response.to_dict()
 
 
@@ -81,5 +108,8 @@ def do_user_search_admin(query: str) -> dict:
         log.debug(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()
+
+    if current_app.config['DEBUG']:
+        log.debug(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()

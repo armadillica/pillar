@@ -30,10 +30,28 @@ def _valid_search() -> str:
     return searchword
 
 
+def _term_filters() -> dict:
+    """
+    Check if frontent want to filter stuff
+    """
+
+    terms = [
+        'node_type', 'media',
+        'tags', 'is_free', 'projectname']
+
+    parsed_terms = {}
+
+    for term in terms:
+        parsed_terms[term] = request.args.get(term, '')
+
+    return parsed_terms
+
+
 @blueprint_search.route('/')
 def search_nodes():
     searchword = _valid_search()
-    data = queries.do_search(searchword)
+    terms = _term_filters()
+    data = queries.do_search(searchword, terms)
     return jsonify(data)
 
 

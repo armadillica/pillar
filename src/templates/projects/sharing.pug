@@ -86,12 +86,7 @@ script.
 			addUser(hit.objectID);
 		}
 
-		$('#user-select').userSearch(
-			'{{config.ALGOLIA_USER}}',
-			'{{config.ALGOLIA_PUBLIC_KEY}}',
-			'{{config.ALGOLIA_INDEX_USERS}}',
-			shareWithUser
-		);
+		$('#user-select').userSearch(shareWithUser);
 	});
 	function addUser(userId){
 		if (!userId || userId.length == 0) {

@@ -3,13 +3,106 @@
 * index and algolia settings are defined in layout.pug
 */
 
+var elasticSearcher = (function() {
+
+	var deze = {
+
+		query:"",
+		url:"",
+		newhits: [],
+		terms: {},
+		page: 0,
+
+		setQuery: (function(q, _url){
+			console.log('setQuery!: ' + q);
+			deze.query=q;
+			if (_url !== undefined) {
+				deze.url=_url;
+			}
+		}),
+
+		setCurrentPage: (function(page){
+			if(page === undefined){
+				return;
+			}
+			deze.page = page;
+		}),
+
+		//result callback
+		results: (function(content){}),
+
+		//error callback
+		error: (function(message){
+			console.log(message);
+		}),
+
+		on: (function(type, callback){
+			deze[type] = callback;
+		}),
+
+		//parse the agg stuff
+		aggs: (function(data){
+			return deze.newhits.aggregations;
+		}),
+
+		addTerm: (function(term, value){
+			deze.terms[term] = value;
+		}),
+
+		//get response from elastic and rebuild json
+		//so we  can be a drop in of angolia
+		execute: (function(){
+			params = {
+				q: deze.query,
+				page: deze.page,
+			};
+			//add term filters
+			Object.assign(params, deze.terms);
+
+			var pstr = jQuery.param( params );
+
+			var jqxhr = $.getJSON("/api/newsearch" + deze.url + "?"+ pstr, function( data ) {
+				let hits = data.hits.hits;
+				var newhits = hits.map(function(hit){
+					return hit._source;
+				});
+
+				deze.newhits = newhits.slice(0);
+				//cb(newhits.slice(0));
+				deze.results({
+					'count': data.hits.total,
+					'hits': newhits.slice(0),
+					'took': data.took,
+					'page': deze.page,
+					'aggs': data.aggregations,
+				});
+			});
+
+		})
+
+	};
+
+	return {
+		execute: deze.execute,
+		on: deze.on,
+		setQuery: deze.setQuery,
+		setCurrentPage: deze.setCurrentPage,
+		query: deze.query,
+		page: deze.page,
+		addTerm: deze.addTerm,
+	};
+
+})();
+
+
 var elasticSearch = (function($, url) {
     console.log(url);
-		return function findMatches(q, cb, async){
-			if (!cb) { return; }
-			$.fn.getSearch(q, cb, async, url);
-		};
+	return function findMatches(q, cb, async){
+		if (!cb) { return; }
+		$.fn.getSearch(q, cb, async, url);
+	};
 });
+
 
 
 (function( $ ){
@@ -20,7 +113,9 @@ var elasticSearch = (function($, url) {
 		if(url === undefined){
 			url = '';
 		}
-    console.log('searching! '+ url + q);
+
+		console.log('searching! '+ url + q);
+
 		$.getJSON("/api/newsearch" + url + "?q=" + q, function( data ) {
 			let hits = data.hits.hits;
 			newhits = hits.map(function(hit){

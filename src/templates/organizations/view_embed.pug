@@ -203,9 +203,6 @@ h4 Organization members
 script.
 	$(document).ready(function() {
 		$('#user-select').userSearch(
-			'{{config.ALGOLIA_USER}}',
-			'{{config.ALGOLIA_PUBLIC_KEY}}',
-			'{{config.ALGOLIA_INDEX_USERS}}',
 			function (event, hit, dataset) {
 				var $existing = $('li.sharing-users-item[data-user-id="' + hit.objectID + '"]');
 				if ($existing.length) {
@@ -224,9 +221,6 @@ script.
 			}
 		);
 		$('#admin-select').userSearch(
-			'{{config.ALGOLIA_USER}}',
-			'{{config.ALGOLIA_PUBLIC_KEY}}',
-			'{{config.ALGOLIA_INDEX_USERS}}',
 			function (event, hit, dataset) {
 				setAdmin(hit.objectID, hit.full_name);
 			}
