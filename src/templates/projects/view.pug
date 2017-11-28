@@ -131,11 +131,6 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 						i.pi-cog
 				| {% endif %}
 
-				.project_nav-toggle-btn(
-					title="Toggle navigation [T]",
-					data-toggle="tooltip",
-					data-placement="right")
-					i.pi-angle-double-left
 
 		#project_nav(class="{{ title }}")
 			#project_nav-container
@@ -150,7 +145,6 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 				| {% endblock project_tree %}
 				| {% endif %}
 
-				.project_split(title="Toggle Navigation [T]")
 
 	#project_context-container
 		| {% if project.has_method('PUT') %}
