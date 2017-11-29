@@ -1,0 +1,110 @@
+| {% block body %}
+
+#user-edit-container
+
+	#user-edit-header
+		.user-edit-name(title="Full Name") {{user.full_name}}
+		.user-edit-username(title="Username")
+			i.pi-users
+			| {{user.username}}
+		.user-edit-email(title="E-mail")
+			i.pi-email
+			| {{user.email}}
+		.user-edit-id(title="User ID")
+			i.pi-vcard
+			| {{user.user_id}} &nbsp;
+
+			a.copy-to-clipboard(
+				style="margin-left: auto",
+				name="Copy to Clipboard",
+				type="button",
+				href="javascript:void(0)",
+				data-clipboard-text="{{ user.user_id }}",
+				title="Copy ID to clipboard")
+				| (copy to clipboard)
+		| {% block user_links %}{% endblock %}
+	form(
+		id="user-edit-form",
+		method="POST",
+		enctype="multipart/form-data",
+		action="{{url_for('users.users_edit', user_id=user.user_id)}}")
+
+		| {% for field in form %}
+
+		| {% if field.name == 'csrf_token' %}
+		| {{ field }}
+
+		| {% else %}
+
+		| {% if field.type == 'HiddenField' %}
+		| {{ field }}
+
+		| {% else %}
+
+		.form-group(class="{{field.name}}{% if field.errors %} error{% endif %}")
+			| {{ field.label }}
+			| {{ field(class='form-control') }}
+
+			| {% if field.errors %}
+			ul.error
+				| {% for error in field.errors %}
+				li {{ error }}
+				| {% endfor %}
+			| {% endif %}
+			span.field-description {{ field.description }}
+
+		| {% endif %}
+
+		| {% endif %}
+
+		| {% endfor %}
+
+		.form-group.capabilities
+			label Capabilities
+			| {% if user.capabilities %}
+			ul
+				| {% for cap in user.capabilities|sort %}
+				li {{ cap }}
+				| {% endfor %}
+			| {% else %}
+			p
+				i.pi-cancel
+				| none
+			| {% endif %}
+
+		a#button-cancel.btn.btn-default(href="#", data-user-id='{{user.user_id}}') Cancel
+
+		input#submit_edit_user.btn.btn-default(
+			data-user-id="{{user.user_id}}",
+			type="submit" value="Submit")
+
+		#user-edit-notification
+
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/clipboard.min.js')}}")
+script(type="text/javascript").
+	$('#roles').select2();
+
+	$('#user-edit-form').submit(function(e){
+		e.preventDefault();
+		//- console.log($(this).serialize());
+		$.post($(this).attr('action'), $(this).serialize())
+		.done(function(data){
+			// This function is defined in index.pug.
+			displayUser('{{ user.user_id }}')
+			.done(function() {
+				$('#user-edit-notification').addClass('success').html('Success!');
+			});
+		})
+		.fail(function(data){
+			$('#user-edit-notification').addClass('fail').html('Houston!');
+		});
+		//- $("#user-edit-form").submit();
+	});
+
+	$('#button-cancel').click(function(e){
+		$('#user-container').html('')
+	});
+
+	new Clipboard('.copy-to-clipboard');
+
+| {% endblock %}
