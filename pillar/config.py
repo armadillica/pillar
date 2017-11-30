@@ -99,6 +99,11 @@ FULL_FILE_ACCESS_ROLES = {'admin', 'subscriber', 'demo'}
 BLENDER_ID_CLIENT_ID = 'SPECIAL-SNOWFLAKE-57'
 BLENDER_ID_SUBCLIENT_ID = 'PILLAR'
 
+# Blender ID user info API endpoint URL and auth token, only used for
+# reconciling subscribers. The token requires the 'userinfo' scope.
+BLENDER_ID_USER_INFO_API = 'http://blender-id:8000/api/user/'
+BLENDER_ID_USER_INFO_TOKEN = '-set-in-config-local-'
+
 # Collection of supported OAuth providers (Blender ID, Facebook and Google).
 # Example entry:
 # OAUTH_CREDENTIALS = {
@@ -172,9 +177,6 @@ URLER_SERVICE_AUTH_TOKEN = None
 # Blender Cloud add-on version. This updates the value in all places in the
 # front-end.
 BLENDER_CLOUD_ADDON_VERSION = '1.4'
-
-EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER = 'https://store.blender.org/api/'
-EXTERNAL_SUBSCRIPTIONS_TIMEOUT_SECS = 10
 
 # Certificate file for communication with other systems.
 TLS_CERT_FILE = requests.certs.where()

@@ -1,3 +1,4 @@
+import typing
 from unittest import mock
 
 import responses
@@ -17,22 +18,16 @@ class RoleUpdatingTest(AbstractPillarTest):
             self.create_standard_groups()
 
     def _setup_testcase(self, mocked_fetch_blenderid_user, *,
-                        store_says_cloud_access: bool,
-                        bid_says_cloud_demo: bool):
+                        bid_roles: typing.Set[str]):
         import urllib.parse
+
+        # The Store API endpoint should not be called upon any more.
         url = '%s?blenderid=%s' % (self.app.config['EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER'],
                                    urllib.parse.quote(TEST_EMAIL_ADDRESS))
         responses.add('GET', url,
-                      json={'shop_id': 58432,
-                            'cloud_access': 1 if store_says_cloud_access else 0,
-                            'paid_balance': 0,
-                            'balance_currency': 'EUR',
-                            'start_date': '2017-05-04 12:07:49',
-                            'expiration_date': '2017-08-04 10:07:49',
-                            'subscription_status': 'wc-active'
-                            },
-                      status=200,
+                      status=500,
                       match_querystring=True)
+
         self.mock_blenderid_validate_happy()
         mocked_fetch_blenderid_user.return_value = {
             'email': TEST_EMAIL_ADDRESS,
@@ -45,27 +40,25 @@ class RoleUpdatingTest(AbstractPillarTest):
                 'network_member': True
             }
         }
-        if bid_says_cloud_demo:
-            mocked_fetch_blenderid_user.return_value['roles']['cloud_demo'] = True
+        for role in bid_roles:
+            mocked_fetch_blenderid_user.return_value['roles'][role] = True
 
     @responses.activate
     @mock.patch('pillar.api.blender_id.fetch_blenderid_user')
     def test_store_api_role_grant_subscriber(self, mocked_fetch_blenderid_user):
         self._setup_testcase(mocked_fetch_blenderid_user,
-                             store_says_cloud_access=True,
-                             bid_says_cloud_demo=False)
+                             bid_roles={'cloud_subscriber', 'cloud_has_subscription'})
 
         self.get('/api/bcloud/update-subscription', auth_token='my-happy-token',
                  expected_status=204)
         user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
-        self.assertEqual(['subscriber'], user_info['roles'])
+        self.assertEqual({'subscriber', 'has_subscription'}, set(user_info['roles']))
 
     @responses.activate
     @mock.patch('pillar.api.blender_id.fetch_blenderid_user')
     def test_store_api_role_revoke_subscriber(self, mocked_fetch_blenderid_user):
         self._setup_testcase(mocked_fetch_blenderid_user,
-                             store_says_cloud_access=False,
-                             bid_says_cloud_demo=False)
+                             bid_roles={'conference_speaker'})
 
         # Make sure this user is currently known as a subcriber.
         self.create_user(roles={'subscriber'}, token='my-happy-token')
@@ -82,8 +75,7 @@ class RoleUpdatingTest(AbstractPillarTest):
     @mock.patch('pillar.api.blender_id.fetch_blenderid_user')
     def test_bid_api_grant_demo(self, mocked_fetch_blenderid_user):
         self._setup_testcase(mocked_fetch_blenderid_user,
-                             store_says_cloud_access=False,
-                             bid_says_cloud_demo=True)
+                             bid_roles={'cloud_demo'})
 
         self.get('/api/bcloud/update-subscription', auth_token='my-happy-token',
                  expected_status=204)
@@ -93,10 +85,9 @@ class RoleUpdatingTest(AbstractPillarTest):
 
     @responses.activate
     @mock.patch('pillar.api.blender_id.fetch_blenderid_user')
-    def test_bid_api_role_revoke_subscriber(self, mocked_fetch_blenderid_user):
+    def test_bid_api_role_revoke_demo(self, mocked_fetch_blenderid_user):
         self._setup_testcase(mocked_fetch_blenderid_user,
-                             store_says_cloud_access=False,
-                             bid_says_cloud_demo=False)
+                             bid_roles={'conference_speaker'})
 
         # Make sure this user is currently known as demo user.
         self.create_user(roles={'demo'}, token='my-happy-token')

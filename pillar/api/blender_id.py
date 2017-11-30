@@ -181,7 +181,8 @@ def fetch_blenderid_user() -> dict:
          "roles": {
            "admin": true,
            "bfct_trainer": false,
-           "cloud_single_member": true,
+           "cloud_has_subscription": true,
+           "cloud_subscriber": true,
            "conference_speaker": true,
            "network_member": true
          }
@@ -218,12 +219,13 @@ def fetch_blenderid_user() -> dict:
         log.warning('Error %i from BlenderID %s: %s', bid_resp.status_code, bid_url, bid_resp.text)
         return {}
 
-    if not bid_resp.json():
+    payload = bid_resp.json()
+    if not payload:
         log.warning('Empty data returned from BlenderID %s', bid_url)
         return {}
 
-    log.debug('BlenderID returned %s', bid_resp.json())
-    return bid_resp.json()
+    log.debug('BlenderID returned %s', payload)
+    return payload
 
 
 def setup_app(app, url_prefix):
