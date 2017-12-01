@@ -30,20 +30,21 @@ $(document).ready(function() {
     //    })
     //};
 
+    // what are we looking for?
+    what = $inputField.attr('what');
+
     // Input binding
     $inputField.on('keyup change', function() {
         var query = $inputField.val();
+
 	if(query === undefined) { return; }
+
         toggleIconEmptyInput(!query.trim());
-	search.setQuery(query);
+	// what could be like "/users"
+	search.setQuery(query, what);
         //setURLParams(search);
 	search.execute();
     }).focus();
-
-    // AlgoliaHelper events
-    //helper.on('change', function(state) {
-        //setURLParams(search);
-    //});
 
     search.on('results', function(content){
         renderStats(content);
@@ -53,8 +54,6 @@ $(document).ready(function() {
         bindSearchObjects();
         renderFirstHit($(hits).children('.search-hit:first'));
     });
-
-    //});
 
     /***************
      * SEARCH RENDERING
@@ -93,7 +92,6 @@ $(document).ready(function() {
 
     // Initial search
     initWithUrlParams();
-    //helper.search();
 
     function convertTimestamp(timestamp) {
         var d = new Date(timestamp * 1000), // Convert the passed timestamp to milliseconds
@@ -120,7 +118,6 @@ $(document).ready(function() {
     function renderHits(content) {
         var hitsHtml = '';
         for (var i = 0; i < content.hits.length; ++i) {
-            // console.log(content.hits[i]);
             var created = content.hits[i].created;
             if (created) {
                 content.hits[i].created = convertTimestamp(created);
@@ -161,7 +158,6 @@ $(document).ready(function() {
 			};
 		};
 
-		console.log('FACETS');
 		var facets =[];
 		var aggs = content.aggs;
 
@@ -264,7 +260,7 @@ $(document).ready(function() {
 
     $(document).on('click', '.toggleRefine', function() {
         search.toggleTerm($(this).data('facet'), $(this).data('value'));
-		search.execute();
+	search.execute();
         return false;
     });
 
