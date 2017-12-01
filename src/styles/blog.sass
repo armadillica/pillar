@@ -239,22 +239,18 @@
 			font:
 				family: $font-body
 				size: 1.8em
-			padding-bottom: 10px
-			padding-top: 20px
 
-		.item-info
-			color: $color-text-dark-secondary
-			font-size: 1em
+			padding: 10px 25px 10px
 
-			a
-				color: $color-text-dark-secondary
-				&:hover
-					color: $color-primary
+		ul.meta
+			+list-meta
+			font-size: .9em
+			padding: 15px 25px 5px
 
 		.item-content
 			+node-details-description
-			padding: 35px 25px
 			font-size: 1.3em
+			padding: 15px 25px 25px
 
 			+media-xs
 				padding:

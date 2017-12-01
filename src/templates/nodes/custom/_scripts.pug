@@ -1,17 +1,5 @@
 script(type="text/javascript").
 
-	/* Convert Markdown */
-	var convert_fields = '.node-details-description, .blog_index-item .item-content';
-	var convert = new Markdown.getSanitizingConverter();
-	Markdown.Extra.init(convert);
-	convert = convert.makeHtml;
-
-
-	/* Parse description/content fields to convert markdown */
-	$(convert_fields).each(function(i){
-		$(convert_fields).eq(i).html(convert($(convert_fields).eq(i).text()));
-	});
-
 	ProjectUtils.setProjectAttributes({isProject: false});
 
 	// Click anywhere in the page to hide the overlay

@@ -29,7 +29,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=1732017
 		| {% for post in posts %}
 		li.jstree-node
 			a.jstree-anchor.tree-item.post(
-				href="{{ url_for_node(node=post) }}")
+				href="{{ node.url }}")
 				.tree-item-thumbnail
 					| {% if post.picture %}
 					img(src="{{ post.picture.thumbnail('s', api=api) }}")

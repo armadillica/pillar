@@ -41,10 +41,6 @@ body.blog
 	width: 100%
 	left: 0
 
-#project-side-container.collapsed+#project_context-header
-	span#status-bar
-		left: $project-sidebar-width
-
 #project_context-header
 	span#status-bar
 		text-align: left
@@ -315,10 +311,6 @@ span#project-edit-title
 		size: 1.1em
 		weight: 400
 	white-space: nowrap
-
-.project_split.collapsed+#project_context-header
-	span#project-edit-title
-		left: 0
 
 
 /* Edit Asset buttons */
@@ -702,41 +694,6 @@ ul.project_nav-edit-list
 		min-height: 800px
 		border: none
 
-#project-side-container
-	&.collapsed
-		.project_nav-toggle-btn i:before
-			content: '\e827'
-
-		.project_split
-			background-color: $project-sidebar-background
-			cursor: e-resize
-			right: 0
-			left: 8px
-			width: 5px
-
-		#project_nav
-			width: 5px
-			+media-xs
-				width: initial
-
-			#project_nav-container
-				width: 5px
-				+media-xs
-					display: block
-					width: initial
-					position: relative
-
-			#project_nav-header,
-			#project_context-header,
-			#project_tree
-				display: none
-				visibility: hidden
-
-				+media-xs
-					display: block
-					visibility: visible
-					position: relative
-
 
 /* The actual navigation tree container */
 #project_tree
@@ -753,20 +710,6 @@ ul.project_nav-edit-list
 	&.edit
 		margin-top: 0
 
-/* Clickable bar between navtree and context view, to collapse tree */
-.project_split
-	float: right
-	position: absolute
-	width: 15px
-	margin-left: -8px
-	top: 0
-	right: -15px
-	bottom: 0
-	cursor: w-resize
-	user-select: none
-
-	+media-xs
-		display: none
 
 /* Node Context */
 =project-node-title

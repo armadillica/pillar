@@ -1,27 +1,31 @@
 //- ******************************************************* -//
 | {% macro render_blog_post(node) %}
 | {% if node.picture %}
-a.blog_index-header(href="{{ url_for_node(node=node) }}")
+a.blog_index-header(href="{{ node.url }}")
 	img(src="{{ node.picture.thumbnail('l', api=api) }}")
 | {% endif %}
 
 .blog_index-item
-	a.item-title(
-		href="{{ url_for_node(node=node) }}")
-		| {{node.name}}
+	ul.meta
+		| {% if node.project.name %}
+		li {{ node.project.name }}
+		| {% endif %}
 
-	.item-info.
-		#[span(title="{{node._created}}") {{node._created | pretty_date }}]
-		{% if node._created != node._updated %}
-		#[span(title="{{node._updated}}") (updated {{node._updated | pretty_date }})]
-		{% endif %}
-		{% if node.properties.category %}| {{node.properties.category}}{% endif %}
-		· {{node.user.full_name}}
-		· #[a(href="{{ url_for_node(node=node) }}#comments") comment]
-		{% if node.properties.status != 'published' %} | {{ node.properties.status}} {% endif %}
+		li.when
+			a(href="{{ node.url }}",
+				title="Updated {{ node._updated | pretty_date }}")
+				| {{ node._created | pretty_date }}
+
+		li
+			a(href="{{ node.url }}#comments")
+				| comment
+
+	a.item-title(
+		href="{{ node.url }}")
+		| {{ node.name }}
 
 	.item-content
-		| {{ node.properties.content }}
+		| {{ node.properties.content | markdown }}
 
 | {% endmacro %}
 
@@ -30,15 +34,15 @@ a.blog_index-header(href="{{ url_for_node(node=node) }}")
 .blog_index-item.list
 
 	| {% if node.picture %}
-	a.item-header(href="{{ url_for_node(node=node) }}")
+	a.item-header(href="{{ node.url }}")
 		img.image(src="{{ node.picture.thumbnail('s', api=api) }}")
 	| {% else %}
-	a.item-header.nothumb(href="{{ url_for_node(node=node) }}")
+	a.item-header.nothumb(href="{{ node.url }}")
 		i.pi-document-text
 	| {% endif %}
 
 	a.item-title(
-		href="{{ url_for_node(node=node) }}")
+		href="{{ node.url }}")
 		| {{node.name}}
 
 	.item-info.

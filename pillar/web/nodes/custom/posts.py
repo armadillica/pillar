@@ -59,6 +59,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
 
     for post in posts._items:
         post.picture = get_file(post.picture, api=api)
+        post.url = url_for_node(node=post)
 
     # Use the *_main_project.html template for the main blog
     is_main_project = project_id == current_app.config['MAIN_PROJECT_ID']
