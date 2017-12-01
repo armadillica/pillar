@@ -58,6 +58,8 @@ def do_update_subscription(local_user: UserClass, bid_user: dict):
      'full_name': 'मूंगफली मक्खन प्रेमी',
      'email': 'here@example.com',
      'roles': {'cloud_demo': True}}
+
+    The 'roles' key can also be an interable of role names instead of a dict.
     """
 
     from pillar.api import service
@@ -69,17 +71,25 @@ def do_update_subscription(local_user: UserClass, bid_user: dict):
     except KeyError:
         email = '-missing email-'
 
+    # Transform the BID roles from a dict to a set.
+    bidr = bid_user.get('roles', set())
+    if isinstance(bidr, dict):
+        bid_roles = {role
+                     for role, has_role in bid_user.get('roles', {}).items()
+                     if has_role}
+    else:
+        bid_roles = set(bidr)
+
     # Handle the role changes via the badger service functionality.
-    bid_roles = collections.defaultdict(bool, **bid_user.get('roles', {}))
     plr_roles = set(local_user.roles)
 
     grant_roles = set()
     revoke_roles = set()
     for bid_role, plr_role in ROLES_BID_TO_PILLAR.items():
-        if bid_roles[bid_role] and plr_role not in plr_roles:
+        if bid_role in bid_roles and plr_role not in plr_roles:
             grant_roles.add(plr_role)
             continue
-        if not bid_roles[bid_role] and plr_role in plr_roles:
+        if bid_role not in bid_roles and plr_role in plr_roles:
             revoke_roles.add(plr_role)
 
     user_id = local_user.user_id
