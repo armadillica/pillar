@@ -8,7 +8,9 @@ $(document).ready(function() {
     var $hits = $('#hits');
     var $stats = $('#stats');
     var $facets = $('#facets');
+	//var facets = [];
     var $pagination = $('#pagination');
+    var what = '';
 
     // Templates binding
     var hitTemplate = Hogan.compile($('#hit-template').text());
@@ -19,6 +21,7 @@ $(document).ready(function() {
 
     // something elasticy!
     var search = elasticSearcher;
+
    //    facets: $.map(FACET_CONFIG, function(facet) {
     //        return !facet.disjunctive ? facet.name : null;
     //    }),
@@ -137,17 +140,23 @@ $(document).ready(function() {
         // If no results
         if (content.hits.length === 0) {
             $facets.empty();
+		    facets =[];
             return;
         }
 
 		var storeValue = function (values, label){
 
+
 			return function(item){
+
+				let refined = search.isRefined(label, item.key);
+
 				values.push({
 					facet: label,
 					label: item.key,
 					value: item.key,
 					count: item.doc_count,
+					refined: refined,
 				});
 			};
 		};
@@ -163,6 +172,8 @@ $(document).ready(function() {
 			let buckets = aggs[label].buckets;
 
 			if (buckets.length === 0) { continue; }
+
+
 
 			buckets.forEach(storeValue(values, label));
 
@@ -252,7 +263,7 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '.toggleRefine', function() {
-        search.addTerm($(this).data('facet'), $(this).data('value'));
+        search.toggleTerm($(this).data('facet'), $(this).data('value'));
 		search.execute();
         return false;
     });
@@ -277,6 +288,7 @@ $(document).ready(function() {
     $('#facets').on("mouseenter mouseleave", ".button-checkbox", function(e) {
         $(this).parent().find('.facet_link').toggleClass("hover");
     });
+
     $('#facets').on("mouseenter mouseleave", ".facet_link", function(e) {
         $(this).parent().find('.button-checkbox button.btn').toggleClass("hover");
     });
@@ -330,7 +342,7 @@ $(document).ready(function() {
         }
         var query = decodeURIComponent(sURLVariables[0].split('=')[1]);
         $inputField.val(query);
-        search.setQuery(query);
+        search.setQuery(query, what);
 
         for (var i = 2; i < sURLVariables.length; i++) {
             var sParameterName = sURLVariables[i].split('=');
@@ -361,5 +373,9 @@ $(document).ready(function() {
         //}
         location.replace(urlParams);
     }
+
+    // do empty search to fill aggregations
+    search.setQuery('', what);
+    search.execute();
 
 });

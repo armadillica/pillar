@@ -14,7 +14,7 @@ var elasticSearcher = (function() {
 		page: 0,
 
 		setQuery: (function(q, _url){
-			console.log('setQuery!: ' + q);
+			console.log('setQuery!: ' + q + 'what :'+ _url);
 			deze.query=q;
 			if (_url !== undefined) {
 				deze.url=_url;
@@ -45,8 +45,19 @@ var elasticSearcher = (function() {
 			return deze.newhits.aggregations;
 		}),
 
-		addTerm: (function(term, value){
-			deze.terms[term] = value;
+		toggleTerm: (function(term, value){
+			if (deze.terms[term] !== undefined) {
+				delete deze.terms[term];
+			} else {
+				deze.terms[term] = value;
+			}
+		}),
+
+		isRefined: (function(term, value){
+			if (deze.terms[term] === value) {
+				return true;
+			}
+			return false;
 		}),
 
 		//get response from elastic and rebuild json
@@ -89,7 +100,8 @@ var elasticSearcher = (function() {
 		setCurrentPage: deze.setCurrentPage,
 		query: deze.query,
 		page: deze.page,
-		addTerm: deze.addTerm,
+		toggleTerm: deze.toggleTerm,
+		isRefined: deze.isRefined,
 	};
 
 })();

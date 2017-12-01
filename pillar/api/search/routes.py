@@ -1,22 +1,15 @@
-import json
 import logging
 
-from bson import ObjectId
-from flask import Blueprint, request, current_app, make_response, url_for
-from flask import Response
+from flask import Blueprint, request
 from werkzeug import exceptions as wz_exceptions
+from pillar.api.utils import authorization, jsonify
 
-from pillar.api.utils import authorization, jsonify, str2id
-from pillar.api.utils import mongo
-from pillar.api.utils.authorization import require_login, check_permissions
-from pillar.auth import current_user
-
+from . import queries
 
 log = logging.getLogger(__name__)
 
 blueprint_search = Blueprint('elksearch', __name__)
 
-from . import queries
 
 
 def _valid_search() -> str:
@@ -25,19 +18,23 @@ def _valid_search() -> str:
     """
 
     searchword = request.args.get('q', '')
-    if not searchword:
-        raise wz_exceptions.BadRequest('You are forgetting a "?q=whatareyoulookingfor"')
+    # if not searchword:
+    #    raise wz_exceptions.BadRequest(
+    #        'You are forgetting a "?q=whatareyoulookingfor"')
     return searchword
 
 
 def _term_filters() -> dict:
     """
-    Check if frontent want to filter stuff
+    Check if frontent wants to filter stuff
+    on specific fields AKA facets
     """
 
     terms = [
         'node_type', 'media',
-        'tags', 'is_free', 'projectname']
+        'tags', 'is_free', 'projectname',
+        'roles',
+    ]
 
     parsed_terms = {}
 
@@ -60,7 +57,8 @@ def search_user():
 
     searchword = _valid_search()
 
-    data = queries.do_user_search(searchword)
+    terms = _term_filters()
+    data = queries.do_user_search(searchword, terms)
 
     return jsonify(data)
 

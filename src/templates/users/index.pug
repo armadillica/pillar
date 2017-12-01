@@ -22,6 +22,7 @@ style.
 				type="text",
 				name="q",
 				id="q",
+				what="/user",
 				autocomplete="off",
 				spellcheck="false",
 				autocorrect="false",
@@ -92,14 +93,6 @@ script(type="text/template", id="stats-template")
 | {% endblock %}
 
 | {% block footer_scripts %}
-script().
-	var APPLICATION_ID = '{{config.ALGOLIA_USER}}';
-	var SEARCH_ONLY_API_KEY = '{{config.ALGOLIA_PUBLIC_KEY}}';
-	var INDEX_NAME = '{{config.ALGOLIA_INDEX_USERS}}';
-	var sortByCountDesc = null;
-	var FACET_CONFIG = [
-	{ name: 'roles', title: 'Roles', disjunctive: false, sortFunction: sortByCountDesc },
-	];
 
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/algoliasearch-3.19.0.min.js')}}")
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/algoliasearch.helper.min.js') }}")

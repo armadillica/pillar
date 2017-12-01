@@ -2,33 +2,57 @@ import logging
 import json
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
-from elasticsearch_dsl.connections import connections
 
 from pillar import current_app
 
-#elk_hosts = current_app.config['ELASTIC_SEARCH_HOSTS']
-#
-#connections.create_connection(
-#    hosts=elk_hosts,
-#    sniff_on_start=True,
-#    timeout=20)
-#
 client = Elasticsearch()
 
 log = logging.getLogger(__name__)
 
+node_agg_terms = ['node_type', 'media', 'tags', 'is_free']
+user_agg_terms = ['roles', ]
 
 
-def add_aggs_to_search(search):
+def add_aggs_to_search(search, agg_terms):
     """
+    Add facets / aggregations to the search result
     """
-
-    agg_terms = ['node_type', 'media', 'tags', 'is_free']
 
     for term in agg_terms:
         search.aggs.bucket(term, 'terms', field=term)
 
-    #search.aggs.bucket('project', 'terms', field='project.name')
+
+def make_must(terms):
+    """
+    Given some term parameters
+    we must match those
+    """
+
+    must = []
+
+    for field, value in terms.items():
+
+        print(field, value)
+
+        if value:
+            must.append({'match': {field: value}})
+
+    return must
+
+
+def nested_bool(should, terms):
+    """
+    """
+    must = []
+    must = make_must(terms)
+    bool_query = Q('bool', should=should)
+    must.append(bool_query)
+    bool_query = Q('bool', must=must)
+
+    search = Search(using=client)
+    search.query = bool_query
+
+    return search
 
 
 def do_search(query: str, terms: dict) -> dict:
@@ -46,16 +70,14 @@ def do_search(query: str, terms: dict) -> dict:
         Q('term', tags=query),
     ]
 
-    #must = []
+    if query:
+        search = nested_bool(should, terms)
+    else:
+        # do a match all for the aggregations
+        search = Search(using=client)
+        search.query = Q('term', _type='node')
 
-    #for field, value in terms.items():
-    #    must.append(
-
-    bool_query = Q('bool', should=should)
-    search = Search(using=client)
-    search.query = bool_query
-
-    add_aggs_to_search(search)
+    add_aggs_to_search(search, node_agg_terms)
 
     if current_app.config['DEBUG']:
         print(json.dumps(search.to_dict(), indent=4))
@@ -68,7 +90,7 @@ def do_search(query: str, terms: dict) -> dict:
     return response.to_dict()
 
 
-def do_user_search(query: str) -> dict:
+def do_user_search(query: str, terms: dict) -> dict:
     """
     return user objects
     """
@@ -76,17 +98,23 @@ def do_user_search(query: str) -> dict:
         Q('match', username=query),
         Q('match', full_name=query),
     ]
-    bool_query = Q('bool', should=should)
-    search = Search(using=client)
-    search.query = bool_query
+
+    if query:
+        search = nested_bool(should, terms)
+    else:
+        # do a match all for the aggregations
+        search = Search(using=client)
+        search.query = Q('term', _type='user')
+
+    add_aggs_to_search(search, user_agg_terms)
 
     if current_app.config['DEBUG']:
-        log.debug(json.dumps(search.to_dict(), indent=4))
+        print(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()
 
     if current_app.config['DEBUG']:
-        log.debug('%s', json.dumps(response.to_dict(), indent=4))
+        print(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()
 

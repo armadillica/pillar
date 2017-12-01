@@ -6,8 +6,8 @@
         this.autocomplete({hint: false}, [
             {
                 source: elasticSearch($, '/user'),
-	        displayKey: 'full_name',
-		async: true,
+	  	        displayKey: 'full_name',
+				async: true,
                 minLength: 1,
                 limit: 10,
                 templates: {
