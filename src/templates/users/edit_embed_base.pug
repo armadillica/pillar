@@ -72,7 +72,7 @@
 				| none
 			| {% endif %}
 
-		a#button-cancel.btn.btn-default(href="#", data-user-id='{{user.user_id}}') Cancel
+		a.btn.btn-default(href="javascript:$('#user-edit-container').html('')") Cancel
 
 		input#submit_edit_user.btn.btn-default(
 			data-user-id="{{user.user_id}}",
@@ -99,10 +99,6 @@ script(type="text/javascript").
 			$('#user-edit-notification').addClass('fail').html('Houston!');
 		});
 		//- $("#user-edit-form").submit();
-	});
-
-	$('#button-cancel').click(function(e){
-		$('#user-container').html('')
 	});
 
 	new Clipboard('.copy-to-clipboard');
