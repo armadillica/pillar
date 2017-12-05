@@ -99,8 +99,9 @@ FULL_FILE_ACCESS_ROLES = {'admin', 'subscriber', 'demo'}
 BLENDER_ID_CLIENT_ID = 'SPECIAL-SNOWFLAKE-57'
 BLENDER_ID_SUBCLIENT_ID = 'PILLAR'
 
-# Blender ID user info API endpoint URL and auth token, only used for
-# reconciling subscribers. The token requires the 'userinfo' scope.
+# Blender ID user info API endpoint URL and auth token, used for
+# reconciling subscribers and updating their info from /u/.
+# The token requires the 'userinfo' scope.
 BLENDER_ID_USER_INFO_API = 'http://blender-id:8000/api/user/'
 BLENDER_ID_USER_INFO_TOKEN = '-set-in-config-local-'
 
