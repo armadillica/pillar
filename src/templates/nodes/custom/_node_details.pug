@@ -74,6 +74,15 @@
 						| Download
 			| {% endif %}
 
+		| {% elif current_user.has_cap('can-renew-subscription') %}
+		li.download
+			a.btn.btn-success(
+				title="Renew your subscription to download",
+				target="_blank",
+				href="/renew")
+				i.pi-heart
+				| Renew subscription to download
+
 		| {% elif current_user.is_authenticated %}
 		li.download
 			a.btn(
