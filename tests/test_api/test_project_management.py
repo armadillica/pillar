@@ -95,7 +95,7 @@ class ProjectCreationTest(AbstractProjectTest):
     def test_project_creation_access_admin(self):
         """Admin-created projects should be public"""
 
-        proj = self._create_user_and_project(roles={'admin'})
+        proj = self._create_user_and_project(roles={'admin', 'demo'})
         self.assertEqual(['GET'], proj['permissions']['world'])
 
     def test_project_creation_access_subscriber(self):
@@ -311,13 +311,14 @@ class ProjectEditTest(AbstractProjectTest):
 
     def test_delete_by_admin(self):
         # Create public test project.
-        project_info = self._create_user_and_project(['admin'])
+        project_info = self._create_user_and_project(['admin', 'demo'])
         project_id = project_info['_id']
         project_url = '/api/projects/%s' % project_id
 
         # Create admin user that doesn't own the project, to check that
         # non-owner admins can delete projects too.
-        self._create_user_with_token(['admin'], 'admin-token', user_id='cafef00dbeefcafef00dbeef')
+        self._create_user_with_token(['admin'], 'admin-token',
+                                     user_id='cafef00dbeefcafef00dbeef')
 
         # Admin user should be able to DELETE.
         resp = self.client.delete(project_url,
