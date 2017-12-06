@@ -75,7 +75,7 @@ class PillarServer(Eve):
         # The default roles Pillar uses. Will probably all move to extensions at some point.
         self._user_roles: typing.Set[str] = {
             'demo', 'admin', 'subscriber', 'homeproject',
-            'protected',
+            'protected', 'org-subscriber',
             'service', 'badger', 'svner', 'urler',
         }
         self._user_roles_indexable: typing.Set[str] = {'demo', 'admin', 'subscriber'}
