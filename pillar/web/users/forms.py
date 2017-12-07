@@ -46,7 +46,7 @@ class UserProfileForm(Form):
                 api=api)
 
             if username:
-                self.username.errors.append('Sorry, username already exists!')
+                self.username.errors.append('Sorry, this username is already taken.')
                 return False
 
         self.user = user
