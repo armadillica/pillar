@@ -42,7 +42,7 @@ class UserProfileForm(Form):
         user = User.find(current_user.objectid, api=api)
         if user.username != self.username.data:
             username = User.find_first(
-                {'where': '{"username": "%s"}' % self.username.data},
+                {'where': {"username": self.username.data}},
                 api=api)
 
             if username:
