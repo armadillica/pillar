@@ -26,7 +26,7 @@ from flask import url_for, helpers
 from pillar.api import utils
 from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket, \
     GoogleCloudStorageBlob
-from pillar.api.utils import remove_private_keys, authentication
+from pillar.api.utils import remove_private_keys
 from pillar.api.utils.authorization import require_login, user_has_role, \
     user_matches_roles
 from pillar.api.utils.cdn import hash_file_path
@@ -291,8 +291,8 @@ def process_file(bucket: Bucket,
     # TODO: overrule the content type based on file extention & magic numbers.
     mime_category, src_file['format'] = src_file['content_type'].split('/', 1)
 
-    # Prevent video handling for non-admins.
-    if not user_has_role('admin') and mime_category == 'video':
+    # Only allow video encoding when the user has the correct capability.
+    if not current_user.has_cap('encode-video') and mime_category == 'video':
         if src_file['format'].startswith('x-'):
             xified = src_file['format']
         else:
@@ -300,7 +300,7 @@ def process_file(bucket: Bucket,
 
         src_file['content_type'] = 'application/%s' % xified
         mime_category = 'application'
-        log.info('Not processing video file %s for non-admin user', file_id)
+        log.info('Not processing video file %s for non-video-encoding user', file_id)
 
     # Run the required processor, based on the MIME category.
     processors: typing.Mapping[str, typing.Callable] = {

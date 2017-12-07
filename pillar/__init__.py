@@ -86,7 +86,7 @@ class PillarServer(BlinkerCompatibleEve):
         # The default roles Pillar uses. Will probably all move to extensions at some point.
         self._user_roles: typing.Set[str] = {
             'demo', 'admin', 'subscriber', 'homeproject',
-            'protected', 'org-subscriber',
+            'protected', 'org-subscriber', 'video-encoder',
             'service', 'badger', 'svner', 'urler',
         }
         self._user_roles_indexable: typing.Set[str] = {'demo', 'admin', 'subscriber'}

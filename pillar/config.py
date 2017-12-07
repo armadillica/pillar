@@ -205,8 +205,9 @@ CELERY_BEAT_SCHEDULE = {
 USER_CAPABILITIES = defaultdict(**{
     'subscriber': {'subscriber', 'home-project'},
     'demo': {'subscriber', 'home-project'},
-    'admin': {'video-encoding', 'admin',
+    'admin': {'encode-video', 'admin',
               'view-pending-nodes', 'edit-project-node-types', 'create-organization'},
+    'video-encoder': {'encode-video'},
     'org-subscriber': {'subscriber', 'home-project'},
 }, default_factory=frozenset)
 
