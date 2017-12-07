@@ -31,10 +31,10 @@ class UserProfileForm(Form):
         r'^[\w.@+-]+$', message="Please do not use spaces")])
 
     def __init__(self, csrf_enabled=False, *args, **kwargs):
-        super(UserProfileForm, self).__init__(csrf_enabled=False, *args, **kwargs)
+        super().__init__(csrf_enabled=csrf_enabled, *args, **kwargs)
 
     def validate(self):
-        rv = Form.validate(self)
+        rv = super().validate()
         if not rv:
             return False
 
