@@ -65,8 +65,13 @@ GOOGLE_SITE_VERIFICATION = ''
 
 ADMIN_USER_GROUP = '5596e975ea893b269af85c0e'
 SUBSCRIBER_USER_GROUP = '5596e975ea893b269af85c0f'
-BUGSNAG_API_KEY = ''
-BUGSNAG_RELEASE_STAGE = 'development'
+
+SENTRY_CONFIG = {
+    'dsn': '-set-in-config-local-',
+    # 'release': raven.fetch_git_sha(os.path.dirname(__file__)),
+}
+# See https://docs.sentry.io/clients/python/integrations/flask/#settings
+SENTRY_USER_ATTRS = ['username', 'full_name', 'email', 'objectid']
 
 ALGOLIA_USER = '-SECRET-'
 ALGOLIA_API_KEY = '-SECRET-'
