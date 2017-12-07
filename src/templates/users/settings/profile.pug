@@ -12,21 +12,21 @@
 					form#settings-form(method='POST', action="{{url_for('settings.profile')}}")
 						.left
 							.form-group
-								| {{ form.full_name.label }}
-								| {{ form.full_name(size=20, class='form-control') }}
-								| {% if form.full_name.errors %}
-								| {% for error in form.full_name.errors %}{{ error|e }}{% endfor %}
-								| {% endif %}
-
-							.form-group
 								| {{ form.username.label }}
 								| {{ form.username(size=20, class='form-control') }}
 								| {% if form.username.errors %}
 								| {% for error in form.username.errors %}{{ error|e }}{% endfor %}
 								| {% endif %}
 
-							.form-group.settings-password
-								| {{ _("Change your password at") }} #[a(href="https://blender.org/id/change") Blender ID]
+							.form-group
+								label {{ _("Full name") }}
+								p {{ current_user.full_name }}
+							.form-group
+								label {{ _("E-mail") }}
+								p {{ current_user.email }}
+
+							.form-group
+								| {{ _("Change your full name, email, and password at") }} #[a(href="https://blender.org/id/",target='_blank') Blender ID].
 
 						.right
 							.settings-avatar
