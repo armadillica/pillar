@@ -21,7 +21,6 @@ from flask_babel import Babel, gettext as _
 from flask.templating import TemplateNotFound
 import pymongo.collection
 import pymongo.database
-from raven.contrib.flask import Sentry
 from werkzeug.local import LocalProxy
 
 
@@ -42,6 +41,7 @@ import pillar.web.jinja
 from . import api
 from . import web
 from . import auth
+from . import sentry_extra
 import pillar.api.organizations
 
 empty_settings = {
@@ -106,7 +106,7 @@ class PillarServer(BlinkerCompatibleEve):
         self._config_tempdirs()
         self._config_git()
 
-        self.sentry: typing.Optional[Sentry] = None
+        self.sentry: typing.Optional[sentry_extra.PillarSentry] = None
         self._config_sentry()
         self._config_google_cloud_storage()
 
@@ -207,8 +207,9 @@ class PillarServer(BlinkerCompatibleEve):
             self.sentry = None
             return
 
-        self.sentry = Sentry(self, logging=True, level=logging.WARNING,
-                             logging_exclusions=('werkzeug',))
+        self.sentry = sentry_extra.PillarSentry(
+            self, logging=True, level=logging.WARNING,
+            logging_exclusions=('werkzeug',))
 
         # bugsnag.before_notify(bugsnag_extra.add_pillar_request_to_notification)
         # got_request_exception.connect(self.__notify_bugsnag)
