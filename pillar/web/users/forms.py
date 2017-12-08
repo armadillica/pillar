@@ -24,17 +24,16 @@ class UserLoginForm(Form):
 
 
 class UserProfileForm(Form):
-    full_name = StringField('Full Name', validators=[DataRequired(), Length(
-        min=3, max=128, message="Min. 3 and max. 128 chars please")])
     username = StringField('Username', validators=[DataRequired(), Length(
         min=3, max=128, message="Min. 3, max. 128 chars please"), Regexp(
         r'^[\w.@+-]+$', message="Please do not use spaces")])
 
     def __init__(self, csrf_enabled=False, *args, **kwargs):
-        super(UserProfileForm, self).__init__(csrf_enabled=False, *args, **kwargs)
+        super().__init__(csrf_enabled=csrf_enabled, *args, **kwargs)
+        self.user = None
 
     def validate(self):
-        rv = Form.validate(self)
+        rv = super().validate()
         if not rv:
             return False
 
@@ -42,11 +41,11 @@ class UserProfileForm(Form):
         user = User.find(current_user.objectid, api=api)
         if user.username != self.username.data:
             username = User.find_first(
-                {'where': '{"username": "%s"}' % self.username.data},
+                {'where': {"username": self.username.data}},
                 api=api)
 
             if username:
-                self.username.errors.append('Sorry, username already exists!')
+                self.username.errors.append('Sorry, this username is already taken.')
                 return False
 
         self.user = user

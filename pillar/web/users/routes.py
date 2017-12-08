@@ -69,8 +69,7 @@ def oauth_callback(provider):
     pillar.auth.login_user(token['token'], load_from_db=True)
 
     if provider == 'blender-id' and current_user.is_authenticated:
-        # Check with the store for user roles. If the user has an active subscription, we apply
-        # the 'subscriber' role
+        # Check with Blender ID to update certain user roles.
         update_subscription()
 
     next_after_login = session.pop('next_after_login', None)

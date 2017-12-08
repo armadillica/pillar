@@ -168,6 +168,24 @@ def _compute_token_expiry(token_expires_string):
     return min(blid_expiry, our_expiry)
 
 
+def get_user_blenderid(db_user: dict) -> str:
+    """Returns the Blender ID user ID for this Pillar user.
+
+    Takes the string from 'auth.*.user_id' for the '*' where 'provider'
+    is 'blender-id'.
+
+    :returns the user ID, or the empty string when the user has none.
+    """
+
+    bid_user_ids = [auth['user_id']
+                    for auth in db_user['auth']
+                    if auth['provider'] == 'blender-id']
+    try:
+        return bid_user_ids[0]
+    except IndexError:
+        return ''
+
+
 def fetch_blenderid_user() -> dict:
     """Returns the user info of the currently logged in user from BlenderID.
 
@@ -181,7 +199,8 @@ def fetch_blenderid_user() -> dict:
          "roles": {
            "admin": true,
            "bfct_trainer": false,
-           "cloud_single_member": true,
+           "cloud_has_subscription": true,
+           "cloud_subscriber": true,
            "conference_speaker": true,
            "network_member": true
          }
@@ -218,12 +237,13 @@ def fetch_blenderid_user() -> dict:
         log.warning('Error %i from BlenderID %s: %s', bid_resp.status_code, bid_url, bid_resp.text)
         return {}
 
-    if not bid_resp.json():
+    payload = bid_resp.json()
+    if not payload:
         log.warning('Empty data returned from BlenderID %s', bid_url)
         return {}
 
-    log.debug('BlenderID returned %s', bid_resp.json())
-    return bid_resp.json()
+    log.debug('BlenderID returned %s', payload)
+    return payload
 
 
 def setup_app(app, url_prefix):

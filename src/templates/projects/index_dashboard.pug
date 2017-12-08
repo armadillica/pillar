@@ -40,12 +40,17 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 						| {% endif %}
 
 					| {% if current_user.has_cap('subscriber') %}
-					li.create(
+					li.create#project-create(
 						data-url="{{ url_for('projects.create') }}")
-						a.btn.btn-success#project-create(
+						a.btn.btn-success(
 							href="{{ url_for('projects.create') }}")
 							i.pi-plus
 							| Create Project
+					| {% elif current_user.has_cap('can-renew-subscription') %}
+					li.create
+						a.btn(href="/renew", target="_blank")
+							i.pi-heart
+							| Renew subscription to create a project
 					| {% endif %}
 
 			nav.nav-tabs__tab.active#own_projects
@@ -83,6 +88,13 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 						.projects__list-details
 							a.title(href="{{ url_for('projects.create') }}")
 								| Create a project to get started!
+					| {% elif current_user.has_cap('can-renew-subscription') %}
+					li.projects__list-item(data-url="https://store.blender.org/renew-my-subscription.php")
+						a.projects__list-thumbnail
+							i.pi-plus
+						.projects__list-details
+							a.title(href="https://store.blender.org/renew-my-subscription.php")
+								| Renew your Blender Cloud subscription to create your own projects!
 					| {% else %}
 					li.projects__list-item(data-url="/join")
 						a.projects__list-thumbnail
@@ -222,7 +234,7 @@ script.
 		});
 
 		// Create project
-		$nav_tabs_list.find('li.create').on('click', function(e){
+		$('#project-create').on('click', function(e){
 			e.preventDefault();
 
 			$(this).addClass('disabled');

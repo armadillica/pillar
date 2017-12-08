@@ -65,8 +65,13 @@ GOOGLE_SITE_VERIFICATION = ''
 
 ADMIN_USER_GROUP = '5596e975ea893b269af85c0e'
 SUBSCRIBER_USER_GROUP = '5596e975ea893b269af85c0f'
-BUGSNAG_API_KEY = ''
-BUGSNAG_RELEASE_STAGE = 'development'
+
+SENTRY_CONFIG = {
+    'dsn': '-set-in-config-local-',
+    # 'release': raven.fetch_git_sha(os.path.dirname(__file__)),
+}
+# See https://docs.sentry.io/clients/python/integrations/flask/#settings
+SENTRY_USER_ATTRS = ['username', 'full_name', 'email', 'objectid']
 
 ALGOLIA_USER = '-SECRET-'
 ALGOLIA_API_KEY = '-SECRET-'
@@ -105,6 +110,12 @@ FULL_FILE_ACCESS_ROLES = {'admin', 'subscriber', 'demo'}
 # Client and Subclient IDs for Blender ID
 BLENDER_ID_CLIENT_ID = 'SPECIAL-SNOWFLAKE-57'
 BLENDER_ID_SUBCLIENT_ID = 'PILLAR'
+
+# Blender ID user info API endpoint URL and auth token, used for
+# reconciling subscribers and updating their info from /u/.
+# The token requires the 'userinfo' scope.
+BLENDER_ID_USER_INFO_API = 'http://blender-id:8000/api/user/'
+BLENDER_ID_USER_INFO_TOKEN = '-set-in-config-local-'
 
 # Collection of supported OAuth providers (Blender ID, Facebook and Google).
 # Example entry:
@@ -180,9 +191,6 @@ URLER_SERVICE_AUTH_TOKEN = None
 # front-end.
 BLENDER_CLOUD_ADDON_VERSION = '1.4'
 
-EXTERNAL_SUBSCRIPTIONS_MANAGEMENT_SERVER = 'https://store.blender.org/api/'
-EXTERNAL_SUBSCRIPTIONS_TIMEOUT_SECS = 10
-
 # Certificate file for communication with other systems.
 TLS_CERT_FILE = requests.certs.where()
 
@@ -204,8 +212,9 @@ CELERY_BEAT_SCHEDULE = {
 USER_CAPABILITIES = defaultdict(**{
     'subscriber': {'subscriber', 'home-project'},
     'demo': {'subscriber', 'home-project'},
-    'admin': {'subscriber', 'home-project', 'video-encoding', 'admin',
+    'admin': {'encode-video', 'admin',
               'view-pending-nodes', 'edit-project-node-types', 'create-organization'},
+    'video-encoder': {'encode-video'},
     'org-subscriber': {'subscriber', 'home-project'},
 }, default_factory=frozenset)
 

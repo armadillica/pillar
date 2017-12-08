@@ -27,8 +27,14 @@
 					span
 						small Support Blender and get awesome stuff!
 					hr
-					a.subscribe(href="{{ url_for('cloud.join') }}") <em>Subscribe</em>
+					| {% if current_user.has_cap('can-renew-subscription') %}
+					a.subscribe(href="/renew") You have a subscription, it just needs to be renewed. <em>Renew your subscription now!</em>
+					| {% else %}
+					a.subscribe(href="{{ url_for('cloud.join') }}") <em>Subscribe to Blender Cloud.</em>
+					| {% endif %}
+					| {% if current_user.is_anonymous %}
 					a(href="{{ url_for('users.login') }}") Already a subscriber? Log in
+					| {% endif %}
 		| {% endif %}
 
 
