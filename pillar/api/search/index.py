@@ -69,16 +69,3 @@ class ResetNodeIndex(ResetIndexTask):
 class ResetUserIndex(ResetIndexTask):
     index_key = 'USER'
     doc_types = [documents.User]
-def reset_node_index():
-    resettask = ResetNodeIndex()
-    resettask.execute()
-
-
-def reset_index(indexnames):
-    if 'users' in indexnames:
-        resettask = ResetUserIndex()
-        resettask.execute()
-    if 'nodes' in indexnames:
-        resettask = ResetUserIndex()
-        resettask.execute()
-

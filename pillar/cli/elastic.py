@@ -5,17 +5,21 @@ import bson
 from flask_script import Manager
 
 from pillar import current_app
+from pillar.api.search import index
 
 log = logging.getLogger(__name__)
 
 manager_elk = Manager(
     current_app, usage="Elastic utilities, like reset_index()")
 
-indexes = ['users', 'nodes']
+name_to_task = {
+    'nodes': index.ResetNodeIndex,
+    'users': index.ResetUserIndex,
+}
 
 
-@manager_elk.command
-def reset_index(elk_index=None):
+@manager_elk.option('indices', nargs='*')
+def reset_index(indices):
     """
     Destroy and recreate elastic indices
 
@@ -23,16 +27,16 @@ def reset_index(elk_index=None):
     """
 
     with current_app.app_context():
-        from pillar.api.search import index
-        if not elk_index:
-            index.reset_index(indexes)
-            return
-        if elk_index == 'nodes':
-            index.reset_index(['node'])
-            return
-        if elk_index == 'users':
-            index.reset_index(['user'])
-            return
+        if not indices:
+            indices = name_to_task.keys()
+
+        for elk_index in indices:
+            try:
+                task = name_to_task[elk_index]()
+            except KeyError:
+                raise SystemError('Unknown elk_index, choose from %s' %
+                                  (', '.join(name_to_task.keys())))
+            task.execute()
 
 
 def _reindex_users():
@@ -71,7 +75,6 @@ def _public_project_ids() -> typing.List[bson.ObjectId]:
 
 
 def _reindex_nodes():
-
     db = current_app.db()
     pipeline = [
         {'$match': {'project': {'$in': _public_project_ids()}}},
@@ -95,16 +98,15 @@ def _reindex_nodes():
             continue
 
 
-@manager_elk.command
-def reindex(indexname):
-
+@manager_elk.option('indexname', nargs='?')
+def reindex(indexname=''):
     if not indexname:
-        log.debug('reindex everything..')
+        log.info('reindex everything..')
         _reindex_nodes()
         _reindex_users()
     elif indexname == 'users':
-        log.debug('Indexing %s', indexname)
+        log.info('Indexing %s', indexname)
         _reindex_users()
     elif indexname == 'nodes':
-        log.debug('Indexing %s', indexname)
+        log.info('Indexing %s', indexname)
         _reindex_nodes()
