@@ -69,19 +69,19 @@ def find_user_in_db(user_info: dict, provider='blender-id'):
 
     users = current_app.data.driver.db['users']
 
+    user_id = user_info['id']
     query = {'$or': [
         {'auth': {'$elemMatch': {
-            'user_id': str(user_info['id']),
+            'user_id': str(user_id),
             'provider': provider}}},
         {'email': user_info['email']},
-        ]}
+    ]}
     log.debug('Querying: %s', query)
     db_user = users.find_one(query)
 
     if db_user:
-        log.debug('User with {provider} id {user_id} already in our database, '
-                  'updating with info from {provider}.'.format(
-                   provider=provider, user_id=user_info['id']))
+        log.debug('User with %s id %s already in our database, updating with info from %s',
+                  provider, user_id, provider)
         db_user['email'] = user_info['email']
 
         # Find out if an auth entry for the current provider already exists
@@ -89,13 +89,13 @@ def find_user_in_db(user_info: dict, provider='blender-id'):
         if not provider_entry:
             db_user['auth'].append({
                 'provider': provider,
-                'user_id': str(user_info['id']),
+                'user_id': str(user_id),
                 'token': ''})
     else:
-        log.debug('User %r not yet in our database, create a new one.', user_info['id'])
+        log.debug('User %r not yet in our database, create a new one.', user_id)
         db_user = create_new_user_document(
             email=user_info['email'],
-            user_id=user_info['id'],
+            user_id=user_id,
             username=user_info['full_name'],
             provider=provider)
         db_user['username'] = make_unique_username(user_info['email'])
@@ -183,7 +183,6 @@ def validate_this_token(token, oauth_subclient=None):
 
 def remove_token(token: str):
     """Removes the token from the database."""
-
 
     tokens_coll = current_app.db('tokens')
     token_hashed = hash_auth_token(token)
