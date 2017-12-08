@@ -371,6 +371,10 @@ def upsert_user(db_user):
         raise wz_exceptions.InternalServerError(
             'Non-ObjectID string found in user.groups: %s' % db_user)
 
+    if not db_user['full_name']:
+        # Blender ID doesn't need a full name, but we do.
+        db_user['full_name'] = db_user['username']
+
     r = {}
     for retry in range(5):
         if '_id' in db_user:

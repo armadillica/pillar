@@ -717,6 +717,74 @@ class UserCreationTest(AbstractPillarTest):
             db_user = users_coll.find()[0]
             self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)
 
+    @responses.activate
+    def test_create_by_auth_no_full_name(self):
+        """Blender ID does not require full name, we do."""
+
+        with self.app.test_request_context():
+            users_coll = self.app.db().users
+            self.assertEqual(0, users_coll.count())
+
+        bid_resp = {'status': 'success',
+                    'user': {'email': TEST_EMAIL_ADDRESS,
+                             'full_name': '',
+                             'id': ctd.BLENDER_ID_TEST_USERID},
+                    'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
+
+        responses.add(responses.POST,
+                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      json=bid_resp,
+                      status=200)
+
+        token = 'this is my life now'
+        self.get('/api/users/me', auth_token=token)
+
+        with self.app.test_request_context():
+            users_coll = self.app.db().users
+            self.assertEqual(1, users_coll.count())
+
+            db_user = users_coll.find()[0]
+            self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)
+            self.assertNotEqual('', db_user['full_name'])
+
+    @responses.activate
+    def test_update_by_auth_no_full_name(self):
+        """Blender ID does not require full name, we do."""
+        self.enter_app_context()
+        users_coll = self.app.db().users
+        self.assertEqual(0, users_coll.count())
+
+        # First request will create the user, the 2nd request will update.
+        self.mock_blenderid_validate_happy()
+        bid_resp = {'status': 'success',
+                    'user': {'email': TEST_EMAIL_ADDRESS,
+                             'full_name': '',
+                             'id': ctd.BLENDER_ID_TEST_USERID},
+                    'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
+        responses.add(responses.POST,
+                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      json=bid_resp,
+                      status=200)
+
+        token = 'this is my life now'
+        self.get('/api/users/me', auth_token=token)
+
+        # Clear out the full name of the user. This could happen for some
+        # reason, and it shouldn't break the login flow.
+        users_coll.update_many({}, {'$set': {'full_name': ''}})
+
+        # Delete all tokens to force a re-check with Blender ID
+        tokens_coll = self.app.db('tokens')
+        tokens_coll.delete_many({})
+
+        self.get('/api/users/me', auth_token=token)
+
+        self.assertEqual(1, users_coll.count())
+
+        db_user = users_coll.find()[0]
+        self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)
+        self.assertNotEqual('', db_user['full_name'])
+
     def test_user_without_email_address(self):
         """Regular users should always have an email address.
         
