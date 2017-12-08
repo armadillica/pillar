@@ -159,7 +159,7 @@ def do_update_subscription(local_user: auth.UserClass, bid_user: dict):
 
     # Re-index the user in the search database.
     from pillar.api.users import hooks
-    hooks.push_updated_user_to_algolia({'_id': user_id}, {})
+    hooks.push_updated_user_to_search({'_id': user_id}, {})
 
 
 def setup_app(app, url_prefix):
