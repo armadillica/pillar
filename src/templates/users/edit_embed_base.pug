@@ -72,7 +72,8 @@
 				| none
 			| {% endif %}
 
-		a#button-cancel.btn.btn-default(href="#", data-user-id='{{user.user_id}}') Cancel
+		a.btn.btn-default(href="javascript:update_from_bid()") Update from Blender ID
+		a.btn.btn-default(href="javascript:$('#user-edit-container').html('')") Cancel
 
 		input#submit_edit_user.btn.btn-default(
 			data-user-id="{{user.user_id}}",
@@ -101,10 +102,18 @@ script(type="text/javascript").
 		//- $("#user-edit-form").submit();
 	});
 
-	$('#button-cancel').click(function(e){
-		$('#user-container').html('')
-	});
-
 	new Clipboard('.copy-to-clipboard');
+
+	function update_from_bid() {
+		var url = '{{ url_for("blender_cloud.subscription.update_subscription_for", user_id=user.user_id) }}';
+		$.post(url)
+		.done(function(data) {
+			toastr.info('User updated from Blender ID');
+			displayUser('{{ user.user_id }}');
+		})
+		.fail(function(data) {
+			toastr.error(data.responseText);
+		});
+	}
 
 | {% endblock %}

@@ -40,6 +40,11 @@ li(class="dropdown")
 				title="View subscription info")
 				i.pi-heart-filled
 				span You have a free account.
+			| {% elif current_user.has_cap('can-renew-subscription') %}
+			a.navbar-item(target='_blank', href="/renew", title="Renew subscription")
+				i.pi-heart
+				span.info Your subscription is not active.
+					span.renew Click here to renew.
 			| {% else %}
 			a.navbar-item(
 				href="https://store.blender.org/product/membership/"

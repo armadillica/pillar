@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 CAPABILITIES = collections.defaultdict(**{
     'subscriber': {'subscriber', 'home-project'},
     'demo': {'subscriber', 'home-project'},
-    'admin': {'subscriber', 'home-project', 'video-encoding', 'admin',
+    'admin': {'video-encoding', 'admin',
               'view-pending-nodes', 'edit-project-node-types'},
 }, default_factory=frozenset)
 

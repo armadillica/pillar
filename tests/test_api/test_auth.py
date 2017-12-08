@@ -677,7 +677,7 @@ class RequireRolesTest(AbstractPillarTest):
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
-            self.login_api_as(ObjectId(24 * 'a'), ['admin'])
+            self.login_api_as(ObjectId(24 * 'a'), ['demo'])
             call_me()
         self.assertTrue(called[0])
 

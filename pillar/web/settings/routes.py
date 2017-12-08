@@ -23,13 +23,10 @@ def profile():
     api = system_util.pillar_api()
     user = User.find(current_user.objectid, api=api)
 
-    form = forms.UserProfileForm(
-        full_name=user.full_name,
-        username=user.username)
+    form = forms.UserProfileForm(username=user.username)
 
     if form.validate_on_submit():
         try:
-            user.full_name = form.full_name.data
             user.username = form.username.data
             user.update(api=api)
             flash("Profile updated", 'success')

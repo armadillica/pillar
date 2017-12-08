@@ -21,6 +21,7 @@ from flask_babel import Babel, gettext as _
 from flask.templating import TemplateNotFound
 import pymongo.collection
 import pymongo.database
+from raven.contrib.flask import Sentry
 from werkzeug.local import LocalProxy
 
 
@@ -59,7 +60,17 @@ class ConfigurationMissingError(SystemExit):
     """
 
 
-class PillarServer(Eve):
+class BlinkerCompatibleEve(Eve):
+    """Workaround for https://github.com/pyeve/eve/issues/1087"""
+
+    def __getattr__(self, name):
+        if name in {"im_self", "im_func"}:
+            raise AttributeError("type object '%s' has no attribute '%s'" %
+                                 (self.__class__.__name__, name))
+        return super().__getattr__(name)
+
+
+class PillarServer(BlinkerCompatibleEve):
     def __init__(self, app_root, **kwargs):
         from .extension import PillarExtension
         from celery import Celery
@@ -75,7 +86,7 @@ class PillarServer(Eve):
         # The default roles Pillar uses. Will probably all move to extensions at some point.
         self._user_roles: typing.Set[str] = {
             'demo', 'admin', 'subscriber', 'homeproject',
-            'protected',
+            'protected', 'org-subscriber', 'video-encoder',
             'service', 'badger', 'svner', 'urler',
         }
         self._user_roles_indexable: typing.Set[str] = {'demo', 'admin', 'subscriber'}
@@ -94,7 +105,9 @@ class PillarServer(Eve):
         self._config_auth_token_hmac_key()
         self._config_tempdirs()
         self._config_git()
-        self._config_bugsnag()
+
+        self.sentry: typing.Optional[Sentry] = None
+        self._config_sentry()
         self._config_google_cloud_storage()
 
         self.algolia_index_users = None
@@ -187,39 +200,19 @@ class PillarServer(Eve):
             self.config['GIT_REVISION'] = 'unknown'
         self.log.info('Git revision %r', self.config['GIT_REVISION'])
 
-    def _config_bugsnag(self):
-        bugsnag_api_key = self.config.get('BUGSNAG_API_KEY')
-        if self.config.get('TESTING') or not bugsnag_api_key:
-            self.log.info('Bugsnag NOT configured.')
+    def _config_sentry(self):
+        sentry_dsn = self.config.get('SENTRY_CONFIG', {}).get('dsn')
+        if self.config.get('TESTING') or sentry_dsn in {'', '-set-in-config-local-'}:
+            self.log.warning('Sentry NOT configured.')
+            self.sentry = None
             return
 
-        import bugsnag
-        from bugsnag.handlers import BugsnagHandler
+        self.sentry = Sentry(self, logging=True, level=logging.WARNING,
+                             logging_exclusions=('werkzeug',))
 
-        release_stage = self.config.get('BUGSNAG_RELEASE_STAGE', 'unconfigured')
-        if self.config.get('DEBUG'):
-            release_stage += '-debug'
-
-        bugsnag.configure(
-            api_key=bugsnag_api_key,
-            project_root="/data/git/pillar/pillar",
-            release_stage=release_stage
-        )
-
-        bs_handler = BugsnagHandler()
-        bs_handler.setLevel(logging.ERROR)
-        self.log.addHandler(bs_handler)
-
-        # This is what bugsnag.flask.handle_exceptions also tries to do,
-        # but it passes the app to the connect() call, which causes an
-        # error. Since we only have one app, we can do without.
-        from flask import got_request_exception
-        from . import bugsnag_extra
-
-        bugsnag.before_notify(bugsnag_extra.add_pillar_request_to_notification)
-        got_request_exception.connect(self.__notify_bugsnag)
-
-        self.log.info('Bugsnag setup complete')
+        # bugsnag.before_notify(bugsnag_extra.add_pillar_request_to_notification)
+        # got_request_exception.connect(self.__notify_bugsnag)
+        self.log.info('Sentry setup complete')
 
     def __notify_bugsnag(self, sender, exception, **extra):
         import bugsnag
