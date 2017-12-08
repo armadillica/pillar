@@ -22,17 +22,13 @@ def add_aggs_to_search(search, agg_terms):
         search.aggs.bucket(term, 'terms', field=term)
 
 
-def make_must(terms):
+def make_must(must: list, terms: dict) -> list:
     """
     Given some term parameters
     we must match those
     """
 
-    must = []
-
     for field, value in terms.items():
-
-        print(field, value)
 
         if value:
             must.append({'match': {field: value}})
@@ -40,11 +36,12 @@ def make_must(terms):
     return must
 
 
-def nested_bool(should, terms):
+def nested_bool(must: list, should: list, terms: dict) -> Search:
     """
+    Create a nested bool, where the aggregation
+    selection is a must
     """
-    must = []
-    must = make_must(terms)
+    must = make_must(must, terms)
     bool_query = Q('bool', should=should)
     must.append(bool_query)
     bool_query = Q('bool', must=must)
@@ -70,13 +67,14 @@ def do_search(query: str, terms: dict) -> dict:
         Q('term', tags=query),
     ]
 
-    if query:
-        search = nested_bool(should, terms)
-    else:
-        # do a match all for the aggregations
-        search = Search(using=client)
-        search.query = Q('term', _type='node')
+    must = [
+        Q('term', _type='node')
+    ]
 
+    if not query:
+        should = []
+
+    search = nested_bool(must, should, terms)
     add_aggs_to_search(search, node_agg_terms)
 
     if current_app.config['DEBUG']:
@@ -99,13 +97,18 @@ def do_user_search(query: str, terms: dict) -> dict:
         Q('match', full_name=query),
     ]
 
-    if query:
-        search = nested_bool(should, terms)
-    else:
-        # do a match all for the aggregations
-        search = Search(using=client)
-        search.query = Q('term', _type='user')
+    must = [
+        Q('term', _type='user')
+    ]
 
+    # We got an id field. we MUST find it.
+    if len(query) == len('563aca02c379cf0005e8e17d'):
+        must.append(Q('term', _id=query))
+
+    if not query:
+        should = []
+
+    search = nested_bool(must, should, terms)
     add_aggs_to_search(search, user_agg_terms)
 
     if current_app.config['DEBUG']:

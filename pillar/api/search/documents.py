@@ -115,7 +115,11 @@ def create_doc_from_user_data(user_to_index):
 def create_doc_from_node_data(node_to_index):
 
     # node stuff
-    doc_id = str(node_to_index['objectID'])
+    doc_id = str(node_to_index.get('objectID', ''))
+
+    if not doc_id:
+        log.error('ID missing %s', node_to_index)
+        return
 
     doc = Node(_id=doc_id)
 

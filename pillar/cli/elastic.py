@@ -48,12 +48,35 @@ def _reindex_users():
         if not to_index:
             log.debug('missing user..')
             continue
-        elastic_indexing.push_updated_user(to_index)
+
+        try:
+            elastic_indexing.push_updated_user(to_index)
+        except(KeyError, AttributeError):
+            log.exception('Field is missing for %s', user)
+            continue
+
+
+# stolen from api.latest.
+def _public_project_ids() -> typing.List[bson.ObjectId]:
+    """Returns a list of ObjectIDs of public projects.
+
+    Memoized in setup_app().
+    """
+
+    proj_coll = current_app.db('projects')
+    result = proj_coll.find({'is_private': False}, {'_id': 1})
+    return [p['_id'] for p in result]
 
 
 def _reindex_nodes():
+
     db = current_app.db()
+    pipeline = [
+        {'$match': {'project': {'$in': _public_project_ids()}}},
+    ]
+    private_filter = {'project': {'$in': _public_project_ids()}}
     nodes_coll = db['nodes']
+    nodes_coll = nodes_coll.find(private_filter)
     node_count = nodes_coll.count()
 
     log.debug('Reindexing %d in Elastic', node_count)
@@ -61,20 +84,25 @@ def _reindex_nodes():
     from pillar.celery.search_index_tasks import prepare_node_data
     from pillar.api.search import elastic_indexing
 
-    for node in nodes_coll.find():
-        to_index = prepare_node_data('', node=node)
-        elastic_indexing.index_node_save(to_index)
+    for node in nodes_coll:
+        try:
+            to_index = prepare_node_data('', node=node)
+            elastic_indexing.index_node_save(to_index)
+        except(KeyError, AttributeError):
+            log.exception('Field is missing for %s', node)
+            continue
 
 
 @manager_elk.command
-def reindex(indexname=None):
+def reindex(indexname):
 
     if not indexname:
         log.debug('reindex everything..')
         _reindex_nodes()
         _reindex_users()
-
     elif indexname == 'users':
+        log.debug('Indexing %s', indexname)
         _reindex_users()
     elif indexname == 'nodes':
+        log.debug('Indexing %s', indexname)
         _reindex_nodes()
