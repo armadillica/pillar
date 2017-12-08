@@ -118,9 +118,13 @@ def validate_token():
 
     from pillar.auth import AnonymousUser
 
+    auth_header = request.headers.get('Authorization') or ''
     if request.authorization:
         token = request.authorization.username
         oauth_subclient = request.authorization.password
+    elif auth_header.startswith('Bearer '):
+        token = auth_header[7:].strip()
+        oauth_subclient = ''
     else:
         # Check the session, the user might be logged in through Flask-Login.
         from pillar import auth
