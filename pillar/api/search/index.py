@@ -21,13 +21,15 @@ class ResetIndexTask(object):
     """
     Clear and build index / mapping
     """
-    index = ''
+    index_key = ''
+    """Key into the ELASTIC_INDICES dict in the app config."""
+
     doc_types = []
     name = 'remove index'
 
     def __init__(self):
 
-        if not self.index:
+        if not self.index_key:
             raise ValueError("No index specified")
 
         if not self.doc_types:
@@ -40,16 +42,16 @@ class ResetIndexTask(object):
         )
 
     def execute(self):
-
-        idx = es.Index(self.index)
+        index = current_app.config['ELASTIC_INDICES'][self.index_key]
+        idx = es.Index(index)
 
         try:
             idx.delete(ignore=404)
-            log.info("Deleted index %s", self.index)
+            log.info("Deleted index %s", index)
         except AttributeError:
-            log.warning("Could not delete index '%s', ignoring", self.index)
+            log.warning("Could not delete index '%s', ignoring", index)
         except NotFoundError:
-            log.warning("Could not delete index '%s', ignoring", self.index)
+            log.warning("Could not delete index '%s', ignoring", index)
 
         # create doc types
         for dt in self.doc_types:
@@ -60,25 +62,10 @@ class ResetIndexTask(object):
 
 
 class ResetNodeIndex(ResetIndexTask):
-    index = current_app.config['ELASTIC_INDICES']['NODE']
+    index_key = 'NODE'
     doc_types = [documents.Node]
 
 
 class ResetUserIndex(ResetIndexTask):
-    index = current_app.config['ELASTIC_INDICES']['USER']
+    index_key = 'USER'
     doc_types = [documents.User]
-
-
-def reset_node_index():
-    resettask = ResetNodeIndex()
-    resettask.execute()
-
-
-def reset_index(indexnames):
-    if 'users' in indexnames:
-        resettask = ResetUserIndex()
-        resettask.execute()
-    if 'nodes' in indexnames:
-        resettask = ResetUserIndex()
-        resettask.execute()
-
