@@ -56,4 +56,5 @@ def index_node_delete(delete_id: str):
         doc = documents.Node.get(id=delete_id)
         doc.delete()
     except NotFoundError:
+        # seems to be gone already..
         pass
