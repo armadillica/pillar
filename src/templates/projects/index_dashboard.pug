@@ -264,7 +264,7 @@ script.
 		$projects_list.find('span.user-remove-confirm').on('click', function(e){
 			e.stopPropagation();
 			e.preventDefault();
-			var parent = $(this).closest('projects__list-item');
+			var parent = $(this).closest('.projects__list-item');
 
 			function removeUser(userId, projectUrl){
 				$.post(projectUrl, {user_id: userId, action: 'remove'})
