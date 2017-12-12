@@ -28,7 +28,7 @@ SECRET_KEY = ''
 AUTH_TOKEN_HMAC_KEY = b''
 
 # Authentication settings
-BLENDER_ID_ENDPOINT = 'http://blender_id:8000/'
+BLENDER_ID_ENDPOINT = 'http://blender-id:8000/'
 
 PILLAR_SERVER_ENDPOINT = 'http://pillar:5001/api/'
 
@@ -116,7 +116,7 @@ BLENDER_ID_USER_INFO_TOKEN = '-set-in-config-local-'
 #    'blender-id': {
 #        'id': 'CLOUD-OF-SNOWFLAKES-43',
 #        'secret': 'thesecret',
-#        'base_url': 'http://blender_id:8000/'
+#        'base_url': 'http://blender-id:8000/'
 #     }
 # }
 # OAuth providers are defined in pillar.auth.oauth

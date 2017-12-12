@@ -24,7 +24,7 @@ OAUTH_CREDENTIALS = {
     'blender-id': {
         'id': 'blender-id-app-id',
         'secret': 'blender-id–secret',
-        'base_url': 'http://blender_id:8000/'
+        'base_url': 'http://blender-id:8000/'
     },
     'facebook': {
         'id': 'fb-app-id',
