@@ -85,8 +85,7 @@ def oauth_callback(provider):
 def login():
     if request.args.get('force'):
         log.debug('Forcing logout of user before rendering login page.')
-        logout_user()
-        session.clear()
+        pillar.auth.logout_user()
 
     session['next_after_login'] = request.args.get('next') or request.referrer
     return render_template('login.html')
