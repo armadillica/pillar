@@ -1,0 +1,66 @@
+| {% block menu_body %}
+| {% if current_user.is_authenticated %}
+
+li(class="dropdown")
+	| {% block menu_avatar %}
+	a.navbar-item.dropdown-toggle(href="#", data-toggle="dropdown", title="{{ current_user.email }}")
+		img.gravatar(
+		src="{{ current_user.gravatar }}",
+		alt="Avatar")
+	| {% endblock menu_avatar %}
+
+	ul.dropdown-menu
+		| {% if not current_user.has_role('protected') %}
+		| {% block menu_list %}
+		li
+			a.navbar-item(
+			href="{{ url_for('projects.home_project') }}"
+			title="Home")
+				i.pi-home
+				| Home
+
+		li
+			a.navbar-item(
+			href="{{ url_for('projects.index') }}"
+			title="My Projects")
+				i.pi-star
+				| My Projects
+
+		| {% if current_user.has_organizations() %}
+		li
+			a.navbar-item(
+			href="{{ url_for('pillar.web.organizations.index') }}"
+			title="My Organizations")
+				i.pi-users
+				| My Organizations
+		| {% endif %}
+
+		li
+			a.navbar-item(
+			href="{{ url_for('settings.profile') }}"
+			title="Settings")
+				i.pi-cog
+				| Settings
+
+		| {% endblock menu_list %}
+
+		li.divider(role="separator")
+		| {% endif %}
+
+		li
+			a.navbar-item(
+			href="{{ url_for('users.logout') }}")
+				i.pi-log-out(title="Log Out")
+				| Log out
+			a.navbar-item.subitem(
+			href="{{ url_for('users.switch') }}")
+				i.pi-blank
+				| Not {{ current_user.full_name }}?
+
+| {% else %}
+
+li.nav-item-sign-in
+	a.navbar-item(href="{{ url_for('users.login') }}")
+		| Log in
+| {% endif %}
+| {% endblock menu_body %}

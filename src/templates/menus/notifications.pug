@@ -1,0 +1,23 @@
+| {% if current_user.is_authenticated %}
+
+li.nav-notifications
+	a.navbar-item#notifications-toggle(
+	title="Notifications",
+	data-toggle="tooltip",
+	data-placement="bottom")
+		i.pi-notifications-none.nav-notifications-icon
+		span#notifications-count
+			span
+		.flyout-hat
+
+	#notifications.flyout.notifications
+		.flyout-content
+			span.flyout-title Notifications
+			a#notifications-markallread(
+			title="Mark All as Read",
+			href="/notifications/read-all")
+				| Mark All as Read
+
+			| {% include '_notifications.html' %}
+
+| {% endif %}
