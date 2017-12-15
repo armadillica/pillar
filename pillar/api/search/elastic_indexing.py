@@ -6,6 +6,7 @@ from elasticsearch.exceptions import NotFoundError
 from pillar import current_app
 from . import documents
 
+log = logging.getLogger(__name__)
 
 elk_hosts = current_app.config['ELASTIC_SEARCH_HOSTS']
 
@@ -14,13 +15,10 @@ connections.create_connection(
     sniff_on_start=True,
     timeout=20)
 
-log = logging.getLogger(__name__)
-
 
 def push_updated_user(user_to_index: dict):
     """
-    Push an update to the Elastic index when
-    a user item is updated.
+    Push an update to the Elastic index when a user item is updated.
     """
     if not user_to_index:
         return
@@ -30,11 +28,14 @@ def push_updated_user(user_to_index: dict):
     if not doc:
         return
 
-    log.debug('UPDATE USER %s', doc._id)
+    log.debug('index update user elasticsearch %s', doc._id)
     doc.save()
 
 
 def index_node_save(node_to_index: dict):
+    """
+    Push an update to the Elastic index when a node item is saved.
+    """
 
     if not node_to_index:
         return
@@ -44,13 +45,16 @@ def index_node_save(node_to_index: dict):
     if not doc:
         return
 
-    log.debug('CREATED ELK NODE DOC %s', doc._id)
+    log.debug('index created node elasticsearch %s', doc._id)
     doc.save()
 
 
 def index_node_delete(delete_id: str):
+    """
+    Delete node document from Elastic index useing a node id
+    """
 
-    log.debug('NODE DELETE INDEXING %s', delete_id)
+    log.debug('index node delete %s', delete_id)
 
     try:
         doc = documents.Node.get(id=delete_id)

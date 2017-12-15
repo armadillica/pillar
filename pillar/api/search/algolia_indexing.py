@@ -30,8 +30,9 @@ def index_node_save(node_to_index: dict):
 
 
 def index_node_delete(delete_id: str):
-
+    """ delete node using id"""
     from pillar.api.utils import algolia
+
     try:
         algolia.index_node_delete(delete_id)
     except AlgoliaException as ex:

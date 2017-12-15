@@ -1,10 +1,9 @@
 import logging
 from bson import ObjectId
+
 from pillar import current_app
 from pillar.api.file_storage import generate_link
-
 from pillar.api.search import elastic_indexing
-
 from pillar.api.search import algolia_indexing
 
 
@@ -21,10 +20,7 @@ SEARCH_BACKENDS = {
 
 
 def _get_node_from_id(node_id: str):
-    """
-    """
     node_oid = ObjectId(node_id)
-    log.info('Retrieving node %s', node_oid)
 
     nodes_coll = current_app.db('nodes')
     node = nodes_coll.find_one({'_id': node_oid})
@@ -56,15 +52,19 @@ def _handle_picture(node: dict, to_index: dict):
             is_public=True)
 
 
-def prepare_node_data(node_id: str, node=None) -> dict:
+def prepare_node_data(node_id: str, node: dict=None) -> dict:
     """
-    Given node build data object with fields to index
+    Given node by id or actual node build data object with fields to index
     """
+
+    if node_id and node:
+        raise ValueError("do not provide node and node_id together")
+
     if node_id:
         node = _get_node_from_id(node_id)
 
     if node is None:
-        log.warning('Unable to find node %s, not updating Algolia.', node_id)
+        log.warning('Unable to find node %s, not updating.', node_id)
         return
 
     if node['node_type'] not in INDEX_ALLOWED_NODE_TYPES:
@@ -95,8 +95,7 @@ def prepare_node_data(node_id: str, node=None) -> dict:
         },
     }
 
-    if 'description' in node and node['description']:
-        to_index['description'] = node['description']
+    to_index['description'] = node.get('description')
 
     _handle_picture(node, to_index)
 
@@ -140,7 +139,7 @@ def prepare_user_data(user_id: str, user=None) -> dict:
     # Strip unneeded roles
     index_roles = user_roles.intersection(current_app.user_roles_indexable)
 
-    log.debug('Pushed user %r to Search index', user['_id'])
+    log.debug('Push user %r to Search index', user['_id'])
 
     user_to_index = {
         'objectID': user['_id'],
@@ -181,7 +180,6 @@ def node_delete(node_id: str):
     # Deleting a node takes nothing more than the ID anyway.
     # No need to fetch anything from Mongo.
     delete_id = ObjectId(node_id)
-    algolia_indexing.index_node_delete(delete_id)
 
     for searchoption in current_app.config['SEARCH_BACKENDS']:
         searchmodule = SEARCH_BACKENDS[searchoption]

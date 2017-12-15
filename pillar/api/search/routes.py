@@ -11,37 +11,28 @@ log = logging.getLogger(__name__)
 blueprint_search = Blueprint('elksearch', __name__)
 
 
+terms = [
+    'node_type', 'media',
+    'tags', 'is_free', 'projectname',
+    'roles',
+]
+
 
 def _valid_search() -> str:
-    """
-    Returns search parameters, raising error when missing.
-    """
-
-    searchword = request.args.get('q', '')
-    # if not searchword:
-    #    raise wz_exceptions.BadRequest(
-    #        'You are forgetting a "?q=whatareyoulookingfor"')
-    return searchword
+    """ Returns search parameters """
+    query = request.args.get('q', '')
+    return query
 
 
 def _term_filters() -> dict:
     """
     Check if frontent wants to filter stuff
     on specific fields AKA facets
+
+    return mapping with term field name
+    and provided user term value
     """
-
-    terms = [
-        'node_type', 'media',
-        'tags', 'is_free', 'projectname',
-        'roles',
-    ]
-
-    parsed_terms = {}
-
-    for term in terms:
-        parsed_terms[term] = request.args.get(term, '')
-
-    return parsed_terms
+    return {term: request.args.get(term, '')  for term in terms}
 
 
 @blueprint_search.route('/')
@@ -54,12 +45,9 @@ def search_nodes():
 
 @blueprint_search.route('/user')
 def search_user():
-
     searchword = _valid_search()
-
     terms = _term_filters()
     data = queries.do_user_search(searchword, terms)
-
     return jsonify(data)
 
 

@@ -1,10 +1,5 @@
 import logging
-# import time
-
-# from elasticsearch import helpers
-# import elasticsearch
-
-# from elasticsearch.client import IndicesClient
+from typing import List
 
 from elasticsearch.exceptions import NotFoundError
 from elasticsearch_dsl.connections import connections
@@ -18,17 +13,14 @@ log = logging.getLogger(__name__)
 
 
 class ResetIndexTask(object):
-    """
-    Clear and build index / mapping
-    """
+    """ Clear and build index / mapping """
     index_key = ''
     """Key into the ELASTIC_INDICES dict in the app config."""
 
-    doc_types = []
+    doc_types: List[type]  = []
     name = 'remove index'
 
     def __init__(self):
-
         if not self.index_key:
             raise ValueError("No index specified")
 
@@ -48,9 +40,9 @@ class ResetIndexTask(object):
         try:
             idx.delete(ignore=404)
             log.info("Deleted index %s", index)
-        except AttributeError:
-            log.warning("Could not delete index '%s', ignoring", index)
         except NotFoundError:
+            log.warning("Could not delete index '%s', ignoring", index)
+        else:
             log.warning("Could not delete index '%s', ignoring", index)
 
         # create doc types

@@ -21,7 +21,6 @@ def index_user_save(to_index_user: dict):
 
 @skip_when_testing
 def index_node_save(node_to_index):
-
     if not current_app.algolia_index_nodes:
         return
     current_app.algolia_index_nodes.save_object(node_to_index)

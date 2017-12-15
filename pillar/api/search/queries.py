@@ -1,7 +1,7 @@
-import logging
 import json
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
+import logging
 
 from pillar import current_app
 
@@ -23,13 +23,9 @@ def add_aggs_to_search(search, agg_terms):
 
 
 def make_must(must: list, terms: dict) -> list:
-    """
-    Given some term parameters
-    we must match those
-    """
+    """ Given term parameters append must queries to the must list """
 
     for field, value in terms.items():
-
         if value:
             must.append({'match': {field: value}})
 
@@ -54,8 +50,10 @@ def nested_bool(must: list, should: list, terms: dict) -> Search:
 
 def do_search(query: str, terms: dict) -> dict:
     """
-    Given user input search for node/stuff
+    Given user query input and term refinements
+    search for public published nodes
     """
+
     should = [
         Q('match', name=query),
 
@@ -77,21 +75,19 @@ def do_search(query: str, terms: dict) -> dict:
     search = nested_bool(must, should, terms)
     add_aggs_to_search(search, node_agg_terms)
 
-    if current_app.config['DEBUG']:
+    if log.isEnabledFor(logging.DEBUG):
         print(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()
 
-    if current_app.config['DEBUG']:
+    if log.isEnabledFor(logging.DEBUG):
         print(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()
 
 
 def do_user_search(query: str, terms: dict) -> dict:
-    """
-    return user objects
-    """
+    """ return user objects represented in elasicsearch result dict"""
     should = [
         Q('match', username=query),
         Q('match', full_name=query),
@@ -101,7 +97,7 @@ def do_user_search(query: str, terms: dict) -> dict:
         Q('term', _type='user')
     ]
 
-    # We got an id field. we MUST find it.
+    # We most likely got and id field. we MUST find it.
     if len(query) == len('563aca02c379cf0005e8e17d'):
         must.append(Q('term', _id=query))
 
@@ -111,12 +107,12 @@ def do_user_search(query: str, terms: dict) -> dict:
     search = nested_bool(must, should, terms)
     add_aggs_to_search(search, user_agg_terms)
 
-    if current_app.config['DEBUG']:
+    if log.isEnabledFor(logging.DEBUG):
         print(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()
 
-    if current_app.config['DEBUG']:
+    if log.isEnabledFor(logging.DEBUG):
         print(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()
@@ -124,7 +120,8 @@ def do_user_search(query: str, terms: dict) -> dict:
 
 def do_user_search_admin(query: str) -> dict:
     """
-    return users with all fields and aggregations
+    return users seach result dict object
+    search all user fields and provide aggregation information
     """
     should = [
         Q('match', username=query),
@@ -135,12 +132,12 @@ def do_user_search_admin(query: str) -> dict:
     search = Search(using=client)
     search.query = bool_query
 
-    if current_app.config['DEBUG']:
+    if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()
 
-    if current_app.config['DEBUG']:
+    if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()

@@ -1,10 +1,20 @@
+"""
+Define elasticsearch document mapping.
+
+Elasticsearch consist of two parts.
+
+Part 1: Define the documents in which you
+define who fields will be indexed.
+Part 2: Building elasticsearch json queries.
+
+BOTH of these parts are equally importand to have
+a search API that returns relevant results.
+"""
 import logging
 
 import elasticsearch_dsl as es
 from elasticsearch_dsl import analysis
-# from pillar import current_app
 
-# define elasticsearch document mapping.
 
 
 log = logging.getLogger(__name__)
@@ -100,7 +110,14 @@ class Node(es.DocType):
         index = 'nodes'
 
 
-def create_doc_from_user_data(user_to_index):
+def create_doc_from_user_data(user_to_index: dict) -> User:
+    """
+    We are indexing a user object which identical between search backends
+
+    see celery.search_index_task.py
+
+    this functions returns a proper ElasticSearch document
+    """
 
     if not user_to_index:
         return
@@ -108,8 +125,8 @@ def create_doc_from_user_data(user_to_index):
     doc_id = str(user_to_index.get('objectID', ''))
 
     if not doc_id:
-        log.error('ID missing %s', user_to_index)
-        return
+        log.error('USER ID is missing %s', user_to_index)
+        raise KeyError
 
     doc = User(_id=doc_id)
     doc.objectID = str(user_to_index['objectID'])
@@ -121,7 +138,14 @@ def create_doc_from_user_data(user_to_index):
     return doc
 
 
-def create_doc_from_node_data(node_to_index):
+def create_doc_from_node_data(node_to_index: dict) -> Node:
+    """
+    We are indexing a Node object which identical between search backends
+
+    see celery.search_index_task.py
+
+    this functions returns a proper ElasticSearch document
+    """
 
     if not node_to_index:
         return
