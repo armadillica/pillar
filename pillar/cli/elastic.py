@@ -9,8 +9,8 @@ from pillar.api.search import index
 
 log = logging.getLogger(__name__)
 
-manager_elk = Manager(
-    current_app, usage="Elastic utilities, like reset_index()")
+manager_elastic = Manager(
+    current_app, usage="Elastic utilities")
 
 name_to_task = {
     'nodes': index.ResetNodeIndex,
@@ -18,12 +18,12 @@ name_to_task = {
 }
 
 
-@manager_elk.option('indices', nargs='*')
+@manager_elastic.option('indices', nargs='*')
 def reset_index(indices):
     """
     Destroy and recreate elastic indices
 
-    node, user ...
+    nodes, users
     """
 
     with current_app.app_context():
@@ -44,7 +44,7 @@ def _reindex_users():
     users_coll = db['users']
     user_count = users_coll.count()
 
-    log.debug('Reindexing %d in Elastic', user_count)
+    log.debug('Reindexing users %d in Elastic', user_count)
 
     from pillar.celery.search_index_tasks import prepare_user_data
     from pillar.api.search import elastic_indexing
@@ -62,7 +62,6 @@ def _reindex_users():
             continue
 
 
-# stolen from api.latest.
 def _public_project_ids() -> typing.List[bson.ObjectId]:
     """Returns a list of ObjectIDs of public projects.
 
@@ -76,15 +75,11 @@ def _public_project_ids() -> typing.List[bson.ObjectId]:
 
 def _reindex_nodes():
     db = current_app.db()
-    pipeline = [
-        {'$match': {'project': {'$in': _public_project_ids()}}},
-    ]
-    private_filter = {'project': {'$in': _public_project_ids()}}
     nodes_coll = db['nodes']
-    nodes_coll = nodes_coll.find(private_filter)
+    nodes_coll = nodes_coll.find({'project': {'$in': _public_project_ids()}})
     node_count = nodes_coll.count()
 
-    log.debug('Reindexing %d in Elastic', node_count)
+    log.debug('Reindexing nodes %d in Elastic', node_count)
 
     from pillar.celery.search_index_tasks import prepare_node_data
     from pillar.api.search import elastic_indexing
@@ -93,12 +88,12 @@ def _reindex_nodes():
         try:
             to_index = prepare_node_data('', node=node)
             elastic_indexing.index_node_save(to_index)
-        except(KeyError, AttributeError):
+        except (KeyError, AttributeError):
             log.exception('Field is missing for %s', node)
             continue
 
 
-@manager_elk.option('indexname', nargs='?')
+@manager_elastic.option('indexname', nargs='?')
 def reindex(indexname=''):
     if not indexname:
         log.info('reindex everything..')

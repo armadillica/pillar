@@ -17,7 +17,8 @@ class ResetIndexTask(object):
     index_key = ''
     """Key into the ELASTIC_INDICES dict in the app config."""
 
-    doc_types: List[type]  = []
+    # List of elastic document  types
+    doc_types = []
     name = 'remove index'
 
     def __init__(self):

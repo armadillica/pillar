@@ -78,10 +78,11 @@ ALGOLIA_API_KEY = '-SECRET-'
 ALGOLIA_INDEX_USERS = 'dev_Users'
 ALGOLIA_INDEX_NODES = 'dev_Nodes'
 
-SEARCH_BACKENDS = ['algolia', 'elastic']
+SEARCH_BACKENDS = ('algolia', 'elastic')    # search backend we use
 
-ELASTIC_SEARCH_HOSTS = ['elasticsearch']
+ELASTIC_SEARCH_HOSTS = ['elasticsearch']    # elasticsearch hosts
 ELASTIC_INDICES = {
+    # elasticsearch indexes
     'NODE': 'nodes',
     'USER': 'users',
 }

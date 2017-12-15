@@ -12,7 +12,7 @@ from pillar.cli.celery import manager_celery
 from pillar.cli.maintenance import manager_maintenance
 from pillar.cli.operations import manager_operations
 from pillar.cli.setup import manager_setup
-from pillar.cli.elastic import manager_elk
+from pillar.cli.elastic import manager_elastic
 
 from pillar.cli import translations
 
@@ -23,4 +23,4 @@ manager.add_command('celery', manager_celery)
 manager.add_command("maintenance", manager_maintenance)
 manager.add_command("setup", manager_setup)
 manager.add_command("operations", manager_operations)
-manager.add_command("elastic", manager_elk)
+manager.add_command("elastic", manager_elastic)

@@ -12,7 +12,7 @@ elk_hosts = current_app.config['ELASTIC_SEARCH_HOSTS']
 
 connections.create_connection(
     hosts=elk_hosts,
-    sniff_on_start=True,
+    sniff_on_start=False,
     timeout=20)
 
 
