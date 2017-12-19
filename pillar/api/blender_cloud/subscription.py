@@ -31,7 +31,7 @@ def update_subscription() -> typing.Tuple[str, int]:
     """
 
     my_log: logging.Logger = log.getChild('update_subscription')
-    current_user = auth.get_current_user()
+    real_current_user = auth.get_current_user()  # multiple accesses, just get unproxied.
 
     try:
         bid_user = blender_id.fetch_blenderid_user()
@@ -41,10 +41,10 @@ def update_subscription() -> typing.Tuple[str, int]:
 
     if not bid_user:
         my_log.warning('Logged in user %s has no BlenderID account! '
-                       'Unable to update subscription status.', current_user.user_id)
+                       'Unable to update subscription status.', real_current_user.user_id)
         return '', 204
 
-    do_update_subscription(current_user, bid_user)
+    do_update_subscription(real_current_user, bid_user)
     return '', 204
 
 
