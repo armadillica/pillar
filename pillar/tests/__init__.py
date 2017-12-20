@@ -251,7 +251,7 @@ class AbstractPillarTest(TestMinimal):
             return result.inserted_id
 
     def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',),
-                    groups=None, *, token: str = None, email: str = TEST_EMAIL_ADDRESS):
+                    groups=None, *, token: str = None, email: str = TEST_EMAIL_ADDRESS) -> ObjectId:
         from pillar.api.utils.authentication import make_unique_username
         import uuid
 
