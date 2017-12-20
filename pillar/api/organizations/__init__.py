@@ -376,6 +376,13 @@ class OrgManager:
 
         return bool(org_count)
 
+    def user_is_unknown_member(self, member_email: str) -> bool:
+        """Return True iff the email is an unknown member of some org."""
+
+        org_coll = current_app.db('organizations')
+        org_count = org_coll.count({'unknown_members': member_email})
+        return bool(org_count)
+
 
 def setup_app(app):
     from . import patch, hooks
