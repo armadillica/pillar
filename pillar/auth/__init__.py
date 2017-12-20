@@ -49,7 +49,7 @@ class UserClass(flask_login.UserMixin):
 
         user = cls(token)
 
-        user.user_id = db_user['_id']
+        user.user_id = db_user.get('_id')
         user.roles = db_user.get('roles') or []
         user.group_ids = db_user.get('groups') or []
         user.email = db_user.get('email') or ''
@@ -57,7 +57,7 @@ class UserClass(flask_login.UserMixin):
         user.full_name = db_user.get('full_name') or ''
 
         # Derived properties
-        user.objectid = str(db_user['_id'])
+        user.objectid = str(user.user_id or '')
         user.gravatar = utils.gravatar(user.email)
         user.groups = [str(g) for g in user.group_ids]
         user.collect_capabilities()
