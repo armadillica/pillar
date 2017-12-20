@@ -264,13 +264,13 @@ def create_new_user(email, username, user_id):
 
 
 def create_new_user_document(email, user_id, username, provider='blender-id',
-                             token=''):
+                             token='', *, full_name=''):
     """Creates a new user document, without storing it in MongoDB. The token
     parameter is a password in case provider is "local".
     """
 
     user_data = {
-        'full_name': username,
+        'full_name': full_name or username,
         'username': username,
         'email': email,
         'auth': [{
