@@ -462,6 +462,7 @@ class PillarServer(BlinkerCompatibleEve):
             'pillar.celery.tasks',
             'pillar.celery.algolia_tasks',
             'pillar.celery.file_link_tasks',
+            'pillar.celery.email_tasks',
         ]
 
         # Allow Pillar extensions from defining their own Celery tasks.
