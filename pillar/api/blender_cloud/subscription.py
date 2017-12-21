@@ -1,6 +1,7 @@
 import logging
 import typing
 
+import blinker
 from flask import Blueprint, Response
 import requests
 from requests.adapters import HTTPAdapter
@@ -20,6 +21,10 @@ ROLES_BID_TO_PILLAR = {
     'cloud_demo': 'demo',
     'cloud_has_subscription': 'has_subscription',
 }
+
+user_subscription_updated = blinker.NamedSignal(
+    'user_subscription_updated',
+    'The sender is a UserClass instance, kwargs includes "revoke_roles" and "grant_roles".')
 
 
 @blueprint.route('/update-subscription')
@@ -156,6 +161,14 @@ def do_update_subscription(local_user: auth.UserClass, bid_user: dict):
             my_log.info('revoking roles to user %s (Blender ID %s): %s',
                         user_id, email, ', '.join(sorted(revoke_roles)))
         service.do_badger('revoke', roles=revoke_roles, user_id=user_id)
+
+    # Let the world know this user's subscription was updated.
+    final_roles = (plr_roles - revoke_roles).union(grant_roles)
+    local_user.roles = list(final_roles)
+    local_user.collect_capabilities()
+    user_subscription_updated.send(local_user,
+                                   grant_roles=grant_roles,
+                                   revoke_roles=revoke_roles)
 
     # Re-index the user in the search database.
     from pillar.api.users import hooks

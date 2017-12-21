@@ -17,6 +17,13 @@ class RoleUpdatingTest(AbstractPillarTest):
         with self.app.test_request_context():
             self.create_standard_groups()
 
+        from pillar.api.blender_cloud import subscription as sub
+        self.user_subs_signal_calls = []
+        sub.user_subscription_updated.connect(self._user_subs_signal)
+
+    def _user_subs_signal(self, sender, **kwargs):
+        self.user_subs_signal_calls.append((sender, kwargs))
+
     def _setup_testcase(self, mocked_fetch_blenderid_user, *,
                         bid_roles: typing.Set[str]):
         import urllib.parse
@@ -54,6 +61,12 @@ class RoleUpdatingTest(AbstractPillarTest):
         user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
         self.assertEqual({'subscriber', 'has_subscription'}, set(user_info['roles']))
 
+        # Check the signals
+        self.assertEqual(1, len(self.user_subs_signal_calls))
+        sender, kwargs = self.user_subs_signal_calls[0]
+        self.assertEqual({'revoke_roles': set(), 'grant_roles': {'subscriber', 'has_subscription'}},
+                         kwargs)
+
     @responses.activate
     @mock.patch('pillar.api.blender_id.fetch_blenderid_user')
     def test_store_api_role_revoke_subscriber(self, mocked_fetch_blenderid_user):
@@ -61,15 +74,20 @@ class RoleUpdatingTest(AbstractPillarTest):
                              bid_roles={'conference_speaker'})
 
         # Make sure this user is currently known as a subcriber.
-        self.create_user(roles={'subscriber'}, token='my-happy-token')
+        self.create_user(roles={'subscriber', 'has_subscription'}, token='my-happy-token')
         user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
-        self.assertEqual(['subscriber'], user_info['roles'])
+        self.assertEqual({'subscriber', 'has_subscription'}, set(user_info['roles']))
 
         # And after updating, it shouldn't be.
         self.get('/api/bcloud/update-subscription', auth_token='my-happy-token',
                  expected_status=204)
         user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
         self.assertEqual([], user_info['roles'])
+
+        self.assertEqual(1, len(self.user_subs_signal_calls))
+        sender, kwargs = self.user_subs_signal_calls[0]
+        self.assertEqual({'revoke_roles': {'subscriber', 'has_subscription'}, 'grant_roles': set()},
+                         kwargs)
 
     @responses.activate
     @mock.patch('pillar.api.blender_id.fetch_blenderid_user')
@@ -82,6 +100,10 @@ class RoleUpdatingTest(AbstractPillarTest):
 
         user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
         self.assertEqual(['demo'], user_info['roles'])
+
+        self.assertEqual(1, len(self.user_subs_signal_calls))
+        sender, kwargs = self.user_subs_signal_calls[0]
+        self.assertEqual({'revoke_roles': set(), 'grant_roles': {'demo'}}, kwargs)
 
     @responses.activate
     @mock.patch('pillar.api.blender_id.fetch_blenderid_user')
@@ -99,3 +121,7 @@ class RoleUpdatingTest(AbstractPillarTest):
                  expected_status=204)
         user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
         self.assertEqual([], user_info['roles'])
+
+        self.assertEqual(1, len(self.user_subs_signal_calls))
+        sender, kwargs = self.user_subs_signal_calls[0]
+        self.assertEqual({'revoke_roles': {'demo'}, 'grant_roles': set()}, kwargs)
