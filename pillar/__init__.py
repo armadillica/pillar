@@ -425,7 +425,7 @@ class PillarServer(BlinkerCompatibleEve):
         custom_jinja_loader = jinja2.ChoiceLoader(paths_list)
         self.jinja_loader = custom_jinja_loader
 
-        pillar.web.jinja.setup_jinja_env(self.jinja_env)
+        pillar.web.jinja.setup_jinja_env(self.jinja_env, self.config)
 
         # Register context processors from extensions
         for ext in self.pillar_extensions.values():
