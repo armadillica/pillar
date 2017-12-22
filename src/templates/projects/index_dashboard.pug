@@ -18,6 +18,25 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 | {{current_user.full_name}}
 | {% endblock %}
 
+| {% block css %}
+| {{ super() }}
+style.
+	.deleted-projects-toggle {
+		z-index: 10;
+		position: absolute;
+		right: 0;
+		font-size: 20px;
+		padding: 3px;
+		text-shadow: 0 0 2px white;
+	}
+	.deleted-projects-toggle .show-deleted {
+		color: #aaa;
+	}
+	.deleted-projects-toggle .hide-deleted {
+		color: #bbb;
+	}
+| {% endblock %}
+
 | {% block body %}
 .dashboard-container
 	section.dashboard-main
@@ -54,7 +73,36 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 					| {% endif %}
 
 			nav.nav-tabs__tab.active#own_projects
+				.deleted-projects-toggle
+					| {% if show_deleted_projects %}
+					a.hide-deleted(href="{{ request.base_url }}", title='Hide deleted projects')
+						i.pi-trash
+					| {% else %}
+					a.show-deleted(href="{{ request.base_url }}?deleted=1", title='Show deleted projects')
+						i.pi-trash
+					| {% endif %}
+
 				ul.projects__list
+					| {% for project in projects_deleted %}
+					li.projects__list-item.deleted
+						span.projects__list-thumbnail
+							| {% if project.picture_square %}
+							img(src="{{ project.picture_square.thumbnail('s', api=api) }}")
+							| {% else %}
+							i.pi-blender-cloud
+							| {% endif %}
+						.projects__list-details
+							span.title {{ project.name }}
+							ul.meta
+								li.status.deleted Deleted
+								li.edit
+									a(href="javascript:undelete_project('{{ project._id }}')") Restore project
+					| {% else %}
+					| {% if show_deleted_projects %}
+					li.projects__list-item.deleted You have no recenly deleted projects. Deleted projects can be restored within a month after deletion.
+					| {% endif %}
+					| {% endfor %}
+
 					| {% for project in projects_user %}
 					li.projects__list-item(
 						data-url="{{ url_for('projects.view', project_url=project.url) }}")
@@ -105,7 +153,7 @@ meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/ba
 					| {% endif %}
 					| {% endfor %}
 
-			section.nav-tabs__tab#shared
+			section.nav-tabs__tab#shared(style='display: none')
 				ul.projects__list
 					| {% if projects_shared %}
 					| {% for project in projects_shared %}
@@ -278,4 +326,15 @@ script.
 
 		hopToTop(); // Display jump to top button
 	});
+
+	function undelete_project(project_id) {
+		console.log('undeleting project', project_id);
+		$.post('{{ url_for('projects.undelete') }}', {project_id: project_id})
+		.done(function(data, textStatus, jqXHR) {
+			location.href = jqXHR.getResponseHeader('Location');
+		})
+		.fail(function(err) {
+			toastr.error(xhrErrorResponseMessage(err), 'Undeletion failed');
+		})
+	}
 | {% endblock %}

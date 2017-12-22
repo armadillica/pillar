@@ -182,11 +182,13 @@ $( document ).ready(function() {
 	$('#item_delete').click(function(e){
 		e.preventDefault();
 		if (ProjectUtils.isProject()) {
-			$.post(urlProjectDelete, {project_id: ProjectUtils.projectId()},
-				function (data) {
-					// Feedback logic
-				}).done(function () {
-					window.location.replace('/p/');
+			$.post(urlProjectDelete, {project_id: ProjectUtils.projectId()})
+			.done(function () {
+				// Redirect to the /p/ URL that shows deleted projects.
+				window.location.replace('/p/?deleted=1');
+			})
+			.fail(function(err) {
+				toastr.error(xhrErrorResponseMessage(err), 'Project deletion failed');
 			});
 		} else {
 			$.post(urlNodeDelete, {node_id: ProjectUtils.nodeId()},
