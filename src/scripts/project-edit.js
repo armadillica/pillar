@@ -182,8 +182,6 @@ $( document ).ready(function() {
 	$('#item_delete').click(function(e){
 		e.preventDefault();
 		if (ProjectUtils.isProject()) {
-			// url = window.location.href.split('#')[0] + 'delete';
-			// window.location.replace(url);
 			$.post(urlProjectDelete, {project_id: ProjectUtils.projectId()},
 				function (data) {
 					// Feedback logic
