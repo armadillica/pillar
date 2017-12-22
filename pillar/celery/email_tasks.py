@@ -39,6 +39,8 @@ def send_email(self: celery.Task, to_name: str, to_addr: str, subject: str, text
     # Send the message via local SMTP server.
     try:
         with smtplib.SMTP(cfg['SMTP_HOST'], cfg['SMTP_PORT'], timeout=cfg['SMTP_TIMEOUT']) as smtp:
+            if cfg.get('SMTP_USERNAME') and cfg.get('SMTP_PASSWORD'):
+                smtp.login(cfg['SMTP_USERNAME'], cfg['SMTP_PASSWORD'])
             smtp.send_message(msg)
     except (IOError, OSError) as ex:
         log.exception('error sending email to %s <%s>, will retry later: %s',

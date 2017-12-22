@@ -234,6 +234,8 @@ SUPPORT_ENGLISH = True
 # Mail options, see pillar.celery.email_tasks.
 SMTP_HOST = 'localhost'
 SMTP_PORT = 2525
+SMTP_USERNAME = ''
+SMTP_PASSWORD = ''
 SMTP_TIMEOUT = 30  # timeout in seconds, https://docs.python.org/3/library/smtplib.html#smtplib.SMTP
 MAIL_RETRY = 180  # in seconds, delay until trying to send an email again.
 MAIL_DEFAULT_FROM_NAME = 'Blender Cloud'
