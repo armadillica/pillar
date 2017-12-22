@@ -289,7 +289,7 @@ def view(project_url):
     header_video_file = None
     header_video_node = None
     if project.header_node and project.header_node.node_type == 'asset' and \
-                    project.header_node.properties.content_type == 'video':
+            project.header_node.properties.content_type == 'video':
         header_video_node = project.header_node
         header_video_file = utils.get_file(project.header_node.properties.file)
         header_video_node.picture = utils.get_file(header_video_node.picture)
