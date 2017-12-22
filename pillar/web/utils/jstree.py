@@ -115,15 +115,17 @@ def jstree_build_from_node(node):
 
     # Get the parent node
     parent = None
+    parent_projection = {'projection': {
+        'name': 1,
+        'parent': 1,
+        'project': 1,
+        'node_type': 1,
+        'properties.content_type': 1,
+    }}
+
     if node.parent:
         try:
-            parent = Node.find(node.parent, {
-                'projection': {
-                    'name': 1,
-                    'node_type': 1,
-                    'parent': 1,
-                    'properties.content_type': 1,
-                }}, api=api)
+            parent = Node.find(node.parent, parent_projection, api=api)
             # Define the child node of the tree (usually an asset)
         except ResourceNotFound:
             # If not found, we might be on the top level, in which case we skip the
@@ -147,10 +149,7 @@ def jstree_build_from_node(node):
         # If we have a parent
         if parent.parent:
             try:
-                parent = Node.find(parent.parent, {
-                    'projection': {
-                        'name': 1, 'parent': 1, 'project': 1, 'node_type': 1},
-                }, api=api)
+                parent = Node.find(parent.parent, parent_projection, api=api)
             except ResourceNotFound:
                 parent = None
         else:
