@@ -755,7 +755,7 @@ class PillarServer(BlinkerCompatibleEve):
 
         return 'basic ' + base64.b64encode('%s:%s' % (username, subclient_id))
 
-    def post_internal(self, resource, payl=None, skip_validation=False):
+    def post_internal(self, resource: str, payl=None, skip_validation=False):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.post import post_internal
 
@@ -764,7 +764,7 @@ class PillarServer(BlinkerCompatibleEve):
         with self.__fake_request_url_rule('POST', path):
             return post_internal(resource, payl=payl, skip_validation=skip_validation)[:4]
 
-    def put_internal(self, resource, payload=None, concurrency_check=False,
+    def put_internal(self, resource: str, payload=None, concurrency_check=False,
                      skip_validation=False, **lookup):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.put import put_internal
@@ -775,7 +775,7 @@ class PillarServer(BlinkerCompatibleEve):
             return put_internal(resource, payload=payload, concurrency_check=concurrency_check,
                                 skip_validation=skip_validation, **lookup)[:4]
 
-    def patch_internal(self, resource, payload=None, concurrency_check=False,
+    def patch_internal(self, resource: str, payload=None, concurrency_check=False,
                        skip_validation=False, **lookup):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.patch import patch_internal
