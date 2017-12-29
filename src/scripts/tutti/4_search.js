@@ -157,7 +157,7 @@ $(document).ready(function() {
     minLength: 0,
     templates: {
       suggestion: function(hit) {
-        console.log('hit!');
+
         var hitMedia = (hit.media ? ' · <span class="media">'+hit.media+'</span>' : '');
         var hitFree = (hit.is_free ? '<div class="search-hit-ribbon"><span>free</span></div>' : '');
         var hitPicture;
@@ -174,21 +174,27 @@ $(document).ready(function() {
           .attr('title', hit.name)
           .text(hit.name);
 
-        return '' +
-          '<a href="/nodes/'+ hit.objectID + '/redir" class="search-site-result" id="'+ hit.objectID + '">' +
-            '<div class="search-hit">' +
-              '<div class="search-hit-thumbnail">' +
-                hitPicture +
-                hitFree +
-              '</div>' +
-              $searchHitName.html() +
-              '<div class="search-hit-meta">' +
-                $span.html() + ' · ' +
-                '<span class="node_type">' + hit.node_type + '</span>' +
-                hitMedia +
-              '</div>' +
-            '</div>'+
-          '</a>';
+        return $('<a/>', {
+              href: '/nodes/'+ hit.objectID + '/redir',
+              class: "search-site-result",
+              id: hit.objectID
+           }).append(
+             '<div class="search-hit">' +
+               '<div class="search-hit-thumbnail">' +
+                 hitPicture +
+                 hitFree +
+               '</div>' +
+               $searchHitName.html() +
+               '<div class="search-hit-meta">' +
+                 $span.html() + ' · ' +
+                 $('<span>', {
+                   class: "node_type",
+                   text: hit.node_type
+                 }) +
+                 hitMedia +
+               '</div>' +
+             '</div>'
+          )
       }
     }
   });
@@ -227,7 +233,11 @@ $(document).ready(function() {
   searchInput.bind('typeahead:render', function(event, suggestions, async, dataset) {
     if( suggestions != undefined && $('.tt-all-results').length <= 0){
       $('.tt-dataset').append(
-        '<a id="search-advanced" href="/search?q='+ $("#cloud-search").val() + '&page=1" class="search-site-result advanced tt-suggestion">' +
+        $("<a/>", {
+           id: "search-advanced",
+           href: '/search?q='+ $("#cloud-search").val() + '&page=1',
+           class: "search-site-result advanced tt-suggestion",
+        }).append(
           '<div class="search-hit">' +
             '<div class="search-hit-thumbnail">' +
               '<div class="search-hit-thumbnail-icon">' +
@@ -237,8 +247,9 @@ $(document).ready(function() {
             '<div class="search-hit-name">' +
               'Use Advanced Search' +
             '</div>' +
-          '</div>'+
-        '</a>');
+          '</div>'
+        )
+      );
     }
   });
 
