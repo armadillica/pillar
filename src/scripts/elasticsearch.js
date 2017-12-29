@@ -8,7 +8,6 @@ $(document).ready(function() {
     var $hits = $('#hits');
     var $stats = $('#stats');
     var $facets = $('#facets');
-  //var facets = [];
     var $pagination = $('#pagination');
     var what = '';
 
@@ -22,15 +21,7 @@ $(document).ready(function() {
     // something elasticy!
     var search = elasticSearcher;
 
-   //    facets: $.map(FACET_CONFIG, function(facet) {
-    //        return !facet.disjunctive ? facet.name : null;
-    //    }),
-    //    disjunctiveFacets: $.map(FACET_CONFIG, function(facet) {
-    //        return facet.disjunctive ? facet.name : null;
-    //    })
-    //};
-
-    // what are we looking for?
+    // what are we looking for? users? assets (default)
     what = $inputField.attr('what');
 
     // Input binding
@@ -40,6 +31,7 @@ $(document).ready(function() {
       if(query === undefined) { return; }
 
       toggleIconEmptyInput(!query.trim());
+
       // what could be like "/users"
       search.setQuery(query, what);
       // setURLParams(search);
@@ -51,7 +43,6 @@ $(document).ready(function() {
         renderHits(content);
         renderFacets(content);
         renderPagination(content);
-        bindSearchObjects();
         renderFirstHit($(hits).children('.search-hit:first'));
     });
 
@@ -184,7 +175,7 @@ $(document).ready(function() {
 
         for (var indexFacet = 0; indexFacet < facets.length; ++indexFacet) {
             var facet = facets[indexFacet];
-      //title, values[facet, value]
+            //title, values[facet, value]
             facetsHtml += facetTemplate.render(facet);
         }
 
@@ -199,7 +190,7 @@ $(document).ready(function() {
         }
 
         var maxPages = 2;
-    var nbPages = content.count / HITS_PER_PAGE;
+        var nbPages = content.count / HITS_PER_PAGE;
 
         // Process pagination
         var pages = [];
@@ -239,17 +230,6 @@ $(document).ready(function() {
 
 
     // Event bindings
-    function bindSearchObjects() {
-        // Slider binding
-        // $('#customerReviewCount-slider').slider().on('slideStop', function(ev) {
-        //   helper.addNumericRefinement('customerReviewCount', '>=', ev.value[0]).search();
-        //   helper.addNumericRefinement('customerReviewCount', '<=', ev.value[1]).search();
-        // });
-
-        // Pimp checkboxes
-        // $('input[type="checkbox"]').checkbox();
-    }
-
     // Click binding
     $(document).on('click', '.show-more, .show-less', function(e) {
         e.preventDefault();
@@ -344,12 +324,10 @@ $(document).ready(function() {
             var sParameterName = sURLVariables[i].split('=');
             var facet = decodeURIComponent(sParameterName[0]);
             var value = decodeURIComponent(sParameterName[1]);
-            //helper.toggleRefine(facet, value, false);
         }
         // Page has to be set in the end to avoid being overwritten
         var page = decodeURIComponent(sURLVariables[1].split('=')[1]) - 1;
         search.setCurrentPage(page);
-
     }
 
     function setURLParams(state) {
@@ -358,15 +336,6 @@ $(document).ready(function() {
         urlParams += 'q=' + encodeURIComponent(currentQuery);
         var currentPage = state.page + 1;
         urlParams += '&page=' + currentPage;
-
-        //for (var facetRefine in state.facetsRefinements) {
-        //    urlParams += '&' + encodeURIComponent(facetRefine) + '=' + encodeURIComponent(state.facetsRefinements[facetRefine]);
-        //}
-        //for (var disjunctiveFacetrefine in state.disjunctiveFacetsRefinements) {
-        //    for (var value in state.disjunctiveFacetsRefinements[disjunctiveFacetrefine]) {
-        //        urlParams += '&' + encodeURIComponent(disjunctiveFacetrefine) + '=' + encodeURIComponent(state.disjunctiveFacetsRefinements[disjunctiveFacetrefine][value]);
-        //    }
-        //}
         location.replace(urlParams);
     }
 
