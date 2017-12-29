@@ -69,19 +69,19 @@ def find_user_in_db(user_info: dict, provider='blender-id'):
 
     users = current_app.data.driver.db['users']
 
+    user_id = user_info['id']
     query = {'$or': [
         {'auth': {'$elemMatch': {
-            'user_id': str(user_info['id']),
+            'user_id': str(user_id),
             'provider': provider}}},
         {'email': user_info['email']},
-        ]}
+    ]}
     log.debug('Querying: %s', query)
     db_user = users.find_one(query)
 
     if db_user:
-        log.debug('User with {provider} id {user_id} already in our database, '
-                  'updating with info from {provider}.'.format(
-                   provider=provider, user_id=user_info['id']))
+        log.debug('User with %s id %s already in our database, updating with info from %s',
+                  provider, user_id, provider)
         db_user['email'] = user_info['email']
 
         # Find out if an auth entry for the current provider already exists
@@ -89,13 +89,13 @@ def find_user_in_db(user_info: dict, provider='blender-id'):
         if not provider_entry:
             db_user['auth'].append({
                 'provider': provider,
-                'user_id': str(user_info['id']),
+                'user_id': str(user_id),
                 'token': ''})
     else:
-        log.debug('User %r not yet in our database, create a new one.', user_info['id'])
+        log.debug('User %r not yet in our database, create a new one.', user_id)
         db_user = create_new_user_document(
             email=user_info['email'],
-            user_id=user_info['id'],
+            user_id=user_id,
             username=user_info['full_name'],
             provider=provider)
         db_user['username'] = make_unique_username(user_info['email'])
@@ -118,9 +118,13 @@ def validate_token():
 
     from pillar.auth import AnonymousUser
 
+    auth_header = request.headers.get('Authorization') or ''
     if request.authorization:
         token = request.authorization.username
         oauth_subclient = request.authorization.password
+    elif auth_header.startswith('Bearer '):
+        token = auth_header[7:].strip()
+        oauth_subclient = ''
     else:
         # Check the session, the user might be logged in through Flask-Login.
         from pillar import auth
@@ -179,7 +183,6 @@ def validate_this_token(token, oauth_subclient=None):
 
 def remove_token(token: str):
     """Removes the token from the database."""
-
 
     tokens_coll = current_app.db('tokens')
     token_hashed = hash_auth_token(token)
@@ -261,13 +264,13 @@ def create_new_user(email, username, user_id):
 
 
 def create_new_user_document(email, user_id, username, provider='blender-id',
-                             token=''):
+                             token='', *, full_name=''):
     """Creates a new user document, without storing it in MongoDB. The token
     parameter is a password in case provider is "local".
     """
 
     user_data = {
-        'full_name': username,
+        'full_name': full_name or username,
         'username': username,
         'email': email,
         'auth': [{
@@ -370,6 +373,10 @@ def upsert_user(db_user):
         log.error('Non-ObjectID string found in user.groups: %s', db_user)
         raise wz_exceptions.InternalServerError(
             'Non-ObjectID string found in user.groups: %s' % db_user)
+
+    if not db_user['full_name']:
+        # Blender ID doesn't need a full name, but we do.
+        db_user['full_name'] = db_user['username']
 
     r = {}
     for retry in range(5):

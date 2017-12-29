@@ -1,6 +1,7 @@
 import logging
 import typing
 
+import blinker
 from flask import Blueprint, Response
 import requests
 from requests.adapters import HTTPAdapter
@@ -21,6 +22,10 @@ ROLES_BID_TO_PILLAR = {
     'cloud_has_subscription': 'has_subscription',
 }
 
+user_subscription_updated = blinker.NamedSignal(
+    'user_subscription_updated',
+    'The sender is a UserClass instance, kwargs includes "revoke_roles" and "grant_roles".')
+
 
 @blueprint.route('/update-subscription')
 @authorization.require_login()
@@ -31,7 +36,7 @@ def update_subscription() -> typing.Tuple[str, int]:
     """
 
     my_log: logging.Logger = log.getChild('update_subscription')
-    current_user = auth.get_current_user()
+    real_current_user = auth.get_current_user()  # multiple accesses, just get unproxied.
 
     try:
         bid_user = blender_id.fetch_blenderid_user()
@@ -41,10 +46,10 @@ def update_subscription() -> typing.Tuple[str, int]:
 
     if not bid_user:
         my_log.warning('Logged in user %s has no BlenderID account! '
-                       'Unable to update subscription status.', current_user.user_id)
+                       'Unable to update subscription status.', real_current_user.user_id)
         return '', 204
 
-    do_update_subscription(current_user, bid_user)
+    do_update_subscription(real_current_user, bid_user)
     return '', 204
 
 
@@ -156,6 +161,14 @@ def do_update_subscription(local_user: auth.UserClass, bid_user: dict):
             my_log.info('revoking roles to user %s (Blender ID %s): %s',
                         user_id, email, ', '.join(sorted(revoke_roles)))
         service.do_badger('revoke', roles=revoke_roles, user_id=user_id)
+
+    # Let the world know this user's subscription was updated.
+    final_roles = (plr_roles - revoke_roles).union(grant_roles)
+    local_user.roles = list(final_roles)
+    local_user.collect_capabilities()
+    user_subscription_updated.send(local_user,
+                                   grant_roles=grant_roles,
+                                   revoke_roles=revoke_roles)
 
     # Re-index the user in the search database.
     from pillar.api.users import hooks

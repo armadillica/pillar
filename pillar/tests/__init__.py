@@ -42,7 +42,7 @@ BLENDER_ID_USER_RESPONSE = {'status': 'success',
                             'user': {'email': TEST_EMAIL_ADDRESS,
                                      'full_name': TEST_FULL_NAME,
                                      'id': ctd.BLENDER_ID_TEST_USERID},
-                            'token_expires': 'Mon, 1 Jan 2018 01:02:03 GMT'}
+                            'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
 
 
 class PillarTestServer(pillar.PillarServer):
@@ -67,19 +67,25 @@ class PillarTestServer(pillar.PillarServer):
         Without this, actual Celery tasks will be created while the tests are running.
         """
 
-        from celery import Celery
+        from celery import Celery, Task
 
         self.celery = unittest.mock.MagicMock(Celery)
 
-        def fake_task(*task_args, **task_kwargs):
+        def fake_task(*task_args, bind=False, **task_kwargs):
             def decorator(f):
                 def delay(*args, **kwargs):
-                    return f(*args, **kwargs)
+                    if bind:
+                        return f(decorator.sender, *args, **kwargs)
+                    else:
+                        return f(*args, **kwargs)
 
                 f.delay = delay
                 f.si = unittest.mock.MagicMock()
                 f.s = unittest.mock.MagicMock()
                 return f
+
+            if bind:
+                decorator.sender = unittest.mock.MagicMock(Task)
 
             return decorator
 
@@ -251,7 +257,7 @@ class AbstractPillarTest(TestMinimal):
             return result.inserted_id
 
     def create_user(self, user_id='cafef00dc379cf10c4aaceaf', roles=('subscriber',),
-                    groups=None, *, token: str = None, email: str = TEST_EMAIL_ADDRESS):
+                    groups=None, *, token: str = None, email: str = TEST_EMAIL_ADDRESS) -> ObjectId:
         from pillar.api.utils.authentication import make_unique_username
         import uuid
 

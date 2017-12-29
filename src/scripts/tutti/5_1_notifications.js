@@ -361,6 +361,20 @@ function getNotificationsLoop() {
 	}, 30000);
 }
 
+/* Returns a more-or-less reasonable message given an error response object. */
+function xhrErrorResponseMessage(err) {
+    if (typeof err.responseJSON == 'undefined')
+        return err.statusText;
+
+    if (typeof err.responseJSON._error != 'undefined' && typeof err.responseJSON._error.message != 'undefined')
+        return err.responseJSON._error.message;
+
+    if (typeof err.responseJSON._message != 'undefined')
+        return err.responseJSON._message
+
+    return err.statusText;
+}
+
 /* Notifications: Toastr Defaults */
 toastr.options.showDuration = 50;
 toastr.options.progressBar = true;

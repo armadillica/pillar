@@ -1,5 +1,6 @@
 """Our custom Jinja filters and other template stuff."""
 
+import functools
 import logging
 import typing
 
@@ -146,7 +147,7 @@ def do_yesno(value, arg=None):
     return no
 
 
-def setup_jinja_env(jinja_env):
+def setup_jinja_env(jinja_env, app_config: dict):
     jinja_env.filters['pretty_date'] = format_pretty_date
     jinja_env.filters['pretty_date_time'] = format_pretty_date_time
     jinja_env.filters['undertitle'] = format_undertitle
@@ -157,5 +158,8 @@ def setup_jinja_env(jinja_env):
     jinja_env.filters['yesno'] = do_yesno
     jinja_env.filters['repr'] = repr
     jinja_env.globals['url_for_node'] = do_url_for_node
+    jinja_env.globals['abs_url'] = functools.partial(flask.url_for,
+                                                     _external=True,
+                                                     _scheme=app_config['SCHEME'])
     jinja_env.globals['session'] = flask.session
     jinja_env.globals['current_user'] = flask_login.current_user

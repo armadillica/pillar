@@ -21,7 +21,6 @@ from flask_babel import Babel, gettext as _
 from flask.templating import TemplateNotFound
 import pymongo.collection
 import pymongo.database
-from raven.contrib.flask import Sentry
 from werkzeug.local import LocalProxy
 
 
@@ -42,6 +41,7 @@ import pillar.web.jinja
 from . import api
 from . import web
 from . import auth
+from . import sentry_extra
 import pillar.api.organizations
 
 empty_settings = {
@@ -106,7 +106,7 @@ class PillarServer(BlinkerCompatibleEve):
         self._config_tempdirs()
         self._config_git()
 
-        self.sentry: typing.Optional[Sentry] = None
+        self.sentry: typing.Optional[sentry_extra.PillarSentry] = None
         self._config_sentry()
         self._config_google_cloud_storage()
 
@@ -207,8 +207,9 @@ class PillarServer(BlinkerCompatibleEve):
             self.sentry = None
             return
 
-        self.sentry = Sentry(self, logging=True, level=logging.WARNING,
-                             logging_exclusions=('werkzeug',))
+        self.sentry = sentry_extra.PillarSentry(
+            self, logging=True, level=logging.WARNING,
+            logging_exclusions=('werkzeug',))
 
         # bugsnag.before_notify(bugsnag_extra.add_pillar_request_to_notification)
         # got_request_exception.connect(self.__notify_bugsnag)
@@ -424,7 +425,7 @@ class PillarServer(BlinkerCompatibleEve):
         custom_jinja_loader = jinja2.ChoiceLoader(paths_list)
         self.jinja_loader = custom_jinja_loader
 
-        pillar.web.jinja.setup_jinja_env(self.jinja_env)
+        pillar.web.jinja.setup_jinja_env(self.jinja_env, self.config)
 
         # Register context processors from extensions
         for ext in self.pillar_extensions.values():
@@ -461,6 +462,7 @@ class PillarServer(BlinkerCompatibleEve):
             'pillar.celery.tasks',
             'pillar.celery.search_index_tasks',
             'pillar.celery.file_link_tasks',
+            'pillar.celery.email_tasks',
         ]
 
         # Allow Pillar extensions from defining their own Celery tasks.
@@ -754,7 +756,7 @@ class PillarServer(BlinkerCompatibleEve):
 
         return 'basic ' + base64.b64encode('%s:%s' % (username, subclient_id))
 
-    def post_internal(self, resource, payl=None, skip_validation=False):
+    def post_internal(self, resource: str, payl=None, skip_validation=False):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.post import post_internal
 
@@ -763,7 +765,7 @@ class PillarServer(BlinkerCompatibleEve):
         with self.__fake_request_url_rule('POST', path):
             return post_internal(resource, payl=payl, skip_validation=skip_validation)[:4]
 
-    def put_internal(self, resource, payload=None, concurrency_check=False,
+    def put_internal(self, resource: str, payload=None, concurrency_check=False,
                      skip_validation=False, **lookup):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.put import put_internal
@@ -774,7 +776,7 @@ class PillarServer(BlinkerCompatibleEve):
             return put_internal(resource, payload=payload, concurrency_check=concurrency_check,
                                 skip_validation=skip_validation, **lookup)[:4]
 
-    def patch_internal(self, resource, payload=None, concurrency_check=False,
+    def patch_internal(self, resource: str, payload=None, concurrency_check=False,
                        skip_validation=False, **lookup):
         """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
         from eve.methods.patch import patch_internal

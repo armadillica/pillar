@@ -198,8 +198,9 @@ def after_inserting_users(user_docs):
         user_email = user_doc.get('email')
 
         if not user_id or not user_email:
-            log.warning('User created with _id=%r and email=%r, unable to check organizations',
-                        user_id, user_email)
+            # Missing emails can happen when creating a service account, it's fine.
+            log.info('User created with _id=%r and email=%r, unable to check organizations',
+                     user_id, user_email)
             continue
 
         om.make_member_known(user_id, user_email)

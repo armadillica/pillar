@@ -1,3 +1,4 @@
+import datetime
 import json
 import logging
 import itertools
@@ -7,6 +8,7 @@ from pillarsdk import Node
 from pillarsdk import Project
 from pillarsdk.exceptions import ResourceNotFound
 from pillarsdk.exceptions import ForbiddenAccess
+import flask
 from flask import Blueprint
 from flask import render_template
 from flask import request
@@ -78,6 +80,19 @@ def index():
         'sort': '-_created'
     }, api=api)
 
+    show_deleted_projects = request.args.get('deleted') is not None
+    if show_deleted_projects:
+        timeframe = utils.datetime_now() - datetime.timedelta(days=31)
+        projects_deleted = Project.all({
+            'where': {'user': current_user.objectid,
+                      'category': {'$ne': 'home'},
+                      '_deleted': True,
+                      '_updated': {'$gt': timeframe}},
+            'sort': '-_created'
+        }, api=api)
+    else:
+        projects_deleted = {'_items': []}
+
     projects_shared = Project.all({
         'where': {'user': {'$ne': current_user.objectid},
                   'permissions.groups.group': {'$in': current_user.groups},
@@ -87,17 +102,17 @@ def index():
     }, api=api)
 
     # Attach project images
-    for project in projects_user['_items']:
-        utils.attach_project_pictures(project, api)
-
-    for project in projects_shared['_items']:
-        utils.attach_project_pictures(project, api)
+    for project_list in (projects_user, projects_deleted, projects_shared):
+        for project in project_list['_items']:
+            utils.attach_project_pictures(project, api)
 
     return render_template(
         'projects/index_dashboard.html',
         gravatar=utils.gravatar(current_user.email, size=128),
         projects_user=projects_user['_items'],
+        projects_deleted=projects_deleted['_items'],
         projects_shared=projects_shared['_items'],
+        show_deleted_projects=show_deleted_projects,
         api=api)
 
 
@@ -274,7 +289,7 @@ def view(project_url):
     header_video_file = None
     header_video_node = None
     if project.header_node and project.header_node.node_type == 'asset' and \
-                    project.header_node.properties.content_type == 'video':
+            project.header_node.properties.content_type == 'video':
         header_video_node = project.header_node
         header_video_file = utils.get_file(project.header_node.properties.file)
         header_video_node.picture = utils.get_file(header_video_node.picture)
@@ -847,3 +862,37 @@ def edit_extension(project: Project, extension_name):
 
     return ext.project_settings(project,
                                 ext_pages=find_extension_pages())
+
+
+@blueprint.route('/undelete', methods=['POST'])
+@login_required
+def undelete():
+    """Undelete a deleted project.
+
+    Can only be done by the owner of the project or an admin.
+    """
+    # This function takes an API-style approach, even though it's a web
+    # endpoint. Undeleting via a REST approach would mean GETting the
+    # deleted project, which now causes a 404 exception to bubble to the
+    # client.
+    from pillar.api.utils import mongo, remove_private_keys
+    from pillar.api.utils.authorization import check_permissions
+
+    project_id = request.form.get('project_id')
+    if not project_id:
+        raise wz_exceptions.BadRequest('missing project ID')
+
+    # Check that the user has PUT permissions on the project itself.
+    project = mongo.find_one_or_404('projects', project_id)
+    check_permissions('projects', project, 'PUT')
+
+    pid = project['_id']
+    log.info('Undeleting project %s on behalf of %s', pid, current_user.email)
+    r, _, _, status = current_app.put_internal('projects', remove_private_keys(project), _id=pid)
+    if status != 200:
+        log.warning('Error %d un-deleting project %s: %s', status, pid, r)
+        return 'Error un-deleting project', 500
+
+    resp = flask.Response('', status=204)
+    resp.location = flask.url_for('projects.view', project_url=project['url'])
+    return resp

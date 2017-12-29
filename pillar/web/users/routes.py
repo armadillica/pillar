@@ -5,6 +5,7 @@ from flask import abort, Blueprint, redirect, render_template, request, session,
 from flask_login import login_required
 from werkzeug import exceptions as wz_exceptions
 
+from pillar import current_app
 import pillar.api.blender_cloud.subscription
 import pillar.auth
 from pillar.api.blender_cloud.subscription import update_subscription
@@ -16,6 +17,7 @@ from pillar.auth.oauth import OAuthSignIn, ProviderConfigurationMissing, Provide
 from pillar.web import system_util
 from pillarsdk import exceptions as sdk_exceptions
 from pillarsdk.users import User
+
 from . import forms
 
 log = logging.getLogger(__name__)
@@ -83,8 +85,7 @@ def oauth_callback(provider):
 def login():
     if request.args.get('force'):
         log.debug('Forcing logout of user before rendering login page.')
-        logout_user()
-        session.clear()
+        pillar.auth.logout_user()
 
     session['next_after_login'] = request.args.get('next') or request.referrer
     return render_template('login.html')
@@ -121,9 +122,11 @@ def switch():
 
     # Without this URL, the user will remain on the Blender ID site. We want them to come
     # back to the Cloud after switching users.
+    scheme = current_app.config.get('PREFERRED_URL_SCHEME', 'https')
     next_url_after_bid_login = url_for('users.login',
                                        next=next_url_after_cloud_login,
                                        force='yes',
+                                       _scheme=scheme,
                                        _external=True)
 
     return redirect(blender_id.switch_user_url(next_url=next_url_after_bid_login))
