@@ -126,7 +126,7 @@ def create_doc_from_user_data(user_to_index: dict) -> User:
 
     if not doc_id:
         log.error('USER ID is missing %s', user_to_index)
-        raise KeyError
+        raise KeyError('Trying to create document without id')
 
     doc = User(_id=doc_id)
     doc.objectID = str(user_to_index['objectID'])
