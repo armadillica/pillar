@@ -52,6 +52,25 @@ def search_user():
     data = queries.do_user_search(searchword, terms)
 
     # filter sensitive stuff
+    # we only need. objectID, full_name, username
+    hits = data.get('hits')
+
+    new_hits = []
+
+    for hit in hits.get('hits'):
+        source = hit['_source']
+        single_hit = {
+            '_source': {
+                'objectID': source.get('objectID'),
+                'username': source.get('username'),
+                'full_name': source.get('full_name'),
+            }
+        }
+
+        new_hits.append(single_hit)
+
+    # replace search result with safe subset
+    data['hits']['hits'] = new_hits
 
     return jsonify(data)
 

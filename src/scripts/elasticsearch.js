@@ -8,7 +8,7 @@ $(document).ready(function() {
     var $hits = $('#hits');
     var $stats = $('#stats');
     var $facets = $('#facets');
-	//var facets = [];
+  //var facets = [];
     var $pagination = $('#pagination');
     var what = '';
 
@@ -35,15 +35,15 @@ $(document).ready(function() {
 
     // Input binding
     $inputField.on('keyup change', function() {
-        var query = $inputField.val();
+      var query = $inputField.val();
 
-	if(query === undefined) { return; }
+      if(query === undefined) { return; }
 
-        toggleIconEmptyInput(!query.trim());
-	// what could be like "/users"
-	search.setQuery(query, what);
-        //setURLParams(search);
-	search.execute();
+      toggleIconEmptyInput(!query.trim());
+      // what could be like "/users"
+      search.setQuery(query, what);
+      // setURLParams(search);
+      search.execute();
     }).focus();
 
     search.on('results', function(content){
@@ -137,54 +137,54 @@ $(document).ready(function() {
         // If no results
         if (content.hits.length === 0) {
             $facets.empty();
-		    facets =[];
+        facets =[];
             return;
         }
 
-		var storeValue = function (values, label){
+    var storeValue = function (values, label){
 
 
-			return function(item){
+      return function(item){
 
-				let refined = search.isRefined(label, item.key);
+        let refined = search.isRefined(label, item.key);
 
-				values.push({
-					facet: label,
-					label: item.key,
-					value: item.key,
-					count: item.doc_count,
-					refined: refined,
-				});
-			};
-		};
+        values.push({
+          facet: label,
+          label: item.key,
+          value: item.key,
+          count: item.doc_count,
+          refined: refined,
+        });
+      };
+    };
 
-		var facets =[];
-		var aggs = content.aggs;
+    var facets =[];
+    var aggs = content.aggs;
 
-		for (var label in aggs) {
+    for (var label in aggs) {
 
-			let values = [];
+      let values = [];
 
-			let buckets = aggs[label].buckets;
+      let buckets = aggs[label].buckets;
 
-			if (buckets.length === 0) { continue; }
+      if (buckets.length === 0) { continue; }
 
 
 
-			buckets.forEach(storeValue(values, label));
+      buckets.forEach(storeValue(values, label));
 
-			facets.push({
-				title: label,
-				values: values.slice(0),
-			});
-		}
+      facets.push({
+        title: label,
+        values: values.slice(0),
+      });
+    }
 
         // Display facets
         var facetsHtml = '';
 
         for (var indexFacet = 0; indexFacet < facets.length; ++indexFacet) {
             var facet = facets[indexFacet];
-			//title, values[facet, value]
+      //title, values[facet, value]
             facetsHtml += facetTemplate.render(facet);
         }
 
@@ -199,7 +199,7 @@ $(document).ready(function() {
         }
 
         var maxPages = 2;
-		var nbPages = content.count / HITS_PER_PAGE;
+    var nbPages = content.count / HITS_PER_PAGE;
 
         // Process pagination
         var pages = [];
@@ -260,7 +260,7 @@ $(document).ready(function() {
 
     $(document).on('click', '.toggleRefine', function() {
         search.toggleTerm($(this).data('facet'), $(this).data('value'));
-	search.execute();
+  search.execute();
         return false;
     });
 

@@ -6,10 +6,10 @@
         this.autocomplete({hint: false}, [
             {
                 source: elasticSearch($, '/user'),
-	  	        displayKey: 'full_name',
-				async: true,
+	  	          displayKey: 'full_name',
+		        		//async: true,
                 minLength: 1,
-                limit: 10,
+                limit: 9,
                 templates: {
                     suggestion: function (hit) {
                         var suggestion = hit.full_name + ' (' + hit.username + ')';
