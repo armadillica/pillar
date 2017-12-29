@@ -180,9 +180,8 @@ script().
 	FACET_CONFIG.push({ name: 'project._id', title: 'Project', disjunctive: false, hidden: true, value: '{{project._id}}' })
 	{% endif %}
 
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/algoliasearch.helper.min.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/hogan.common-3.0.0.js') }}")
-script(src="{{ url_for('static_pillar', filename='assets/js/algolia_search.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/elasticsearch.min.js') }}")
 
 script(type="text/javascript").
 

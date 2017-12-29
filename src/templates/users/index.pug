@@ -94,10 +94,8 @@ script(type="text/template", id="stats-template")
 
 | {% block footer_scripts %}
 
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/algoliasearch-3.19.0.min.js')}}")
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/algoliasearch.helper.min.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/hogan.common-3.0.0.js') }}")
-script(src="{{ url_for('static_pillar', filename='assets/js/algolia_search.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/elasticsearch.min.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.select2.min.js') }}")
 
 script(type="text/javascript").

@@ -108,8 +108,7 @@ var elasticSearcher = (function() {
 
 
 var elasticSearch = (function($, url) {
-    console.log(url);
-	return function findMatches(q, cb, async){
+  return function findMatches(q, cb, async){
 		if (!cb) { return; }
 		$.fn.getSearch(q, cb, async, url);
 	};
@@ -133,7 +132,7 @@ var elasticSearch = (function($, url) {
 			newhits = hits.map(function(hit){
 				return hit._source;
 			});
-			cb(newhits.slice(0));
+			//cb(newhits.slice(0));
 			async(newhits.slice(0));
 		});
 	};
@@ -151,7 +150,8 @@ $(document).ready(function() {
 		source: elasticSearch($),
 		async: true,
 		displayKey: 'name',
-		limit: 10,
+		limit: 9,  //  Above 10 it stops working from
+					     //  some magic reason
 		minLength: 0,
 		templates: {
 			suggestion: function(hit) {
@@ -193,7 +193,7 @@ $(document).ready(function() {
 	$('.search-site-result.advanced, .search-icon').on('click', function(e){
 		e.stopPropagation();
 		e.preventDefault();
-		window.location.href = '/search#q='+ $("#cloud-search").val() + '&page=1';
+		window.location.href = '/search?q='+ $("#cloud-search").val() + '&page=1';
 	});
 
 
@@ -224,7 +224,7 @@ $(document).ready(function() {
 	searchInput.bind('typeahead:render', function(event, suggestions, async, dataset) {
 		if( suggestions != undefined && $('.tt-all-results').length <= 0){
 			$('.tt-dataset').append(
-				'<a id="search-advanced" href="/search#q='+ $("#cloud-search").val() + '&page=1" class="search-site-result advanced tt-suggestion">' +
+				'<a id="search-advanced" href="/search?q='+ $("#cloud-search").val() + '&page=1" class="search-site-result advanced tt-suggestion">' +
 					'<div class="search-hit">' +
 						'<div class="search-hit-thumbnail">' +
 							'<div class="search-hit-thumbnail-icon">' +

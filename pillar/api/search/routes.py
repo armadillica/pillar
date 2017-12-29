@@ -47,7 +47,12 @@ def search_nodes():
 def search_user():
     searchword = _valid_search()
     terms = _term_filters()
+    # data is the raw elasticseach output.
+    # we need to filter fields in case of user objects.
     data = queries.do_user_search(searchword, terms)
+
+    # filter sensitive stuff
+
     return jsonify(data)
 
 

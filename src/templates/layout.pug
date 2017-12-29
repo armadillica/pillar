@@ -31,12 +31,9 @@ html(lang="en")
 
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery-3.1.0.min.js')}}")
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.typeahead-0.11.1.min.js')}}")
-		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/algoliasearch-3.19.0.min.js')}}")
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/js.cookie-2.0.3.min.js')}}")
 
 		script.
-			var algolia = algoliasearch("{{config['ALGOLIA_USER']}}", "{{config['ALGOLIA_PUBLIC_KEY']}}");
-			var algoliaIndex = algolia.initIndex("{{config['ALGOLIA_INDEX_NODES']}}");
 
 			!function(e){"use strict";e.loadCSS=function(t,n,o){var r,i=e.document,l=i.createElement("link");if(n)r=n;else{var d=(i.body||i.getElementsByTagName("head")[0]).childNodes;r=d[d.length-1]}var a=i.styleSheets;l.rel="stylesheet",l.href=t,l.media="only x",r.parentNode.insertBefore(l,n?r:r.nextSibling);var f=function(e){for(var t=l.href,n=a.length;n--;)if(a[n].href===t)return e();setTimeout(function(){f(e)})};return l.onloadcssdefined=f,f(function(){l.media=o||"all"}),l},"undefined"!=typeof module&&(module.exports=e.loadCSS)}(this);
 
