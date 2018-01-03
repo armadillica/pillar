@@ -168,8 +168,8 @@ def grant_org_roles(user_doc):
 
     email = user_doc.get('email')
     if not email:
-        log.warning('Unable to check new user for organization membership, no email address! %r',
-                    user_doc)
+        log.info('Unable to check new user for organization membership, no email address: %r',
+                 user_doc)
         return
 
     org_roles = current_app.org_manager.unknown_member_roles(email)
