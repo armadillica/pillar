@@ -42,7 +42,7 @@ class FlaskInternalApi(pillarsdk.Api):
             content = self.handle_response(response, response.data)
         except:
             log.warning("%s: Response[%s]: %s", url, response.status_code,
-                        response.data)
+                        response.data, exc_info=True)
             raise
 
         return content
