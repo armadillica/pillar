@@ -210,14 +210,7 @@ class PillarServer(BlinkerCompatibleEve):
         self.sentry = sentry_extra.PillarSentry(
             self, logging=True, level=logging.WARNING,
             logging_exclusions=('werkzeug',))
-
-        # bugsnag.before_notify(bugsnag_extra.add_pillar_request_to_notification)
-        # got_request_exception.connect(self.__notify_bugsnag)
-        self.log.info('Sentry setup complete')
-
-    def __notify_bugsnag(self, sender, exception, **extra):
-        import bugsnag
-        bugsnag.auto_notify(exception)
+        self.log.debug('Sentry setup complete')
 
     def _config_google_cloud_storage(self):
         # Google Cloud project
