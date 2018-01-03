@@ -209,11 +209,12 @@ def fetch_blenderid_user() -> dict:
     :raises LogoutUser: when Blender ID tells us the current token is
         invalid, and the user should be logged out.
     """
-
     import httplib2  # used by the oauth2 package
 
+    my_log = log.getChild('fetch_blenderid_user')
+
     bid_url = '%s/api/user' % blender_id_endpoint()
-    log.debug('Fetching user info from %s', bid_url)
+    my_log.debug('Fetching user info from %s', bid_url)
 
     credentials = current_app.config['OAUTH_CREDENTIALS']['blender-id']
     oauth_token = session['blender_id_oauth_token']
@@ -226,23 +227,23 @@ def fetch_blenderid_user() -> dict:
     try:
         bid_resp = oauth_session.get(bid_url)
     except httplib2.HttpLib2Error:
-        log.exception('Error getting %s from BlenderID', bid_url)
+        my_log.exception('Error getting %s from BlenderID', bid_url)
         return {}
 
     if bid_resp.status_code == 403:
-        log.warning('Error %i from BlenderID %s, logging out user', bid_resp.status_code, bid_url)
+        my_log.warning('Error %i from BlenderID %s, logging out user', bid_resp.status_code, bid_url)
         raise LogoutUser()
 
     if bid_resp.status_code != 200:
-        log.warning('Error %i from BlenderID %s: %s', bid_resp.status_code, bid_url, bid_resp.text)
+        my_log.warning('Error %i from BlenderID %s: %s', bid_resp.status_code, bid_url, bid_resp.text)
         return {}
 
     payload = bid_resp.json()
     if not payload:
-        log.warning('Empty data returned from BlenderID %s', bid_url)
+        my_log.warning('Empty data returned from BlenderID %s', bid_url)
         return {}
 
-    log.debug('BlenderID returned %s', payload)
+    my_log.debug('BlenderID returned %s', payload)
     return payload
 
 
