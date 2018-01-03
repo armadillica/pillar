@@ -217,7 +217,11 @@ def fetch_blenderid_user() -> dict:
     my_log.debug('Fetching user info from %s', bid_url)
 
     credentials = current_app.config['OAUTH_CREDENTIALS']['blender-id']
-    oauth_token = session['blender_id_oauth_token']
+    oauth_token = session.get('blender_id_oauth_token')
+    if not oauth_token:
+        my_log.warning('no Blender ID oauth token found in user session')
+        return {}
+
     assert isinstance(oauth_token, str), f'oauth token must be str, not {type(oauth_token)}'
 
     oauth_session = OAuth2Session(
