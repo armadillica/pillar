@@ -4,30 +4,13 @@ import logging
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
 
-from pillar import current_app
 log = logging.getLogger(__name__)
 
 node_agg_terms = ['node_type', 'media', 'tags', 'is_free']
 user_agg_terms = ['roles', ]
 
-
-class TheELKClient():
-    """
-    Elastic-client singleton.
-
-    `current_app` is not available when on import
-    """
-    client: Elasticsearch = None
-
-    def get_client(self):
-        if not self.client:
-            self.client = Elasticsearch(
-                current_app.config['ELASTIC_SEARCH_HOSTS'])
-        else:
-            return self.client
-
-
-elk = TheELKClient()
+# Will be set in setup_app()
+client: Elasticsearch = None
 
 
 def add_aggs_to_search(search, agg_terms):
@@ -59,7 +42,7 @@ def nested_bool(must: list, should: list, terms: dict) -> Search:
     must.append(bool_query)
     bool_query = Q('bool', must=must)
 
-    search = Search(using=elk.get_client())
+    search = Search(using=client)
     search.query = bool_query
 
     return search
@@ -147,7 +130,7 @@ def do_user_search_admin(query: str) -> dict:
         Q('match', full_name=query),
     ]
     bool_query = Q('bool', should=should)
-    search = Search(using=elk.get_client())
+    search = Search(using=client)
     search.query = bool_query
 
     if log.isEnabledFor(logging.DEBUG):
@@ -159,3 +142,11 @@ def do_user_search_admin(query: str) -> dict:
         log.debug(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()
+
+
+def setup_app(app):
+    global client
+
+    hosts = app.config['ELASTIC_SEARCH_HOSTS']
+    log.getChild('setup_app').info('Creating ElasticSearch client for %s', hosts)
+    client = Elasticsearch(hosts)
