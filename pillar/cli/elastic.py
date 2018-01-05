@@ -76,21 +76,26 @@ def _public_project_ids() -> typing.List[bson.ObjectId]:
 def _reindex_nodes():
     db = current_app.db()
     nodes_coll = db['nodes']
-    nodes_coll = nodes_coll.find({'project': {'$in': _public_project_ids()}})
-    node_count = nodes_coll.count()
+    nodes = nodes_coll.find({'project': {'$in': _public_project_ids()}})
+    node_count = nodes.count()
 
-    log.debug('Nodes %d will be reindexed in Elastic', node_count)
+    log.info('Nodes %d will be reindexed in Elastic', node_count)
 
     from pillar.celery.search_index_tasks import prepare_node_data
     from pillar.api.search import elastic_indexing
 
-    for node in nodes_coll:
+    indexed = 0
+    for idx, node in enumerate(nodes):
+        if idx % 100 == 0:
+            log.info('Processing node %d/%d', idx+1, node_count)
         try:
             to_index = prepare_node_data('', node=node)
             elastic_indexing.index_node_save(to_index)
         except (KeyError, AttributeError):
-            log.exception('%s is missing Field', node)
-            continue
+            log.exception('Node %s is missing Field', node)
+        else:
+            indexed += 1
+    log.info('Reindexed %d/%d nodes', indexed, node_count)
 
 
 @manager_elastic.option('indexname', nargs='?')
