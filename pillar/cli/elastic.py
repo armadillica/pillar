@@ -85,7 +85,10 @@ def _public_project_ids() -> typing.List[bson.ObjectId]:
 def _reindex_nodes():
     db = current_app.db()
     nodes_coll = db['nodes']
-    nodes = nodes_coll.find({'project': {'$in': _public_project_ids()}})
+    nodes = nodes_coll.find({
+        'project': {'$in': _public_project_ids()},
+        '_deleted': {'$ne': True},
+    })
     node_count = nodes.count()
 
     log.info('Nodes %d will be reindexed in Elastic', node_count)
