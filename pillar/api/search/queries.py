@@ -6,8 +6,8 @@ from elasticsearch_dsl import Search, Q
 
 log = logging.getLogger(__name__)
 
-node_agg_terms = ['node_type', 'media', 'tags', 'is_free']
-user_agg_terms = ['roles', ]
+NODE_AGG_TERMS = ['node_type', 'media', 'tags', 'is_free']
+USER_AGG_TERMS = ['roles', ]
 
 # Will be set in setup_app()
 client: Elasticsearch = None
@@ -73,7 +73,7 @@ def do_node_search(query: str, terms: dict) -> dict:
         should = []
 
     search = nested_bool(must, should, terms)
-    add_aggs_to_search(search, node_agg_terms)
+    add_aggs_to_search(search, NODE_AGG_TERMS)
 
     if log.isEnabledFor(logging.DEBUG):
         # logging removes readable indendation.
@@ -103,7 +103,7 @@ def do_user_search(query: str, terms: dict) -> dict:
         should = []
 
     search = nested_bool(must, should, terms)
-    add_aggs_to_search(search, user_agg_terms)
+    add_aggs_to_search(search, USER_AGG_TERMS)
 
     if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(search.to_dict(), indent=4))
@@ -138,6 +138,7 @@ def do_user_search_admin(query: str) -> dict:
 
     search = Search(using=client)
     search.query = Q('bool', should=should)
+    add_aggs_to_search(search, USER_AGG_TERMS)
 
     if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(search.to_dict(), indent=4))
