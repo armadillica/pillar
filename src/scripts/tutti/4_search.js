@@ -33,7 +33,7 @@ var elasticSearcher = (function() {
 
     //error callback
     error: (function(message){
-      console.log(message);
+      toastr.error(message);
     }),
 
     on: (function(type, callback){
@@ -72,7 +72,8 @@ var elasticSearcher = (function() {
 
       var pstr = jQuery.param( params );
 
-      var jqxhr = $.getJSON("/api/newsearch" + deze.url + "?"+ pstr, function( data ) {
+      $.getJSON("/api/newsearch" + deze.url + "?"+ pstr)
+      .done(function (data) {
         let hits = data.hits.hits;
         var newhits = hits.map(function(hit){
           return hit._source;
@@ -87,7 +88,11 @@ var elasticSearcher = (function() {
           'page': deze.page,
           'aggs': data.aggregations,
         });
-      });
+      })
+      .fail(function(err) {
+          toastr.error(xhrErrorResponseMessage(err), 'Unable to perform search:');
+      })
+      ;
 
     })
 
