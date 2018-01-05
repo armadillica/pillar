@@ -12,7 +12,7 @@ var elasticSearcher = (function() {
     newhits: [],
     terms: {},
     page: 0,
-    last_params: null,  // to prevent re-querying for the same thing.
+    last_query: null,  // to prevent re-querying for the same thing.
 
     setQuery: (function(q, _url){
       deze.query=q;
@@ -67,16 +67,11 @@ var elasticSearcher = (function() {
         q: deze.query,
         page: deze.page,
       };
-
-      if (deze.last_params != null && deze.last_params.q == params.q && deze.last_params.page == params.page) {
-          // We're requesting exactly the same thing as before, don't bother.
-          return;
-      }
-
       //add term filters
       Object.assign(params, deze.terms);
 
       var pstr = jQuery.param( params );
+      if (pstr === deze.last_query) return;
 
       $.getJSON("/api/newsearch" + deze.url + "?"+ pstr)
       .done(function (data) {
@@ -87,7 +82,7 @@ var elasticSearcher = (function() {
 
         deze.newhits = newhits.slice(0);
         //cb(newhits.slice(0));
-        deze.last_params = params;
+        deze.last_query = pstr;
         deze.results({
           'count': data.hits.total,
           'hits': newhits.slice(0),
@@ -98,7 +93,7 @@ var elasticSearcher = (function() {
       })
       .fail(function(err) {
           toastr.error(xhrErrorResponseMessage(err), 'Unable to perform search:');
-          deze.last_params = null;
+          deze.last_query = null;
       })
       ;
 
