@@ -80,13 +80,12 @@ def do_node_search(query: str, terms: dict) -> dict:
     add_aggs_to_search(search, NODE_AGG_TERMS)
 
     if log.isEnabledFor(logging.DEBUG):
-        # logging removes readable indendation.
-        print(json.dumps(search.to_dict(), indent=4))
+        log.debug(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()
 
     if log.isEnabledFor(logging.DEBUG):
-        print(json.dumps(response.to_dict(), indent=4))
+        log.debug(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()
 
