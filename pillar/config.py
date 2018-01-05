@@ -80,13 +80,10 @@ ALGOLIA_INDEX_NODES = 'dev_Nodes'
 
 SEARCH_BACKENDS = ('algolia', 'elastic')    # search backend we use
 
-
 ELASTIC_INDICES = {
-    # elasticsearch indexes
     'NODE': 'nodes',
     'USER': 'users',
 }
-
 
 def get_docker_host():
     """

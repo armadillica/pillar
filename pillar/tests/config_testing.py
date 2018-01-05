@@ -35,3 +35,8 @@ OAUTH_CREDENTIALS = {
         'secret': 'google-secret'
     }
 }
+
+ELASTIC_INDICES = {
+    'NODE': 'test_nodes',
+    'USER': 'test_users',
+}
