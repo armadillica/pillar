@@ -14,11 +14,12 @@ log = logging.getLogger(__name__)
 
 class ResetIndexTask(object):
     """ Clear and build index / mapping """
-    index_key = ''
-    """Key into the ELASTIC_INDICES dict in the app config."""
+
+    # Key into the ELASTIC_INDICES dict in the app config.
+    index_key: str = ''
 
     # List of elastic document  types
-    doc_types = []
+    doc_types: List = []
     name = 'remove index'
 
     def __init__(self):

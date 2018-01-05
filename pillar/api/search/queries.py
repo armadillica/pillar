@@ -1,7 +1,8 @@
 import json
+import logging
+
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
-import logging
 
 from pillar import current_app
 log = logging.getLogger(__name__)
@@ -12,7 +13,9 @@ user_agg_terms = ['roles', ]
 
 class TheELKClient():
     """
-    current_app is not available when on import
+    Elastic-client singleton.
+
+    `current_app` is not available when on import
     """
     client: Elasticsearch = None
 
@@ -22,6 +25,7 @@ class TheELKClient():
                 current_app.config['ELASTIC_SEARCH_HOSTS'])
         else:
             return self.client
+
 
 elk = TheELKClient()
 
@@ -89,6 +93,7 @@ def do_search(query: str, terms: dict) -> dict:
     add_aggs_to_search(search, node_agg_terms)
 
     if log.isEnabledFor(logging.DEBUG):
+        # logging removes readable indendation.
         print(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()

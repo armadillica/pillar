@@ -79,7 +79,7 @@ def _reindex_nodes():
     nodes_coll = nodes_coll.find({'project': {'$in': _public_project_ids()}})
     node_count = nodes_coll.count()
 
-    log.debug('Reindexing nodes %d in Elastic', node_count)
+    log.debug('Nodes %d will be reindexed in Elastic', node_count)
 
     from pillar.celery.search_index_tasks import prepare_node_data
     from pillar.api.search import elastic_indexing
@@ -89,7 +89,7 @@ def _reindex_nodes():
             to_index = prepare_node_data('', node=node)
             elastic_indexing.index_node_save(to_index)
         except (KeyError, AttributeError):
-            log.exception('Field is missing for %s', node)
+            log.exception('%s is missing Field', node)
             continue
 
 
