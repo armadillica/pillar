@@ -39,7 +39,7 @@ def _term_filters() -> dict:
 def search_nodes():
     searchword = _valid_search()
     terms = _term_filters()
-    data = queries.do_search(searchword, terms)
+    data = queries.do_node_search(searchword, terms)
     return jsonify(data)
 
 

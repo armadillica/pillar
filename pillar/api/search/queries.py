@@ -48,7 +48,7 @@ def nested_bool(must: list, should: list, terms: dict) -> Search:
     return search
 
 
-def do_search(query: str, terms: dict) -> dict:
+def do_node_search(query: str, terms: dict) -> dict:
     """
     Given user query input and term refinements
     search for public published nodes
