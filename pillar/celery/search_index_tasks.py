@@ -126,7 +126,7 @@ def prepare_user_data(user_id: str, user=None) -> dict:
         user = users_coll.find_one({'_id': user_oid})
 
     if user is None:
-        log.warning('Unable to find user %s, not updating Algolia.', user_id)
+        log.warning('Unable to find user %s, not updating search index.', user_id)
         return {}
 
     user_roles = set(user.get('roles', ()))

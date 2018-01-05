@@ -41,11 +41,10 @@ class ResetIndexTask(object):
 
         try:
             idx.delete(ignore=404)
-            log.info("Deleted index %s", index)
         except NotFoundError:
             log.warning("Could not delete index '%s', ignoring", index)
         else:
-            log.warning("Could not delete index '%s', ignoring", index)
+            log.info("Deleted index %s", index)
 
         # create doc types
         for dt in self.doc_types:

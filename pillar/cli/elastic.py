@@ -42,6 +42,9 @@ def reset_index(indices):
 def _reindex_users():
     db = current_app.db()
     users_coll = db['users']
+
+    # Note that this also finds service accounts, which are filtered out
+    # in prepare_user_data(…)
     users = users_coll.find()
     user_count = users.count()
 
