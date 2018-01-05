@@ -110,12 +110,12 @@ def do_user_search(query: str, terms: dict) -> dict:
     add_aggs_to_search(search, user_agg_terms)
 
     if log.isEnabledFor(logging.DEBUG):
-        print(json.dumps(search.to_dict(), indent=4))
+        log.debug(json.dumps(search.to_dict(), indent=4))
 
     response = search.execute()
 
     if log.isEnabledFor(logging.DEBUG):
-        print(json.dumps(response.to_dict(), indent=4))
+        log.debug(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()
 
