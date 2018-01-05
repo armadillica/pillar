@@ -92,7 +92,9 @@ script.
 	// If there's a comment link in the URL, scroll there
 	function scrollToLinkedComment() {
 		var scrollToId = location.hash;
-		if (scrollToId.length <= 1) return;
+
+		// Check that it's a valid ObjectID before passing it to jQuery.
+		if (!/^[a-fA-F0-9]{24}$/.test(scrollToId)) return;
 
 		$(scrollToId)
 			.addClass('comment-linked')
