@@ -103,7 +103,6 @@ $(document).ready(function() {
     function renderHits(content) {
         var hitsHtml = '';
         for (var i = 0; i < content.hits.length; ++i) {
-            console.log('rendering hit ', i, ': ', content.hits[i]);
             var created = content.hits[i].created_at;
             if (created) {
                 content.hits[i].created_at = convertTimestamp(created);
