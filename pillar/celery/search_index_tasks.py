@@ -114,7 +114,9 @@ def prepare_node_data(node_id: str, node: dict=None) -> dict:
 
 def prepare_user_data(user_id: str, user=None) -> dict:
     """
-    Prepare data to index for user node
+    Prepare data to index for user node.
+
+    Returns an empty dict if the user should not be indexed.
     """
 
     if not user:
@@ -124,13 +126,13 @@ def prepare_user_data(user_id: str, user=None) -> dict:
         user = users_coll.find_one({'_id': user_oid})
 
     if user is None:
-        log.warning('Unable to find user %s, not updating Algolia.', user_oid)
-        return
+        log.warning('Unable to find user %s, not updating Algolia.', user_id)
+        return {}
 
     user_roles = set(user.get('roles', ()))
 
     if 'service' in user_roles:
-        return
+        return {}
 
     # Strip unneeded roles
     index_roles = user_roles.intersection(current_app.user_roles_indexable)
