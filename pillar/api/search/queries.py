@@ -4,13 +4,26 @@ from elasticsearch_dsl import Search, Q
 import logging
 
 from pillar import current_app
-
-client = Elasticsearch()
-
 log = logging.getLogger(__name__)
 
 node_agg_terms = ['node_type', 'media', 'tags', 'is_free']
 user_agg_terms = ['roles', ]
+
+
+class TheELKClient():
+    """
+    current_app is not available when on import
+    """
+    client: Elasticsearch = None
+
+    def get_client(self):
+        if not self.client:
+            self.client = Elasticsearch(
+                current_app.config['ELASTIC_SEARCH_HOSTS'])
+        else:
+            return self.client
+
+elk = TheELKClient()
 
 
 def add_aggs_to_search(search, agg_terms):
@@ -42,7 +55,7 @@ def nested_bool(must: list, should: list, terms: dict) -> Search:
     must.append(bool_query)
     bool_query = Q('bool', must=must)
 
-    search = Search(using=client)
+    search = Search(using=elk.get_client())
     search.query = bool_query
 
     return search
@@ -129,7 +142,7 @@ def do_user_search_admin(query: str) -> dict:
         Q('match', full_name=query),
     ]
     bool_query = Q('bool', should=should)
-    search = Search(using=client)
+    search = Search(using=elk.get_client())
     search.query = bool_query
 
     if log.isEnabledFor(logging.DEBUG):

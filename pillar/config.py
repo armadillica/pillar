@@ -80,12 +80,35 @@ ALGOLIA_INDEX_NODES = 'dev_Nodes'
 
 SEARCH_BACKENDS = ('algolia', 'elastic')    # search backend we use
 
-ELASTIC_SEARCH_HOSTS = ['elasticsearch']    # elasticsearch hosts
+
 ELASTIC_INDICES = {
     # elasticsearch indexes
     'NODE': 'nodes',
     'USER': 'users',
 }
+
+
+def get_docker_host():
+    """
+    Looks for the DOCKER_HOST environment variable to find the VM
+    running docker-machine.
+
+    If the environment variable is not found, it is assumed that
+    you're running docker on localhost.
+    """
+    d_host = os.getenv('DOCKER_HOST', None)
+    if d_host:
+        if re.match(r'^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$', d_host):
+            return d_host
+
+        return re.match(r'tcp://(.*?):\d+', d_host).group(1)
+    return 'localhost'
+
+
+# Elasticsearch hosts
+ELASTIC_SEARCH_HOSTS = ["{}:{}".format(
+    os.getenv('ELASTICSEARCH_PORT_9200_TCP_ADDR', get_docker_host()),
+    os.getenv('ELASTICSEARCH_PORT_9200_TCP_PORT', 9200))]
 
 
 ZENCODER_API_KEY = '-SECRET-'
