@@ -92,6 +92,7 @@ def do_user_search(query: str, terms: dict) -> dict:
     should = [
         Q('match', username=query),
         Q('match', full_name=query),
+        Q('match', email=query),
     ]
 
     must = [
