@@ -77,6 +77,8 @@ def do_node_search(query: str, terms: dict) -> dict:
         should = []
 
     search = nested_bool(must, should, terms, index_alias='NODE')
+    if not query:
+        search = search.sort('-created_at')
     add_aggs_to_search(search, NODE_AGG_TERMS)
 
     if log.isEnabledFor(logging.DEBUG):
