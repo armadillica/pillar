@@ -99,10 +99,6 @@ def do_user_search(query: str, terms: dict) -> dict:
         Q('term', _type='user')
     ]
 
-    # We most likely got and id field. we MUST find it.
-    if len(query) == len('563aca02c379cf0005e8e17d'):
-        must.append(Q('term', _id=query))
-
     if not query:
         should = []
 
@@ -130,9 +126,13 @@ def do_user_search_admin(query: str) -> dict:
         Q('match', email=query),
         Q('match', full_name=query),
     ]
-    bool_query = Q('bool', should=should)
+
+    # We most likely got and id field. we should find it.
+    if len(query) == len('563aca02c379cf0005e8e17d'):
+        should.append(Q('term', objectID=query))
+
     search = Search(using=client)
-    search.query = bool_query
+    search.query = Q('bool', should=should)
 
     if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(search.to_dict(), indent=4))
