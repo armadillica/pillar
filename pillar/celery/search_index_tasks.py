@@ -40,28 +40,11 @@ def _handle_picture(node: dict, to_index: dict):
     lookup = {'_id': ObjectId(node['picture'])}
     picture = files_collection.find_one(lookup)
 
-    img_variation_t = next(
-        (item for item in picture.get('variations', [])
-         if item['size'] == 't'), None)
-
-    if not img_variation_t:
-        return
-
-    try:
-        pic_pid = picture['project']
-    except KeyError:
-        if picture.get('backend') != 'pillar':
-            # We know for sure that locally saved images don't need regeneration,
-            # so don't bother warning about that.
-            log.warning('Picture %s has no project ID, unable to regenerate link',
-                        picture['_id'])
-        to_index['picture'] = img_variation_t['link']
-    else:
-        to_index['picture'] = generate_link(
-            picture['backend'],
-            img_variation_t['file_path'],
-            project_id=str(pic_pid),
-            is_public=True)
+    for item in picture.get('variations', []):
+        if item['size'] != 't':
+            continue
+        to_index['picture'] = item['link']
+        break
 
 
 def prepare_node_data(node_id: str, node: dict=None) -> dict:
