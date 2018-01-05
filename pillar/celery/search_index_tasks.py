@@ -66,7 +66,9 @@ def _handle_picture(node: dict, to_index: dict):
 
 def prepare_node_data(node_id: str, node: dict=None) -> dict:
     """
-    Given node by id or actual node build data object with fields to index
+    Given node by id or actual node build data object with fields to index.
+
+    Returns an empty dict when the node shouldn't be indexed.
     """
 
     if node_id and node:
@@ -77,13 +79,13 @@ def prepare_node_data(node_id: str, node: dict=None) -> dict:
 
     if node is None:
         log.warning('Unable to find node %s, not updating.', node_id)
-        return
+        return {}
 
     if node['node_type'] not in INDEX_ALLOWED_NODE_TYPES:
-        return
+        return {}
     # If a nodes does not have status published, do not index
     if node['properties'].get('status') != 'published':
-        return
+        return {}
 
     projects_collection = current_app.data.driver.db['projects']
     project = projects_collection.find_one({'_id': ObjectId(node['project'])})
@@ -105,9 +107,8 @@ def prepare_node_data(node_id: str, node: dict=None) -> dict:
             '_id': user['_id'],
             'full_name': user['full_name']
         },
+        'description': node.get('description'),
     }
-
-    to_index['description'] = node.get('description')
 
     _handle_picture(node, to_index)
 
