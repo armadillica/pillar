@@ -11,7 +11,7 @@ log = logging.getLogger(__name__)
 blueprint_search = Blueprint('elksearch', __name__)
 
 
-terms = [
+TERMS = [
     'node_type', 'media',
     'tags', 'is_free', 'projectname',
     'roles',
@@ -32,7 +32,7 @@ def _term_filters() -> dict:
     return mapping with term field name
     and provided user term value
     """
-    return {term: request.args.get(term, '')  for term in terms}
+    return {term: request.args.get(term, '') for term in TERMS}
 
 
 @blueprint_search.route('/')
@@ -83,7 +83,7 @@ def search_user_admin():
     """
 
     searchword = _valid_search()
-
-    data = queries.do_user_search_admin(searchword)
+    terms = _term_filters()
+    data = queries.do_user_search_admin(searchword, terms)
 
     return jsonify(data)

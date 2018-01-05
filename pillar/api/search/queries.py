@@ -121,7 +121,7 @@ def do_user_search(query: str, terms: dict) -> dict:
     return response.to_dict()
 
 
-def do_user_search_admin(query: str) -> dict:
+def do_user_search_admin(query: str, terms: dict) -> dict:
     """
     return users seach result dict object
     search all user fields and provide aggregation information
@@ -145,8 +145,7 @@ def do_user_search_admin(query: str) -> dict:
     else:
         should = []
 
-    search = Search(using=client, index=current_app.config['ELASTIC_INDICES']['USER'])
-    search.query = Q('bool', should=should)
+    search = nested_bool([], should, terms, index_alias='USER')
     add_aggs_to_search(search, USER_AGG_TERMS)
 
     if log.isEnabledFor(logging.DEBUG):
