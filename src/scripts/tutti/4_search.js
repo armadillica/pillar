@@ -14,7 +14,6 @@ var elasticSearcher = (function() {
     page: 0,
 
     setQuery: (function(q, _url){
-      console.log('setQuery!: ' + q + 'what :'+ _url);
       deze.query=q;
       if (_url !== undefined) {
         deze.url=_url;
@@ -129,8 +128,6 @@ var elasticSearch = (function($, url) {
     if(url === undefined){
       url = '';
     }
-
-    console.log('searching! '+ url + ' q= ' + q);
 
     $.getJSON("/api/newsearch" + url + "?q=" + q, function( data ) {
       let hits = data.hits.hits;
