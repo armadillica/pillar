@@ -1,5 +1,4 @@
 $(document).ready(function() {
-
     var HITS_PER_PAGE = 25;
     var MAX_VALUES_PER_FACET = 30;
 
@@ -26,19 +25,21 @@ $(document).ready(function() {
 
     // Input binding
     $inputField.on('keyup change', function() {
-      var query = $inputField.val();
+        var query = $inputField.val();
 
-      if(query === undefined) { return; }
+        if (query === undefined) {
+            return;
+        }
 
-      toggleIconEmptyInput(!query.trim());
+        toggleIconEmptyInput(!query.trim());
 
-      // what could be like "/users"
-      search.setQuery(query, what);
-      // setURLParams(search);
-      search.execute();
+        // what could be like "/users"
+        search.setQuery(query, what);
+        // setURLParams(search);
+        search.execute();
     }).focus();
 
-    search.on('results', function(content){
+    search.on('results', function(content) {
         renderStats(content);
         renderHits(content);
         renderFacets(content);
@@ -128,51 +129,42 @@ $(document).ready(function() {
         // If no results
         if (content.hits.length === 0) {
             $facets.empty();
-        facets =[];
+            facets = [];
             return;
         }
 
-    var storeValue = function (values, label){
+        var storeValue = function(values, label) {
+            return function(item) {
+                let refined = search.isRefined(label, item.key);
+                values.push({
+                    facet: label,
+                    label: item.key,
+                    value: item.key,
+                    count: item.doc_count,
+                    refined: refined,
+                });
+            };
+        };
 
+        var facets = [];
+        var aggs = content.aggs;
+        for (var label in aggs) {
+            let values = [];
+            let buckets = aggs[label].buckets;
 
-      return function(item){
+            if (buckets.length === 0) {
+                continue;
+            }
 
-        let refined = search.isRefined(label, item.key);
-
-        values.push({
-          facet: label,
-          label: item.key,
-          value: item.key,
-          count: item.doc_count,
-          refined: refined,
-        });
-      };
-    };
-
-    var facets =[];
-    var aggs = content.aggs;
-
-    for (var label in aggs) {
-
-      let values = [];
-
-      let buckets = aggs[label].buckets;
-
-      if (buckets.length === 0) { continue; }
-
-
-
-      buckets.forEach(storeValue(values, label));
-
-      facets.push({
-        title: label,
-        values: values.slice(0),
-      });
-    }
+            buckets.forEach(storeValue(values, label));
+            facets.push({
+                title: label,
+                values: values.slice(0),
+            });
+        }
 
         // Display facets
         var facetsHtml = '';
-
         for (var indexFacet = 0; indexFacet < facets.length; ++indexFacet) {
             var facet = facets[indexFacet];
             //title, values[facet, value]
@@ -240,7 +232,7 @@ $(document).ready(function() {
 
     $(document).on('click', '.toggleRefine', function() {
         search.toggleTerm($(this).data('facet'), $(this).data('value'));
-  search.execute();
+        search.execute();
         return false;
     });
 
@@ -268,7 +260,6 @@ $(document).ready(function() {
     $('#facets').on("mouseenter mouseleave", ".facet_link", function(e) {
         $(this).parent().find('.button-checkbox button.btn').toggleClass("hover");
     });
-
 
     /************
      * HELPERS
@@ -342,5 +333,4 @@ $(document).ready(function() {
     // do empty search to fill aggregations
     search.setQuery('', what);
     search.execute();
-
 });
