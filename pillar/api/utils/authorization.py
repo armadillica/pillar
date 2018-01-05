@@ -345,13 +345,13 @@ def require_login(*, require_roles=set(),
                 return render_error()
 
             if require_roles and not current_user.matches_roles(require_roles, require_all):
-                log.warning('User %s is authenticated, but does not have required roles %s to '
-                            'access %s', current_user.user_id, require_roles, func)
+                log.info('User %s is authenticated, but does not have required roles %s to '
+                         'access %s', current_user.user_id, require_roles, func)
                 return render_error()
 
             if require_cap and not current_user.has_cap(require_cap):
-                log.warning('User %s is authenticated, but does not have required capability %s to '
-                            'access %s', current_user.user_id, require_cap, func)
+                log.info('User %s is authenticated, but does not have required capability %s to '
+                         'access %s', current_user.user_id, require_cap, func)
                 return render_error()
 
             return func(*args, **kwargs)
