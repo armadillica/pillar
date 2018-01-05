@@ -85,16 +85,9 @@ $(document).ready(function() {
     // Initial search
     initWithUrlParams();
 
-    function convertTimestamp(timestamp) {
-        var d = new Date(timestamp * 1000), // Convert the passed timestamp to milliseconds
-            yyyy = d.getFullYear(),
-            mm = ('0' + (d.getMonth() + 1)).slice(-2), // Months are zero based. Add leading 0.
-            dd = ('0' + d.getDate()).slice(-2), // Add leading 0.
-            time;
-
-        time = dd + '/' + mm + '/' + yyyy;
-
-        return time;
+    function convertTimestamp(iso8601) {
+        var d = new Date(iso8601)
+        return d.toLocaleDateString();
     }
 
 
@@ -110,13 +103,14 @@ $(document).ready(function() {
     function renderHits(content) {
         var hitsHtml = '';
         for (var i = 0; i < content.hits.length; ++i) {
-            var created = content.hits[i].created;
+            console.log('rendering hit ', i, ': ', content.hits[i]);
+            var created = content.hits[i].created_at;
             if (created) {
-                content.hits[i].created = convertTimestamp(created);
+                content.hits[i].created_at = convertTimestamp(created);
             }
-            var updated = content.hits[i].updated;
+            var updated = content.hits[i].updated_at;
             if (updated) {
-                content.hits[i].updated = convertTimestamp(updated);
+                content.hits[i].updated_at = convertTimestamp(updated);
             }
             hitsHtml += hitTemplate.render(content.hits[i]);
         }
