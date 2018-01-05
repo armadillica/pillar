@@ -363,6 +363,9 @@ function getNotificationsLoop() {
 
 /* Returns a more-or-less reasonable message given an error response object. */
 function xhrErrorResponseMessage(err) {
+	if (err.status == 0)
+		return 'Unable to connect to the server, check your internet connection and try again.';
+
     if (typeof err.responseJSON == 'undefined')
         return err.statusText;
 
