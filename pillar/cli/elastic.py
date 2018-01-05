@@ -42,14 +42,18 @@ def reset_index(indices):
 def _reindex_users():
     db = current_app.db()
     users_coll = db['users']
-    user_count = users_coll.count()
+    users = users_coll.find()
+    user_count = users.count()
 
-    log.debug('Reindexing users %d in Elastic', user_count)
+    log.info('Reindexing %d users in Elastic', user_count)
 
     from pillar.celery.search_index_tasks import prepare_user_data
     from pillar.api.search import elastic_indexing
 
-    for user in users_coll.find():
+    indexed = 0
+    for idx, user in enumerate(users):
+        if idx % 100 == 0:
+            log.info('Processing user %d/%d', idx+1, user_count)
         to_index = prepare_user_data('', user=user)
         if not to_index:
             log.debug('missing user..')
@@ -59,7 +63,9 @@ def _reindex_users():
             elastic_indexing.push_updated_user(to_index)
         except(KeyError, AttributeError):
             log.exception('Field is missing for %s', user)
-            continue
+        else:
+            indexed += 1
+    log.info('Reindexed %d/%d users', indexed, user_count)
 
 
 def _public_project_ids() -> typing.List[bson.ObjectId]:
