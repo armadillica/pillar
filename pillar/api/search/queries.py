@@ -129,7 +129,12 @@ def do_user_search_admin(query: str) -> dict:
 
     # We most likely got and id field. we should find it.
     if len(query) == len('563aca02c379cf0005e8e17d'):
-        should.append(Q('term', objectID=query))
+        should.append({'term': {
+            'objectID': {
+                'value': query,  # the thing we're looking for
+                'boost': 100,  # how much more it counts for the score
+            }
+        }})
 
     search = Search(using=client)
     search.query = Q('bool', should=should)
