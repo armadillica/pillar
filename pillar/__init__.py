@@ -866,3 +866,11 @@ class PillarServer(BlinkerCompatibleEve):
     @property
     def user_caps(self) -> typing.Mapping[str, typing.FrozenSet[str]]:
         return self._user_caps
+
+    @property
+    def real_app(self) -> 'PillarServer':
+        """The real application object.
+
+        Can be used to obtain the real app object from a LocalProxy.
+        """
+        return self
