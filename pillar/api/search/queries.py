@@ -123,6 +123,9 @@ def _common_user_search(query: str) -> (typing.List[Query], typing.List[Query]):
         Q('match', email=query),
     ]
 
+    if '@' in query:
+        should.append(Q('term', email_exact=query))
+
     return [], should
 
 

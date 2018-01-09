@@ -53,6 +53,7 @@ class User(es.DocType):
         fielddata=True,
         analyzer=autocomplete,
     )
+    email_exact = es.Keyword()
 
     class Meta:
         index = 'users'
@@ -131,6 +132,8 @@ def create_doc_from_user_data(user_to_index: dict) -> User:
     doc.roles = list(map(str, user_to_index['roles']))
     doc.groups = list(map(str, user_to_index['groups']))
     doc.email = user_to_index['email']
+    doc.email_exact = user_to_index['email']
+
     return doc
 
 
