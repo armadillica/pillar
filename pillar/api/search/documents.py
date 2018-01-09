@@ -1,16 +1,16 @@
 """
 Define elasticsearch document mapping.
 
-Elasticsearch consist of two parts.
+Elasticsearch consist of two parts:
 
-Part 1: Define the documents in which you
-define who fields will be indexed.
-Part 2: Building elasticsearch json queries.
+- Part 1: Define the documents in which you define who fields will be indexed.
+- Part 2: Building elasticsearch json queries.
 
-BOTH of these parts are equally importand to have
-a search API that returns relevant results.
+BOTH of these parts are equally importand to havea search API that returns
+relevant results.
 """
 import logging
+import typing
 
 import elasticsearch_dsl as es
 from elasticsearch_dsl import analysis
@@ -107,17 +107,17 @@ class Node(es.DocType):
         index = 'nodes'
 
 
-def create_doc_from_user_data(user_to_index: dict) -> User:
+def create_doc_from_user_data(user_to_index: dict) -> typing.Optional[User]:
     """
-    We are indexing a user object which identical between search backends
+    Create the document to store in a search engine for this user.
 
-    see celery.search_index_task.py
+    See pillar.celery.search_index_task
 
-    this functions returns a proper ElasticSearch document
+    :returns: an ElasticSearch document or None if user_to_index has no data.
     """
 
     if not user_to_index:
-        return
+        return None
 
     doc_id = str(user_to_index.get('objectID', ''))
 
@@ -137,24 +137,24 @@ def create_doc_from_user_data(user_to_index: dict) -> User:
     return doc
 
 
-def create_doc_from_node_data(node_to_index: dict) -> Node:
+def create_doc_from_node_data(node_to_index: dict) -> typing.Optional[Node]:
     """
-    We are indexing a Node object which identical between search backends
+    Create the document to store in a search engine for this node.
 
-    see celery.search_index_task.py
+    See pillar.celery.search_index_task
 
-    this functions returns a proper ElasticSearch document
+    :returns: an ElasticSearch document or None if node_to_index has no data.
     """
 
     if not node_to_index:
-        return
+        return None
 
     # node stuff
     doc_id = str(node_to_index.get('objectID', ''))
 
     if not doc_id:
         log.error('ID missing %s', node_to_index)
-        return
+        return None
 
     doc = Node(_id=doc_id)
 
