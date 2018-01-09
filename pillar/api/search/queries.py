@@ -1,8 +1,10 @@
 import json
 import logging
+import typing
 
 from elasticsearch import Elasticsearch
 from elasticsearch_dsl import Search, Q
+from elasticsearch_dsl.query import Query
 
 from pillar import current_app
 
@@ -95,19 +97,7 @@ def do_node_search(query: str, terms: dict) -> dict:
 def do_user_search(query: str, terms: dict) -> dict:
     """ return user objects represented in elasicsearch result dict"""
 
-    if query:
-        should = [
-            Q('match', username=query),
-            Q('match', full_name=query),
-            Q('match', email=query),
-        ]
-    else:
-        should = []
-
-    must = [
-        Q('term', _type='user')
-    ]
-
+    must, should = _common_user_search(query)
     search = nested_bool(must, should, terms, index_alias='USER')
     add_aggs_to_search(search, USER_AGG_TERMS)
 
@@ -122,19 +112,29 @@ def do_user_search(query: str, terms: dict) -> dict:
     return response.to_dict()
 
 
+def _common_user_search(query: str) -> (typing.List[Query], typing.List[Query]):
+    """Construct (must,shoud) for regular + admin user search."""
+    if not query:
+        return [], []
+
+    should = [
+        Q('match', username=query),
+        Q('match', full_name=query),
+        Q('match', email=query),
+    ]
+
+    return [], should
+
+
 def do_user_search_admin(query: str, terms: dict) -> dict:
     """
     return users seach result dict object
     search all user fields and provide aggregation information
     """
 
-    if query:
-        should = [
-            Q('match', username=query),
-            Q('match', email=query),
-            Q('match', full_name=query),
-        ]
+    must, should = _common_user_search(query)
 
+    if query:
         # We most likely got and id field. we should find it.
         if len(query) == len('563aca02c379cf0005e8e17d'):
             should.append({'term': {
@@ -143,10 +143,8 @@ def do_user_search_admin(query: str, terms: dict) -> dict:
                     'boost': 100,  # how much more it counts for the score
                 }
             }})
-    else:
-        should = []
 
-    search = nested_bool([], should, terms, index_alias='USER')
+    search = nested_bool(must, should, terms, index_alias='USER')
     add_aggs_to_search(search, USER_AGG_TERMS)
 
     if log.isEnabledFor(logging.DEBUG):
