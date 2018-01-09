@@ -15,10 +15,7 @@ import logging
 import elasticsearch_dsl as es
 from elasticsearch_dsl import analysis
 
-
-
 log = logging.getLogger(__name__)
-
 
 edge_ngram_filter = analysis.token_filter(
     'edge_ngram_filter',
@@ -26,7 +23,6 @@ edge_ngram_filter = analysis.token_filter(
     min_gram=1,
     max_gram=15
 )
-
 
 autocomplete = es.analyzer(
     'autocomplete',
@@ -79,7 +75,7 @@ class Node(es.DocType):
     user = es.Object({
         'fields': {
             'id': es.Keyword(),
-            'name':  es.String(
+            'name': es.String(
                 fielddata=True,
                 analyzer=autocomplete)
         }
