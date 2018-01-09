@@ -112,6 +112,10 @@ def _reindex_nodes():
 
 @manager_elastic.option('indexname', nargs='?')
 def reindex(indexname=''):
+    import time
+    import datetime
+
+    start = time.time()
     if not indexname:
         log.info('reindex everything..')
         _reindex_nodes()
@@ -122,3 +126,5 @@ def reindex(indexname=''):
     elif indexname == 'nodes':
         log.info('Indexing %s', indexname)
         _reindex_nodes()
+    duration = time.time() - start
+    log.info('Reindexing took %s', datetime.timedelta(seconds=duration))
