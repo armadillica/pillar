@@ -10,7 +10,6 @@ log = logging.getLogger(__name__)
 
 blueprint_search = Blueprint('elksearch', __name__)
 
-
 TERMS = [
     'node_type', 'media',
     'tags', 'is_free', 'projectname',
@@ -35,25 +34,38 @@ def _term_filters() -> dict:
     return {term: request.args.get(term, '') for term in TERMS}
 
 
+def _page_index() -> int:
+    """Return the page index from the query string."""
+    try:
+        page_idx = int(request.args.get('page') or '0')
+    except TypeError:
+        log.info('invalid page number %r received', request.args.get('page'))
+        raise wz_exceptions.BadRequest()
+    return page_idx
+
+
 @blueprint_search.route('/')
 def search_nodes():
     searchword = _valid_search()
     terms = _term_filters()
-    data = queries.do_node_search(searchword, terms)
-    return jsonify(data)
+    page_idx = _page_index()
+
+    result = queries.do_node_search(searchword, terms, page_idx)
+    return jsonify(result)
 
 
 @blueprint_search.route('/user')
 def search_user():
     searchword = _valid_search()
     terms = _term_filters()
-    # data is the raw elasticseach output.
+    page_idx = _page_index()
+    # result is the raw elasticseach output.
     # we need to filter fields in case of user objects.
-    data = queries.do_user_search(searchword, terms)
+    result = queries.do_user_search(searchword, terms, page_idx)
 
     # filter sensitive stuff
     # we only need. objectID, full_name, username
-    hits = data.get('hits')
+    hits = result.get('hits', {})
 
     new_hits = []
 
@@ -70,9 +82,9 @@ def search_user():
         new_hits.append(single_hit)
 
     # replace search result with safe subset
-    data['hits']['hits'] = new_hits
+    result['hits']['hits'] = new_hits
 
-    return jsonify(data)
+    return jsonify(result)
 
 
 @blueprint_search.route('/admin/user')
@@ -84,6 +96,7 @@ def search_user_admin():
 
     searchword = _valid_search()
     terms = _term_filters()
-    data = queries.do_user_search_admin(searchword, terms)
+    page_idx = _page_index()
+    result = queries.do_user_search_admin(searchword, terms, page_idx)
 
-    return jsonify(data)
+    return jsonify(result)

@@ -12,6 +12,7 @@ log = logging.getLogger(__name__)
 
 NODE_AGG_TERMS = ['node_type', 'media', 'tags', 'is_free']
 USER_AGG_TERMS = ['roles', ]
+ITEMS_PER_PAGE = 10
 
 # Will be set in setup_app()
 client: Elasticsearch = None
@@ -54,7 +55,7 @@ def nested_bool(must: list, should: list, terms: dict, *, index_alias: str) -> S
     return search
 
 
-def do_node_search(query: str, terms: dict) -> dict:
+def do_node_search(query: str, terms: dict, page: int) -> dict:
     """
     Given user query input and term refinements
     search for public published nodes
@@ -82,6 +83,7 @@ def do_node_search(query: str, terms: dict) -> dict:
     if not query:
         search = search.sort('-created_at')
     add_aggs_to_search(search, NODE_AGG_TERMS)
+    search = paginate(search, page)
 
     if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(search.to_dict(), indent=4))
@@ -94,12 +96,13 @@ def do_node_search(query: str, terms: dict) -> dict:
     return response.to_dict()
 
 
-def do_user_search(query: str, terms: dict) -> dict:
+def do_user_search(query: str, terms: dict, page: int) -> dict:
     """ return user objects represented in elasicsearch result dict"""
 
     must, should = _common_user_search(query)
     search = nested_bool(must, should, terms, index_alias='USER')
     add_aggs_to_search(search, USER_AGG_TERMS)
+    search = paginate(search, page)
 
     if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(search.to_dict(), indent=4))
@@ -130,7 +133,7 @@ def _common_user_search(query: str) -> (typing.List[Query], typing.List[Query]):
     return [], should
 
 
-def do_user_search_admin(query: str, terms: dict) -> dict:
+def do_user_search_admin(query: str, terms: dict, page: int) -> dict:
     """
     return users seach result dict object
     search all user fields and provide aggregation information
@@ -150,6 +153,7 @@ def do_user_search_admin(query: str, terms: dict) -> dict:
 
     search = nested_bool(must, should, terms, index_alias='USER')
     add_aggs_to_search(search, USER_AGG_TERMS)
+    search = paginate(search, page)
 
     if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(search.to_dict(), indent=4))
@@ -160,6 +164,10 @@ def do_user_search_admin(query: str, terms: dict) -> dict:
         log.debug(json.dumps(response.to_dict(), indent=4))
 
     return response.to_dict()
+
+
+def paginate(search: Search, page_idx: int) -> Search:
+    return search[page_idx * ITEMS_PER_PAGE:(page_idx + 1) * ITEMS_PER_PAGE]
 
 
 def setup_app(app):

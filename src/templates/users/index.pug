@@ -78,11 +78,11 @@ script(type="text/template", id="hit-template")
 // Pagination template
 script(type="text/template", id="pagination-template")
 	ul.search-pagination.
-		<li {{^prev_page}}class="disabled"{{/prev_page}}><a href="#" {{#prev_page}} class="gotoPage" data-page="{{ prev_page }}" {{/prev_page}}><i class="pi-angle-left"></i></a></li>
+		<li {{^prev_page}}class="disabled"{{/prev_page}}><a href="#" {{#prev_page}} class="gotoPage" data-page="{{ page }}" {{/prev_page}}><i class="pi-angle-left"></i></a></li>
 		{{#pages}}
-		<li class="{{#current}}active{{/current}}{{#disabled}}disabled{{/disabled}}"><a href="#" {{^disabled}} class="gotoPage" data-page="{{ number }}" {{/disabled}}>{{ number }}</a></li>
+		<li class="{{#current}}active{{/current}}{{#disabled}}disabled{{/disabled}}"><a href="#" {{^disabled}} class="gotoPage" data-page="{{ number }}" {{/disabled}}>{{ shownr }}</a></li>
 		{{/pages}}
-		<li {{^next_page}}class="disabled"{{/next_page}}><a href="#" {{#next_page}} class="gotoPage" data-page="{{ next_page }}" {{/next_page}}><i class="pi-angle-right"></i></a></li>
+		<li {{^next_page}}class="disabled"{{/next_page}}><a href="#" {{#next_page}} class="gotoPage" data-page="{{ page }}" {{/next_page}}><i class="pi-angle-right"></i></a></li>
 
 // Stats template
 script(type="text/template", id="stats-template")

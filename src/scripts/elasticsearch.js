@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    var HITS_PER_PAGE = 25;
+    var HITS_PER_PAGE = 10;
     var MAX_VALUES_PER_FACET = 30;
 
     // DOM binding
@@ -174,41 +174,48 @@ $(document).ready(function() {
             return;
         }
 
-        var maxPages = 2;
-        var nbPages = content.count / HITS_PER_PAGE;
+        var maxPages = 3;
+        var nbPages = Math.floor(content.count / HITS_PER_PAGE);
 
         // Process pagination
         var pages = [];
         if (content.page > maxPages) {
             pages.push({
                 current: false,
-                number: 1
+                number: 0,
+                shownr: 1
             });
-            // They don't really add much...
-            // pages.push({ current: false, number: '...', disabled: true });
         }
         for (var p = content.page - maxPages; p < content.page + maxPages; ++p) {
-            if (p < 0 || p >= nbPages) {
+            if (p < 0 || p > nbPages) {
                 continue;
             }
             pages.push({
                 current: content.page === p,
-                number: (p + 1)
+                number: p,
+                shownr: p+1
             });
         }
         if (content.page + maxPages < nbPages) {
-            // They don't really add much...
-            // pages.push({ current: false, number: '...', disabled: true });
             pages.push({
                 current: false,
-                number: nbPages
+                number: nbPages-1,
+                shownr: nbPages
             });
         }
+        console.log('showing page', content.page);
         var pagination = {
             pages: pages,
-            prev_page: (content.page > 0 ? content.page : false),
-            next_page: (content.page + 1 < nbPages ? content.page + 2 : false)
         };
+        if (content.page > 0) {
+            pagination.prev_page = {page: content.page - 1};
+        }
+        if (content.page < nbPages) {
+            pagination.next_page = {page: content.page + 1};
+        }
+        console.log('next page', pagination.next_page);
+        console.log('prev page', pagination.prev_page);
+        console.log('nbPages', nbPages);
         // Display pagination
         $pagination.html(paginationTemplate.render(pagination));
     }
@@ -230,7 +237,10 @@ $(document).ready(function() {
     });
 
     $(document).on('click', '.gotoPage', function() {
-        //helper.setCurrentPage(+$(this).data('page') - 1).search();
+        const page_idx = $(this).data('page');
+        search.setCurrentPage(page_idx);
+        search.execute();
+
         $("html, body").animate({
             scrollTop: 0
         }, '500', 'swing');
