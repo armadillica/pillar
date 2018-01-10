@@ -203,7 +203,6 @@ $(document).ready(function() {
                 shownr: nbPages
             });
         }
-        console.log('showing page', content.page);
         var pagination = {
             pages: pages,
         };
@@ -213,9 +212,6 @@ $(document).ready(function() {
         if (content.page < nbPages) {
             pagination.next_page = {page: content.page + 1};
         }
-        console.log('next page', pagination.next_page);
-        console.log('prev page', pagination.prev_page);
-        console.log('nbPages', nbPages);
         // Display pagination
         $pagination.html(paginationTemplate.render(pagination));
     }
