@@ -121,6 +121,7 @@ def _common_user_search(query: str) -> (typing.List[Query], typing.List[Query]):
         Q('match', username=query),
         Q('match', full_name=query),
         Q('match', email=query),
+        {'term': {'username_exact': {'value': query, 'boost': 50}}},
     ]
 
     if '@' in query:

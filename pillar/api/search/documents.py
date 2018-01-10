@@ -37,6 +37,7 @@ class User(es.DocType):
     objectID = es.Keyword()
 
     username = es.String(fielddata=True, analyzer=autocomplete)
+    username_exact = es.Keyword()
     full_name = es.String(fielddata=True, analyzer=autocomplete)
 
     roles = es.Keyword(multi=True)
@@ -118,6 +119,7 @@ def create_doc_from_user_data(user_to_index: dict) -> typing.Optional[User]:
     doc = User(_id=doc_id)
     doc.objectID = str(user_to_index['objectID'])
     doc.username = user_to_index['username']
+    doc.username_exact = user_to_index['username']
     doc.full_name = user_to_index['full_name']
     doc.roles = list(map(str, user_to_index['roles']))
     doc.groups = list(map(str, user_to_index['groups']))
