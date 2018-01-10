@@ -163,8 +163,6 @@ $(document).ready(function() {
     minLength: 0,
     templates: {
       suggestion: function(hit) {
-
-        var hitMedia = (hit.media ? ' · <span class="media">'+hit.media+'</span>' : '');
         var hitFree = (hit.is_free ? '<div class="search-hit-ribbon"><span>free</span></div>' : '');
         var hitPicture;
 
@@ -180,6 +178,9 @@ $(document).ready(function() {
           .attr('title', hit.name)
           .text(hit.name);
 
+        const $nodeType = $('<span>').addClass('node_type').text(hit.node_type);
+        const hitMedia = (hit.media ? ' · ' + $('<span>').addClass('media').text(hit.media)[0].outerHTML : '');
+
         return $('<a/>', {
               href: '/nodes/'+ hit.objectID + '/redir',
               class: "search-site-result",
@@ -193,10 +194,7 @@ $(document).ready(function() {
                $searchHitName.html() +
                '<div class="search-hit-meta">' +
                  $span.html() + ' · ' +
-                 $('<span>', {
-                   class: "node_type",
-                   text: hit.node_type
-                 }) +
+                 $nodeType.html() +
                  hitMedia +
                '</div>' +
              '</div>'
