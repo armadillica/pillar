@@ -36,14 +36,14 @@ class User(es.DocType):
 
     objectID = es.Keyword()
 
-    username = es.String(fielddata=True, analyzer=autocomplete)
+    username = es.Text(fielddata=True, analyzer=autocomplete)
     username_exact = es.Keyword()
-    full_name = es.String(fielddata=True, analyzer=autocomplete)
+    full_name = es.Text(fielddata=True, analyzer=autocomplete)
 
     roles = es.Keyword(multi=True)
     groups = es.Keyword(multi=True)
 
-    email = es.String(fielddata=True, analyzer=autocomplete)
+    email = es.Text(fielddata=True, analyzer=autocomplete)
     email_exact = es.Keyword()
 
     class Meta:
@@ -59,37 +59,37 @@ class Node(es.DocType):
 
     objectID = es.Keyword()
 
-    name = es.String(
+    name = es.Text(
         fielddata=True,
         analyzer=autocomplete
     )
 
-    user = es.Object({
-        'fields': {
+    user = es.Object(
+        fields={
             'id': es.Keyword(),
-            'name': es.String(
+            'name': es.Text(
                 fielddata=True,
                 analyzer=autocomplete)
         }
-    })
+    )
 
-    description = es.String()
+    description = es.Text()
 
     is_free = es.Boolean()
 
-    project = es.Object({
-        'fields': {
+    project = es.Object(
+        fields={
             'id': es.Keyword(),
             'name': es.Keyword(),
         }
-    })
+    )
 
     media = es.Keyword()
 
     picture = es.Keyword()
 
     tags = es.Keyword(multi=True)
-    license_notes = es.String()
+    license_notes = es.Text()
 
     created_at = es.Date()
     updated_at = es.Date()

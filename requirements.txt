@@ -8,8 +8,8 @@ blinker==1.4
 bleach==1.4.3
 celery[redis]==4.0.2
 CommonMark==0.7.2
-elasticsearch==6.0.0
-elasticsearch-dsl==5.4.0
+elasticsearch==6.1.1
+elasticsearch-dsl==6.1.0
 Eve==0.7.3
 Flask==0.12
 Flask-Babel==0.11.2
