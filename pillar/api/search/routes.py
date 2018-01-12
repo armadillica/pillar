@@ -1,6 +1,7 @@
 import logging
 
 from flask import Blueprint, request
+import elasticsearch.exceptions as elk_ex
 from werkzeug import exceptions as wz_exceptions
 from pillar.api.utils import authorization, jsonify
 
@@ -61,7 +62,13 @@ def search_user():
     page_idx = _page_index()
     # result is the raw elasticseach output.
     # we need to filter fields in case of user objects.
-    result = queries.do_user_search(searchword, terms, page_idx)
+
+    try:
+        result = queries.do_user_search(searchword, terms, page_idx)
+    except elk_ex.ElasticsearchException as ex:
+        resp = jsonify({'_message': str(ex)})
+        resp.status_code = 500
+        return resp
 
     # filter sensitive stuff
     # we only need. objectID, full_name, username
@@ -97,6 +104,12 @@ def search_user_admin():
     searchword = _valid_search()
     terms = _term_filters()
     page_idx = _page_index()
-    result = queries.do_user_search_admin(searchword, terms, page_idx)
+
+    try:
+        result = queries.do_user_search_admin(searchword, terms, page_idx)
+    except elk_ex.ElasticsearchException as ex:
+        resp = jsonify({'_message': str(ex)})
+        resp.status_code = 500
+        return resp
 
     return jsonify(result)
