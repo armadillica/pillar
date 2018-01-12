@@ -28,8 +28,9 @@ def push_updated_user(user_to_index: dict):
     if not doc:
         return
 
-    log.debug('Index update user doc elasticsearch %s.', doc._id)
-    doc.save()
+    index = current_app.config['ELASTIC_INDICES']['USER']
+    log.debug('Index %r update user doc %s in ElasticSearch.', index, doc._id)
+    doc.save(index=index)
 
 
 def index_node_save(node_to_index: dict):
@@ -44,19 +45,21 @@ def index_node_save(node_to_index: dict):
     if not doc:
         return
 
-    log.debug('Index created node doc elasticsearch %s.', doc._id)
-    doc.save()
+    index = current_app.config['ELASTIC_INDICES']['NODE']
+    log.debug('Index %r update node doc %s in ElasticSearch.', index, doc._id)
+    doc.save(index=index)
 
 
 def index_node_delete(delete_id: str):
     """
     Delete node document from Elastic index useing a node id
     """
-    log.debug('Index node doc delete %s', delete_id)
+    index = current_app.config['ELASTIC_INDICES']['NODE']
+    log.debug('Index %r node doc delete %s', index, delete_id)
 
     try:
-        doc = documents.Node.get(id=delete_id)
-        doc.delete()
+        doc: documents.Node = documents.Node.get(id=delete_id)
+        doc.delete(index=index)
     except NotFoundError:
         # seems to be gone already..
         pass
