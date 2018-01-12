@@ -24,10 +24,17 @@ edge_ngram_filter = analysis.token_filter(
     max_gram=15
 )
 
+ngram_filter = analysis.token_filter(
+    'ngram_filter',
+    type='ngram',
+    min_gram=3,
+    max_gram=3,
+)
+
 autocomplete = es.analyzer(
     'autocomplete',
     tokenizer='standard',
-    filter=['lowercase', edge_ngram_filter]
+    filter=['standard', 'asciifolding', 'lowercase', ngram_filter, edge_ngram_filter]
 )
 
 

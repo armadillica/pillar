@@ -118,15 +118,20 @@ def _common_user_search(query: str) -> (typing.List[Query], typing.List[Query]):
     if not query:
         return [], []
 
-    should = [
-        Q('match', username=query),
-        Q('match', full_name=query),
-        Q('match', email=query),
-        {'term': {'username_exact': {'value': query, 'boost': 50}}},
-    ]
+    should = []
 
     if '@' in query:
-        should.append(Q('term', email_exact=query))
+        should.append({'term': {'email_exact': {'value': query, 'boost': 50}}})
+        email_boost = 25
+    else:
+        email_boost = 1
+
+    should.extend([
+        Q('match', username=query),
+        Q('match', full_name=query),
+        {'match': {'email': {'query': query, 'boost': email_boost}}},
+        {'term': {'username_exact': {'value': query, 'boost': 50}}},
+    ])
 
     return [], should
 
