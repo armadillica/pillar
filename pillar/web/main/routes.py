@@ -1,7 +1,6 @@
 import logging
 
 from pillarsdk import Node
-from pillarsdk import Project
 from flask import Blueprint
 from flask import current_app
 from flask import render_template
@@ -103,6 +102,8 @@ def feeds_blogs():
             'max_results': '15'
             }, api=api)
 
+        newest = None
+
         # Populate the feed
         for post in latest_posts._items:
             author = post.user.fullname
@@ -110,13 +111,22 @@ def feeds_blogs():
             url = url_for_node(node=post)
             content = post.properties.content[:500]
             content = '<p>{0}... <a href="{1}">Read more</a></p>'.format(content, url)
+
+            if newest is None:
+                newest = updated
+            else:
+                newest = max(newest, updated)
+
             feed.add(post.name, str(content),
                      content_type='html',
                      author=author,
                      url=url,
                      updated=updated,
                      published=post._created)
-        return feed.get_response()
+        resp = feed.get_response()
+        if newest is not None:
+            resp.headers['Last-Modified'] = newest.strftime(current_app.config['RFC1123_DATE_FORMAT'])
+        return resp
     return render_page()
 
 
