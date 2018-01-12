@@ -72,9 +72,7 @@ def do_node_search(query: str, terms: dict, page: int) -> dict:
         Q('term', tags=query),
     ]
 
-    must = [
-        Q('term', _type='node')
-    ]
+    must = []
 
     if not query:
         should = []
