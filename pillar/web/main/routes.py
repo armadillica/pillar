@@ -1,4 +1,5 @@
 import logging
+import urllib.parse
 
 from pillarsdk import Node
 from flask import Blueprint
@@ -8,6 +9,7 @@ from flask import redirect
 from flask import request
 from werkzeug.contrib.atom import AtomFeed
 
+from pillar.flask_extra import ensure_schema
 from pillar.web.utils import system_util
 from pillar.web.nodes.routes import url_for_node
 from pillar.web.nodes.custom.posts import posts_view
@@ -92,7 +94,8 @@ def feeds_blogs():
     @current_app.cache.cached(60*5)
     def render_page():
         feed = AtomFeed('Blender Cloud - Latest updates',
-                        feed_url=request.url, url=request.url_root)
+                        feed_url=ensure_schema(request.url),
+                        url=ensure_schema(request.url_root))
         # Get latest blog posts
         api = system_util.pillar_api()
         latest_posts = Node.all({
@@ -106,9 +109,9 @@ def feeds_blogs():
 
         # Populate the feed
         for post in latest_posts._items:
-            author = post.user.fullname
+            author = post.user.fullname or post.user.username
             updated = post._updated if post._updated else post._created
-            url = url_for_node(node=post)
+            url = ensure_schema(urllib.parse.urljoin(request.host_url, url_for_node(node=post)))
             content = post.properties.content[:500]
             content = '<p>{0}... <a href="{1}">Read more</a></p>'.format(content, url)
 

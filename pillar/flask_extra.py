@@ -27,3 +27,21 @@ def vary_xhr():
         return header_adder(f)
 
     return decorator
+
+
+def ensure_schema(url: str) -> str:
+    """Return the same URL with the configured PREFERRED_URL_SCHEME."""
+    import urllib.parse
+
+    if not url:
+        return url
+
+    bits = urllib.parse.urlsplit(url, allow_fragments=True)
+
+    if not bits[0] and not bits[1]:
+        # don't replace the schema if there is not even a hostname.
+        return url
+
+    scheme = flask.current_app.config.get('PREFERRED_URL_SCHEME', 'https')
+    bits = (scheme, *bits[1:])
+    return urllib.parse.urlunsplit(bits)
