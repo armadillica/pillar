@@ -34,6 +34,12 @@ ngram_filter = analysis.token_filter(
 autocomplete = es.analyzer(
     'autocomplete',
     tokenizer='standard',
+    filter=['standard', 'asciifolding', 'lowercase', edge_ngram_filter]
+)
+
+all_gram = es.analyzer(
+    'autocomplete',
+    tokenizer='standard',
     filter=['standard', 'asciifolding', 'lowercase', ngram_filter, edge_ngram_filter]
 )
 
@@ -43,14 +49,14 @@ class User(es.DocType):
 
     objectID = es.Keyword()
 
-    username = es.Text(fielddata=True, analyzer=autocomplete)
+    username = es.Text(fielddata=True, analyzer=all_gram)
     username_exact = es.Keyword()
-    full_name = es.Text(fielddata=True, analyzer=autocomplete)
+    full_name = es.Text(fielddata=True, analyzer=all_gram)
 
     roles = es.Keyword(multi=True)
     groups = es.Keyword(multi=True)
 
-    email = es.Text(fielddata=True, analyzer=autocomplete)
+    email = es.Text(fielddata=True, analyzer=all_gram)
     email_exact = es.Keyword()
 
     class Meta:
