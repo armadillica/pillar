@@ -1,0 +1,11 @@
+| {% if 'link' in attachment and attachment['link'] != 'none' %}
+| {% if attachment['link'] == 'self' %}
+video(src="{{ var.link }}", alt="{{ file.filename }}", controls)
+a.attachment(href="{{ file.link }}") {{ file.filename }}
+| {% elif attachment['link'] == 'custom' %}
+video(src="{{ var.link }}", alt="{{ file.filename }}", controls)
+a.attachment(href="{{ attachment['link_custom'] }}") Learn more about this video
+| {% endif %}
+| {% else %}
+video(src="{{ var.link }}", alt="{{ file.filename }}", controls)
+| {% endif %}

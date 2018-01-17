@@ -69,7 +69,8 @@ def render_attachment_file(attachment):
     sdk_file = pillarsdk.File.find(attachment['oid'], api=api)
 
     file_renderers = {
-        'image': render_attachment_file_image
+        'image': render_attachment_file_image,
+        'video': render_attachment_file_video,
     }
 
     mime_type_cat, _ = sdk_file.content_type.split('/', 1)
@@ -87,6 +88,20 @@ def render_attachment_file_image(sdk_file, attachment):
     variations = {var.size: var for var in sdk_file.variations}
     return flask.render_template('nodes/attachments/file_image.html',
                                  file=sdk_file, vars=variations, attachment=attachment)
+
+
+def render_attachment_file_video(sdk_file, attachment):
+    """Renders a video file."""
+
+    try:
+        # The very first variation is an mp4 file with max width of 1920px
+        default_variation = sdk_file.variations[0]
+    except IndexError:
+        log.error('Could not find variations for file %s' % sdk_file._id)
+        return flask.render_template('nodes/attachments/file_generic.html', file=sdk_file)
+
+    return flask.render_template('nodes/attachments/file_video.html',
+                                 file=sdk_file, var=default_variation, attachment=attachment)
 
 
 def attachment_form_group_create(schema_prop):
