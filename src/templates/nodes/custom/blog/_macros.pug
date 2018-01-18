@@ -12,16 +12,16 @@ a.blog_index-header(href="{{ node.properties.url }}")
 		| {% endif %}
 
 		li.when
-			a(href="{{ node.url }}",
+			a(href="{{ node.properties.url }}",
 				title="Updated {{ node._updated | pretty_date }}")
 				| {{ node._created | pretty_date }}
 
 		li
-			a(href="{{ node.url }}#comments")
+			a(href="{{ node.properties.url }}#comments")
 				| comment
 
 	a.item-title(
-		href="{{ node.url }}")
+		href="{{ node.properties.url }}")
 		| {{ node.name }}
 
 	.item-content
