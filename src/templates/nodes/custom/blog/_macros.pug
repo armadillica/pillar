@@ -1,7 +1,7 @@
 //- ******************************************************* -//
 | {% macro render_blog_post(node) %}
 | {% if node.picture %}
-a.blog_index-header(href="{{ node.url }}")
+a.blog_index-header(href="{{ node.properties.url }}")
 	img(src="{{ node.picture.thumbnail('l', api=api) }}")
 | {% endif %}
 
