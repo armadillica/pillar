@@ -36,6 +36,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
     api = system_util.pillar_api()
 
     # Fetch project (for backgroud images and links generation)
+    # Fetch project (for background images and links generation)
     if project_id:
         project = Project.find(project_id, api=api)
     else:
