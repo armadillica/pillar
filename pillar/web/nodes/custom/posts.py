@@ -35,7 +35,6 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
 
     api = system_util.pillar_api()
 
-    # Fetch project (for backgroud images and links generation)
     # Fetch project (for background images and links generation)
     if project_id:
         project = Project.find(project_id, api=api)
@@ -78,6 +77,8 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
 
         if post.picture:
             post.picture = get_file(post.picture, api=api)
+
+        post.url = url_for_node(node=post)
     elif posts._items:
         post = posts._items[0]
     else:

@@ -1,7 +1,7 @@
 //- ******************************************************* -//
 | {% macro render_blog_post(node) %}
 | {% if node.picture %}
-a.blog_index-header(href="{{ node.properties.url }}")
+a.blog_index-header(href="{{ node.url }}")
 	img(src="{{ node.picture.thumbnail('l', api=api) }}")
 | {% endif %}
 
@@ -12,16 +12,16 @@ a.blog_index-header(href="{{ node.properties.url }}")
 		| {% endif %}
 
 		li.when
-			a(href="{{ node.properties.url }}",
+			a(href="{{ node.url }}",
 				title="Updated {{ node._updated | pretty_date }}")
 				| {{ node._created | pretty_date }}
 
 		li
-			a(href="{{ node.properties.url }}#comments")
+			a(href="{{ node.url }}#comments")
 				| comment
 
 	a.item-title(
-		href="{{ node.properties.url }}")
+		href="{{ node.url }}")
 		| {{ node.name }}
 
 	.item-content
