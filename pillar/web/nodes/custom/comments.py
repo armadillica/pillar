@@ -126,7 +126,10 @@ def format_comment(comment, is_reply=False, is_team=False, replies=None):
 
 @blueprint.route('/<string(length=24):node_id>/comments')
 def comments_for_node(node_id):
-    """Shows the comments attached to the given node."""
+    """Shows the comments attached to the given node.
+
+    The URL can be overridden in order to define can_post_comments in a different way
+    """
 
     api = system_util.pillar_api()
 
@@ -134,7 +137,14 @@ def comments_for_node(node_id):
     project = Project({'_id': node.project})
     can_post_comments = project.node_type_has_method('comment', 'POST', api=api)
     can_comment_override = request.args.get('can_comment', 'True') == 'True'
-    can_post_comments = can_post_comments and can_comment_override and current_user.has_cap('subscriber')
+    can_post_comments = can_post_comments and can_comment_override
+
+    return render_comments_for_node(node_id, can_post_comments=can_post_comments)
+
+
+def render_comments_for_node(node_id: str, *, can_post_comments: bool):
+    """Render the list of comments for a node."""
+    api = system_util.pillar_api()
 
     # Query for all children, i.e. comments on the node.
     comments = Node.all({
@@ -145,7 +155,8 @@ def comments_for_node(node_id):
         some_comment['_user'] = subquery.get_user_info(some_comment['user'])
         some_comment['_is_own'] = some_comment['user'] == current_user.objectid
         some_comment['_current_user_rating'] = None  # tri-state boolean
-        some_comment['_rating'] = some_comment.properties.rating_positive - some_comment.properties.rating_negative
+        some_comment[
+            '_rating'] = some_comment.properties.rating_positive - some_comment.properties.rating_negative
 
         if current_user.is_authenticated:
             for rating in some_comment.properties.ratings or ():
@@ -163,10 +174,8 @@ def comments_for_node(node_id):
         enrich(comment)
         for reply in comment['_replies']['_items']:
             enrich(reply)
-
     nr_of_comments = sum(1 + comment['_replies']['_meta']['total']
                          for comment in comments['_items'])
-
     return render_template('nodes/custom/comment/list_embed.html',
                            node_id=node_id,
                            comments=comments,

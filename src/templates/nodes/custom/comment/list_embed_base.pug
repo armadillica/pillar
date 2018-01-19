@@ -1,0 +1,239 @@
+| {% import 'nodes/custom/comment/_macros.html' as macros %}
+#comments.comments-container
+	section#comments-list.comments-list
+		.comment-reply-container
+			| {% if can_post_comments %}
+			| {% block can_post_comment %}
+			.comment-reply-avatar
+				img(
+					title="{{ _('Commenting as') }} {{ current_user.full_name }}",
+					src="{{ current_user.gravatar }}")
+
+			.comment-reply-form
+
+				.comment-reply-field
+					textarea(
+						id="comment_field",
+						data-parent-id="{{ node_id }}",
+						placeholder="{{ _('Join the conversation...') }}")
+
+					.comment-reply-meta
+
+						button.comment-action-submit(
+							id="comment_submit",
+							type="button",
+							title="Post Comment (Ctrl+Enter)")
+							span
+								i.pi-paper-plane
+								| {{ _('Send') }}
+							span.hotkey Ctrl + Enter
+
+				.comment-reply-preview
+					.comment-reply-preview-md
+					.comment-reply-info
+						.comment-action-cancel(
+							type="button",
+							title="{{ _('cancel') }}")
+							span {{ _('cancel') }}
+
+						a(
+							title="{{ _('Handy guide of Markdown syntax') }}",
+							target="_blank",
+							href="https://guides.github.com/features/mastering-markdown/")
+							span {{ _('markdown cheatsheet') }}
+			| {% endblock can_post_comment %}
+
+			| {% else %}
+			| {% block can_not_post_comment %}
+			| {% if current_user.is_authenticated %}
+
+			| {# * User is authenticated, but has no subscription or 'POST' permission #}
+			.comment-reply-form
+				.comment-reply-field.sign-in
+					| {% if current_user.has_cap('subscriber') %}
+					i.pi-lock
+					|  Only project members can comment.
+					| {% elif current_user.has_cap('can-renew-subscription') %}
+					i.pi-heart
+					a(href='/renew', target='_blank') Renew your subscription to join the conversation!
+					| {% else %}
+					| Join the conversations!&nbsp;<a href="https://store.blender.org/product/membership/">Subscribe to Blender Cloud</a> now.
+					| {% endif %}
+
+			| {% else %}
+			| {# * User is not autenticated #}
+			.comment-reply-form
+				.comment-reply-field.sign-in
+					a(href="{{ url_for('users.login') }}") {{ _('Log in to comment') }}
+			| {% endif %}
+			| {% endblock can_not_post_comment %}
+			| {% endif %}
+
+		| {% if show_comments and (nr_of_comments > 0) %}
+		section.comments-list-header
+			.comments-list-title
+				| {{ nr_of_comments }} {{ _('comment') }}{{ nr_of_comments|pluralize }}
+			.comments-list-items
+				| {% for comment in comments['_items'] %}
+				| {{ macros.render_comment(comment, False) }}
+				| {% endfor %}
+		| {% endif %}
+
+| {% block comment_scripts %}
+script.
+
+	{% if show_comments %}
+	$('body')
+		.off('pillar:comment-posted')
+		.on('pillar:comment-posted', function(e, comment_node_id) {
+
+		var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node_id) }}";
+
+		loadComments(commentsUrl)
+		.done(function() {
+			$('#' + comment_node_id).scrollHere();
+		});
+	});
+
+	// If there's a comment link in the URL, scroll there
+	function scrollToLinkedComment() {
+		var scrollToId = location.hash;
+
+		// Check that it's a valid ObjectID before passing it to jQuery.
+		if (!/^[a-fA-F0-9]{24}$/.test(scrollToId)) return;
+
+		$(scrollToId)
+			.addClass('comment-linked')
+			.scrollHere();
+	}
+	$(scrollToLinkedComment);
+
+	{% endif %}
+
+
+	{% if can_post_comments %}
+
+	// If we can actually comment, load the tools to do it
+
+	// Initialize Markdown to later convert comment as we type
+	var convert = new Markdown.getSanitizingConverter();
+	Markdown.Extra.init(convert);
+	convert = convert.makeHtml;
+
+	// Submit new comment
+	$(document)
+		.off('click','body .comment-action-submit')
+		.on( 'click','body .comment-action-submit', function(e){
+		post_comment($(this));
+	});
+
+	// Writing comment
+	// Markdown convert as we type in the textarea
+	$(document)
+		.off('keyup','body .comment-reply-field textarea')
+		.on( 'keyup','body .comment-reply-field textarea',function(e){
+		var $textarea = $(this);
+		var $container = $(this).parent();
+		var $preview = $container.parent().find('.comment-reply-preview-md');
+
+		// TODO: communicate with back-end to do the conversion,
+		// rather than relying on our JS-converted Markdown.
+		$preview.html(convert($textarea.val()));
+
+		// While we are at it, style if empty
+		if ($textarea.val()) {
+			$container.addClass('filled');
+		} else {
+			$container.removeClass('filled');
+		}
+
+		// Send on ctrl+enter
+		if ($textarea.is(":focus")) {
+			if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey){
+				post_comment($container.find('.comment-action-submit'));
+			}
+		}
+	});
+
+	// Autoresize the textarea as we type
+	$('#comment_field').autoResize();
+
+
+	// Edit comment
+	// Enter edit mode
+	$(document)
+		.off('click','body .comment-action-edit span.edit_mode')
+		.on( 'click','body .comment-action-edit span.edit_mode',function(){
+
+		comment_mode(this, 'edit');
+
+		var $parent_div = $(this).closest('.comment-container');
+		var comment_id = $parent_div.data('node-id');
+
+		var comment_content = $parent_div.find('.comment-body span');
+		var height = comment_content.height();
+
+		loadComment(comment_id, {'properties.content': 1})
+
+		.done(function(data) {
+			var comment_raw = data['properties']['content'];
+			comment_content.html($('<textarea>').text(comment_raw));
+			comment_content
+				.addClass('editing')
+				.find('textarea')
+				.autoResize()
+				.focus()
+				.trigger('keyup');
+		})
+		.fail(function(xhr) {
+			if (console) console.log('Error fetching comment: ', xhr);
+			toastr.error('Error ' + xhr.status + ' entering edit mode.');
+		});
+	});
+
+	// Abort, abort
+	$(document)
+		.off('click','body .comment-action-edit span.edit_cancel')
+		.on( 'click','body .comment-action-edit span.edit_cancel',function(e){
+		commentEditCancel(this, true);
+	});
+
+	// Save edited comment
+	$(document)
+		.off('click','body .comment-action-edit span.edit_save')
+		.on( 'click','body .comment-action-edit span.edit_save',function(e){
+		var $button = $(this);
+		var $container = $button.closest('.comment-container');
+
+		save_comment(false, $container)
+		.progress(function() {
+			$button
+				.addClass('submitting')
+				.html('<i class="pi-spin spin"></i> Posting...');
+		})
+		.fail(function(xhr) {
+			if (typeof xhr === 'string') {
+				show_comment_edit_button_error($button, xhr);
+			} else {
+				// If it's not a string, we assume it's a jQuery XHR object.
+				if (console) console.log('Error saving comment:', xhr.responseText);
+				show_comment_edit_button_error($button, "Houston! Try again?");
+			}
+		})
+		.done(function(comment_id, comment_html) {
+			commentEditCancel($button, false)
+
+			$container.find('.comment-body span')
+				.html(comment_html)
+				.removeClass('editing')
+				.flashOnce();
+
+			$button
+				.html('<i class="pi-check"></i> save changes')
+				.removeClass('saving');
+		});
+	});
+
+	{% endif %}
+
+| {% endblock %}
