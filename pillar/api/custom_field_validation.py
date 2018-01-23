@@ -125,3 +125,30 @@ class ValidateCustomFields(Validator):
 
         if not value:
             self._error(field, "Value is required once the document was created")
+
+    def _validate_type_iprange(self, field_name: str, value: str):
+        """Ensure the field contains a valid IP address.
+
+        Supports both IPv6 and IPv4 ranges. Requires the IPy module.
+        """
+
+        from IPy import IP
+
+        try:
+            ip = IP(value, make_net=True)
+        except ValueError as ex:
+            self._error(field_name, str(ex))
+            return
+
+        if ip.prefixlen() == 0:
+            self._error(field_name, 'Zero-length prefix is not allowed')
+
+    def _validate_type_binary(self, field_name: str, value: bytes):
+        """Add support for binary type.
+
+        This type was actually introduced in Cerberus 1.0, so we can drop
+        support for this once Eve starts using that version (or newer).
+        """
+
+        if not isinstance(value, (bytes, bytearray)):
+            self._error(field_name, f'wrong value type {type(value)}, expected bytes or bytearray')

@@ -383,6 +383,20 @@ class OrgManager:
         org_count = org_coll.count({'unknown_members': member_email})
         return bool(org_count)
 
+    def roles_for_ip_address(self, remote_addr: str) -> typing.Set[str]:
+        """Find the roles given to the user via org IP range definitions."""
+
+        from . import ip_ranges
+
+        org_coll = current_app.db('organizations')
+        orgs = org_coll.find(
+            {'ip_ranges': ip_ranges.query(remote_addr)},
+            projection={'org_roles': True},
+        )
+        return set(role
+                   for org in orgs
+                   for role in org.get('org_roles', []))
+
 
 def setup_app(app):
     from . import patch, hooks

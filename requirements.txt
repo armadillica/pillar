@@ -20,6 +20,7 @@ Flask-WTF==0.12
 gcloud==0.12.0
 google-apitools==0.4.11
 httplib2==0.9.2
+IPy==0.83
 MarkupSafe==0.23
 ndg-httpsclient==0.4.0
 Pillow==4.1.1

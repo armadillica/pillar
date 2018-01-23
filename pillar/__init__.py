@@ -739,6 +739,11 @@ class PillarServer(BlinkerCompatibleEve):
         coll.create_index([('is_private', pymongo.ASCENDING)])
         coll.create_index([('category', pymongo.ASCENDING)])
 
+        coll = db['organizations']
+        coll.create_index([('ip_ranges.start', pymongo.ASCENDING)])
+        coll.create_index([('ip_ranges.end', pymongo.ASCENDING)])
+        self.log.debug('Created database indices')
+
     def register_api_blueprint(self, blueprint, url_prefix):
         # TODO: use Eve config variable instead of hard-coded '/api'
         self.register_blueprint(blueprint, url_prefix='/api' + url_prefix)

@@ -135,9 +135,20 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
 
     @authorization.require_login()
     def patch_edit_from_web(self, org_id: bson.ObjectId, patch: dict):
-        """Updates Organization fields from the web."""
+        """Updates Organization fields from the web.
+
+        The PATCH command supports the following payload. The 'name' field must
+        be set, all other fields are optional. When an optional field is
+        ommitted it will be handled as an instruction to clear that field.
+            {'name': str,
+             'description': str,
+             'website': str,
+             'location': str,
+             'ip_ranges': list of human-readable IP ranges}
+        """
 
         from pymongo.results import UpdateResult
+        from . import ip_ranges
 
         self._assert_is_admin(org_id)
         user = current_user()
@@ -150,6 +161,21 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
             'website': patch.get('website', '').strip(),
             'location': patch.get('location', '').strip(),
         }
+        unset = {}
+
+        # Special transformation for IP ranges
+        iprs = patch.get('ip_ranges')
+        if iprs:
+            ipr_docs = []
+            for r in iprs:
+                try:
+                    doc = ip_ranges.doc(r, min_prefixlen6=48, min_prefixlen4=8)
+                except ValueError as ex:
+                    raise wz_exceptions.UnprocessableEntity(f'Invalid IP range {r!r}: {ex}')
+                ipr_docs.append(doc)
+            update['ip_ranges'] = ipr_docs
+        else:
+            unset['ip_ranges'] = True
 
         refresh_user_roles = False
         if user.has_cap('admin'):
@@ -177,11 +203,13 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
             resp.status_code = 422
             return resp
 
+        # Figure out what to set and what to unset
+        for_mongo = {'$set': update}
+        if unset:
+            for_mongo['$unset'] = unset
+
         organizations_coll = current_app.db('organizations')
-        result: UpdateResult = organizations_coll.update_one(
-            {'_id': org_id},
-            {'$set': update}
-        )
+        result: UpdateResult = organizations_coll.update_one({'_id': org_id}, for_mongo)
 
         if result.matched_count != 1:
             self.log.warning('User %s edits Organization %s but update matched %i items',

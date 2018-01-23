@@ -214,7 +214,21 @@ organizations_schema = {
     # in an external subscription/payment management system.
     'payment_subscription_id': {
         'type': 'string',
-    }
+    },
+
+    'ip_ranges': {
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                # see _validate_type_{typename} in ValidateCustomFields:
+                'start': {'type': 'binary', 'required': True},
+                'end': {'type': 'binary', 'required': True},
+                'prefix': {'type': 'integer', 'required': True},
+                'human': {'type': 'iprange', 'required': True},
+            }
+        },
+    },
 }
 
 permissions_embedded_schema = {

@@ -7,6 +7,14 @@ from pillar.tests import AbstractPillarTest
 from pillar.api.utils import remove_private_keys
 
 
+class AbstractOrgTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+
+        self.enter_app_context()
+        self.om = self.app.org_manager
+
+
 class OrganizationCruTest(AbstractPillarTest):
     """Test creating and updating organizations."""
 
@@ -470,14 +478,11 @@ class OrganizationPatchTest(AbstractPillarTest):
         self.assertEqual(admin_uid, db_org['admin_uid'])
 
 
-class OrganizationResourceEveTest(AbstractPillarTest):
+class OrganizationResourceEveTest(AbstractOrgTest):
     """Test GET/POST/PUT access to Organization resource"""
 
     def setUp(self, **kwargs):
         super().setUp(**kwargs)
-
-        self.enter_app_context()
-        self.om = self.app.org_manager
 
         # Pillar admin
         self.create_user(24 * '1', roles={'admin'}, token='uberadmin')
@@ -764,3 +769,179 @@ class UserCreationTest(AbstractPillarTest):
         db_org = self._from_db()
         self.assertEqual([], db_org['unknown_members'])
         self.assertEqual([my_id], db_org['members'])
+
+
+class IPRangeTest(AbstractOrgTest):
+
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+        self.uid = self.create_user(24 * 'a', token='token')
+        self.org_roles = {'org-subscriber', 'org-phabricator'}
+        self.org = self.app.org_manager.create_new_org('Хакеры', self.uid, 25,
+                                                       org_roles=self.org_roles)
+        self.org_id = self.org['_id']
+
+    def _patch(self, payload: dict, expected_status=204) -> dict:
+        self.patch(f'/api/organizations/{self.org_id}',
+                   json={
+                       'op': 'edit-from-web',
+                       'name': self.org['name'],
+                       **payload,
+                   },
+                   auth_token='token',
+                   expected_status=expected_status)
+        db_org = self.om._get_org(self.org_id)
+        return db_org
+
+    def test_ipranges_doc(self):
+        from pillar.api.organizations import ip_ranges
+
+        doc = ip_ranges.doc('2a03:b0c0:0:1010::8fe:6ef1/120')
+        self.assertEqual(0x2a03b0c0000010100000000008fe6e00.to_bytes(16, 'big'), doc['start'])
+        self.assertEqual(0x2a03b0c0000010100000000008fe6eff.to_bytes(16, 'big'), doc['end'])
+        self.assertEqual('2a03:b0c0:0:1010::8fe:6e00/120', doc['human'])
+        self.assertEqual(120, doc['prefix'])
+        self.assertEqual({'prefix', 'human', 'start', 'end'}, set(doc.keys()))
+
+    def test_ipranges_query(self):
+        from pillar.api.organizations import ip_ranges
+
+        doc = ip_ranges.query('2a03:b0c0:0:1010::8fe:6ef1')
+        addr = 0x2a03b0c0000010100000000008fe6ef1.to_bytes(16, 'big')
+
+        self.assertEqual(addr, doc['$elemMatch']['start']['$lte'])
+        self.assertEqual(addr, doc['$elemMatch']['end']['$gte'])
+
+    def test_patch_set_ip_ranges_happy(self):
+        from pillar.api.organizations import ip_ranges
+
+        # IP ranges should be saved as integers for fast matching.
+        db_org = self._patch({'ip_ranges': [
+            '192.168.3.0/24',
+            '192.168.3.1/32',
+            '2a03:b0c0:0:1010::8fe:6ef1/120',
+        ]})
+
+        self.assertEqual([
+            ip_ranges.doc('192.168.3.0/24'),
+            ip_ranges.doc('192.168.3.1/32'),
+            ip_ranges.doc('2a03:b0c0:0:1010::8fe:6ef1/120'),
+        ], db_org['ip_ranges'])
+
+    def test_patch_unset_ip_ranges_happy(self):
+        """Setting to empty list should just delete the entire key."""
+        ipranges = [
+            '192.168.3.0/24',
+            '48.44.12.35/32',
+            '2a01:7c8:aab9:3b::0/64',
+        ]
+        self._patch({'ip_ranges': ipranges})
+        db_org = self._patch({'ip_ranges': []})
+        self.assertNotIn('ip_ranges', db_org)
+
+    def test_single_host(self):
+        from pillar.api.organizations import ip_ranges
+
+        # A host is a valid range by itself.
+        db_org = self._patch({'ip_ranges': ['192.168.3.5', '3abe:0412:0000::f00d']})
+        self.assertEqual([
+            ip_ranges.doc('192.168.3.5/32'),
+            ip_ranges.doc('3abe:0412:0000::f00d/128'),
+        ], db_org['ip_ranges'])
+
+    def test_patch_set_ip_ranges_invalid(self):
+        db_org = self._patch({'ip_ranges': ['www.example.com']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+        db_org = self._patch({'ip_ranges': ['127,0,0,0/16']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+    def test_patch_set_ip_ranges_invalid_ipv4(self):
+        # zero range should not be allowed
+        db_org = self._patch({'ip_ranges': ['0.0.0.0/0']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+        # range too large should not be allowed
+        db_org = self._patch({'ip_ranges': ['192.168.3.5/64']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+        # Hollywood-style IP address
+        db_org = self._patch({'ip_ranges': ['555.168.3.5/24']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+    def test_patch_set_ip_ranges_invalid_ipv6(self):
+        # small range should not be allowed
+        db_org = self._patch({'ip_ranges': ['::/0']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+        db_org = self._patch({'ip_ranges': ['123::/16']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+        # range too large should not be allowed
+        db_org = self._patch({'ip_ranges': ['2a03:b0c0:0:1010::8fe:6ef1/192']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+        # Hollywood-style IP address
+        db_org = self._patch({'ip_ranges': ['555:555:555:555:b0c0:0:1010:fe:6ef1/64']},
+                             expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+        # Non-hex IP address
+        db_org = self._patch({'ip_ranges': ['boo:foo::1010::8fe:6ef1/64']}, expected_status=422)
+        self.assertNotIn('ip_ranges', db_org)
+
+
+class IPRangeQueryTest(AbstractOrgTest):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+        self.uid = self.create_user(24 * 'a', token='token')
+
+    def _patch(self, org_id: bson.ObjectId, payload: dict, expected_status=204) -> dict:
+        self.patch(f'/api/organizations/{org_id}',
+                   json={
+                       'op': 'edit-from-web',
+                       **payload,
+                   },
+                   auth_token='token',
+                   expected_status=expected_status)
+        db_org = self.om._get_org(org_id)
+        return db_org
+
+    def test_happy(self):
+        # Set up a few organisations. A and B have overlapping IPv4 ranges, B and C on IPv6.
+        org_roles_a = {'org-roleA1', 'org-roleA2'}
+        org_a = self.app.org_manager.create_new_org('Хакеры', self.uid, 25, org_roles=org_roles_a)
+        self._patch(org_a['_id'], {
+            'name': 'Хакеры',
+            'ip_ranges': [
+                '192.168.0.0/16',
+                '2a03:b0c0:0:1010::8fe:6ef1/120',
+            ]})
+
+        org_roles_b = {'org-roleB'}
+        org_b = self.app.org_manager.create_new_org('ヤクザ', self.uid, 25, org_roles=org_roles_b)
+        self._patch(org_b['_id'], {
+            'name': 'ヤクザ',
+            'ip_ranges': [
+                '192.168.9.0/24',
+                '2a03:b0c0:beef:1010::/64',
+            ]})
+
+        org_roles_c = {'org-roleC'}
+        org_c = self.app.org_manager.create_new_org('ਘਰ ਵਿਚ ਨ', self.uid, 25, org_roles=org_roles_c)
+        self._patch(org_c['_id'], {
+            'name': 'ਘਰ ਵਿਚ ਨ',
+            'ip_ranges': [
+                '172.168.9.0/24',
+                '2a03:b0c0:beef::/48',
+            ]})
+
+        self.assertEqual(org_roles_a, self.om.roles_for_ip_address('192.168.3.255'))
+        self.assertEqual(org_roles_a.union(org_roles_b),
+                         self.om.roles_for_ip_address('192.168.9.16'))
+        self.assertEqual(org_roles_a, self.om.roles_for_ip_address('2a03:b0c0:0:1010::8fe:6e47'))
+        self.assertEqual(org_roles_b.union(org_roles_c),
+                         self.om.roles_for_ip_address('2a03:b0c0:beef:1010::8fe:6e47'))
+        self.assertEqual(org_roles_c, self.om.roles_for_ip_address('2a03:b0c0:beef:d00d::8fe:6e47'))
+
+        self.assertEqual(set(), self.om.roles_for_ip_address('1111:ffff::1'))
+        self.assertEqual(set(), self.om.roles_for_ip_address('::1'))
