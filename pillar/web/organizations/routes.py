@@ -54,6 +54,7 @@ def view_embed(organization_id: str):
 
     # Make sure it's never None
     organization.unknown_members = organization.unknown_members or []
+    organization.human_ip_ranges = [ipr['human'] for ipr in (organization.ip_ranges or [])]
 
     can_super_edit = current_user.has_cap('admin')
     can_edit = can_super_edit or om.user_is_admin(organization_oid)

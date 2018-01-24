@@ -29,6 +29,19 @@
 				type="text",
 				placeholder="Organization's location",
 				value="{{ organization.location | hide_none }}")
+		.input-group
+			label(for='org-ip-ranges-field') IP Ranges
+			textarea.item-ip-ranges#org-ip-ranges-field(
+				name="ip_ranges",
+				type="text",
+				rows="{{ organization.human_ip_ranges|length|default(1, true) }}",
+				placeholder="IP ranges in CIDR notation, one on each line",
+				title="IPv6 like 2a01:1234:abcd:3b::0/64\nIPv4 like 172.16.0.0/16")
+				| {{ organization.human_ip_ranges | join('\n') }}
+			p.help-block.
+				Clients with a matching IP address will be considered part of the organization. IPv4
+				ranges are always normalized to IPv6 prior to saving. Changes to IP Ranges take up
+				to an hour to affect already logged-in users.
 
 		| {% if can_super_edit %}
 		.input-group
@@ -38,6 +51,7 @@
 				type="text",
 				placeholder="Seat count",
 				value="{{ organization.seat_count | hide_none }}")
+			p.help-block Users covered by the IP Ranges do not count towards the seat count.
 		.input-group
 			label(for='org-roles-field') Roles
 			input.item-location.input-transparent#org-roles-field(
@@ -292,6 +306,7 @@ script.
 			description: $form.find('*[name="description"]').val(),
 			website: $form.find('*[name="website"]').val(),
 			location: $form.find('*[name="location"]').val(),
+			ip_ranges: $form.find('*[name="ip_ranges"]').val().trim().split('\n'),
 			{% if can_super_edit %}
 			seat_count: parseInt($form.find('*[name="seat_count"]').val()),
 			org_roles: org_roles,

@@ -818,7 +818,7 @@ class IPRangeTest(AbstractOrgTest):
         # IP ranges should be saved as integers for fast matching.
         db_org = self._patch({'ip_ranges': [
             '192.168.3.0/24',
-            '192.168.3.1/32',
+            ' 192.168.3.1/32 \r\n ',  # Whitespace should be ignored
             '2a03:b0c0:0:1010::8fe:6ef1/120',
         ]})
 
