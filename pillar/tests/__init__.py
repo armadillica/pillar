@@ -477,13 +477,15 @@ class AbstractPillarTest(TestMinimal):
         return urlencode(jsonified_params)
 
     def client_request(self, method, path, qs=None, expected_status=200, auth_token=None, json=None,
-                       data=None, headers=None, files=None, content_type=None, etag=None):
+                       data=None, headers=None, files=None, content_type=None, etag=None,
+                       environ_overrides=None):
         """Performs a HTTP request to the server."""
 
         from pillar.api.utils import dumps
         import json as mod_json
 
         headers = headers or {}
+        environ_overrides = environ_overrides or {}
         if auth_token is not None:
             headers['Authorization'] = self.make_header(auth_token)
 
@@ -506,7 +508,8 @@ class AbstractPillarTest(TestMinimal):
 
         resp = self.client.open(path=path, method=method, data=data, headers=headers,
                                 content_type=content_type,
-                                query_string=self.join_url_params(qs))
+                                query_string=self.join_url_params(qs),
+                                environ_overrides=environ_overrides)
         self.assertEqual(expected_status, resp.status_code,
                          'Expected status %i but got %i. Response: %s' % (
                              expected_status, resp.status_code, resp.data

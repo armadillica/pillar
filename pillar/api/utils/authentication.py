@@ -55,7 +55,7 @@ def force_cli_user():
     g.current_user = CLI_USER
 
 
-def find_user_in_db(user_info: dict, provider='blender-id'):
+def find_user_in_db(user_info: dict, provider='blender-id') -> dict:
     """Find the user in our database, creating/updating the returned document where needed.
 
     First, search for the user using its id from the provider, then try to look the user up via the
@@ -222,7 +222,8 @@ def hash_auth_token(token: str) -> str:
     return base64.b64encode(digest).decode('ascii')
 
 
-def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False):
+def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False,
+                org_roles: typing.Set[str]=frozenset()):
     """Stores an authentication token.
 
     :returns: the token document from MongoDB
@@ -237,6 +238,8 @@ def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False):
     }
     if oauth_subclient_id:
         token_data['is_subclient_token'] = True
+    if org_roles:
+        token_data['org_roles'] = sorted(org_roles)
 
     r, _, _, status = current_app.post_internal('tokens', token_data)
 

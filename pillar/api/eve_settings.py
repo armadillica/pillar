@@ -354,7 +354,16 @@ tokens_schema = {
     'is_subclient_token': {
         'type': 'boolean',
         'required': False,
-    }
+    },
+
+    # Roles this user gets while this token is valid.
+    'org_roles': {
+        'type': 'list',
+        'default': [],
+        'schema': {
+            'type': 'string',
+        },
+    },
 }
 
 files_schema = {

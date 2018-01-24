@@ -4,11 +4,13 @@ Assumes role names that are given to users by organization membership
 start with the string "org-".
 """
 
+import datetime
 import logging
 import typing
 
 import attr
 import bson
+import flask
 import werkzeug.exceptions as wz_exceptions
 
 from pillar import attrs_extra, current_app
@@ -244,8 +246,11 @@ class OrgManager:
         for uid in members:
             self.refresh_roles(uid)
 
-    def refresh_roles(self, user_id: bson.ObjectId):
-        """Refreshes the user's roles to own roles + organizations' roles."""
+    def refresh_roles(self, user_id: bson.ObjectId) -> typing.Set[str]:
+        """Refreshes the user's roles to own roles + organizations' roles.
+
+        :returns: the applied set of roles.
+        """
 
         assert isinstance(user_id, bson.ObjectId)
 
@@ -254,30 +259,41 @@ class OrgManager:
         self._log.info('Refreshing roles for user %s', user_id)
 
         org_coll = current_app.db('organizations')
+        tokens_coll = current_app.db('tokens')
 
-        # Aggregate all org-given roles for this user.
-        query = org_coll.aggregate([
-            {'$match': {'members': user_id}},
-            {'$project': {'org_roles': 1}},
-            {'$unwind': {'path': '$org_roles'}},
-            {'$group': {
-                '_id': None,
-                'org_roles': {'$addToSet': '$org_roles'},
-            }}])
+        def aggr_roles(coll, match: dict) -> typing.Set[str]:
+            query = coll.aggregate([
+                {'$match': match},
+                {'$project': {'org_roles': 1}},
+                {'$unwind': {'path': '$org_roles'}},
+                {'$group': {
+                    '_id': None,
+                    'org_roles': {'$addToSet': '$org_roles'},
+                }}])
 
-        # If the user has no organizations at all, the query will have no results.
-        try:
-            org_roles_doc = query.next()
-        except StopIteration:
-            org_roles = set()
-        else:
-            org_roles = set(org_roles_doc['org_roles'])
+            # If the user has no organizations/tokens at all, the query will have no results.
+            try:
+                org_roles_doc = query.next()
+            except StopIteration:
+                return set()
+            return set(org_roles_doc['org_roles'])
+
+        # Join all organization-given roles and roles from the tokens collection.
+        org_roles = aggr_roles(org_coll, {'members': user_id})
+        self._log.debug('Organization-given roles for user %s: %s', user_id, org_roles)
+        now = datetime.datetime.now(bson.tz_util.utc)
+        token_roles = aggr_roles(tokens_coll, {
+            'user': user_id,
+            'expire_time': {"$gt": now},
+        })
+        self._log.debug('Token-given roles for user %s: %s', user_id, token_roles)
+        org_roles.update(token_roles)
 
         users_coll = current_app.db('users')
         user_doc = users_coll.find_one(user_id, projection={'roles': 1})
         if not user_doc:
             self._log.warning('Trying refresh roles of non-existing user %s, ignoring', user_id)
-            return
+            return set()
 
         all_user_roles = set(user_doc.get('roles') or [])
         existing_org_roles = {role for role in all_user_roles
@@ -290,6 +306,8 @@ class OrgManager:
             do_badger('grant', roles=grant_roles, user_id=user_id)
         if revoke_roles:
             do_badger('revoke', roles=revoke_roles, user_id=user_id)
+
+        return all_user_roles.union(grant_roles) - revoke_roles
 
     def user_is_admin(self, org_id: bson.ObjectId) -> bool:
         """Returns whether the currently logged in user is the admin of the organization."""
@@ -389,13 +407,36 @@ class OrgManager:
         from . import ip_ranges
 
         org_coll = current_app.db('organizations')
+        try:
+            q = ip_ranges.query(remote_addr)
+        except ValueError as ex:
+            self._log.warning('Invalid remote address %s, ignoring IP-based roles: %s',
+                              remote_addr, ex)
+            return set()
+
         orgs = org_coll.find(
-            {'ip_ranges': ip_ranges.query(remote_addr)},
+            {'ip_ranges': q},
             projection={'org_roles': True},
         )
         return set(role
                    for org in orgs
                    for role in org.get('org_roles', []))
+
+    def roles_for_request(self) -> typing.Set[str]:
+        """Find roles for user via the request's remote IP address."""
+
+        try:
+            remote_addr = flask.request.access_route[0]
+        except IndexError:
+            return set()
+
+        if not remote_addr:
+            return set()
+
+        roles = self.roles_for_ip_address(remote_addr)
+        self._log.debug('Roles for IP address %s: %s', remote_addr, roles)
+
+        return roles
 
 
 def setup_app(app):

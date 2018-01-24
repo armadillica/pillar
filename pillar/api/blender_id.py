@@ -10,9 +10,11 @@ import logging
 import requests
 from bson import tz_util
 from rauth import OAuth2Session
-from flask import Blueprint, request, current_app, jsonify, session
+from flask import Blueprint, request, jsonify, session
 from requests.adapters import HTTPAdapter
 
+from pillar import current_app
+from pillar.api import service
 from pillar.api.utils import authentication
 from pillar.api.utils.authentication import find_user_in_db, upsert_user
 
@@ -79,7 +81,13 @@ def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
     db_id, status = upsert_user(db_user)
 
     # Store the token in MongoDB.
-    authentication.store_token(db_id, token, token_expiry, oauth_subclient_id)
+    ip_based_roles = current_app.org_manager.roles_for_request()
+    authentication.store_token(db_id, token, token_expiry, oauth_subclient_id,
+                               org_roles=ip_based_roles)
+
+    if current_app.org_manager is not None:
+        roles = current_app.org_manager.refresh_roles(db_id)
+        db_user['roles'] = list(roles)
 
     return db_user, status
 

@@ -1,10 +1,11 @@
+import datetime
 import typing
 
 import bson
+from bson import tz_util
 import responses
 
 from pillar.tests import AbstractPillarTest
-from pillar.api.utils import remove_private_keys
 
 
 class AbstractOrgTest(AbstractPillarTest):
@@ -669,6 +670,7 @@ class OrganizationItemEveTest(AbstractPillarTest):
 
     def _put_test(self, auth_token: typing.Optional[str]):
         """Generic PUT test, should be same result for all cases."""
+        from pillar.api.utils import remove_private_keys
 
         put_doc = remove_private_keys(self.org_doc)
         put_doc['name'] = 'new name'
@@ -771,11 +773,10 @@ class UserCreationTest(AbstractPillarTest):
         self.assertEqual([my_id], db_org['members'])
 
 
-class IPRangeTest(AbstractOrgTest):
-
+class AbstractIPRangeSingleOrgTest(AbstractOrgTest):
     def setUp(self, **kwargs):
         super().setUp(**kwargs)
-        self.uid = self.create_user(24 * 'a', token='token')
+        self.uid = self.create_user(24 * 'a', roles={'subscriber'}, token='token')
         self.org_roles = {'org-subscriber', 'org-phabricator'}
         self.org = self.app.org_manager.create_new_org('Хакеры', self.uid, 25,
                                                        org_roles=self.org_roles)
@@ -792,6 +793,9 @@ class IPRangeTest(AbstractOrgTest):
                    expected_status=expected_status)
         db_org = self.om._get_org(self.org_id)
         return db_org
+
+
+class IPRangeTest(AbstractIPRangeSingleOrgTest):
 
     def test_ipranges_doc(self):
         from pillar.api.organizations import ip_ranges
@@ -922,7 +926,7 @@ class IPRangeQueryTest(AbstractOrgTest):
         db_org = self.om._get_org(org_id)
         return db_org
 
-    def test_happy(self):
+    def test_query(self):
         # Set up a few organisations. A and B have overlapping IPv4 ranges, B and C on IPv6.
         org_roles_a = {'org-roleA1', 'org-roleA2'}
         org_a = self.app.org_manager.create_new_org('Хакеры', self.uid, 25, org_roles=org_roles_a)
@@ -961,3 +965,128 @@ class IPRangeQueryTest(AbstractOrgTest):
 
         self.assertEqual(set(), self.om.roles_for_ip_address('1111:ffff::1'))
         self.assertEqual(set(), self.om.roles_for_ip_address('::1'))
+
+
+class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+        self.user_roles = {'subscriber'}
+        self._patch({
+            'name': 'Хакеры',
+            'ip_ranges': [
+                '192.168.0.0/16',
+                '2a03:b0c0:0:1010::8fe:6ef1/120',
+            ]})
+
+    def _test_api(self, headers: dict, env: dict):
+        from pillar.api.utils.authentication import hash_auth_token
+
+        self.mock_blenderid_validate_happy()
+        # This should check the IP of the user agains the organization IP ranges and update the
+        # user in the database.
+        resp = self.get('/api/users/me', auth_token='usertoken',
+                        headers=headers, environ_overrides=env)
+        me = resp.json()
+
+        # The IP-based roles should be stored in the token document.
+        tokens_coll = self.app.db('tokens')
+        token = tokens_coll.find_one({
+            'user': bson.ObjectId(me['_id']),
+            'token_hashed': hash_auth_token('usertoken'),
+        })
+        self.assertEqual(self.org_roles, set(token['org_roles']))
+
+        # The IP-based roles should also be persisted in the user document.
+        self.assertEqual({'subscriber', *self.org_roles}, set(me['roles']))
+
+    def _test_api_forwarded_for(self, ip_addr: str):
+        self._test_api({'X-Forwarded-For': ip_addr}, {})
+
+    def _test_api_remote_addr(self, ip_addr: str):
+        self._test_api({}, {'REMOTE_ADDR': ip_addr})
+
+    @responses.activate
+    def test_api_forwarded_for_ipv6(self):
+        self._test_api_forwarded_for('2a03:b0c0:0:1010::8fe:6ede')
+
+    @responses.activate
+    def test_api_forwarded_for_ipv4(self):
+        self._test_api_forwarded_for('192.168.3.254, 4.3.4.4, 5.6.7.8')
+
+    @responses.activate
+    def test_api_remote_addr_ipv6(self):
+        self._test_api_remote_addr('2a03:b0c0:0:1010::8fe:6ede')
+
+    @responses.activate
+    def test_api_remote_addr_ipv4(self):
+        self._test_api_remote_addr('192.168.3.254')
+
+    def _test_web_forwarded_for(self, ip_addr: str, ip_roles: typing.Set[str]):
+        from pillar.api.utils.authentication import hash_auth_token
+        from pillar import auth
+        self.mock_blenderid_validate_happy()
+
+        expect_roles = {*self.user_roles, *ip_roles}
+
+        with self.app.test_request_context(headers={'X-Forwarded-For': ip_addr}):
+            # This should check the IP of the user agains the organization IP ranges and update the
+            # user in the database.
+            auth.login_user('usertoken', load_from_db=True)
+            my_id = auth.current_user.user_id
+
+            # The roles should be reflected in the current user object.
+            self.assertEqual(expect_roles, set(auth.current_user.roles))
+
+        # The IP-based roles should be stored in the token document.
+        tokens_coll = self.app.db('tokens')
+        token = tokens_coll.find_one({
+            'user': bson.ObjectId(my_id),
+            'token_hashed': hash_auth_token('usertoken'),
+            'expire_time': {'$gt': datetime.datetime.now(tz_util.utc)},
+        })
+        self.assertEqual(ip_roles, set(token['org_roles']))
+
+        # The IP-based roles should also be persisted in the user document.
+        users_coll = self.app.db('users')
+        me = users_coll.find_one({'_id': my_id})
+        self.assertEqual(expect_roles, set(me['roles']))
+
+    @responses.activate
+    def test_web_forwarded_for_ipv6(self):
+        self._test_web_forwarded_for('2a03:b0c0:0:1010::8fe:6ede', self.org_roles)
+
+        # Even though this request is outside of the IP range, the user should
+        # still maintain their organization's roles because it's stored in the
+        # token document created for the previous request.
+        self._test_web_forwarded_for('2a03:d00d:0:1010::8fe:6ede', self.org_roles)
+
+    @responses.activate
+    def test_web_forwarded_for_ipv6_outside_range(self):
+        self._test_web_forwarded_for('2a03:d00d:0:1010::8fe:6ede', set())
+
+    @responses.activate
+    def test_web_forwarded_for_ipv4(self):
+        self._test_web_forwarded_for('192.168.3.254', self.org_roles)
+        self._test_web_forwarded_for('123.123.123.123', self.org_roles)
+
+    @responses.activate
+    def test_web_forwarded_for_ipv4_outside_range(self):
+        self._test_web_forwarded_for('123.123.123.123', set())
+
+    @responses.activate
+    def test_web_forwarded_for_invalid_addr(self):
+        # This shouldn't produce any exception, but be ignored instead.
+        self._test_web_forwarded_for('317.518.1.7', set())
+
+    @responses.activate
+    def test_web_expire_Roles(self):
+        # This gives the roles until the token expires.
+        self._test_web_forwarded_for('2a03:b0c0:0:1010::8fe:6ede', self.org_roles)
+
+        # Force all tokens to expire.
+        tokens_coll = self.app.db('tokens')
+        expire = datetime.datetime.now(tz=tz_util.utc) - datetime.timedelta(hours=1)
+        tokens_coll.update_many({}, {'$set': {'expire_time': expire}})
+
+        # A new request from outside the IP range should now not result in the org roles.
+        self._test_web_forwarded_for('2a03:d00d:0:1010::8fe:6ede', set())
