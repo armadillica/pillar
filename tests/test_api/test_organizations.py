@@ -828,6 +828,22 @@ class IPRangeTest(AbstractOrgTest):
             ip_ranges.doc('2a03:b0c0:0:1010::8fe:6ef1/120'),
         ], db_org['ip_ranges'])
 
+    def test_ipranges_get_via_eve(self):
+        self.test_patch_set_ip_ranges_happy()
+        r = self.get(f'/api/organizations/{self.org_id}', auth_token='token')
+        from_eve = r.json()
+
+        # Eve cannot return binary data, at least not until we upgrade to a version
+        # that depends on Cerberus >= 1.0.
+        expect_ranges = [{'human': '::ffff:192.168.3.0/120'},
+                         {'human': '::ffff:192.168.3.1/128'},
+                         {'human': '2a03:b0c0:0:1010::8fe:6e00/120'}]
+        self.assertEqual(expect_ranges, from_eve['ip_ranges'])
+
+        r = self.get(f'/api/organizations', auth_token='token')
+        from_eve = r.json()
+        self.assertEqual(expect_ranges, from_eve['_items'][0]['ip_ranges'])
+
     def test_patch_unset_ip_ranges_happy(self):
         """Setting to empty list should just delete the entire key."""
         ipranges = [
