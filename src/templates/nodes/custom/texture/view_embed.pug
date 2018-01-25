@@ -43,7 +43,6 @@
 			i.pi-puzzle
 			| {% if not node.properties.is_tileable %}Not {% endif %}Seamless
 
-	| {% if node.properties.files %}
 	| {% for f in node.properties.files %}
 	section.node-row.texture-map
 		section.node-preview.texture
@@ -105,14 +104,12 @@
 							i.pi-lock
 							| Download
 						| {% endif %}
-	| {% endfor %}
 	| {% else %}
 	section.node-row
 		section.node-details-container.texture
 			.node-details-header.nofiles
 				.node-title No texture maps... yet!
-
-	| {% endif %}
+	| {% endfor %}
 
 
 include ../_scripts
@@ -197,4 +194,3 @@ script.
 	});
 
 | {% endblock %}
-
