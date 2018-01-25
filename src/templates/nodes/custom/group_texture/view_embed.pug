@@ -22,10 +22,7 @@
 
 	section.node-children.group.texture
 
-		| {% if children %}
-		| 	{% for child in children %}
-		| 	{% if child.properties.status == 'published' %}
-
+		| {% for child in children %}
 		a.list-node-children-container(
 			href="#",
 			data-node_id="{{ child._id }}",
@@ -114,12 +111,10 @@
 					span {{ child.name }}
 				| {% endif %}
 
-		| 	{% endif %}
-		| 	{% endfor %}
 		| {% else %}
 		.list-node-children-container
 			.list-node-children-empty No textures... yet!
-		| {% endif %}
+		| {% endfor %}
 
 script.
 	// Generate GA pageview
@@ -193,4 +188,3 @@ script.
 include ../_scripts
 
 | {% endblock %}
-

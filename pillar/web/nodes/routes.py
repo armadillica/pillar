@@ -30,7 +30,7 @@ from pillar.web.nodes.custom.storage import StorageNode
 from pillar.web.projects.routes import project_update_nodes_list
 from pillar.web.utils import get_file
 from pillar.web.utils import attach_project_pictures
-from pillar.web.utils.jstree import jstree_build_children
+from pillar.web.utils.jstree import jstree_build_children, GROUP_NODES
 from pillar.web.utils.jstree import jstree_build_from_node
 from pillar.web.utils.forms import build_file_select_form
 from pillar.web import system_util
@@ -159,7 +159,7 @@ def view(node_id, extra_template_args: dict=None):
                            'user': 1, 'properties.content_type': 1}
     children_where = {'parent': node._id}
 
-    if node_type_name == 'group':
+    if node_type_name in GROUP_NODES:
         children_where['properties.status'] = 'published'
         children_projection['permissions.world'] = 1
     else:
