@@ -300,13 +300,17 @@ script.
 		if (org_roles_str.length) org_roles = org_roles_str.split(/\s/);
 		{% endif %}
 
+		var ipr = $form.find('*[name="ip_ranges"]').val().trim();
+		if (ipr == '') ip_ranges = Array();
+		else ip_ranges = ipr.split(/\s/);
+
 		patchOrganization({
 			op: 'edit-from-web',
 			name: new_name,
 			description: $form.find('*[name="description"]').val(),
 			website: $form.find('*[name="website"]').val(),
 			location: $form.find('*[name="location"]').val(),
-			ip_ranges: $form.find('*[name="ip_ranges"]').val().trim().split('\n'),
+			ip_ranges: ip_ranges,
 			{% if can_super_edit %}
 			seat_count: parseInt($form.find('*[name="seat_count"]').val()),
 			org_roles: org_roles,
