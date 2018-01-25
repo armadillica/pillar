@@ -1,0 +1,29 @@
+| {% extends 'layout.html' %}
+//- Don't extend this base file directly. Instead, extend page.html so that Pillar extensions
+//- can provide overrides.
+| {% block body %}
+.container
+	#settings
+		#settings-sidebar
+			| {% block settings_sidebar %}
+			.settings-header
+				.settings-title Settings
+			.settings-content
+				ul
+					| {% block settings_sidebar_menu %}
+					a(class="{% if title == 'profile' %}active{% endif %}",
+						href="{{ url_for('settings.profile') }}")
+						li
+							i.pi-vcard
+							| Profile
+					| {% endblock settings_sidebar_menu %}
+			| {% endblock %}
+
+		#settings-container
+			.settings-header
+				.settings-title {% block settings_page_title %}{{ _("Title not set") }}{% endblock %}
+
+			.settings-content
+				| {% block settings_page_content %}No content set, update your template.{% endblock %}
+
+| {% endblock %}

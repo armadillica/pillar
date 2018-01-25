@@ -1,42 +1,34 @@
-| {% extends 'layout.html' %}
-| {% block body %}
-.container
-	#settings
-		| {% include 'users/settings/_sidebar.html'%}
-		#settings-container
-			.settings-header
-				.settings-title {{ _("Profile") }}
+| {% extends 'users/settings/page.html' %}
+| {% block settings_page_title %}{{ _("Profile") }}{% endblock %}
+| {% block settings_page_content %}
+.settings-form
+	form#settings-form(method='POST', action="{{url_for('settings.profile')}}")
+		.left
+			.form-group
+				| {{ form.username.label }}
+				| {{ form.username(size=20, class='form-control') }}
+				| {% if form.username.errors %}
+				| {% for error in form.username.errors %}{{ error|e }}{% endfor %}
+				| {% endif %}
 
-			.settings-content
-				.settings-form
-					form#settings-form(method='POST', action="{{url_for('settings.profile')}}")
-						.left
-							.form-group
-								| {{ form.username.label }}
-								| {{ form.username(size=20, class='form-control') }}
-								| {% if form.username.errors %}
-								| {% for error in form.username.errors %}{{ error|e }}{% endfor %}
-								| {% endif %}
+			.form-group
+				label {{ _("Full name") }}
+				p {{ current_user.full_name }}
+			.form-group
+				label {{ _("E-mail") }}
+				p {{ current_user.email }}
 
-							.form-group
-								label {{ _("Full name") }}
-								p {{ current_user.full_name }}
-							.form-group
-								label {{ _("E-mail") }}
-								p {{ current_user.email }}
+			.form-group
+				| {{ _("Change your full name, email, and password at") }} #[a(href="https://www.blender.org/id/settings/profile",target='_blank') Blender ID].
 
-							.form-group
-								| {{ _("Change your full name, email, and password at") }} #[a(href="https://www.blender.org/id/settings/profile",target='_blank') Blender ID].
+		.right
+			.settings-avatar
+				a(href="https://gravatar.com/")
+					img(src="{{ current_user.gravatar }}")
+					span {{ _("Change Gravatar") }}
 
-						.right
-							.settings-avatar
-								a(href="https://gravatar.com/")
-									img(src="{{ current_user.gravatar }}")
-									span {{ _("Change Gravatar") }}
-
-						.buttons
-							button.btn.btn-default.button-submit(type='submit')
-								i.pi-check
-								| {{ _("Save Changes") }}
-
+		.buttons
+			button.btn.btn-default.button-submit(type='submit')
+				i.pi-check
+				| {{ _("Save Changes") }}
 | {% endblock %}
