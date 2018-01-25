@@ -47,22 +47,6 @@ def get_node(node_id, user_id):
     return node.to_dict()
 
 
-def get_node_children(node_id, node_type_name, user_id):
-    """This function is currently unused since it does not give significant
-    performance improvements.
-    """
-    api = system_util.pillar_api()
-    if node_type_name == 'group':
-        published_status = ',"properties.status": "published"'
-    else:
-        published_status = ''
-
-    children = Node.all({
-        'where': '{"parent": "%s" %s}' % (node_id, published_status),
-        'embedded': '{"node_type": 1}'}, api=api)
-    return children.to_dict()
-
-
 @blueprint.route("/<node_id>/jstree")
 def jstree(node_id):
     """JsTree view.
