@@ -3,6 +3,7 @@
 import functools
 import logging
 import typing
+import urllib.parse
 
 import flask
 import flask_login
@@ -157,6 +158,7 @@ def setup_jinja_env(jinja_env, app_config: dict):
     jinja_env.filters['markdown'] = do_markdown
     jinja_env.filters['yesno'] = do_yesno
     jinja_env.filters['repr'] = repr
+    jinja_env.filters['urljoin'] = functools.partial(urllib.parse.urljoin, allow_fragments=True)
     jinja_env.globals['url_for_node'] = do_url_for_node
     jinja_env.globals['abs_url'] = functools.partial(flask.url_for,
                                                      _external=True,
