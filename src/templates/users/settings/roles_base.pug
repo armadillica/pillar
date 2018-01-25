@@ -1,0 +1,35 @@
+| {% extends 'users/settings/page.html' %}
+| {% block settings_page_title %}Roles &amp; Capabilities{% endblock %}
+| {% block settings_page_content %}
+| {% block explanation %}
+p.
+	Here is some behind-the-scenes info! In order to define what you can do on this website, we rely
+	on a system of #[em roles] and #[em capabilities]. For example, every website user "can-read" a
+	post, but only editors "can-write" and "can-edit" it.
+
+p.
+	Your roles are determined by multiple factors, such as being part of an organisation, being
+	subscribed to a service, etc… Your capabilities are determined by the roles you have.
+
+p.
+	If the website does not work as expected (for example you received permission-related errors),
+	it is often useful to mention what your Roles and Capabilities are when asking for support.
+| {% endblock explanation %}
+
+dl.dl-horizontal
+	dt Your Roles
+	| {% for role in current_user.roles | sort %}
+	dd {{ role }}
+	| {% else %}
+	dd Your account has no roles assigned, which means you have a free account.
+	| {% endfor %}
+
+dl.dl-horizontal
+	dt Your Capabilities
+	| {% for cap in current_user.capabilities | sort %}
+	dd {{ cap }}
+	| {% else %}
+	dd Your account has no capabilities assigned.
+	| {% endfor %}
+
+| {% endblock %}

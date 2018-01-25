@@ -17,6 +17,13 @@
 							i.pi-vcard
 							| Profile
 					| {% endblock settings_sidebar_menu %}
+					| {% block settings_sidebar_menu_bottom %}
+					a(class="{% if title == 'roles' %}active{% endif %}",
+						href="{{ url_for('settings.roles') }}")
+						li
+							i.pi-cog
+							| Roles &amp; Capabilities
+					| {% endblock settings_sidebar_menu_bottom %}
 			| {% endblock %}
 
 		#settings-container

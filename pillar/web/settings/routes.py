@@ -35,3 +35,10 @@ def profile():
             flash(message)
 
     return render_template('users/settings/profile.html', form=form, title='profile')
+
+
+@blueprint.route('/roles')
+@login_required
+def roles():
+    """Show roles and capabilties of the current user."""
+    return render_template('users/settings/roles.html', title='roles')
