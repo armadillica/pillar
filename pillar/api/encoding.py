@@ -168,7 +168,10 @@ def zencoder_notifications():
     # Force an update of the links on the next load of the file.
     file_doc['link_expires'] = datetime.datetime.now(tz=tz_util.utc) - datetime.timedelta(days=1)
 
-    current_app.put_internal('files', file_doc, _id=file_id)
+    r, _, _, status = current_app.put_internal('files', file_doc, _id=file_id)
+    if status != 200:
+        log.error('unable to save file %s after Zencoder notification: %s', file_id, r)
+        return json.dumps(r), 500
 
     return '', 204
 

@@ -1,7 +1,10 @@
 """Test cases for the zencoder notifications."""
+import dateutil.parser
+from bson import ObjectId
 import json
 
 from pillar.tests import AbstractPillarTest
+from pillar.tests import common_test_data as ctd
 
 
 class SizeDescriptorTest(AbstractPillarTest):
@@ -89,3 +92,72 @@ class ZencoderNotificationTest(AbstractPillarTest):
         db_file = self.app.db('files').find_one(file_id)
         self.assertEqual('failed', db_file['status'])
         self.assertEqual('failed', db_file['processing']['status'])
+
+    def test_failure_saving(self):
+        # This document is intentionally created with non-existing project ID. As a result,
+        # it cannot be saved any more with Eve.
+        file_doc = {
+            "_id": ObjectId("5a6751b33bea6a01fdfd59f0"),
+            "name": "02a877a1d9da45509cdba97e283ef0bc.mkv",
+            "filename": "4. pose-library-previews.mkv",
+            "file_path": "02a877a1d9da45509cdba97e283ef0bc.mkv",
+            "user": ctd.EXAMPLE_PROJECT_OWNER_ID,
+            "backend": "gcs",
+            "md5": "",
+            "content_type": "video/x-matroska",
+            "length": 39283494,
+            "project": ObjectId('deadbeefcafef00dbeefcace'),
+            "status": "processing",
+            "length_aggregate_in_bytes": 45333852,
+            "format": "x-matroska",
+            "variations": [{
+                "format": "mp4",
+                "content_type": "video/mp4",
+                "file_path": "02a877a1d9da45509cdba97e283ef0bc-1080p.mp4",
+                "size": "1080p",
+                "duration": 100,
+                "width": 1920,
+                "height": 1080,
+                "length": 6050358,
+                "md5": "",
+                "link": "https://storage.googleapis.com/59d69c94f4/_%2F02-1080p.mp4"
+            }],
+            "processing": {
+                "status": "processing",
+                "job_id": "447043841",
+                "backend": "zencoder"
+            },
+            "link_expires": dateutil.parser.parse("2018-01-27T06:24:31.827+0100"),
+            "_updated": dateutil.parser.parse("2018-01-26T07:24:54.000+0100"),
+            "_created": dateutil.parser.parse("2018-01-23T16:16:03.000+0100"),
+            "_deleted": False,
+            "_etag": "54f1d65326f4d856b740480dc52edefa96476d8a",
+            "link": "https://storage.googleapis.com/59d69c94f4/_%2F02.mkv"
+        }
+
+        files_coll = self.app.db('files')
+        files_coll.insert_one(file_doc)
+        file_id = file_doc['_id']
+
+        notif = {
+            'job': {'created_at': '2018-01-23T15:16:17Z',
+                    'id': 447043841,
+                    'pass_through': None,
+                    'state': 'finished',
+                    'submitted_at': '2018-01-23T15:16:17Z',
+                    'test': False,
+                    'updated_at': '2018-01-23T15:16:42Z'},
+            'outputs': [{'height': 1080,
+                         'id': 1656104422,
+                         'format': 'je moeder',
+                         'url': 'gcs://59d69c94f488551661254569/_/02-mp4.mp4',
+                         'width': 1920}]}
+
+        self.post('/api/encoding/zencoder/notifications',
+                  json=notif,
+                  headers={'X-Zencoder-Notification-Secret': self.secret},
+                  expected_status=500)
+
+        db_file = files_coll.find_one(file_id)
+        self.assertEqual('processing', db_file['status'])
+        self.assertEqual('processing', db_file['processing']['status'])
