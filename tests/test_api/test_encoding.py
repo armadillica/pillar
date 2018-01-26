@@ -4,6 +4,22 @@ import json
 from pillar.tests import AbstractPillarTest
 
 
+class SizeDescriptorTest(AbstractPillarTest):
+    def test_known_sizes(self):
+        from pillar.api.encoding import size_descriptor
+        self.assertEqual('720p', size_descriptor(1280, 720))  # 720p at 16:9 aspect
+        self.assertEqual('720p', size_descriptor(1280, 548))  # 720p at 21:9 aspect
+        self.assertEqual('720p', size_descriptor(1280, 500))  # 720p at 23:9 aspect
+        self.assertEqual('4k', size_descriptor(4096, 2304))  # 4k at 16:9 aspect
+        self.assertEqual('4k', size_descriptor(4096, 1602))  # 4k at 23:9 aspect
+        self.assertEqual('4k', size_descriptor(4096, 1602))  # 4k at 23:9 aspect
+        self.assertEqual('UHD', size_descriptor(3840, 2160))  # UHD at 16:9 aspect
+
+    def test_unknown_sizes(self):
+        from pillar.api.encoding import size_descriptor
+        self.assertEqual('240p', size_descriptor(320, 240))  # old VGA resolution
+
+
 class ZencoderNotificationTest(AbstractPillarTest):
     def setUp(self, **kwargs):
         super().setUp(**kwargs)
