@@ -29,21 +29,25 @@ def _get_node_from_id(node_id: str):
 
 
 def _handle_picture(node: dict, to_index: dict):
-    """
-    add picture fields to be indexed
-    """
+    """Add picture URL in-place to the to-be-indexed node."""
 
-    if not node.get('picture'):
+    picture_id = node.get('picture')
+    if not picture_id:
         return
 
     files_collection = current_app.data.driver.db['files']
-    lookup = {'_id': ObjectId(node['picture'])}
+    lookup = {'_id': ObjectId(picture_id)}
     picture = files_collection.find_one(lookup)
 
     for item in picture.get('variations', []):
         if item['size'] != 't':
             continue
-        to_index['picture'] = item['link']
+
+        link = generate_link(picture['backend'],
+                             item['file_path'],
+                             str(picture['project']),
+                             is_public=True)
+        to_index['picture'] = link
         break
 
 

@@ -17,7 +17,7 @@ name_to_task = {
     'nodes': index.ResetNodeIndex,
     'users': index.ResetUserIndex,
 }
-REINDEX_THREAD_COUNT = 3
+REINDEX_THREAD_COUNT = 5
 
 
 @manager_elastic.option('indices', nargs='*')

@@ -338,7 +338,7 @@ def process_file(bucket: Bucket,
                     file_id, status, r)
 
 
-def generate_link(backend, file_path: str, project_id=None, is_public=False) -> str:
+def generate_link(backend, file_path: str, project_id: str=None, is_public=False) -> str:
     """Hook to check the backend of a file resource, to build an appropriate link
     that can be used by the client to retrieve the actual file.
     """
