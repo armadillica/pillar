@@ -67,6 +67,10 @@ class Bucket(metaclass=abc.ABCMeta):
         same storage backend.
         """
 
+    @abc.abstractmethod
+    def rename_blob(self, blob: 'Blob', new_name: str) -> 'Blob':
+        """Rename the blob, returning the new Blob."""
+
     @classmethod
     def copy_to_bucket(cls, blob_name, src_project_id: ObjectId, dest_project_id: ObjectId):
         """Copies a file from one bucket to the other."""

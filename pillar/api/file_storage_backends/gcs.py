@@ -10,7 +10,7 @@ import gcloud.exceptions as gcloud_exc
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
-from .abstract import Bucket, Blob, Path, FileType
+from .abstract import Bucket, Blob, FileType
 
 log = logging.getLogger(__name__)
 
@@ -132,15 +132,28 @@ class GoogleCloudStorageBucket(Bucket):
 
         return self._gcs_bucket.copy_blob(blob.gblob, to_bucket._gcs_bucket)
 
+    def rename_blob(self, blob: 'GoogleCloudStorageBlob', new_name: str) \
+            -> 'GoogleCloudStorageBlob':
+        """Rename the blob, returning the new Blob."""
+
+        assert isinstance(blob, GoogleCloudStorageBlob)
+
+        new_name = os.path.join(self.subdir, new_name)
+
+        self._log.info('Renaming %s to %r', blob, new_name)
+        new_gblob = self._gcs_bucket.rename_blob(blob.gblob, new_name)
+        return GoogleCloudStorageBlob(new_gblob.name, self, gblob=new_gblob)
+
 
 class GoogleCloudStorageBlob(Blob):
     """GCS blob interface."""
 
-    def __init__(self, name: str, bucket: GoogleCloudStorageBucket) -> None:
+    def __init__(self, name: str, bucket: GoogleCloudStorageBucket,
+                 *, gblob: gcloud.storage.blob.Blob=None) -> None:
         super().__init__(name, bucket)
 
         self._log = logging.getLogger(f'{__name__}.GoogleCloudStorageBlob')
-        self.gblob = bucket._gcs_get(name, chunk_size=256 * 1024 * 2)
+        self.gblob = gblob or bucket._gcs_get(name, chunk_size=256 * 1024 * 2)
 
     def create_from_file(self, file_obj: FileType, *,
                          content_type: str,

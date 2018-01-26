@@ -39,6 +39,7 @@ class ZencoderNotificationTest(AbstractPillarTest):
 
     def test_good_secret_existing_file(self):
         file_id, _ = self.ensure_file_exists(file_overrides={
+            'backend': 'local',
             'processing': {'backend': 'zencoder',
                            'job_id': 'koro-007',
                            'status': 'processing'}
@@ -101,7 +102,7 @@ class ZencoderNotificationTest(AbstractPillarTest):
             "filename": "4. pose-library-previews.mkv",
             "file_path": "02a877a1d9da45509cdba97e283ef0bc.mkv",
             "user": ctd.EXAMPLE_PROJECT_OWNER_ID,
-            "backend": "gcs",
+            "backend": "local",
             "md5": "",
             "content_type": "video/x-matroska",
             "length": 39283494,
@@ -170,7 +171,7 @@ class ZencoderNotificationTest(AbstractPillarTest):
             "filename": "4. pose-library-previews.mkv",
             "file_path": "02a877a1d9da45509cdba97e283ef0bc.mkv",
             "user": ctd.EXAMPLE_PROJECT_OWNER_ID,
-            "backend": "gcs",
+            "backend": "local",
             "md5": "",
             "content_type": "video/x-matroska",
             "length": 39283494,
@@ -202,6 +203,13 @@ class ZencoderNotificationTest(AbstractPillarTest):
             "_etag": "54f1d65326f4d856b740480dc52edefa96476d8a",
             "link": "https://storage.googleapis.com/59d69c94f4/_%2F02.mkv"
         }
+
+        # Make sure the to-be-renamed file exists on the local storage bucket.
+        from pillar.api.file_storage_backends import Bucket, local
+        bucket_class = Bucket.for_backend('local')
+        bucket = bucket_class(str(file_doc['project']))
+        blob: local.LocalBlob = bucket.blob('02a877a1d9da45509cdba97e283ef0bc-1080p.mp4')
+        blob.touch()
 
         files_coll = self.app.db('files')
         files_coll.insert_one(file_doc)

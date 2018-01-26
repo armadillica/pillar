@@ -52,6 +52,21 @@ class LocalBucket(Bucket):
         with open(blob.abspath(), 'rb') as src_file:
             dest_blob.create_from_file(src_file, content_type='application/x-octet-stream')
 
+    def rename_blob(self, blob: 'LocalBlob', new_name: str) -> 'LocalBlob':
+        """Rename the blob, returning the new Blob."""
+
+        assert isinstance(blob, LocalBlob)
+
+        self._log.info('Renaming %s to %r', blob, new_name)
+        new_blob = LocalBlob(new_name, self)
+
+        old_path = blob.abspath()
+        new_path = new_blob.abspath()
+        new_path.parent.mkdir(parents=True, exist_ok=True)
+        old_path.rename(new_path)
+
+        return new_blob
+
 
 class LocalBlob(Blob):
     """Blob representing a local file on the filesystem."""
@@ -103,3 +118,9 @@ class LocalBlob(Blob):
 
     def exists(self) -> bool:
         return self.abspath().exists()
+
+    def touch(self):
+        """Touch the file, creating parent directories if needed."""
+        path = self.abspath()
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.touch(exist_ok=True)

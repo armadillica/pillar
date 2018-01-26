@@ -1,3 +1,4 @@
+import abc
 import typing
 from unittest import mock
 
@@ -5,6 +6,10 @@ from pillar.tests import AbstractPillarTest
 
 
 class AbstractStorageBackendTest(AbstractPillarTest):
+    @abc.abstractmethod
+    def storage_backend(self):
+        pass
+
     def create_test_file(self) -> (typing.IO, bytes):
         import io
         import secrets
@@ -20,6 +25,20 @@ class AbstractStorageBackendTest(AbstractPillarTest):
         self.assertEqual(200, resp.status_code)
         self.assertEqual(len(expected_file_contents), int(resp.headers['Content-Length']))
         self.assertEqual(expected_file_contents, resp.data)
+
+    def do_test_rename(self):
+        from pillar.api.file_storage_backends import Bucket
+
+        test_file, file_contents = self.create_test_file()
+
+        bucket_class: typing.Type[Bucket] = self.storage_backend()
+        bucket = bucket_class(24 * 'a')
+
+        blob = bucket.blob('somefile.bin')
+        blob.create_from_file(test_file, content_type='application/octet-stream')
+
+        new_blob = bucket.rename_blob(blob, 'ænother-näme.bin')
+        return blob, new_blob
 
 
 class LocalStorageBackendTest(AbstractStorageBackendTest):
@@ -107,6 +126,21 @@ class LocalStorageBackendTest(AbstractStorageBackendTest):
         self.assertTrue(blob.exists())
         self.assertFalse(bucket.blob('ütﬀ-8').exists())
 
+    def test_rename(self):
+        from pillar.api.file_storage_backends.local import LocalBlob
+
+        self.enter_app_context()
+
+        old_blob, new_blob = self.do_test_rename()
+        assert isinstance(old_blob, LocalBlob)
+        assert isinstance(new_blob, LocalBlob)
+
+        self.assertTrue(new_blob.abspath().exists())
+        self.assertFalse(old_blob.exists())
+
+        self.assertEqual(old_blob.abspath().parent.parent,
+                         new_blob.abspath().parent.parent)
+
 
 class MockedGoogleCloudStorageTest(AbstractStorageBackendTest):
     def storage_backend(self):
@@ -114,20 +148,23 @@ class MockedGoogleCloudStorageTest(AbstractStorageBackendTest):
 
         return Bucket.for_backend('gcs')
 
-    def test_file_upload(self):
+    def mock_gcs(self):
         import pillar.api.file_storage_backends.gcs as gcs
         from gcloud.storage import Client, Bucket, Blob
 
-        # Set up mock GCS client
         mock_gcs_client = gcs.gcs = mock.MagicMock(name='mock_gcs_client', autospec=Client)
         mock_bucket = mock.MagicMock(name='mock_bucket', autospec=Bucket)
         mock_blob = mock.MagicMock(name='mock_blob', autospec=Blob)
-
         mock_gcs_client.get_bucket.return_value = mock_bucket
         mock_bucket.blob.return_value = mock_blob
         mock_blob.public_url = '/path/to/somefile.bin'
         mock_blob.size = 318
         mock_blob.exists.return_value = True
+
+        return mock_bucket, mock_blob
+
+    def test_file_upload(self):
+        _, mock_blob = self.mock_gcs()
 
         test_file, file_contents = self.create_test_file()
 
@@ -151,3 +188,11 @@ class MockedGoogleCloudStorageTest(AbstractStorageBackendTest):
                                                       size=512,
                                                       content_type='application/octet-stream')
         self.assertEqual(2, mock_blob.reload.call_count)
+
+    def test_rename(self):
+        self.enter_app_context()
+        mock_bucket, mock_blob = self.mock_gcs()
+        self.do_test_rename()
+
+        # The storage API should have added the _ path in front.
+        mock_bucket.rename_blob.assert_called_with(mock_blob, '_/ænother-näme.bin')

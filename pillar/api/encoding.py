@@ -10,8 +10,7 @@ from flask import current_app
 from flask import request
 
 from pillar.api import utils
-from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket
-from pillar.api.utils import skip_when_testing
+from pillar.api.file_storage_backends import Bucket
 
 encoding = Blueprint('encoding', __name__)
 log = logging.getLogger(__name__)
@@ -43,14 +42,6 @@ def size_descriptor(width, height):
         return widths[width]
 
     return '%ip' % height
-
-
-@skip_when_testing
-def rename_on_gcs(bucket_name, from_path, to_path):
-    gcs = GoogleCloudStorageBucket(str(bucket_name))
-    # FIXME: don't use internal property, but use our bucket/blob API.
-    blob = gcs._gcs_bucket.blob(from_path)
-    gcs._gcs_bucket.rename_blob(blob, to_path)
 
 
 @encoding.route('/zencoder/notifications', methods=['POST'])
@@ -119,7 +110,11 @@ def zencoder_notifications():
              job_state)
 
     # For every variation encoded, try to update the file object
-    root, _ = os.path.splitext(file_doc['file_path'])
+    storage_name, _ = os.path.splitext(file_doc['file_path'])
+    nice_name, _ = os.path.splitext(file_doc['filename'])
+
+    bucket_class = Bucket.for_backend(file_doc['backend'])
+    bucket = bucket_class(str(file_doc['project']))
 
     for output in data['outputs']:
         video_format = output['format']
@@ -140,16 +135,16 @@ def zencoder_notifications():
 
         # Rename the file to include the now-known size descriptor.
         size = size_descriptor(output['width'], output['height'])
-        new_fname = '{}-{}.{}'.format(root, size, video_format)
+        new_fname = f'{storage_name}-{size}.{video_format}'
 
-        # Rename on Google Cloud Storage
+        # Rename the file on the storage.
+        blob = bucket.blob(variation['file_path'])
         try:
-            rename_on_gcs(file_doc['project'],
-                          '_/' + variation['file_path'],
-                          '_/' + new_fname)
+            new_blob = bucket.rename_blob(blob, new_fname)
+            new_blob.update_filename(f'{nice_name}-{size}.{video_format}')
         except Exception:
-            log.warning('Unable to rename GCS blob %r to %r. Keeping old name.',
-                        variation['file_path'], new_fname, exc_info=True)
+            log.warning('Unable to rename blob %r to %r. Keeping old name.',
+                        blob, new_fname, exc_info=True)
         else:
             variation['file_path'] = new_fname
 
