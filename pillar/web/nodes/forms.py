@@ -258,7 +258,7 @@ def process_node_form(form, node_id=None, node_type=None, user=None):
                     if data == '':
                         data = []
                 if schema_prop['type'] == 'datetime':
-                    data = datetime.strftime(data, app.config['RFC1123_DATE_FORMAT'])
+                    data = datetime.strftime(data, current_app.config['RFC1123_DATE_FORMAT'])
                 if schema_prop['type'] == 'objectid':
                     if data == '':
                         data = None
