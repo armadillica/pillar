@@ -36,7 +36,7 @@ class ZencoderNotificationTest(AbstractPillarTest):
                   expected_status=401)
 
     def test_good_secret_existing_file(self):
-        self.ensure_file_exists(file_overrides={
+        file_id, _ = self.ensure_file_exists(file_overrides={
             'processing': {'backend': 'zencoder',
                            'job_id': 'koro-007',
                            'status': 'processing'}
@@ -44,7 +44,7 @@ class ZencoderNotificationTest(AbstractPillarTest):
 
         self.post('/api/encoding/zencoder/notifications',
                   json={'job': {'id': 'koro-007',
-                                'state': 'done'},
+                                'state': 'finished'},
                         'outputs': [{
                             'format': 'jpg',
                             'height': 1080,
@@ -58,4 +58,34 @@ class ZencoderNotificationTest(AbstractPillarTest):
                   headers={'X-Zencoder-Notification-Secret': self.secret},
                   expected_status=204)
 
-        # TODO: check that the file in MongoDB is actually updated properly.
+        db_file = self.app.db('files').find_one(file_id)
+        self.assertEqual('complete', db_file['status'])
+        self.assertEqual('finished', db_file['processing']['status'])
+
+    def test_failed_job(self):
+        file_id, _ = self.ensure_file_exists(file_overrides={
+            'processing': {'backend': 'zencoder',
+                           'job_id': 'koro-007',
+                           'status': 'processing'}
+        })
+
+        self.post('/api/encoding/zencoder/notifications',
+                  json={'job': {'id': 'koro-007',
+                                'state': 'failed'},
+                        'outputs': [{
+                            'format': 'jpg',
+                            'height': 1080,
+                            'width': 2048,
+                            'file_size_in_bytes': 15,
+                            'md5_checksum': None,
+                            'error': 'Lama support malfunctioning',
+                            'url': 'http://example.com/file.mp4',
+                        }],
+                        'input': {
+                            'duration_in_ms': 5000,
+                        }},
+                  headers={'X-Zencoder-Notification-Secret': self.secret})
+
+        db_file = self.app.db('files').find_one(file_id)
+        self.assertEqual('failed', db_file['status'])
+        self.assertEqual('failed', db_file['processing']['status'])

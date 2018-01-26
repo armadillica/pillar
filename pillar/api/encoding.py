@@ -1,4 +1,5 @@
 import datetime
+import json
 import logging
 import os
 
@@ -33,6 +34,7 @@ def size_descriptor(width, height):
         1280: '720p',
         1920: '1080p',
         2048: '2k',
+        3840: 'UHD',
         4096: '4k',
     }
 
@@ -104,18 +106,13 @@ def zencoder_notifications():
     file_doc['processing']['status'] = job_state
 
     if job_state == 'failed':
-        log.warning('Zencoder job %i for file %s failed.', zencoder_job_id, file_id)
-        # Log what Zencoder told us went wrong.
-        for output in data['outputs']:
-            if not any('error' in key for key in output):
-                continue
-            log.warning('Errors for output %s:', output['url'])
-            for key in output:
-                if 'error' in key:
-                    log.info('    %s: %s', key, output[key])
+        log.warning('Zencoder job %s for file %s failed: %s', zencoder_job_id, file_id,
+                    json.dumps(data, sort_keys=True, indent=4))
 
         file_doc['status'] = 'failed'
         current_app.put_internal('files', file_doc, _id=file_id)
+
+        # This is 'okay' because we handled the Zencoder notification properly.
         return "You failed, but that's okay.", 200
 
     log.info('Zencoder job %s for file %s completed with status %s.', zencoder_job_id, file_id,
