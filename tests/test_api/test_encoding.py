@@ -5,17 +5,19 @@ from pillar.tests import AbstractPillarTest
 
 
 class ZencoderNotificationTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+        self.enter_app_context()
+        self.secret = self.app.config['ZENCODER_NOTIFICATIONS_SECRET']
 
     def test_missing_secret(self):
-        with self.app.test_request_context():
-            resp = self.client.post('/api/encoding/zencoder/notifications')
-        self.assertEqual(401, resp.status_code)
+        self.post('/api/encoding/zencoder/notifications',
+                  expected_status=401)
 
     def test_wrong_secret(self):
-        with self.app.test_request_context():
-            resp = self.client.post('/api/encoding/zencoder/notifications',
-                                    headers={'X-Zencoder-Notification-Secret': 'koro'})
-        self.assertEqual(401, resp.status_code)
+        self.post('/api/encoding/zencoder/notifications',
+                  headers={'X-Zencoder-Notification-Secret': 'koro'},
+                  expected_status=401)
 
     def test_good_secret_existing_file(self):
         self.ensure_file_exists(file_overrides={
@@ -24,23 +26,20 @@ class ZencoderNotificationTest(AbstractPillarTest):
                            'status': 'processing'}
         })
 
-        with self.app.test_request_context():
-            secret = self.app.config['ZENCODER_NOTIFICATIONS_SECRET']
-            resp = self.client.post('/api/encoding/zencoder/notifications',
-                                    data=json.dumps({'job': {'id': 'koro-007',
-                                                             'state': 'done'},
-                                                     'outputs': [{
-                                                         'format': 'jpg',
-                                                         'height': 1080,
-                                                         'width': 2048,
-                                                         'file_size_in_bytes': 15,
-                                                         'md5_checksum': None,
-                                                     }],
-                                                     'input': {
-                                                         'duration_in_ms': 5000,
-                                                     }}),
-                                    headers={'X-Zencoder-Notification-Secret': secret,
-                                             'Content-Type': 'application/json'})
+        self.post('/api/encoding/zencoder/notifications',
+                  json={'job': {'id': 'koro-007',
+                                'state': 'done'},
+                        'outputs': [{
+                            'format': 'jpg',
+                            'height': 1080,
+                            'width': 2048,
+                            'file_size_in_bytes': 15,
+                            'md5_checksum': None,
+                        }],
+                        'input': {
+                            'duration_in_ms': 5000,
+                        }},
+                  headers={'X-Zencoder-Notification-Secret': self.secret},
+                  expected_status=204)
 
         # TODO: check that the file in MongoDB is actually updated properly.
-        self.assertEqual(204, resp.status_code)
