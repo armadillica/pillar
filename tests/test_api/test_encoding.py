@@ -1,7 +1,6 @@
 """Test cases for the zencoder notifications."""
 import dateutil.parser
 from bson import ObjectId
-import json
 
 from pillar.tests import AbstractPillarTest
 from pillar.tests import common_test_data as ctd
