@@ -51,7 +51,7 @@ class GoogleCloudStorageBucket(Bucket):
 
     backend_name = 'gcs'
 
-    def __init__(self, name: str, subdir='_/') -> None:
+    def __init__(self, name: str, subdir='_') -> None:
         super().__init__(name=name)
 
         self._log = logging.getLogger(f'{__name__}.GoogleCloudStorageBucket')
