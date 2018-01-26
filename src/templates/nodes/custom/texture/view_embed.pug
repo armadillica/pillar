@@ -42,6 +42,8 @@
 		span.texture-info-seamless
 			i.pi-puzzle
 			| {% if not node.properties.is_tileable %}Not {% endif %}Seamless
+		| {% if node.has_method('PUT') %}
+		| {# Display publishing status only to editors #}
 		span.texture-info-status
 			| {% if node.properties.status == 'published' %}
 			i.pi-laugh
@@ -49,6 +51,7 @@
 			i.pi-displeased
 			| {% endif %}
 			| {{ node.properties.status }}
+		| {% endif %}
 
 	| {% for f in node.properties.files %}
 	section.node-row.texture-map
