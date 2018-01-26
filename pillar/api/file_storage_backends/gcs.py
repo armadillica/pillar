@@ -97,7 +97,7 @@ class GoogleCloudStorageBucket(Bucket):
     def _gcs_post(self, full_path, *, path=None) -> typing.Optional[gcloud.storage.Blob]:
         """Create new blob and upload data to it.
         """
-        path = path if path else os.path.join('_', os.path.basename(full_path))
+        path = path if path else os.path.join(self.subdir, os.path.basename(full_path))
         gblob = self._gcs_bucket.blob(path)
         if gblob.exists():
             self._log.error(f'Trying to upload to {path}, but that blob already exists. '
