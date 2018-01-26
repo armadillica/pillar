@@ -43,10 +43,15 @@ def _handle_picture(node: dict, to_index: dict):
         if item['size'] != 't':
             continue
 
-        link = generate_link(picture['backend'],
-                             item['file_path'],
-                             str(picture['project']),
-                             is_public=True)
+        # Not all files have a project...
+        pid = picture.get('project')
+        if pid:
+            link = generate_link(picture['backend'],
+                                 item['file_path'],
+                                 str(pid),
+                                 is_public=True)
+        else:
+            link = item['link']
         to_index['picture'] = link
         break
 
