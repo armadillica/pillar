@@ -2,7 +2,6 @@ import json
 
 import pillar.tests.common_test_data as ctd
 from bson import ObjectId
-from flask import g
 from mock import mock
 from pillar.tests import AbstractPillarTest
 from werkzeug.exceptions import UnprocessableEntity
@@ -240,7 +239,7 @@ class NodeSharingTest(AbstractPillarTest):
                 'category': 'home',
                 'permissions':
                     {'groups': [{'group': ctd.EXAMPLE_ADMIN_GROUP_ID,
-                                  'methods': ['GET', 'POST', 'PUT', 'DELETE']}],
+                                 'methods': ['GET', 'POST', 'PUT', 'DELETE']}],
                      'users': [],
                      'world': []}}
         )
