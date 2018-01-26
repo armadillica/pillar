@@ -1,12 +1,15 @@
 import copy
 import datetime
 import logging
+from pathlib import PurePosixPath
+import re
 import typing
 
 import bson.tz_util
 from bson import ObjectId
 from bson.errors import InvalidId
 from flask_script import Manager
+import pymongo
 
 from pillar import current_app
 
@@ -296,6 +299,88 @@ def refresh_backend_links_celery(backend_name, chunk_size=50):
     file_link_tasks.regenerate_all_expired_links.delay(backend_name, chunk_size)
 
     log.info('File link regeneration task has been queued for execution.')
+
+
+_var_type_re = re.compile(r'-[a-z0-9A-Z]+$')
+
+
+def _fix_variation(fdoc, variation, nice_name):
+    from pillar.api.file_storage_backends import Bucket
+
+    # See if we can reuse the bucket we already had.
+    backend = fdoc['backend']
+    pid_str = str(fdoc['project'])
+    bucket_cls = Bucket.for_backend(backend)
+    bucket = bucket_cls(pid_str)
+
+    var_path = PurePosixPath(variation["file_path"])
+    # NOTE: this breaks for variations with double extensions
+    var_stem = var_path.stem
+    m = _var_type_re.search(var_stem)
+    var_type = m.group(0) if m else ''
+    var_name = f'{nice_name}{var_type}{var_path.suffix}'
+    log.info(f'    - %s → %s', variation["file_path"], var_name)
+
+    blob = bucket.blob(variation['file_path'])
+    if not blob.exists():
+        log.warning('Blob %s does not exist', blob)
+        return
+
+    try:
+        blob.update_filename(var_name)
+    except Exception:
+        log.warning('Unable to update blob %s filename to %r', blob, var_name, exc_info=True)
+
+
+@manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
+                            help='Project URL')
+@manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
+                            help='Replace on all projects.')
+@manager_maintenance.option('-c', '--chunk', dest='chunk_size', default=50,
+                            help='Number of links to update, use 0 to update all.')
+def refresh_content_disposition(proj_url=None, all_projects=False, chunk_size=0):
+    """Refreshes the filename as mentioned in the Content Disposition header.
+
+    Works on all files of a specific project, or on all files in general.
+    Only works on variations, as this is intended to fix the database after
+    T51477 is fixed, and that issue doesn't affect the original files.
+    """
+    from concurrent.futures import ProcessPoolExecutor as Executor
+
+    if bool(proj_url) == all_projects:
+        log.error('Use either --project or --all.')
+        return 1
+
+    # CLI parameters are passed as strings
+    chunk_size = int(chunk_size)
+
+    # Main implementation in separate function so that we're sure that
+    # fix_variation() doesn't accidentally use nonlocal variables.
+    def go():
+        query = {'_deleted': {'$ne': False}}
+        if proj_url:
+            from pillar.api.projects.utils import get_project
+            proj = get_project(proj_url)
+            query['project'] = proj['_id']
+
+        files_coll = current_app.db('files')
+        cursor = files_coll.find(query)
+        if all_projects:
+            cursor = cursor.sort([('project', pymongo.ASCENDING)])
+        cursor = cursor.limit(chunk_size)
+
+        with Executor(max_workers=15) as exe:
+            futures = []
+            for fdoc in cursor:
+                nice_name = PurePosixPath(fdoc['filename']).stem
+
+                variations = fdoc.get('variations') or []
+                futures.extend(exe.submit(_fix_variation, fdoc, variation, nice_name)
+                               for variation in variations)
+            for future in futures:
+                future.result()
+
+    go()
 
 
 @manager_maintenance.command
