@@ -402,6 +402,29 @@ def nodes_convert_markdown(nodes):
         convert_markdown(node)
 
 
+only_for_textures = only_for_node_type_decorator('texture')
+
+
+@only_for_textures
+def texture_sort_files(node, original=None):
+    """Sort files alphabetically by map type, with colour map first."""
+
+    try:
+        files = node['properties']['files']
+    except KeyError:
+        return
+
+    # Sort the map types alphabetically, ensuring 'color' comes first.
+    as_dict = {f['map_type']: f for f in files}
+    types = sorted(as_dict.keys(), key=lambda k: '\0' if k == 'color' else k)
+    node['properties']['files'] = [as_dict[map_type] for map_type in types]
+
+
+def textures_sort_files(nodes):
+    for node in nodes:
+        texture_sort_files(node)
+
+
 def setup_app(app, url_prefix):
     from . import patch
     patch.setup_app(app, url_prefix=url_prefix)
@@ -411,6 +434,7 @@ def setup_app(app, url_prefix):
 
     app.on_replace_nodes += before_replacing_node
     app.on_replace_nodes += convert_markdown
+    app.on_replace_nodes += texture_sort_files
     app.on_replace_nodes += deduct_content_type
     app.on_replace_nodes += node_set_default_picture
     app.on_replaced_nodes += after_replacing_node
@@ -419,9 +443,11 @@ def setup_app(app, url_prefix):
     app.on_insert_nodes += nodes_deduct_content_type
     app.on_insert_nodes += nodes_set_default_picture
     app.on_insert_nodes += nodes_convert_markdown
+    app.on_insert_nodes += textures_sort_files
     app.on_inserted_nodes += after_inserting_nodes
 
     app.on_update_nodes += convert_markdown
+    app.on_update_nodes += texture_sort_files
 
     app.on_delete_item_nodes += before_deleting_node
     app.on_deleted_item_nodes += after_deleting_node

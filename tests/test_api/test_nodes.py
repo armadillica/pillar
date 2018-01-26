@@ -376,3 +376,102 @@ class NodeSharingTest(AbstractPillarTest):
         node = resp.json()
         self.assertNotIn('short_code', node)
         self.assertNotIn('short_link', node)
+
+
+class TextureSortFilesTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+
+        self.create_valid_auth_token(user_id=ctd.EXAMPLE_PROJECT_OWNER_ID, token='token')
+        self.project_id, _ = self.ensure_project_exists()
+
+    def mkfile(self, file_id: str):
+        file_id, _ = self.ensure_file_exists(file_overrides={
+            '_id': ObjectId(file_id),
+            'content_type': 'image/png'})
+        return file_id
+
+    def test_happy(self):
+        file_id_1 = self.mkfile('cafef00dcafef00dcafef00d')
+        file_id_2 = self.mkfile('cafef00dcafef00dcafecafe')
+        file_id_3 = self.mkfile('cafef00dcafef00ddeadbeef')
+
+        # Create a texture node in the 'wrong' order
+        resp = self.post('/api/nodes', expected_status=201, auth_token='token', json={
+            'project': self.project_id,
+            'node_type': 'texture',
+            'name': str(self),
+            'properties': {
+                'files': [
+                    {'map_type': 'specular', 'file': file_id_1},
+                    {'map_type': 'color', 'file': file_id_2},
+                    {'map_type': 'alpha', 'file': file_id_3},
+                ]
+            },
+            'user': ctd.EXAMPLE_PROJECT_OWNER_ID,
+        })
+        node_id = resp.json()['_id']
+
+        resp = self.get(f'/api/nodes/{node_id}', auth_token='token')
+        node = resp.json()
+        map_types = [f['map_type'] for f in node['properties']['files']]
+        self.assertEqual(['color', 'alpha', 'specular'], map_types)
+
+    def test_no_color_map(self):
+        file_id_1 = self.mkfile('cafef00dcafef00dcafef00d')
+        file_id_2 = self.mkfile('cafef00dcafef00dcafecafe')
+        file_id_3 = self.mkfile('cafef00dcafef00ddeadbeef')
+
+        # Create a texture node in the 'wrong' order
+        resp = self.post('/api/nodes', expected_status=201, auth_token='token', json={
+            'project': self.project_id,
+            'node_type': 'texture',
+            'name': str(self),
+            'properties': {
+                'files': [
+                    {'map_type': 'specular', 'file': file_id_1},
+                    {'map_type': 'bump', 'file': file_id_2},
+                    {'map_type': 'alpha', 'file': file_id_3},
+                ]
+            },
+            'user': ctd.EXAMPLE_PROJECT_OWNER_ID,
+        })
+        node_id = resp.json()['_id']
+
+        resp = self.get(f'/api/nodes/{node_id}', auth_token='token')
+        node = resp.json()
+        map_types = [f['map_type'] for f in node['properties']['files']]
+        self.assertEqual(['alpha', 'bump', 'specular'], map_types)
+
+    def test_empty_files_list(self):
+        # Create a texture node without any files.
+        resp = self.post('/api/nodes', expected_status=201, auth_token='token', json={
+            'project': self.project_id,
+            'node_type': 'texture',
+            'name': str(self),
+            'properties': {
+                'files': []
+            },
+            'user': ctd.EXAMPLE_PROJECT_OWNER_ID,
+        })
+        node_id = resp.json()['_id']
+
+        resp = self.get(f'/api/nodes/{node_id}', auth_token='token')
+        node = resp.json()
+        self.assertEqual([], node['properties']['files'])
+
+    def test_no_files_list(self):
+        # Create a texture node without any files.
+        resp = self.post('/api/nodes', expected_status=201, auth_token='token', json={
+            'project': self.project_id,
+            'node_type': 'texture',
+            'name': str(self),
+            'properties': {},
+            'user': ctd.EXAMPLE_PROJECT_OWNER_ID,
+        })
+        node_id = resp.json()['_id']
+
+        resp = self.get(f'/api/nodes/{node_id}', auth_token='token')
+        node = resp.json()
+        self.assertNotIn('files', node['properties'])
+
