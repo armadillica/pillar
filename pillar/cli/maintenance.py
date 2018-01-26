@@ -229,19 +229,20 @@ def check_home_project_groups():
 
     good = bad = 0
     for proj in proj_coll.find({'category': 'home'}):
+        pid = proj['_id']
         try:
             admin_group_perms = proj['permissions']['groups'][0]
         except IndexError:
-            log.error('Project %s has no admin group', proj['_id'])
+            log.error('Project %s has no admin group', pid)
             return 255
         except KeyError:
-            log.error('Project %s has no group permissions at all', proj['_id'])
+            log.error('Project %s has no group permissions at all', pid)
             return 255
 
         user = users_coll.find_one({'_id': proj['user']},
                                    projection={'groups': 1})
         if user is None:
-            log.error('Project %s has non-existing owner %s', proj['user'])
+            log.error('Project %s has non-existing owner %s', pid, proj['user'])
             return 255
 
         user_groups = set(user['groups'])
@@ -252,7 +253,7 @@ def check_home_project_groups():
             continue
 
         log.warning('User %s has no admin rights to home project %s -- needs group %s',
-                    proj['user'], proj['_id'], admin_group_id)
+                    proj['user'], pid, admin_group_id)
         bad += 1
 
     log.info('%i projects OK, %i projects in error', good, bad)
