@@ -33,7 +33,7 @@ EXAMPLE_FILE = {
     'user': ObjectId('56264fc4fa3a250344bd10c5'),
     'content_type': 'image/png',
     'file_path': 'c2a5c897769ce1ef0eb10f8fa1c472bcb8e2d5a4.png',
-    'backend': 'pillar',
+    'backend': 'local',
     'link': 'http://localhost:8002/file',
 }
 
@@ -58,7 +58,7 @@ class FileLinkCeleryTasksTest(AbstractPillarTest):
             'link_expires': now + datetime.timedelta(hours=1, minutes=57)})
         # Not same backend → ignore
         fid4, file_4 = self.ensure_file_exists({
-            'backend': 'pillar',
+            'backend': 'local',
             'link_expires': now + datetime.timedelta(hours=1, minutes=58)})
         # Same as fid3 → refresh
         fid5, _ = self.ensure_file_exists({

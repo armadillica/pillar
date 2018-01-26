@@ -38,7 +38,7 @@ EXAMPLE_FILE = {'_id': ObjectId('5672e2c1c379cf0007b31995'),
                 '_created': datetime.datetime(2015, 12, 17, 16, 28, 49, tzinfo=tz_util.utc),
                 'md5': '',
                 'file_path': 'c2a5c897769ce1ef0eb10f8fa1c472bcb8e2d5a4.png',
-                'backend': 'pillar',
+                'backend': 'local',
                 'link': 'http://localhost:8002/file',
                 'link_expires': datetime.datetime(2016, 3, 22, 9, 28, 22, tzinfo=tz_util.utc)}
 

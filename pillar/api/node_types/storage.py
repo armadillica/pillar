@@ -16,7 +16,7 @@ node_type_storage = {
         'subdir': {
             'type': 'string',
         },
-        # Which backend is used to store the files (gcs, pillar, bam, cdnsun)
+        # Which backend is used to store the files (gcs, local)
         'backend': {
             'type': 'string',
         },

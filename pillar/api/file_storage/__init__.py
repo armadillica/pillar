@@ -363,7 +363,7 @@ def generate_link(backend, file_path: str, project_id: str=None, is_public=False
 
         return blob.get_url(is_public=is_public)
 
-    if backend == 'pillar':
+    if backend == 'pillar':  # obsolete, replace with local.
         return url_for('file_storage.index', file_name=file_path,
                        _external=True, _scheme=current_app.config['SCHEME'])
     if backend == 'cdnsun':
