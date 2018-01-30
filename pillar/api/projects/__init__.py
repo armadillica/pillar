@@ -6,10 +6,17 @@ def setup_app(app, api_prefix):
     app.on_replace_projects += hooks.override_is_private_field
     app.on_replace_projects += hooks.before_edit_check_permissions
     app.on_replace_projects += hooks.protect_sensitive_fields
+
+    app.on_replaced_projects += hooks.after_undelete_project
+    app.on_updated_projects += hooks.after_undelete_project
+
     app.on_update_projects += hooks.override_is_private_field
     app.on_update_projects += hooks.before_edit_check_permissions
     app.on_update_projects += hooks.protect_sensitive_fields
+
     app.on_delete_item_projects += hooks.before_delete_project
+    app.on_deleted_item_projects += hooks.after_delete_project
+
     app.on_insert_projects += hooks.before_inserting_override_is_private_field
     app.on_insert_projects += hooks.before_inserting_projects
     app.on_inserted_projects += hooks.after_inserting_projects

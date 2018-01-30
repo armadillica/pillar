@@ -1,12 +1,13 @@
+import base64
 import copy
-import hashlib
-import json
-import typing
-import urllib.request, urllib.parse, urllib.error
-
 import datetime
 import functools
+import hashlib
+import json
 import logging
+import random
+import typing
+import urllib.request, urllib.parse, urllib.error
 
 import bson.objectid
 from eve import RFC1123_DATE_FORMAT
@@ -192,3 +193,10 @@ def doc_diff(doc1, doc2, falsey_is_equal=True):
             continue
 
         yield key, val1, val2
+
+
+def random_etag() -> str:
+    """Random string usable as etag."""
+
+    randbytes = random.getrandbits(256).to_bytes(32, 'big')
+    return base64.b64encode(randbytes)[:-1].decode()

@@ -295,22 +295,17 @@ class HomeProjectTest(AbstractHomeProjectTest):
         self._create_user_with_token(roles={'subscriber'}, token='token')
 
         # Create home project by getting it.
-        resp = self.client.get('/api/bcloud/home-project',
-                               headers={'Authorization': self.make_header('token')})
-        self.assertEqual(200, resp.status_code, resp.data)
-        before_delete_json_proj = json.loads(resp.data)
+        resp = self.get('/api/bcloud/home-project', auth_token='token')
+        before_delete_json_proj = resp.json()
 
         # Delete the project.
-        resp = self.client.delete('/api/projects/%s' % before_delete_json_proj['_id'],
-                                  headers={'Authorization': self.make_header('token'),
-                                           'If-Match': before_delete_json_proj['_etag']})
-        self.assertEqual(204, resp.status_code, resp.data)
+        self.delete(f'/api/projects/{before_delete_json_proj["_id"]}',
+                    auth_token='token', etag=before_delete_json_proj['_etag'],
+                    expected_status=204)
 
         # Recreate home project by getting it.
-        resp = self.client.get('/api/bcloud/home-project',
-                               headers={'Authorization': self.make_header('token')})
-        self.assertEqual(200, resp.status_code, resp.data)
-        after_delete_json_proj = json.loads(resp.data)
+        resp = self.get('/api/bcloud/home-project', auth_token='token')
+        after_delete_json_proj = resp.json()
 
         self.assertEqual(before_delete_json_proj['_id'],
                          after_delete_json_proj['_id'])

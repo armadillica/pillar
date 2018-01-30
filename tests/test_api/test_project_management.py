@@ -1,13 +1,15 @@
-# -*- encoding: utf-8 -*-
-
 """Unit tests for creating and editing projects_blueprint."""
 
+import datetime
 import functools
 import json
 import logging
 import urllib.request, urllib.parse, urllib.error
 
 from bson import ObjectId
+import bson.tz_util
+from pymongo.collection import ReturnDocument
+
 from pillar.tests import AbstractPillarTest
 
 log = logging.getLogger(__name__)
@@ -369,6 +371,68 @@ class ProjectEditTest(AbstractProjectTest):
                                   headers={'Authorization': self.make_header('token'),
                                            'If-Match': project_info['_etag']})
         self.assertEqual(204, resp.status_code, resp.data)
+
+    def test_delete_files_too(self):
+        # Create test project with a file.
+        project_info = self._create_user_and_project(['subscriber'])
+        project_id = project_info['_id']
+
+        fid, _ = self.ensure_file_exists({'project': ObjectId(project_id)})
+        with self.app.app_context():
+            files_coll = self.app.db('files')
+            nowish = datetime.datetime.now(tz=bson.tz_util.utc) - datetime.timedelta(seconds=5)
+            db_file_before = files_coll.find_one_and_update({'_id': fid},
+                                                            {'$set': {'_updated': nowish}},
+                                                            return_document=ReturnDocument.AFTER)
+
+        # DELETE by owner should also soft-delete the file documents.
+        self.delete(f'/api/projects/{project_id}',
+                    auth_token='token', etag=project_info['_etag'],
+                    expected_status=204)
+
+        resp = self.get(f'/api/files/{fid}', expected_status=404)
+        self.assertEqual(str(fid), resp.json()['_id'])
+
+        with self.app.app_context():
+            db_file_after = files_coll.find_one(fid)
+        self.assertGreater(db_file_after['_updated'], db_file_before['_updated'])
+        self.assertNotEqual(db_file_after['_etag'], db_file_before['_etag'])
+
+    def test_undelete_with_put__files_too(self):
+        from pillar.api.utils import remove_private_keys
+
+        # Create test project with a file.
+        project_info = self._create_user_and_project(['subscriber'])
+        project_id = project_info['_id']
+
+        fid, _ = self.ensure_file_exists({'project': ObjectId(project_id)})
+
+        # DELETE by owner should also soft-delete the file documents.
+        proj_url = f'/api/projects/{project_id}'
+        self.delete(proj_url, auth_token='token', etag=project_info['_etag'],
+                    expected_status=204)
+
+        resp = self.get(proj_url, auth_token='token', expected_status=404)
+        etag = resp.json()['_etag']
+
+        with self.app.app_context():
+            files_coll = self.app.db('files')
+            now = datetime.datetime.now(tz=bson.tz_util.utc) - datetime.timedelta(seconds=5)
+            db_file_before = files_coll.find_one_and_update({'_id': fid},
+                                                            {'$set': {'_updated': now}},
+                                                            return_document=ReturnDocument.AFTER)
+
+        # PUT on the project should also restore the files.
+        self.put(proj_url, auth_token='token', etag=etag,
+                 json=remove_private_keys(project_info))
+
+        resp = self.get(f'/api/files/{fid}')
+        self.assertEqual(str(fid), resp.json()['_id'])
+
+        with self.app.app_context():
+            db_file_after = files_coll.find_one(fid)
+        self.assertGreater(db_file_after['_updated'], db_file_before['_updated'])
+        self.assertNotEqual(db_file_after['_etag'], db_file_before['_etag'])
 
 
 class ProjectNodeAccess(AbstractProjectTest):
