@@ -103,8 +103,7 @@ def index():
 
     # Attach project images
     for project_list in (projects_user, projects_deleted, projects_shared):
-        for project in project_list['_items']:
-            utils.attach_project_pictures(project, api)
+        utils.mass_attach_project_pictures(project_list['_items'], api=api, header=False)
 
     return render_template(
         'projects/index_dashboard.html',

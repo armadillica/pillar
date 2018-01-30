@@ -47,6 +47,64 @@ def attach_project_pictures(project, api):
     project.picture_header = get_file(project.picture_header, api=api)
 
 
+def mass_attach_project_pictures(projects: typing.Iterable[pillarsdk.Project], *,
+                                 api, header=True, square=True):
+    """Attach file object to all projects in the list.
+
+    Queries for all picture files at once and sets the header and square
+    images.
+    """
+
+    my_log = log.getChild('mass_attach_project_pictures')
+
+    if not (header or square):
+        raise ValueError("at least one of header/square must be True")
+
+    if not projects:
+        return
+
+    file_ids = set()
+    if header:
+        file_ids.update(p.picture_header for p in projects if p.picture_header)
+    if square:
+        file_ids.update(p.picture_square for p in projects if p.picture_square)
+
+    if not file_ids:
+        return
+
+    fid_list = list(file_ids)
+    my_log.debug('mass-fetching %d files %s', len(fid_list), fid_list)
+
+    file_resp = File.all({'where': {'_id': {'$in': fid_list}}}, api=api)
+    file_obs = {f['_id']: f for f in file_resp['_items']}
+
+    to_find = len(file_ids)
+    found = 0
+    missing = 0
+    for p in projects:
+        if header and p.picture_header:
+            try:
+                p.picture_header = file_obs[p.picture_header]
+            except KeyError:
+                p.picture_header = None
+                my_log.warning('File %r not found, but used as picture_header in project %s',
+                               p.picture_header, p['_id'])
+                missing += 1
+            else:
+                found += 1
+        if square and p.picture_square:
+            try:
+                p.picture_square = file_obs[p.picture_square]
+            except KeyError:
+                p.picture_square = None
+                my_log.warning('File %s not found, but used as picture_square in project %s',
+                               p.picture_square, p['_id'])
+                missing += 1
+            else:
+                found += 1
+    my_log.debug('found %d of %d pictures, there were %d missing', found, to_find, missing)
+
+
 def gravatar(email: str, size=64):
     import warnings
     warnings.warn("the pillar.web.gravatar function is deprecated; use hashlib instead",
