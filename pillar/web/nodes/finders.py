@@ -2,13 +2,15 @@
 
 import logging
 
-from flask import current_app, url_for
+import bson
+from flask import url_for
 import werkzeug.exceptions as wz_exceptions
 
 import pillarsdk
 from pillarsdk import Node
 from pillarsdk.exceptions import ResourceNotFound
 
+from pillar import current_app
 from pillar.web.utils import caching
 from pillar.web import system_util
 
@@ -109,28 +111,25 @@ def find_for_other(project, node):
 
 
 @caching.cache_for_request()
-def project_url(project_id, project):
+def project_url(project_id: str, project: pillarsdk.Project=None) -> pillarsdk.Project:
     """Returns the project, raising a ValueError if it can't be found.
 
-    Uses the "urler" service endpoint.
+    Uses a direct MongoDB query to allow calls by any user. Only returns
+    a partial project with the _id and url properties set.
     """
 
     if project is not None:
         return project
 
-    if not current_app.config['URLER_SERVICE_AUTH_TOKEN']:
-        log.error('No URLER_SERVICE_AUTH_TOKEN token, unable to use URLer service.')
-        return None
+    proj_coll = current_app.db('projects')
+    proj = proj_coll.find_one({'_id': bson.ObjectId(project_id)},
+                              {'url': 1})
 
-    urler_api = system_util.pillar_api(
-        token=current_app.config['URLER_SERVICE_AUTH_TOKEN'])
-
-    try:
-        return pillarsdk.Project.find_from_endpoint(
-            '/service/urler/%s' % project_id, api=urler_api)
-    except pillarsdk.ForbiddenAccess as ex:
-        log.error('URLER request to find URL for project %s failed: %s', project_id, ex)
+    if proj is None:
+        log.error('project_url(%s): project does not exist, cannot find its URL', project_id)
         raise wz_exceptions.NotFound()
+
+    return pillarsdk.Project(proj)
 
 
 # Cache the actual URL based on the node ID, for the duration of the request.
