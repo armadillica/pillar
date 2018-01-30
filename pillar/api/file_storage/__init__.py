@@ -496,12 +496,22 @@ def on_pre_get_files(_, lookup):
     parsed_req = eve.utils.parse_request('files')
     parsed_req.if_modified_since = None
 
+    # If there is no lookup, we would refresh *all* file documents,
+    # which is far too heavy to do in one client HTTP request.
+    if not lookup:
+        return
+
     # Only fetch it if the date got expired.
     now = datetime.datetime.now(tz=bson.tz_util.utc)
     lookup_expired = lookup.copy()
     lookup_expired['link_expires'] = {'$lte': now}
 
     cursor = current_app.data.find('files', parsed_req, lookup_expired)
+    if cursor.count() == 0:
+        return
+
+    log.debug('Updating expired links for %d files that matched lookup %s',
+              cursor.count(), lookup_expired)
     for file_doc in cursor:
         # log.debug('Updating expired links for file %r.', file_doc['_id'])
         generate_all_links(file_doc, now)
