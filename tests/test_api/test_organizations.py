@@ -12,7 +12,7 @@ class AbstractOrgTest(AbstractPillarTest):
     def setUp(self, **kwargs):
         super().setUp(**kwargs)
 
-        self.enter_app_context()
+        # self.enter_app_context()
         self.om = self.app.org_manager
 
 
@@ -492,10 +492,11 @@ class OrganizationResourceEveTest(AbstractOrgTest):
         self.admin1_uid = self.create_user(24 * 'a', token='admin1-token')
         self.admin2_uid = self.create_user(24 * 'b', token='admin2-token')
 
-        org_doc = self.om.create_new_org('Хакеры 1', self.admin1_uid, 25)
-        self.org1_id = org_doc['_id']
-        org_doc = self.om.create_new_org('Хакеры 2', self.admin2_uid, 10)
-        self.org2_id = org_doc['_id']
+        with self.app.app_context():
+            org_doc = self.om.create_new_org('Хакеры 1', self.admin1_uid, 25)
+            self.org1_id = org_doc['_id']
+            org_doc = self.om.create_new_org('Хакеры 2', self.admin2_uid, 10)
+            self.org2_id = org_doc['_id']
 
         # Create members of the organizations.
         self.member1_uid = self.create_user(24 * 'd',
@@ -504,8 +505,10 @@ class OrganizationResourceEveTest(AbstractOrgTest):
         self.member2_uid = self.create_user(24 * 'e',
                                             email='member2@example.com',
                                             token='member2-token')
-        self.om.assign_users(self.org1_id, ['member1@example.com', 'member2@example.com'])
-        self.om.assign_users(self.org2_id, ['member2@example.com'])
+
+        with self.app.app_context():
+            self.om.assign_users(self.org1_id, ['member1@example.com', 'member2@example.com'])
+            self.om.assign_users(self.org2_id, ['member2@example.com'])
 
         # Create an outside user.
         self.outsider_uid = self.create_user(24 * '0', token='outsider-token')
@@ -515,7 +518,8 @@ class OrganizationResourceEveTest(AbstractOrgTest):
         self.org2_doc = self._from_db(self.org2_id)
 
     def _from_db(self, org_id) -> dict:
-        return self.om._get_org(org_id)
+        with self.app.app_context():
+            return self.om._get_org(org_id)
 
     def test_list_as_pillar_admin(self):
         """Pillar Admins should see all orgs"""
@@ -778,8 +782,10 @@ class AbstractIPRangeSingleOrgTest(AbstractOrgTest):
         super().setUp(**kwargs)
         self.uid = self.create_user(24 * 'a', roles={'subscriber'}, token='token')
         self.org_roles = {'org-subscriber', 'org-phabricator'}
-        self.org = self.app.org_manager.create_new_org('Хакеры', self.uid, 25,
-                                                       org_roles=self.org_roles)
+
+        with self.app.app_context():
+            self.org = self.app.org_manager.create_new_org('Хакеры', self.uid, 25,
+                                                           org_roles=self.org_roles)
         self.org_id = self.org['_id']
 
     def _patch(self, payload: dict, expected_status=204) -> dict:
@@ -791,7 +797,9 @@ class AbstractIPRangeSingleOrgTest(AbstractOrgTest):
                    },
                    auth_token='token',
                    expected_status=expected_status)
-        db_org = self.om._get_org(self.org_id)
+
+        with self.app.app_context():
+            db_org = self.om._get_org(self.org_id)
         return db_org
 
 
@@ -927,6 +935,8 @@ class IPRangeQueryTest(AbstractOrgTest):
         return db_org
 
     def test_query(self):
+        self.enter_app_context()
+
         # Set up a few organisations. A and B have overlapping IPv4 ranges, B and C on IPv6.
         org_roles_a = {'org-roleA1', 'org-roleA2'}
         org_a = self.app.org_manager.create_new_org('Хакеры', self.uid, 25, org_roles=org_roles_a)
@@ -989,6 +999,7 @@ class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
         me = resp.json()
 
         # The IP-based roles should be stored in the token document.
+        self.enter_app_context()
         tokens_coll = self.app.db('tokens')
         token = tokens_coll.find_one({
             'user': bson.ObjectId(me['_id']),
@@ -1038,6 +1049,7 @@ class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
             self.assertEqual(expect_roles, set(auth.current_user.roles))
 
         # The IP-based roles should be stored in the token document.
+        self.enter_app_context()
         tokens_coll = self.app.db('tokens')
         token = tokens_coll.find_one({
             'user': bson.ObjectId(my_id),

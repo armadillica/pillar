@@ -16,7 +16,6 @@ import bson
 from bson import tz_util
 from flask import g, current_app
 from flask import request
-from flask import current_app
 from werkzeug import exceptions as wz_exceptions
 
 from pillar.api.utils import remove_private_keys
@@ -105,7 +104,7 @@ def find_user_in_db(user_info: dict, provider='blender-id') -> dict:
     return db_user
 
 
-def validate_token():
+def validate_token(*, force=False):
     """Validate the token provided in the request and populate the current_user
     flask.g object, so that permissions and access to a resource can be defined
     from it.
@@ -113,10 +112,18 @@ def validate_token():
     When the token is successfully validated, sets `g.current_user` to contain
     the user information, otherwise it is set to None.
 
-    @returns True iff the user is logged in with a valid Blender ID token.
+    :param force: don't trust g.current_user and force a re-check.
+    :returns: True iff the user is logged in with a valid Blender ID token.
     """
 
     from pillar.auth import AnonymousUser
+
+    # Trust a pre-existing g.current_user
+    if not force:
+        cur = getattr(g, 'current_user', None)
+        if cur is not None and cur.is_authenticated:
+            log.debug('skipping token check because current user is already set to %s', cur)
+            return True
 
     auth_header = request.headers.get('Authorization') or ''
     if request.authorization:
@@ -359,7 +366,6 @@ def setup_app(app):
     @app.before_request
     def validate_token_at_each_request():
         validate_token()
-        return None
 
 
 def upsert_user(db_user):

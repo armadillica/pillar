@@ -113,7 +113,7 @@ def create_home_project(user_id, write_access):
 
     # Re-validate the authentication token, so that the put_internal call sees the
     # new group created for the project.
-    authentication.validate_token()
+    authentication.validate_token(force=True)
 
     # There are a few things in the on_insert_projects hook we need to adjust.
 

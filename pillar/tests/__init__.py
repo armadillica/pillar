@@ -138,7 +138,8 @@ class AbstractPillarTest(TestMinimal):
         self.app.process_extensions()
         assert self.app.config['MONGO_DBNAME'] == 'pillar_test'
 
-        self.client = self.app.test_client()
+        self.app.testing = True
+        self.client = self.app.test_client(use_cookies=False)
         assert isinstance(self.client, FlaskClient)
 
     def tearDown(self):
@@ -157,8 +158,13 @@ class AbstractPillarTest(TestMinimal):
         The app context is automatically exited upon testcase teardown.
         """
 
+        from flask import g
+
         self._app_ctx: flask.ctx.AppContext = self.app.app_context()
         self._app_ctx.__enter__()
+
+        if hasattr(g, 'current_user'):
+            g.current_user = None
 
     def unload_modules(self, module_name):
         """Uploads the named module, and all submodules."""

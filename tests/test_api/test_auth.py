@@ -51,6 +51,34 @@ class AuthenticationTests(AbstractPillarTest):
             self.assertFalse(auth.validate_token())
 
     @responses.activate
+    def test_validate_token__force_logged_in(self):
+        from pillar.api.utils import authentication as auth
+        from pillar.auth import UserClass
+
+        self.mock_blenderid_validate_happy()
+        with self.app.test_request_context(
+                headers={'Authorization': self.make_header('knowntoken')}):
+            from flask import g
+            g.current_user = UserClass('12345')
+            self.assertTrue(g.current_user.is_authenticated)
+
+            self.assertTrue(auth.validate_token(force=True))
+            self.assertTrue(g.current_user.is_authenticated)
+
+    @responses.activate
+    def test_validate_token__force_not_logged_in(self):
+        from pillar.api.utils import authentication as auth
+        from pillar.auth import UserClass, current_user
+
+        with self.app.test_request_context():
+            from flask import g
+            g.current_user = UserClass('12345')
+            self.assertTrue(g.current_user.is_authenticated)
+
+            self.assertFalse(auth.validate_token(force=True))
+            self.assertFalse(g.current_user.is_authenticated)
+
+    @responses.activate
     def test_validate_token__unknown_token(self):
         """Test validating of invalid token, unknown both to us and Blender ID."""
 
@@ -78,24 +106,23 @@ class AuthenticationTests(AbstractPillarTest):
 
         from pillar.api.utils import authentication as auth
 
-        self.enter_app_context()
-
         user_id = self.create_user()
 
-        now = datetime.datetime.now(tz_util.utc)
-        future = now + datetime.timedelta(days=1)
-        past = now - datetime.timedelta(days=1)
-        subclient = self.app.config['BLENDER_ID_SUBCLIENT_ID']
+        with self.app.app_context():
+            now = datetime.datetime.now(tz_util.utc)
+            future = now + datetime.timedelta(days=1)
+            past = now - datetime.timedelta(days=1)
+            subclient = self.app.config['BLENDER_ID_SUBCLIENT_ID']
 
-        auth.store_token(user_id, 'nonexpired-main', future, None)
-        auth.store_token(user_id, 'nonexpired-sub', future, subclient)
-        token3 = auth.store_token(user_id, 'expired-sub', past, subclient)
+            auth.store_token(user_id, 'nonexpired-main', future, None)
+            auth.store_token(user_id, 'nonexpired-sub', future, subclient)
+            token3 = auth.store_token(user_id, 'expired-sub', past, subclient)
 
-        # We should not find the given tokens as unhashed tokens.
-        tokens_coll = self.app.db('tokens')
-        self.assertIsNone(tokens_coll.find_one({'token': 'nonespired-main'}))
-        self.assertIsNone(tokens_coll.find_one({'token': 'nonespired-sub'}))
-        self.assertIsNone(tokens_coll.find_one({'token': 'expired-sub'}))
+            # We should not find the given tokens as unhashed tokens.
+            tokens_coll = self.app.db('tokens')
+            self.assertIsNone(tokens_coll.find_one({'token': 'nonespired-main'}))
+            self.assertIsNone(tokens_coll.find_one({'token': 'nonespired-sub'}))
+            self.assertIsNone(tokens_coll.find_one({'token': 'expired-sub'}))
 
         with self.app.test_request_context(
                 headers={'Authorization': self.make_header('nonexpired-main')}):
@@ -195,32 +222,32 @@ class AuthenticationTests(AbstractPillarTest):
 
     def test_token_hashing_cli(self):
         from dateutil.parser import parse
-        self.enter_app_context()
 
-        user_id1 = self.create_user(24 * 'a')
-        user_id2 = self.create_user(24 * 'b')
-        now = datetime.datetime.now(tz_util.utc)
+        with self.app.app_context():
+            user_id1 = self.create_user(24 * 'a')
+            user_id2 = self.create_user(24 * 'b')
+            now = datetime.datetime.now(tz_util.utc)
 
-        # Force unhashed tokens into our database.
-        tokens_coll = self.app.db('tokens')
-        tokens_coll.insert_one({
-            '_id': ObjectId('59c0f8ef98377327e1525cd1'),
-            '_etag': '3b8fffa5177e87555acd95e49e6764cb81de5d70',
-            '_created': parse('2017-09-19T13:01:03.000+0200'),
-            '_updated': parse('2017-09-19T13:01:03.000+0200'),
-            'user': user_id1,
-            'token': 'unhashed-token',
-            'expire_time': now + datetime.timedelta(hours=1),
-        })
-        tokens_coll.insert_one({
-            '_id': ObjectId(24 * 'c'),
-            '_etag': '3b8fffa5177e87555acd95e49e6764cb81de5d70',
-            '_created': parse('2017-09-20T13:01:03.000+0200'),
-            '_updated': parse('2017-09-20T13:01:03.000+0200'),
-            'user': user_id2,
-            'token': 'some-other-token',
-            'expire_time': now + datetime.timedelta(hours=1),
-        })
+            # Force unhashed tokens into our database.
+            tokens_coll = self.app.db('tokens')
+            tokens_coll.insert_one({
+                '_id': ObjectId('59c0f8ef98377327e1525cd1'),
+                '_etag': '3b8fffa5177e87555acd95e49e6764cb81de5d70',
+                '_created': parse('2017-09-19T13:01:03.000+0200'),
+                '_updated': parse('2017-09-19T13:01:03.000+0200'),
+                'user': user_id1,
+                'token': 'unhashed-token',
+                'expire_time': now + datetime.timedelta(hours=1),
+            })
+            tokens_coll.insert_one({
+                '_id': ObjectId(24 * 'c'),
+                '_etag': '3b8fffa5177e87555acd95e49e6764cb81de5d70',
+                '_created': parse('2017-09-20T13:01:03.000+0200'),
+                '_updated': parse('2017-09-20T13:01:03.000+0200'),
+                'user': user_id2,
+                'token': 'some-other-token',
+                'expire_time': now + datetime.timedelta(hours=1),
+            })
 
         # This token should work.
         me1 = self.get('/api/users/me', auth_token='unhashed-token').get_json()
@@ -228,8 +255,9 @@ class AuthenticationTests(AbstractPillarTest):
         me2 = self.get('/api/users/me', auth_token='some-other-token').get_json()
         self.assertEqual(str(user_id2), me2['_id'])
 
-        from pillar.cli.operations import hash_auth_tokens
-        hash_auth_tokens()
+        with self.app.app_context():
+            from pillar.cli.operations import hash_auth_tokens
+            hash_auth_tokens()
 
         # The same token should still work, but be hashed in the DB.
         me1 = self.get('/api/users/me', auth_token='unhashed-token').get_json()
@@ -750,9 +778,9 @@ class UserCreationTest(AbstractPillarTest):
     @responses.activate
     def test_update_by_auth_no_full_name(self):
         """Blender ID does not require full name, we do."""
-        self.enter_app_context()
-        users_coll = self.app.db().users
-        self.assertEqual(0, users_coll.count())
+        with self.app.app_context():
+            users_coll = self.app.db().users
+            self.assertEqual(0, users_coll.count())
 
         # First request will create the user, the 2nd request will update.
         self.mock_blenderid_validate_happy()
@@ -769,21 +797,23 @@ class UserCreationTest(AbstractPillarTest):
         token = 'this is my life now'
         self.get('/api/users/me', auth_token=token)
 
-        # Clear out the full name of the user. This could happen for some
-        # reason, and it shouldn't break the login flow.
-        users_coll.update_many({}, {'$set': {'full_name': ''}})
+        with self.app.app_context():
+            # Clear out the full name of the user. This could happen for some
+            # reason, and it shouldn't break the login flow.
+            users_coll.update_many({}, {'$set': {'full_name': ''}})
 
-        # Delete all tokens to force a re-check with Blender ID
-        tokens_coll = self.app.db('tokens')
-        tokens_coll.delete_many({})
+            # Delete all tokens to force a re-check with Blender ID
+            tokens_coll = self.app.db('tokens')
+            tokens_coll.delete_many({})
 
         self.get('/api/users/me', auth_token=token)
 
-        self.assertEqual(1, users_coll.count())
+        with self.app.app_context():
+            self.assertEqual(1, users_coll.count())
 
-        db_user = users_coll.find()[0]
-        self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)
-        self.assertNotEqual('', db_user['full_name'])
+            db_user = users_coll.find()[0]
+            self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)
+            self.assertNotEqual('', db_user['full_name'])
 
     def test_user_without_email_address(self):
         """Regular users should always have an email address.
