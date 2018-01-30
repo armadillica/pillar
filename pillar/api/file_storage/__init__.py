@@ -550,13 +550,15 @@ def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
 def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
     import gcloud.exceptions
 
+    my_log = log.getChild(f'refresh_links_for_backend.{backend_name}')
+
     # Retrieve expired links.
     files_collection = current_app.data.driver.db['files']
     proj_coll = current_app.data.driver.db['projects']
 
     now = datetime.datetime.now(tz=bson.tz_util.utc)
     expire_before = now + datetime.timedelta(seconds=expiry_seconds)
-    log.info('Limiting to links that expire before %s', expire_before)
+    my_log.info('Limiting to links that expire before %s', expire_before)
 
     base_query = {'backend': backend_name, '_deleted': {'$ne': True}}
     to_refresh = files_collection.find(
@@ -568,14 +570,14 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
 
     document_count = to_refresh.count()
     if document_count == 0:
-        log.info('No links to refresh.')
+        my_log.info('No links to refresh.')
         return
 
     if 0 < chunk_size == document_count:
-        log.info('Found %d documents to refresh, probably limited by the chunk size.',
-                 document_count)
+        my_log.info('Found %d documents to refresh, probably limited by the chunk size.',
+                    document_count)
     else:
-        log.info('Found %d documents to refresh.', document_count)
+        my_log.info('Found %d documents to refresh.', document_count)
 
     refreshed = 0
     report_chunks = min(max(5, document_count // 25), 100)
@@ -584,7 +586,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
             file_id = file_doc['_id']
             project_id = file_doc.get('project')
             if project_id is None:
-                log.debug('Skipping file %s, it has no project.', file_id)
+                my_log.debug('Skipping file %s, it has no project.', file_id)
                 continue
 
             count = proj_coll.count({'_id': project_id, '$or': [
@@ -593,33 +595,33 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
             ]})
 
             if count == 0:
-                log.debug('Skipping file %s, project %s does not exist.',
-                          file_id, project_id)
+                my_log.debug('Skipping file %s, project %s does not exist.',
+                             file_id, project_id)
                 continue
 
             if 'file_path' not in file_doc:
-                log.warning("Skipping file %s, missing 'file_path' property.",
-                            file_id)
+                my_log.warning("Skipping file %s, missing 'file_path' property.",
+                               file_id)
                 continue
 
-            log.debug('Refreshing links for file %s', file_id)
+            my_log.debug('Refreshing links for file %s', file_id)
 
             try:
                 generate_all_links(file_doc, now)
             except gcloud.exceptions.Forbidden:
-                log.warning('Skipping file %s, GCS forbids us access to '
-                            'project %s bucket.', file_id, project_id)
+                my_log.warning('Skipping file %s, GCS forbids us access to '
+                               'project %s bucket.', file_id, project_id)
                 continue
             refreshed += 1
 
             if refreshed % report_chunks == 0:
-                log.info('Refreshed %i links', refreshed)
+                my_log.info('Refreshed %i links', refreshed)
         except KeyboardInterrupt:
-            log.warning('Aborting due to KeyboardInterrupt after refreshing %i '
-                        'links', refreshed)
+            my_log.warning('Aborting due to KeyboardInterrupt after refreshing %i '
+                           'links', refreshed)
             return
 
-    log.info('Refreshed %i links', refreshed)
+    my_log.info('Refreshed %i links', refreshed)
 
 
 @require_login()
