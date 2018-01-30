@@ -447,7 +447,14 @@ def generate_all_links(response, now):
         response['project']) if 'project' in response else None
     # TODO: add project id to all files
     backend = response['backend']
-    response['link'] = generate_link(backend, response['file_path'], project_id)
+
+    if 'file_path' in response:
+        response['link'] = generate_link(backend, response['file_path'], project_id)
+    else:
+        import pprint
+        log.error('File without file_path properly, unable to generate links: %s',
+                  pprint.pformat(response))
+        return
 
     variations = response.get('variations')
     if variations:
