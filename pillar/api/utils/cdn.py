@@ -1,5 +1,7 @@
 import datetime
 from hashlib import md5
+import base64
+
 from flask import current_app
 
 
@@ -17,19 +19,20 @@ def hash_file_path(file_path, expiry_timestamp=None):
     if current_app.config['CDN_USE_URL_SIGNING']:
 
         url_signing_key = current_app.config['CDN_URL_SIGNING_KEY']
-        hash_string = domain_subfolder + file_path + url_signing_key
+        to_hash = domain_subfolder + file_path + url_signing_key
 
         if not expiry_timestamp:
             expiry_timestamp = datetime.datetime.now() + datetime.timedelta(hours=24)
             expiry_timestamp = expiry_timestamp.strftime('%s')
 
-        hash_string = expiry_timestamp + hash_string
+        to_hash = expiry_timestamp + to_hash
+        if isinstance(to_hash, str):
+            to_hash = to_hash.encode()
 
         expiry_timestamp = "," + str(expiry_timestamp)
 
-        hashed_file_path = md5(hash_string).digest().encode('base64')[:-1]
-        hashed_file_path = hashed_file_path.replace('+', '-')
-        hashed_file_path = hashed_file_path.replace('/', '_')
+        hashed_file_path = base64.b64encode(md5(to_hash).digest())[:-1].decode()
+        hashed_file_path = hashed_file_path.replace('+', '-').replace('/', '_')
 
         asset_url = asset_url + \
                     '?secure=' + \
