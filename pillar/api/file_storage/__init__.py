@@ -467,6 +467,12 @@ def generate_all_links(response, now):
     response['link_expires'] = now + datetime.timedelta(seconds=validity_secs)
 
     patch_info = remove_private_keys(response)
+
+    # The project could have been soft-deleted, in which case it's fine to
+    # update the links to the file. However, Eve/Cerberus doesn't allow this;
+    # removing the 'project' key from the PATCH works around this.
+    patch_info.pop('project', None)
+
     file_id = ObjectId(response['_id'])
     (patch_resp, _, _, _) = current_app.patch_internal('files', patch_info,
                                                        _id=file_id)
