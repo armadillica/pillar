@@ -19,7 +19,6 @@ import flask
 from flask import g, render_template, request
 from flask_babel import Babel, gettext as _
 from flask.templating import TemplateNotFound
-import pymongo.collection
 import pymongo.database
 from werkzeug.local import LocalProxy
 
@@ -87,7 +86,7 @@ class PillarServer(BlinkerCompatibleEve):
         self._user_roles: typing.Set[str] = {
             'demo', 'admin', 'subscriber', 'homeproject',
             'protected', 'org-subscriber', 'video-encoder',
-            'service', 'badger', 'svner', 'urler',
+            'service', 'badger', 'svner',
         }
         self._user_roles_indexable: typing.Set[str] = {'demo', 'admin', 'subscriber'}
 

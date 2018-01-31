@@ -5,6 +5,8 @@ BLENDER_ID_ENDPOINT = 'http://127.0.0.1:8001'  # nonexistant server, no trailing
 SERVER_NAME = 'localhost'
 PILLAR_SERVER_ENDPOINT = 'http://localhost/api/'
 
+MAIN_PROJECT_ID = '5672beecc0261b2005ed1a33'
+
 DEBUG = False
 TESTING = True
 

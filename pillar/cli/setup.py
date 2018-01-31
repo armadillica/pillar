@@ -66,13 +66,6 @@ def create_badger_account(email, badges):
 
 
 @manager_setup.command
-def create_urler_account(email):
-    """Creates a new service account that can fetch all project URLs."""
-
-    create_service_account(email, ['urler'], {})
-
-
-@manager_setup.command
 def create_local_user_account(email, password):
     from pillar.api.local_auth import create_local_user
     create_local_user(email, password)

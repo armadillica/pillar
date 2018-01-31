@@ -3,7 +3,6 @@
 import logging
 import typing
 
-import bson
 import blinker
 import bson
 
@@ -11,8 +10,7 @@ from flask import Blueprint, current_app, request
 from werkzeug import exceptions as wz_exceptions
 
 from pillar.api import local_auth
-from pillar.api.utils import mongo
-from pillar.api.utils import authorization, authentication, str2id, jsonify
+from pillar.api.utils import authorization, authentication
 
 blueprint = Blueprint('service', __name__)
 log = logging.getLogger(__name__)
@@ -157,19 +155,6 @@ def do_badger(action: str, *,
     signal_user_changed_role.send(current_app, user=db_user)
 
     return '', 204
-
-
-@blueprint.route('/urler/<project_id>', methods=['GET'])
-@authorization.require_login(require_roles={'service', 'urler'}, require_all=True)
-def urler(project_id):
-    """Returns the URL of any project."""
-
-    project_id = str2id(project_id)
-    project = mongo.find_one_or_404('projects', project_id,
-                                    projection={'url': 1})
-    return jsonify({
-        '_id': project_id,
-        'url': project['url']})
 
 
 def manage_user_group_membership(db_user, role, action):

@@ -183,11 +183,6 @@ GIT = 'git'
 RENDER_HOME_AS_REGULAR_PROJECT = False
 
 
-# Authentication token for the Urler service. If None, defaults
-# to the authentication token of the current user.
-URLER_SERVICE_AUTH_TOKEN = None
-
-
 # Blender Cloud add-on version. This updates the value in all places in the
 # front-end.
 BLENDER_CLOUD_ADDON_VERSION = '1.4'
