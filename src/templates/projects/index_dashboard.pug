@@ -327,9 +327,16 @@ script.
 		hopToTop(); // Display jump to top button
 	});
 
+
+	var patch_url = '{{ url_for('projects.patch.patch_project', project_id='PROJECTID') }}';
 	function undelete_project(project_id) {
 		console.log('undeleting project', project_id);
-		$.post('{{ url_for('projects.undelete') }}', {project_id: project_id})
+		$.ajax({
+			url: patch_url.replace('PROJECTID', project_id),
+			method: 'PATCH',
+			data: JSON.stringify({'op': 'undelete'}),
+			contentType: 'application/json'
+		})
 		.done(function(data, textStatus, jqXHR) {
 			location.href = jqXHR.getResponseHeader('Location');
 		})

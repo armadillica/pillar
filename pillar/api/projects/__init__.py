@@ -3,12 +3,12 @@ from .routes import blueprint_api
 
 
 def setup_app(app, api_prefix):
+    from . import patch
+    patch.setup_app(app)
+
     app.on_replace_projects += hooks.override_is_private_field
     app.on_replace_projects += hooks.before_edit_check_permissions
     app.on_replace_projects += hooks.protect_sensitive_fields
-
-    app.on_replaced_projects += hooks.after_undelete_project
-    app.on_updated_projects += hooks.after_undelete_project
 
     app.on_update_projects += hooks.override_is_private_field
     app.on_update_projects += hooks.before_edit_check_permissions

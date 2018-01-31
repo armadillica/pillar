@@ -861,37 +861,3 @@ def edit_extension(project: Project, extension_name):
 
     return ext.project_settings(project,
                                 ext_pages=find_extension_pages())
-
-
-@blueprint.route('/undelete', methods=['POST'])
-@login_required
-def undelete():
-    """Undelete a deleted project.
-
-    Can only be done by the owner of the project or an admin.
-    """
-    # This function takes an API-style approach, even though it's a web
-    # endpoint. Undeleting via a REST approach would mean GETting the
-    # deleted project, which now causes a 404 exception to bubble to the
-    # client.
-    from pillar.api.utils import mongo, remove_private_keys
-    from pillar.api.utils.authorization import check_permissions
-
-    project_id = request.form.get('project_id')
-    if not project_id:
-        raise wz_exceptions.BadRequest('missing project ID')
-
-    # Check that the user has PUT permissions on the project itself.
-    project = mongo.find_one_or_404('projects', project_id)
-    check_permissions('projects', project, 'PUT')
-
-    pid = project['_id']
-    log.info('Undeleting project %s on behalf of %s', pid, current_user.email)
-    r, _, _, status = current_app.put_internal('projects', remove_private_keys(project), _id=pid)
-    if status != 200:
-        log.warning('Error %d un-deleting project %s: %s', status, pid, r)
-        return 'Error un-deleting project', 500
-
-    resp = flask.Response('', status=204)
-    resp.location = flask.url_for('projects.view', project_url=project['url'])
-    return resp

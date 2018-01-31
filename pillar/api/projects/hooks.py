@@ -1,8 +1,6 @@
 import copy
-import datetime
 import logging
 
-import bson.tz_util
 from flask import request, abort
 
 from pillar import current_app
@@ -13,7 +11,7 @@ from pillar.api.node_types.group_texture import node_type_group_texture
 from pillar.api.node_types.texture import node_type_texture
 from pillar.api.file_storage_backends import default_storage_backend
 from pillar.api.utils import authorization, authentication
-from pillar.api.utils import remove_private_keys, random_etag
+from pillar.api.utils import remove_private_keys
 from pillar.api.utils.authorization import user_has_role, check_permissions
 from pillar.auth import current_user
 from .utils import abort_with_error
@@ -82,37 +80,6 @@ def after_delete_project(project: dict):
     r, _, _, status = delete('files', {'project': pid})
     if status != 204:
         log.warning('Unable to delete files of project %s: %s', pid, r)
-
-
-def after_undelete_project(project: dict, original: dict):
-    """Undelete the files that belong to this project.
-
-    We cannot do this via Eve, as it doesn't support PATCHing collections, so
-    direct MongoDB modification is used to set _deleted=False and provide
-    new _etag and _updated values.
-    """
-
-    if not original:
-        return
-
-    was_deleted = original.get('_deleted', False)
-    now_deleted = project.get('_deleted', False)
-    if not was_deleted or now_deleted:
-        # This is not an undelete.
-        return
-
-    pid = project['_id']
-    new_etag = random_etag()
-    now = datetime.datetime.now(tz=bson.tz_util.utc)
-
-    files_coll = current_app.db('files')
-    update_result = files_coll.update_many(
-        {'project': pid},
-        {'$set': {'_deleted': False,
-                  '_etag': new_etag,
-                  '_updated': now}})
-    log.info('undeleted %d of %d file documents of project %s',
-             update_result.modified_count, update_result.matched_count, pid)
 
 
 def protect_sensitive_fields(document, original):

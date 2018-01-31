@@ -398,22 +398,25 @@ class ProjectEditTest(AbstractProjectTest):
         self.assertGreater(db_file_after['_updated'], db_file_before['_updated'])
         self.assertNotEqual(db_file_after['_etag'], db_file_before['_etag'])
 
-    def test_undelete_with_put__files_too(self):
-        from pillar.api.utils import remove_private_keys
+    def _create_delete_project(self):
+        """Create and then delete a project."""
 
+        from pillar.api.utils import remove_private_keys
         # Create test project with a file.
         project_info = self._create_user_and_project(['subscriber'])
         project_id = project_info['_id']
-
-        fid, _ = self.ensure_file_exists({'project': ObjectId(project_id)})
-
-        # DELETE by owner should also soft-delete the file documents.
         proj_url = f'/api/projects/{project_id}'
-        self.delete(proj_url, auth_token='token', etag=project_info['_etag'],
-                    expected_status=204)
+        etag = project_info['_etag']
 
-        resp = self.get(proj_url, auth_token='token', expected_status=404)
+        # Assign the file as picture_header so that we have a nice circular reference.
+        fid, _ = self.ensure_file_exists({'project': ObjectId(project_id)})
+        project_info['picture_header'] = str(fid)
+        resp = self.put(proj_url, auth_token='token', etag=etag,
+                        json=remove_private_keys(project_info))
         etag = resp.json()['_etag']
+
+        # DELETE the project.
+        self.delete(proj_url, auth_token='token', etag=etag, expected_status=204)
 
         with self.app.app_context():
             files_coll = self.app.db('files')
@@ -421,18 +424,40 @@ class ProjectEditTest(AbstractProjectTest):
             db_file_before = files_coll.find_one_and_update({'_id': fid},
                                                             {'$set': {'_updated': now}},
                                                             return_document=ReturnDocument.AFTER)
+        return db_file_before, fid, proj_url
 
-        # PUT on the project should also restore the files.
-        self.put(proj_url, auth_token='token', etag=etag,
-                 json=remove_private_keys(project_info))
+    def test_undelete_with_patch(self):
+        db_file_before, fid, proj_url = self._create_delete_project()
+
+        # PATCH on the project should also restore the files.
+        self.patch(proj_url, auth_token='token', json={'op': 'undelete'}, expected_status=204)
 
         resp = self.get(f'/api/files/{fid}')
         self.assertEqual(str(fid), resp.json()['_id'])
 
         with self.app.app_context():
+            files_coll = self.app.db('files')
             db_file_after = files_coll.find_one(fid)
         self.assertGreater(db_file_after['_updated'], db_file_before['_updated'])
         self.assertNotEqual(db_file_after['_etag'], db_file_before['_etag'])
+
+    def test_undelete_other_user(self):
+        _, fid, proj_url = self._create_delete_project()
+
+        self.create_user(user_id='baddf00dbaddf00dbaddf00d', token='baduser')
+
+        # PATCH on the project should be denied.
+        self.patch(proj_url, auth_token='baduser', json={'op': 'undelete'}, expected_status=403)
+
+        self.get(f'/api/files/{fid}', expected_status=404)
+
+        with self.app.app_context():
+            files_coll = self.app.db('files')
+            db_file_after = files_coll.find_one(fid)
+        self.assertTrue(db_file_after['_deleted'])
+
+        resp = self.get(proj_url, auth_token='token', expected_status=404).json()
+        self.assertTrue(resp['_deleted'])
 
 
 class ProjectNodeAccess(AbstractProjectTest):
