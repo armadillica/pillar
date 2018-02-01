@@ -82,13 +82,14 @@ script.
 
 			var data = $node_type_form.serialize();
 
-			$.post(url, data, function(datata) {
-			})
+			$.post(url, data)
 			.done(function(){
 				toastr.success("Node Type: {{ node_type['name'] | undertitle }}", "Saved")
 			})
-			.fail(function(){
-				toastr.error("Node Type: {{ node_type['name'] | undertitle }}", "Could not save")
+			.fail(function(err) {
+				toastr.error(
+					xhrErrorResponseMessage(err),
+					"Could not save {{ node_type['name'] | undertitle }}")
 			});
 		});
 	});

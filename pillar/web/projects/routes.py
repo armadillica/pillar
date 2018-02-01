@@ -580,13 +580,14 @@ def edit_node_type(project_url, node_type_name):
     api = system_util.pillar_api()
     # Fetch the Node or 404
     try:
-        project = Project.find_one({
-            'where': '{"url" : "%s"}' % (project_url)}, api=api)
+        project = Project.find_one({'where': {'url': project_url}}, api=api)
     except ResourceNotFound:
         return abort(404)
+
     utils.attach_project_pictures(project, api)
     node_type = project.get_node_type(node_type_name)
     form = NodeTypeForm()
+
     if form.validate_on_submit():
         # Update dynamic & form schemas
         dyn_schema = json.loads(form.dyn_schema.data)
@@ -617,6 +618,15 @@ def edit_node_type(project_url, node_type_name):
             form.form_schema.data = json.dumps(form_schema, indent=4)
             form.dyn_schema.data = json.dumps(dyn_schema, indent=4)
             form.permissions.data = json.dumps(permissions, indent=4)
+
+    if request.method == 'POST':
+        # Send back a JSON response, as this is actually called
+        # from JS instead of rendered as page.
+        if form.errors:
+            resp = jsonify({'_message': str(form.errors)})
+            resp.status_code = 400
+            return resp
+        return jsonify({'_message': 'ok'})
 
     return render_template('projects/edit_node_type_embed.html',
                            form=form,
