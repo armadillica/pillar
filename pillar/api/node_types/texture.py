@@ -28,7 +28,7 @@ node_type_texture = {
                         'type': 'string',
                         'allowed': [
                             "alpha",
-                            "ambient occlusion"
+                            "ambient occlusion",
                             "bump",
                             "color",
                             "displacement",
