@@ -61,24 +61,10 @@
 				data-preview="{{ f.file.thumbnail('l', api=api) }}",
 				data-aspect_ratio="{{ node.properties.aspect_ratio }}")
 
-		| {% if f.map_type == 'color' %}
-		| {% set map_type = 'Color Map' %}
-		| {% elif f.map_type == 'bump' %}
-		| {% set map_type = 'Bump Map' %}
-		| {% elif f.map_type == 'specular' %}
-		| {% set map_type = 'Specular Map' %}
-		| {% elif f.map_type == 'normal' %}
-		| {% set map_type = 'Normal Map' %}
-		| {% elif f.map_type == 'translucency' %}
-		| {% set map_type = 'Translucency' %}
-		| {% elif f.map_type == 'emission' %}
-		| {% set map_type = 'Emission' %}
-		| {% elif f.map_type == 'alpha' %}
-		| {% set map_type = 'Alpha' %}
-		| {% elif f.map_type == 'id' %}
+		| {% if f.map_type == 'id' %}
 		| {% set map_type = 'ID Map' %}
 		| {% else %}
-		| {% set map_type = f.map_type %}
+		| {% set map_type = f.map_type.title() %}
 		| {% endif %}
 
 		section.node-details-container.texture
