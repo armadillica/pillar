@@ -27,15 +27,19 @@ node_type_texture = {
                     'map_type': {
                         'type': 'string',
                         'allowed': [
-                            'color',
-                            'specular',
-                            'bump',
-                            'normal',
-                            'translucency',
-                            'emission',
-                            'alpha',
-                            'id',
-                            'displacement'
+                            "alpha",
+                            "ambient occlusion"
+                            "bump",
+                            "color",
+                            "displacement",
+                            "emission",
+                            "glossiness",
+                            "id",
+                            "mask",
+                            "normal",
+                            "roughness",
+                            "specular",
+                            "translucency",
                     ]}
                 }
             }
