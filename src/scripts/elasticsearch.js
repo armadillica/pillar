@@ -128,7 +128,7 @@ $(document).ready(function() {
 
         var storeValue = function(values, label) {
             return function(item) {
-                let refined = search.isRefined(label, item.key);
+                var refined = search.isRefined(label, item.key);
                 values.push({
                     facet: label,
                     label: item.key,
@@ -142,8 +142,8 @@ $(document).ready(function() {
         var facets = [];
         var aggs = content.aggs;
         for (var label in aggs) {
-            let values = [];
-            let buckets = aggs[label].buckets;
+            var values = [];
+            var buckets = aggs[label].buckets;
 
             if (buckets.length === 0) {
                 continue;

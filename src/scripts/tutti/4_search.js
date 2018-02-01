@@ -75,7 +75,7 @@ var elasticSearcher = (function() {
 
       $.getJSON("/api/newsearch" + deze.url + "?"+ pstr)
       .done(function (data) {
-        let hits = data.hits.hits;
+        var hits = data.hits.hits;
         var newhits = hits.map(function(hit){
           return hit._source;
         });
@@ -128,13 +128,13 @@ var elasticSearch = (function($, url) {
 
   $.fn.getSearch = function(q, cb, async, url){
 
-    let newhits = [];
+    var newhits = [];
     if(url === undefined){
       url = '';
     }
 
     $.getJSON("/api/newsearch" + url + "?q=" + q, function( data ) {
-      let hits = data.hits.hits;
+      var hits = data.hits.hits;
       newhits = hits.map(function(hit){
         return hit._source;
       });
