@@ -33,7 +33,9 @@ node_type_texture = {
                             'normal',
                             'translucency',
                             'emission',
-                            'alpha'
+                            'alpha',
+                            'id',
+                            'displacement'
                     ]}
                 }
             }
