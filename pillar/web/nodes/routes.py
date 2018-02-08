@@ -17,6 +17,8 @@ from flask import request
 from flask import jsonify
 from flask import abort
 from flask_login import current_user
+from flask_wtf.csrf import validate_csrf
+
 import werkzeug.exceptions as wz_exceptions
 from wtforms import SelectMultipleField
 from flask_login import login_required
@@ -24,6 +26,7 @@ from jinja2.exceptions import TemplateNotFound
 
 from pillar.api.utils.authorization import check_permissions
 from pillar.web.utils import caching
+from pillar.markdown import markdown
 from pillar.web.nodes.forms import get_node_form
 from pillar.web.nodes.forms import process_node_form
 from pillar.web.nodes.custom.storage import StorageNode
@@ -473,6 +476,26 @@ def edit(node_id):
             project=project,
             is_embedded_edit=is_embedded_edit,
         )
+
+
+@blueprint.route('/preview-markdown', methods=['POST'])
+@login_required
+def preview_markdown():
+    """Return the 'content' field of POST request as Markdown.
+
+    This endpoint can be called via AJAX in order to preview the
+    content of a node.
+    """
+
+    if not validate_csrf(request.headers.get('X-CSRFToken')):
+        return jsonify({'status': 'fail',
+                        'error': 'CRSF validation failed'}), 403
+    try:
+        content = request.form['content']
+    except KeyError:
+        return jsonify({'status': 'fail',
+                        'error': 'The field "content" was not specified.'}), 400
+    return jsonify(content=markdown(content))
 
 
 def ensure_lists_exist_as_empty(node_doc, node_type):
