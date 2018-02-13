@@ -61,8 +61,8 @@ class NodeMover(object):
         """Moves a single file to another project"""
 
         self._log.info('Moving file %s to project %s', file_id, dest_proj['_id'])
-        pillar.api.file_storage.moving.gcs_move_to_bucket(file_id, dest_proj['_id'],
-                                                          skip_gcs=self.skip_gcs)
+        pillar.api.file_storage.moving.move_to_bucket(file_id, dest_proj['_id'],
+                                                      skip_storage=self.skip_gcs)
 
     def _files(self, file_ref, *properties):
         """Yields file ObjectIDs."""

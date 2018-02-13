@@ -12,8 +12,8 @@ __all__ = ['Bucket', 'Blob', 'Path', 'FileType']
 Path = pathlib.PurePosixPath
 
 # This is a mess: typing.IO keeps mypy-0.501 happy, but not in all cases,
-# and io.FileIO keeps PyCharm-2017.1 happy.
-FileType = typing.Union[typing.IO, io.FileIO]
+# and io.FileIO + io.BytesIO keeps PyCharm-2017.1 happy.
+FileType = typing.Union[typing.IO, io.FileIO, io.BytesIO]
 
 
 class Bucket(metaclass=abc.ABCMeta):
@@ -31,7 +31,7 @@ class Bucket(metaclass=abc.ABCMeta):
     backend_name: str = None  # define in subclass.
 
     def __init__(self, name: str) -> None:
-        self.name = name
+        self.name = str(name)
 
     def __init_subclass__(cls):
         assert cls.backend_name, '%s.backend_name must be non-empty string' % cls

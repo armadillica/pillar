@@ -1,10 +1,8 @@
 import logging
+import pathlib
 import typing
 
-import pathlib
 from flask import current_app
-
-from pillar.api.utils.imaging import generate_local_thumbnails
 
 __all__ = ['LocalBucket', 'LocalBlob']
 
@@ -22,7 +20,7 @@ class LocalBucket(Bucket):
         # For local storage, the name is actually a partial path, relative
         # to the local storage root.
         self.root = pathlib.Path(current_app.config['STORAGE_DIR'])
-        self.bucket_path = pathlib.PurePosixPath(name[:2]) / name
+        self.bucket_path = pathlib.PurePosixPath(self.name[:2]) / self.name
         self.abspath = self.root / self.bucket_path
 
     def blob(self, blob_name: str) -> 'LocalBlob':
@@ -49,7 +47,14 @@ class LocalBucket(Bucket):
         # TODO: implement content type handling for local storage.
         self._log.warning('Unable to set correct file content type for %s', dest_blob)
 
-        with open(blob.abspath(), 'rb') as src_file:
+        fpath = blob.abspath()
+        if not fpath.exists():
+            if not fpath.parent.exists():
+                raise FileNotFoundError(f'File {fpath} does not exist, and neither does its parent,'
+                                        f' unable to copy to {to_bucket}')
+            raise FileNotFoundError(f'File {fpath} does not exist, unable to copy to {to_bucket}')
+
+        with open(fpath, 'rb') as src_file:
             dest_blob.create_from_file(src_file, content_type='application/x-octet-stream')
 
     def rename_blob(self, blob: 'LocalBlob', new_name: str) -> 'LocalBlob':

@@ -106,11 +106,11 @@ class NodeMoverTest(unittest.TestCase):
         self.db['nodes'].update_one.return_value = update_res
         self.mover.change_project(node, new_project)
 
-        mock_fsmoving.gcs_move_to_bucket.assert_has_calls([
-            mock.call(ObjectId(24 * 'b'), prid, skip_gcs=False),
-            mock.call(ObjectId(24 * 'e'), prid, skip_gcs=False),
-            mock.call(ObjectId(24 * 'c'), prid, skip_gcs=False),
-            mock.call(ObjectId(24 * 'd'), prid, skip_gcs=False),
+        mock_fsmoving.move_to_bucket.assert_has_calls([
+            mock.call(ObjectId(24 * 'b'), prid, skip_storage=False),
+            mock.call(ObjectId(24 * 'e'), prid, skip_storage=False),
+            mock.call(ObjectId(24 * 'c'), prid, skip_storage=False),
+            mock.call(ObjectId(24 * 'd'), prid, skip_storage=False),
         ])
 
     @mock.patch('pillar.api.file_storage.moving', autospec=True)
@@ -135,7 +135,7 @@ class NodeMoverTest(unittest.TestCase):
         self.db['nodes'].update_one.return_value = update_res
         self.mover.change_project(node, new_project)
 
-        mock_fsmoving.gcs_move_to_bucket.assert_has_calls([
-            mock.call(ObjectId(24 * 'e'), prid, skip_gcs=False),
-            mock.call(ObjectId(24 * 'b'), prid, skip_gcs=False),
+        mock_fsmoving.move_to_bucket.assert_has_calls([
+            mock.call(ObjectId(24 * 'e'), prid, skip_storage=False),
+            mock.call(ObjectId(24 * 'b'), prid, skip_storage=False),
         ])

@@ -12,7 +12,7 @@ from flask import current_app
 from pillar.api import utils
 from . import stream_to_gcs, generate_all_links, ensure_valid_link
 
-__all__ = ['PrerequisiteNotMetError', 'change_file_storage_backend']
+__all__ = ['PrerequisiteNotMetError', 'change_file_storage_backend', 'move_to_bucket']
 
 log = logging.getLogger(__name__)
 
@@ -150,31 +150,39 @@ def fetch_file_from_local(file_doc):
     return local_finfo
 
 
-def gcs_move_to_bucket(file_id, dest_project_id, skip_gcs=False):
-    """Moves a file from its own bucket to the new project_id bucket."""
+def move_to_bucket(file_id: ObjectId, dest_project_id: ObjectId, *, skip_storage=False):
+    """Move a file + variations from its own bucket to the new project_id bucket.
 
-    files_coll = current_app.db()['files']
+    :param file_id: ID of the file to move.
+    :param dest_project_id: Project to move to.
+    :param skip_storage: If True, the storage bucket will not be touched.
+        Only use this when you know what you're doing.
+    """
 
+    files_coll = current_app.db('files')
     f = files_coll.find_one(file_id)
     if f is None:
-        raise ValueError('File with _id: {} not found'.format(file_id))
-
-    # Check that new backend differs from current one
-    if f['backend'] != 'gcs':
-        raise ValueError('Only Google Cloud Storage is supported for now.')
+        raise ValueError(f'File with _id: {file_id} not found')
 
     # Move file and variations to the new bucket.
-    if skip_gcs:
-        log.warning('NOT ACTUALLY MOVING file %s on GCS, just updating MongoDB', file_id)
+    if skip_storage:
+        log.warning('NOT ACTUALLY MOVING file %s on storage, just updating MongoDB', file_id)
     else:
-        from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket
+        from pillar.api.file_storage_backends import Bucket
+        bucket_class = Bucket.for_backend(f['backend'])
+        src_bucket = bucket_class(str(f['project']))
+        dst_bucket = bucket_class(str(dest_project_id))
 
-        src_project = f['project']
-        GoogleCloudStorageBucket.copy_to_bucket(f['file_path'], src_project, dest_project_id)
+        src_blob = src_bucket.get_blob(f['file_path'])
+        src_bucket.copy_blob(src_blob, dst_bucket)
+
         for var in f.get('variations', []):
-            GoogleCloudStorageBucket.copy_to_bucket(var['file_path'], src_project, dest_project_id)
+            src_blob = src_bucket.get_blob(var['file_path'])
+            src_bucket.copy_blob(src_blob, dst_bucket)
 
     # Update the file document after moving was successful.
+    # No need to update _etag or _updated, since that'll be done when
+    # the links are regenerated at the end of this function.
     log.info('Switching file %s to project %s', file_id, dest_project_id)
     update_result = files_coll.update_one({'_id': file_id},
                                           {'$set': {'project': dest_project_id}})
