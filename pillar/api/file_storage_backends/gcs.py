@@ -10,6 +10,7 @@ import gcloud.exceptions as gcloud_exc
 from flask import current_app, g
 from werkzeug.local import LocalProxy
 
+from pillar.api import utils
 from .abstract import Bucket, Blob, FileType
 
 log = logging.getLogger(__name__)
@@ -188,7 +189,7 @@ class GoogleCloudStorageBlob(Blob):
         if is_public:
             return self.gblob.public_url
 
-        expiration = datetime.datetime.utcnow() + datetime.timedelta(days=1)
+        expiration = utils.utcnow() + datetime.timedelta(days=1)
         return self.gblob.generate_signed_url(expiration)
 
     def make_public(self):
