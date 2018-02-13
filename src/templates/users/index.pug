@@ -102,6 +102,9 @@ script(type="text/javascript").
 
 	// This function is also used in edit_embed.pug.
 	function displayUser(userId) {
+		$('#hits .active').removeClass('active');
+		$("#hits [data-user-id='" + userId + "']").addClass('active');
+
 		var url = '/u/' + userId + '/edit';
 		return $.get(url, function(dataHtml){
 			$('#search-hit-container')
