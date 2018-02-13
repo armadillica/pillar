@@ -1,5 +1,4 @@
 import logging
-import warnings
 
 from flask import current_app
 from flask import request

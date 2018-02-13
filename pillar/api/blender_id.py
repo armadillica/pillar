@@ -14,7 +14,6 @@ from flask import Blueprint, request, jsonify, session
 from requests.adapters import HTTPAdapter
 
 from pillar import current_app
-from pillar.api import service
 from pillar.api.utils import authentication, utcnow
 from pillar.api.utils.authentication import find_user_in_db, upsert_user
 

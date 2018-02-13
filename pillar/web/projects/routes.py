@@ -8,7 +8,7 @@ from pillarsdk import Node
 from pillarsdk import Project
 from pillarsdk.exceptions import ResourceNotFound
 from pillarsdk.exceptions import ForbiddenAccess
-import flask
+
 from flask import Blueprint
 from flask import render_template
 from flask import request
