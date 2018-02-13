@@ -114,12 +114,6 @@ def gravatar(email: str, size=64):
     return api_gravatar(email, size)
 
 
-def datetime_now():
-    """Returns a datetime.datetime that represents 'now' in UTC."""
-
-    return datetime.datetime.now(tz=pillarsdk.utils.utc)
-
-
 def pretty_date(time, detail=False, now=None):
     """Get a datetime object or a int() Epoch timestamp and return a
     pretty string like 'an hour ago', 'Yesterday', '3 months ago',

@@ -10,6 +10,7 @@ import typing
 import urllib.request, urllib.parse, urllib.error
 
 import bson.objectid
+import bson.tz_util
 from eve import RFC1123_DATE_FORMAT
 from flask import current_app
 from werkzeug import exceptions as wz_exceptions
@@ -200,3 +201,7 @@ def random_etag() -> str:
 
     randbytes = random.getrandbits(256).to_bytes(32, 'big')
     return base64.b64encode(randbytes)[:-1].decode()
+
+
+def utcnow() -> datetime.datetime:
+    return datetime.datetime.now(tz=bson.tz_util.utc)

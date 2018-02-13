@@ -4,7 +4,6 @@ Assumes role names that are given to users by organization membership
 start with the string "org-".
 """
 
-import datetime
 import logging
 import typing
 
@@ -14,7 +13,7 @@ import flask
 import werkzeug.exceptions as wz_exceptions
 
 from pillar import attrs_extra, current_app
-from pillar.api.utils import remove_private_keys
+from pillar.api.utils import remove_private_keys, utcnow
 
 
 class OrganizationError(Exception):
@@ -281,10 +280,9 @@ class OrgManager:
         # Join all organization-given roles and roles from the tokens collection.
         org_roles = aggr_roles(org_coll, {'members': user_id})
         self._log.debug('Organization-given roles for user %s: %s', user_id, org_roles)
-        now = datetime.datetime.now(bson.tz_util.utc)
         token_roles = aggr_roles(tokens_coll, {
             'user': user_id,
-            'expire_time': {"$gt": now},
+            'expire_time': {"$gt": utcnow()},
         })
         self._log.debug('Token-given roles for user %s: %s', user_id, token_roles)
         org_roles.update(token_roles)

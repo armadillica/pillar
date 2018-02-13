@@ -1,16 +1,15 @@
 """Code for moving files between backends."""
 
-import datetime
 import logging
 import os
 import tempfile
 
-import bson.tz_util
 import requests
 import requests.exceptions
 from bson import ObjectId
 from flask import current_app
 
+from pillar.api import utils
 from . import stream_to_gcs, generate_all_links, ensure_valid_link
 
 __all__ = ['PrerequisiteNotMetError', 'change_file_storage_backend']
@@ -74,8 +73,7 @@ def change_file_storage_backend(file_id, dest_backend):
     # Generate new links for the file & all variations. This also saves
     # the new backend we set here.
     f['backend'] = dest_backend
-    now = datetime.datetime.now(tz=bson.tz_util.utc)
-    generate_all_links(f, now)
+    generate_all_links(f, utils.utcnow())
 
 
 def copy_file_to_backend(file_id, project_id, file_or_var, src_backend, dest_backend):
@@ -190,4 +188,4 @@ def gcs_move_to_bucket(file_id, dest_project_id, skip_gcs=False):
 
     # Regenerate the links for this file
     f['project'] = dest_project_id
-    generate_all_links(f, now=datetime.datetime.now(tz=bson.tz_util.utc))
+    generate_all_links(f, now=utils.utcnow())

@@ -1,16 +1,14 @@
 """Project patching support."""
 
-import datetime
 import logging
 
-import bson.tz_util
 import flask
 from flask import Blueprint, request
 import werkzeug.exceptions as wz_exceptions
 
 from pillar import current_app
 from pillar.auth import current_user
-from pillar.api.utils import random_etag, str2id
+from pillar.api.utils import random_etag, str2id, utcnow
 from pillar.api.utils import authorization
 
 log = logging.getLogger(__name__)
@@ -60,7 +58,6 @@ def patch_project(project_id: str):
     # PATCHing collections, so direct MongoDB modification is used to set
     # _deleted=False and provide new _etag and _updated values.
     new_etag = random_etag()
-    now = datetime.datetime.now(tz=bson.tz_util.utc)
 
     log.debug('undeleting files before undeleting project %s', pid)
     files_coll = current_app.db('files')
@@ -68,7 +65,7 @@ def patch_project(project_id: str):
         {'project': pid},
         {'$set': {'_deleted': False,
                   '_etag': new_etag,
-                  '_updated': now}})
+                  '_updated': utcnow()}})
     log.info('undeleted %d of %d file documents of project %s',
              update_result.modified_count, update_result.matched_count, pid)
 

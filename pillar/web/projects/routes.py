@@ -21,6 +21,7 @@ from flask_login import login_required, current_user
 import werkzeug.exceptions as wz_exceptions
 
 from pillar import current_app
+from pillar.api.utils import utcnow
 from pillar.web import system_util
 from pillar.web import utils
 from pillar.web.utils.jstree import jstree_get_children
@@ -82,7 +83,7 @@ def index():
 
     show_deleted_projects = request.args.get('deleted') is not None
     if show_deleted_projects:
-        timeframe = utils.datetime_now() - datetime.timedelta(days=31)
+        timeframe = utcnow() - datetime.timedelta(days=31)
         projects_deleted = Project.all({
             'where': {'user': current_user.objectid,
                       'category': {'$ne': 'home'},

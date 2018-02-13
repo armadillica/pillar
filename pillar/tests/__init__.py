@@ -327,8 +327,9 @@ class AbstractPillarTest(TestMinimal):
         return user
 
     def create_valid_auth_token(self, user_id, token='token'):
-        now = datetime.datetime.now(tz_util.utc)
-        future = now + datetime.timedelta(days=1)
+        from pillar.api.utils import utcnow
+
+        future = utcnow() + datetime.timedelta(days=1)
 
         with self.app.test_request_context():
             from pillar.api.utils import authentication as auth

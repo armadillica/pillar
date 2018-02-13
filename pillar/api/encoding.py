@@ -3,7 +3,7 @@ import json
 import logging
 import os
 
-from bson import ObjectId, tz_util
+from bson import ObjectId
 from flask import Blueprint
 from flask import abort
 from flask import current_app
@@ -161,7 +161,7 @@ def zencoder_notifications():
     file_doc['status'] = 'complete'
 
     # Force an update of the links on the next load of the file.
-    file_doc['link_expires'] = datetime.datetime.now(tz=tz_util.utc) - datetime.timedelta(days=1)
+    file_doc['link_expires'] = utils.utcnow() - datetime.timedelta(days=1)
 
     r, _, _, status = current_app.put_internal('files', file_doc, _id=file_id)
     if status != 200:

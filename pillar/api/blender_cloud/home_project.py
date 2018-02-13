@@ -1,12 +1,11 @@
 import copy
 import logging
 
-import datetime
-from bson import ObjectId, tz_util
+from bson import ObjectId
 from eve.methods.get import get
 from flask import Blueprint, current_app, request
 from pillar.api import utils
-from pillar.api.utils import authentication, authorization
+from pillar.api.utils import authentication, authorization, utcnow
 from werkzeug import exceptions as wz_exceptions
 
 from pillar.api.projects import utils as proj_utils
@@ -282,7 +281,7 @@ def is_home_project(project_id, user_id):
 def mark_node_updated(node_id):
     """Uses pymongo to set the node's _updated to "now"."""
 
-    now = datetime.datetime.now(tz=tz_util.utc)
+    now = utcnow()
     nodes_coll = current_app.data.driver.db['nodes']
 
     return nodes_coll.update_one({'_id': node_id},

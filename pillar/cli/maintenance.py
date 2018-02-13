@@ -391,13 +391,11 @@ def expire_all_project_links(project_uuid):
     """
 
     import datetime
-    import bson.tz_util
+    from pillar.api.utils import utcnow
 
     files_collection = current_app.data.driver.db['files']
 
-    now = datetime.datetime.now(tz=bson.tz_util.utc)
-    expires = now - datetime.timedelta(days=1)
-
+    expires = utcnow() - datetime.timedelta(days=1)
     result = files_collection.update_many(
         {'project': ObjectId(project_uuid)},
         {'$set': {'link_expires': expires}}

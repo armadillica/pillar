@@ -10,10 +10,11 @@ from pillarsdk import Node
 from pillarsdk import Project
 import werkzeug.exceptions as wz_exceptions
 
+from pillar.api.utils import utcnow
 from pillar.web import subquery
 from pillar.web.nodes.routes import blueprint
 from pillar.web.utils import gravatar
-from pillar.web.utils import pretty_date, datetime_now
+from pillar.web.utils import pretty_date
 from pillar.web.utils import system_util
 
 log = logging.getLogger(__name__)
@@ -111,7 +112,7 @@ def format_comment(comment, is_reply=False, is_team=False, replies=None):
 
     return dict(_id=comment._id,
                 gravatar=gravatar(comment.user.email, size=32),
-                time_published=pretty_date(comment._created or datetime_now(), detail=True),
+                time_published=pretty_date(comment._created or utcnow(), detail=True),
                 rating=comment.properties.rating_positive - comment.properties.rating_negative,
                 author=comment.user.full_name,
                 author_username=comment.user.username,

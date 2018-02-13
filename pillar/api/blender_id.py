@@ -15,7 +15,7 @@ from requests.adapters import HTTPAdapter
 
 from pillar import current_app
 from pillar.api import service
-from pillar.api.utils import authentication
+from pillar.api.utils import authentication, utcnow
 from pillar.api.utils.authentication import find_user_in_db, upsert_user
 
 blender_id = Blueprint('blender_id', __name__)
@@ -171,7 +171,7 @@ def _compute_token_expiry(token_expires_string):
 
     blid_expiry = parser.parse(token_expires_string)
     blid_expiry = blid_expiry.astimezone(tz_util.utc)
-    our_expiry = datetime.datetime.now(tz=tz_util.utc) + datetime.timedelta(hours=1)
+    our_expiry = utcnow() + datetime.timedelta(hours=1)
 
     return min(blid_expiry, our_expiry)
 

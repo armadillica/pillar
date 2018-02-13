@@ -1,15 +1,16 @@
 import base64
+import datetime
 import hashlib
 import logging
 import typing
 
 import bcrypt
-import datetime
-from bson import tz_util
+
 from flask import abort, Blueprint, current_app, jsonify, request
 from pillar.api.utils.authentication import create_new_user_document
 from pillar.api.utils.authentication import make_unique_username
 from pillar.api.utils.authentication import store_token
+from pillar.api.utils import utcnow
 
 blueprint = Blueprint('authentication', __name__)
 log = logging.getLogger(__name__)
@@ -96,7 +97,7 @@ def generate_and_store_token(user_id, days=15, prefix=b'') -> dict:
     token_bytes = prefix + base64.b64encode(random_bits, altchars=b'xy').strip(b'=')
     token = token_bytes.decode('ascii')
 
-    token_expiry = datetime.datetime.now(tz=tz_util.utc) + datetime.timedelta(days=days)
+    token_expiry = utcnow() + datetime.timedelta(days=days)
     token_data = store_token(user_id, token, token_expiry)
 
     # Include the token in the returned document so that it can be stored client-side,

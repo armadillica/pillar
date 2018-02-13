@@ -9,7 +9,6 @@ import typing
 import uuid
 from hashlib import md5
 
-import bson.tz_util
 import eve.utils
 import pymongo
 import werkzeug.exceptions as wz_exceptions
@@ -27,7 +26,7 @@ from pillar.api import utils
 from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket, \
     GoogleCloudStorageBlob
 from pillar.api.utils import remove_private_keys
-from pillar.api.utils.authorization import require_login, user_has_role, \
+from pillar.api.utils.authorization import require_login, \
     user_matches_roles
 from pillar.api.utils.cdn import hash_file_path
 from pillar.api.utils.encoding import Encoder
@@ -419,7 +418,7 @@ def ensure_valid_link(response):
     # log.debug('Inspecting link for file %s', response['_id'])
 
     # Check link expiry.
-    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    now = utils.utcnow()
     if 'link_expires' in response:
         link_expires = response['link_expires']
         if now < link_expires:
@@ -502,7 +501,7 @@ def on_pre_get_files(_, lookup):
         return
 
     # Only fetch it if the date got expired.
-    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    now = utils.utcnow()
     lookup_expired = lookup.copy()
     lookup_expired['link_expires'] = {'$lte': now}
 
@@ -527,7 +526,7 @@ def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
     # Retrieve expired links.
     files_collection = current_app.data.driver.db['files']
 
-    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    now = utils.utcnow()
     expire_before = now + datetime.timedelta(seconds=expiry_seconds)
     log.info('Limiting to links that expire before %s', expire_before)
 
@@ -556,7 +555,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
     files_collection = current_app.data.driver.db['files']
     proj_coll = current_app.data.driver.db['projects']
 
-    now = datetime.datetime.now(tz=bson.tz_util.utc)
+    now = utils.utcnow()
     expire_before = now + datetime.timedelta(seconds=expiry_seconds)
     my_log.info('Limiting to links that expire before %s', expire_before)
 

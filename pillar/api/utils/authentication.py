@@ -13,12 +13,11 @@ import logging
 import typing
 
 import bson
-from bson import tz_util
 from flask import g, current_app
 from flask import request
 from werkzeug import exceptions as wz_exceptions
 
-from pillar.api.utils import remove_private_keys
+from pillar.api.utils import remove_private_keys, utcnow
 
 log = logging.getLogger(__name__)
 
@@ -209,7 +208,7 @@ def find_token(token, is_subclient_token=False, **extra_filters):
     # TODO: remove matching on unhashed tokens once all tokens have been hashed.
     lookup = {'$or': [{'token': token}, {'token_hashed': token_hashed}],
               'is_subclient_token': True if is_subclient_token else {'$in': [False, None]},
-              'expire_time': {"$gt": datetime.datetime.now(tz=tz_util.utc)}}
+              'expire_time': {"$gt": utcnow()}}
     lookup.update(extra_filters)
 
     db_token = tokens_coll.find_one(lookup)
@@ -333,9 +332,7 @@ def _delete_expired_tokens():
 
     token_coll = current_app.data.driver.db['tokens']
 
-    now = datetime.datetime.now(tz_util.utc)
-    expiry_date = now - datetime.timedelta(days=7)
-
+    expiry_date = utcnow() - datetime.timedelta(days=7)
     result = token_coll.delete_many({'expire_time': {"$lt": expiry_date}})
     # log.debug('Deleted %i expired authentication tokens', result.deleted_count)
 
