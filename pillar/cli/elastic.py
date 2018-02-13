@@ -21,7 +21,7 @@ REINDEX_THREAD_COUNT = 5
 
 
 @manager_elastic.option('indices', nargs='*')
-def reset_index(indices):
+def reset_index(indices: typing.List[str]):
     """
     Destroy and recreate elastic indices
 
@@ -139,11 +139,17 @@ def _reindex_nodes():
 
 
 @manager_elastic.option('indexname', nargs='?')
-def reindex(indexname=''):
+@manager_elastic.option('-r', '--reset', default=False, action='store_true')
+def reindex(indexname='', reset=False):
     import time
     import datetime
 
     start = time.time()
+
+    if reset:
+        log.info('Resetting first')
+        reset_index([indexname] if indexname else [])
+
     if not indexname:
         log.info('reindex everything..')
         _reindex_nodes()
