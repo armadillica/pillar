@@ -81,7 +81,7 @@ def dumps(mongo_doc, **kwargs):
 
 def jsonify(mongo_doc, status=200, headers=None):
     """JSonifies a Mongo document into a Flask response object."""
-    
+
     return current_app.response_class(dumps(mongo_doc),
                                       mimetype='application/json',
                                       status=status,
@@ -110,6 +110,7 @@ def skip_when_testing(func):
             return None
 
         return func(*args, **kwargs)
+
     return wrapper
 
 
