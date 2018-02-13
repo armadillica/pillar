@@ -130,6 +130,11 @@ def merge_project(src_proj_url, dest_proj_url):
 
     logging.getLogger('pillar').setLevel(logging.INFO)
 
+    log.info('Current server name is %s', current_app.config['SERVER_NAME'])
+    if not current_app.config['SERVER_NAME']:
+        log.fatal('SERVER_NAME configuration is missing, would result in malformed file links.')
+        return 5
+
     # Parse CLI args and get source and destination projects.
     projs_coll = current_app.db('projects')
     src_proj = projs_coll.find_one({'url': src_proj_url}, projection={'_id': 1})
@@ -149,7 +154,8 @@ def merge_project(src_proj_url, dest_proj_url):
 
     print()
     try:
-        input(f'Press ENTER to start moving ALL NODES AND FILES from {spid} to {dpid}')
+        input(f'Press ENTER to start moving ALL NODES AND FILES '
+              f'from {src_proj_url} to {dest_proj_url}')
     except KeyboardInterrupt:
         print()
         print('Aborted')
