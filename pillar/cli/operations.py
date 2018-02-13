@@ -123,6 +123,44 @@ def move_group_node_project(node_uuid, dest_proj_url, force=False, skip_gcs=Fals
 
 
 @manager_operations.command
+def merge_project(src_proj_url, dest_proj_url):
+    """Move all nodes and files from one project to the other."""
+
+    from pillar.api.projects import merging
+
+    logging.getLogger('pillar').setLevel(logging.INFO)
+
+    # Parse CLI args and get source and destination projects.
+    projs_coll = current_app.db('projects')
+    src_proj = projs_coll.find_one({'url': src_proj_url}, projection={'_id': 1})
+    dest_proj = projs_coll.find_one({'url': dest_proj_url}, projection={'_id': 1})
+
+    if src_proj is None:
+        log.fatal("Source project url='%s' doesn't exist.", src_proj_url)
+        return 1
+    if dest_proj is None:
+        log.fatal("Destination project url='%s' doesn't exist.", dest_proj_url)
+        return 2
+    dpid = dest_proj['_id']
+    spid = src_proj['_id']
+    if spid == dpid:
+        log.fatal("Source and destination projects are the same!")
+        return 3
+
+    print()
+    try:
+        input(f'Press ENTER to start moving ALL NODES AND FILES from {spid} to {dpid}')
+    except KeyboardInterrupt:
+        print()
+        print('Aborted')
+        return 4
+    print()
+
+    merging.merge_project(spid, dpid)
+    log.info('Done moving.')
+
+
+@manager_operations.command
 def index_users_rebuild():
     """Clear users index, update settings and reindex all users."""
 
@@ -160,7 +198,7 @@ def index_users_rebuild():
             try:
                 future.result()
             except Exception:
-                log.exception('Error updating user %i/%i %s', idx+1, user_count, user_ident)
+                log.exception('Error updating user %i/%i %s', idx + 1, user_count, user_ident)
             else:
                 log.info('Updated user %i/%i %s', idx + 1, user_count, user_ident)
 
