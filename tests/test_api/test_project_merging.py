@@ -1,6 +1,3 @@
-import pathlib
-from unittest import mock
-
 from pillar.tests import AbstractPillarTest
 
 from bson import ObjectId
