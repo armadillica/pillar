@@ -152,6 +152,7 @@ var elasticSearch = (function($, url) {
 $(document).ready(function() {
 
   var searchInput = $('#cloud-search');
+  if (!searchInput.length) return;
 
   var tu = searchInput.typeahead({hint: true}, {
     //source: algoliaIndex.ttAdapter(),
