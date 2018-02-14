@@ -155,7 +155,7 @@ def validate_this_token(token, oauth_subclient=None):
     :rtype: dict
     """
 
-    from pillar.auth import UserClass, AnonymousUser
+    from pillar.auth import UserClass, AnonymousUser, user_authenticated
 
     g.current_user = None
     _delete_expired_tokens()
@@ -183,6 +183,7 @@ def validate_this_token(token, oauth_subclient=None):
         return None
 
     g.current_user = UserClass.construct(token, db_user)
+    user_authenticated.send(None)
 
     return db_user
 

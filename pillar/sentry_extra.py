@@ -11,6 +11,20 @@ class PillarSentry(Sentry):
     and for preventing the auth tokens to be logged as user ID.
     """
 
+    def init_app(self, app, *args, **kwargs):
+        super().init_app(app, *args, **kwargs)
+
+        # We perform authentication of the user while handling the request,
+        # so Sentry calls get_user_info() too early.
+
+    def get_user_context_again(self, ):
+        from flask import request
+
+        try:
+            self.client.user_context(self.get_user_info(request))
+        except Exception as e:
+            self.client.logger.exception(str(e))
+
     def get_user_info(self, request):
         user_info = super().get_user_info(request)
 

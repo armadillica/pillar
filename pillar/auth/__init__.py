@@ -4,14 +4,15 @@ import collections
 import logging
 import typing
 
+import blinker
+import bson
 from flask import session, g
 import flask_login
 from werkzeug.local import LocalProxy
 
 from pillar import current_app
 
-import bson
-
+user_authenticated = blinker.Signal('Sent whenever a user was authenticated')
 log = logging.getLogger(__name__)
 
 # Mapping from user role to capabilities obtained by users with that role.
@@ -211,6 +212,7 @@ def login_user(oauth_token: str, *, load_from_db=False):
         user = UserClass(oauth_token)
     flask_login.login_user(user, remember=True)
     g.current_user = user
+    user_authenticated.send(None)
 
 
 def logout_user():
