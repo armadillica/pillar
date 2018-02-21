@@ -114,7 +114,12 @@ def validate_token(user_id, token, oauth_subclient_id):
     payload = {'user_id': user_id,
                'token': token}
     if oauth_subclient_id:
+        # If the subclient ID is set, the token belongs to another OAuth Client,
+        # in which case we do not set the client_id field.
         payload['subclient_id'] = oauth_subclient_id
+    else:
+        # We only want to accept Blender Cloud tokens.
+        payload['client_id'] = current_app.config['OAUTH_CREDENTIALS']['blender-id']['id']
 
     url = '{0}/u/validate_token'.format(blender_id_endpoint())
     log.debug('POSTing to %r', url)
