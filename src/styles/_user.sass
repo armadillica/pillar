@@ -1,14 +1,12 @@
 .login-container
   align-items: center
-  display: flex
-  // height: 100%
-  justify-content: center
-  // width: 100%
-  position: fixed
-  top: 0
   bottom: 0
+  display: flex
+  justify-content: center
   left: 0
+  position: fixed
   right: 0
+  top: 0
 
 .login-box
   +container-box
@@ -19,7 +17,6 @@
 
   .login-title,
   .settings-title
-    color: $color-primary
     font:
       size: 2.2em
       weight: 300
@@ -31,6 +28,9 @@
     font-weight: 300
     text-align: center
 
+  $provider-color-facebook: #3b5998
+  $provider-color-google: #dd4b39
+  $provider-color-blender_id: #00bcef
   .login-providers
     align-items: center
     display: flex
@@ -39,57 +39,72 @@
     margin: 15px
 
     .login-provider-button
-      background-color: $color-primary
-      border: thin solid $color-primary
+      background-color: $provider-color-blender_id
       border-radius: 3px
-      color: #fff
+      color: white
       display: block
+      font-weight: bold
       margin-bottom: 10px
       min-width: 200px
-      padding: 5px 10px
+      padding: 8px 10px
       text-align: center
+      text-decoration: none
+      text-shadow: 1px 1px rgba(black, .2)
+      transition: background-color 150ms ease-in-out
+
+      &:hover
+        background-color: lighten($provider-color-blender_id, 7%)
 
       &.facebook
-        background-color: #3b5998
-        border-color: transparent
+        background-color: $provider-color-facebook
+
+        &:hover
+          background-color: lighten($provider-color-facebook, 7%)
 
       &.google
-        background-color: #dd4b39
-        border-color: transparent
+        background-color: $provider-color-google
+
+        &:hover
+          background-color: lighten($provider-color-google, 7%)
 
 #settings
   +media-xs
     flex-direction: column
 
-  display: flex
   align-items: stretch
+  display: flex
   margin: 25px auto
 
   #settings-sidebar
     +media-xs
       width: 100%
 
-    width: 30%
     +container-box
+    background-color: $color-background-light
+    color: $color-text
     margin-right: 15px
+    width: 30%
 
     .settings-content
       padding: 0
+
       ul
-        padding: 0
-        margin: 0
         list-style: none
+        margin: 0
+        padding: 0
 
       a
         &:hover
           text-decoration: none
+
           li
             background-color: lighten($color-background, 5%)
+
         li
-          padding: 25px
-          margin: 0
           border-bottom: thin solid $color-background
           border-left: thick solid transparent
+          margin: 0
+          padding: 25px
           transition: all 100ms ease-in-out
 
           i
@@ -106,9 +121,9 @@
     +media-xs
       width: 100%
 
-    width: 70%
     +container-box
-
+    background-color: $color-background-light
+    width: 70%
 
   .settings-header
     background-color: $color-background
@@ -116,16 +131,13 @@
     border-top-right-radius: 3px
 
     .settings-title
-      padding: 25px 15px 5px 15px
       font:
-        size: 2em
+        size: 1.5em
         weight: 300
+      padding: 10px 15px 10px 25px
 
   .settings-content
     padding: 25px
-
-    p
-      color: $color-text-dark-primary
 
     .settings-billing-info
       font-size: 1.2em
@@ -141,8 +153,8 @@
       margin-top: 0
 
   .button-submit
-    display: block
     clear: both
+    display: block
     min-width: 200px
     margin: 0 auto
     +button($color-primary, 3px, true)
@@ -151,9 +163,11 @@
 #settings-container
   #settings-form
     width: 100%
+
+
   .settings-form
-    display: flex
     align-items: center
+    display: flex
     justify-content: center
 
     .left, .right
@@ -168,9 +182,14 @@
       float: right
       text-align: center
 
+    label
+      color: $color-text
+      display: block
+
     .settings-avatar
       img
         border-radius: 3px
+
       span
         display: block
         padding: 15px 0
@@ -215,4 +234,3 @@
         color: $color-success
       &.fail
         color: $color-danger
-
