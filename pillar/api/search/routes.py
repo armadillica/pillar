@@ -42,10 +42,11 @@ def _page_index() -> int:
 @blueprint_search.route('/')
 def search_nodes():
     searchword = request.args.get('q', '')
+    project_id = request.args.get('project', '')
     terms = _term_filters()
     page_idx = _page_index()
 
-    result = queries.do_node_search(searchword, terms, page_idx)
+    result = queries.do_node_search(searchword, terms, page_idx, project_id)
     return jsonify(result)
 
 

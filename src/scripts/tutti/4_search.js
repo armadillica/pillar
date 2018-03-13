@@ -8,6 +8,7 @@ var elasticSearcher = (function() {
   var deze = {
 
     query:"",
+    project_id:"",
     url:"",
     newhits: [],
     terms: {},
@@ -19,6 +20,10 @@ var elasticSearcher = (function() {
       if (_url !== undefined) {
         deze.url=_url;
       }
+    }),
+
+    setProjectID: (function(pid){
+      deze.project_id = pid;
     }),
 
     setCurrentPage: (function(page){
@@ -66,6 +71,7 @@ var elasticSearcher = (function() {
       params = {
         q: deze.query,
         page: deze.page,
+        project: deze.project_id,
       };
       //add term filters
       Object.assign(params, deze.terms);
@@ -105,6 +111,7 @@ var elasticSearcher = (function() {
     execute: deze.execute,
     on: deze.on,
     setQuery: deze.setQuery,
+    setProjectID: deze.setProjectID,
     setCurrentPage: deze.setCurrentPage,
     query: deze.query,
     page: deze.page,

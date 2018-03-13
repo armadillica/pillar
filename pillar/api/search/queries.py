@@ -55,7 +55,7 @@ def nested_bool(must: list, should: list, terms: dict, *, index_alias: str) -> S
     return search
 
 
-def do_node_search(query: str, terms: dict, page: int) -> dict:
+def do_node_search(query: str, terms: dict, page: int, project_id: str='') -> dict:
     """
     Given user query input and term refinements
     search for public published nodes
@@ -73,6 +73,8 @@ def do_node_search(query: str, terms: dict, page: int) -> dict:
     ]
 
     must = []
+    if project_id:
+        must.append({'term': {'project.id': project_id}})
 
     if not query:
         should = []

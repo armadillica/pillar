@@ -23,6 +23,10 @@ meta(name="twitter:description", content="{{project.summary}}")
 | {% endblock %}
 
 | {% block body %}
+| {% if project %}
+script.
+	document.body.dataset["projectId"] = "{{project._id}}";
+| {% endif %}
 
 #search-container
 
@@ -171,27 +175,11 @@ script(type="text/template", id="stats-template")
 
 | {% block footer_scripts %}
 script(src="//releases.flowplayer.org/6.0.5/flowplayer.min.js", async)
-script().
-	var APPLICATION_ID = '{{config.ALGOLIA_USER}}';
-	var SEARCH_ONLY_API_KEY = '{{config.ALGOLIA_PUBLIC_KEY}}';
-	var INDEX_NAME = '{{config.ALGOLIA_INDEX_NODES}}';
-	var sortByCountDesc = null;
-	var FACET_CONFIG = [
-	{ name: 'node_type', title: 'Type', disjunctive: false, sortFunction: sortByCountDesc },
-	{ name: 'media', title: 'Media', disjunctive: false, sortFunction: sortByCountDesc },
-	{ name: 'tags', title: 'Tags', disjunctive: false, sortFunction: sortByCountDesc },
-	{ name: 'is_free', title: 'Free Access', disjunctive: false, sortFunction: sortByCountDesc },
-	];
-	{% if project %}
-	FACET_CONFIG.push({ name: 'project._id', title: 'Project', disjunctive: false, hidden: true, value: '{{project._id}}' })
-	{% endif %}
-
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/hogan.common-3.0.0.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/elasticsearch.min.js') }}")
 
-script(type="text/javascript").
-
-	function displayUser(userId) {
+script.
+	function displayNode(userId) {
 		var url = '/nodes/' + userId + '/view';
 
 		$.get(url, function(dataHtml){
@@ -215,7 +203,7 @@ script(type="text/javascript").
 		}
 		$(this).find('#search-loading').addClass('active');
 
-		displayUser($(this).data('hit-id'));
+		displayNode($(this).data('hit-id'));
 		$('.search-hit').removeClass('active');
 		$(this).addClass('active');
 	});

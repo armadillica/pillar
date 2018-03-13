@@ -17,26 +17,28 @@ $(document).ready(function() {
     var sliderTemplate = Hogan.compile($('#slider-template').text());
     var paginationTemplate = Hogan.compile($('#pagination-template').text());
 
-    // something elasticy!
+    // defined in tutti/4_search.js
     var search = elasticSearcher;
 
     // what are we looking for? users? assets (default)
     what = $inputField.attr('what');
 
-    // Input binding
-    $inputField.on('keyup change', function() {
-        var query = $inputField.val();
-
+    function do_search(query) {
         if (query === undefined) {
             return;
         }
-
         toggleIconEmptyInput(!query.trim());
 
-        // what could be like "/users"
-        search.setQuery(query, what);
-        // setURLParams(search);
+        search.setQuery(query, what);  // what could be like "/users"
+        var pid = ProjectUtils.projectId();
+        if (pid) search.setProjectID(pid);
         search.execute();
+    }
+
+    // Input binding
+    $inputField.on('keyup change', function() {
+        var query = $inputField.val();
+        do_search(query);
     }).focus();
 
     search.on('results', function(content) {
@@ -330,6 +332,5 @@ $(document).ready(function() {
     }
 
     // do empty search to fill aggregations
-    search.setQuery('', what);
-    search.execute();
+    do_search('');
 });
