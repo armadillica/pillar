@@ -18,12 +18,6 @@ TERMS = [
 ]
 
 
-def _valid_search() -> str:
-    """ Returns search parameters """
-    query = request.args.get('q', '')
-    return query
-
-
 def _term_filters() -> dict:
     """
     Check if frontent wants to filter stuff
@@ -47,7 +41,7 @@ def _page_index() -> int:
 
 @blueprint_search.route('/')
 def search_nodes():
-    searchword = _valid_search()
+    searchword = request.args.get('q', '')
     terms = _term_filters()
     page_idx = _page_index()
 
@@ -57,7 +51,7 @@ def search_nodes():
 
 @blueprint_search.route('/user')
 def search_user():
-    searchword = _valid_search()
+    searchword = request.args.get('q', '')
     terms = _term_filters()
     page_idx = _page_index()
     # result is the raw elasticseach output.
@@ -101,7 +95,7 @@ def search_user_admin():
     User search over all fields.
     """
 
-    searchword = _valid_search()
+    searchword = request.args.get('q', '')
     terms = _term_filters()
     page_idx = _page_index()
 
