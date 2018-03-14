@@ -382,7 +382,7 @@
 
 	blockquote
 		background-color: lighten($color-background-light, 5%)
-		box-shadow: inset 5px 0 0 lighten($color-background-light, 15%)
+		box-shadow: inset 5px 0 0 $color-background
 		display: block
 		font-size: 1em
 		margin:
@@ -402,9 +402,8 @@
 	ul li img
 		max-width: 100%
 		padding:
-			top: 25px
-			// bottom: 10px
 			bottom: 25px
+			top: 25px
 
 	h2
 		margin-bottom: 15px
@@ -414,8 +413,8 @@
 
 	/* e.g. YouTube embed */
 	iframe
-		margin: 15px auto
 		height: auto
+		margin: 15px auto
 		max-width: 100%
 		min-height: 500px
 		width: 100%
@@ -439,8 +438,8 @@
 	+list-bullets
 
 	ul
-		padding-left: 40px
 		margin-bottom: 25px
+		padding-left: 40px
 
 		li
 			margin-bottom: 7px
@@ -456,9 +455,27 @@
 
 	code, kbd, pre, samp
 		background-color: rgba($color-primary, .05)
-		color: darken($color-primary, 10%)
+		color: $color-primary
 		font-size: inherit
+		white-space: pre-line
 
+	kbd
+		border:
+			color: rgba($color-primary, .33)
+			radius: 3px
+			style: solid
+			width: 2px
+		cursor: default
+		display: inline-block
+		font:
+			size: .9em
+			weight: bold
+		margin: 2px
+		min-width: 15px
+		padding: 0 3px
+		text:
+			align: center
+			transform: uppercase
 
 =markdown-preview-container
 	border:
