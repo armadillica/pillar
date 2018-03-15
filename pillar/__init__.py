@@ -124,9 +124,7 @@ class PillarServer(BlinkerCompatibleEve):
                                          'api', 'eve_settings.py')
         # self.settings = self.config['EVE_SETTINGS_PATH']
         self.load_config()
-
-        if not self.config.get('SECRET_KEY'):
-            raise ConfigurationMissingError('SECRET_KEY configuration key is missing')
+        self._validate_config()
 
         # Configure authentication
         self.login_manager = auth.config_login_manager(self)
@@ -141,6 +139,14 @@ class PillarServer(BlinkerCompatibleEve):
         self.org_manager = pillar.api.organizations.OrgManager()
 
         self.before_first_request(self.setup_db_indices)
+
+    def _validate_config(self):
+        if not self.config.get('SECRET_KEY'):
+            raise ConfigurationMissingError('SECRET_KEY configuration key is missing')
+
+        server_name = self.config.get('SERVER_NAME', '')
+        if server_name != 'localhost' and '.' not in server_name:
+            raise ConfigurationMissingError('SERVER_NAME should contain a FQDN with TLD')
 
     def _load_flask_config(self):
         # Load configuration from different sources, to make it easy to override
