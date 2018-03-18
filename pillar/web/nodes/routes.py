@@ -126,11 +126,7 @@ def view(node_id, extra_template_args: dict=None):
         if node.permissions and node.permissions.world:
             return 'GET' in node.permissions.world
 
-        if current_user.is_authenticated:
-            allowed_roles = {'subscriber', 'demo', 'admin'}
-            return bool(allowed_roles.intersection(current_user.roles or ()))
-
-        return False
+        return current_user.has_cap('subscriber')
 
     link_allowed = allow_link()
 
