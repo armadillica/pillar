@@ -144,8 +144,11 @@ class PillarServer(BlinkerCompatibleEve):
         if not self.config.get('SECRET_KEY'):
             raise ConfigurationMissingError('SECRET_KEY configuration key is missing')
 
-        server_name = self.config.get('SERVER_NAME', '')
-        if server_name != 'localhost' and '.' not in server_name:
+        server_name = self.config.get('SERVER_NAME')
+        if not server_name:
+            raise ConfigurationMissingError('SERVER_NAME configuration key is missing, should be a '
+                                            'FQDN with TLD')
+        elif server_name != 'localhost' and '.' not in server_name:
             raise ConfigurationMissingError('SERVER_NAME should contain a FQDN with TLD')
 
     def _load_flask_config(self):
