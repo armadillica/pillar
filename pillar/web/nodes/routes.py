@@ -481,7 +481,7 @@ def edit(node_id):
 @blueprint.route('/preview-markdown', methods=['POST'])
 @login_required
 def preview_markdown():
-    """Return the 'content' field of POST request as Markdown.
+    """Return the 'content' field of POST request as HTML.
 
     This endpoint can be called via AJAX in order to preview the
     content of a node.
