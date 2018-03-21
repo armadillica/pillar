@@ -57,14 +57,13 @@ def _handle_picture(node: dict, to_index: dict):
 
 
 def prepare_node_data(node_id: str, node: dict=None) -> dict:
-    """
-    Given node by id or actual node build data object with fields to index.
+    """Given a node id or a node document, return an indexable version of it.
 
     Returns an empty dict when the node shouldn't be indexed.
     """
 
     if node_id and node:
-        raise ValueError("do not provide node and node_id together")
+        raise ValueError("Do not provide node and node_id together")
 
     if node_id:
         node = _get_node_from_id(node_id)

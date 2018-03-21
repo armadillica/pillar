@@ -6,7 +6,7 @@ log = logging.getLogger(__name__)
 
 
 def push_updated_user(user_to_index: dict):
-    """Push an update to the Algolia index when a user item is updated"""
+    """Push an update to the index when a user document is updated."""
 
     from pillar.api.utils.algolia import index_user_save
 
@@ -20,6 +20,7 @@ def push_updated_user(user_to_index: dict):
 
 
 def index_node_save(node_to_index: dict):
+    """Save parsed node document to the index."""
     from pillar.api.utils import algolia
 
     try:
@@ -30,7 +31,7 @@ def index_node_save(node_to_index: dict):
 
 
 def index_node_delete(delete_id: str):
-    """ delete node using id"""
+    """Delete node using id."""
     from pillar.api.utils import algolia
 
     try:
