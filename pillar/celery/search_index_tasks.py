@@ -177,6 +177,10 @@ def node_save(node_id: str):
 
     to_index = prepare_node_data(node_id)
 
+    if not to_index:
+        log.debug('Node %s will not be indexed', node_id)
+        return
+
     for searchoption in current_app.config['SEARCH_BACKENDS']:
         searchmodule = SEARCH_BACKENDS[searchoption]
         searchmodule.index_node_save(to_index)
