@@ -1,11 +1,11 @@
 | {% block body %}
 #node-container
 
-	section.node-preview.group
-		.node-title#node-title
-			| {{node.name}}
+	section.node-details-container
+		.node-details-header
+			.node-title#node-title
+				| {{node.name}}
 
-		.node-details-meta.preview
 			.node-details-meta-actions
 				.btn-browsetoggle(
 					title="Toggle between list/grid view",
@@ -13,10 +13,11 @@
 					data-placement="top")
 					i.pi-list
 
-	| {% if node.description %}
-	.node-details-description
-		| {{ node.description | markdown }}
-	| {% endif %}
+		| {% if node.description %}
+		.node-details-description#node-description
+			| {{ node.description | markdown }}
+		| {% endif %}
+
 
 	section.node-children.group
 

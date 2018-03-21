@@ -940,36 +940,34 @@ section.node-preview
 	iframe
 		width: 100%
 
-	&.image,
-	&.file,
-		min-height: 200px
-		flex: 1
-		max-height: 500px
-		background-color: black
-		display: flex
-		justify-content: center
-		align-items: center
+	min-height: 200px
+	flex: 1
+	max-height: 500px
+	background-color: black
+	display: flex
+	justify-content: center
+	align-items: center
 
-		cursor: zoom-in
+	cursor: zoom-in
+
+	+media-md
+		max-height: $node-preview-max-height-md
+	+media-lg
+		max-height: $node-preview-max-height-lg
+
+	img
+		display: block
+		max-height: $node-preview-max-height-lg
+		max-width: 100%
+		object-fit: scale-down
+
+		+media-xs
+			width: 100%
 
 		+media-md
 			max-height: $node-preview-max-height-md
 		+media-lg
 			max-height: $node-preview-max-height-lg
-
-		img
-			display: block
-			max-height: $node-preview-max-height-lg
-			max-width: 100%
-			object-fit: scale-down
-
-			+media-xs
-				width: 100%
-
-			+media-md
-				max-height: $node-preview-max-height-md
-			+media-lg
-				max-height: $node-preview-max-height-lg
 
 	&.video
 		background-color: black
@@ -1041,6 +1039,22 @@ section.node-preview
 			width: 100%
 
 
+	&.image.node-preview-blur
+		cursor: default
+		min-height: 400px
+		position: relative
+
+		img
+			height: 130%
+			left: -60px
+			max-width: initial
+			filter: blur(30px)
+			object-fit: cover
+			position: absolute
+			top: -60px
+			width: 130%
+
+
 section.node-details-container
 	background-color: white
 
@@ -1090,26 +1104,18 @@ section.node-preview.group
 				border-radius: 3px
 				cursor: default
 
-	&.group
-		.node-details-meta.preview
-			.node-details-meta-list
-				display: inline-block
+	.node-details-meta-actions
+		margin-left: auto
 
-				> li
-					padding: 0 5px
-
-			.node-details-meta-actions
-				display: inline-block
-
-				.btn-browsetoggle
-					+button(lighten($color-background-nav, 20%), 3px)
-					width: 48px
-					text-align: center
-					padding: 2px 4px
-					i
-						font-size: 1.3em
-						padding: 0
-						margin: 0
+		.btn-browsetoggle
+			+button(lighten($color-background-nav, 20%), 3px)
+			width: 48px
+			text-align: center
+			padding: 2px 4px
+			i
+				font-size: 1.3em
+				padding: 0
+				margin: 0
 
 	&.project
 		.node-details-title
@@ -1190,7 +1196,6 @@ section.node-preview.group
 
 						span
 							display: inline-block
-
 
 				&.type
 					text-transform: uppercase

@@ -9,18 +9,7 @@
 			src="{{ node.picture.thumbnail('l', api=api) }}")
 	| {% endif %}
 
-
-	section.node-details-container.file
-
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
-
-		| {% if node.description %}
-		.node-details-description#node-description
-			| {{ node.description | markdown }}
-		| {% endif %}
-
+	section.node-details-container
 		include ../../_node_details
 
 		#comments-embed

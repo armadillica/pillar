@@ -41,7 +41,7 @@ script(type="text/javascript").
 		{% endif %}
 
 
-		// If we are im preview mode, update the image source
+		// If we are in preview mode, update the image source
 		if (page_overlay.classList.contains('active')) {
 			var node_preview = document.getElementById('node-preview');
 
@@ -73,7 +73,7 @@ script(type="text/javascript").
 					.html('<div class="nav-prev"></div><img src="' + src + '"/><div class="nav-next"></div>');
 			}
 
-			$('#node-preview.image, #node-preview.file').click(function(e){
+			$('.js-node-preview-image').click(function(e){
 				e.preventDefault();
 				e.stopPropagation();
 
