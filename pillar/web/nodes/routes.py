@@ -488,13 +488,13 @@ def preview_markdown():
     """
 
     if not validate_csrf(request.headers.get('X-CSRFToken')):
-        return jsonify({'status': 'fail',
-                        'error': 'CRSF validation failed'}), 403
+        return jsonify({'_status': 'ERR',
+                        'message': 'CSRF validation failed.'}), 403
     try:
         content = request.form['content']
     except KeyError:
-        return jsonify({'status': 'fail',
-                        'error': 'The field "content" was not specified.'}), 400
+        return jsonify({'_status': 'ERR',
+                        'message': 'The field "content" was not specified.'}), 400
     return jsonify(content=markdown(content))
 
 
