@@ -73,9 +73,11 @@ def prepare_node_data(node_id: str, node: dict=None) -> dict:
         return {}
 
     if node['node_type'] not in INDEX_ALLOWED_NODE_TYPES:
+        log.debug('Node of type %s is not indexable by Pillar', node['node_type'])
         return {}
     # If a nodes does not have status published, do not index
     if node['properties'].get('status') != 'published':
+        log.debug('Node %s is does not have published status', node_id)
         return {}
 
     projects_collection = current_app.data.driver.db['projects']
