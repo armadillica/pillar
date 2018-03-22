@@ -1,54 +1,61 @@
-import os
 import json
+import typing
+
+import os
+import pathlib
 import subprocess
+
 from PIL import Image
 from flask import current_app
 
+# Images with these modes will be thumbed to PNG, others to JPEG.
+MODES_FOR_PNG = {'RGBA', 'LA'}
 
-# TODO: refactor to use pathlib.Path and f-strings.
-def generate_local_thumbnails(name_base, src):
+
+def generate_local_thumbnails(fp_base: str, src: pathlib.Path):
     """Given a source image, use Pillow to generate thumbnails according to the
     application settings.
 
-    :param name_base: the thumbnail will get a field 'name': '{basename}-{thumbsize}.jpg'
-    :type name_base: str
+    :param fp_base: the thumbnail will get a field
+        'file_path': '{fp_base}-{thumbsize}.{ext}'
     :param src: the path of the image to be thumbnailed
-    :type src: str
     """
 
     thumbnail_settings = current_app.config['UPLOADS_LOCAL_STORAGE_THUMBNAILS']
     thumbnails = []
 
-    save_to_base, _ = os.path.splitext(src)
-    name_base, _ = os.path.splitext(name_base)
-
     for size, settings in thumbnail_settings.items():
-        dst = '{0}-{1}{2}'.format(save_to_base, size, '.jpg')
-        name = '{0}-{1}{2}'.format(name_base, size, '.jpg')
+        im = Image.open(src)
+        extra_args = {}
+
+        # If the source image has transparency, save as PNG
+        if im.mode in MODES_FOR_PNG:
+            suffix = '.png'
+            imformat = 'PNG'
+        else:
+            suffix = '.jpg'
+            imformat = 'JPEG'
+            extra_args = {'quality': 95}
+        dst = src.with_name(f'{src.stem}-{size}{suffix}')
 
         if settings['crop']:
-            resize_and_crop(src, dst, settings['size'])
-            width, height = settings['size']
+            im = resize_and_crop(im, settings['size'])
         else:
-            im = Image.open(src)
             im.thumbnail(settings['size'], resample=Image.LANCZOS)
+        width, height = im.size
 
-            # If the source image has transparency, save as PNG
-            if im.mode == 'RGBA':
-                im.save(dst, format='PNG', optimize=True)
-            else:
-                im.save(dst, format='JPEG', optimize=True, quality=95)
-
-            width, height = im.size
+        if imformat == 'JPEG':
+            im = im.convert('RGB')
+        im.save(dst, format=imformat, optimize=True, **extra_args)
 
         thumb_info = {'size': size,
-                      'file_path': name,
-                      'local_path': dst,
-                      'length': os.stat(dst).st_size,
+                      'file_path': f'{fp_base}-{size}{suffix}',
+                      'local_path': str(dst),
+                      'length': dst.stat().st_size,
                       'width': width,
                       'height': height,
                       'md5': '',
-                      'content_type': 'image/jpeg'}
+                      'content_type': f'image/{imformat.lower()}'}
 
         if size == 't':
             thumb_info['is_public'] = True
@@ -58,63 +65,40 @@ def generate_local_thumbnails(name_base, src):
     return thumbnails
 
 
-def resize_and_crop(img_path, modified_path, size, crop_type='middle'):
-    """
-    Resize and crop an image to fit the specified size. Thanks to:
-    https://gist.github.com/sigilioso/2957026
+def resize_and_crop(img: Image, size: typing.Tuple[int, int]) -> Image:
+    """Resize and crop an image to fit the specified size.
 
-    args:
-    img_path: path for the image to resize.
-    modified_path: path to store the modified image.
-    size: `(width, height)` tuple.
-    crop_type: can be 'top', 'middle' or 'bottom', depending on this
-    value, the image will cropped getting the 'top/left', 'middle' or
-    'bottom/right' of the image to fit the size.
-    raises:
-    Exception: if can not open the file in img_path of there is problems
-    to save the image.
-    ValueError: if an invalid `crop_type` is provided.
+    Thanks to: https://gist.github.com/sigilioso/2957026
 
+    :param img: opened PIL.Image to work on
+    :param size: `(width, height)` tuple.
     """
     # If height is higher we resize vertically, if not we resize horizontally
-    img = Image.open(img_path).convert('RGB')
     # Get current and desired ratio for the images
-    img_ratio = img.size[0] / float(img.size[1])
-    ratio = size[0] / float(size[1])
+    cur_w, cur_h = img.size  # current
+    img_ratio = cur_w / cur_h
+
+    w, h = size  # desired
+    ratio = w / h
+
     # The image is scaled/cropped vertically or horizontally depending on the ratio
     if ratio > img_ratio:
-        img = img.resize((size[0], int(round(size[0] * img.size[1] / img.size[0]))),
-                         Image.ANTIALIAS)
-        # Crop in the top, middle or bottom
-        if crop_type == 'top':
-            box = (0, 0, img.size[0], size[1])
-        elif crop_type == 'middle':
-            box = (0, int(round((img.size[1] - size[1]) / 2)), img.size[0],
-                   int(round((img.size[1] + size[1]) / 2)))
-        elif crop_type == 'bottom':
-            box = (0, img.size[1] - size[1], img.size[0], img.size[1])
-        else:
-            raise ValueError('ERROR: invalid value for crop_type')
+        uncropped_h = (w * cur_h) // cur_w
+        img = img.resize((w, uncropped_h), Image.ANTIALIAS)
+        box = (0, (uncropped_h - h) // 2,
+               w, (uncropped_h + h) // 2)
         img = img.crop(box)
     elif ratio < img_ratio:
-        img = img.resize((int(round(size[1] * img.size[0] / img.size[1])), size[1]),
-                         Image.ANTIALIAS)
-        # Crop in the top, middle or bottom
-        if crop_type == 'top':
-            box = (0, 0, size[0], img.size[1])
-        elif crop_type == 'middle':
-            box = (int(round((img.size[0] - size[0]) / 2)), 0,
-                   int(round((img.size[0] + size[0]) / 2)), img.size[1])
-        elif crop_type == 'bottom':
-            box = (img.size[0] - size[0], 0, img.size[0], img.size[1])
-        else:
-            raise ValueError('ERROR: invalid value for crop_type')
+        uncropped_w = (h * cur_w) // cur_h
+        img = img.resize((uncropped_w, h), Image.ANTIALIAS)
+        box = ((uncropped_w - w) // 2, 0,
+               (uncropped_w + w) // 2, h)
         img = img.crop(box)
     else:
-        img = img.resize((size[0], size[1]),
-                         Image.ANTIALIAS)
+        img = img.resize((w, h), Image.ANTIALIAS)
+
     # If the scale is the same, we do not need to crop
-    img.save(modified_path, "JPEG")
+    return img
 
 
 def get_video_data(filepath):
