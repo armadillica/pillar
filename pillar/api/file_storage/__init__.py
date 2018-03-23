@@ -386,13 +386,8 @@ def before_returning_file(response):
 
 def strip_link_and_variations(response):
     # Check the access level of the user.
-    if current_user.is_anonymous:
-        has_full_access = False
-    else:
-        user_roles = current_user.roles
-        # TODO: convert to a capability and check for that.
-        access_roles = current_app.config['FULL_FILE_ACCESS_ROLES']
-        has_full_access = bool(user_roles.intersection(access_roles))
+    capability = current_app.config['FULL_FILE_ACCESS_CAP']
+    has_full_access = current_user.has_cap(capability)
 
     # Strip all file variations (unless image) and link to the actual file.
     if not has_full_access:
