@@ -247,3 +247,11 @@ SMTP_TIMEOUT = 30  # timeout in seconds, https://docs.python.org/3/library/smtpl
 MAIL_RETRY = 180  # in seconds, delay until trying to send an email again.
 MAIL_DEFAULT_FROM_NAME = 'Blender Cloud'
 MAIL_DEFAULT_FROM_ADDR = 'cloudsupport@localhost'
+
+SEND_FILE_MAX_AGE_DEFAULT = 3600 * 24 * 365  # seconds
+
+# MUST be 8 characters long, see pillar.flask_extra.HashedPathConverter
+# Intended to be changed for every deploy. If it is empty, a random hash will
+# be used. Note that this causes extra traffic, since every time the process
+# restarts the URLs will be different.
+STATIC_FILE_HASH = ''

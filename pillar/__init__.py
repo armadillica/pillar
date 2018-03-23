@@ -101,6 +101,7 @@ class PillarServer(BlinkerCompatibleEve):
         self.log = logging.getLogger('%s.%s' % (__name__, self.__class__.__name__))
         self.log.info('Creating new instance from %r', self.app_root)
 
+        self._config_url_map()
         self._config_auth_token_hmac_key()
         self._config_tempdirs()
         self._config_git()
@@ -170,6 +171,19 @@ class PillarServer(BlinkerCompatibleEve):
         log = logging.getLogger(__name__)
         if self.config['DEBUG']:
             log.info('Pillar starting, debug=%s', self.config['DEBUG'])
+
+    def _config_url_map(self):
+        """Extend Flask url_map with our own converters."""
+        import secrets, re
+        from . import flask_extra
+
+        if not self.config.get('STATIC_FILE_HASH'):
+            self.log.warning('STATIC_FILE_HASH is empty, generating random one')
+            f = open('/data/git/blender-cloud/config_local.py', 'a')
+            h = re.sub(r'[_.~-]', '', secrets.token_urlsafe())[:8]
+            self.config['STATIC_FILE_HASH'] = h
+
+        self.url_map.converters['hashed_path'] = flask_extra.HashedPathConverter
 
     def _config_auth_token_hmac_key(self):
         """Load AUTH_TOKEN_HMAC_KEY, falling back to SECRET_KEY."""
@@ -529,7 +543,7 @@ class PillarServer(BlinkerCompatibleEve):
         from pillar.web.staticfile import PillarStaticFile
 
         view_func = PillarStaticFile.as_view(endpoint_name, static_folder=static_folder)
-        self.add_url_rule('%s/<path:filename>' % url_prefix, view_func=view_func)
+        self.add_url_rule(f'{url_prefix}/<hashed_path:filename>', view_func=view_func)
 
     def process_extensions(self):
         """This is about Eve extensions, not Pillar extensions."""

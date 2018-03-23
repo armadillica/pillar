@@ -66,20 +66,20 @@ meta(property="og:url", content="{{url_for('projects.view', project_url=project.
 | {% endblock %}
 
 | {% block head %}
-link(href="{{ url_for('static_pillar', filename='assets/jstree/themes/default/style.min.css', v=9112017) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/jstree/themes/default/style.min.css') }}", rel="stylesheet")
 | {% if node %}
 link(rel="amphtml", href="{{ url_for('nodes.view', node_id=node._id, _external=True, format='amp') }}")
 | {% endif %}
 
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-6.2.8.min.js', v=9112017) }}")
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-ga-0.4.2.min.js', v=9112017) }}")
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-hotkeys-0.2.20.min.js', v=9112017) }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-6.2.8.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-ga-0.4.2.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-hotkeys-0.2.20.min.js') }}")
 | {% endblock %}
 
 | {% block css %}
-link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css', v=9112017) }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/base.css', v=9112017) }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v=9112017) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css') }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/base.css') }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }}", rel="stylesheet")
 | {% endblock %}
 
 | {% block body %}
@@ -280,7 +280,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css', v
 
 | {% if project.has_method('PUT') %}
 | {# JS containing the Edit, Add, Featured, and Move functions #}
-script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets/js/project-edit.min.js', v=9112017) }}")
+script(type="text/javascript", src="{{ url_for('static_pillar', filename='assets/js/project-edit.min.js') }}")
 | {% endif %}
 
 script.

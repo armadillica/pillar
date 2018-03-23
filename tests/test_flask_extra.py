@@ -2,6 +2,8 @@ import unittest
 
 import flask
 
+from pillar.tests import AbstractPillarTest
+
 
 class FlaskExtraTest(unittest.TestCase):
     def test_vary_xhr(self):
@@ -84,3 +86,25 @@ class EnsureSchemaTest(unittest.TestCase):
             self.assertEqual('/some/path/only', pillar.flask_extra.ensure_schema('/some/path/only'))
             self.assertEqual('https://hostname/path',
                              pillar.flask_extra.ensure_schema('//hostname/path'))
+
+
+class HashedPathConverterTest(AbstractPillarTest):
+    def test_to_python(self):
+        from pillar.flask_extra import HashedPathConverter
+
+        hpc = HashedPathConverter({})
+        self.assertEqual('/path/to/file.min.js', hpc.to_python('/path/to/file.min.abcd1234.js'))
+        self.assertEqual('/path/to/file.js', hpc.to_python('/path/to/file.abcd1234.js'))
+        self.assertEqual('/path/to/file', hpc.to_python('/path/to/file'))
+        self.assertEqual('', hpc.to_python(''))
+
+    def test_to_url(self):
+        from pillar.flask_extra import HashedPathConverter
+
+        hpc = HashedPathConverter({})
+
+        with self.app.app_context():
+            self.assertEqual('/path/to/file.min.abcd1234.js', hpc.to_url('/path/to/file.min.js'))
+            self.assertEqual('/path/to/file.abcd1234.js', hpc.to_url('/path/to/file.js'))
+            self.assertEqual('/path/to/file', hpc.to_url('/path/to/file'))
+            self.assertEqual('', hpc.to_url(''))
