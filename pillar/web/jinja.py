@@ -101,6 +101,8 @@ def do_markdown(s: typing.Optional[str]):
     This filter is not preferred. Use {'coerce': 'markdown'} in the Eve schema
     instead, to cache the HTML in the database, and use do_markdowned() to
     fetch it.
+
+    Jinja example: {{ node.properties.content | markdown }}
     """
     if s is None:
         return None
@@ -113,33 +115,47 @@ def do_markdown(s: typing.Optional[str]):
     return jinja2.utils.Markup(safe_html)
 
 
-def do_markdowned(document: typing.Union[dict, pillarsdk.Resource], field_name: str) -> str:
+def _get_markdowned_html(document: typing.Union[dict, pillarsdk.Resource], field_name: str) -> str:
     """Fetch pre-converted Markdown or render on the fly.
 
     Use {'coerce': 'markdown'} in the Eve schema to cache the HTML in the
     database and use do_markdowned() to fetch it in a safe way.
 
-    Jinja example: {{ node.properties | markdowned:'content' }}
+    Places shortcode tags `{...}` between HTML comments, so that they pass
+    through the Markdown parser as-is.
     """
     if isinstance(document, pillarsdk.Resource):
         document = document.to_dict()
-
     if not document:
+        # If it's empty, we don't care what it is.
         return ''
-
-    my_log = log.getChild('do_markdowned')
+    assert isinstance(document, dict), \
+        f'document should be dict or pillarsdk.Resource, not {document!r}'
 
     cache_field_name = pillar.markdown.cache_field_name(field_name)
-    my_log.debug('Getting %r', cache_field_name)
+    html = document.get(cache_field_name)
+    if html is None:
+        markdown_src = document.get(field_name) or ''
+        html = pillar.markdown.markdown(markdown_src)
+    return html
 
-    cached_html = document.get(cache_field_name)
-    if cached_html is not None:
-        my_log.debug('Cached HTML is %r', cached_html[:40])
-        return jinja2.utils.Markup(cached_html)
 
-    markdown_src = document.get(field_name)
-    my_log.debug('No cached HTML, rendering doc[%r]', field_name)
-    return do_markdown(markdown_src)
+def do_markdowned(document: typing.Union[dict, pillarsdk.Resource], field_name: str) \
+        -> jinja2.utils.Markup:
+    """Render Markdown and shortcodes.
+
+    Use {'coerce': 'markdown'} in the Eve schema to cache the HTML in the
+    database and use do_markdowned() to fetch it in a safe way.
+
+    Jinja example: {{ node.properties | markdowned('content') }}
+
+    The value of `document` is sent as context to the shortcodes render
+    function.
+    """
+    from pillar import shortcodes
+    html = _get_markdowned_html(document, field_name)
+    html = shortcodes.render_commented(html, context=document)
+    return jinja2.utils.Markup(html)
 
 
 def do_url_for_node(node_id=None, node=None):

@@ -54,6 +54,7 @@ setuptools.setup(
         'Pillow>=2.8.1',
         'requests>=2.9.1',
         'rsa>=3.3',
+        'shortcodes>=2.5',  # 2.4.0 and earlier corrupted unicode
         'zencoder>=0.6.5',
         'bcrypt>=2.0.0',
         'blinker>=1.4',

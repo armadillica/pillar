@@ -6,6 +6,8 @@ This is for user-generated stuff, like comments.
 import bleach
 import CommonMark
 
+from . import shortcodes
+
 ALLOWED_TAGS = [
     'a',
     'abbr',
@@ -40,12 +42,14 @@ ALLOWED_STYLES = [
 ]
 
 
-def markdown(s):
-    tainted_html = CommonMark.commonmark(s)
+def markdown(s: str) -> str:
+    commented_shortcodes = shortcodes.comment_shortcodes(s)
+    tainted_html = CommonMark.commonmark(commented_shortcodes)
     safe_html = bleach.clean(tainted_html,
                              tags=ALLOWED_TAGS,
                              attributes=ALLOWED_ATTRIBUTES,
-                             styles=ALLOWED_STYLES)
+                             styles=ALLOWED_STYLES,
+                             strip_comments=False)
     return safe_html
 
 
