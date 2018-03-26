@@ -15,7 +15,7 @@
 
 	| {% if node.description %}
 	.node-details-description
-		| {{ node.description | markdown }}
+		| {{ node | markdowned('description') }}
 	| {% endif %}
 
 	section.node-children.group

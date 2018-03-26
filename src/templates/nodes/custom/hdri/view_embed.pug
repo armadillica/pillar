@@ -93,7 +93,7 @@
 
 		| {% if node.description %}
 		.node-details-description#node-description
-			| {{ node.description | markdown }}
+			| {{ node | markdowned('description') }}
 		| {% endif %}
 
 		| {% if node.properties.license_notes %}

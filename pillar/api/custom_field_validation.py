@@ -1,9 +1,12 @@
 import logging
 
 from bson import ObjectId, tz_util
-from datetime import datetime, tzinfo
+from datetime import datetime
+import cerberus.errors
 from eve.io.mongo import Validator
 from flask import current_app
+
+import pillar.markdown
 
 log = logging.getLogger(__name__)
 
@@ -152,3 +155,52 @@ class ValidateCustomFields(Validator):
 
         if not isinstance(value, (bytes, bytearray)):
             self._error(field_name, f'wrong value type {type(value)}, expected bytes or bytearray')
+
+    def _validate_coerce(self, coerce, field: str, value):
+        """Override Cerberus' _validate_coerce method for richer features.
+
+        This now supports named coercion functions (available in Cerberus 1.0+)
+        and passes the field name to coercion functions as well.
+        """
+        if isinstance(coerce, str):
+            coerce = getattr(self, f'_normalize_coerce_{coerce}')
+
+        try:
+            return coerce(field, value)
+        except (TypeError, ValueError):
+            self._error(field, cerberus.errors.ERROR_COERCION_FAILED.format(field))
+
+    def _normalize_coerce_markdown(self, field: str, value):
+        """Render Markdown from this field into {field}_html.
+
+        The field name MUST NOT end in `_html`. The Markdown is read from this
+        field and the rendered HTML is written to the field `{field}_html`.
+        """
+        html = pillar.markdown.markdown(value)
+        field_name = pillar.markdown.cache_field_name(field)
+        self.current[field_name] = html
+        return value
+
+
+if __name__ == '__main__':
+    from pprint import pprint
+
+    v = ValidateCustomFields()
+    v.schema = {
+        'foo': {'type': 'string', 'coerce': 'markdown'},
+        'foo_html': {'type': 'string'},
+        'nested': {
+            'type': 'dict',
+            'schema': {
+                'bar': {'type': 'string', 'coerce': 'markdown'},
+                'bar_html': {'type': 'string'},
+            }
+        }
+    }
+    print('Valid   :', v.validate({
+        'foo': '# Title\n\nHeyyyy',
+        'nested': {'bar': 'bhahaha'},
+    }))
+    print('Document:')
+    pprint(v.document)
+    print('Errors  :', v.errors)

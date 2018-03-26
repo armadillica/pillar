@@ -80,7 +80,7 @@ def comment_edit(comment_id):
     return jsonify({
         'status': 'success',
         'data': {
-            'content_html': result.properties.content_html,
+            'content_html': result.properties['_content_html'],
         }})
 
 

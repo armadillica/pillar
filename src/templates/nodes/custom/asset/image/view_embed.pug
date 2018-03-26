@@ -18,7 +18,7 @@
 
 		| {% if node.description %}
 		.node-details-description#node-description
-			| {{ node.description | markdown }}
+			| {{ node | markdowned('description') }}
 		| {% endif %}
 
 		include ../../_node_details
@@ -46,4 +46,3 @@ script.
 	});
 
 | {% endblock %}
-

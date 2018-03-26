@@ -4,13 +4,14 @@ node_type_post = {
     'name': 'post',
     'description': 'A blog post, for any project',
     'dyn_schema': {
-        # The blogpost content (Markdown format)
         'content': {
             'type': 'string',
             'minlength': 5,
             'maxlength': 90000,
-            'required': True
+            'required': True,
+            'coerce': 'markdown',
         },
+        '_content_html': {'type': 'string'},
         'status': {
             'type': 'string',
             'allowed': [

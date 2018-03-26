@@ -2,16 +2,14 @@ node_type_comment = {
     'name': 'comment',
     'description': 'Comments for asset nodes, pages, etc.',
     'dyn_schema': {
-        # The actual comment content (initially Markdown format)
+        # The actual comment content
         'content': {
             'type': 'string',
             'minlength': 5,
             'required': True,
+            'coerce': 'markdown',
         },
-        # The converted-to-HTML content.
-        'content_html': {
-            'type': 'string',
-        },
+        '_content_html': {'type': 'string'},
         'status': {
             'type': 'string',
             'allowed': [

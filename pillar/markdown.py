@@ -47,3 +47,11 @@ def markdown(s):
                              attributes=ALLOWED_ATTRIBUTES,
                              styles=ALLOWED_STYLES)
     return safe_html
+
+
+def cache_field_name(field_name: str) -> str:
+    """Return the field name containing the cached HTML.
+
+    See ValidateCustomFields._normalize_coerce_markdown().
+    """
+    return f'_{field_name}_html'

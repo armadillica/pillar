@@ -155,7 +155,9 @@ organizations_schema = {
     'description': {
         'type': 'string',
         'maxlength': 256,
+        'coerce': 'markdown',
     },
+    '_description_html': {'type': 'string'},
     'website': {
         'type': 'string',
         'maxlength': 256,
@@ -290,7 +292,9 @@ nodes_schema = {
     },
     'description': {
         'type': 'string',
+        'coerce': 'markdown',
     },
+    '_description_html': {'type': 'string'},
     'picture': _file_embedded_schema,
     'order': {
         'type': 'integer',
@@ -535,7 +539,9 @@ projects_schema = {
     },
     'description': {
         'type': 'string',
+        'coerce': 'markdown',
     },
+    '_description_html': {'type': 'string'},
     # Short summary for the project
     'summary': {
         'type': 'string',
