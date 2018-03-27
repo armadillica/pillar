@@ -138,3 +138,12 @@ script(type="text/javascript").
 		}
 
 	{% endif %}
+
+	var $content_type = $(".js-type");
+	var type_value = $content_type.text();
+	var type_value_trimmed = type_value.substring(type_value.indexOf("/") + 1);
+	$content_type.text(type_value_trimmed);
+
+	if (type_value_trimmed == 'x-blender' || type_value_trimmed == 'blend'){
+		$content_type.html('<span class="blend"><i class="pi-blender-logo"></i></span>');
+	};
