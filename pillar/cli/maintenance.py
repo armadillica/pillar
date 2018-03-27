@@ -484,7 +484,13 @@ def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missi
     projects_collection = current_app.db()['projects']
     will_would = 'Will' if go else 'Would'
 
+    projects_changed = projects_seen = 0
+
     def handle_project(proj):
+        nonlocal projects_changed, projects_seen
+
+        projects_seen += 1
+
         orig_proj = copy.deepcopy(proj)
         proj_id = proj['_id']
         if 'url' not in proj:
@@ -526,6 +532,8 @@ def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missi
                 proj_has_difference = True
             log.info('    %30r: %r → %r', key, val1, val2)
 
+        projects_changed += proj_has_difference
+
         if go and proj_has_difference:
             # Use Eve to PUT, so we have schema checking.
             db_proj = remove_private_keys(proj)
@@ -546,6 +554,9 @@ def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missi
     if all_projects:
         for project in projects_collection.find({'_deleted': {'$ne': True}}):
             handle_project(project)
+        log.info('%s %d of %d projects',
+                 'Changed' if go else 'Would change',
+                 projects_changed, projects_seen)
         return
 
     if project_url:

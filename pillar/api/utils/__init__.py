@@ -172,7 +172,7 @@ def doc_diff(doc1, doc2, *, falsey_is_equal=True, superkey: str = None):
 
     Yields changes as (key, value in doc1, value in doc2) tuples, where
     the value can also be the DoesNotExist class. Does not report changed
-    private keys (i.e. starting with underscores).
+    private keys (i.e. the standard Eve keys starting with underscores).
 
     Sub-documents (i.e. dicts) are recursed, and dot notation is used
     for the keys if changes are found.
@@ -180,6 +180,8 @@ def doc_diff(doc1, doc2, *, falsey_is_equal=True, superkey: str = None):
     If falsey_is_equal=True, all Falsey values compare as equal, i.e. this
     function won't report differences between DoesNotExist, False, '', and 0.
     """
+
+    private_keys = {'_id', '_etag', '_deleted', '_updated', '_created'}
 
     def combine_key(some_key):
         """Combine this key with the superkey.
@@ -200,7 +202,7 @@ def doc_diff(doc1, doc2, *, falsey_is_equal=True, superkey: str = None):
 
     if isinstance(doc1, dict) and isinstance(doc2, dict):
         for key in set(doc1.keys()).union(set(doc2.keys())):
-            if isinstance(key, str) and key[0] == '_':
+            if key in private_keys:
                 continue
 
             val1 = doc1.get(key, DoesNotExist)
