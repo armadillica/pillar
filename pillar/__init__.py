@@ -223,6 +223,7 @@ class PillarServer(BlinkerCompatibleEve):
         self.log.info('Git revision %r', self.config['GIT_REVISION'])
 
     def _config_sentry(self):
+        # TODO(Sybren): keep Sentry unconfigured when running CLI commands.
         sentry_dsn = self.config.get('SENTRY_CONFIG', {}).get('dsn')
         if self.config.get('TESTING') or sentry_dsn in {'', '-set-in-config-local-'}:
             self.log.warning('Sentry NOT configured.')
