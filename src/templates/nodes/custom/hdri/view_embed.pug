@@ -1,144 +1,62 @@
-| {% block body %}
+| {% extends "nodes/view_base.html" %}
 
-#node-container.texture
-	#node-overlay
-	section.node-preview
-		| {% if node.picture %}
-		iframe(
-		id='vrview_window'
-		width='100%',
-		height='450px',
-		scrolling='no',
-		frameborder='0',
-		allowfullscreen='',
-		src="{{url_for('main.vrview', preview=node.picture.thumbnail('l', api=api), image=node.picture.thumbnail('h', api=api), default_yaw=(node.properties.default_yaw or 0))}}")
-		| {% endif %}
+| {% block node_preview %}
+| {% if node.picture %}
+iframe(
+id='vrview_window'
+width='100%',
+height='450px',
+scrolling='no',
+frameborder='0',
+allowfullscreen='',
+src="{{url_for('main.vrview', preview=node.picture.thumbnail('l', api=api), image=node.picture.thumbnail('h', api=api), default_yaw=(node.properties.default_yaw or 0))}}")
+| {% else %}
+section.node-preview
+	h3 Missing Preview
+| {% endif %}
+| {% endblock node_preview %}
 
-	section.node-details-container
+| {% block node_details_meta_extra %}
+| {% if write_access %}
+li.node-details-meta-list-item
+	a.btn#copy_yaw(
+		href='javascript:void(0);'
+		title='Copies current yaw of panorama to the clipboard, so you can set it as default yaw.'
+		) Copy yaw
+| {% endif %}
+| {% endblock node_details_meta_extra %}
 
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
+| {% block node_download %}
+| {% if node.properties.files %}
+button.btn.btn-default.dropdown-toggle(
+	title="Download HDRI",
+	type="button",
+	data-toggle="dropdown",
+	aria-haspopup="true",
+	aria-expanded="false")
+	i.pi-download
+	| Download
+	i.pi-angle-down.icon-dropdown-menu
 
-		.node-details-meta.header
-			ul.node-details-meta-list
-				| {% if node.permissions.world %}
-				li.node-details-meta-list-item.access.public(
-				data-toggle="tooltip",
-				data-placement="bottom",
-				title="Anybody can download. Share it!")
-					i.pi-lock-open
-					span Public
-				| {% endif %}
+ul.dropdown-menu
+	| {% for var in node.properties.files %}
+	li
+		a(href="{{ var.file.link }}",
+		title="Download this HDRi format",
+		download)
+			span.length {{ var.file.length | filesizeformat }}
+			span.format {{ var.file.format | hide_none }}
+			span.size {{ var.resolution }}
 
-				| {% if node.properties.license_type %}
-				| {% if node.properties.license_notes %}
-				li.node-details-meta-list-item.video.license(
-				id="asset-license",
-				data-toggle="popover",
-				data-placement="left",
-				data-trigger="hover",
-				data-content="{{ node.properties.license_notes }}",
-				title="{{ node.properties.license_type }}")
+	| {% endfor %}
+| {% endif %}
+| {% endblock node_download %}
 
-					i(class="pi-license-{{ node.properties.license_type }}")
-				| {% else %}
-				li.node-details-meta-list-item.video.license(
-				id="asset-license",
-				data-toggle="tooltip",
-				data-placement="bottom",
-				title="{{ node.properties.license_type }}")
-					i(class="pi-license-{{ node.properties.license_type }}")
-				| {% endif %}
-				| {% endif %}
+| {% block node_comments %}{% endblock %}
 
-				| {% if write_access %}
-				li.node-details-meta-list-item
-					a.btn#copy_yaw(
-						href='javascript:void(0);'
-						title='Copies current yaw of panorama to the clipboard, so you can set it as default yaw.'
-						) Copy yaw
-				| {% endif %}
-
-				| {% if node.properties.files %}
-				li.btn-group.node-details-meta-list-item.video.download(
-				title="Download HDRI")
-					button.btn.btn-default.dropdown-toggle(
-					type="button",
-					data-toggle="dropdown",
-					aria-haspopup="true",
-					aria-expanded="false")
-						i.pi-download
-						i.pi-angle-down.icon-dropdown-menu
-
-					ul.dropdown-menu
-						| {% for var in node.properties.files %}
-						li
-							a(href="{{ var.file.link }}",
-							title="Download this HDRi format",
-							download)
-								span.length {{ var.file.length | filesizeformat }}
-
-								span.format {{ var.file.format | hide_none }}
-								span.size {{ var.resolution }}
-
-						| {% endfor %}
-				| {% else %}
-				li.btn-group.node-details-meta-list-item.video.download.disabled(
-				title="Download HDRi")
-					button.btn.btn-default.sorry(type="button")
-						i.pi-lock
-						i.pi-download
-				| {% endif %}
-
-		| {% if node.description %}
-		.node-details-description#node-description
-			| {{ node.description | markdown }}
-		| {% endif %}
-
-		| {% if node.properties.license_notes %}
-		.node-details-meta.license
-			| {{ node.properties.license_notes }}
-		| {% endif %}
-
-		.node-details-meta.footer
-			ul.node-details-meta-list
-				li.node-details-meta-list-item.status
-					| {{ node.properties.status | undertitle }}
-
-				li.node-details-meta-list-item.author
-					| {{ node.user.full_name }}
-
-				li.node-details-meta-list-item.date(title="Created {{ node._created }}")
-					| {{ node._created | pretty_date }}
-					| {% if (node._created | pretty_date) != (node._updated | pretty_date) %}
-					span(title="Updated {{ node._updated }}") (updated {{ node._updated | pretty_date }})
-					| {% endif %}
-
-
-include ../_scripts
-
-| {% endblock %}
-
-| {% block footer_scripts %}
+| {% block node_scripts %}
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/clipboard.min.js')}}")
-
 script.
-	$('#asset-license').popover();
-	// Generate GA pageview
-	ga('send', 'pageview', location.pathname);
-
-
-	$('.sorry').click(function() {
-		$.get('/403', function(data) {
-			$('#node-overlay').html(data).show().addClass('active');
-		})
-	});
-
-	$('#node-overlay').click(function(){
-		$(this).removeClass('active').hide().html();
-	});
-
 	$().ready(function () {
 		new Clipboard('#copy_yaw', {
 			text: function(trigger) {
@@ -150,8 +68,7 @@ script.
 			}
 		})
 		.on('success', function(e) {
-		    $(e.trigger).flashOnce();
+			$(e.trigger).flashOnce();
 		});
 	});
-
-| {% endblock %}
+| {% endblock node_scripts %}
