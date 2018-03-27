@@ -263,6 +263,53 @@ def check_home_project_groups():
     return bad
 
 
+@manager_maintenance.option('-g', '--go', dest='go',
+                            action='store_true', default=False,
+                            help='Actually go and perform the changes, without this just '
+                                 'shows differences.')
+def purge_home_projects(go=False):
+    """Deletes all home projects that have no owner."""
+    from pillar.api.utils.authentication import force_cli_user
+    force_cli_user()
+
+    users_coll = current_app.data.driver.db['users']
+    proj_coll = current_app.data.driver.db['projects']
+    good = bad = 0
+
+    def bad_projects():
+        nonlocal good, bad
+
+        for proj in proj_coll.find({'category': 'home', '_deleted': {'$ne': True}}):
+            pid = proj['_id']
+            uid = proj.get('user')
+            if not uid:
+                log.info('Project %s has no user assigned', uid)
+                bad += 1
+                yield pid
+                continue
+
+            if users_coll.find({'_id': uid, '_deleted': {'$ne': True}}).count() == 0:
+                log.info('Project %s has non-existing owner %s', pid, uid)
+                bad += 1
+                yield pid
+                continue
+
+            good += 1
+
+    if not go:
+        log.info('Dry run, use --go to actually perform the changes.')
+
+    for project_id in bad_projects():
+        log.info('Soft-deleting project %s', project_id)
+        if go:
+            r, _, _, status = current_app.delete_internal('projects', _id=project_id)
+            if status != 204:
+                raise ValueError(f'Error {status} deleting {project_id}: {r}')
+
+    log.info('%i projects OK, %i projects deleted', good, bad)
+    return bad
+
+
 @manager_maintenance.command
 @manager_maintenance.option('-c', '--chunk', dest='chunk_size', default=50,
                             help='Number of links to update, use 0 to update all.')

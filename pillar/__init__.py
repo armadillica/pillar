@@ -808,6 +808,19 @@ class PillarServer(BlinkerCompatibleEve):
             return patch_internal(resource, payload=payload, concurrency_check=concurrency_check,
                                   skip_validation=skip_validation, **lookup)[:4]
 
+    def delete_internal(self, resource: str, concurrency_check=False,
+                        suppress_callbacks=False, **lookup):
+        """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
+        from eve.methods.delete import deleteitem_internal
+
+        url = self.config['URLS'][resource]
+        path = '%s/%s/%s' % (self.api_prefix, url, lookup['_id'])
+        with self.__fake_request_url_rule('DELETE', path):
+            return deleteitem_internal(resource,
+                                       concurrency_check=concurrency_check,
+                                       suppress_callbacks=suppress_callbacks,
+                                       **lookup)[:4]
+
     def _list_routes(self):
         from pprint import pprint
         from flask import url_for
