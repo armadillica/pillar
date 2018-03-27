@@ -158,7 +158,12 @@ class MetaFalsey(type):
         return False
 
 
-class DoesNotExist(object, metaclass=MetaFalsey):
+class DoesNotExistMeta(MetaFalsey):
+    def __repr__(cls) -> str:
+        return 'DoesNotExist'
+
+
+class DoesNotExist(object, metaclass=DoesNotExistMeta):
     """Returned as value by doc_diff if a value does not exist."""
 
 
