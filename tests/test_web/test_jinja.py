@@ -19,3 +19,13 @@ class MarkdownTest(unittest.TestCase):
 
         self.assertEqual(None, jinja.do_markdown(None))
         self.assertEqual('', jinja.do_markdown(''))
+
+    def test_markdowned(self):
+        from pillar.web import jinja
+
+        self.assertEqual(None, jinja.do_markdowned({'eek': None}, 'eek'))
+        self.assertEqual('<p>ook</p>\n', jinja.do_markdowned({'eek': 'ook'}, 'eek'))
+        self.assertEqual('<p>ook</p>\n', jinja.do_markdowned(
+            {'eek': 'ook', '_eek_html': None}, 'eek'))
+        self.assertEqual('prerendered', jinja.do_markdowned(
+            {'eek': 'ook', '_eek_html': 'prerendered'}, 'eek'))
