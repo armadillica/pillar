@@ -404,26 +404,28 @@ def expire_all_project_links(project_uuid):
     print('Expired %i links' % result.matched_count)
 
 
-@manager_maintenance.command
-@manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
+@manager_maintenance.option('-u', '--url', dest='project_url', nargs='?',
                             help='Project URL')
 @manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
                             help='Replace on all projects.')
 @manager_maintenance.option('-m', '--missing', dest='missing',
                             action='store_true', default=False,
                             help='Add missing node types. Note that this may add unwanted ones.')
-@manager_maintenance.option('-g', '--go', dest='gogogo',
+@manager_maintenance.option('-g', '--go', dest='go',
                             action='store_true', default=False,
                             help='Actually go and perform the changes, without this just '
                                  'shows differences.')
-def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missing=False, go=False):
+@manager_maintenance.option('-i', '--id', dest='project_id', nargs='?',
+                            help='Project ID')
+def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missing=False, go=False,
+                                     project_id=None):
     """Replaces the project's node type schemas with the standard Pillar ones.
 
     Non-standard node types are left alone.
     """
 
-    if bool(project_url) == all_projects:
-        log.error('Use either --project or --all.')
+    if sum([bool(project_url), all_projects, bool(project_id)]) != 1:
+        log.error('Use either --project, --id, or --all.')
         return 1
 
     from pillar.api.utils.authentication import force_cli_user
@@ -466,37 +468,46 @@ def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missi
                 pillar_nt = PILLAR_NAMED_NODE_TYPES[nt_name]
                 proj['node_types'].append(copy.deepcopy(pillar_nt))
 
-        proj_header_shown = False
+        proj_has_difference = False
         for key, val1, val2 in doc_diff(orig_proj, proj, falsey_is_equal=False):
-            if not proj_header_shown:
+            if not proj_has_difference:
                 if proj.get('_deleted', False):
                     deleted = ' (deleted)'
                 else:
                     deleted = ''
                 log.info('%s change project %s%s', will_would, proj_url, deleted)
-                proj_header_shown = True
+                proj_has_difference = True
             log.info('    %30r: %r → %r', key, val1, val2)
 
-        if go:
+        if go and proj_has_difference:
             # Use Eve to PUT, so we have schema checking.
             db_proj = remove_private_keys(proj)
-            r, _, _, status = current_app.put_internal('projects', db_proj, _id=proj['_id'])
+            try:
+                r, _, _, status = current_app.put_internal('projects', db_proj, _id=proj_id)
+            except Exception:
+                log.exception('Error saving project %s (url=%s)', proj_id, proj_url)
+                raise SystemExit(5)
+
             if status != 200:
                 log.error('Error %i storing altered project %s %s', status, proj['_id'], r)
                 raise SystemExit('Error storing project, see log.')
-            log.info('Project saved succesfully.')
+            log.debug('Project saved succesfully.')
 
     if not go:
         log.info('Not changing anything, use --go to actually go and change things.')
 
     if all_projects:
-        for project in projects_collection.find():
+        for project in projects_collection.find({'_deleted': {'$ne': True}}):
             handle_project(project)
         return
 
-    project = projects_collection.find_one({'url': project_url})
+    if project_url:
+        project = projects_collection.find_one({'url': project_url})
+    else:
+        project = projects_collection.find_one({'_id': bson.ObjectId(project_id)})
+
     if not project:
-        log.error('Project url=%s not found', project_url)
+        log.error('Project url=%s id=%s not found', project_url, project_id)
         return 3
 
     handle_project(project)
