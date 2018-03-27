@@ -46,10 +46,10 @@ def force_cli_user():
             'email': 'local@nowhere',
             'username': 'CLI',
         })
-        log.warning('CONSTRUCTED CLI USER %s of type %s', id(CLI_USER), id(type(CLI_USER)))
+        log.info('CONSTRUCTED CLI USER %s of type %s', id(CLI_USER), id(type(CLI_USER)))
 
-    log.warning('Logging in as CLI_USER (%s) of type %s, circumventing authentication.',
-                id(CLI_USER), id(type(CLI_USER)))
+    log.info('Logging in as CLI_USER (%s) of type %s, circumventing authentication.',
+             id(CLI_USER), id(type(CLI_USER)))
     g.current_user = CLI_USER
 
 
@@ -230,7 +230,7 @@ def hash_auth_token(token: str) -> str:
 
 
 def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False,
-                org_roles: typing.Set[str]=frozenset()):
+                org_roles: typing.Set[str] = frozenset()):
     """Stores an authentication token.
 
     :returns: the token document from MongoDB
