@@ -33,24 +33,23 @@
 		span Public
 	| {% endif %}
 
-	section.node-row.texture-info
+	ul.node-row.texture-info
 		| {% if node.properties.files %}
-		span.texture-info-files
+		li
 			i.pi-texture
 			| {{ node.properties.files|length }} map{% if node.properties.files|length != 1 %}s{% endif %}
 		| {% endif %}
-		span.texture-info-seamless
+
+		li
 			i.pi-puzzle
 			| {% if not node.properties.is_tileable %}Not {% endif %}Seamless
-		| {% if node.has_method('PUT') %}
+
 		| {# Display publishing status only to editors #}
-		span.texture-info-status
-			| {% if node.properties.status == 'published' %}
-			i.pi-laugh
-			| {% else %}
-			i.pi-displeased
-			| {% endif %}
-			| {{ node.properties.status }}
+		| {% if node.has_method('PUT') %}
+		li.status(
+			class="{{ node.properties.status }}",
+			title="Status")
+			| Status: #[strong {{ node.properties.status | undertitle }}]
 		| {% endif %}
 
 	| {% for f in node.properties.files %}

@@ -781,7 +781,7 @@ $node-preview-max-height-lg: 700px
 			filter: none
 
 
-section.node-row
+.node-row
 	display: flex
 	width: 100%
 	flex: row
@@ -799,19 +799,20 @@ section.node-row
 		background-color: white
 		position: relative
 
-		&:nth-child(even), &:last-child
+		&:last-child,
+		&:nth-child(even)
 			border-right: none
 
 		&:last-child
 			border-bottom: none
 
 	&.texture-info
-		padding: 10px 20px
 		color: $color-text-dark-secondary
-		position: relative
-		z-index: 1
+		list-style-type: none
+		margin: 0
+		padding: 10px 20px
 
-		span
+		li
 			&:not(:first-child)
 				padding-left: 15px
 
@@ -820,6 +821,11 @@ section.node-row
 				top: -1px
 				right: 2px
 
+			&.status
+				margin-left: auto
+
+			&.pending
+				color: $color-danger
 
 	section.node-preview.texture
 		overflow: hidden
@@ -935,25 +941,23 @@ section.node-row
 				text-transform: uppercase
 
 section.node-preview
-	overflow: hidden
-
-	iframe
-		width: 100%
-
-	min-height: 200px
-	flex: 1
-	max-height: 500px
-	background-color: black
-	display: flex
-	justify-content: center
-	align-items: center
-
-	cursor: zoom-in
-
 	+media-md
 		max-height: $node-preview-max-height-md
 	+media-lg
 		max-height: $node-preview-max-height-lg
+
+	align-items: center
+	background-color: black
+	color: $color-text-light-primary
+	display: flex
+	flex: 1
+	justify-content: center
+	max-height: 500px
+	min-height: 200px
+	overflow: hidden
+
+	iframe
+		width: 100%
 
 	img
 		display: block
@@ -968,6 +972,9 @@ section.node-preview
 			max-height: $node-preview-max-height-md
 		+media-lg
 			max-height: $node-preview-max-height-lg
+
+	&.image
+		cursor: zoom-in
 
 	&.video
 		background-color: black
@@ -1038,22 +1045,45 @@ section.node-preview
 			object-fit: cover
 			width: 100%
 
+section.node-preview-forbidden
+	align-items: center
+	background-color: $color-background-nav
+	color: $color-text-light
+	cursor: default
+	display: flex
+	justify-content: center
+	min-height: 400px
+	position: relative
 
-	&.image.node-preview-blur
-		cursor: default
-		min-height: 400px
+	img
+		height: 130%
+		left: -60px
+		max-width: initial
+		filter: blur(30px)
+		object-fit: cover
+		opacity: .5
+		position: absolute
+		top: -60px
+		width: 130%
+		z-index: 0
+
+	> div
+		font-size: 1.4em
 		position: relative
+		z-index: 1
 
-		img
-			height: 130%
-			left: -60px
-			max-width: initial
-			filter: blur(30px)
-			object-fit: cover
-			position: absolute
-			top: -60px
-			width: 130%
+	span
+		display: block
 
+	a
+		color: $color-text-light
+
+		&.btn
+			border-color: white
+			color: white
+
+	hr
+		opacity: .5
 
 section.node-details-container
 	background-color: white
@@ -1085,25 +1115,6 @@ section.node-preview.group
 			width: 100%
 			max-width: 100%
 
-		.node-title-details
-			margin-left: auto
-			line-height: 1em
-
-			& .date
-				display: inline-block
-				margin-right: 10px
-				color: $color-text-dark-secondary
-
-			& .status
-				display: inline-block
-				font-size: .9em
-				text-transform: capitalize
-				color: $color-text-dark-primary
-				padding: 5px 15px
-				border: thin solid $color-text-dark-hint
-				border-radius: 3px
-				cursor: default
-
 	.node-details-meta-actions
 		margin-left: auto
 
@@ -1120,170 +1131,6 @@ section.node-preview.group
 	&.project
 		.node-details-title
 			padding: 10px 20px 0 20px
-
-		ul.node-details-meta-list
-			display: flex
-			align-items: center
-
-			list-style-type: none
-			margin: 0
-			padding: 0
-
-			+media-xs
-				font-size: .9em
-				width: 100%
-				max-width: 100%
-
-			> li
-				margin: 0
-				padding: 0
-				line-height: 1em
-				float: left
-
-				& a.btn
-					padding: 4px 12px 5px 12px
-					margin: 0
-
-				&.date
-					color: $color-text-dark-secondary
-					padding-left: 5px
-					margin-left: 5px
-
-					&:before
-						color: $color-text-dark-secondary
-						position: relative
-						content: '·'
-						left: -10px
-						font-weight: 500
-
-					span /* (updated x mins ago) */
-						color: $color-text-dark-hint
-						margin-left: 3px
-						font-size: .9em
-						text-transform: lowercase
-
-				&.author
-					color: $color-text-dark-primary
-
-				&.status
-					margin-right: 10px
-					font-size: .9em
-					text-transform: capitalize
-					color: $color-text-dark-secondary
-					font-weight: 300
-					padding: 5px 15px
-					border: thin solid $color-text-dark-hint
-					border-radius: 3px
-					cursor: default
-
-				&.access
-					color: $color-text-dark-primary
-					cursor: default
-					opacity: .5
-					white-space: nowrap
-
-					&:hover
-						opacity: 1
-
-					&.public
-						border-color: $color-success
-						color: $color-success
-						padding: 0
-						i
-							font-size: 1.2em
-							position: relative
-							top: 1px
-
-						span
-							display: inline-block
-
-				&.type
-					text-transform: uppercase
-					padding: 0 5px 0 15px
-					cursor: default
-					font-weight: 400
-					color: $color-text-dark-hint
-
-					+media-xs
-						display: none
-
-					/* .blend files are special snowflakes */
-					span.blend
-						display: inline-block
-						padding: 0 35px 0 0
-						font-size: 1.2em
-						color: $color-text-dark-secondary
-
-				&.access+li.node-details-meta-list-item.video.download,
-				&.access+.tooltip+li.node-details-meta-list-item.video.download
-					margin-left: 10px
-
-				&.length
-					padding: 0 5px 0 15px
-					cursor: default
-					font-weight: 400
-					color: $color-text-dark-hint
-					white-space: nowrap
-
-				&.license
-					color: $color-text-dark-secondary
-
-					i
-						color: $color-text-dark-primary
-						font-size: 1.4em
-						position: relative
-						bottom: -2px
-						left: -5px
-
-				/* Download button */
-				&.download
-					align-self: flex-end
-					padding: 0 0 0 10px
-
-					/* Actual button */
-					button
-						+button($color-primary, 3px)
-						position: relative
-
-						padding:
-							left: 20px
-							right: 20px
-
-						font-size: .9em
-
-						i
-							margin-right: 0
-
-						/* Tweaks for specific icons */
-						i.icon-dropdown-menu
-							padding-left: 10px
-
-						&.disabled
-							border-color: $color-text-dark-hint
-							color: $color-text-dark-hint
-							+stripes(rgba($color-text-dark-hint, .1), rgba($color-text-dark-hint, .2), -45deg, 28px)
-
-					/* Videos have dropdown caret, so paddit 5px less */
-					&.video.download
-						button
-							padding-right: 10px
-
-					&.file.download
-						button
-							+button($color-primary, 3px, true)
-							padding:
-								left: 15px
-								right: 15px
-
-							i
-								margin-right: 0
-
-					&.texture.download
-						width: 100%
-
-					&.open
-						button
-							box-shadow: none
 
 .node-details-description
 	+node-details-description
