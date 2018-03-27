@@ -107,6 +107,27 @@ class DocDiffTest(unittest.TestCase):
                           ('props.status2', DoesNotExist, 'todo')},
                          set(diff))
 
+    def test_diff_list_values(self):
+        from pillar.api.utils import doc_diff
+        diff = doc_diff({'a': 'b', 'props': ['status', 'todo', 'notes', 'jemoeder']},
+                        {'a': 'b', 'props': ['todo', 'others', 'notes', 'jemoeder']})
+
+        self.assertEqual({
+            ('props[0]', 'status', 'todo'),
+            ('props[1]', 'todo', 'others'),
+        }, set(diff))
+
+    def test_diff_list_unequal_lengths(self):
+        from pillar.api.utils import doc_diff, DoesNotExist
+        diff = doc_diff({'a': 'b', 'props': ['status', 'todo', 'notes']},
+                        {'a': 'b', 'props': ['todo', 'others', 'notes', 'jemoeder']})
+
+        self.assertEqual({
+            ('props[0]', 'status', 'todo'),
+            ('props[1]', 'todo', 'others'),
+            ('props[3]', DoesNotExist, 'jemoeder'),
+        }, set(diff))
+
 
 class NodeSetattrTest(unittest.TestCase):
     def test_simple(self):
@@ -163,4 +184,3 @@ class NodeSetattrTest(unittest.TestCase):
 
         node_setattr(node, 'b.complex', {None: 5})
         self.assertEqual({'b': {'complex': {None: 5}}}, node)
-

@@ -162,7 +162,7 @@ class DoesNotExist(object, metaclass=MetaFalsey):
     """Returned as value by doc_diff if a value does not exist."""
 
 
-def doc_diff(doc1, doc2, falsey_is_equal=True):
+def doc_diff(doc1, doc2, *, falsey_is_equal=True, superkey: str = None):
     """Generator, yields differences between documents.
 
     Yields changes as (key, value in doc1, value in doc2) tuples, where
@@ -176,25 +176,58 @@ def doc_diff(doc1, doc2, falsey_is_equal=True):
     function won't report differences between DoesNotExist, False, '', and 0.
     """
 
-    for key in set(doc1.keys()).union(set(doc2.keys())):
-        if isinstance(key, str) and key[0] == '_':
-            continue
+    def combine_key(some_key):
+        """Combine this key with the superkey.
 
-        val1 = doc1.get(key, DoesNotExist)
-        val2 = doc2.get(key, DoesNotExist)
+        Keep the key type the same, unless we have to combine with a superkey.
+        """
+        if not superkey:
+            return some_key
+        if isinstance(some_key, str) and some_key[0] == '[':
+            return f'{superkey}{some_key}'
+        return f'{superkey}.{some_key}'
 
-        # Only recurse if both values are dicts
-        if isinstance(val1, dict) and isinstance(val2, dict):
-            for subkey, subval1, subval2 in doc_diff(val1, val2):
-                yield '%s.%s' % (key, subkey), subval1, subval2
-            continue
+    if doc1 is doc2:
+        return
 
-        if val1 == val2:
-            continue
-        if falsey_is_equal and bool(val1) == bool(val2) == False:
-            continue
+    if falsey_is_equal and not bool(doc1) and not bool(doc2):
+        return
 
-        yield key, val1, val2
+    if isinstance(doc1, dict) and isinstance(doc2, dict):
+        for key in set(doc1.keys()).union(set(doc2.keys())):
+            if isinstance(key, str) and key[0] == '_':
+                continue
+
+            val1 = doc1.get(key, DoesNotExist)
+            val2 = doc2.get(key, DoesNotExist)
+
+            yield from doc_diff(val1, val2,
+                                falsey_is_equal=falsey_is_equal,
+                                superkey=combine_key(key))
+        return
+
+    if isinstance(doc1, list) and isinstance(doc2, list):
+        for idx in range(max(len(doc1), len(doc2))):
+            try:
+                item1 = doc1[idx]
+            except IndexError:
+                item1 = DoesNotExist
+            try:
+                item2 = doc2[idx]
+            except IndexError:
+                item2 = DoesNotExist
+
+            subkey = f'[{idx}]'
+            if item1 is DoesNotExist or item2 is DoesNotExist:
+                yield combine_key(subkey), item1, item2
+            else:
+                yield from doc_diff(item1, item2,
+                                    falsey_is_equal=falsey_is_equal,
+                                    superkey=combine_key(subkey))
+        return
+
+    if doc1 != doc2:
+        yield superkey, doc1, doc2
 
 
 def random_etag() -> str:
