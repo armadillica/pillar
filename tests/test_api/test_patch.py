@@ -187,14 +187,14 @@ class EditCommentTest(AbstractPatchCommentTest):
                          json={'op': 'edit', 'content': 'Je moeder is niet je vader.'},
                          auth_token=token).json()
         self.assertEqual('<p>Je moeder is niet je vader.</p>\n',
-                         res['properties']['content_html'])
+                         res['properties']['_content_html'])
 
         # Get the node again, to inspect its changed state.
         patched_node = self.get(self.node_url, auth_token=token).json()
         self.assertEqual('Je moeder is niet je vader.',
                          patched_node['properties']['content'])
         self.assertEqual('<p>Je moeder is niet je vader.</p>\n',
-                         patched_node['properties']['content_html'])
+                         patched_node['properties']['_content_html'])
         self.assertNotEqual(pre_node['_etag'], patched_node['_etag'])
 
     def test_comment_edit_other_user_admin(self):
@@ -214,7 +214,7 @@ class EditCommentTest(AbstractPatchCommentTest):
         self.assertEqual('Purrrr kittycat',
                          patched_node['properties']['content'])
         self.assertEqual('<p>Purrrr kittycat</p>\n',
-                         patched_node['properties']['content_html'])
+                         patched_node['properties']['_content_html'])
 
     def test_edit_noncomment_node(self):
         url = '/api/nodes/%s' % self.asset_id

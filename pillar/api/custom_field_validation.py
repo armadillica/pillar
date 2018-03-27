@@ -105,6 +105,9 @@ class ValidateCustomFields(Validator):
         val = v.validate(value)
 
         if val:
+            # This ensures the modifications made by v's coercion rules are
+            # visible to this validator's output.
+            self.current[field] = v.current
             return True
 
         log.warning('Error validating properties for node %s: %s', self.document, v.errors)
