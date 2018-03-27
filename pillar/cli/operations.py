@@ -64,9 +64,8 @@ def mass_copy_between_backends(src_backend='cdnsun', dest_backend='gcs'):
     log.info('%i files we did not copy', copy_errs)
 
 
-@manager_operations.command
-@manager_operations.option('-p', '--project', dest='dest_proj_url',
-                           help='Destination project URL')
+@manager_operations.option('dest_proj_url', help='Destination project URL')
+@manager_operations.option('node_uuid', help='ID of the node to move')
 @manager_operations.option('-f', '--force', dest='force', action='store_true', default=False,
                            help='Move even when already at the given project.')
 @manager_operations.option('-s', '--skip-gcs', dest='skip_gcs', action='store_true', default=False,
