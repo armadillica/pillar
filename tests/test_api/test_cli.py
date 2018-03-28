@@ -329,7 +329,7 @@ class UpgradeAttachmentSchemaTest(AbstractNodeReplacementTest):
         group_perms = self.add_group_permission_to_asset_node_type()
 
         with self.app.test_request_context():
-            upgrade_attachment_schema(self.proj['url'])
+            upgrade_attachment_schema(self.proj['url'], go=True)
 
         dbproj = self.fetch_project_from_db()
 

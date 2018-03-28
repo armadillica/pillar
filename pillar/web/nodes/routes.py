@@ -177,9 +177,6 @@ def view(node_id, extra_template_args: dict=None):
     for child in children:
         child.picture = get_file(child.picture, api=api)
 
-    if 'description' in node:
-        node['description'] = attachments.render_attachments(node, node['description'])
-
     # Overwrite the file length by the biggest variation, if any.
     if node.file and node.file_variations:
         node.file.length = max(var.length for var in node.file_variations)

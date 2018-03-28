@@ -1,11 +1,11 @@
-| {% if 'link' in attachment and attachment['link'] != 'none' %}
-| {% if attachment['link'] == 'self' %}
+| {% if 'link' in tag_args and tag_args['link'] != 'none' %}
+|     {% if tag_args['link'] == 'self' %}
 a(href="{{ vars['l'].link }}")
 	img(src="{{ vars['l'].link }}", alt="{{ file.filename }}")
-| {% elif attachment['link'] == 'custom' %}
-a(href="{{ attachment['link_custom'] }}")
+|     {% else %}
+a(href="{{ tag_args['link'] }}", target="_blank")
 	img(src="{{ vars['l'].link }}", alt="{{ file.filename }}")
-| {% endif %}
+|     {% endif %}
 | {% else %}
 img(src="{{ vars['l'].link }}", alt="{{ file.filename }}")
 | {% endif %}

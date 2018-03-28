@@ -1,4 +1,5 @@
 import logging
+import typing
 
 from bson import ObjectId
 from werkzeug import exceptions as wz_exceptions
@@ -133,6 +134,14 @@ def get_node_type(project, node_type_name):
 
     return next((nt for nt in project['node_types']
                  if nt['name'] == node_type_name), None)
+
+
+def node_type_dict(project: dict) -> typing.Dict[str, dict]:
+    """Return the node types of the project as dictionary.
+
+    The returned dictionary will be keyed by the node type name.
+    """
+    return {nt['name']: nt for nt in project['node_types']}
 
 
 def project_id(project_url: str) -> ObjectId:

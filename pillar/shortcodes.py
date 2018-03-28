@@ -21,6 +21,7 @@ import typing
 import urllib.parse
 
 import shortcodes
+import pillarsdk
 
 _parser: shortcodes.Parser = None
 _commented_parser: shortcodes.Parser = None
@@ -156,6 +157,105 @@ def iframe(context: typing.Any,
     return html
 
 
+@shortcode('attachment')
+class Attachment:
+    class NoSuchSlug(ValueError):
+        """Raised when there is no attachment with the given slug."""
+
+    class NoSuchFile(ValueError):
+        """Raised when the file pointed to by the attachment doesn't exist."""
+
+    class NotSupported(ValueError):
+        """Raised when an attachment is not pointing to a file."""
+
+    def __call__(self,
+                 context: typing.Any,
+                 content: str,
+                 pargs: typing.List[str],
+                 kwargs: typing.Dict[str, str]) -> str:
+        if isinstance(context, pillarsdk.Resource):
+            context = context.to_dict()
+        if not isinstance(context, dict):
+            return '{attachment context not a dictionary}'
+
+        try:
+            slug = pargs[0]
+        except KeyError:
+            return '{attachment No slug given}'
+
+        try:
+            file_doc = self.sdk_file(slug, context)
+        except self.NoSuchSlug:
+            return html_module.escape('{attachment %r does not exist}' % slug)
+        except self.NoSuchFile:
+            return html_module.escape('{attachment file for %r does not exist}' % slug)
+        except self.NotSupported as ex:
+            return html_module.escape('{attachment %s}' % ex)
+
+        return self.render(file_doc, kwargs)
+
+    def sdk_file(self, slug: str, node_properties: dict) -> pillarsdk.File:
+        """Return the file document for the attachment with this slug."""
+
+        from pillar.web import system_util
+
+        attachments = node_properties.get('attachments', {})
+        attachment = attachments.get(slug)
+        if not attachment:
+            raise self.NoSuchSlug(slug)
+
+        object_id = attachment.get('oid')
+        if not object_id:
+            raise self.NoSuchFile(object_id)
+
+        # In theory attachments can also point to other collections.
+        # There is no support for that yet, though.
+        collection = attachment.get('collection', 'files')
+        if collection != 'files':
+            log.warning('Attachment %r points to ObjectID %s in unsupported collection %r',
+                        slug, object_id, collection)
+            raise self.NotSupported(f'unsupported collection {collection!r}')
+
+        api = system_util.pillar_api()
+        sdk_file = pillarsdk.File.find(object_id, api=api)
+        return sdk_file
+
+    def render(self, sdk_file: pillarsdk.File, tag_args: dict) -> str:
+        file_renderers = {
+            'image': self.render_image,
+            'video': self.render_video,
+        }
+
+        mime_type_cat, _ = sdk_file.content_type.split('/', 1)
+        renderer = file_renderers.get(mime_type_cat, self.render_generic)
+        return renderer(sdk_file, tag_args)
+
+    def render_generic(self, sdk_file, tag_args):
+        import flask
+        return flask.render_template('nodes/attachments/file_generic.html',
+                                     file=sdk_file, tag_args=tag_args)
+
+    def render_image(self, sdk_file, tag_args):
+        """Renders an image file."""
+        import flask
+        variations = {var.size: var for var in sdk_file.variations}
+        return flask.render_template('nodes/attachments/file_image.html',
+                                     file=sdk_file, vars=variations, tag_args=tag_args)
+
+    def render_video(self, sdk_file, tag_args):
+        """Renders a video file."""
+        import flask
+        try:
+            # The very first variation is an mp4 file with max width of 1920px
+            default_variation = sdk_file.variations[0]
+        except IndexError:
+            log.error('Could not find variations for file %s' % sdk_file._id)
+            return flask.render_template('nodes/attachments/file_generic.html', file=sdk_file)
+
+        return flask.render_template('nodes/attachments/file_video.html',
+                                     file=sdk_file, var=default_variation, tag_args=tag_args)
+
+
 def _get_parser() -> typing.Tuple[shortcodes.Parser, shortcodes.Parser]:
     """Return the shortcodes parser, create it if necessary."""
     global _parser, _commented_parser
@@ -180,6 +280,7 @@ def render_commented(text: str, context: typing.Any = None) -> str:
     except shortcodes.InvalidTagError as ex:
         return html_module.escape('{%s}' % ex)
     except shortcodes.RenderingError as ex:
+        log.info('Error rendering tag', exc_info=True)
         return html_module.escape('{unable to render tag: %s}' % str(ex.__cause__ or ex))
 
 

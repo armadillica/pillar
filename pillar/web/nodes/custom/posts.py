@@ -86,18 +86,10 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
 
     if post is not None:
         # If post is not published, check that the user is also the author of
-        # the post. If not, return 404.
+        # the post. If not, return an error.
         if post.properties.status != "published":
             if not (current_user.is_authenticated and post.has_method('PUT')):
                 abort(403)
-
-        try:
-            post_contents = post['properties']['content']
-        except KeyError:
-            log.warning('Blog post %s has no content', post._id)
-        else:
-            post['properties']['content'] = pillar.web.nodes.attachments.render_attachments(
-                post, post_contents)
 
     can_create_blog_posts = project.node_type_has_method('post', 'POST', api=api)
 

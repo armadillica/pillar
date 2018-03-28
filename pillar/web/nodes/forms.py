@@ -169,6 +169,8 @@ def process_node_form(form, node_id=None, node_type=None, user=None):
             data = form[prop_name].data
             if schema_prop['type'] == 'dict':
                 data = attachments.attachment_form_parse_post_data(data)
+                if not data:
+                    data = None
             elif schema_prop['type'] == 'integer':
                 if not data:
                     data = None

@@ -31,6 +31,21 @@ manager_maintenance = Manager(
     current_app, usage="Maintenance scripts, to update user groups")
 
 
+def _single_logger(*args, level=logging.INFO, **kwargs):
+    """Construct a logger function that's only logging once."""
+
+    shown = False
+
+    def log_once():
+        nonlocal shown
+        if shown:
+            return
+        log.log(level, *args, **kwargs)
+        shown = True
+
+    return log_once
+
+
 @manager_maintenance.command
 def find_duplicate_users():
     """Finds users that have the same BlenderID user_id."""
@@ -471,24 +486,15 @@ def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missi
     Non-standard node types are left alone.
     """
 
-    if sum([bool(project_url), all_projects, bool(project_id)]) != 1:
-        log.error('Use either --project, --id, or --all.')
-        return 1
-
     from pillar.api.utils.authentication import force_cli_user
     force_cli_user()
 
     from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
     from pillar.api.utils import remove_private_keys, doc_diff
 
-    projects_collection = current_app.db()['projects']
     will_would = 'Will' if go else 'Would'
-
     projects_changed = projects_seen = 0
-
-    def handle_project(proj):
-        nonlocal projects_changed, projects_seen
-
+    for proj in _db_projects(project_url, all_projects, project_id, go=go):
         projects_seen += 1
 
         orig_proj = copy.deepcopy(proj)
@@ -548,27 +554,9 @@ def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missi
                 raise SystemExit('Error storing project, see log.')
             log.debug('Project saved succesfully.')
 
-    if not go:
-        log.info('Not changing anything, use --go to actually go and change things.')
-
-    if all_projects:
-        for project in projects_collection.find({'_deleted': {'$ne': True}}):
-            handle_project(project)
-        log.info('%s %d of %d projects',
-                 'Changed' if go else 'Would change',
-                 projects_changed, projects_seen)
-        return
-
-    if project_url:
-        project = projects_collection.find_one({'url': project_url})
-    else:
-        project = projects_collection.find_one({'_id': bson.ObjectId(project_id)})
-
-    if not project:
-        log.error('Project url=%s id=%s not found', project_url, project_id)
-        return 3
-
-    handle_project(project)
+    log.info('%s %d of %d projects',
+             'Changed' if go else 'Would change',
+             projects_changed, projects_seen)
 
 
 @manager_maintenance.command
@@ -615,17 +603,17 @@ def remarkdown_comments():
     log.info('errors   : %i', errors)
 
 
-@manager_maintenance.command
 @manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
                             help='Project URL')
 @manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
                             help='Replace on all projects.')
-def upgrade_attachment_schema(proj_url=None, all_projects=False):
+@manager_maintenance.option('-g', '--go', dest='go', action='store_true', default=False,
+                            help='Actually perform the changes (otherwise just show as dry-run).')
+def upgrade_attachment_schema(proj_url=None, all_projects=False, go=False):
     """Replaces the project's attachments with the new schema.
 
     Updates both the schema definition and the nodes with attachments (asset, page, post).
     """
-
     if bool(proj_url) == all_projects:
         log.error('Use either --project or --all.')
         return 1
@@ -637,28 +625,29 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
     from pillar.api.node_types.page import node_type_page
     from pillar.api.node_types.post import node_type_post
     from pillar.api.node_types import attachments_embedded_schema
-    from pillar.api.utils import remove_private_keys
+    from pillar.api.utils import remove_private_keys, doc_diff
 
     # Node types that support attachments
     node_types = (node_type_asset, node_type_page, node_type_post)
     nts_by_name = {nt['name']: nt for nt in node_types}
 
-    db = current_app.db()
-    projects_coll = db['projects']
-    nodes_coll = db['nodes']
-
-    def handle_project(project):
-        log.info('Handling project %s', project['url'])
-
-        replace_schemas(project)
-        replace_attachments(project)
+    nodes_coll = current_app.db('nodes')
 
     def replace_schemas(project):
+        log_proj = _single_logger('Upgrading schema project %s (%s)',
+                                  project['url'], project['_id'])
+
+        orig_proj = copy.deepcopy(project)
         for proj_nt in project['node_types']:
             nt_name = proj_nt['name']
             if nt_name not in nts_by_name:
                 continue
 
+            if proj_nt['dyn_schema']['attachments'] == attachments_embedded_schema:
+                # Schema already up to date.
+                continue
+
+            log_proj()
             log.info('   - replacing attachment schema on node type "%s"', nt_name)
             pillar_nt = nts_by_name[nt_name]
             proj_nt['dyn_schema']['attachments'] = copy.deepcopy(attachments_embedded_schema)
@@ -671,16 +660,44 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
             else:
                 proj_nt['form_schema']['attachments'] = pillar_form_schema
 
-        # Use Eve to PUT, so we have schema checking.
-        db_proj = remove_private_keys(project)
-        r, _, _, status = current_app.put_internal('projects', db_proj, _id=project['_id'])
-        if status != 200:
-            log.error('Error %i storing altered project %s %s', status, project['_id'], r)
-            raise SystemExit('Error storing project, see log.')
-        log.info('Project saved succesfully.')
+        seen_changes = False
+        for key, val1, val2 in doc_diff(orig_proj, project):
+            if not seen_changes:
+                log.info('Schema changes to project %s (%s):', project['url'], project['_id'])
+                seen_changes = True
+            log.info('    - %30s: %s → %s', key, val1, val2)
+
+        if go:
+            # Use Eve to PUT, so we have schema checking.
+            db_proj = remove_private_keys(project)
+            r, _, _, status = current_app.put_internal('projects', db_proj, _id=project['_id'])
+            if status != 200:
+                log.error('Error %i storing altered project %s %s', status, project['_id'], r)
+                raise SystemExit('Error storing project, see log.')
+            log.debug('Project saved succesfully.')
 
     def replace_attachments(project):
-        log.info('Upgrading nodes for project %s', project['url'])
+        log_proj = _single_logger('Upgrading nodes for project %s (%s)',
+                                  project['url'], project['_id'])
+
+        # Remove empty attachments
+        if go:
+            res = nodes_coll.update_many(
+                {'properties.attachments': {},
+                 'project': project['_id']},
+                {'$unset': {'properties.attachments': 1}},
+            )
+            if res.matched_count > 0:
+                log_proj()
+                log.info('Removed %d empty attachment dicts', res.modified_count)
+        else:
+            to_remove = nodes_coll.count({'properties.attachments': {},
+                                          'project': project['_id']})
+            if to_remove:
+                log_proj()
+                log.info('Would remove %d empty attachment dicts', to_remove)
+
+        # Convert attachments.
         nodes = nodes_coll.find({
             '_deleted': False,
             'project': project['_id'],
@@ -689,10 +706,22 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
         })
         for node in nodes:
             attachments = node['properties']['attachments']
+            if not attachments:
+                # If we're not modifying the database (e.g. go=False),
+                # any attachments={} will not be filtered out earlier.
+                if go or attachments != {}:
+                    log_proj()
+                    log.info('    - Node %s (%s) still has empty attachments %r',
+                             node['_id'], node.get('name'), attachments)
+                continue
+
             if isinstance(attachments, dict):
                 # This node has already been upgraded.
                 continue
 
+            # Upgrade from list [{'slug': 'xxx', 'oid': 'yyy'}, ...]
+            # to dict {'xxx': {'oid': 'yyy'}, ...}
+            log_proj()
             log.info('    - Updating schema on node %s (%s)', node['_id'], node.get('name'))
             new_atts = {}
             for field_info in attachments:
@@ -700,25 +729,187 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False):
                     new_atts[attachment['slug']] = {'oid': attachment['file']}
 
             node['properties']['attachments'] = new_atts
+            log.info('      from %s to %s', attachments, new_atts)
 
-            # Use Eve to PUT, so we have schema checking.
-            db_node = remove_private_keys(node)
-            r, _, _, status = current_app.put_internal('nodes', db_node, _id=node['_id'])
-            if status != 200:
-                log.error('Error %i storing altered node %s %s', status, node['_id'], r)
-                raise SystemExit('Error storing node; see log.')
+            if go:
+                # Use Eve to PUT, so we have schema checking.
+                db_node = remove_private_keys(node)
+                r, _, _, status = current_app.put_internal('nodes', db_node, _id=node['_id'])
+                if status != 200:
+                    log.error('Error %i storing altered node %s %s', status, node['_id'], r)
+                    raise SystemExit('Error storing node; see log.')
 
+    for proj in _db_projects(proj_url, all_projects, go=go):
+        replace_schemas(proj)
+        replace_attachments(proj)
+
+
+def iter_markdown(proj_node_types: dict, some_node: dict, callback: typing.Callable[[str], str]):
+    """Calls the callback for each MarkDown value in the node.
+
+    Replaces the value in-place with the return value of the callback.
+    """
+    from collections import deque
+    from pillar.api.eve_settings import nodes_schema
+
+    my_log = log.getChild('iter_markdown')
+
+    # Inspect the node type to find properties containing Markdown.
+    node_type_name = some_node['node_type']
+    try:
+        node_type = proj_node_types[node_type_name]
+    except KeyError:
+        raise KeyError(f'Project has no node type {node_type_name}')
+
+    to_visit = deque([
+        (some_node, nodes_schema),
+        (some_node['properties'], node_type['dyn_schema'])])
+    while to_visit:
+        doc, doc_schema = to_visit.popleft()
+        for key, definition in doc_schema.items():
+            if definition.get('type') == 'dict' and definition.get('schema'):
+                # This is a subdocument with its own schema, visit it later.
+                subdoc = doc.get(key)
+                if not subdoc:
+                    continue
+                to_visit.append((subdoc, definition['schema']))
+                continue
+            if definition.get('coerce') != 'markdown':
+                continue
+
+            my_log.debug('I have to change %r of %s', key, doc)
+            old_value = doc.get(key)
+            if not old_value:
+                continue
+            new_value = callback(old_value)
+            doc[key] = new_value
+
+
+@manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
+                            help='Project URL')
+@manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
+                            help='Replace on all projects.')
+@manager_maintenance.option('-g', '--go', dest='go', action='store_true', default=False,
+                            help='Actually perform the changes (otherwise just show as dry-run).')
+def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
+    """Replaces '@[slug]' with '{attachment slug}'.
+
+    Also moves links from the attachment dict to the attachment shortcode.
+    """
+    if bool(proj_url) == all_projects:
+        log.error('Use either --project or --all.')
+        return 1
+
+    import html
+    from pillar.api.node_types import ATTACHMENT_SLUG_REGEX
+    from pillar.api.projects.utils import node_type_dict
+    from pillar.api.utils import remove_private_keys
+    from pillar.api.utils.authentication import force_cli_user
+
+    force_cli_user()
+
+    nodes_coll = current_app.db('nodes')
+    total_nodes = 0
+    old_slug_re = re.compile(r'@\[(%s)\]' % ATTACHMENT_SLUG_REGEX)
+    for proj in _db_projects(proj_url, all_projects, go=go):
+        proj_id = proj['_id']
+        proj_url = proj.get('url', '-no-url-')
+        nodes = nodes_coll.find({
+            '_deleted': {'$ne': True},
+            'project': proj_id,
+            'properties.attachments': {'$exists': True},
+        })
+        node_count = nodes.count()
+        if node_count == 0:
+            log.debug('Skipping project %s (%s)', proj_url, proj_id)
+            continue
+        total_nodes += node_count
+
+        proj_node_types = node_type_dict(proj)
+
+        for node in nodes:
+            attachments = node['properties']['attachments']
+
+            # Inner functions because of access to the node's attachments.
+            def replace(match):
+                slug = match.group(1)
+                log.debug('    - OLD STYLE attachment slug %r', slug)
+                try:
+                    att = attachments[slug]
+                except KeyError:
+                    log.info("Attachment %r not found for node %s", slug, node['_id'])
+                    link = ''
+                else:
+                    link = att.get('link', '')
+                    if link == 'self':
+                        link = " link='self'"
+                    elif link == 'custom':
+                        url = att.get('link_custom')
+                        if url:
+                            link = " link='%s'" % html.escape(url)
+                return '{attachment %r%s}' % (slug, link)
+
+            def update_markdown(value: str) -> str:
+                return old_slug_re.sub(replace, value)
+
+            iter_markdown(proj_node_types, node, update_markdown)
+
+            # Remove no longer used properties from attachments
+            for attachment in attachments.values():
+                attachment.pop('link', None)
+                attachment.pop('link_custom', None)
+
+            if go:
+                # Use Eve to PUT, so we have schema checking.
+                db_node = remove_private_keys(node)
+                r, _, _, status = current_app.put_internal('nodes', db_node, _id=node['_id'])
+                if status != 200:
+                    log.error('Error %i storing altered node %s %s', status, node['_id'], r)
+                    raise SystemExit('Error storing node; see log.')
+
+        log.info('Project %s (%s) has %d nodes with attachments',
+                 proj_url, proj_id, node_count)
+    if not go:
+        log.info('Would update %d nodes', total_nodes)
+
+
+def _db_projects(proj_url: str, all_projects: bool, project_id='', *, go: bool) \
+        -> typing.Iterable[dict]:
+    """Yields a subset of the projects in the database.
+
+    :param all_projects: when True, yields all projects.
+    :param proj_url: when all_projects is False, this denotes the project
+        to yield.
+
+    Handles soft-deleted projects as non-existing. This ensures that
+    the receiver can actually modify and save the project without any
+    issues.
+
+    Also shows duration and a note about dry-running when go=False.
+    """
+    if sum([bool(proj_url), all_projects, bool(project_id)]) != 1:
+        log.error('Only use one way to specify a project / all projects')
+        raise SystemExit(1)
+
+    projects_coll = current_app.db('projects')
+    start = datetime.datetime.now()
     if all_projects:
-        for proj in projects_coll.find():
-            handle_project(proj)
-        return
+        yield from projects_coll.find({'_deleted': {'$ne': True}})
+    else:
+        if proj_url:
+            q = {'url': proj_url}
+        else:
+            q = {'_id': bson.ObjectId(project_id)}
+        proj = projects_coll.find_one({**q, '_deleted': {'$ne': True}})
+        if not proj:
+            log.error('Project %s not found', q)
+            raise SystemExit(3)
+        yield proj
 
-    proj = projects_coll.find_one({'url': proj_url})
-    if not proj:
-        log.error('Project url=%s not found', proj_url)
-        return 3
-
-    handle_project(proj)
+    if not go:
+        log.info('Dry run, use --go to perform the change.')
+    duration = datetime.datetime.now() - start
+    log.info('Command took %s', duration)
 
 
 def _find_orphan_files() -> typing.Set[bson.ObjectId]:
