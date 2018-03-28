@@ -34,8 +34,10 @@ def iter_node_properties(node_type):
     form_schema = node_type['form_schema'].to_dict()
 
     for prop_name, prop_schema in node_schema.items():
-        prop_fschema = form_schema.get(prop_name, {})
+        if prop_name.startswith('_'):
+            continue
 
+        prop_fschema = form_schema.get(prop_name, {})
         if not prop_fschema.get('visible', True):
             continue
 
