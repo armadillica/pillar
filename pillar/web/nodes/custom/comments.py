@@ -70,6 +70,7 @@ def comments_create():
 @login_required
 def comment_edit(comment_id):
     """Allows a user to edit their comment."""
+    from pillar.web import jinja
 
     api = system_util.pillar_api()
 
@@ -80,7 +81,8 @@ def comment_edit(comment_id):
     return jsonify({
         'status': 'success',
         'data': {
-            'content_html': result.properties['_content_html'],
+            'content': result.properties.content or '',
+            'content_html': jinja.do_markdowned(result.properties, 'content'),
         }})
 
 
