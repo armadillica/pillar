@@ -1,11 +1,11 @@
 | {% block body %}
 #node-container
 
-	section.node-preview.group
-		.node-title#node-title
-			| {{node.name}}
+	section.node-details-container
+		.node-details-header
+			.node-title#node-title
+				| {{node.name}}
 
-		.node-details-meta.preview
 			.node-details-meta-actions
 				.btn-browsetoggle(
 					title="Toggle between list/grid view",
@@ -17,6 +17,7 @@
 	.node-details-description
 		| {{ node | markdowned('description') }}
 	| {% endif %}
+
 
 	section.node-children.group
 

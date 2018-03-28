@@ -41,7 +41,7 @@ script(type="text/javascript").
 		{% endif %}
 
 
-		// If we are im preview mode, update the image source
+		// If we are in preview mode, update the image source
 		if (page_overlay.classList.contains('active')) {
 			var node_preview = document.getElementById('node-preview');
 
@@ -73,7 +73,7 @@ script(type="text/javascript").
 					.html('<div class="nav-prev"></div><img src="' + src + '"/><div class="nav-next"></div>');
 			}
 
-			$('#node-preview.image, #node-preview.file').click(function(e){
+			$('.js-node-preview-image').click(function(e){
 				e.preventDefault();
 				e.stopPropagation();
 
@@ -138,3 +138,12 @@ script(type="text/javascript").
 		}
 
 	{% endif %}
+
+	var $content_type = $(".js-type");
+	var type_value = $content_type.text();
+	var type_value_trimmed = type_value.substring(type_value.indexOf("/") + 1);
+	$content_type.text(type_value_trimmed);
+
+	if (type_value_trimmed == 'x-blender' || type_value_trimmed == 'blend'){
+		$content_type.html('<span class="blend"><i class="pi-blender-logo"></i></span>');
+	};

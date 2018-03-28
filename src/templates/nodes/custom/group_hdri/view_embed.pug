@@ -4,11 +4,6 @@
 	.texture-title#node-title
 		| {{node.name}}
 
-	| {% if node.picture %}
-	.texture-backdrop(
-		style="background-image: url({{ node.picture.thumbnail('m', api=api) }})")
-	| {% endif %}
-
 	| {% if node.description %}
 	section.node-row
 		.node-details-description

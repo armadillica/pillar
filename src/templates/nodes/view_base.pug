@@ -1,0 +1,140 @@
+| {% block body %}
+#node-container
+	#node-overlay
+
+	| {% block node_preview %}
+	| {% if node.picture %}
+	| {% if current_user.has_cap('subscriber') %}
+	section#node-preview.node-preview.image.js-node-preview-image
+		img.node-preview-thumbnail#node-preview-thumbnail(
+			src="{{ node.picture.thumbnail('l', api=api) }}")
+	| {% else %}
+	| {% include 'nodes/custom/_node_preview_forbidden.html' %}
+	| {% endif %}
+	| {% endif %}
+	| {% endblock node_preview %}
+
+	| {% block node_details %}
+	section.node-details-container
+
+		| {# NAME #}
+		.node-details-header
+			.node-title#node-title
+				| {{node.name}}
+
+
+		| {# DESCRIPTION #}
+		| {% if node.description %}
+		.node-details-description#node-description
+			| {{ node | markdowned('description') }}
+		| {% endif %}
+
+
+		| {# LICENSE #}
+		| {% if node.properties.license_type %}
+		a.node-details-license(
+			href="https://creativecommons.org/licenses/",
+			target="_blank")
+			span.type
+				i(class="pi-license-{{ node.properties.license_type }}")
+				| License <span>{{ node.properties.license_type }}</span>
+			| {% if node.properties.license_notes %}
+			| &mdash; {{ node.properties.license_notes }}
+			| {% endif %}
+		| {% endif %}
+
+
+		| {# DETAILS #}
+		.node-details-meta
+			ul
+				| {% if node.has_method('PUT') and (node.properties.status != 'published') %}
+				li(class="status-{{ node.properties.status }}")
+					| {{ node.properties.status | undertitle }}
+				| {% endif %}
+
+				li(title="Author")
+					| {{ node.user.full_name }}
+
+				li.dim(
+					title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
+					| {{ node._created | pretty_date }}
+
+				| {% if node.short_link %}
+				li.shared
+					a(href="{{ node.short_link }}")
+						i.pi-share
+						| Shared
+				| {% endif %}
+
+				li.left-side
+
+				| {% if node.file %}
+				li.dim(title="File size")
+					| {{ node.file.length | filesizeformat }}
+				li.dim.js-type(title="File format")
+					| {{ node.file.content_type }}
+				| {% endif %}
+
+				| {% if node.permissions.world %}
+				li.public(
+					data-toggle="tooltip",
+					data-placement="bottom",
+					title="Anybody can download. Share it!")
+					i.pi-lock-open
+					span Public
+				| {% endif %}
+
+				| {% block node_details_meta_extra %}{% endblock %}
+
+				li.download
+					| {% if (current_user.has_cap('subscriber') or node.permissions.world) and (node.file or node.properties.files) %}
+					| {% block node_download %}
+					a(
+						title="Download {{ node.properties.content_type | undertitle }}",
+						href="{{ node.file.link }}",
+						download="{{ node.file.filename }}")
+						button.btn(type="button")
+							i.pi-download
+							| Download
+					| {% endblock node_download %}
+
+					| {% elif current_user.has_cap('can-renew-subscription') %}
+					a.btn.btn-success(
+						title="Renew your subscription to download",
+						target="_blank",
+						href="/renew")
+						i.pi-heart
+						| Renew Subscription
+
+					| {% elif current_user.is_authenticated %}
+					.btn.disabled
+						i.pi-lock
+						| Download
+
+					| {% else %}
+					a.btn(
+						title="Login to download {{ node.properties.content_type | undertitle }}",
+						href="{{ url_for('users.login') }}")
+						i.pi-lock
+						| Download
+					| {% endif %}
+
+	| {% endblock node_details %}
+
+	| {% block node_comments %}
+	#comments-embed
+		.comments-list-loading
+			i.pi-spin
+	| {% endblock node_comments %}
+
+| {% include 'nodes/custom/_scripts.html' %}
+
+| {% endblock %}
+
+
+| {% block node_scripts %}{% endblock %}
+| {% block footer_scripts %}
+script.
+	// Generate analytics pageview
+	ga('send', 'pageview', location.pathname);
+| {% endblock %}

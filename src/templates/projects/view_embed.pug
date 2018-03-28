@@ -22,17 +22,6 @@
 		| {% endif %}
 
 	section.node-details-container.project
-
-		| {# Hide for now
-		.node-details-header
-			.node-title-details
-				.date(title="Last updated {{ project._updated | pretty_date }}") {{ project._created | pretty_date }}
-
-				| {% if project.status %}
-				.status {{project.status}}
-				| {% endif %}
-		| #}
-
 		.node-details-title
 			h1
 				a(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}

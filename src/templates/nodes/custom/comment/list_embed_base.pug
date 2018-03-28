@@ -55,9 +55,9 @@
 					|  Only project members can comment.
 					| {% elif current_user.has_cap('can-renew-subscription') %}
 					i.pi-heart
-					a(href='/renew', target='_blank') Renew your subscription to join the conversation!
+					| Join the conversation! #[a(href='/renew', target='_blank') Renew your subscription] to comment.
 					| {% else %}
-					| Join the conversations!&nbsp;<a href="https://store.blender.org/product/membership/">Subscribe to Blender Cloud</a> now.
+					| Join the conversation! #[a(href="https://store.blender.org/product/membership/") Subscribe to Blender Cloud] to comment.
 					| {% endif %}
 
 			| {% else %}

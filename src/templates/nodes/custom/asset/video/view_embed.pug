@@ -1,60 +1,53 @@
-| {% block body %}
+| {% extends "nodes/view_base.html" %}
 
-#node-container
-	#node-overlay
+| {% block node_preview %}
+| {% if node.video_sources %}
+section.node-preview.video
+	video#videoplayer.video-js(
+		controls,
+		data-setup="{}",
+		preload="auto",
+		poster="{% if node.picture %}{{ node.picture.thumbnail('l', api=api) }}{% endif %}")
+		| {% for source in node.video_sources %}
+		source(
+			src="{{ source.src }}",
+			type="{{ source.type }}")
+		| {% endfor %}
+		p.vjs-no-js.
+			To view this video please enable JavaScript, and consider upgrading to a web browser that
+			<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+| {% else %}
+| {% include 'nodes/custom/_node_preview_forbidden.html' %}
+| {% endif %}
+| {% endblock node_preview %}
 
-	section.node-preview.video
-		| {% if node.video_sources %}
-		video#videoplayer.video-js(
-			controls,
-			data-setup="{}",
-			preload="auto",
-			poster="{% if node.picture %}{{ node.picture.thumbnail('l', api=api) }}{% endif %}")
-			| {% for source in node.video_sources %}
-			source(
-				src="{{ source.src }}",
-				type="{{ source.type }}")
-			| {% endfor %}
-			p.vjs-no-js.
-				To view this video please enable JavaScript, and consider upgrading to a web browser that
-				<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-		| {% else %}
-		.video-dummy.sorry(
-			style="{% if node.picture %}background-image: url({{ node.picture.thumbnail('l', api=api) }});{% endif %}")
-			.video-dummy-content
-				.video-dummy-content-text
-					span Available to Blender Cloud subscribers
-					span
-						small Support Blender and get awesome stuff!
-					hr
-					| {% if current_user.has_cap('can-renew-subscription') %}
-					a.subscribe(href="/renew") You have a subscription, it just needs to be renewed. <em>Renew your subscription now!</em>
-					| {% else %}
-					a.subscribe(href="{{ url_for('cloud.join') }}") <em>Subscribe to Blender Cloud.</em>
-					| {% endif %}
-					| {% if current_user.is_anonymous %}
-					a(href="{{ url_for('users.login') }}") Already a subscriber? Log in
-					| {% endif %}
-		| {% endif %}
+| {% block node_download %}
+| {% if node.file_variations %}
+button.btn.btn-default.dropdown-toggle(
+	type="button",
+	data-toggle="dropdown",
+	aria-haspopup="true",
+	aria-expanded="false")
+	i.pi-download
+	| Download
+	i.pi-angle-down.icon-dropdown-menu
+
+ul.dropdown-menu
+	| {% for variation in node.file_variations %}
+	li
+		a(href="{{ variation.link }}",
+			title="Download this format",
+			download)
+			span.length {{ variation.length | filesizeformat }}
+
+			span.format {{ variation.format }}
+			span.size {{ variation.size }}
+	| {% endfor %}
+| {% endif %}
+| {% endblock node_download %}
 
 
-	section.node-details-container.video
-
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
-
-		| {% if node.description %}
-		.node-details-description#node-description
-			| {{ node | markdowned('description') }}
-		| {% endif %}
-
-		include ../../_node_details
-
-		#comments-embed
-			.comments-list-loading
-				i.pi-spin
-
+| {% block node_scripts %}
 script(type="text/javascript").
 	{% if node.video_sources %}
 
@@ -114,17 +107,6 @@ script(type="text/javascript").
 		}
 	};
 
-	{% endif %}
+	{% endif %} // if node.video_sources
 
-	$(function(){
-		// Generate GA pageview
-		ga('send', 'pageview', location.pathname);
-
-		var content_type = $("li.node-details-meta-list-item.type").text();
-		$("li.node-details-meta-list-item.type").text(content_type.substring(content_type.indexOf("/") + 1));
-
-	});
-
-include ../../_scripts
-
-| {% endblock %}
+| {% endblock node_scripts %}
