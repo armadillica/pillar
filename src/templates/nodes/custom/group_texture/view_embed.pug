@@ -7,7 +7,7 @@
 	| {% if node.description %}
 	section.node-row
 		.node-details-description
-			| {{ node.description | markdown }}
+			| {{ node | markdowned('description') }}
 	| {% endif %}
 
 	| {% if children %}

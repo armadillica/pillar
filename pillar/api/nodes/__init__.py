@@ -378,30 +378,6 @@ def after_deleting_node(item):
     index.node_delete.delay(str(item['_id']))
 
 
-only_for_comments = only_for_node_type_decorator('comment')
-
-
-@only_for_comments
-def convert_markdown(node, original=None):
-    """Converts comments from Markdown to HTML.
-
-    Always does this on save, even when the original Markdown hasn't changed,
-    because our Markdown -> HTML conversion rules might have.
-    """
-
-    try:
-        content = node['properties']['content']
-    except KeyError:
-        node['properties']['content_html'] = ''
-    else:
-        node['properties']['content_html'] = pillar.markdown.markdown(content)
-
-
-def nodes_convert_markdown(nodes):
-    for node in nodes:
-        convert_markdown(node)
-
-
 only_for_textures = only_for_node_type_decorator('texture')
 
 
@@ -433,7 +409,6 @@ def setup_app(app, url_prefix):
     app.on_fetched_resource_nodes += before_returning_nodes
 
     app.on_replace_nodes += before_replacing_node
-    app.on_replace_nodes += convert_markdown
     app.on_replace_nodes += texture_sort_files
     app.on_replace_nodes += deduct_content_type
     app.on_replace_nodes += node_set_default_picture
@@ -442,11 +417,9 @@ def setup_app(app, url_prefix):
     app.on_insert_nodes += before_inserting_nodes
     app.on_insert_nodes += nodes_deduct_content_type
     app.on_insert_nodes += nodes_set_default_picture
-    app.on_insert_nodes += nodes_convert_markdown
     app.on_insert_nodes += textures_sort_files
     app.on_inserted_nodes += after_inserting_nodes
 
-    app.on_update_nodes += convert_markdown
     app.on_update_nodes += texture_sort_files
 
     app.on_delete_item_nodes += before_deleting_node

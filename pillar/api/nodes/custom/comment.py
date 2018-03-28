@@ -162,7 +162,7 @@ def edit_comment(user_id, node_id, patch):
         log.info('User %s edited comment %s', user_id, node_id)
 
     # Fetch the new content, so the client can show these without querying again.
-    node = nodes_coll.find_one(node_id, projection={'properties.content_html': 1})
+    node = nodes_coll.find_one(node_id, projection={'properties._content_html': 1})
     return status, node
 
 

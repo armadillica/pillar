@@ -27,6 +27,12 @@ def check_permissions(collection_name, resource, method, append_allowed_methods=
     :param check_node_type: node type to check. Only valid when collection_name='projects'.
     :type check_node_type: str
     """
+    from pillar.auth import get_current_user
+    from .authentication import CLI_USER
+
+    if get_current_user() is CLI_USER:
+        log.debug('Short-circuiting check_permissions() for CLI user')
+        return
 
     if not has_permissions(collection_name, resource, method, append_allowed_methods,
                            check_node_type):

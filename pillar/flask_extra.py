@@ -1,5 +1,34 @@
+import re
 import functools
+
 import flask
+import werkzeug.routing
+
+
+class HashedPathConverter(werkzeug.routing.PathConverter):
+    """Allows for files `xxx.yyy.js` to be served as `xxx.yyy.abc123.js`.
+
+    The hash code is placed before the last extension.
+    """
+    weight = 300
+    # Hash length is hard-coded to 8 characters for now.
+    hash_re = re.compile(r'\.([a-zA-Z0-9]{8})(?=\.[^.]+$)')
+
+    @functools.lru_cache(maxsize=1024)
+    def to_python(self, from_url: str) -> str:
+        return self.hash_re.sub('', from_url)
+
+    @functools.lru_cache(maxsize=1024)
+    def to_url(self, filepath: str) -> str:
+        try:
+            dotidx = filepath.rindex('.')
+        except ValueError:
+            # Happens when there is no dot. Very unlikely.
+            return filepath
+
+        current_hash = flask.current_app.config['STATIC_FILE_HASH']
+        before, after = filepath[:dotidx], filepath[dotidx:]
+        return f'{before}.{current_hash}{after}'
 
 
 def add_response_headers(headers: dict):

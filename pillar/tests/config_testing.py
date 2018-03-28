@@ -42,3 +42,6 @@ ELASTIC_INDICES = {
     'NODE': 'test_nodes',
     'USER': 'test_users',
 }
+
+# MUST be 8 characters long, see pillar.flask_extra.HashedPathConverter
+STATIC_FILE_HASH = 'abcd1234'

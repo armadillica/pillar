@@ -21,7 +21,7 @@ meta(property="og:image", content="{{ node.picture.thumbnail('l', api=api) }}")
 
 | {% block css %}
 | {{ super() }}
-link(href="{{ url_for('static_pillar', filename='assets/css/blog.css', v=17320171) }}", rel="stylesheet")
+link(href="{{ url_for('static_pillar', filename='assets/css/blog.css') }}", rel="stylesheet")
 | {% endblock %}
 
 | {% block project_context %}

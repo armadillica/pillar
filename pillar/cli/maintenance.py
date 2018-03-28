@@ -263,6 +263,53 @@ def check_home_project_groups():
     return bad
 
 
+@manager_maintenance.option('-g', '--go', dest='go',
+                            action='store_true', default=False,
+                            help='Actually go and perform the changes, without this just '
+                                 'shows differences.')
+def purge_home_projects(go=False):
+    """Deletes all home projects that have no owner."""
+    from pillar.api.utils.authentication import force_cli_user
+    force_cli_user()
+
+    users_coll = current_app.data.driver.db['users']
+    proj_coll = current_app.data.driver.db['projects']
+    good = bad = 0
+
+    def bad_projects():
+        nonlocal good, bad
+
+        for proj in proj_coll.find({'category': 'home', '_deleted': {'$ne': True}}):
+            pid = proj['_id']
+            uid = proj.get('user')
+            if not uid:
+                log.info('Project %s has no user assigned', uid)
+                bad += 1
+                yield pid
+                continue
+
+            if users_coll.find({'_id': uid, '_deleted': {'$ne': True}}).count() == 0:
+                log.info('Project %s has non-existing owner %s', pid, uid)
+                bad += 1
+                yield pid
+                continue
+
+            good += 1
+
+    if not go:
+        log.info('Dry run, use --go to actually perform the changes.')
+
+    for project_id in bad_projects():
+        log.info('Soft-deleting project %s', project_id)
+        if go:
+            r, _, _, status = current_app.delete_internal('projects', _id=project_id)
+            if status != 204:
+                raise ValueError(f'Error {status} deleting {project_id}: {r}')
+
+    log.info('%i projects OK, %i projects deleted', good, bad)
+    return bad
+
+
 @manager_maintenance.command
 @manager_maintenance.option('-c', '--chunk', dest='chunk_size', default=50,
                             help='Number of links to update, use 0 to update all.')
@@ -404,79 +451,121 @@ def expire_all_project_links(project_uuid):
     print('Expired %i links' % result.matched_count)
 
 
-@manager_maintenance.command
-@manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
+@manager_maintenance.option('-u', '--url', dest='project_url', nargs='?',
                             help='Project URL')
 @manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
                             help='Replace on all projects.')
 @manager_maintenance.option('-m', '--missing', dest='missing',
                             action='store_true', default=False,
                             help='Add missing node types. Note that this may add unwanted ones.')
-def replace_pillar_node_type_schemas(proj_url=None, all_projects=False, missing=False):
+@manager_maintenance.option('-g', '--go', dest='go',
+                            action='store_true', default=False,
+                            help='Actually go and perform the changes, without this just '
+                                 'shows differences.')
+@manager_maintenance.option('-i', '--id', dest='project_id', nargs='?',
+                            help='Project ID')
+def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missing=False, go=False,
+                                     project_id=None):
     """Replaces the project's node type schemas with the standard Pillar ones.
 
     Non-standard node types are left alone.
     """
 
-    if bool(proj_url) == all_projects:
-        log.error('Use either --project or --all.')
+    if sum([bool(project_url), all_projects, bool(project_id)]) != 1:
+        log.error('Use either --project, --id, or --all.')
         return 1
 
     from pillar.api.utils.authentication import force_cli_user
     force_cli_user()
 
     from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
-    from pillar.api.utils import remove_private_keys
+    from pillar.api.utils import remove_private_keys, doc_diff
 
     projects_collection = current_app.db()['projects']
+    will_would = 'Will' if go else 'Would'
 
-    def handle_project(project):
-        log.info('Handling project %s', project['url'])
-        is_public_proj = not project.get('is_private', True)
+    projects_changed = projects_seen = 0
 
-        for proj_nt in project['node_types']:
+    def handle_project(proj):
+        nonlocal projects_changed, projects_seen
+
+        projects_seen += 1
+
+        orig_proj = copy.deepcopy(proj)
+        proj_id = proj['_id']
+        if 'url' not in proj:
+            log.warning('Project %s has no URL!', proj_id)
+        proj_url = proj.get('url', f'-no URL id {proj_id}')
+        log.debug('Handling project %s', proj_url)
+
+        for proj_nt in proj['node_types']:
             nt_name = proj_nt['name']
             try:
                 pillar_nt = PILLAR_NAMED_NODE_TYPES[nt_name]
             except KeyError:
-                log.info('   - skipping non-standard node type "%s"', nt_name)
+                log.debug('   - skipping non-standard node type "%s"', nt_name)
                 continue
 
-            log.info('   - replacing schema on node type "%s"', nt_name)
+            log.debug('   - replacing schema on node type "%s"', nt_name)
 
             # This leaves node type keys intact that aren't in Pillar's node_type_xxx definitions,
-            # such as permissions.
+            # such as permissions. It also keeps form schemas as-is.
+            pillar_nt.pop('form_schema', None)
             proj_nt.update(copy.deepcopy(pillar_nt))
-
-            # On our own public projects we want to be able to set license stuff.
-            if is_public_proj:
-                proj_nt['form_schema'].pop('license_type', None)
-                proj_nt['form_schema'].pop('license_notes', None)
 
         # Find new node types that aren't in the project yet.
         if missing:
-            project_ntnames = set(nt['name'] for nt in project['node_types'])
+            project_ntnames = set(nt['name'] for nt in proj['node_types'])
             for nt_name in set(PILLAR_NAMED_NODE_TYPES.keys()) - project_ntnames:
                 log.info('   - Adding node type "%s"', nt_name)
                 pillar_nt = PILLAR_NAMED_NODE_TYPES[nt_name]
-                project['node_types'].append(copy.deepcopy(pillar_nt))
+                proj['node_types'].append(copy.deepcopy(pillar_nt))
 
-        # Use Eve to PUT, so we have schema checking.
-        db_proj = remove_private_keys(project)
-        r, _, _, status = current_app.put_internal('projects', db_proj, _id=project['_id'])
-        if status != 200:
-            log.error('Error %i storing altered project %s %s', status, project['_id'], r)
-            raise SystemExit('Error storing project, see log.')
-        log.info('Project saved succesfully.')
+        proj_has_difference = False
+        for key, val1, val2 in doc_diff(orig_proj, proj, falsey_is_equal=False):
+            if not proj_has_difference:
+                if proj.get('_deleted', False):
+                    deleted = ' (deleted)'
+                else:
+                    deleted = ''
+                log.info('%s change project %s%s', will_would, proj_url, deleted)
+                proj_has_difference = True
+            log.info('    %30r: %r → %r', key, val1, val2)
+
+        projects_changed += proj_has_difference
+
+        if go and proj_has_difference:
+            # Use Eve to PUT, so we have schema checking.
+            db_proj = remove_private_keys(proj)
+            try:
+                r, _, _, status = current_app.put_internal('projects', db_proj, _id=proj_id)
+            except Exception:
+                log.exception('Error saving project %s (url=%s)', proj_id, proj_url)
+                raise SystemExit(5)
+
+            if status != 200:
+                log.error('Error %i storing altered project %s %s', status, proj['_id'], r)
+                raise SystemExit('Error storing project, see log.')
+            log.debug('Project saved succesfully.')
+
+    if not go:
+        log.info('Not changing anything, use --go to actually go and change things.')
 
     if all_projects:
-        for project in projects_collection.find():
+        for project in projects_collection.find({'_deleted': {'$ne': True}}):
             handle_project(project)
+        log.info('%s %d of %d projects',
+                 'Changed' if go else 'Would change',
+                 projects_changed, projects_seen)
         return
 
-    project = projects_collection.find_one({'url': proj_url})
+    if project_url:
+        project = projects_collection.find_one({'url': project_url})
+    else:
+        project = projects_collection.find_one({'_id': bson.ObjectId(project_id)})
+
     if not project:
-        log.error('Project url=%s not found', proj_url)
+        log.error('Project url=%s id=%s not found', project_url, project_id)
         return 3
 
     handle_project(project)

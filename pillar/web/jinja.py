@@ -10,6 +10,7 @@ import flask_login
 import jinja2.filters
 import jinja2.utils
 import werkzeug.exceptions as wz_exceptions
+import pillarsdk
 
 import pillar.api.utils
 from pillar.web.utils import pretty_date
@@ -95,6 +96,12 @@ def do_pluralize(value, arg='s'):
 
 
 def do_markdown(s: typing.Optional[str]):
+    """Convert Markdown.
+
+    This filter is not preferred. Use {'coerce': 'markdown'} in the Eve schema
+    instead, to cache the HTML in the database, and use do_markdowned() to
+    fetch it.
+    """
     if s is None:
         return None
 
@@ -104,6 +111,35 @@ def do_markdown(s: typing.Optional[str]):
     # FIXME: get rid of this filter altogether and cache HTML of comments.
     safe_html = pillar.markdown.markdown(s)
     return jinja2.utils.Markup(safe_html)
+
+
+def do_markdowned(document: typing.Union[dict, pillarsdk.Resource], field_name: str) -> str:
+    """Fetch pre-converted Markdown or render on the fly.
+
+    Use {'coerce': 'markdown'} in the Eve schema to cache the HTML in the
+    database and use do_markdowned() to fetch it in a safe way.
+
+    Jinja example: {{ node.properties | markdowned:'content' }}
+    """
+    if isinstance(document, pillarsdk.Resource):
+        document = document.to_dict()
+
+    if not document:
+        return ''
+
+    my_log = log.getChild('do_markdowned')
+
+    cache_field_name = pillar.markdown.cache_field_name(field_name)
+    my_log.debug('Getting %r', cache_field_name)
+
+    cached_html = document.get(cache_field_name)
+    if cached_html is not None:
+        my_log.debug('Cached HTML is %r', cached_html[:40])
+        return jinja2.utils.Markup(cached_html)
+
+    markdown_src = document.get(field_name)
+    my_log.debug('No cached HTML, rendering doc[%r]', field_name)
+    return do_markdown(markdown_src)
 
 
 def do_url_for_node(node_id=None, node=None):
@@ -156,6 +192,7 @@ def setup_jinja_env(jinja_env, app_config: dict):
     jinja_env.filters['pluralize'] = do_pluralize
     jinja_env.filters['gravatar'] = pillar.api.utils.gravatar
     jinja_env.filters['markdown'] = do_markdown
+    jinja_env.filters['markdowned'] = do_markdowned
     jinja_env.filters['yesno'] = do_yesno
     jinja_env.filters['repr'] = repr
     jinja_env.filters['urljoin'] = functools.partial(urllib.parse.urljoin, allow_fragments=True)

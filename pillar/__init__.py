@@ -101,6 +101,7 @@ class PillarServer(BlinkerCompatibleEve):
         self.log = logging.getLogger('%s.%s' % (__name__, self.__class__.__name__))
         self.log.info('Creating new instance from %r', self.app_root)
 
+        self._config_url_map()
         self._config_auth_token_hmac_key()
         self._config_tempdirs()
         self._config_git()
@@ -171,6 +172,19 @@ class PillarServer(BlinkerCompatibleEve):
         if self.config['DEBUG']:
             log.info('Pillar starting, debug=%s', self.config['DEBUG'])
 
+    def _config_url_map(self):
+        """Extend Flask url_map with our own converters."""
+        import secrets, re
+        from . import flask_extra
+
+        if not self.config.get('STATIC_FILE_HASH'):
+            self.log.warning('STATIC_FILE_HASH is empty, generating random one')
+            f = open('/data/git/blender-cloud/config_local.py', 'a')
+            h = re.sub(r'[_.~-]', '', secrets.token_urlsafe())[:8]
+            self.config['STATIC_FILE_HASH'] = h
+
+        self.url_map.converters['hashed_path'] = flask_extra.HashedPathConverter
+
     def _config_auth_token_hmac_key(self):
         """Load AUTH_TOKEN_HMAC_KEY, falling back to SECRET_KEY."""
 
@@ -209,6 +223,7 @@ class PillarServer(BlinkerCompatibleEve):
         self.log.info('Git revision %r', self.config['GIT_REVISION'])
 
     def _config_sentry(self):
+        # TODO(Sybren): keep Sentry unconfigured when running CLI commands.
         sentry_dsn = self.config.get('SENTRY_CONFIG', {}).get('dsn')
         if self.config.get('TESTING') or sentry_dsn in {'', '-set-in-config-local-'}:
             self.log.warning('Sentry NOT configured.')
@@ -529,7 +544,7 @@ class PillarServer(BlinkerCompatibleEve):
         from pillar.web.staticfile import PillarStaticFile
 
         view_func = PillarStaticFile.as_view(endpoint_name, static_folder=static_folder)
-        self.add_url_rule('%s/<path:filename>' % url_prefix, view_func=view_func)
+        self.add_url_rule(f'{url_prefix}/<hashed_path:filename>', view_func=view_func)
 
     def process_extensions(self):
         """This is about Eve extensions, not Pillar extensions."""
@@ -792,6 +807,19 @@ class PillarServer(BlinkerCompatibleEve):
         with self.__fake_request_url_rule('PATCH', path):
             return patch_internal(resource, payload=payload, concurrency_check=concurrency_check,
                                   skip_validation=skip_validation, **lookup)[:4]
+
+    def delete_internal(self, resource: str, concurrency_check=False,
+                        suppress_callbacks=False, **lookup):
+        """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
+        from eve.methods.delete import deleteitem_internal
+
+        url = self.config['URLS'][resource]
+        path = '%s/%s/%s' % (self.api_prefix, url, lookup['_id'])
+        with self.__fake_request_url_rule('DELETE', path):
+            return deleteitem_internal(resource,
+                                       concurrency_check=concurrency_check,
+                                       suppress_callbacks=suppress_callbacks,
+                                       **lookup)[:4]
 
     def _list_routes(self):
         from pprint import pprint

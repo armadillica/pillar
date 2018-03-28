@@ -11,7 +11,7 @@
 		.comment-body
 			p.comment-author {{ comment._user.full_name }}
 
-			span {{comment.properties.content_html | safe }}
+			span {{comment.properties | markdowned('content') }}
 
 		// TODO: Markdown preview when editing
 

@@ -17,7 +17,7 @@
 
 		| {% if node.description %}
 		.node-details-description#node-description
-			| {{ node.description | markdown }}
+			| {{ node | markdowned('description') }}
 		| {% endif %}
 
 		.node-details-meta.footer

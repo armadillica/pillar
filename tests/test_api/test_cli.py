@@ -293,7 +293,7 @@ class ReplaceNodeTypesTest(AbstractNodeReplacementTest):
 
         # Run the CLI command
         with self.app.test_request_context():
-            replace_pillar_node_type_schemas(proj_url=self.proj['url'])
+            replace_pillar_node_type_schemas(project_url=self.proj['url'])
 
         # Fetch the project again from MongoDB
         dbproj = self.fetch_project_from_db()

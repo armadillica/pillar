@@ -2,9 +2,9 @@
 | {% block page_title %}Search{% if project %} {{ project.name }}{% endif %}{% endblock %}
 
 | {% block head %}
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-6.2.8.min.js', v=9112017) }}")
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-ga-0.4.2.min.js', v=9112017) }}")
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-hotkeys-0.2.20.min.js', v=9112017) }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-6.2.8.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-ga-0.4.2.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-hotkeys-0.2.20.min.js') }}")
 | {% endblock %}
 
 | {% block og %}

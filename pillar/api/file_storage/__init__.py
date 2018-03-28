@@ -25,12 +25,11 @@ from flask import url_for, helpers
 from pillar.api import utils
 from pillar.api.file_storage_backends.gcs import GoogleCloudStorageBucket, \
     GoogleCloudStorageBlob
-from pillar.api.utils import remove_private_keys
+from pillar.api.utils import remove_private_keys, imaging
 from pillar.api.utils.authorization import require_login, \
     user_matches_roles
 from pillar.api.utils.cdn import hash_file_path
 from pillar.api.utils.encoding import Encoder
-from pillar.api.utils.imaging import generate_local_thumbnails
 from pillar.api.file_storage_backends import default_storage_backend, Bucket
 from pillar.auth import current_user
 
@@ -97,8 +96,9 @@ def _process_image(bucket: Bucket,
 
     # Generate previews
     log.info('Generating thumbnails for file %s', file_id)
-    src_file['variations'] = generate_local_thumbnails(src_file['name'],
-                                                       local_file.name)
+    local_path = pathlib.Path(local_file.name)
+    name_base = pathlib.Path(src_file['name']).stem
+    src_file['variations'] = imaging.generate_local_thumbnails(name_base, local_path)
 
     # Send those previews to Google Cloud Storage.
     log.info('Uploading %i thumbnails for file %s to Google Cloud Storage '
@@ -386,13 +386,8 @@ def before_returning_file(response):
 
 def strip_link_and_variations(response):
     # Check the access level of the user.
-    if current_user.is_anonymous:
-        has_full_access = False
-    else:
-        user_roles = current_user.roles
-        # TODO: convert to a capability and check for that.
-        access_roles = current_app.config['FULL_FILE_ACCESS_ROLES']
-        has_full_access = bool(user_roles.intersection(access_roles))
+    capability = current_app.config['FULL_FILE_ACCESS_CAP']
+    has_full_access = current_user.has_cap(capability)
 
     # Strip all file variations (unless image) and link to the actual file.
     if not has_full_access:

@@ -2,10 +2,6 @@ node_type_blog = {
     'name': 'blog',
     'description': 'Container for node_type post.',
     'dyn_schema': {
-        # Path for a custom template to be used for rendering the posts
-        'template': {
-            'type': 'string',
-        },
         'categories': {
             'type': 'list',
             'schema': {
@@ -17,5 +13,5 @@ node_type_blog = {
         'categories': {},
         'template': {},
     },
-    'parent': ['project',],
+    'parent': ['project', ],
 }
