@@ -2,16 +2,24 @@ section.node-preview-forbidden
 	| {% if node.picture %}
 	img(src="{{ node.picture.thumbnail('t', api=api) }}")
 	| {% endif %}
+
 	div
-		div Available to Blender Cloud subscribers
-		div
-			small Support Blender and get awesome stuff!
+		p Available to Blender Cloud subscribers
 		hr
 		| {% if current_user.has_cap('can-renew-subscription') %}
-		a.btn(href="/renew") You have a subscription, it just needs to be renewed. Renew your subscription now!
+		p
+			small You have a subscription, it just needs to be renewed.
+		a.btn(href="/renew")
+			| #[i.pi-heart] Renew Subscription
 		| {% else %}
-		a.btn(href="{{ url_for('cloud.join') }}") Get a Subscription
+		p
+			small Support Blender and get awesome stuff!
+		a.btn(href="{{ url_for('cloud.join') }}")
+			| #[i.pi-heart] Get a Subscription
 		| {% endif %}
+
 		| {% if current_user.is_anonymous %}
-		a(href="{{ url_for('users.login') }}") Already a subscriber? Log in
+		p
+			small Already a subscriber?
+		a.btn(href="{{ url_for('users.login') }}") Log In
 		| {% endif %}
