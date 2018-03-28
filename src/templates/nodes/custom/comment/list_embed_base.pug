@@ -125,15 +125,10 @@ script.
 
 	// Writing comment
 	var $commentField = $("#comment_field");
+	var $commentContainer = $commentField.parent();
 	var $commentPreview = $commentField.parent().parent().find('.comment-reply-preview-md');
 
-	console.log('{{csrf_token}}');
-
 	function parseCommentContent(content) {
-
-		var csrf_token = '{{ csrf_token }}';
-
-		console.log(csrf_token);
 
 		$.ajax({
 			url: "{{ url_for('nodes.preview_markdown')}}",
@@ -149,7 +144,6 @@ script.
 		.fail(function (err) {
 			toastr.error(xhrErrorResponseMessage(err), 'Parsing failed');
 		});
-
 	}
 
 	var options = {
@@ -162,32 +156,24 @@ script.
 
 	$commentField.typeWatch(options);
 
-	// Markdown convert as we type in the textarea
-	//- $(document)
-	//- 	.off('keyup','body .comment-reply-field textarea')
-	//- 	.on( 'keyup','body .comment-reply-field textarea',function(e){
-	//- 	var $textarea = $(this);
-	//- 	var $container = $(this).parent();
-	//- 	var $preview = $container.parent().find('.comment-reply-preview-md');
+	$(document)
+		.off('keyup','body .comment-reply-field textarea')
+		.on( 'keyup','body .comment-reply-field textarea',function(e){
 
-	//- 	// TODO: communicate with back-end to do the conversion,
-	//- 	// rather than relying on our JS-converted Markdown.
-	//- 	$preview.html($textarea.val());
+		// While we are at it, style if empty
+		if ($commentField.val()) {
+			$commentContainer.addClass('filled');
+		} else {
+			$commentContainer.removeClass('filled');
+		}
 
-	//- 	// While we are at it, style if empty
-	//- 	if ($textarea.val()) {
-	//- 		$container.addClass('filled');
-	//- 	} else {
-	//- 		$container.removeClass('filled');
-	//- 	}
-
-	//- 	// Send on ctrl+enter
-	//- 	if ($textarea.is(":focus")) {
-	//- 		if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey){
-	//- 			post_comment($container.find('.comment-action-submit'));
-	//- 		}
-	//- 	}
-	//- });
+		// Send on ctrl+enter
+		if ($commentField.is(":focus")) {
+			if ((e.keyCode == 10 || e.keyCode == 13) && e.ctrlKey){
+				post_comment($commentContainer.find('.comment-action-submit'));
+			}
+		}
+	});
 
 	// Autoresize the textarea as we type
 	$('#comment_field').autoResize();
