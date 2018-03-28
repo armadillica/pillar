@@ -73,6 +73,7 @@ class PillarServer(BlinkerCompatibleEve):
     def __init__(self, app_root, **kwargs):
         from .extension import PillarExtension
         from celery import Celery
+        from flask_wtf.csrf import CSRFProtect
 
         kwargs.setdefault('validator', custom_field_validation.ValidateCustomFields)
         super(PillarServer, self).__init__(settings=empty_settings, **kwargs)
@@ -140,6 +141,10 @@ class PillarServer(BlinkerCompatibleEve):
         self.org_manager = pillar.api.organizations.OrgManager()
 
         self.before_first_request(self.setup_db_indices)
+
+        # Make CSRF protection available to the application. By default it is
+        # disabled on all endpoints. More info at WTF_CSRF_CHECK_DEFAULT in config.py
+        self.csrf = CSRFProtect(self)
 
     def _validate_config(self):
         if not self.config.get('SECRET_KEY'):

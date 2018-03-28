@@ -39,7 +39,7 @@ setuptools.setup(
         'Flask-Script>=2.0.5',
         'Flask-Login>=0.3.2',
         'Flask-OAuthlib>=0.9.3',
-        'Flask-WTF>=0.12',
+        'Flask-WTF>=0.14.2',
         'algoliasearch>=1.12.0',
 
         # Limit the major version to the major version of ElasticSearch we're using.

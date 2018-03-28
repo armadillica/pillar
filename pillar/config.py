@@ -255,3 +255,8 @@ SEND_FILE_MAX_AGE_DEFAULT = 3600 * 24 * 365  # seconds
 # be used. Note that this causes extra traffic, since every time the process
 # restarts the URLs will be different.
 STATIC_FILE_HASH = ''
+
+# Disable default CSRF protection for all views, since most web endpoints and
+# all API endpoints do not need it. On the views that require it, we use the
+# current_app.csrf.protect() method.
+WTF_CSRF_CHECK_DEFAULT = False

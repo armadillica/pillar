@@ -487,9 +487,8 @@ def preview_markdown():
     content of a node.
     """
 
-    if not validate_csrf(request.headers.get('X-CSRFToken')):
-        return jsonify({'_status': 'ERR',
-                        'message': 'CSRF validation failed.'}), 403
+    current_app.csrf.protect()
+
     try:
         content = request.form['content']
     except KeyError:

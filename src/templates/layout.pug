@@ -87,7 +87,16 @@ html(lang="en")
 		| {% block footer_scripts_pre %}{% endblock %}
 		| {% block footer_scripts %}{% endblock %}
 
-
+		script.
+			// When sending an AJAX request, always add the X-CSRFToken header to it.
+			var csrf_token = "{{ csrf_token() }}";
+			$.ajaxSetup({
+				beforeSend: function (xhr, settings) {
+					if (!/^(GET|HEAD|OPTIONS|TRACE)$/i.test(settings.type) && !this.crossDomain) {
+						xhr.setRequestHeader("X-CSRFToken", csrf_token);
+					}
+				}
+			});
 
 		script.
 			(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
