@@ -45,6 +45,10 @@
 				i.pi-plus
 				| Add New Attachment
 
+			p.text-muted
+				| Attachments can be included in any MarkDown field by using the #[code {attachment slug}] shortcode.
+				| This shortcode is placed on your copy-paste buffer by clicking "Copy to clipboard".
+
 		| {{ render_field(field, field.name) }}
 
 		| {% elif field.name == 'files' %}

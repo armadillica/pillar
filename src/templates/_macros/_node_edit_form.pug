@@ -19,9 +19,9 @@
 
 			| {% if subfield.name.endswith('slug') %}
 			button.fieldlist-action-button.js-append-attachment(
-				type="button")
+				type="button", data-clipboard)
 				i.pi-plus
-				| Append to Description
+				| Copy to clipboard
 			| {% endif %}
 
 			| {% endfor %}

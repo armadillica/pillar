@@ -1,3 +1,5 @@
+// This file requires script(src="{{ url_for('static_pillar', filename='assets/js/vendor/clipboard.min.js')}}")
+
 function deleteFile(fileField, newFileId) {
     if (newFileId) {
         fileField.val(newFileId);
@@ -159,25 +161,20 @@ $(function () {
         })
         .on('file-upload:activated', on_file_upload_activated)
         .on('file-upload:finished', on_file_upload_finished)
-        .on('click', '.js-append-attachment', function(e) {
-            e.preventDefault();
-
-            // Append widget @[slug-name] to the post's description
-            // Note: Heavily connected to HTML in _node_edit_form.jade
-            var slug = $(this).parent().find("input[id*='slug']").val();
-            var widget = '@[' + slug + ']\n';
-
-            if (slug) {
-                var textarea_description = document.getElementById('description').value;
-                if (textarea_description) {
-                    textarea_description.value += widget;
-                    toastr.success('Attachment appended to description');
-                }
-            } else {
-                toastr.error('Slug is empty, upload something first');
-            }
-        })
     ;
+
+	new Clipboard('.js-append-attachment', {
+        text: function(trigger) {
+            var slug = $(trigger).parent().find("input[id*='slug']").val();
+            if (!slug) {
+                toastr.error('Slug is empty, upload something first');
+                return;
+            }
+            toastr.success('Attachment code copied, paste it where you want to show it.');
+            return '{attachment ' + slug + '}\n';
+        }
+    });
+
 
     function inject_project_id_into_url(index, element) {
         // console.log('Injecting ', ProjectUtils.projectId(), ' into ', element);
