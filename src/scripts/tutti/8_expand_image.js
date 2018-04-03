@@ -1,8 +1,6 @@
 $(function() {
-    /* Expand images when their link points to a jpg/png/gif/webp */
-    var imgs = $('.expand-image-links a img')
-    .off('click')
-    .on('click', function(e){
+
+    function _expandImg(e) {
         var $img = $(this);
         var href = $img.parent().attr('href');
 
@@ -14,5 +12,15 @@ $(function() {
                         .html(overlay_img);
             e.preventDefault();
         }
-    });
+    }
+
+    $.fn.expandOnClick = function() {
+        $(this)
+            .off('click')
+            .on('click', _expandImg);
+    };
+
+    /* Expand images when their link points to a jpg/png/gif/webp */
+    $('.expand-image-links a img').expandOnClick();
+    $('a.expand-image-links img').expandOnClick();
 });

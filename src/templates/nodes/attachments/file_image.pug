@@ -1,6 +1,6 @@
 | {% if 'link' in tag_args and tag_args['link'] != 'none' %}
 |     {% if tag_args['link'] == 'self' %}
-a(href="{{ vars['l'].link }}")
+a.expand-image-links(href="{{ vars['l'].link }}")
 	img(src="{{ vars['l'].link }}", alt="{{ file.filename }}")
 |     {% else %}
 a(href="{{ tag_args['link'] }}", target="_blank")

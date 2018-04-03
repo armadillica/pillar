@@ -185,12 +185,14 @@ class AttachmentTest(AbstractPillarTest):
         link = db_file['variations'][0]['link']
 
         with self.app.test_request_context():
+            self_linked = f'<a class="expand-image-links" href="{link}">' \
+                          f'<img src="{link}" alt="cute_kitten.jpg"/></a>'
             self.assertEqual(
-                f'<a href="{link}"><img src="{link}" alt="cute_kitten.jpg"/></a>',
+                self_linked,
                 render('{attachment img link}', context=node_props).strip()
             )
             self.assertEqual(
-                f'<a href="{link}"><img src="{link}" alt="cute_kitten.jpg"/></a>',
+                self_linked,
                 render('{attachment img link=self}', context=node_props).strip()
             )
             self.assertEqual(
