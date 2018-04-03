@@ -867,6 +867,7 @@ def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
                 if status != 200:
                     log.error('Error %i storing altered node %s %s', status, node['_id'], r)
                     raise SystemExit('Error storing node; see log.')
+                log.debug('Updated node %s: %s', node['_id'], r)
 
         log.info('Project %s (%s) has %d nodes with attachments',
                  proj_url, proj_id, node_count)
