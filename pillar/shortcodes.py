@@ -194,7 +194,7 @@ class Attachment:
         except self.NotSupported as ex:
             return html_module.escape('{attachment %s}' % ex)
 
-        return self.render(file_doc, kwargs)
+        return self.render(file_doc, pargs, kwargs)
 
     def sdk_file(self, slug: str, node_properties: dict) -> pillarsdk.File:
         """Return the file document for the attachment with this slug."""
@@ -222,7 +222,9 @@ class Attachment:
         sdk_file = pillarsdk.File.find(object_id, api=api)
         return sdk_file
 
-    def render(self, sdk_file: pillarsdk.File, tag_args: dict) -> str:
+    def render(self, sdk_file: pillarsdk.File,
+               pargs: typing.List[str],
+               kwargs: typing.Dict[str, str]) -> str:
         file_renderers = {
             'image': self.render_image,
             'video': self.render_video,
@@ -230,21 +232,29 @@ class Attachment:
 
         mime_type_cat, _ = sdk_file.content_type.split('/', 1)
         renderer = file_renderers.get(mime_type_cat, self.render_generic)
-        return renderer(sdk_file, tag_args)
+        return renderer(sdk_file, pargs, kwargs)
 
-    def render_generic(self, sdk_file, tag_args):
+    def render_generic(self, sdk_file,
+                       pargs: typing.List[str],
+                       kwargs: typing.Dict[str, str]):
         import flask
         return flask.render_template('nodes/attachments/file_generic.html',
-                                     file=sdk_file, tag_args=tag_args)
+                                     file=sdk_file, tag_args=kwargs)
 
-    def render_image(self, sdk_file, tag_args):
+    def render_image(self, sdk_file,
+                     pargs: typing.List[str],
+                     kwargs: typing.Dict[str, str]):
         """Renders an image file."""
         import flask
+        if 'link' in pargs:
+            kwargs['link'] = 'self'
         variations = {var.size: var for var in sdk_file.variations}
         return flask.render_template('nodes/attachments/file_image.html',
-                                     file=sdk_file, vars=variations, tag_args=tag_args)
+                                     file=sdk_file, vars=variations, tag_args=kwargs)
 
-    def render_video(self, sdk_file, tag_args):
+    def render_video(self, sdk_file,
+                     pargs: typing.List[str],
+                     kwargs: typing.Dict[str, str]):
         """Renders a video file."""
         import flask
         try:
@@ -255,7 +265,7 @@ class Attachment:
             return flask.render_template('nodes/attachments/file_generic.html', file=sdk_file)
 
         return flask.render_template('nodes/attachments/file_video.html',
-                                     file=sdk_file, var=default_variation, tag_args=tag_args)
+                                     file=sdk_file, var=default_variation, tag_args=kwargs)
 
 
 def _get_parser() -> typing.Tuple[shortcodes.Parser, shortcodes.Parser]:

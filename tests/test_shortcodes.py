@@ -155,3 +155,52 @@ class IFrameTest(AbstractPillarTest):
         with self.app.app_context():
             self.login_api_as(uid, roles=roles)
             self.assertEqual(expect, render(md))
+
+
+class AttachmentTest(AbstractPillarTest):
+    def test_image(self):
+        from pillar.shortcodes import render
+
+        oid, _ = self.ensure_file_exists(file_overrides={
+            'variations': [
+                {'format': 'jpg', 'height': 2048, 'width': 2048, 'length': 819569,
+                 'link': 'https://i.imgur.com/FmbuPNe.jpg',
+                 'content_type': 'image/jpeg',
+                 'md5': '--',
+                 'file_path': 'c2a5c897769ce1ef0eb10f8fa1c472bcb8e2d5a4-h.jpg',
+                 'size': 'l'},
+            ],
+            'filename': 'cute_kitten.jpg',
+        })
+        node_props = {
+            'attachments': {
+                'img': {'oid': oid},
+            }
+        }
+
+        # We have to get the file document again, because retrieving it via the
+        # API (which is what the shortcode rendering is doing) will change its
+        # link URL.
+        db_file = self.get(f'/api/files/{oid}').json()
+        link = db_file['variations'][0]['link']
+
+        with self.app.test_request_context():
+            self.assertEqual(
+                f'<a href="{link}"><img src="{link}" alt="cute_kitten.jpg"/></a>',
+                render('{attachment img link}', context=node_props).strip()
+            )
+            self.assertEqual(
+                f'<a href="{link}"><img src="{link}" alt="cute_kitten.jpg"/></a>',
+                render('{attachment img link=self}', context=node_props).strip()
+            )
+            self.assertEqual(
+                f'<img src="{link}" alt="cute_kitten.jpg"/>',
+                render('{attachment img}', context=node_props).strip()
+            )
+
+            tag_link = 'https://i.imgur.com/FmbuPNe.jpg'
+            self.assertEqual(
+                f'<a href="{tag_link}" target="_blank">'
+                f'<img src="{link}" alt="cute_kitten.jpg"/></a>',
+                render('{attachment img link=%r}' % tag_link, context=node_props).strip()
+            )
