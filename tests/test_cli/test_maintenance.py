@@ -36,6 +36,81 @@ class PurgeHomeProjectsTest(AbstractPillarTest):
             self.assertEqual(True, proj_coll.find_one({'_id': ObjectId(home_b['_id'])})['_deleted'])
 
 
+class UpgradeAttachmentSchemaTest(AbstractPillarTest):
+    def test_blog_post(self):
+        from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
+        from pillar.cli.maintenance import upgrade_attachment_schema
+
+        old_blog_post_nt = {
+            "name": "post",
+            "description": "A blog post, for any project",
+            "dyn_schema": {
+                "content": {
+                    "type": "string",
+                    "minlength": 5,
+                    "maxlength": 90000,
+                    "required": True
+                },
+                "status": {
+                    "type": "string",
+                    "allowed": ["published", "pending"],
+                    "default": "pending"
+                },
+                "category": {"type": "string"},
+                "url": {"type": "string"},
+                "attachments": {
+                    "type": "dict",
+                    "propertyschema": {"type": "string", "regex": "^[a-zA-Z0-9_ ]+$"},
+                    "valueschema": {
+                        "type": "dict",
+                        "schema": {
+                            "oid": {"type": "objectid", "required": True},
+                            "link": {
+                                "type": "string",
+                                "allowed": ["self", "none", "custom"],
+                                "default": "self"
+                            },
+                            "link_custom": {"type": "string"},
+                            "collection": {
+                                "type": "string",
+                                "allowed": ["files"],
+                                "default": "files"
+                            }
+                        }
+                    }
+                }
+            },
+            "form_schema": {},
+            "parent": ["blog"]
+        }
+
+        pid, project = self.ensure_project_exists(
+            project_overrides={
+                'picture_header': None,
+                'picture_square': None,
+                'node_types': [
+                    PILLAR_NAMED_NODE_TYPES['group_texture'],
+                    PILLAR_NAMED_NODE_TYPES['group'],
+                    PILLAR_NAMED_NODE_TYPES['asset'],
+                    PILLAR_NAMED_NODE_TYPES['storage'],
+                    PILLAR_NAMED_NODE_TYPES['comment'],
+                    PILLAR_NAMED_NODE_TYPES['blog'],
+                    old_blog_post_nt,
+                ]})
+
+        with self.app.app_context():
+            upgrade_attachment_schema(proj_url=project['url'], go=True)
+
+            db_proj = self.app.db('projects').find_one({'_id': pid})
+            db_node_type = db_proj['node_types'][-1]
+            self.assertEqual('post', db_node_type['name'])
+
+            self.assertEqual(
+                PILLAR_NAMED_NODE_TYPES['post']['dyn_schema'],
+                db_node_type['dyn_schema'])
+            self.assertEqual({}, db_node_type['form_schema'])
+
+
 class UpgradeAttachmentUsageTest(AbstractPillarTest):
     def setUp(self, **kwargs):
         super().setUp(**kwargs)

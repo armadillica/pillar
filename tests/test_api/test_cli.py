@@ -328,6 +328,8 @@ class UpgradeAttachmentSchemaTest(AbstractNodeReplacementTest):
 
         group_perms = self.add_group_permission_to_asset_node_type()
 
+        orig_nt_asset = get_node_type(self.proj, 'asset')
+
         with self.app.test_request_context():
             upgrade_attachment_schema(self.proj['url'], go=True)
 
@@ -337,7 +339,9 @@ class UpgradeAttachmentSchemaTest(AbstractNodeReplacementTest):
         nt_asset = get_node_type(dbproj, 'asset')
         self.assertEqual(node_type_asset['dyn_schema']['attachments'],
                          nt_asset['dyn_schema']['attachments'])
-        self.assertNotIn('attachments', nt_asset['form_schema'])
+
+        # The form schema should be untouched.
+        self.assertEqual(orig_nt_asset['form_schema'], nt_asset['form_schema'])
 
         # Test that the permissions set previously are still there.
         self.assertEqual([group_perms], nt_asset['permissions']['groups'])

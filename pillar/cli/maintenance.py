@@ -624,7 +624,6 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False, go=False):
     from pillar.api.node_types.asset import node_type_asset
     from pillar.api.node_types.page import node_type_page
     from pillar.api.node_types.post import node_type_post
-    from pillar.api.node_types import attachments_embedded_schema
     from pillar.api.utils import remove_private_keys, doc_diff
 
     # Node types that support attachments
@@ -643,22 +642,15 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False, go=False):
             if nt_name not in nts_by_name:
                 continue
 
-            if proj_nt['dyn_schema']['attachments'] == attachments_embedded_schema:
+            pillar_nt = nts_by_name[nt_name]
+            pillar_dyn_schema = pillar_nt['dyn_schema']
+            if proj_nt['dyn_schema'] == pillar_dyn_schema:
                 # Schema already up to date.
                 continue
 
             log_proj()
-            log.info('   - replacing attachment schema on node type "%s"', nt_name)
-            pillar_nt = nts_by_name[nt_name]
-            proj_nt['dyn_schema']['attachments'] = copy.deepcopy(attachments_embedded_schema)
-
-            # Get the form schema the same as the official Pillar one, but only for attachments.
-            try:
-                pillar_form_schema = pillar_nt['form_schema']['attachments']
-            except KeyError:
-                proj_nt['form_schema'].pop('attachments', None)
-            else:
-                proj_nt['form_schema']['attachments'] = pillar_form_schema
+            log.info('   - replacing dyn_schema on node type "%s"', nt_name)
+            proj_nt['dyn_schema'] = copy.deepcopy(pillar_dyn_schema)
 
         seen_changes = False
         for key, val1, val2 in doc_diff(orig_proj, project):
