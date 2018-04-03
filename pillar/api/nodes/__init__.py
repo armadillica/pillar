@@ -8,7 +8,6 @@ import werkzeug.exceptions as wz_exceptions
 from bson import ObjectId
 from flask import current_app, Blueprint, request
 
-import pillar.markdown
 from pillar.api.activities import activity_subscribe, activity_object_add
 from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
 from pillar.api.file_storage_backends.gcs import update_file_name

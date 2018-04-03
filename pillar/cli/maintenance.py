@@ -726,8 +726,6 @@ def _find_orphan_files() -> typing.Set[bson.ObjectId]:
 
     Returns an iterable of all orphan file IDs.
     """
-    from pillar.api.utils import str2id
-
     log.debug('Finding orphan files')
 
     # Get all file IDs that belong to this project.
