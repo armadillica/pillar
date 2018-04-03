@@ -13,6 +13,8 @@ supported.
 
 NOTE: only single-line shortcodes are supported for now, due to the need to
 pass them though Markdown unscathed.
+
+See https://pillarframework.org/shortcodes/ for documentation.
 """
 import html as html_module  # I want to be able to use the name 'html' in local scope.
 import logging
