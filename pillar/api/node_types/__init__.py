@@ -7,7 +7,7 @@ _file_embedded_schema = {
     }
 }
 
-ATTACHMENT_SLUG_REGEX = '[a-zA-Z0-9_]+'
+ATTACHMENT_SLUG_REGEX = r'[a-zA-Z0-9_\-]+'
 
 attachments_embedded_schema = {
     'type': 'dict',

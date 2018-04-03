@@ -794,7 +794,6 @@ def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
         return 1
 
     import html
-    from pillar.api.node_types import ATTACHMENT_SLUG_REGEX
     from pillar.api.projects.utils import node_type_dict
     from pillar.api.utils import remove_private_keys
     from pillar.api.utils.authentication import force_cli_user
@@ -803,7 +802,11 @@ def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
 
     nodes_coll = current_app.db('nodes')
     total_nodes = 0
-    old_slug_re = re.compile(r'@\[(%s)\]' % ATTACHMENT_SLUG_REGEX)
+    failed_node_ids = set()
+
+    # Use a mixture of the old slug RE that still allowes spaces in the slug
+    # name and the new RE that allows dashes.
+    old_slug_re = re.compile(r'@\[([a-zA-Z0-9_\- ]+)\]')
     for proj in _db_projects(proj_url, all_projects, go=go):
         proj_id = proj['_id']
         proj_url = proj.get('url', '-no-url-')
@@ -816,15 +819,16 @@ def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
         if node_count == 0:
             log.debug('Skipping project %s (%s)', proj_url, proj_id)
             continue
-        total_nodes += node_count
 
         proj_node_types = node_type_dict(proj)
 
         for node in nodes:
             attachments = node['properties']['attachments']
+            replaced = False
 
             # Inner functions because of access to the node's attachments.
             def replace(match):
+                nonlocal replaced
                 slug = match.group(1)
                 log.debug('    - OLD STYLE attachment slug %r', slug)
                 try:
@@ -840,7 +844,8 @@ def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
                         url = att.get('link_custom')
                         if url:
                             link = " link='%s'" % html.escape(url)
-                return '{attachment %r%s}' % (slug, link)
+                replaced = True
+                return '{attachment %r%s}' % (slug.replace(' ', '-'), link)
 
             def update_markdown(value: str) -> str:
                 return old_slug_re.sub(replace, value)
@@ -848,9 +853,19 @@ def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
             iter_markdown(proj_node_types, node, update_markdown)
 
             # Remove no longer used properties from attachments
-            for attachment in attachments.values():
+            new_attachments = {}
+            for slug, attachment in attachments.items():
+                replaced |= 'link' in attachment  # link_custom implies link
                 attachment.pop('link', None)
                 attachment.pop('link_custom', None)
+                new_attachments[slug.replace(' ', '-')] = attachment
+            node['properties']['attachments'] = new_attachments
+
+            if replaced:
+                total_nodes += 1
+            else:
+                # Nothing got replaced,
+                continue
 
             if go:
                 # Use Eve to PUT, so we have schema checking.
@@ -858,13 +873,16 @@ def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
                 r, _, _, status = current_app.put_internal('nodes', db_node, _id=node['_id'])
                 if status != 200:
                     log.error('Error %i storing altered node %s %s', status, node['_id'], r)
-                    raise SystemExit('Error storing node; see log.')
+                    failed_node_ids.add(node['_id'])
+                    # raise SystemExit('Error storing node; see log.')
                 log.debug('Updated node %s: %s', node['_id'], r)
 
         log.info('Project %s (%s) has %d nodes with attachments',
                  proj_url, proj_id, node_count)
-    if not go:
-        log.info('Would update %d nodes', total_nodes)
+    log.info('%s %d nodes', 'Updated' if go else 'Would update', total_nodes)
+    if failed_node_ids:
+        log.warning('Failed to update %d of %d nodes: %s', len(failed_node_ids), total_nodes,
+                    ', '.join(str(nid) for nid in failed_node_ids))
 
 
 def _db_projects(proj_url: str, all_projects: bool, project_id='', *, go: bool) \

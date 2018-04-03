@@ -134,13 +134,13 @@ class UpgradeAttachmentUsageTest(AbstractPillarTest):
                 'picture': self.fid,
                 'project': self.pid,
                 'user': self.uid,
-                'description': "# Title\n\n@[slug0]\n@[slug1]\n@[slug2]\nEitje van Fabergé.",
+                'description': "# Title\n\n@[slug 0]\n@[slug1]\n@[slug2]\nEitje van Fabergé.",
                 'properties': {
                     'status': 'published',
                     'content_type': 'image',
                     'file': self.fid,
                     'attachments': {
-                        'slug0': {
+                        'slug 0': {
                             'oid': self.fid,
                             'link': 'self',
                         },
@@ -165,7 +165,7 @@ class UpgradeAttachmentUsageTest(AbstractPillarTest):
 
             self.assertEqual(
                 "# Title\n\n"
-                "{attachment 'slug0' link='self'}\n"
+                "{attachment 'slug-0' link='self'}\n"
                 "{attachment 'slug1' link='https://cloud.blender.org/'}\n"
                 "{attachment 'slug2'}\n"
                 "Eitje van Fabergé.",
@@ -173,7 +173,7 @@ class UpgradeAttachmentUsageTest(AbstractPillarTest):
                 'The description should be updated')
             self.assertEqual(
                 "<h1>Title</h1>\n"
-                "<!-- {attachment 'slug0' link='self'} -->\n"
+                "<!-- {attachment 'slug-0' link='self'} -->\n"
                 "<!-- {attachment 'slug1' link='https://cloud.blender.org/'} -->\n"
                 "<!-- {attachment 'slug2'} -->\n"
                 "<p>Eitje van Fabergé.</p>\n",
@@ -181,7 +181,7 @@ class UpgradeAttachmentUsageTest(AbstractPillarTest):
                 'The _description_html should be updated')
 
             self.assertEqual(
-                {'slug0': {'oid': self.fid},
+                {'slug-0': {'oid': self.fid},
                  'slug1': {'oid': self.fid},
                  'slug2': {'oid': self.fid},
                  },
