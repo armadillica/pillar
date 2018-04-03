@@ -634,8 +634,8 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False, go=False):
     nodes_coll = current_app.db('nodes')
 
     def replace_schemas(project):
-        log_proj = _single_logger('Upgrading schema project %s (%s)',
-                                  project['url'], project['_id'])
+        project_url = project.get('url', '-no-url-')
+        log_proj = _single_logger('Upgrading schema project %s (%s)', project_url, project['_id'])
 
         orig_proj = copy.deepcopy(project)
         for proj_nt in project['node_types']:
@@ -663,7 +663,7 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False, go=False):
         seen_changes = False
         for key, val1, val2 in doc_diff(orig_proj, project):
             if not seen_changes:
-                log.info('Schema changes to project %s (%s):', project['url'], project['_id'])
+                log.info('Schema changes to project %s (%s):', project_url, project['_id'])
                 seen_changes = True
             log.info('    - %30s: %s → %s', key, val1, val2)
 
@@ -677,8 +677,9 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False, go=False):
             log.debug('Project saved succesfully.')
 
     def replace_attachments(project):
+        project_url = project.get('url', '-no-url-')
         log_proj = _single_logger('Upgrading nodes for project %s (%s)',
-                                  project['url'], project['_id'])
+                                  project_url, project['_id'])
 
         # Remove empty attachments
         if go:
