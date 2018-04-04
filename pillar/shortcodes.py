@@ -142,16 +142,14 @@ def iframe(context: typing.Any,
     import xml.etree.ElementTree as ET
     from pillar.auth import current_user
 
-    cap = kwargs.pop('cap', None)
-    if not cap:
-        return html_module.escape('{iframe missing cap="somecap"}')
-
-    nocap = kwargs.pop('nocap', '')
-    if not current_user.has_cap(cap):
-        if not nocap:
-            return ''
-        html = html_module.escape(nocap)
-        return f'<p class="shortcode nocap">{html}</p>'
+    cap = kwargs.pop('cap', '')
+    if cap:
+        nocap = kwargs.pop('nocap', '')
+        if not current_user.has_cap(cap):
+            if not nocap:
+                return ''
+            html = html_module.escape(nocap)
+            return f'<p class="shortcode nocap">{html}</p>'
 
     kwargs['class'] = f'shortcode {kwargs.get("class", "")}'.strip()
     element = ET.Element('iframe', kwargs)

@@ -109,7 +109,9 @@ class IFrameTest(AbstractPillarTest):
     def test_missing_cap(self):
         from pillar.shortcodes import render
 
-        self.assertEqual('{iframe missing cap=&quot;somecap&quot;}', render('{iframe}'))
+        md = '{iframe src="https://docs.python.org/3/library/"}'
+        expect = '<iframe class="shortcode" src="https://docs.python.org/3/library/"></iframe>'
+        self.assertEqual(expect, render(md))
 
     def test_user_no_cap(self):
         from pillar.shortcodes import render
