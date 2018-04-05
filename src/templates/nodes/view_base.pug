@@ -55,7 +55,7 @@
 				li(title="Author")
 					| {{ node.user.full_name }}
 
-				li.dim(
+				li(
 					title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
 					| {{ node._created | pretty_date }}
 
@@ -69,9 +69,9 @@
 				li.left-side
 
 				| {% if node.file %}
-				li.dim(title="File size")
+				li(title="File size")
 					| {{ node.file.length | filesizeformat }}
-				li.dim.js-type(title="File format")
+				li.js-type(title="File format")
 					| {{ node.file.content_type }}
 				| {% endif %}
 

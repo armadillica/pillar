@@ -19,7 +19,7 @@ section.node-preview-forbidden
 		| {% endif %}
 
 		| {% if current_user.is_anonymous %}
-		p
-			small Already a subscriber?
-		a.btn(href="{{ url_for('users.login') }}") Log In
+		p(style="margin-top: 15px")
+			small
+				a(href="{{ url_for('users.login') }}") Already a subscriber? Log in
 		| {% endif %}
