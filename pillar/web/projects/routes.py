@@ -197,14 +197,17 @@ def synced_blender_versions(home_project_id, api):
     if not sync_group:
         return []
 
-    sync_nodes = Node.all({
-        'where': {'project': home_project_id,
-                  'node_type': 'group',
-                  'parent': sync_group['_id']},
-        'projection': {
-            'name': 1,
-            '_updated': 1,
-        }},
+    sync_nodes = Node.all(
+        {
+            'where': {'project': home_project_id,
+                      'node_type': 'group',
+                      'parent': sync_group['_id']},
+            'projection': {
+                'name': 1,
+                '_updated': 1,
+            },
+            'sort': [('_updated', -1)],
+        },
         api=api)
 
     sync_nodes = sync_nodes._items
