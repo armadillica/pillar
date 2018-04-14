@@ -16,7 +16,7 @@ SCHEME = 'https'
 PREFERRED_URL_SCHEME = SCHEME
 
 # Be sure to set this in your config_local:
-# SERVER_NAME = 'blender-cloud:5001'
+# SERVER_NAME = 'pillar.local:5000'
 # PILLAR_SERVER_ENDPOINT = f'{SCHEME}://{SERVER_NAME}/api/'
 
 STORAGE_DIR = getenv('PILLAR_STORAGE_DIR', '/data/storage/pillar')
@@ -33,8 +33,6 @@ AUTH_TOKEN_HMAC_KEY = b''
 
 # Authentication settings
 BLENDER_ID_ENDPOINT = 'http://blender-id:8000/'
-
-PILLAR_SERVER_ENDPOINT = 'http://pillar:5001/api/'
 
 CDN_USE_URL_SIGNING = True
 CDN_SERVICE_DOMAIN_PROTOCOL = 'https'
