@@ -14,7 +14,7 @@ GROUP_NODES = {'group', 'storage', 'group_texture', 'group_hdri'}
 # Node types that shouldn't be embedded in the project view.
 # Rather those nodes have their own end point for viewing.
 # Such nodes should implement a finder in web/nodes/finders.py.
-CUSTOM_VIEW_NODE_TYPES = {'blog'}
+CUSTOM_VIEW_NODE_TYPES = {'blog', 'page'}
 
 log = logging.getLogger(__name__)
 
