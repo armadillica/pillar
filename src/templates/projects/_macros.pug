@@ -26,9 +26,15 @@ nav.navbar-secondary
 				| {% endfor %}
 				| {% endif %}
 				| {% if project.nodes_featured %}
+				| {# In some cases featured_nodes might might be embedded #}
+				| {% if '_id' in project.nodes_featured[0] %}
+				| {% set featured_node_id=project.nodes_featured[0]._id %}
+				| {% else %}
+				| {% set featured_node_id=project.nodes_featured[0] %}
+				| {% endif %}
 				li
 					a.navbar-item(
-					href="{{ url_for('projects.view_node', project_url=project.url, node_id=project.nodes_featured[0]) }}",
+					href="{{ url_for('projects.view_node', project_url=project.url, node_id=featured_node_id) }}",
 					title="Explore {{ project.name }}",
 					class="{% if category == 'blog' %}active{% endif %}")
 						span Explore
