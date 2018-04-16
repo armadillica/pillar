@@ -1,13 +1,15 @@
-| {% block body %}
+| {% extends 'projects/landing.html' %}
 
+| {% block body %}
+| {% if node.picture %}
+header
+	img.header(src="{{ node.picture.thumbnail('l', api=api) }}")
+| {% endif  %}
+| {% block navbar_secondary %}
+| {{ super() }}
+| {% endblock navbar_secondary %}
 #node-container
 	#node-overlay
-
-	| {% if node.picture %}
-	section#node-preview.node-preview.page
-		img.node-preview-thumbnail#node-preview-thumbnail(
-			src="{{ node.picture.thumbnail('l', api=api) }}")
-	| {% endif %}
 
 	section.node-details-container.page
 
@@ -28,6 +30,7 @@ include ../_scripts
 | {% endblock %}
 
 | {% block footer_scripts %}
+| {{ super() }}
 script.
 	// Push the correct URL onto the history. This push happens after the id has
 	// been pushed to the history already. We should probably keep only this and
@@ -41,6 +44,9 @@ script.
 		url
 	);
 	// Generate GA pageview
-	ga('send', 'pageview', location.pathname);
+	$(document).ready(function () {
+		ga('send', 'pageview', location.pathname);
+	});
+
 | {% endblock %}
 

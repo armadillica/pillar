@@ -448,6 +448,17 @@ def view_node(project_url, node_id):
     # Append _theatre to load the proper template
     theatre = '_theatre' if theatre_mode else ''
 
+    if node.node_type == 'page':
+        pages = Node.all({
+            'where': {'project': project._id, 'node_type': 'page'},
+            'projection': {'name': 1}}, api=api)
+        return render_template('nodes/custom/page/view_embed.html',
+                               api=api,
+                               node=node,
+                               project=project,
+                               pages=pages._items,
+                               og_picture=og_picture,)
+
     extension_sidebar_links = current_app.extension_sidebar_links(project)
 
     return render_template('projects/view{}.html'.format(theatre),

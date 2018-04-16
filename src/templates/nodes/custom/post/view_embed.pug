@@ -4,15 +4,13 @@
 
 	#blog_index-container.expand-image-links
 		.blog-action
-			| {% if project and project._id == config.MAIN_PROJECT_ID %}
 			| {% if node.has_method('PUT') %}
 			a.btn.btn-default.button-edit(href="{{url_for('nodes.edit', node_id=node._id)}}")
 				i.pi-edit
 				| Edit Post
 			| {% endif %}
-			| {% endif %}
 
-		| {{ blogmacros.render_blog_post(node) }}
+		| {{ blogmacros.render_blog_post(node, project=project) }}
 
 		#comments-embed
 			.comments-list-loading

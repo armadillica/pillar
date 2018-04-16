@@ -6,6 +6,8 @@
 @import _error
 @import _search
 
+.container-fluid.blog
+	padding: 0
 
 #blog_container
 	+media-xs
@@ -13,7 +15,6 @@
 		padding-top: 0
 	display: flex
 	padding:
-		top: 15px
 		bottom: 15px
 
 	video
@@ -178,11 +179,11 @@
 		clear: both
 		display: block
 	+media-sm
-		width: 60%
+		width: 100%
 	+media-md
-		width: 70%
+		width: 100%
 	+media-lg
-		width: 75%
+		width: 100%
 
 	.blog_index-header
 		border-top-left-radius: 3px
@@ -198,9 +199,9 @@
 
 	.blog_index-item
 		+media-lg
-			max-width: 880px
+			max-width: 780px
 		+media-md
-			max-width: 880px
+			max-width: 780px
 		+media-sm
 			max-width: 780px
 
@@ -248,7 +249,7 @@
 		ul.meta
 			+list-meta
 			font-size: .9em
-			padding: 15px 25px 5px
+			padding: 0px 25px 5px
 
 		.item-content
 			+node-details-description
@@ -480,7 +481,7 @@
 		#blog_index-container,
 		#blog_post-create-container,
 		#blog_post-edit-container
-			width: 90%
+			width: 100%
 			padding: 25px 30px 20px 30px
 
 		#blog_index-container+#blog_index-sidebar
@@ -505,7 +506,7 @@
 			&.list
 				margin: 0 auto
 				padding: 15px 0
-				margin: 0 80px
+				margin: 0 auto
 				border-bottom: thin solid $color-background
 
 				&:last-child
@@ -584,7 +585,7 @@
 		size: 1.2em
 		weight: 300
 	margin: 0 auto
-	max-width: 90%
+	max-width: 780px
 	text-align: center
 	+text-overflow-ellipsis
 

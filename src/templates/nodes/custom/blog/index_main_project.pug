@@ -4,8 +4,13 @@
 
 | {% block page_title %}Blog{% endblock%}
 
+| {% block css %}
+| {{ super() }}
+link(href="{{ url_for('static_cloud', filename='assets/css/project-landing.css') }}", rel="stylesheet")
+| {% endblock css %}
+
 | {% block body %}
-.container
+.container-fluid.blog
 	#blog_container.cloud-blog
 		#blog_index-container.expand-image-links
 			| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta) }}
