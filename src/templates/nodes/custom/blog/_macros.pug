@@ -1,32 +1,12 @@
 //- ******************************************************* -//
-| {% macro render_blog_post(node, project=None) %}
+| {% import 'projects/_macros.html' as projectmacros %}
+| {% macro render_blog_post(node, project=None, pages=None) %}
 | {% if node.picture %}
 a.blog_index-header(href="{{ node.url }}")
 	img(src="{{ node.picture.thumbnail('l', api=api) }}")
 | {% endif %}
 | {% if project and project._id != config.MAIN_PROJECT_ID %}
-nav.navbar-secondary
-	.navbar-container
-		nav.collapse.navbar-collapse
-			ul.nav.navbar-nav.navbar-right
-				li
-					a.navbar-item(
-					href="{{ url_for('projects.view', project_url='hero') }}",
-					title="Hero Homepage")
-						span
-							b Hero
-				li
-					a.navbar-item.active(
-					href="{{ url_for('main.project_blog', project_url=project.url) }}",
-					title="Project Blog",
-					class="{% if category == 'blog' %}active{% endif %}")
-						span Blog
-				li
-					a.navbar-item(
-					href="{{ url_for('main.project_blog', project_url=project.url) }}",
-					title="Project Blog",
-					class="{% if category == 'blog' %}active{% endif %}")
-						span Explore
+| {{ projectmacros.render_secondary_navigation(project, pages=pages) }}
 | {% endif %}
 .blog_index-item
 	a.item-title(
@@ -83,7 +63,7 @@ nav.navbar-secondary
 
 
 //- ******************************************************* -//
-| {% macro render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta) %}
+| {% macro render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta, pages=None) %}
 | {% if can_create_blog_posts %}
 .blog-action
 	a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
@@ -92,7 +72,7 @@ nav.navbar-secondary
 | {% endif %}
 
 | {% if posts %}
-| {{ render_blog_post(posts[0], project=project) }}
+| {{ render_blog_post(posts[0], project=project, pages=pages) }}
 
 | {% for node in posts[1:] %}
 | {% if loop.first %}
