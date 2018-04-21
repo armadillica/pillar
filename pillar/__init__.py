@@ -184,7 +184,6 @@ class PillarServer(BlinkerCompatibleEve):
 
         if not self.config.get('STATIC_FILE_HASH'):
             self.log.warning('STATIC_FILE_HASH is empty, generating random one')
-            f = open('/data/git/blender-cloud/config_local.py', 'a')
             h = re.sub(r'[_.~-]', '', secrets.token_urlsafe())[:8]
             self.config['STATIC_FILE_HASH'] = h
 
