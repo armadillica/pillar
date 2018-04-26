@@ -1,5 +1,5 @@
 from flask_login import current_user
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from pillar.web import system_util
 from pillarsdk.users import User
 
@@ -14,7 +14,7 @@ from wtforms.validators import Regexp
 import wtforms.validators as wtvalid
 
 
-class UserLoginForm(Form):
+class UserLoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     remember_me = BooleanField('Remember Me')
@@ -23,7 +23,7 @@ class UserLoginForm(Form):
         super(UserLoginForm, self).__init__(csrf_enabled=False, *args, **kwargs)
 
 
-class UserProfileForm(Form):
+class UserProfileForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired(), Length(
         min=3, max=128, message="Min. 3, max. 128 chars please"), Regexp(
         r'^[\w.@+-]+$', message="Please do not use spaces")])
@@ -52,7 +52,7 @@ class UserProfileForm(Form):
         return True
 
 
-class UserSettingsEmailsForm(Form):
+class UserSettingsEmailsForm(FlaskForm):
     choices = [
         (1, 'Keep me updated with Blender Cloud news.'),
         (0, 'Do not mail me news update.')]
@@ -74,7 +74,7 @@ class RolesField(SelectMultipleField):
         return current_app.user_roles
 
 
-class UserEditForm(Form):
+class UserEditForm(FlaskForm):
     roles = RolesField('Roles')
     email = StringField(
         validators=[wtvalid.DataRequired(), wtvalid.Email()],

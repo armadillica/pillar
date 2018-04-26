@@ -4,7 +4,7 @@ from datetime import datetime
 from datetime import date
 import pillarsdk
 from flask import current_app
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import DateField
 from wtforms import SelectField
@@ -110,7 +110,7 @@ def get_node_form(node_type):
     :param node_type: Describes the node type via dyn_schema, form_schema and
     parent
     """
-    class ProceduralForm(Form):
+    class ProceduralForm(FlaskForm):
         pass
 
     parent_prop = node_type['parent']

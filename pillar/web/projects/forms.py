@@ -1,4 +1,4 @@
-from flask_wtf import Form
+from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import BooleanField
 from wtforms import HiddenField
@@ -12,7 +12,7 @@ from pillar.web import system_util
 from pillar.web.utils.forms import FileSelectField, JSONRequired
 
 
-class ProjectForm(Form):
+class ProjectForm(FlaskForm):
     project_id = HiddenField('project_id', validators=[DataRequired()])
     name = StringField('Name', validators=[DataRequired()])
     url = StringField('Url', validators=[DataRequired()])
@@ -32,7 +32,7 @@ class ProjectForm(Form):
     picture_square = FileSelectField('Picture square', file_format='image')
 
     def validate(self):
-        rv = Form.validate(self)
+        rv = FlaskForm.validate(self)
         if not rv:
             return False
 
@@ -54,7 +54,7 @@ class ProjectForm(Form):
         return True
 
 
-class NodeTypeForm(Form):
+class NodeTypeForm(FlaskForm):
     project_id = HiddenField('project_id', validators=[DataRequired()])
     name = StringField('Name', validators=[DataRequired()])
     parent = StringField('Parent')
