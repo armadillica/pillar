@@ -3,7 +3,7 @@
 | {% block body %}
 | {% if node.picture %}
 header
-	img.header(src="{{ node.picture.thumbnail('l', api=api) }}")
+	img.header(src="{{ node.picture.thumbnail('h', api=api) }}")
 | {% endif  %}
 | {% block navbar_secondary %}
 | {{ super() }}

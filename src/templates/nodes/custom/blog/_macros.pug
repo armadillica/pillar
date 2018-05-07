@@ -3,7 +3,7 @@
 | {% macro render_blog_post(node, project=None, pages=None) %}
 | {% if node.picture %}
 a.blog_index-header(href="{{ node.url }}")
-	img(src="{{ node.picture.thumbnail('l', api=api) }}")
+	img(src="{{ node.picture.thumbnail('h', api=api) }}")
 | {% endif %}
 | {% if project and project._id != config.MAIN_PROJECT_ID %}
 | {{ projectmacros.render_secondary_navigation(project, pages=pages) }}
