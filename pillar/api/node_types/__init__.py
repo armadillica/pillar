@@ -40,6 +40,51 @@ attachments_embedded_schema = {
     },
 }
 
+# TODO (fsiddi) reference this schema in all node_types that allow ratings
+ratings_embedded_schema = {
+    'type': 'dict',
+    # Total count of positive ratings (updated at every rating action)
+    'schema': {
+        'positive': {
+            'type': 'integer',
+        },
+        # Total count of negative ratings (updated at every rating action)
+        'negative': {
+            'type': 'integer',
+        },
+        # Collection of ratings, keyed by user
+        'ratings': {
+            'type': 'list',
+            'schema': {
+                'type': 'dict',
+                'schema': {
+                    'user': {
+                        'type': 'objectid',
+                        'data_relation': {
+                            'resource': 'users',
+                            'field': '_id',
+                            'embeddable': False
+                        }
+                    },
+                    'is_positive': {
+                        'type': 'boolean'
+                    },
+                    # Weight of the rating based on user rep and the context.
+                    # Currently we have the following weights:
+                    # - 1 auto null
+                    # - 2 manual null
+                    # - 3 auto valid
+                    # - 4 manual valid
+                    'weight': {
+                        'type': 'integer'
+                    }
+                }
+            }
+        },
+        'hot': {'type': 'float'},
+    },
+}
+
 # Import after defining the common embedded schemas, to prevent dependency cycles.
 from pillar.api.node_types.asset import node_type_asset
 from pillar.api.node_types.blog import node_type_blog
