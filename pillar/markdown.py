@@ -45,11 +45,15 @@ ALLOWED_STYLES = [
 def markdown(s: str) -> str:
     commented_shortcodes = shortcodes.comment_shortcodes(s)
     tainted_html = CommonMark.commonmark(commented_shortcodes)
-    safe_html = bleach.clean(tainted_html,
-                             tags=ALLOWED_TAGS,
+
+    # Create a Cleaner that supports parsing of bare links (see filters).
+    cleaner = bleach.Cleaner(tags=ALLOWED_TAGS,
                              attributes=ALLOWED_ATTRIBUTES,
                              styles=ALLOWED_STYLES,
-                             strip_comments=False)
+                             strip_comments=False,
+                             filters=[bleach.linkifier.LinkifyFilter])
+
+    safe_html = cleaner.clean(tainted_html)
     return safe_html
 
 
