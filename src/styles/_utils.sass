@@ -405,6 +405,10 @@
 			bottom: 25px
 			top: 25px
 
+		&.emoji
+			display: inline-block
+			padding: initial
+
 	h2
 		margin-bottom: 15px
 
@@ -443,15 +447,12 @@
 
 		li
 			margin-bottom: 7px
+
 			img
 				display: block
 				padding:
 					bottom: 10px
 					top: 25px
-
-				&.emoji
-					display: inline-block
-					padding: initial
 
 			ul, ul li ul
 				margin-top: 15px
@@ -459,9 +460,12 @@
 
 	code, kbd, pre, samp
 		background-color: rgba($color-primary, .05)
-		color: $color-primary
+		color: darken($color-primary, 15%)
 		font-size: inherit
 		white-space: pre-line
+
+		code
+			background-color: transparent
 
 	kbd
 		border:
