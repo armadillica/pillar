@@ -47,13 +47,6 @@ def store_subclient_token():
                     'subclient_user_id': str(db_user['_id'])}), status
 
 
-def blender_id_endpoint():
-    """Gets the endpoint for the authentication API. If the env variable
-    is defined, it's possible to override the (default) production address.
-    """
-    return current_app.config['BLENDER_ID_ENDPOINT'].rstrip('/')
-
-
 def validate_create_user(blender_id_user_id, token, oauth_subclient_id):
     """Validates a user against Blender ID, creating the user in our database.
 
@@ -121,13 +114,13 @@ def validate_token(user_id, token, oauth_subclient_id):
         # We only want to accept Blender Cloud tokens.
         payload['client_id'] = current_app.config['OAUTH_CREDENTIALS']['blender-id']['id']
 
-    url = '{0}/u/validate_token'.format(blender_id_endpoint())
+    url = '{0}/u/validate_token'.format(current_app.config['BLENDER_ID_ENDPOINT'])
     log.debug('POSTing to %r', url)
 
     # Retry a few times when POSTing to BlenderID fails.
     # Source: http://stackoverflow.com/a/15431343/875379
     s = requests.Session()
-    s.mount(blender_id_endpoint(), HTTPAdapter(max_retries=5))
+    s.mount(current_app.config['BLENDER_ID_ENDPOINT'], HTTPAdapter(max_retries=5))
 
     # POST to Blender ID, handling errors as negative verification results.
     try:
@@ -225,7 +218,7 @@ def fetch_blenderid_user() -> dict:
 
     my_log = log.getChild('fetch_blenderid_user')
 
-    bid_url = '%s/api/user' % blender_id_endpoint()
+    bid_url = '%s/api/user' % current_app.config['BLENDER_ID_ENDPOINT']
     my_log.debug('Fetching user info from %s', bid_url)
 
     credentials = current_app.config['OAUTH_CREDENTIALS']['blender-id']
@@ -270,7 +263,7 @@ def setup_app(app, url_prefix):
 def switch_user_url(next_url: str) -> str:
     from urllib.parse import quote
 
-    base_url = '%s/switch' % blender_id_endpoint()
+    base_url = '%s/switch' % current_app.config['BLENDER_ID_ENDPOINT']
     if next_url:
         return '%s?next=%s' % (base_url, quote(next_url))
     return base_url

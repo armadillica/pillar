@@ -12,7 +12,7 @@ class OAuthTests(AbstractPillarTest):
 
         oauth_provider = OAuthSignIn.get_provider('blender-id')
         self.assertIsInstance(oauth_provider, BlenderIdSignIn)
-        self.assertEqual(oauth_provider.service.base_url, 'http://blender-id:8000/api/')
+        self.assertEqual(oauth_provider.service.base_url, 'http://id.local:8001/api/')
 
     def test_provider_not_implemented(self):
         from pillar.auth.oauth import OAuthSignIn, ProviderNotImplemented
@@ -46,11 +46,11 @@ class OAuthTests(AbstractPillarTest):
     def test_provider_callback_happy(self):
         from pillar.auth.oauth import OAuthSignIn
 
-        responses.add(responses.POST, 'http://blender-id:8000/oauth/token',
+        responses.add(responses.POST, 'http://id.local:8001/oauth/token',
                       json={'access_token': 'successful-token'},
                       status=200)
 
-        responses.add(responses.GET, 'http://blender-id:8000/api/user',
+        responses.add(responses.GET, 'http://id.local:8001/api/user',
                       json={'id': '7',
                             'email': 'harry@blender.org'},
                       status=200)

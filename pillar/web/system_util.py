@@ -12,14 +12,6 @@ from pillar.sdk import FlaskInternalApi
 log = logging.getLogger(__name__)
 
 
-def blender_id_endpoint():
-    """Gets the endpoint for the authentication API. If the env variable
-    is defined, it's possible to override the (default) production address.
-    """
-    return os.environ.get('BLENDER_ID_ENDPOINT',
-                          "https://www.blender.org/id").rstrip('/')
-
-
 def pillar_server_endpoint():
     """Gets the endpoint for the authentication API. If the env variable
     is defined, we will use the one from the config object.

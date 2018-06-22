@@ -1,6 +1,6 @@
 """Flask configuration file for unit testing."""
 
-BLENDER_ID_ENDPOINT = 'http://127.0.0.1:8001'  # nonexistant server, no trailing slash!
+BLENDER_ID_ENDPOINT = 'http://id.local:8001'  # Non existant server
 
 SERVER_NAME = 'localhost'
 PILLAR_SERVER_ENDPOINT = 'http://localhost/api/'
@@ -26,7 +26,6 @@ OAUTH_CREDENTIALS = {
     'blender-id': {
         'id': 'blender-id-app-id',
         'secret': 'blender-id–secret',
-        'base_url': 'http://blender-id:8000/'
     },
     'facebook': {
         'id': 'fb-app-id',

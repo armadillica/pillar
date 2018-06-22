@@ -131,16 +131,15 @@ class BlenderIdSignIn(OAuthSignIn):
     def __init__(self):
         super().__init__()
 
-        base_url = current_app.config['OAUTH_CREDENTIALS']['blender-id'].get(
-            'base_url', 'https://www.blender.org/id/')
+        base_url = current_app.config['BLENDER_ID_ENDPOINT']
 
         self.service = OAuth2Service(
             name='blender-id',
             client_id=self.consumer_id,
             client_secret=self.consumer_secret,
-            authorize_url='%soauth/authorize' % base_url,
-            access_token_url='%soauth/token' % base_url,
-            base_url='%sapi/' % base_url
+            authorize_url='%s/oauth/authorize' % base_url,
+            access_token_url='%s/oauth/token' % base_url,
+            base_url='%s/api/' % base_url
         )
 
     def authorize(self):
