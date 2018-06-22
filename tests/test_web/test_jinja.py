@@ -11,8 +11,8 @@ class MarkdownTest(unittest.TestCase):
     def test_bleached(self):
         from pillar.web import jinja
 
-        self.assertEqual('&lt;script&gt;alert("hey");&lt;script&gt;',
-                         jinja.do_markdown('<script>alert("hey");<script>').strip())
+        self.assertEqual('&lt;script&gt;alert("hey");&lt;/script&gt;',
+                         jinja.do_markdown('<script>alert("hey");</script>').strip())
 
     def test_degenerate(self):
         from pillar.web import jinja
