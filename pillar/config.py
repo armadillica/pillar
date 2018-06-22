@@ -32,7 +32,7 @@ SECRET_KEY = ''
 AUTH_TOKEN_HMAC_KEY = b''
 
 # Authentication settings
-BLENDER_ID_ENDPOINT = 'https://id.local:8000'
+BLENDER_ID_ENDPOINT = 'http://id.local:8000'
 
 CDN_USE_URL_SIGNING = True
 CDN_SERVICE_DOMAIN_PROTOCOL = 'https'
