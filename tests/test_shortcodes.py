@@ -40,7 +40,7 @@ class DemoTest(unittest.TestCase):
         self.assertEqual('<dl><dt>test</dt><dt>ü</dt><dd>é</dd></dl>', render('{test ü="é"}'))
 
 
-class YouTubeTest(unittest.TestCase):
+class YouTubeTest(AbstractPillarTest):
     def test_missing(self):
         from pillar.shortcodes import render
 
@@ -103,6 +103,19 @@ class YouTubeTest(unittest.TestCase):
             'allow="autoplay; encrypted-media" allowfullscreen></iframe>',
             render('{youtube "https://www.youtube.com/watch?v=NwVGvcIrNWA" width=5 height="3"}')
         )
+
+    def test_user_no_cap(self):
+        from pillar.shortcodes import render
+
+        with self.app.app_context():
+            # Anonymous user, so no subscriber capability.
+            self.assertEqual('', render('{youtube ABCDEF cap=subscriber}'))
+            self.assertEqual('', render('{youtube ABCDEF cap="subscriber"}'))
+            self.assertEqual(
+                '<p class="shortcode nocap">Aðeins áskrifendur hafa aðgang að þessu efni.</p>',
+                render('{youtube ABCDEF'
+                       ' cap="subscriber"'
+                       ' nocap="Aðeins áskrifendur hafa aðgang að þessu efni."}'))
 
 
 class IFrameTest(AbstractPillarTest):

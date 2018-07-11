@@ -33,16 +33,55 @@ log = logging.getLogger(__name__)
 def shortcode(name: str):
     """Class decorator for shortcodes."""
 
-    def decorator(cls):
-        assert hasattr(cls, '__call__'), '@shortcode should be used on callables.'
-        if isinstance(cls, type):
-            instance = cls()
+    def decorator(decorated):
+        assert hasattr(decorated, '__call__'), '@shortcode should be used on callables.'
+        if isinstance(decorated, type):
+            as_callable = decorated()
         else:
-            instance = cls
-        shortcodes.register(name)(instance)
-        return cls
+            as_callable = decorated
+        shortcodes.register(name)(as_callable)
+        return decorated
 
     return decorator
+
+
+class capcheck:
+    """Decorator for shortcodes.
+
+    On call, check for capabilities before calling the function. If the user does not
+    have a capability, display a message insdead of the content.
+
+    kwargs:
+        - 'cap': Capability required for viewing.
+        - 'nocap': Optional, text shown when the user does not have this capability.
+        - others: Passed to the decorated shortcode.
+    """
+
+    def __init__(self, decorated):
+        assert hasattr(decorated, '__call__'), '@capcheck should be used on callables.'
+        if isinstance(decorated, type):
+            as_callable = decorated()
+        else:
+            as_callable = decorated
+        self.decorated = as_callable
+
+    def __call__(self,
+                 context: typing.Any,
+                 content: str,
+                 pargs: typing.List[str],
+                 kwargs: typing.Dict[str, str]) -> str:
+        from pillar.auth import current_user
+
+        cap = kwargs.pop('cap', '')
+        if cap:
+            nocap = kwargs.pop('nocap', '')
+            if not current_user.has_cap(cap):
+                if not nocap:
+                    return ''
+                html = html_module.escape(nocap)
+                return f'<p class="shortcode nocap">{html}</p>'
+
+        return self.decorated(context, content, pargs, kwargs)
 
 
 @shortcode('test')
@@ -68,6 +107,7 @@ class Test:
 
 
 @shortcode('youtube')
+@capcheck
 class YouTube:
     log = log.getChild('YouTube')
 
@@ -129,6 +169,7 @@ class YouTube:
 
 
 @shortcode('iframe')
+@capcheck
 def iframe(context: typing.Any,
            content: str,
            pargs: typing.List[str],
@@ -140,16 +181,6 @@ def iframe(context: typing.Any,
         - others: Turned into attributes for the iframe element.
     """
     import xml.etree.ElementTree as ET
-    from pillar.auth import current_user
-
-    cap = kwargs.pop('cap', '')
-    if cap:
-        nocap = kwargs.pop('nocap', '')
-        if not current_user.has_cap(cap):
-            if not nocap:
-                return ''
-            html = html_module.escape(nocap)
-            return f'<p class="shortcode nocap">{html}</p>'
 
     kwargs['class'] = f'shortcode {kwargs.get("class", "")}'.strip()
     element = ET.Element('iframe', kwargs)
