@@ -7,7 +7,7 @@ node_type_comment = {
             'type': 'string',
             'minlength': 5,
             'required': True,
-            'coerce': 'markdown',
+            'validator': 'markdown',
         },
         '_content_html': {'type': 'string'},
         'status': {

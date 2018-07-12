@@ -58,7 +58,7 @@ class RoleUpdatingTest(AbstractPillarTest):
 
         self.get('/api/bcloud/update-subscription', auth_token='my-happy-token',
                  expected_status=204)
-        user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
+        user_info = self.get('/api/users/me', auth_token='my-happy-token').get_json()
         self.assertEqual({'subscriber', 'has_subscription'}, set(user_info['roles']))
 
         # Check the signals
@@ -75,13 +75,13 @@ class RoleUpdatingTest(AbstractPillarTest):
 
         # Make sure this user is currently known as a subcriber.
         self.create_user(roles={'subscriber', 'has_subscription'}, token='my-happy-token')
-        user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
+        user_info = self.get('/api/users/me', auth_token='my-happy-token').get_json()
         self.assertEqual({'subscriber', 'has_subscription'}, set(user_info['roles']))
 
         # And after updating, it shouldn't be.
         self.get('/api/bcloud/update-subscription', auth_token='my-happy-token',
                  expected_status=204)
-        user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
+        user_info = self.get('/api/users/me', auth_token='my-happy-token').get_json()
         self.assertEqual([], user_info['roles'])
 
         self.assertEqual(1, len(self.user_subs_signal_calls))
@@ -98,7 +98,7 @@ class RoleUpdatingTest(AbstractPillarTest):
         self.get('/api/bcloud/update-subscription', auth_token='my-happy-token',
                  expected_status=204)
 
-        user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
+        user_info = self.get('/api/users/me', auth_token='my-happy-token').get_json()
         self.assertEqual(['demo'], user_info['roles'])
 
         self.assertEqual(1, len(self.user_subs_signal_calls))
@@ -113,13 +113,13 @@ class RoleUpdatingTest(AbstractPillarTest):
 
         # Make sure this user is currently known as demo user.
         self.create_user(roles={'demo'}, token='my-happy-token')
-        user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
+        user_info = self.get('/api/users/me', auth_token='my-happy-token').get_json()
         self.assertEqual(['demo'], user_info['roles'])
 
         # And after updating, it shouldn't be.
         self.get('/api/bcloud/update-subscription', auth_token='my-happy-token',
                  expected_status=204)
-        user_info = self.get('/api/users/me', auth_token='my-happy-token').json()
+        user_info = self.get('/api/users/me', auth_token='my-happy-token').get_json()
         self.assertEqual([], user_info['roles'])
 
         self.assertEqual(1, len(self.user_subs_signal_calls))

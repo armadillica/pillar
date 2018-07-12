@@ -31,8 +31,8 @@ class ProjectMergerTest(AbstractPillarTest):
         with self.app.app_context():
             merging.merge_project(self.pid_from, self.pid_to)
 
-        db_file = self.get(f'/api/files/{fid}').json()
-        db_node = self.get(f'/api/nodes/{nid}').json()
+        db_file = self.get(f'/api/files/{fid}').get_json()
+        db_node = self.get(f'/api/nodes/{nid}').get_json()
 
         self.assertEqual(db_file['project'], str(self.pid_to))
         self.assertEqual(db_node['project'], str(self.pid_to))

@@ -253,7 +253,7 @@ class NodeSharingTest(AbstractPillarTest):
             'name': str(self),
             'properties': {},
         })
-        self.node_id = resp.json()['_id']
+        self.node_id = resp.get_json()['_id']
 
     def _check_share_data(self, share_data):
         base_url = self.app.config['SHORT_LINK_BASE_URL']
@@ -265,7 +265,7 @@ class NodeSharingTest(AbstractPillarTest):
         # Share the node
         resp = self.post('/api/nodes/%s/share' % self.node_id, auth_token='token',
                          expected_status=201)
-        share_data = resp.json()
+        share_data = resp.get_json()
 
         self._check_share_data(share_data)
 
@@ -279,7 +279,7 @@ class NodeSharingTest(AbstractPillarTest):
 
         # Check that an anonymous user has acces.
         resp = self.get('/api/nodes/%s' % self.node_id)
-        self.assertEqual(str(self.node_id), resp.json()['_id'])
+        self.assertEqual(str(self.node_id), resp.get_json()['_id'])
 
     def test_other_user_access_shared_node(self):
         # Share the node
@@ -290,7 +290,7 @@ class NodeSharingTest(AbstractPillarTest):
         other_user_id = self.create_user(user_id=24 * 'a')
         self.create_valid_auth_token(other_user_id, 'other-token')
         resp = self.get('/api/nodes/%s' % self.node_id, auth_token='other-token')
-        self.assertEqual(str(self.node_id), resp.json()['_id'])
+        self.assertEqual(str(self.node_id), resp.get_json()['_id'])
 
     def test_get_share_data__unshared_node(self):
         self.get('/api/nodes/%s/share' % self.node_id,
@@ -304,7 +304,7 @@ class NodeSharingTest(AbstractPillarTest):
 
         # Then get its share info.
         resp = self.get('/api/nodes/%s/share' % self.node_id, auth_token='token')
-        share_data = resp.json()
+        share_data = resp.get_json()
 
         self._check_share_data(share_data)
 
@@ -349,7 +349,7 @@ class NodeSharingTest(AbstractPillarTest):
             resp = self.post('/api/nodes/%s/share' % self.node_id, auth_token='token',
                              expected_status=201)
 
-        share_data = resp.json()
+        share_data = resp.get_json()
 
         self._check_share_data(share_data)
         self.assertEqual(3, create_short_link.call_count)
@@ -360,19 +360,19 @@ class NodeSharingTest(AbstractPillarTest):
         # Share the node
         resp = self.post('/api/nodes/%s/share' % self.node_id, auth_token='token',
                          expected_status=201)
-        share_data = resp.json()
+        share_data = resp.get_json()
 
         # Get the node with short_code
         resp = self.get('/api/nodes/%s' % self.node_id,
                         json={'projection': {'short_code': 1}})
-        node = resp.json()
+        node = resp.get_json()
         self.assertEqual(node['short_code'], share_data['short_code'])
         self.assertTrue(node['short_link'].endswith(share_data['short_code']))
 
         # Get the node without short_code
         resp = self.get('/api/nodes/%s' % self.node_id,
                         qs={'projection': {'short_code': 0}})
-        node = resp.json()
+        node = resp.get_json()
         self.assertNotIn('short_code', node)
         self.assertNotIn('short_link', node)
 
@@ -409,10 +409,10 @@ class TextureSortFilesTest(AbstractPillarTest):
             },
             'user': ctd.EXAMPLE_PROJECT_OWNER_ID,
         })
-        node_id = resp.json()['_id']
+        node_id = resp.get_json()['_id']
 
         resp = self.get(f'/api/nodes/{node_id}', auth_token='token')
-        node = resp.json()
+        node = resp.get_json()
         map_types = [f['map_type'] for f in node['properties']['files']]
         self.assertEqual(['color', 'alpha', 'specular'], map_types)
 
@@ -435,10 +435,10 @@ class TextureSortFilesTest(AbstractPillarTest):
             },
             'user': ctd.EXAMPLE_PROJECT_OWNER_ID,
         })
-        node_id = resp.json()['_id']
+        node_id = resp.get_json()['_id']
 
         resp = self.get(f'/api/nodes/{node_id}', auth_token='token')
-        node = resp.json()
+        node = resp.get_json()
         map_types = [f['map_type'] for f in node['properties']['files']]
         self.assertEqual(['alpha', 'bump', 'specular'], map_types)
 
@@ -453,10 +453,10 @@ class TextureSortFilesTest(AbstractPillarTest):
             },
             'user': ctd.EXAMPLE_PROJECT_OWNER_ID,
         })
-        node_id = resp.json()['_id']
+        node_id = resp.get_json()['_id']
 
         resp = self.get(f'/api/nodes/{node_id}', auth_token='token')
-        node = resp.json()
+        node = resp.get_json()
         self.assertEqual([], node['properties']['files'])
 
     def test_no_files_list(self):
@@ -468,9 +468,9 @@ class TextureSortFilesTest(AbstractPillarTest):
             'properties': {},
             'user': ctd.EXAMPLE_PROJECT_OWNER_ID,
         })
-        node_id = resp.json()['_id']
+        node_id = resp.get_json()['_id']
 
         resp = self.get(f'/api/nodes/{node_id}', auth_token='token')
-        node = resp.json()
+        node = resp.get_json()
         self.assertNotIn('files', node['properties'])
 

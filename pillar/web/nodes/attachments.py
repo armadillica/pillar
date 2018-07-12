@@ -21,7 +21,7 @@ def attachment_form_group_create(schema_prop):
 def _attachment_build_single_field(schema_prop):
     # Ugly hard-coded schema.
     fake_schema = {
-        'slug': schema_prop['propertyschema'],
+        'slug': schema_prop['keyschema'],
         'oid': schema_prop['valueschema']['schema']['oid'],
     }
     file_select_form_group = build_file_select_form(fake_schema)

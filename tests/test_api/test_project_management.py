@@ -166,7 +166,7 @@ class ProjectEditTest(AbstractProjectTest):
         project_info = self._create_user_and_project(['subscriber'])
         project_url = '/api/projects/%(_id)s' % project_info
 
-        project = self.get(project_url, auth_token='token').json()
+        project = self.get(project_url, auth_token='token').get_json()
 
         # Create another user we can try and assign the project to.
         other_user_id = 'f00dd00df00dd00df00dd00d'
@@ -199,7 +199,7 @@ class ProjectEditTest(AbstractProjectTest):
         # Re-fetch from database to see which fields actually made it there.
         # equal to put_project -> changed in DB
         # equal to project -> not changed in DB
-        db_proj = self.get(project_url, auth_token='token').json()
+        db_proj = self.get(project_url, auth_token='token').get_json()
         self.assertEqual(project['url'], db_proj['url'])
         self.assertEqual(put_project['description'], db_proj['description'])
         self.assertEqual(put_project['name'], db_proj['name'])
@@ -391,7 +391,7 @@ class ProjectEditTest(AbstractProjectTest):
                     expected_status=204)
 
         resp = self.get(f'/api/files/{fid}', expected_status=404)
-        self.assertEqual(str(fid), resp.json()['_id'])
+        self.assertEqual(str(fid), resp.get_json()['_id'])
 
         with self.app.app_context():
             db_file_after = files_coll.find_one(fid)
@@ -413,7 +413,7 @@ class ProjectEditTest(AbstractProjectTest):
         project_info['picture_header'] = str(fid)
         resp = self.put(proj_url, auth_token='token', etag=etag,
                         json=remove_private_keys(project_info))
-        etag = resp.json()['_etag']
+        etag = resp.get_json()['_etag']
 
         # DELETE the project.
         self.delete(proj_url, auth_token='token', etag=etag, expected_status=204)
@@ -433,7 +433,7 @@ class ProjectEditTest(AbstractProjectTest):
         self.patch(proj_url, auth_token='token', json={'op': 'undelete'}, expected_status=204)
 
         resp = self.get(f'/api/files/{fid}')
-        self.assertEqual(str(fid), resp.json()['_id'])
+        self.assertEqual(str(fid), resp.get_json()['_id'])
 
         with self.app.app_context():
             files_coll = self.app.db('files')
@@ -456,7 +456,7 @@ class ProjectEditTest(AbstractProjectTest):
             db_file_after = files_coll.find_one(fid)
         self.assertTrue(db_file_after['_deleted'])
 
-        resp = self.get(proj_url, auth_token='token', expected_status=404).json()
+        resp = self.get(proj_url, auth_token='token', expected_status=404).get_json()
         self.assertTrue(resp['_deleted'])
 
 

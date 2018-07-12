@@ -294,7 +294,7 @@ class UserListTests(AbstractPillarTest):
 
     def test_list_all_users_subscriber(self):
         # Regular access should result in only your own info.
-        users = self.get('/api/users', auth_token='token').json()
+        users = self.get('/api/users', auth_token='token').get_json()
         self.assertEqual(1, users['_meta']['total'])
 
         # The 'auth' section should be removed.
@@ -303,7 +303,7 @@ class UserListTests(AbstractPillarTest):
 
     def test_list_all_users_admin(self):
         # Admin access should result in all users
-        users = self.get('/api/users', auth_token='admin-token').json()
+        users = self.get('/api/users', auth_token='admin-token').get_json()
         self.assertEqual(3, users['_meta']['total'])
 
         # The 'auth' section should be removed.
@@ -314,7 +314,7 @@ class UserListTests(AbstractPillarTest):
         """Even admins shouldn't be able to GET auth info."""
 
         projection = json.dumps({'auth': 1})
-        users = self.get(f'/api/users?projection={projection}', auth_token='admin-token').json()
+        users = self.get(f'/api/users?projection={projection}', auth_token='admin-token').get_json()
         self.assertEqual(3, users['_meta']['total'])
 
         # The 'auth' section should be removed.
@@ -333,21 +333,21 @@ class UserListTests(AbstractPillarTest):
 
     def test_own_user_subscriber(self):
         # Regular access should result in only your own info.
-        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').json()
+        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').get_json()
         self.assertNotIn('auth', user_info)
 
     def test_own_user_subscriber_explicit_projection(self):
         # With a custom projection requesting the auth list
         projection = json.dumps({'auth': 1})
         user_info = self.get(f'/api/users/123456789abc123456789abc?projection={projection}',
-                             auth_token='token').json()
+                             auth_token='token').get_json()
         self.assertNotIn('auth', user_info)
 
     def test_other_user_subscriber(self):
         from pillar.api.utils import remove_private_keys
 
         # Requesting another user should be limited to full name and email.
-        user_info = self.get('/api/users/223456789abc123456789abc', auth_token='token').json()
+        user_info = self.get('/api/users/223456789abc123456789abc', auth_token='token').get_json()
         self.assertNotIn('auth', user_info)
 
         regular_info = remove_private_keys(user_info)
@@ -357,7 +357,7 @@ class UserListTests(AbstractPillarTest):
         from pillar.api.utils import remove_private_keys
 
         # PUTting a user should work, and not mess up the auth field.
-        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').json()
+        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').get_json()
         self.assertNotIn('auth', user_info)
 
         put_user = remove_private_keys(user_info)
@@ -378,7 +378,7 @@ class UserListTests(AbstractPillarTest):
         group_ids = self.create_standard_groups()
 
         # A user should be able to change only some fields, but not all.
-        user_info = self.get('/api/users/me', auth_token='token').json()
+        user_info = self.get('/api/users/me', auth_token='token').get_json()
 
         # Alter all fields (except auth, another test already checks that that's uneditable).
         put_user = remove_private_keys(user_info)
@@ -395,7 +395,7 @@ class UserListTests(AbstractPillarTest):
                  auth_token='token',
                  etag=user_info['_etag'])
 
-        new_user_info = self.get('/api/users/me', auth_token='token').json()
+        new_user_info = self.get('/api/users/me', auth_token='token').get_json()
         self.assertEqual(new_user_info['full_name'], put_user['full_name'])
         self.assertEqual(new_user_info['username'], put_user['username'])
         self.assertEqual(new_user_info['email'], put_user['email'])
@@ -409,7 +409,7 @@ class UserListTests(AbstractPillarTest):
         from pillar.api.utils import remove_private_keys
 
         # PUTting the user as another user should fail.
-        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').json()
+        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').get_json()
         put_user = remove_private_keys(user_info)
 
         self.put('/api/users/123456789abc123456789abc', auth_token='other-token',
@@ -420,7 +420,7 @@ class UserListTests(AbstractPillarTest):
         from pillar.api.utils import remove_private_keys
 
         # PUTting a user should work, and not mess up the auth field.
-        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').json()
+        user_info = self.get('/api/users/123456789abc123456789abc', auth_token='token').get_json()
         put_user = remove_private_keys(user_info)
 
         self.put('/api/users/123456789abc123456789abc', auth_token='admin-token',
@@ -841,7 +841,7 @@ class UserCreationTest(AbstractPillarTest):
 
         etag = db_user['_etag']
         resp = self.put(f'/api/users/{user_id}', json=puttable, etag=etag,
-                        auth_token='user-token', expected_status=200).json()
+                        auth_token='user-token', expected_status=200).get_json()
         etag = resp['_etag']
         self.put(f'/api/users/{user_id}', json=empty_email, etag=etag,
                  auth_token='user-token', expected_status=422)
@@ -851,7 +851,7 @@ class UserCreationTest(AbstractPillarTest):
         # An admin should be able to edit this user, but also not clear the email address.
         self.create_user(24 * 'a', roles={'admin'}, token='admin-token')
         resp = self.put(f'/api/users/{user_id}', json=puttable, etag=etag,
-                        auth_token='admin-token', expected_status=200).json()
+                        auth_token='admin-token', expected_status=200).get_json()
         etag = resp['_etag']
         self.put(f'/api/users/{user_id}', json=empty_email, etag=etag,
                  auth_token='admin-token', expected_status=422)

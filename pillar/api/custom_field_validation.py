@@ -97,7 +97,7 @@ class ValidateCustomFields(Validator):
             return False
 
         try:
-            value = self.convert_properties(value, node_type['dyn_schema'])
+            value = self.convert_properties(value, node_type['dyn_schema']['shema'])
         except Exception as e:
             log.warning("Error converting form properties", exc_info=True)
 
@@ -107,7 +107,10 @@ class ValidateCustomFields(Validator):
         if val:
             # This ensures the modifications made by v's coercion rules are
             # visible to this validator's output.
-            self.current[field] = v.current
+            #self.current[field] = v.current
+            print('*********')
+            print(valid_properties)
+            #print(v.current)
             return True
 
         log.warning('Error validating properties for node %s: %s', self.document, v.errors)
@@ -149,39 +152,25 @@ class ValidateCustomFields(Validator):
         if ip.prefixlen() == 0:
             self._error(field_name, 'Zero-length prefix is not allowed')
 
-    def _validate_type_binary(self, field_name: str, value: bytes):
-        """Add support for binary type.
+    # def _validate_coerce(self, coerce, field: str, value):
+    #     """Override Cerberus' _validate_coerce method for richer features.
+    #
+    #     This now supports named coercion functions (available in Cerberus 1.0+)
+    #     and passes the field name to coercion functions as well.
+    #     """
+    #     if isinstance(coerce, str):
+    #         coerce = getattr(self, f'_normalize_coerce_{coerce}')
+    #
+    #     try:
+    #         return coerce(field, value)
+    #     except (TypeError, ValueError):
+    #         self._error(field, cerberus.errors.ERROR_COERCION_FAILED.format(field))
 
-        This type was actually introduced in Cerberus 1.0, so we can drop
-        support for this once Eve starts using that version (or newer).
+    def _validator_markdown(self, field, value):
+        """This is a placeholder.
+
+        Markdown is actually processed in a hook
         """
-
-        if not isinstance(value, (bytes, bytearray)):
-            self._error(field_name, f'wrong value type {type(value)}, expected bytes or bytearray')
-
-    def _validate_coerce(self, coerce, field: str, value):
-        """Override Cerberus' _validate_coerce method for richer features.
-
-        This now supports named coercion functions (available in Cerberus 1.0+)
-        and passes the field name to coercion functions as well.
-        """
-        if isinstance(coerce, str):
-            coerce = getattr(self, f'_normalize_coerce_{coerce}')
-
-        try:
-            return coerce(field, value)
-        except (TypeError, ValueError):
-            self._error(field, cerberus.errors.ERROR_COERCION_FAILED.format(field))
-
-    def _normalize_coerce_markdown(self, field: str, value):
-        """Render Markdown from this field into {field}_html.
-
-        The field name MUST NOT end in `_html`. The Markdown is read from this
-        field and the rendered HTML is written to the field `{field}_html`.
-        """
-        html = pillar.markdown.markdown(value)
-        field_name = pillar.markdown.cache_field_name(field)
-        self.current[field_name] = html
         return value
 
 
@@ -190,12 +179,12 @@ if __name__ == '__main__':
 
     v = ValidateCustomFields()
     v.schema = {
-        'foo': {'type': 'string', 'coerce': 'markdown'},
+        'foo': {'type': 'string', 'validator': 'markdown'},
         'foo_html': {'type': 'string'},
         'nested': {
             'type': 'dict',
             'schema': {
-                'bar': {'type': 'string', 'coerce': 'markdown'},
+                'bar': {'type': 'string', 'validator': 'markdown'},
                 'bar_html': {'type': 'string'},
             }
         }

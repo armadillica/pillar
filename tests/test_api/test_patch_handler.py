@@ -60,7 +60,7 @@ class PatchHandlerTest(AbstractPillarTest):
         resp = self.patch('/api/test/%s' % oid, auth_token='user-token',
                           json={'op': 'test-echo',
                                 'echo': '¡Thith ith Špahtah!'})
-        self.assertEqual({'echo': '¡Thith ith Špahtah!'}, resp.json())
+        self.assertEqual({'echo': '¡Thith ith Špahtah!'}, resp.get_json())
 
     def test_patch_empty_response(self):
         import bson

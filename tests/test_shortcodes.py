@@ -183,7 +183,7 @@ class AttachmentTest(AbstractPillarTest):
         # We have to get the file document again, because retrieving it via the
         # API (which is what the shortcode rendering is doing) will change its
         # link URL.
-        db_file = self.get(f'/api/files/{oid}').json()
+        db_file = self.get(f'/api/files/{oid}').get_json()
         link = db_file['variations'][0]['link']
 
         with self.app.test_request_context():

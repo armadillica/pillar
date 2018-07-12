@@ -296,7 +296,7 @@ class HomeProjectTest(AbstractHomeProjectTest):
 
         # Create home project by getting it.
         resp = self.get('/api/bcloud/home-project', auth_token='token')
-        before_delete_json_proj = resp.json()
+        before_delete_json_proj = resp.get_json()
 
         # Delete the project.
         self.delete(f'/api/projects/{before_delete_json_proj["_id"]}',
@@ -305,7 +305,7 @@ class HomeProjectTest(AbstractHomeProjectTest):
 
         # Recreate home project by getting it.
         resp = self.get('/api/bcloud/home-project', auth_token='token')
-        after_delete_json_proj = resp.json()
+        after_delete_json_proj = resp.get_json()
 
         self.assertEqual(before_delete_json_proj['_id'],
                          after_delete_json_proj['_id'])
@@ -452,7 +452,7 @@ class TextureLibraryTest(AbstractHomeProjectTest):
 
     def test_hdri_library__no_bcloud_version(self):
         resp = self.get('/api/bcloud/texture-libraries', auth_token='token')
-        libs = resp.json()['_items']
+        libs = resp.get_json()['_items']
         library_project_ids = {proj['_id'] for proj in libs}
 
         self.assertNotIn(str(self.hdri_proj_id), library_project_ids)
@@ -462,7 +462,7 @@ class TextureLibraryTest(AbstractHomeProjectTest):
         resp = self.get('/api/bcloud/texture-libraries',
                         auth_token='token',
                         headers={'Blender-Cloud-Addon': '1.3.3'})
-        libs = resp.json()['_items']
+        libs = resp.get_json()['_items']
         library_project_ids = {proj['_id'] for proj in libs}
         self.assertNotIn(str(self.hdri_proj_id), library_project_ids)
         self.assertIn(str(self.tex_proj_id), library_project_ids)
@@ -471,7 +471,7 @@ class TextureLibraryTest(AbstractHomeProjectTest):
         resp = self.get('/api/bcloud/texture-libraries',
                         auth_token='token',
                         headers={'Blender-Cloud-Addon': '1.4.0'})
-        libs = resp.json()['_items']
+        libs = resp.get_json()['_items']
         library_project_ids = {proj['_id'] for proj in libs}
         self.assertIn(str(self.hdri_proj_id), library_project_ids)
         self.assertIn(str(self.tex_proj_id), library_project_ids)
@@ -539,11 +539,11 @@ class HdriSortingTest(AbstractHomeProjectTest):
                 'name': 'Symmetrical Garden'
                 }
         resp = self.post('/api/nodes', json=node, expected_status=201, auth_token='token')
-        node_info = resp.json()
+        node_info = resp.json
 
         # Check that the node's files are in the right order
         resp = self.get('/api/nodes/%s' % node_info['_id'], auth_token='token')
-        get_node = resp.json()
+        get_node = resp.json
 
         self.assertEqual(['256p', '1k', '2k'],
                          [file_info['resolution']
@@ -565,7 +565,7 @@ class HdriSortingTest(AbstractHomeProjectTest):
                 'name': 'Symmetrical Garden'
                 }
         resp = self.post('/api/nodes', json=node, expected_status=201, auth_token='token')
-        node_info = resp.json()
+        node_info = resp.json
 
         # Mess up the node's order
         node['properties']['files'] = [
@@ -578,7 +578,7 @@ class HdriSortingTest(AbstractHomeProjectTest):
 
         # Check that the node's files are in the right order
         resp = self.get('/api/nodes/%s' % node_info['_id'], auth_token='token')
-        get_node = resp.json()
+        get_node = resp.json
 
         self.assertEqual(['256p', '1k', '2k'],
                          [file_info['resolution']

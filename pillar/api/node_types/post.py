@@ -9,7 +9,7 @@ node_type_post = {
             'minlength': 5,
             'maxlength': 90000,
             'required': True,
-            'coerce': 'markdown',
+            'validator': 'markdown',
         },
         '_content_html': {'type': 'string'},
         'status': {

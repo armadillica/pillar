@@ -280,7 +280,7 @@ class PillarServer(BlinkerCompatibleEve):
         self.encoding_service_client = Zencoder(self.config['ZENCODER_API_KEY'])
 
     def _config_caching(self):
-        from flask_cache import Cache
+        from flask_caching import Cache
         self.cache = Cache(self)
 
     def set_languages(self, translations_folder: pathlib.Path):

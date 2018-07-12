@@ -843,7 +843,7 @@ class IPRangeTest(AbstractIPRangeSingleOrgTest):
     def test_ipranges_get_via_eve(self):
         self.test_patch_set_ip_ranges_happy()
         r = self.get(f'/api/organizations/{self.org_id}', auth_token='token')
-        from_eve = r.json()
+        from_eve = r.get_json()
 
         # Eve cannot return binary data, at least not until we upgrade to a version
         # that depends on Cerberus >= 1.0.
@@ -853,7 +853,7 @@ class IPRangeTest(AbstractIPRangeSingleOrgTest):
         self.assertEqual(expect_ranges, from_eve['ip_ranges'])
 
         r = self.get(f'/api/organizations', auth_token='token')
-        from_eve = r.json()
+        from_eve = r.get_json()
         self.assertEqual(expect_ranges, from_eve['_items'][0]['ip_ranges'])
 
     def test_patch_unset_ip_ranges_happy(self):
@@ -996,7 +996,7 @@ class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
         # user in the database.
         resp = self.get('/api/users/me', auth_token='usertoken',
                         headers=headers, environ_overrides=env)
-        me = resp.json()
+        me = resp.get_json()
 
         # The IP-based roles should be stored in the token document.
         self.enter_app_context()

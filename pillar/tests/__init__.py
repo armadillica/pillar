@@ -522,13 +522,12 @@ class AbstractPillarTest(TestMinimal):
                              expected_status, resp.status_code, resp.data
                          ))
 
-        def get_json():
-            if resp.mimetype != 'application/json':
-                raise TypeError('Unable to load JSON from mimetype %r' % resp.mimetype)
-            return mod_json.loads(resp.data)
-
-        resp.json = get_json
-        resp.get_json = get_json
+        # def get_json():
+        #     if resp.mimetype != 'application/json':
+        #         raise TypeError('Unable to load JSON from mimetype %r' % resp.mimetype)
+        #     return mod_json.loads(resp.data)
+        #
+        # resp.get_json = get_json
 
         return resp
 
@@ -561,7 +560,7 @@ class AbstractPillarTest(TestMinimal):
             raise TypeError('expected_user_id should be a string or ObjectId, '
                             f'but is {expected_user_id!r}')
 
-        resp = self.get('/api/users/me', expected_status=200, auth_token=token).json()
+        resp = self.get('/api/users/me', expected_status=200, auth_token=token).get_json()
 
         if expected_user_id:
             self.assertEqual(resp['_id'], str(expected_user_id))

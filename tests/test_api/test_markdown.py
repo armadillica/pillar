@@ -16,10 +16,10 @@ class CoerceMarkdownTest(AbstractPillarTest):
         }
 
         created_data = self.post('/api/nodes', json=node, expected_status=201,
-                                 auth_token='token-a').json()
+                                 auth_token='token-a').get_json()
         node_id = created_data['_id']
 
-        json_node = self.get(f'/api/nodes/{node_id}', auth_token='token-a').json()
+        json_node = self.get(f'/api/nodes/{node_id}', auth_token='token-a').get_json()
         self.assertEqual('<h1>Title</h1>\n<p>This is content.</p>\n',
                          json_node['_description_html'])
 
@@ -43,7 +43,7 @@ class CoerceMarkdownTest(AbstractPillarTest):
 
         pid = r['_id']
 
-        json_proj = self.get(f'/api/projects/{pid}', auth_token='token-a').json()
+        json_proj = self.get(f'/api/projects/{pid}', auth_token='token-a').get_json()
         json_proj.pop('node_types', None)  # just to make it easier to print
         import pprint
         pprint.pprint(json_proj)
@@ -63,9 +63,9 @@ class CoerceMarkdownTest(AbstractPillarTest):
         }
 
         created_data = self.post('/api/nodes', json=node, expected_status=201,
-                                 auth_token='token-a').json()
+                                 auth_token='token-a').get_json()
         node_id = created_data['_id']
 
-        json_node = self.get(f'/api/nodes/{node_id}', auth_token='token-a').json()
+        json_node = self.get(f'/api/nodes/{node_id}', auth_token='token-a').get_json()
         expect = '<h1>Title</h1>\n<!-- {test a="b"} -->\n'
         self.assertEqual(expect, json_node['_description_html'])

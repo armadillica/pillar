@@ -63,7 +63,7 @@ class ServiceAccountCreationTest(AbstractPillarTest):
         resp = self.put(f'/api/users/{user_id}',
                         json=puttable,
                         auth_token=token['token'],
-                        etag=etag).json()
+                        etag=etag).get_json()
         etag = resp['_etag']
 
         with self.app.test_request_context():

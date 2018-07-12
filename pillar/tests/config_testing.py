@@ -2,8 +2,8 @@
 
 BLENDER_ID_ENDPOINT = 'http://id.local:8001'  # Non existant server
 
-SERVER_NAME = 'localhost'
-PILLAR_SERVER_ENDPOINT = 'http://localhost/api/'
+SERVER_NAME = 'localhost.local'
+PILLAR_SERVER_ENDPOINT = 'http://localhost.local/api/'
 
 MAIN_PROJECT_ID = '5672beecc0261b2005ed1a33'
 

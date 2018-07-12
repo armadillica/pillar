@@ -8,6 +8,7 @@ import werkzeug.exceptions as wz_exceptions
 from bson import ObjectId
 from flask import current_app, Blueprint, request
 
+import pillar.markdown
 from pillar.api.activities import activity_subscribe, activity_object_add
 from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
 from pillar.api.file_storage_backends.gcs import update_file_name
@@ -400,6 +401,40 @@ def textures_sort_files(nodes):
         texture_sort_files(node)
 
 
+def parse_markdown(node, original=None):
+    projects_collection = current_app.data.driver.db['projects']
+    project = projects_collection.find_one({'_id': node['project']}, {'node_types': 1})
+    # Query node type directly using the key
+    node_type = next(nt for nt in project['node_types']
+                     if nt['name'] == node['node_type'])
+    schema = current_app.config['DOMAIN']['nodes']['schema']
+    schema['properties'] = node_type['dyn_schema']
+
+    def find_markdown_fields(schema, node):
+        """Find and process all makrdown validated fields."""
+        for k, v in schema.items():
+            if isinstance(v, dict):
+                if 'validator' in v and 'markdown' == v['validator']:
+                    # If there is a match with the validator: markdown pair, assign the sibling
+                    # property (following the naming convention _<property>_html)
+                    # the processed value.
+                    if k in node:
+                        html = pillar.markdown.markdown(node[k])
+                        field_name = pillar.markdown.cache_field_name(k)
+                        node[field_name] = html
+                if isinstance(node, dict) and k in node:
+                    find_markdown_fields(v, node[k])
+
+    find_markdown_fields(schema, node)
+
+    return 'ok'
+
+
+def parse_markdowns(items):
+    for item in items:
+        parse_markdown(item)
+
+
 def setup_app(app, url_prefix):
     from . import patch
     patch.setup_app(app, url_prefix=url_prefix)
@@ -408,12 +443,14 @@ def setup_app(app, url_prefix):
     app.on_fetched_resource_nodes += before_returning_nodes
 
     app.on_replace_nodes += before_replacing_node
+    app.on_replace_nodes += parse_markdown
     app.on_replace_nodes += texture_sort_files
     app.on_replace_nodes += deduct_content_type
     app.on_replace_nodes += node_set_default_picture
     app.on_replaced_nodes += after_replacing_node
 
     app.on_insert_nodes += before_inserting_nodes
+    app.on_insert_nodes += parse_markdowns
     app.on_insert_nodes += nodes_deduct_content_type
     app.on_insert_nodes += nodes_set_default_picture
     app.on_insert_nodes += textures_sort_files

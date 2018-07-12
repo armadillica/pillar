@@ -10,10 +10,10 @@ celery[redis]==4.0.2
 CommonMark==0.7.2
 elasticsearch==6.1.1
 elasticsearch-dsl==6.1.0
-Eve==0.7.3
-Flask==0.12
+Eve==0.8
+Flask==1.0.2
 Flask-Babel==0.11.2
-Flask-Cache==0.13.1
+Flask-Caching==1.4.0
 Flask-Script==2.0.6
 Flask-Login==0.3.2
 Flask-WTF==0.14.2
@@ -37,7 +37,7 @@ zencoder==0.6.5
 amqp==2.1.4
 billiard==3.5.0.2
 Flask-PyMongo==0.4.1
--e git+https://github.com/armadillica/cerberus.git@sybren-0.9#egg=Cerberus
+Cerberus==1.2.0
 Events==0.2.2
 future==0.15.2
 html5lib==0.99999999

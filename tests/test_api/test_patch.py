@@ -24,7 +24,7 @@ class AbstractPatchCommentTest(AbstractPillarTest):
         resp = self.post('/api/nodes', json=asset,
                          auth_token='owner-token',
                          expected_status=201)
-        self.asset_id = resp.json()['_id']
+        self.asset_id = resp.get_json()['_id']
 
         # Create the comment
         comment = {'description': '',
@@ -43,7 +43,7 @@ class AbstractPatchCommentTest(AbstractPillarTest):
         resp = self.post('/api/nodes', json=comment,
                          auth_token='owner-token',
                          expected_status=201)
-        comment_info = resp.json()
+        comment_info = resp.get_json()
         self.node_url = '/api/nodes/%s' % comment_info['_id']
 
 
@@ -66,12 +66,12 @@ class VoteCommentTest(AbstractPatchCommentTest):
         # Patch the node
         res = self.patch(self.node_url,
                          json={'op': 'upvote'},
-                         auth_token='token').json()
+                         auth_token='token').get_json()
         self.assertEqual(1, res['properties']['rating_positive'])
         self.assertEqual(0, res['properties']['rating_negative'])
 
         # Get the node again, to inspect its changed state.
-        patched_node = self.get(self.node_url, auth_token='token').json()
+        patched_node = self.get(self.node_url, auth_token='token').get_json()
         self.assertEqual(1, patched_node['properties']['rating_positive'])
         self.assertEqual(0, patched_node['properties']['rating_negative'])
         self.assertEqual({'user': str(self.user_id), 'is_positive': True},
@@ -87,12 +87,12 @@ class VoteCommentTest(AbstractPatchCommentTest):
         # Patch the node
         res = self.patch(self.node_url,
                          json={'op': 'downvote'},
-                         auth_token='token').json()
+                         auth_token='token').get_json()
         self.assertEqual(0, res['properties']['rating_positive'])
         self.assertEqual(1, res['properties']['rating_negative'])
 
         # Get the node again, to inspect its changed state.
-        patched_node = self.get(self.node_url, auth_token='token').json()
+        patched_node = self.get(self.node_url, auth_token='token').get_json()
         self.assertEqual(0, patched_node['properties']['rating_positive'])
         self.assertEqual(1, patched_node['properties']['rating_negative'])
         self.assertEqual({'user': str(self.user_id), 'is_positive': False},
@@ -124,7 +124,7 @@ class VoteCommentTest(AbstractPatchCommentTest):
                    auth_token='token')
 
         # Get the node again, to inspect its changed state.
-        patched_node = self.get(self.node_url, auth_token='token').json()
+        patched_node = self.get(self.node_url, auth_token='token').get_json()
         self.assertEqual(0, patched_node['properties']['rating_positive'])
         self.assertEqual(0, patched_node['properties']['rating_negative'])
         self.assertEqual([], patched_node['properties'].get('ratings', []))
@@ -167,7 +167,7 @@ class VoteCommentTest(AbstractPatchCommentTest):
                    auth_token='other-token-4')
 
         # Inspect the result
-        patched_node = self.get(self.node_url, auth_token='token').json()
+        patched_node = self.get(self.node_url, auth_token='token').get_json()
         self.assertEqual(3, patched_node['properties']['rating_positive'])
         self.assertEqual(2, patched_node['properties']['rating_negative'])
         self.assertEqual([
@@ -181,16 +181,16 @@ class VoteCommentTest(AbstractPatchCommentTest):
 
 class EditCommentTest(AbstractPatchCommentTest):
     def test_comment_edit_happy(self, token='owner-token'):
-        pre_node = self.get(self.node_url, auth_token=token).json()
+        pre_node = self.get(self.node_url, auth_token=token).get_json()
 
         res = self.patch(self.node_url,
                          json={'op': 'edit', 'content': 'Je moeder is niet je vader.'},
-                         auth_token=token).json()
+                         auth_token=token).get_json()
         self.assertEqual('<p>Je moeder is niet je vader.</p>\n',
                          res['properties']['_content_html'])
 
         # Get the node again, to inspect its changed state.
-        patched_node = self.get(self.node_url, auth_token=token).json()
+        patched_node = self.get(self.node_url, auth_token=token).get_json()
         self.assertEqual('Je moeder is niet je vader.',
                          patched_node['properties']['content'])
         self.assertEqual('<p>Je moeder is niet je vader.</p>\n',
@@ -210,7 +210,7 @@ class EditCommentTest(AbstractPatchCommentTest):
                    expected_status=403)
 
         # Get the node again, to inspect its old state.
-        patched_node = self.get(self.node_url, auth_token='token').json()
+        patched_node = self.get(self.node_url, auth_token='token').get_json()
         self.assertEqual('Purrrr kittycat',
                          patched_node['properties']['content'])
         self.assertEqual('<p>Purrrr kittycat</p>\n',

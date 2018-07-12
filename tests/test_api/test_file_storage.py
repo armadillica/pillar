@@ -192,7 +192,7 @@ class FileMaxSizeTest(AbstractPillarTest):
                          expected_status=201,
                          auth_token='token',
                          files={'file': (test_file, 'test_file.bin')})
-        stream_info = resp.json()
+        stream_info = resp.get_json()
         file_id = stream_info['file_id']
 
         self.assert_file_doc_ok(file_id, file_size)
@@ -216,7 +216,7 @@ class FileMaxSizeTest(AbstractPillarTest):
                          expected_status=201,
                          auth_token='token',
                          files={'file': (test_file, 'test_file.bin')})
-        stream_info = resp.json()
+        stream_info = resp.get_json()
         file_id = stream_info['file_id']
 
         self.assert_file_doc_ok(file_id, file_size)

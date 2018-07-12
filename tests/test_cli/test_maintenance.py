@@ -14,8 +14,8 @@ class PurgeHomeProjectsTest(AbstractPillarTest):
         user_b = self.create_user(user_id=24 * 'b', roles={'subscriber'}, token='token-b')
 
         # GET the home project to create it.
-        home_a = self.get('/api/bcloud/home-project', auth_token='token-a').json()
-        home_b = self.get('/api/bcloud/home-project', auth_token='token-b').json()
+        home_a = self.get('/api/bcloud/home-project', auth_token='token-a').get_json()
+        home_b = self.get('/api/bcloud/home-project', auth_token='token-b').get_json()
 
         with self.app.app_context():
             users_coll = self.app.db('users')
@@ -60,7 +60,7 @@ class UpgradeAttachmentSchemaTest(AbstractPillarTest):
                 "url": {"type": "string"},
                 "attachments": {
                     "type": "dict",
-                    "propertyschema": {"type": "string", "regex": "^[a-zA-Z0-9_ ]+$"},
+                    "keyschema": {"type": "string", "regex": "^[a-zA-Z0-9_ ]+$"},
                     "valueschema": {
                         "type": "dict",
                         "schema": {

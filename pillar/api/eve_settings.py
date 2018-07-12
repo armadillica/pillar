@@ -155,7 +155,7 @@ organizations_schema = {
     'description': {
         'type': 'string',
         'maxlength': 256,
-        'coerce': 'markdown',
+        'validator': 'markdown',
     },
     '_description_html': {'type': 'string'},
     'website': {
@@ -292,7 +292,7 @@ nodes_schema = {
     },
     'description': {
         'type': 'string',
-        'coerce': 'markdown',
+        'validator': 'markdown',
     },
     '_description_html': {'type': 'string'},
     'picture': _file_embedded_schema,
@@ -326,8 +326,8 @@ nodes_schema = {
     },
     'properties': {
         'type': 'dict',
-        'valid_properties': True,
-        'required': True,
+        # 'valid_properties': True,
+        'required': True
     },
     'permissions': {
         'type': 'dict',
@@ -539,7 +539,7 @@ projects_schema = {
     },
     'description': {
         'type': 'string',
-        'coerce': 'markdown',
+        'validator': 'markdown',
     },
     '_description_html': {'type': 'string'},
     # Short summary for the project
@@ -833,4 +833,4 @@ UPSET_ON_PUT = False  # do not create new document on PUT of non-existant URL.
 X_DOMAINS = '*'
 X_ALLOW_CREDENTIALS = True
 X_HEADERS = 'Authorization'
-XML = False
+RENDERERS = ['eve.render.JSONRenderer']

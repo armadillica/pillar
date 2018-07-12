@@ -42,7 +42,7 @@ class FlaskInternalApiTest(AbstractPillarTest):
         with self.app.test_request_context():
             # Check the asset in MongoDB
             resp = self.get(url_for('nodes|item_lookup', _id=asset._id), auth_token='token')
-            db_asset = resp.json()
+            db_asset = resp.get_json()
             self.assertEqual('Test asset', db_asset['name'])
 
         return asset
@@ -66,7 +66,7 @@ class FlaskInternalApiTest(AbstractPillarTest):
         # Check the file in MongoDB
         with self.app.test_request_context():
             resp = self.get(url_for('files|item_lookup', _id=file_id), auth_token='token')
-            file_doc = resp.json()
+            file_doc = resp.get_json()
             self.assertEqual('BlenderDesktopLogo.png', file_doc['filename'])
 
     def test_create_asset_from_file(self):
@@ -80,7 +80,7 @@ class FlaskInternalApiTest(AbstractPillarTest):
                                  'properties': {}
                              },
                              expected_status=201)
-            parent_id = resp.json()['_id']
+            parent_id = resp.get_json()['_id']
 
         with self.app.test_request_context(), open(blender_desktop_logo_path, 'rb') as fileobj:
             resp = pillarsdk.Node.create_asset_from_file(
@@ -99,5 +99,5 @@ class FlaskInternalApiTest(AbstractPillarTest):
         # Check the node in MongoDB
         with self.app.test_request_context():
             resp = self.get(url_for('nodes|item_lookup', _id=node_id), auth_token='token')
-            node_doc = resp.json()
+            node_doc = resp.get_json()
             self.assertEqual('BlenderDesktopLogo.png', node_doc['name'])
