@@ -143,7 +143,7 @@ class ValidateCustomFields(Validator):
         if not value:
             self._error(field, "Value is required once the document was created")
 
-    def _validate_type_iprange(self, field_name: str, value: str):
+    def _validator_iprange(self, field_name: str, value: str):
         """Ensure the field contains a valid IP address.
 
         Supports both IPv6 and IPv4 ranges. Requires the IPy module.

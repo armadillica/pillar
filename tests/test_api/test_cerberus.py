@@ -173,7 +173,7 @@ class NodeValidationTest(ValidationTest):
 
 
 class IPRangeValidatorTest(ValidationTest):
-    schema = {'iprange': {'type': 'iprange', 'required': True}}
+    schema = {'iprange': {'type': 'string', 'required': True, 'validator': 'iprange'}}
 
     def assertValid(self, document, schema=None):
         return super().assertValid(document, schema or self.schema)
@@ -199,3 +199,11 @@ class IPRangeValidatorTest(ValidationTest):
         self.assertValid({'iprange': '127.0.0.0/8'})
         self.assertInvalid({'iprange': '127.0.0.0/0'})
         self.assertInvalid({'iprange': 'garbled'})
+
+    def test_descriptive_error_message(self):
+        is_valid = self.validator.validate({'iprange': '::/0'}, self.schema)
+        self.assertFalse(is_valid)
+        self.assertEquals(1, len(self.validator._errors))
+        err = self.validator._errors[0]
+        self.assertEquals(('iprange', ), err.document_path)
+        self.assertEquals(('Zero-length prefix is not allowed',), err.info)
