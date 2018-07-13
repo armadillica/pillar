@@ -417,17 +417,19 @@ def parse_markdown(node, original=None):
     def find_markdown_fields(schema, node):
         """Find and process all makrdown validated fields."""
         for k, v in schema.items():
-            if isinstance(v, dict):
-                if 'validator' in v and 'markdown' == v['validator']:
-                    # If there is a match with the validator: markdown pair, assign the sibling
-                    # property (following the naming convention _<property>_html)
-                    # the processed value.
-                    if k in node:
-                        html = pillar.markdown.markdown(node[k])
-                        field_name = pillar.markdown.cache_field_name(k)
-                        node[field_name] = html
-                if isinstance(node, dict) and k in node:
-                    find_markdown_fields(v, node[k])
+            if not isinstance(v, dict):
+                continue
+
+            if v.get('validator') == 'markdown':
+                # If there is a match with the validator: markdown pair, assign the sibling
+                # property (following the naming convention _<property>_html)
+                # the processed value.
+                if k in node:
+                    html = pillar.markdown.markdown(node[k])
+                    field_name = pillar.markdown.cache_field_name(k)
+                    node[field_name] = html
+            if isinstance(node, dict) and k in node:
+                find_markdown_fields(v, node[k])
 
     find_markdown_fields(schema, node)
 
