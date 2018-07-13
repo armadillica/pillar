@@ -102,7 +102,7 @@ class ValidateCustomFields(Validator):
             return False
 
         try:
-            value = self.convert_properties(value, node_type['dyn_schema']['shema'])
+            value = self.convert_properties(value, node_type['dyn_schema'])
         except Exception as e:
             log.warning("Error converting form properties", exc_info=True)
 
