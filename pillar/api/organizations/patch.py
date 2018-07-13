@@ -225,4 +225,4 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
 
 def setup_app(app):
     OrganizationPatchHandler(patch_api_blueprint)
-    # app.register_api_blueprint(patch_api_blueprint, url_prefix='/organizations')
+    app.register_api_blueprint(patch_api_blueprint, url_prefix='/organizations')
