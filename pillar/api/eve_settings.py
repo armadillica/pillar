@@ -326,7 +326,7 @@ nodes_schema = {
     },
     'properties': {
         'type': 'dict',
-        # 'valid_properties': True,
+        'valid_properties': True,
         'required': True
     },
     'permissions': {
