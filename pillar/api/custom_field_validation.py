@@ -73,6 +73,11 @@ class ValidateCustomFields(Validator):
             dict_property[key] = self.convert_properties(item_prop, item_schema)['item']
 
     def _validate_valid_properties(self, valid_properties, field, value):
+        """Fake property that triggers node dynamic property validation.
+
+        The rule's arguments are validated against this schema:
+        {'type': 'boolean'}
+        """
         from pillar.api.utils import project_get_node_type
 
         projects_collection = current_app.data.driver.db['projects']
@@ -121,6 +126,9 @@ class ValidateCustomFields(Validator):
 
         Combine "required_after_creation=True" with "required=False" to allow
         pre-insert hooks to set default values.
+
+        The rule's arguments are validated against this schema:
+        {'type': 'boolean'}
         """
 
         if not required_after_creation:
