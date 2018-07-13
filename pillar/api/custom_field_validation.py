@@ -129,10 +129,8 @@ class ValidateCustomFields(Validator):
         if val:
             # This ensures the modifications made by v's coercion rules are
             # visible to this validator's output.
-            #self.current[field] = v.current
-            print('*********')
-            print(valid_properties)
-            #print(v.current)
+            # TODO(fsiddi): this no longer works due to Cerberus internal changes.
+            # self.current[field] = v.current
             return True
 
         log.warning('Error validating properties for node %s: %s', self.document, v.errors)
