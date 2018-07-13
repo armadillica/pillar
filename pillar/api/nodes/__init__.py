@@ -402,12 +402,16 @@ def textures_sort_files(nodes):
 
 
 def parse_markdown(node, original=None):
+    import copy
+
     projects_collection = current_app.data.driver.db['projects']
     project = projects_collection.find_one({'_id': node['project']}, {'node_types': 1})
     # Query node type directly using the key
     node_type = next(nt for nt in project['node_types']
                      if nt['name'] == node['node_type'])
-    schema = current_app.config['DOMAIN']['nodes']['schema']
+
+    # Create a copy to not overwrite the actual schema.
+    schema = copy.deepcopy(current_app.config['DOMAIN']['nodes']['schema'])
     schema['properties'] = node_type['dyn_schema']
 
     def find_markdown_fields(schema, node):
