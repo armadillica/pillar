@@ -1,7 +1,7 @@
 """Code for moving around nodes."""
 
 import attr
-import flask_pymongo.wrappers
+import pymongo.database
 from bson import ObjectId
 
 from pillar import attrs_extra
@@ -10,7 +10,7 @@ import pillar.api.file_storage.moving
 
 @attr.s
 class NodeMover(object):
-    db = attr.ib(validator=attr.validators.instance_of(flask_pymongo.wrappers.Database))
+    db = attr.ib(validator=attr.validators.instance_of(pymongo.database.Database))
     skip_gcs = attr.ib(default=False, validator=attr.validators.instance_of(bool))
     _log = attrs_extra.log('%s.NodeMover' % __name__)
 

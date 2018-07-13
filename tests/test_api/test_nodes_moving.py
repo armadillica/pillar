@@ -2,7 +2,7 @@ import unittest
 
 import mock
 from bson import ObjectId
-import flask_pymongo.wrappers
+import pymongo.database
 
 # Required to mock this module, otherwise 'pillar.api.file_storage' doesn't have
 # the attribute 'moving'
@@ -13,7 +13,7 @@ class NodeMoverTest(unittest.TestCase):
     def setUp(self):
         from pillar.api.nodes import moving
 
-        self.db = mock.MagicMock(spec=flask_pymongo.wrappers.Database)
+        self.db = mock.MagicMock(spec=pymongo.database.Database)
         self.mover = moving.NodeMover(db=self.db)
 
     def test_file_generator(self):
