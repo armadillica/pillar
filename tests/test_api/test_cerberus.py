@@ -15,7 +15,9 @@ class CerberusCanaryTest(unittest.TestCase):
         groups_schema = {'name': {'type': 'string', 'required': True}}
 
         # On error, validate_schema() raises ValidationError
-        validator.validate_schema(groups_schema)
+        if hasattr(validator, 'validate_schema'):
+            # It was removed in Cerberus 1.0 (or thereabouts)
+            validator.validate_schema(groups_schema)
 
         # On error, validate() returns False
         self.assertTrue(validator.validate({'name': 'je moeder'}, groups_schema))
