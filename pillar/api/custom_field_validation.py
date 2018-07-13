@@ -180,6 +180,9 @@ class ValidateCustomFields(Validator):
         """
         # Find this field inside the original document
         my_subdoc = self._subdoc_in_real_document()
+        if my_subdoc is None:
+            self._error(field, f'unable to find sub-document for path {self.document_path}')
+            return
 
         save_to = pillar.markdown.cache_field_name(field)
         html = pillar.markdown.markdown(value)
@@ -190,7 +193,7 @@ class ValidateCustomFields(Validator):
 
         This allows modification of the document being validated.
         """
-        my_subdoc = self.__real_document
+        my_subdoc = getattr(self, 'persisted_document') or self.__real_document
         for item in self.document_path:
             my_subdoc = my_subdoc[item]
         return my_subdoc
