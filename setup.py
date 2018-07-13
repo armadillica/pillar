@@ -35,7 +35,7 @@ setuptools.setup(
     install_requires=[
         'Flask>=0.12',
         'Eve>=0.7.3',
-        'Flask-Cache>=0.13.1',
+        'Flask-Caching>=1.4.0',
         'Flask-Script>=2.0.5',
         'Flask-Login>=0.3.2',
         'Flask-OAuthlib>=0.9.3',
