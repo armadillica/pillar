@@ -71,14 +71,19 @@ def before_delete_project(document):
 
 def after_delete_project(project: dict):
     """Perform delete on the project's files too."""
-
+    from werkzeug.exceptions import NotFound
     from eve.methods.delete import delete
 
     pid = project['_id']
     log.info('Project %s was deleted, also deleting its files.', pid)
 
-    r, _, _, status = delete('files', {'project': pid})
+    try:
+        r, _, _, status = delete('files', {'project': pid})
+    except NotFound:
+        # There were no files, and that's fine.
+        return
     if status != 204:
+        # Will never happen because bloody Eve always returns 204 or raises an exception.
         log.warning('Unable to delete files of project %s: %s', pid, r)
 
 
