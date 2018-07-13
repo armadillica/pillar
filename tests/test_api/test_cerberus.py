@@ -170,3 +170,32 @@ class NodeValidationTest(ValidationTest):
             'parent': node_id,
         }
         self.assertValid(comment, nodes_schema)
+
+
+class IPRangeValidatorTest(ValidationTest):
+    schema = {'iprange': {'type': 'iprange', 'required': True}}
+
+    def assertValid(self, document, schema=None):
+        return super().assertValid(document, schema or self.schema)
+
+    def assertInvalid(self, document, schema=None):
+        return super().assertInvalid(document, schema or self.schema)
+
+    def test_ipv6(self):
+        self.assertValid({'iprange': '2a03:b0c0:0:1010::8fe:6ef1'})
+        self.assertValid({'iprange': '0:0:0:0:0:ffff:102:304'})
+        self.assertValid({'iprange': '2a03:b0c0:0:1010::8fe:6ef1/120'})
+        self.assertValid({'iprange': 'ff06::/8'})
+        self.assertValid({'iprange': '::/8'})
+        self.assertValid({'iprange': '::/1'})
+        self.assertValid({'iprange': '::1/128'})
+        self.assertValid({'iprange': '::'})
+        self.assertInvalid({'iprange': '::/0'})
+        self.assertInvalid({'iprange': 'barbled'})
+
+    def test_ipv4(self):
+        self.assertValid({'iprange': '1.2.3.4'})
+        self.assertValid({'iprange': '1.2.3.4/24'})
+        self.assertValid({'iprange': '127.0.0.0/8'})
+        self.assertInvalid({'iprange': '127.0.0.0/0'})
+        self.assertInvalid({'iprange': 'garbled'})
