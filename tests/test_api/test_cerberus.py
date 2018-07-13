@@ -36,7 +36,7 @@ class CerberusCanaryTest(unittest.TestCase):
         self._canary_test(validator)
 
 
-class ValidationTest(AbstractPillarTest):
+class AbstractValidationTest(AbstractPillarTest):
     def setUp(self):
         super().setUp()
 
@@ -57,7 +57,7 @@ class ValidationTest(AbstractPillarTest):
         self.assertFalse(is_valid)
 
 
-class ProjectValidationTest(ValidationTest):
+class ProjectValidationTest(AbstractValidationTest):
 
     def test_empty(self):
         from pillar.api.eve_settings import projects_schema
@@ -93,7 +93,7 @@ class ProjectValidationTest(ValidationTest):
         self.assertValid(project, projects_schema)
 
 
-class NodeValidationTest(ValidationTest):
+class NodeValidationTest(AbstractValidationTest):
     def setUp(self):
         super().setUp()
         self.pid, self.project = self.ensure_project_exists()
@@ -172,14 +172,18 @@ class NodeValidationTest(ValidationTest):
         self.assertValid(comment, nodes_schema)
 
 
-class IPRangeValidatorTest(ValidationTest):
-    schema = {'iprange': {'type': 'string', 'required': True, 'validator': 'iprange'}}
+class AbstractSchemaValidationTest(AbstractValidationTest):
+    schema = {}
 
     def assertValid(self, document, schema=None):
         return super().assertValid(document, schema or self.schema)
 
     def assertInvalid(self, document, schema=None):
         return super().assertInvalid(document, schema or self.schema)
+
+
+class IPRangeValidatorTest(AbstractSchemaValidationTest):
+    schema = {'iprange': {'type': 'string', 'required': True, 'validator': 'iprange'}}
 
     def test_ipv6(self):
         self.assertValid({'iprange': '2a03:b0c0:0:1010::8fe:6ef1'})
@@ -207,3 +211,34 @@ class IPRangeValidatorTest(ValidationTest):
         err = self.validator._errors[0]
         self.assertEquals(('iprange', ), err.document_path)
         self.assertEquals(('Zero-length prefix is not allowed',), err.info)
+
+
+class MarkdownValidatorTest(AbstractSchemaValidationTest):
+    schema = {'subdoc': {
+        'type': 'list',
+        'schema': {
+            'type': 'dict',
+            'schema': {
+                'content': {'type': 'string', 'required': True, 'validator': 'markdown'},
+                '_content_html': {'type': 'string'},
+                'descr': {'type': 'string', 'required': True, 'validator': 'markdown'},
+                '_descr_html': {'type': 'string'},
+            }
+        },
+    }}
+
+    def test_in_subdoc(self):
+        doc = {'subdoc': [{
+            'content': '# Header\n\nSome text',
+            'descr': 'je moeder'
+        }]}
+        self.validator.validate(doc, self.schema, normalize=True)
+
+        expect = {'subdoc': [{
+            'content': '# Header\n\nSome text',
+            '_content_html': '<h1>Header</h1>\n<p>Some text</p>\n',
+            'descr': 'je moeder',
+            '_descr_html': '<p>je moeder</p>\n',
+        }]}
+
+        self.assertEqual(expect, doc)

@@ -1,8 +1,7 @@
+from datetime import datetime
 import logging
 
 from bson import ObjectId, tz_util
-from datetime import datetime
-import cerberus.errors
 from eve.io.mongo import Validator
 from flask import current_app
 
@@ -12,6 +11,24 @@ log = logging.getLogger(__name__)
 
 
 class ValidateCustomFields(Validator):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # Will be reference to the actual document being validated, so that we can
+        # modify it during validation.
+        self.__real_document = None
+
+    def validate(self, document, *args, **kwargs):
+        # Keep a reference to the actual document, because Cerberus validates copies.
+        self.__real_document = document
+        return super().validate(document, *args, **kwargs)
+
+    def _get_child_validator(self, *args, **kwargs):
+        child = super()._get_child_validator(*args, **kwargs)
+        # Pass along our reference to the actual document.
+        child.__real_document = self.__real_document
+        return child
+
     # TODO: split this into a convert_property(property, schema) and call that from this function.
     def convert_properties(self, properties, node_schema):
         """Converts datetime strings and ObjectId strings to actual Python objects."""
@@ -160,26 +177,25 @@ class ValidateCustomFields(Validator):
         if ip.prefixlen() == 0:
             self._error(field_name, 'Zero-length prefix is not allowed')
 
-    # def _validate_coerce(self, coerce, field: str, value):
-    #     """Override Cerberus' _validate_coerce method for richer features.
-    #
-    #     This now supports named coercion functions (available in Cerberus 1.0+)
-    #     and passes the field name to coercion functions as well.
-    #     """
-    #     if isinstance(coerce, str):
-    #         coerce = getattr(self, f'_normalize_coerce_{coerce}')
-    #
-    #     try:
-    #         return coerce(field, value)
-    #     except (TypeError, ValueError):
-    #         self._error(field, cerberus.errors.ERROR_COERCION_FAILED.format(field))
-
     def _validator_markdown(self, field, value):
-        """This is a placeholder.
-
-        Markdown is actually processed in a hook
+        """Convert MarkDown.
         """
-        return value
+        # Find this field inside the original document
+        my_subdoc = self._subdoc_in_real_document()
+
+        save_to = pillar.markdown.cache_field_name(field)
+        html = pillar.markdown.markdown(value)
+        my_subdoc[save_to] = html
+
+    def _subdoc_in_real_document(self):
+        """Return a reference to the current sub-document inside the real document.
+
+        This allows modification of the document being validated.
+        """
+        my_subdoc = self.__real_document
+        for item in self.document_path:
+            my_subdoc = my_subdoc[item]
+        return my_subdoc
 
 
 if __name__ == '__main__':
