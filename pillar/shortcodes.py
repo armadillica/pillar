@@ -163,8 +163,11 @@ class YouTube:
             return html_module.escape('{youtube invalid YouTube ID/URL}')
 
         src = f'https://www.youtube.com/embed/{youtube_id}?rel=0'
-        html = f'<iframe class="shortcode youtube" width="{width}" height="{height}" src="{src}"' \
-               f' frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>'
+        iframe_tag = f'<iframe class="shortcode youtube embed-responsive-item" width="{width}"' \
+                     f' height="{height}" src="{src}" frameborder="0" allow="autoplay; encrypted-media"' \
+                     f' allowfullscreen></iframe>'
+        # Embed the iframe in a container, to allow easier styling
+        html = f'<div class="embed-responsive embed-responsive-16by9">{iframe_tag}</div>'
         return html
 
 
