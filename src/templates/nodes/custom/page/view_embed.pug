@@ -1,26 +1,26 @@
 | {% extends 'projects/landing.html' %}
 
 | {% block body %}
+
 | {% if node.picture %}
 header
-	img.header(src="{{ node.picture.thumbnail('h', api=api) }}")
+	.jumbotron.jumbotron-fluid(
+		style="background-image: url('{{ node.picture.thumbnail('h', api=api) }}'); background-position: 50% 50%;")
 | {% endif  %}
+
+| {# Secondary Navigation #}
 | {% block navbar_secondary %}
 | {{ super() }}
 | {% endblock navbar_secondary %}
-#node-container
-	#node-overlay
 
-	section.node-details-container.page
+.container.landing
+	section.node-details-container.project
+		.node-details-title.container
+			h1 {{node.name}}
 
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
-
-		| {% if node.description %}
-		.node-details-description#node-description
+			| {% if node.description %}
 			| {{ node | markdowned('description') }}
-		| {% endif %}
+			| {% endif %}
 
 		.node-details-meta.footer
 			span.updated(title="created {{ node._created | pretty_date }}") updated {{ node._updated | pretty_date }}
