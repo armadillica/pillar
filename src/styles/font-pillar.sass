@@ -1,7 +1,9 @@
+/* So it's possible to override the path before importing font-pillar.sass */
+$pillar-font-path: "../font" !default
+
 @font-face
   font-family: 'pillar-font'
-  src: url('../font/pillar-font.eot?55726379')
-  src: url('../font/pillar-font.eot?55726379#iefix') format("embedded-opentype"), url('../font/pillar-font.woff2?55726379') format("woff2"), url('../font/pillar-font.woff?55726379') format("woff")
+  src: url('#{$pillar-font-path}/pillar-font.woff?55726379') format("woff"), url('#{$pillar-font-path}/pillar-font.woff2?55726379') format("woff2")
   font-weight: normal
   font-style: normal
 
