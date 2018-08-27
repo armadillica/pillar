@@ -1,0 +1,20 @@
+.tooltip
+	transition: opacity 50ms ease-in-out
+	&.in
+		opacity: 1
+
+	.tooltip-inner
+		max-width: auto
+		white-space: nowrap
+		background-color: $color-background-nav-light
+		color: $color-text-light-primary
+		border-radius: 3px
+
+	&.top .tooltip-arrow
+		border-top-color: $color-background-nav-light
+	&.bottom .tooltip-arrow
+		border-bottom-color: $color-background-nav-light
+	&.left .tooltip-arrow
+		border-left-color: $color-background-nav-light
+	&.right .tooltip-arrow
+		border-right-color: $color-background-nav-light

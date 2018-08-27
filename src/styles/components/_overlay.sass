@@ -1,0 +1,75 @@
+#page-overlay
+	background-color: rgba(black, .8)
+	position: fixed
+	top: 0
+	bottom: 0
+	right: 0
+	left: 0
+	z-index: $z-index-base + 15
+	visibility: hidden
+	opacity: 0
+	transition: opacity 150ms ease-in-out
+
+	display: flex
+	align-items: center
+	justify-content: center
+
+	img
+		user-select: none
+		display: block
+		max-height: 96%
+		max-width: 96%
+		z-index: 0
+
+		box-shadow: 0 0 15px rgba(black, .2), 0 0 100px rgba(black, .5)
+	p.caption
+		position: absolute
+		bottom: 1%
+
+	&.active
+		visibility: visible
+		opacity: 1
+
+	.no-preview
+		user-select: none
+		z-index: 0
+		color: $color-text-light-secondary
+
+	.nav-prev, .nav-next
+		display: block
+		font:
+			family: 'pillar-font'
+			size: 2em
+		height: 80%
+		width: 50px
+		cursor: pointer
+		color: $color-text-light-secondary
+		z-index: 1
+		+position-center-translate
+
+		&:hover
+			color: $color-text-light
+
+		&:before, &:after
+			+position-center-translate
+
+	.nav-prev
+		left: 50px
+		&:before
+			content: '\e839'
+
+	.nav-next
+		left: initial
+		right: 0
+		&:before
+			content: '\e83a'
+
+
+	&.video
+		.video-embed
+			+position-center-translate
+			position: fixed
+
+			iframe
+				width: 853px
+				height: 480px

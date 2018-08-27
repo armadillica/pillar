@@ -1,0 +1,108 @@
+/* FOOTER */
+#footer-container
+	position: relative
+
+	.row
+		+media-xs
+			margin: 0
+
+/* Footer Navigation */
+footer
+	font-size: .75em
+	padding: 0 0 10px 0
+	a
+		color: $color-text-dark-primary
+
+		&:hover
+			color: $color-primary
+
+	ul.links
+		float: left
+		padding: 0
+		margin: 0
+		list-style-type: none
+
+		li
+			padding: 0 15px 0 0
+			margin: 0
+			float: left
+
+#hop
+	display: flex
+	align-items: center
+	justify-content: center
+	visibility: hidden
+	position: fixed
+	right: 25px
+	bottom: 25px
+	z-index: 999
+	cursor: pointer
+	opacity: 0
+	background: $color-background-light
+	width: 32px
+	height: 32px
+	border-radius: 50%
+	color: $color-text-dark-secondary
+	font-size: 2em
+	box-shadow: 0 0 15px rgba(black, .2)
+	transform: scale(0.5)
+	transition: all 150ms ease-in-out
+
+	&:hover
+		transform: scale(1.2)
+		background-color: $color-background-nav
+
+	&.active
+		visibility: visible
+		opacity: 1
+		transform: scale(1)
+
+
+#footer-navigation
+	font-size: .85em
+	margin-bottom: 5px
+	color: lighten($color-text, 30%)
+	border-top: thick solid lighten($color-text, 60%)
+	padding:
+		top: 15px
+		bottom: 15px
+
+	a
+		color: lighten($color-text, 35%)
+
+		&:hover
+			color: $color-primary
+
+	.footer-links
+		i
+			font-size: 80%
+			position: absolute
+			left: -14px
+			top: 20%
+
+	.special
+		padding:
+			top: 10px
+			bottom: 15px
+		font-size: .9em
+		border-left: thin solid darken($color-background, 20%)
+
+
+		img
+			max-width: 100%
+			opacity: .6
+
+	ul.footer-social
+		width: 100%
+		text-align:center
+		margin: 0 auto
+		display: flex
+		align-items: center
+		justify-content: space-around
+
+		li
+			display: inline-block
+			padding: 30px 0
+
+			i
+				font-size: 3em
