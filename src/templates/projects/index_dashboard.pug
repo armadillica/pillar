@@ -213,7 +213,7 @@ style.
 			img.header(
 				src="{{ url_for('static', filename='assets/img/backgrounds/services_projects.jpg')}}")
 			.text
-				.title Projects
+				h5 Projects
 				.lead
 					span.
 						Create and manage your own personal projects.
@@ -223,13 +223,14 @@ style.
 						href="https://cloud.blender.org/blog/introducing-private-projects")
 						| Learn More
 
-		section.announcement
+		section.announcement.mt-3
 			a(href="https://cloud.blender.org/blog/introducing-blender-sync")
 			img.header(
 				src="{{ url_for('static', filename='assets/img/blender_sync_header.jpg') }}")
 			.text
-				.title
-					a(href="https://cloud.blender.org/blog/introducing-blender-sync") Textures Browser & Settings Sync
+				h5
+					a.text-muted(href="https://cloud.blender.org/blog/introducing-blender-sync")
+						| Textures Browser & Settings Sync
 
 				.lead
 					span.
