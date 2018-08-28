@@ -1,0 +1,12 @@
+// Global, we want all menus to look like this.
+.dropdown-menu
+	box-shadow: $dropdown-box-shadow
+
+	> li
+		> a
+			padding: $dropdown-item-padding-y
+
+// Open dropdown on mouse hover dropdowns in the navbar.
+nav .dropdown:hover
+	ul.dropdown-menu
+		display: block
