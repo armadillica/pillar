@@ -1,3 +1,4 @@
+import copy
 from datetime import datetime
 import logging
 
@@ -24,8 +25,9 @@ class ValidateCustomFields(Validator):
         result = super().validate(document, *args, **kwargs)
 
         # Store the in-place modified document as self.document, so that Eve's post_internal
-        # can actually pick it up as the validated document.
-        self.document = document
+        # can actually pick it up as the validated document. We need to make a copy so that
+        # further modifications (like setting '_etag' etc.) aren't done in-place.
+        self.document = copy.deepcopy(document)
 
         return result
 
