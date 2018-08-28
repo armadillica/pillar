@@ -33,7 +33,9 @@ WebOb==1.5.0
 wheel==0.29.0
 zencoder==0.6.5
 
+
 # Secondary requirements
+pyasn1
 # amqp==2.1.4
 # billiard==3.5.0.2
 # Flask-PyMongo==0.4.1
