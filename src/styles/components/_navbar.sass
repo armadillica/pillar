@@ -1,5 +1,7 @@
-/* Navigation */
+// Navigation.
 .navbar-overlay
+	+media-lg
+		display: block
 	bottom: 0
 	display: none
 	left: 0
@@ -11,87 +13,26 @@
 	width: 100%
 	z-index: 0
 
-	&+.navbar-container
-		.search-input
-			+media-lg
-				border: thin solid rgba(white, .2)
-
-				#cloud-search, .tt-hint
-					&::placeholder
-						color: rgba(white, .8)
-
-			border: thin solid transparent
-			border-radius: 3px
-			margin: 8px 0
-
 	&.is-active
 		background-color: $color-background-nav
 		text-shadow: none
 
-		&+.navbar-container
-			.search-input
-				+media-sm
-					background-color: darken($color-background-nav, 6%)
-				+media-md
-					background-color: darken($color-background-nav, 6%)
-				+media-lg
-					border: thin solid transparent
-					background-color: darken($color-background-nav, 6%)
-
-				#cloud-search, .tt-hint
-					&::placeholder
-						color: rgba(white, .5)
-
-	+media-lg
-		display: block
-
-
-.navbar-container
-	align-items: center
-	display: flex
-	width: 100%
-
-	.navbar-collapse
-		+media-xs
-			padding: 0
-			width: 100%
-			max-height: initial // overrides bs, we don't have many items
-
-		&.show-notifications
-			display: block
-
-			li
-				display: none
-				&.nav-notifications
-					display: block
-					position: absolute
-					top: 7px
-					left: 0
-					width: 100%
-					z-index: $z-index-base
-
-					#notifications
-						padding: 0 10px
-
-
-nav
-	&.navbar
-		border-radius: 0
-		left: 0
-		position: fixed
-		right: 0
-		top: 0
-
 .navbar-brand
 	padding-left: 10px
 	color: $color-text
-
 	width: 120px // Blender Cloud logo width
 
 	&:hover
 		color: $color-text-dark-primary
 
-nav.navbar,
+
+nav.navbar
+	.navbar-collapse
+		> ul > li > .navbar-item
+			padding: $navbar-nav-link-padding-x
+			height: $nav-link-height
+
+.navbar,
 nav.sidebar
 	align-items: center
 	background-color: $color-background-nav
@@ -110,42 +51,40 @@ nav.sidebar
 				margin: 0
 				width: 100%
 
+	.navbar-item
+		align-items: center
+		color: $color-text
+		display: flex
+		user-select: none
+		transition: color 150ms ease-in-out, box-shadow 100ms ease-in-out
+
+		+media-sm
+			padding-left: 10px
+			padding-right: 10px
+
+		&:hover, &:focus
+			color: $color-primary
+			background-color: transparent
+			box-shadow: inset 0 -3px 0 $color-primary
+			text-decoration: none
+
+		&:focus
+			box-shadow: inset 0 -3px 0 $color-primary
+
+		&.active
+			color: $color-primary
+			box-shadow: inset 0 -3px 0 lighten($color-secondary, 10%)
+
+			&:hover
+				box-shadow: inset 0 -3px 0 lighten($color-secondary, 20%)
+
+		.pi-angle-down
+			position: relative
+			left: 5px
+
 	li
 		user-select: none
 		position: relative
-
-		a.navbar-item
-			align-items: center
-			color: $color-text
-			display: flex
-			user-select: none
-			padding: $navbar-brand-padding-y
-			height: 100%
-			transition: color 150ms ease-in-out, box-shadow 100ms ease-in-out
-
-			+media-sm
-				padding-left: 10px
-				padding-right: 10px
-
-			&:hover, &:focus
-				color: $color-primary
-				background-color: transparent
-				box-shadow: inset 0 -3px 0 $color-primary
-				text-decoration: none
-
-			&:focus
-				box-shadow: inset 0 -3px 0 $color-primary
-
-			&.active
-				color: $color-primary
-				box-shadow: inset 0 -3px 0 lighten($color-secondary, 10%)
-
-				&:hover
-					box-shadow: inset 0 -3px 0 lighten($color-secondary, 20%)
-
-			.pi-angle-down
-				position: relative
-				left: 5px
 
 		&.nav-item-sign-in
 			i
@@ -158,7 +97,6 @@ nav.sidebar
 			width: 32px
 			box-shadow: 1px 1px 0 rgba(black, .2)
 			position: relative
-
 
 		.special
 			width: 18px
@@ -190,8 +128,7 @@ nav.sidebar
 				+position-center-translate
 
 	.dropdown
-		position: relative
-		min-width: 60px
+		min-width: 60px // navbar avatar size
 
 		// Removes angle-down icon from bootstrap,
 		// since we use a nicer chevron.
@@ -205,41 +142,25 @@ nav.sidebar
 			transform: translate(-50%, -50%)
 
 		ul.dropdown-menu
-			padding: 0
-
 			li
 				a
-					padding: 5px 15px 5px 5px
+					white-space: nowrap
 
 					&:hover
-						color: $color-primary
-						box-shadow: none
+						box-shadow: none // removes underline
 
-					&.subitem
+					&.subitem // e.g. "Not Sintel? Log out"
 						font-size: .8em
 						padding-top: 0
 						text-transform: initial
 
 				i
-					width: 35px
-					text-align: center
+					width: 30px
 
 				&.subscription-status
-					padding:
-						top: 10px
-						bottom: 10px
-
-					transition: opacity 150ms ease-in-out
-					opacity: 1
-
-					&:hover
-						opacity: .8
-
-					a
-						text-transform: initial
-
 					&.none a
 						color: $color-danger
+
 					&.subscriber a
 						color: $color-success
 
@@ -280,71 +201,11 @@ nav.sidebar
 			display: block
 
 
-.navbar-backdrop
-	z-index: 0
-	position: absolute
-	top: 0
-	left: 0
-	right: 0
-	bottom: 0
-
-	width: 100%
-	height: 100%
-	background:
-		size: 100%
-		position: 0 0
-		repeat: no-repeat
-		color: transparent
-		image: url(https://cloud.blender.org/static/assets/img/backgrounds/pattern_02_blur.jpg)
-
-	filter: none
-
-	&.project
-		display: none
-		+media-lg
-			display: block
-			left: -10px
-			width: 105%
-	&.blog
-		display: none
-		+media-lg
-			display: block
-			left: -10px
-			width: 105%
-		+media-md
-			display: block
-			left: -10px
-			width: 105%
-
-
-.navbar-backdrop-overlay
-	position: absolute
-	top: 0
-	left: 0
-	width: 100%
-	height: $navbar-backdrop-height
-	background: linear-gradient(to bottom, rgba($color-background, 0) 25%, rgba($color-background,0.5) 50%, rgba($color-background,1) 100%)
-
-
-/* Global, we want all menus to look like this */
-ul.dropdown-menu
-	background-color: $color-background-light
-	border: none
-	box-shadow: 0 10px 25px rgba(black, .1)
-	user-select: none
-
-	.divider
-		background-color: rgba(black, .1)
-
-nav .dropdown:hover ul.dropdown-menu
-	display: block
-
 .nav-tabs .dropdown-menu, .nav-pills .dropdown-menu
 	margin-top: 0
 
 .navbar+.page-content
-	padding-top: $navbar-height
-
+	padding-top: $nav-link-height
 
 // Secondary navigation for
 .nav-secondary
