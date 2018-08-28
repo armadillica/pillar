@@ -52,8 +52,8 @@ class NodeContentTypeTest(AbstractPillarTest):
                 self.assertNotIn('content_type', db_node['properties'])
 
                 # PUT it again, without a file -- should be blocked.
-                self.assertRaises(UnprocessableEntity, self.app.put_internal, 'nodes', node_doc,
-                                  _id=node_id)
+                with self.assertRaises(UnprocessableEntity):
+                    self.app.put_internal('nodes', node_doc, _id=node_id)
 
                 # PUT it with a file.
                 node_doc['properties']['file'] = str(file_id)
