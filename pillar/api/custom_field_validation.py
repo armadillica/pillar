@@ -21,7 +21,13 @@ class ValidateCustomFields(Validator):
     def validate(self, document, *args, **kwargs):
         # Keep a reference to the actual document, because Cerberus validates copies.
         self.__real_document = document
-        return super().validate(document, *args, **kwargs)
+        result = super().validate(document, *args, **kwargs)
+
+        # Store the in-place modified document as self.document, so that Eve's post_internal
+        # can actually pick it up as the validated document.
+        self.document = document
+
+        return result
 
     def _get_child_validator(self, *args, **kwargs):
         child = super()._get_child_validator(*args, **kwargs)
@@ -178,14 +184,18 @@ class ValidateCustomFields(Validator):
     def _validator_markdown(self, field, value):
         """Convert MarkDown.
         """
+        my_log = log.getChild('_validator_markdown')
+
         # Find this field inside the original document
         my_subdoc = self._subdoc_in_real_document()
         if my_subdoc is None:
             self._error(field, f'unable to find sub-document for path {self.document_path}')
             return
 
+        my_log.debug('validating field %r with value %r', field, value)
         save_to = pillar.markdown.cache_field_name(field)
         html = pillar.markdown.markdown(value)
+        my_log.debug('saving result to %r in doc with id %s', save_to, id(my_subdoc))
         my_subdoc[save_to] = html
 
     def _subdoc_in_real_document(self):
