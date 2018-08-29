@@ -6,6 +6,7 @@ with Blender ID.
 
 import datetime
 import logging
+from urllib.parse import urljoin
 
 import requests
 from bson import tz_util
@@ -114,13 +115,14 @@ def validate_token(user_id, token, oauth_subclient_id):
         # We only want to accept Blender Cloud tokens.
         payload['client_id'] = current_app.config['OAUTH_CREDENTIALS']['blender-id']['id']
 
-    url = '{0}/u/validate_token'.format(current_app.config['BLENDER_ID_ENDPOINT'])
+    blender_id_endpoint = current_app.config['BLENDER_ID_ENDPOINT']
+    url = urljoin(blender_id_endpoint, 'u/validate_token')
     log.debug('POSTing to %r', url)
 
     # Retry a few times when POSTing to BlenderID fails.
     # Source: http://stackoverflow.com/a/15431343/875379
     s = requests.Session()
-    s.mount(current_app.config['BLENDER_ID_ENDPOINT'], HTTPAdapter(max_retries=5))
+    s.mount(blender_id_endpoint, HTTPAdapter(max_retries=5))
 
     # POST to Blender ID, handling errors as negative verification results.
     try:
@@ -261,7 +263,7 @@ def setup_app(app, url_prefix):
 
 
 def switch_user_url(next_url: str) -> str:
-    from urllib.parse import quote, urljoin
+    from urllib.parse import quote
 
     base_url = urljoin(current_app.config['BLENDER_ID_ENDPOINT'], 'switch')
     if next_url:
