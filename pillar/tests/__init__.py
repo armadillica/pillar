@@ -27,6 +27,7 @@ from eve.tests import TestMinimal
 import pymongo.collection
 from flask.testing import FlaskClient
 import flask.ctx
+import flask.wrappers
 import responses
 
 import pillar
@@ -485,11 +486,10 @@ class AbstractPillarTest(TestMinimal):
 
     def client_request(self, method, path, qs=None, expected_status=200, auth_token=None, json=None,
                        data=None, headers=None, files=None, content_type=None, etag=None,
-                       environ_overrides=None):
+                       environ_overrides=None) -> flask.wrappers.Response:
         """Performs a HTTP request to the server."""
 
         from pillar.api.utils import dumps
-        import json as mod_json
 
         headers = headers or {}
         environ_overrides = environ_overrides or {}
@@ -522,28 +522,21 @@ class AbstractPillarTest(TestMinimal):
                              expected_status, resp.status_code, resp.data
                          ))
 
-        # def get_json():
-        #     if resp.mimetype != 'application/json':
-        #         raise TypeError('Unable to load JSON from mimetype %r' % resp.mimetype)
-        #     return mod_json.loads(resp.data)
-        #
-        # resp.get_json = get_json
-
         return resp
 
-    def get(self, *args, **kwargs):
+    def get(self, *args, **kwargs) -> flask.wrappers.Response:
         return self.client_request('GET', *args, **kwargs)
 
-    def post(self, *args, **kwargs):
+    def post(self, *args, **kwargs) -> flask.wrappers.Response:
         return self.client_request('POST', *args, **kwargs)
 
-    def put(self, *args, **kwargs):
+    def put(self, *args, **kwargs) -> flask.wrappers.Response:
         return self.client_request('PUT', *args, **kwargs)
 
-    def delete(self, *args, **kwargs):
+    def delete(self, *args, **kwargs) -> flask.wrappers.Response:
         return self.client_request('DELETE', *args, **kwargs)
 
-    def patch(self, *args, **kwargs):
+    def patch(self, *args, **kwargs) -> flask.wrappers.Response:
         return self.client_request('PATCH', *args, **kwargs)
 
     def assertAllowsAccess(self,
