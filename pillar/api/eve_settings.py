@@ -121,12 +121,6 @@ users_schema = {
     'service': {
         'type': 'dict',
         'allow_unknown': True,
-        'schema': {
-            'badger': {
-                'type': 'list',
-                'schema': {'type': 'string'}
-            }
-        }
     },
 
     # Properties defined by extensions. Extensions should use their name (see the
