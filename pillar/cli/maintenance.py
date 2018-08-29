@@ -767,7 +767,9 @@ def iter_markdown(proj_node_types: dict, some_node: dict, callback: typing.Calla
                     continue
                 to_visit.append((subdoc, definition['schema']))
                 continue
-            if definition.get('coerce') != 'markdown':
+            coerce = definition.get('coerce')  # Eve < 0.8
+            validator = definition.get('validator')  # Eve >= 0.8
+            if coerce != 'markdown' and validator != 'markdown':
                 continue
 
             my_log.debug('I have to change %r of %s', key, doc)
