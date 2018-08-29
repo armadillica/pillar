@@ -254,8 +254,8 @@ class OrganizationPatchTest(AbstractPillarTest):
         db = self.app.db('organizations')
         db_org = db.find_one(org_id)
 
-        self.assertEqual([], db_org['members'])
-        self.assertEqual([], db_org['unknown_members'])
+        self.assertEqual([], db_org.get('members', []))
+        self.assertEqual([], db_org.get('unknown_members', []))
 
     def test_remove_user_by_email(self):
         self.enter_app_context()
@@ -1056,7 +1056,7 @@ class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
             'token_hashed': hash_auth_token('usertoken'),
             'expire_time': {'$gt': datetime.datetime.now(tz_util.utc)},
         })
-        self.assertEqual(ip_roles, set(token['org_roles']))
+        self.assertEqual(ip_roles, set(token.get('org_roles', [])))
 
         # The IP-based roles should also be persisted in the user document.
         users_coll = self.app.db('users')
