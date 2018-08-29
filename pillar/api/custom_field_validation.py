@@ -159,7 +159,7 @@ class ValidateCustomFields(Validator):
             # validator at all.
             return
 
-        if self._id is None:
+        if self.document_id is None:
             # This is a creation call, in which case this validator shouldn't run.
             return
 
