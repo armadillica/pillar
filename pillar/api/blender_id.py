@@ -261,9 +261,9 @@ def setup_app(app, url_prefix):
 
 
 def switch_user_url(next_url: str) -> str:
-    from urllib.parse import quote
+    from urllib.parse import quote, urljoin
 
-    base_url = '%s/switch' % current_app.config['BLENDER_ID_ENDPOINT']
+    base_url = urljoin(current_app.config['BLENDER_ID_ENDPOINT'], 'switch')
     if next_url:
         return '%s?next=%s' % (base_url, quote(next_url))
     return base_url

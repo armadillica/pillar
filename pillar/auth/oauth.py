@@ -129,6 +129,7 @@ class BlenderIdSignIn(OAuthSignIn):
     provider_name = 'blender-id'
 
     def __init__(self):
+        from urllib.parse import urljoin
         super().__init__()
 
         base_url = current_app.config['BLENDER_ID_ENDPOINT']
@@ -137,8 +138,8 @@ class BlenderIdSignIn(OAuthSignIn):
             name='blender-id',
             client_id=self.consumer_id,
             client_secret=self.consumer_secret,
-            authorize_url='%s/oauth/authorize' % base_url,
-            access_token_url='%s/oauth/token' % base_url,
+            authorize_url=urljoin(base_url, 'oauth/authorize'),
+            access_token_url=urljoin(base_url, 'oauth/token'),
             base_url='%s/api/' % base_url
         )
 
