@@ -191,7 +191,11 @@ class ValidateCustomFields(Validator):
         # Find this field inside the original document
         my_subdoc = self._subdoc_in_real_document()
         if my_subdoc is None:
-            self._error(field, f'unable to find sub-document for path {self.document_path}')
+            # If self.update==True we are validating an update document, which
+            # may not contain all fields, so then a missing field is fine.
+            if not self.update:
+                self._error(field, f'validator_markdown: unable to find sub-document '
+                                   f'for path {self.document_path}')
             return
 
         my_log.debug('validating field %r with value %r', field, value)
