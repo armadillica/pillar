@@ -61,7 +61,7 @@ class ProjectCreationTest(AbstractProjectTest):
         project_id = project_info['_id']
 
         # Test that the Location header contains the location of the project document.
-        self.assertEqual('http://localhost/api/projects/%s' % project_id,
+        self.assertEqual('https://localhost.local/api/projects/%s' % project_id,
                          resp.headers['Location'])
 
         # GET the project from the URL in the Location header to see if that works too.
