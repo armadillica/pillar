@@ -44,3 +44,5 @@ ELASTIC_INDICES = {
 
 # MUST be 8 characters long, see pillar.flask_extra.HashedPathConverter
 STATIC_FILE_HASH = 'abcd1234'
+
+CACHE_NO_NULL_WARNING = True
