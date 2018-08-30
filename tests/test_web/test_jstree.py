@@ -99,3 +99,12 @@ class JSTreeTest(AbstractPillarTest):
             'children': False,
             'custom_view': False,
         })
+
+    def test_jstree_canary(self):
+        """Test that a project's /jstree URL can be called at all.
+
+        This catches a problem we had with MONGO_QUERY_BLACKLIST.
+        """
+
+        resp = self.get(f'/p/{self.project["url"]}/jstree')
+        self.assertEqual(200, resp.status_code)

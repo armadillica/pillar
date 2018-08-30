@@ -828,3 +828,8 @@ X_DOMAINS = '*'
 X_ALLOW_CREDENTIALS = True
 X_HEADERS = 'Authorization'
 RENDERERS = ['eve.render.JSONRenderer']
+
+# TODO(Sybren): this is a quick workaround to make /p/{url}/jstree work again.
+# Apparently Eve is now stricter in checking against MONGO_QUERY_BLACKLIST, and
+# blocks our use of $regex.
+MONGO_QUERY_BLACKLIST = ['$where']
