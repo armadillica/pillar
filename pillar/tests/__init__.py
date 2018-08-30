@@ -391,7 +391,7 @@ class AbstractPillarTest(TestMinimal):
 
         return user_id
 
-    def create_node(self, node_doc):
+    def create_node(self, node_doc) -> ObjectId:
         """Creates a node, returning its ObjectId. """
 
         with self.app.test_request_context():

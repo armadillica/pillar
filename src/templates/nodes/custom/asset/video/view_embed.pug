@@ -67,6 +67,14 @@ script(type="text/javascript").
 		});
 		this.hotkeys();
 
+		{% if current_user.is_authenticated %}
+		let fetch_progress_url = '{{ url_for("users_api.get_video_progress", video_id=node._id) }}';
+		let report_url = '{{ url_for("users_api.set_video_progress", video_id=node._id) }}';
+		this.progressPlugin({
+			'report_url': report_url,
+			'fetch_progress_url': fetch_progress_url,
+		});
+		{% endif %}
 	});
 
 	function addVideoPlayerButton(data) {

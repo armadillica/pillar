@@ -123,6 +123,35 @@ users_schema = {
         'allow_unknown': True,
     },
 
+    # Node-specific information for this user.
+    'nodes': {
+        'type': 'dict',
+        'schema': {
+            # Per watched video info about where the user left off, both in time and in percent.
+            'view_progress': {
+                'type': 'dict',
+                # Keyed by Node ID of the video asset. MongoDB doesn't support using
+                # ObjectIds as key, so we cast them to string instead.
+                'keyschema': {'type': 'string'},
+                'valueschema': {
+                    'type': 'dict',
+                    'schema': {
+                        'progress_in_sec': {'type': 'float', 'min': 0},
+                        'progress_in_percent': {'type': 'integer', 'min': 0, 'max': 100},
+
+                        # When the progress was last updated, so we can limit this history to
+                        # the last-watched N videos if we want, or show stuff in chrono order.
+                        'last_watched': {'type': 'datetime'},
+
+                        # True means progress_in_percent = 100, for easy querying
+                        'done': {'type': 'boolean', 'default': False},
+                    },
+                },
+            },
+
+        },
+    },
+
     # Properties defined by extensions. Extensions should use their name (see the
     # PillarExtension.name property) as the key, and are free to use whatever they want as value,
     # but we suggest a dict for future extendability.
