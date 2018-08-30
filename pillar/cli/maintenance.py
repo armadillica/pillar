@@ -684,8 +684,8 @@ def upgrade_attachment_schema(proj_url=None, all_projects=False, go=False):
                 log_proj()
                 log.info('Removed %d empty attachment dicts', res.modified_count)
         else:
-            to_remove = nodes_coll.count({'properties.attachments': {},
-                                          'project': project['_id']})
+            to_remove = nodes_coll.count_documents({'properties.attachments': {},
+                                                    'project': project['_id']})
             if to_remove:
                 log_proj()
                 log.info('Would remove %d empty attachment dicts', to_remove)
