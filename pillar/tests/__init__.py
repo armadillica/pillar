@@ -187,7 +187,7 @@ class AbstractPillarTest(TestMinimal):
         else:
             self.ensure_project_exists()
 
-        with self.app.test_request_context():
+        with self.app.app_context():
             files_collection = self.app.data.driver.db['files']
             assert isinstance(files_collection, pymongo.collection.Collection)
 
