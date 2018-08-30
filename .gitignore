@@ -12,6 +12,7 @@ config_local.py
 
 /build
 /.cache
+/.pytest_cache/
 /*.egg-info/
 profile.stats
 /dump/
