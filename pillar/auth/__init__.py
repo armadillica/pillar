@@ -210,6 +210,11 @@ def login_user(oauth_token: str, *, load_from_db=False):
         user = _load_user(oauth_token)
     else:
         user = UserClass(oauth_token)
+    login_user_object(user)
+
+
+def login_user_object(user: UserClass):
+    """Log in the given user."""
     flask_login.login_user(user, remember=True)
     g.current_user = user
     user_authenticated.send(None)

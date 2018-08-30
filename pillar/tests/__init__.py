@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 import base64
+import contextlib
 import copy
 import datetime
 import json
@@ -326,6 +327,31 @@ class AbstractPillarTest(TestMinimal):
         g.current_user = user
 
         return user
+
+    @contextlib.contextmanager
+    def login_as(self, user_id: typing.Union[str, ObjectId]):
+        """Context manager, within the context the app context is active and the user logged in.
+
+        The logging-in happens when a request starts, so it's only active when
+        e.g. self.get() or self.post() or somesuch request is used.
+        """
+        from pillar.auth import UserClass, login_user_object
+
+        if isinstance(user_id, str):
+            user_oid = ObjectId(user_id)
+        elif isinstance(user_id, ObjectId):
+            user_oid = user_id
+        else:
+            raise TypeError(f'invalid type {type(user_id)} for parameter user_id')
+        user_doc = self.fetch_user_from_db(user_oid)
+
+        def signal_handler(sender, **kwargs):
+            login_user_object(user)
+
+        with self.app.app_context():
+            user = UserClass.construct('', user_doc)
+            with flask.request_started.connected_to(signal_handler, self.app):
+                yield
 
     def create_valid_auth_token(self, user_id, token='token'):
         from pillar.api.utils import utcnow
