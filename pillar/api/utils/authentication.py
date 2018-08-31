@@ -13,7 +13,7 @@ import logging
 import typing
 
 import bson
-from flask import g, current_app
+from flask import g, current_app, session
 from flask import request
 from werkzeug import exceptions as wz_exceptions
 
@@ -103,7 +103,7 @@ def find_user_in_db(user_info: dict, provider='blender-id') -> dict:
     return db_user
 
 
-def validate_token(*, force=False):
+def validate_token(*, force=False) -> bool:
     """Validate the token provided in the request and populate the current_user
     flask.g object, so that permissions and access to a resource can be defined
     from it.
@@ -115,7 +115,7 @@ def validate_token(*, force=False):
     :returns: True iff the user is logged in with a valid Blender ID token.
     """
 
-    from pillar.auth import AnonymousUser
+    import pillar.auth
 
     # Trust a pre-existing g.current_user
     if not force:
@@ -133,16 +133,22 @@ def validate_token(*, force=False):
         oauth_subclient = ''
     else:
         # Check the session, the user might be logged in through Flask-Login.
-        from pillar import auth
 
-        token = auth.get_blender_id_oauth_token()
+        # The user has a logged-in session; trust only if this request passes a CSRF check.
+        # FIXME(Sybren): we should stop saving the token as 'user_id' in the sesion.
+        token = session.get('user_id')
+        if token:
+            log.debug('skipping token check because current user already has a session')
+            current_app.csrf.protect()
+        else:
+            token = pillar.auth.get_blender_id_oauth_token()
         oauth_subclient = None
 
     if not token:
         # If no authorization headers are provided, we are getting a request
         # from a non logged in user. Proceed accordingly.
         log.debug('No authentication headers, so not logged in.')
-        g.current_user = AnonymousUser()
+        g.current_user = pillar.auth.AnonymousUser()
         return False
 
     return validate_this_token(token, oauth_subclient) is not None
