@@ -66,6 +66,7 @@ script(type="text/javascript").
 			'eventsToTrack' : ['start', 'error', 'percentsPlayed']
 		});
 		this.hotkeys();
+		this.rememberVolumePlugin();
 
 		{% if current_user.is_authenticated %}
 		let fetch_progress_url = '{{ url_for("users_api.get_video_progress", video_id=node._id) }}';

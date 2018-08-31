@@ -178,5 +178,25 @@ var VideoProgressPlugin = videojs.extend(Plugin, {
     },
 });
 
+var RememberVolumePlugin = videojs.extend(Plugin, {
+    constructor: function(player, options) {
+        Plugin.call(this, player, options);
+        player.on('volumechange', this.on_volumechange.bind(this));
+        this.restore_volume();
+    },
+
+    restore_volume: function() {
+        let volume_str = localStorage.getItem('video-player-volume');
+        if (volume_str == null) return;
+        this.player.volume(1.0 * volume_str);
+    },
+
+    on_volumechange: function(event) {
+        localStorage.setItem('video-player-volume', this.player.volume());
+    },
+});
+
+
 // Register our watch-progress-bookkeeping plugin.
 videojs.registerPlugin('progressPlugin', VideoProgressPlugin);
+videojs.registerPlugin('rememberVolumePlugin', RememberVolumePlugin);
