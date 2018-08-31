@@ -303,7 +303,7 @@ script.
 	function updateUi(nodeId, mode) {
 
 		if (mode === 'view') {
-			$('.project-mode-view').show();
+			$('.project-mode-view').displayAs('inline-block');
 			$('.project-mode-edit').hide();
 
 			$("#node-edit-form").unbind("submit");
@@ -311,12 +311,12 @@ script.
 			$("#item_cancel").unbind("click");
 		} else if (mode === 'edit') {
 			$('.project-mode-view').hide();
-			$('.project-mode-edit').show();
+			$('.project-mode-edit').displayAs('inline-block');
 		} else {
 			if (console) console.log('Invalid mode:', mode);
 		}
 
-		// Prevent flicker by scrolling to top
+		// Prevent flicker by scrolling to top.
 		$("#project_context-container").scrollTop(0);
 
 		// Enable specific items under the Add New dropdown
@@ -497,7 +497,7 @@ script.
 				// Handle old-style /p/{url}/#node-ID links, and redirect them to the correct spot.
 				redirectToNode(location.hash.substr(1));
 			}
-			$('.project-mode-view').show();
+			$('.project-mode-view').displayAs('inline-block');
 			$('.project-mode-edit').hide();
 		} else {
 			displayNode(nodeId, false);
