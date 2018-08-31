@@ -245,4 +245,10 @@ def random_etag() -> str:
 
 
 def utcnow() -> datetime.datetime:
-    return datetime.datetime.now(tz=bson.tz_util.utc)
+    """Construct timezone-aware 'now' in UTC with millisecond precision."""
+    now = datetime.datetime.now(tz=bson.tz_util.utc)
+
+    # MongoDB stores in millisecond precision, so truncate the microseconds.
+    # This way the returned datetime can be round-tripped via MongoDB and stay the same.
+    trunc_now = now.replace(microsecond=now.microsecond - (now.microsecond % 1000))
+    return trunc_now
