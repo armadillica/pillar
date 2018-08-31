@@ -68,9 +68,9 @@
 						| {% endif %}
 						| {% endfor %}
 
-					input.btn.btn-default.button-create(type='submit', value='Create {{ node_type.name }}')
+					input.btn.btn-outline-secondary.button-create(type='submit', value='Create {{ node_type.name }}')
 
-					a.btn.btn-default.button-back(href="{{ url_for('projects.view', project_url=project.url) }}blog")
+					a.btn.btn-link.button-back(href="{{ url_for('projects.view', project_url=project.url) }}blog")
 						| Back to Blog
 
 			#blog_post-create-container

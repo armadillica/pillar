@@ -22,9 +22,8 @@
 		| {% endif %}
 
 	section.node-details-container.project
-		.node-details-title
-			h1
-				a(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
+		h2.px-3.pt-3
+			a(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
 
 		| {% if project.description %}
 		.node-details-description

@@ -5,7 +5,7 @@
 	#blog_index-container.expand-image-links
 		.blog-action
 			| {% if node.has_method('PUT') %}
-			a.btn.btn-default.button-edit(href="{{url_for('nodes.edit', node_id=node._id)}}")
+			a.btn.btn-outline-secondary.button-edit(href="{{url_for('nodes.edit', node_id=node._id)}}")
 				i.pi-edit
 				| Edit Post
 			| {% endif %}

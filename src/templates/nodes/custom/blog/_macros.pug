@@ -8,10 +8,10 @@ a.blog_index-header(href="{{ node.url }}")
 | {% if project and project._id != config.MAIN_PROJECT_ID %}
 | {{ projectmacros.render_secondary_navigation(project, pages=pages) }}
 | {% endif %}
-.blog_index-item
-	a.item-title(
-	href="{{ node.url }}")
-		| {{ node.name }}
+.blog_index-item.mx-auto
+	h2.pt-4.px-4
+		a.text-muted(href="{{ node.url }}")
+			| {{ node.name }}
 	ul.meta
 		| {% if node.project.name %}
 		li {{ node.project.name }}
@@ -46,7 +46,7 @@ a.blog_index-header(href="{{ node.url }}")
 		i.pi-document-text
 	| {% endif %}
 
-	a.item-title(
+	a.item-title.text-muted(
 		href="{{ node.url }}")
 		| {{node.name}}
 
@@ -66,7 +66,7 @@ a.blog_index-header(href="{{ node.url }}")
 | {% macro render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta, pages=None) %}
 | {% if can_create_blog_posts %}
 .blog-action
-	a.btn.btn-default.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
+	a.btn.btn-outline-primary.button-create(href="{{url_for('nodes.posts_create', project_id=project._id)}}")
 		i.pi-plus
 		| Create New Post
 | {% endif %}

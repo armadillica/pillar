@@ -2,6 +2,7 @@
 | {% from '_macros/_add_new_menu.html' import add_new_menu %}
 
 | {% block page_title %}{{ project.name }}{% endblock%}
+| {% set title = 'project' %}
 
 | {% block og %}
 meta(property="og:type", content="website")
@@ -78,15 +79,14 @@ script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-hotke
 
 | {% block css %}
 link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css') }}", rel="stylesheet")
-link(href="{{ url_for('static_pillar', filename='assets/css/base.css') }}", rel="stylesheet")
 link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }}", rel="stylesheet")
 | {% endblock %}
 
 | {% block body %}
 #project-container
 	#project-side-container
-		#project_sidebar
-			ul.project-tabs
+		#project_sidebar.bg-white
+			ul.project-tabs.p-0
 				li.tabs-thumbnail(class="{% if project.picture_square %}image{% endif %}")
 					a(href="{{url_for('projects.view', project_url=project.url)}}")
 						#project-loading
@@ -96,6 +96,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }
 						| {% else %}
 						i.pi-home
 						| {% endif %}
+
 				li.tabs-browse(
 					title="Browse",
 					data-toggle="tooltip",
@@ -103,6 +104,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }
 					class="active")
 					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 						i.pi-folder
+
 				| {% if not project.is_private %}
 				| {% if current_user_is_subscriber %}
 				li.tabs-search(
@@ -135,29 +137,29 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }
 		#project_nav(class="{{ title }}")
 			#project_nav-container
 				| {% if title != 'about' %}
-				#project_nav-header
-					.project-title
-						a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-							| {{ project.name }}
+				#project_nav-header.bg-white
+					a.project-title.p-2.font-weight-bold.text-dark(
+						href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+						| {{ project.name }}
 
 				| {% block project_tree %}
-				#project_tree
+				#project_tree.bg-white
 				| {% endblock project_tree %}
 				| {% endif %}
 
 
 	#project_context-container
 		| {% if project.has_method('PUT') %}
-		#project_context-header
+		#project_context-header.bg-white
 			span#status-bar
 
 			ul.project-edit-tools.disabled
-				li.button-dropdown
-					a#item_add.dropdown-toggle.project-mode-view(
-					type="button",
-					data-toggle="dropdown",
-					aria-haspopup="true",
-					aria-expanded="false")
+				li.dropdown
+					button#item_add.project-mode-view.btn.btn-sm.btn-outline-secondary.dropdown-toggle(
+						type="button",
+						data-toggle="dropdown",
+						aria-haspopup="true",
+						aria-expanded="false")
 						i.button-add-icon.pi-collection-plus
 						| New...
 
@@ -165,52 +167,52 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }
 						| {{ add_new_menu(project.node_types) }}
 
 				li.button-edit
-					a#item_edit.project-mode-view(
+					a#item_edit.project-mode-view.btn.btn-sm.btn-outline-secondary.ml-2(
 						href="javascript:void(0);",
 						title="Edit",
 						data-project_id="{{project._id}}")
 						i.button-edit-icon.pi-edit
 						| Edit Project
 
-				li.button-dropdown
-					a.dropdown-toggle.project-mode-view(
+				li.dropdown
+					button.dropdown-toggle.project-mode-view.btn.btn-sm.btn-outline-secondary.mx-2(
 						type="button",
 						data-toggle="dropdown",
 						aria-haspopup="true",
 						aria-expanded="false")
-						i.pi-more-vertical
+						i.pi-more-vertical.p-0
 
 					ul.dropdown-menu
 						| {% if current_user.has_cap('admin') %}
-						li.button-featured
+						li.dropdown-item
 							a#item_featured(
 								href="javascript:void(0);",
 								title="Feature on project's homepage",
 								data-toggle="tooltip",
 								data-placement="left")
-								i.button-featured-icon.pi-star
+								i.pi-star
 								| Toggle Featured
 
-						li.button-toggle-public
+						li.dropdown-item
 							a#item_toggle_public(
 								href="javascript:void(0);",
 								title="Make it accessible to anyone",
 								data-toggle="tooltip",
 								data-placement="left")
 								i.pi-lock-open
-								| Toggle public
+								| Toggle Public
 						| {% endif %}
 
-						li.button-toggle-projheader
+						li.dropdown-item
 							a#item_toggle_projheader(
 								href="javascript:void(0);",
 								title="Feature as project's header",
 								data-toggle="tooltip",
 								data-placement="left")
-								i.button-featured-icon.pi-star
+								i.pi-star
 								| Toggle Project Header video
 
-						li.button-move
+						li.dropdown-item.button-move
 							a#item_move(
 								href="javascript:void(0);",
 								title="Move into a folder...",
@@ -219,7 +221,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }
 								i.button-move-icon.pi-move
 								| Move
 
-						li.button-delete
+						li.dropdown-item.button-delete
 							a#item_delete(
 								href="javascript:void(0);",
 								title="Can be undone within a month",
@@ -230,14 +232,14 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }
 
 				// Edit Mode
 				li.button-cancel
-					a#item_cancel.project-mode-edit(
+					a#item_cancel.project-mode-edit.btn.btn-outline-secondary(
 						href="javascript:void(0);",
 						title="Cancel changes")
 						i.button-cancel-icon.pi-cancel
 						| Cancel
 
 				li.button-save
-					a#item_save.project-mode-edit(
+					a#item_save.project-mode-edit.btn.btn-outline-success.mx-2(
 						href="javascript:void(0);",
 						title="Save changes")
 						i.button-save-icon.pi-check
@@ -272,9 +274,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/project-main.css') }
 
 | {% endblock %}
 
-| {% block footer_navigation %}{% endblock %}
-| {% block footer %}{% endblock %}
-
+| {% block footer_container %}{% endblock %}
 
 | {% block footer_scripts_pre %}
 

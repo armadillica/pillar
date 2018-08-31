@@ -59,15 +59,15 @@ style.
 						| {% endif %}
 
 					| {% if current_user.has_cap('subscriber') %}
-					li.create#project-create(
+					li#project-create(
 						data-url="{{ url_for('projects.create') }}")
 						a.btn.btn-success(
 							href="{{ url_for('projects.create') }}")
 							i.pi-plus
 							| Create Project
 					| {% elif current_user.has_cap('can-renew-subscription') %}
-					li.create
-						a.btn(href="/renew", target="_blank")
+					li
+						a.btn.btn-outline-success(href="/renew", target="_blank")
 							i.pi-heart
 							| Renew subscription to create a project
 					| {% endif %}
@@ -210,44 +210,52 @@ style.
 
 	section.dashboard-secondary
 		section.announcement
-			img.header(
-				src="{{ url_for('static', filename='assets/img/backgrounds/services_projects.jpg')}}")
+			a(href="https://cloud.blender.org/blog/introducing-private-projects")
+				img.header(
+					src="{{ url_for('static', filename='assets/img/backgrounds/services_projects.jpg')}}")
 			.text
-				h5 Projects
+				h5
+					a.text-muted(href="https://cloud.blender.org/blog/introducing-private-projects")
+						| Projects
 				.lead
-					span.
+					p.
 						Create and manage your own personal projects.
 						Upload assets and collaborate with other Blender Cloud members.
-				.buttons
-					a.btn.btn-default.btn-outline.blue(
+
+					a.btn.btn-link.btn-block(
 						href="https://cloud.blender.org/blog/introducing-private-projects")
 						| Learn More
+						i.pi-angle-right
 
 		section.announcement.mt-3
 			a(href="https://cloud.blender.org/blog/introducing-blender-sync")
-			img.header(
-				src="{{ url_for('static', filename='assets/img/blender_sync_header.jpg') }}")
+				img.header(
+					src="{{ url_for('static', filename='assets/img/blender_sync_header.jpg') }}")
 			.text
 				h5
 					a.text-muted(href="https://cloud.blender.org/blog/introducing-blender-sync")
 						| Textures Browser & Settings Sync
 
 				.lead
-					span.
+					p.
 						Get the official Blender Cloud add-on:
+
 					ul
 						li Save your Blender settings online, use them anywhere
 						li Browse over 800 textures & HDRIs within Blender
 						li Share Screenshots & Renders directly to Blender Cloud
 
-				.buttons
-					a.btn.btn-default.btn-outline.orange(
-						href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
-						i.pi-download
-						| Download Add-on <small>v</small> {{ config.BLENDER_CLOUD_ADDON_VERSION }}
-					a.btn.btn-default.btn-outline.blue(
-						href="https://cloud.blender.org/blog/introducing-blender-sync")
-						| Learn More
+				.row
+					.col-md-8
+						a.btn.btn-outline-success.btn-block(
+							href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
+							i.pi-download
+							| Download Add-on <small>v</small> {{ config.BLENDER_CLOUD_ADDON_VERSION }}
+					.col-md-4
+						a.btn.btn-link(
+							href="https://cloud.blender.org/blog/introducing-blender-sync")
+							| Learn More
+							i.pi-angle-right
 
 | {% endblock %}
 

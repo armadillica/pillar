@@ -66,10 +66,9 @@ html(lang="en")
 		| {% if not title %}{% set title="default" %}{% endif %}
 
 	body(class="{{ title }}")
-		.container-page
-			.page-content
-				.page-body
-					| {% block body %}{% endblock %}
+		.page-content
+			.page-body
+				| {% block body %}{% endblock %}
 
 		| {% block footer_container %}
 		#footer-container

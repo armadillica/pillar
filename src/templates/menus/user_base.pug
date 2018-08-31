@@ -16,27 +16,27 @@ li.dropdown
 			a.navbar-item(
 			href="{{ url_for('projects.home_project') }}"
 			title="Home")
-				#[i.pi-home] Home
+				| #[i.pi-home] Home
 
 		li
 			a.navbar-item(
 			href="{{ url_for('projects.index') }}"
 			title="My Projects")
-				#[i.pi-star] My Projects
+				| #[i.pi-star] My Projects
 
 		| {% if current_user.has_organizations() %}
 		li
 			a.navbar-item(
 			href="{{ url_for('pillar.web.organizations.index') }}"
 			title="My Organizations")
-				#[i.pi-users] My Organizations
+				| #[i.pi-users] My Organizations
 		| {% endif %}
 
 		li
 			a.navbar-item(
 			href="{{ url_for('settings.profile') }}"
 			title="Settings")
-				#[i.pi-cog] Settings
+				| #[i.pi-cog] Settings
 
 		| {% endblock menu_list %}
 
@@ -55,8 +55,9 @@ li.dropdown
 
 | {% else %}
 
-li.nav-item-sign-in
-	a.navbar-item(href="{{ url_for('users.login') }}")
-		| Log in
+li.pt-1.pr-1
+	a.btn.btn-sm.btn-outline-primary.px-3(
+		href="{{ url_for('users.login') }}")
+		| Log In
 | {% endif %}
 | {% endblock menu_body %}
