@@ -64,4 +64,13 @@
 		return this;
 	};
 
+	// jQuery's show() sets display as 'inline', this utility sets it to whatever we want.
+	// Useful for buttons or links that need 'inline-block' or flex for correct padding and alignment.
+	$.fn.displayAs = function(display_type) {
+		if (typeof(display_type) === 'undefined') {
+			display_type = 'block';
+		}
+
+		this.css('display', display_type);
+	}
 }(jQuery));
