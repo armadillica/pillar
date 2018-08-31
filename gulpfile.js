@@ -30,6 +30,10 @@ var destination = {
     js: 'pillar/web/static/assets/js',
 }
 
+var source = {
+    bootstrap: 'node_modules/bootstrap/',
+    popper: 'node_modules/popper.js/'
+}
 
 /* CSS */
 gulp.task('styles', function() {
@@ -101,6 +105,29 @@ gulp.task('scripts_concat_markdown', function() {
 });
 
 
+// Combine all needed Bootstrap JavaScript into a single file.
+gulp.task('scripts_concat_bootstrap', function() {
+
+    toUglify = [
+        source.popper    + 'dist/umd/popper.min.js',
+        source.bootstrap + 'js/dist/index.js',
+        source.bootstrap + 'js/dist/util.js',
+        source.bootstrap + 'js/dist/tooltip.js',
+        source.bootstrap + 'js/dist/dropdown.js',
+    ];
+
+    gulp.src(toUglify)
+        .pipe(gulpif(enabled.failCheck, plumber()))
+        .pipe(gulpif(enabled.maps, sourcemaps.init()))
+        .pipe(concat("bootstrap.min.js"))
+        .pipe(gulpif(enabled.uglify, uglify()))
+        .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
+        .pipe(gulpif(enabled.chmod, chmod(644)))
+        .pipe(gulp.dest(destination.js))
+        .pipe(gulpif(argv.livereload, livereload()));
+});
+
+
 // While developing, run 'gulp watch'
 gulp.task('watch',function() {
     // Only listen for live reloads if ran with --livereload
@@ -138,4 +165,5 @@ gulp.task('default', tasks.concat([
     'scripts',
     'scripts_concat_tutti',
     'scripts_concat_markdown',
+    'scripts_concat_bootstrap',
 ]));
