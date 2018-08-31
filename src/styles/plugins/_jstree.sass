@@ -1,9 +1,8 @@
 /* jsTree overrides */
-
 $tree-color-text: $color-text-dark-primary
-$tree-color-highlight: hsl(hue($color-background-active), 40%, 50%)
-$tree-color-highlight-background: hsl(hue($color-background-active), 40%, 50%)
-$tree-color-highlight-background-text: white
+$tree-color-highlight: $color-primary-accent
+$tree-color-highlight-background: $color-primary-accent
+$tree-color-highlight-background-text: $white
 
 .jstree-default
 	/* list item */
@@ -104,8 +103,7 @@ $tree-color-highlight-background-text: white
 			padding-left: 28px
 			padding-right: 10px
 			text-overflow: ellipsis
-			transition: none
-			transition: color 50ms ease-in-out, background-color 100ms ease-in-out
+			transition: background-color 100ms ease-in-out
 			white-space: nowrap
 			width: 100%
 

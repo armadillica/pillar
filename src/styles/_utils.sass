@@ -82,6 +82,15 @@
 			text-shadow: none
 
 
+=disabled-stripes
+	color: $color-text-dark
+	cursor: not-allowed
+	background: repeating-linear-gradient(-45deg, lighten($color-text-dark-hint, 15%), lighten($color-text-dark-hint, 15%) 10px, lighten($color-text-dark-hint, 5%) 10px, lighten($color-text-dark-hint, 5%) 20px)
+	border-color: darken($color-text-dark-hint, 5%)
+	pointer-events: none
+	opacity: .6
+
+
 @mixin overlay($from-color, $from-percentage, $to-color, $to-percentage)
 	position: absolute
 	top: 0
@@ -121,23 +130,17 @@
 	transform: translate(-50%, -50%)
 
 =input-generic
-	padding: 5px 5px 5px 0
+	// padding: 5px 5px 5px 0
 	color: $color-text-dark
-	box-shadow: none
-	border: thin solid transparent
-	border-radius: 0
-	border-bottom-color: $color-background-dark
 	background-color: transparent
-	transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out
 
 	&:hover
 		border-bottom-color: $color-background
 
 	&:focus
 		outline: 0
-		border: thin solid transparent
-		border-bottom-color: $color-primary
-		box-shadow: 0 1px 0 0 $color-primary
+		border-color: $primary
+		box-shadow: none
 
 =label-generic
 	color: $color-text-dark-primary

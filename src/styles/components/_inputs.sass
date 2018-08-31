@@ -24,23 +24,7 @@ textarea
 	resize: vertical
 
 button, .btn
-	+button($color-text-dark-secondary, $color-background, false)
-
-	&-success
-		+button($color-success, $color-success, false)
-	&-warning
-		+button($color-warning, $color-warning, false)
-	&-danger
-		+button($color-danger, $color-danger, false)
-	&-info
-		+button($color-info, $color-info, false)
-
-
 	&.disabled
-		+button($color-background-dark, $color-background, false)
-		background-color: $color-background-light !important
-		border-color: $color-background-dark !important
-		color: $color-text !important
 		opacity: .5 !important
 		pointer-events: none !important
 		text-shadow: none !important

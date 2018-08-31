@@ -35,30 +35,25 @@
 	padding: 0
 	margin: 0
 
-
 	.search-icon
 		position: absolute
-		color: white
 		top: 4px
 		left: 10px
 		cursor: pointer
 
 		&:after
-			opacity: 0
+			@extend .tooltip-inner
+
 			content: 'Use advanced search...'
-			font-style: normal
-			background: darken($color-background-nav, 5%)
-			color: $color-text-light-primary
-			box-shadow: 1px 1px 3px rgba(black, .4)
-			padding: 3px 10px
 			font-size: .85em
-			border-radius: 3px
-			top: 30px
+			font-style: normal
 			left: -10px
-			width: 150px
-			position: absolute
-			transition: top 150ms ease-in-out, opacity 150ms ease-in-out
+			opacity: 0
 			pointer-events: none
+			position: absolute
+			top: 30px
+			transition: top 150ms ease-in-out, opacity 150ms ease-in-out
+			width: 150px
 
 		&:hover
 			&:after

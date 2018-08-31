@@ -94,9 +94,6 @@
 	+media-xs
 		flex-direction: column
 		padding-top: 0
-	display: flex
-	padding:
-		bottom: 15px
 
 	video
 		max-width: 100%
@@ -278,14 +275,7 @@
 			width: 100%
 
 	.blog_index-item
-		+media-lg
-			max-width: 780px
-		+media-md
-			max-width: 780px
-		+media-sm
-			max-width: 780px
-
-		margin: 15px auto
+		max-width: 780px
 
 		&:hover
 			.item-info a
@@ -316,13 +306,6 @@
 				min-height: 250px
 			+media-lg
 				min-height: 250px
-
-		.item-title
-			color: $color-text-dark
-			display: block
-			font-size: 1.8em
-
-			padding: 10px 25px 10px
 
 		ul.meta
 			+list-meta
@@ -585,7 +568,7 @@
 				margin: 0 auto
 				padding: 15px 0
 				margin: 0 auto
-				border-bottom: thin solid $color-background
+				border-bottom: thin solid $color-background-dark
 
 				&:last-child
 					border-bottom: none
@@ -616,7 +599,7 @@
 					position: absolute
 					top: 20px
 					border-radius: 3px
-					background-color: $color-background
+					background-color: $color-background-dark
 					overflow: hidden
 
 					img

@@ -453,12 +453,17 @@ $comments-width-max: 710px
 		transition: background-color 150ms ease-in-out, color 150ms ease-in-out
 		width: 100px
 
+		// The actual button for submitting the comment.
 		button.comment-action-submit
+			align-items: center
 			background: transparent
 			border: none
 			border-top-left-radius: 0
 			border-bottom-left-radius: 0
 			color: $color-success
+			cursor: pointer
+			display: flex
+			justify-content: center
 			flex-direction: column
 			height: 100%
 			position: relative
@@ -466,8 +471,12 @@ $comments-width-max: 710px
 			white-space: nowrap
 			width: 100%
 
+			&:hover
+				background: rgba($color-success, .1)
+
 			&:focus
 				background: lighten($color-success, 10%)
+				color: $white
 
 			&.submitting
 				color: $color-info

@@ -1,15 +1,24 @@
 /* FOOTER */
-#footer-container
+.footer-wrapper
+	background-color: $color-background
 	position: relative
 
-	.row
-		+media-xs
-			margin: 0
+	&:after
+		background-color: $color-background
+		bottom: 0
+		content: ''
+		position: fixed
+		left: 0
+		right: 0
+		top: 0
+		pointer-events: none
+		z-index: -1
 
 /* Footer Navigation */
 footer
 	font-size: .75em
 	padding: 0 0 10px 0
+
 	a
 		color: $color-text-dark-primary
 
@@ -58,7 +67,7 @@ footer
 		transform: scale(1)
 
 
-#footer-navigation
+.footer-navigation
 	font-size: .85em
 	margin-bottom: 5px
 	color: lighten($color-text, 30%)
