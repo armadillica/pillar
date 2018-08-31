@@ -59,16 +59,14 @@ script(type="text/javascript").
 		}
 	};
 
-	videojs.registerPlugin('analytics', function() {
+	videojs(videoPlayer, options).ready(function() {
 		this.ga({
 			'eventLabel' : '{{ node._id }} - {{ node.name }}',
 			'eventCategory' : '{{ node.project }}',
 			'eventsToTrack' : ['start', 'error', 'percentsPlayed']
 		});
-	});
-
-	videojs(videoPlayer, options).ready(function() {
 		this.hotkeys();
+
 	});
 
 	function addVideoPlayerButton(data) {
