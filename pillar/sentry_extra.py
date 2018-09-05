@@ -1,3 +1,5 @@
+import flask
+import raven.breadcrumbs
 from raven.contrib.flask import Sentry
 
 from .auth import current_user
@@ -14,16 +16,14 @@ class PillarSentry(Sentry):
     def init_app(self, app, *args, **kwargs):
         super().init_app(app, *args, **kwargs)
 
-        # We perform authentication of the user while handling the request,
-        # so Sentry calls get_user_info() too early.
+        flask.request_started.connect(self.__add_sentry_breadcrumbs, self)
 
-    def get_user_context_again(self, ):
-        from flask import request
-
-        try:
-            self.client.user_context(self.get_user_info(request))
-        except Exception as e:
-            self.client.logger.exception(str(e))
+    def __add_sentry_breadcrumbs(self, sender, **extra):
+        raven.breadcrumbs.record(
+            message='Request started',
+            category='http',
+            data={'url': flask.request.url}
+        )
 
     def get_user_info(self, request):
         user_info = super().get_user_info(request)
