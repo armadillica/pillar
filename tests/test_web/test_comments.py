@@ -1,9 +1,49 @@
 import json
 
 from bson import ObjectId
+import flask
 
 from pillar.tests import AbstractPillarTest
 from pillar.tests import common_test_data as ctd
+
+
+class CommentTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+
+        self.pid, self.project = self.ensure_project_exists()
+        self.owner_uid = self.create_user(24 * 'a',
+                                          groups=[ctd.EXAMPLE_ADMIN_GROUP_ID],
+                                          token='admin-token')
+
+        # Create a node people can comment on.
+        self.node_id = self.create_node({
+            '_id': ObjectId('572761099837730efe8e120d'),
+            'description': 'This is an asset without file',
+            'node_type': 'asset',
+            'user': self.owner_uid,
+            'properties': {
+                'status': 'published',
+                'content_type': 'image',
+            },
+            'name': 'Image test',
+            'project': self.pid,
+        })
+
+        self.user_uid = self.create_user(24 * 'b', groups=[ctd.EXAMPLE_ADMIN_GROUP_ID],
+                                         token='user-token')
+
+    def test_write_comment(self):
+        with self.login_as(self.user_uid):
+            comment_url = flask.url_for('nodes.comments_create')
+            self.post(
+                comment_url,
+                data={
+                    'content': 'je möder lives at [home](https://cloud.blender.org/)',
+                    'parent_id': str(self.node_id),
+                },
+                expected_status=201,
+            )
 
 
 class CommentEditTest(AbstractPillarTest):
