@@ -16,7 +16,7 @@ var uglify       = require('gulp-uglify-es').default;
 
 var enabled = {
     uglify: argv.production,
-    maps: argv.production,
+    maps: !argv.production,
     failCheck: !argv.production,
     prettyPug: !argv.production,
     cachify: !argv.production,
