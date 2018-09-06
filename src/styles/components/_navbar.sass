@@ -1,4 +1,8 @@
 // Navigation.
+
+.navbar
+	box-shadow: inset 0 -2px  $color-background
+
 .navbar,
 nav.sidebar
 	border: none
@@ -38,10 +42,6 @@ nav.sidebar
 		&.active
 			color: $primary
 			box-shadow: inset 0 -3px 0 $primary
-
-		.pi-angle-down
-			position: relative
-			left: 5px
 
 	li
 		user-select: none
@@ -130,15 +130,16 @@ nav.sidebar
 // Secondary navigation for
 .nav-secondary
 	align-items: center
-	box-shadow: 0 2px 0 0 $color-background
+	box-shadow: inset 0 -2px 0 0 $color-background
 
 	.nav-link
 		color: $color-text
+		cursor: pointer
 		transition: box-shadow 150ms ease-in-out
 
 		&:hover,
 		&.active
-			box-shadow: 0 2px 0 0 $primary
+			box-shadow: inset 0 -2px 0 0 $primary
 
 
 .navbar-overlay
@@ -160,9 +161,8 @@ nav.sidebar
 		text-shadow: none
 
 .navbar-brand
-	padding-left: 10px
 	color: inherit
-	width: 120px // Blender Cloud logo width
+	padding-left: 4px
 
 	&:hover
 		color: $primary

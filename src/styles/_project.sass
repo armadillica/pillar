@@ -40,10 +40,6 @@ body.blog
 	width: 100%
 	left: 0
 
-#project_context-header
-	span#status-bar
-		text-align: left
-
 #project_nav-container
 	+media-lg
 		width: $project_nav-width * 1.33
@@ -62,6 +58,7 @@ body.blog
 #project_sidebar
 	width: $project-sidebar-width
 	z-index: $z-index-base + 6
+	box-shadow: inset -1px 0 0 0 $color-background
 
 	+media-xs
 		width: 100%
@@ -95,29 +92,20 @@ body.blog
 			&:first-child
 				border-top: thin solid transparent
 
-			&:hover
-				background-color: $primary
+			&:hover,
+			&.active
 				cursor: pointer
 
 				a
-					color: $white
+					color: $primary
 
 			a
 				align-items: center
+				color: $color-text
 				display: flex
 				justify-content: center
 				height: $project-sidebar-width
 				width: $project-sidebar-width
-
-			i
-				font-size: 1.1em
-
-			&.active
-				background-color: $primary
-				color: $white
-
-				a
-					color: $white
 
 			&.tabs-thumbnail
 				img
@@ -176,12 +164,15 @@ body.blog
 	height: $project_header-height
 	min-height: $project_header-height
 	position: fixed
-	top: $project_header-height
+	top: $project_header-height + 1
 	transition: box-shadow 250ms ease-in-out
 	z-index: $z-index-base + 3
 
 	&.is-offset
 		box-shadow: 0 0 25px rgba(black, .2)
+
+	span#status-bar
+		text-align: left
 
 #project_nav-header
 	left: 0
@@ -432,8 +423,8 @@ ul.project_nav-edit-list
 	padding-top: $project_header-height
 
 #node-container
-	flex: 1
 	background-color: white
+	flex: 1
 
 	/* For error messages (403) and other overlaid text*/
 	#node-overlay
@@ -466,8 +457,7 @@ ul.project_nav-edit-list
 	+media-xs
 		margin-top: 0
 
-	border-right: thin solid $color-background
-	margin-top: $project_header-height //so it's right below the project title.
+	// margin-top: $project_header-height //so it's right below the project title.
 	overflow-y: auto // show vertical scrollbars when needed.
 	padding: 0 0 5px 0 // some padding on top/bottom of jstree.
 	position: relative
@@ -816,6 +806,7 @@ section.node-preview-forbidden
 	justify-content: center
 	min-height: 400px
 	position: relative
+	overflow: hidden
 
 	img
 		height: 130%
@@ -1243,8 +1234,6 @@ a.learn-more
 
 
 section.node-children
-	background-color: white
-
 	&.group, &.storage
 		flex: 1
 		padding: 10px 0 25px 20px

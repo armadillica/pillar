@@ -666,3 +666,11 @@
 
 .user-select-none
 	user-select: none
+
+// Bootstrap has .img-fluid, a class to limit the width of an image to 100%.
+// .imgs-fluid below is to be applied on a parent container when we can't add
+// classes to the images themselves. e.g. the blog.
+.imgs-fluid
+	img
+		// Just re-use Bootstrap's mixin here.
+		+img-fluid
