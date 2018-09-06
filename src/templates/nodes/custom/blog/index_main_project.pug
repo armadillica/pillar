@@ -10,10 +10,7 @@ link(href="{{ url_for('static_cloud', filename='assets/css/project-landing.css')
 | {% endblock css %}
 
 | {% block body %}
-.container-fluid.blog
-	#blog_container.cloud-blog
-		#blog_index-container.expand-image-links
-			| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta, pages=pages) }}
+| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta, pages=pages) }}
 | {% endblock %}
 
 | {% block footer_scripts %}
@@ -25,7 +22,7 @@ script.
 	/* Expand images when their link points to a jpg/png/gif */
 	/* TODO: De-duplicate code from view post */
 	var page_overlay = document.getElementById('page-overlay');
-	$('.blog_index-item .item-content a img').on('click', function(e){
+	$('.item-content a img').on('click', function(e){
 		e.preventDefault();
 
 		var href = $(this).parent().attr('href');

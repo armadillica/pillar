@@ -7,17 +7,16 @@ span#project-edit-title
 	| Edit Project
 
 ul.project-edit-tools
-
 	// Edit Mode
 	li.button-cancel
-		a#item_cancel.project-mode-edit(
+		a#item_cancel.project-mode-edit.btn.btn-sm.btn-link(
 			href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
 			title="Cancel changes")
-			i.button-cancel-icon.pi-back
+			i.button-cancel-icon.pi-angle-left
 			| Go to Project
 
 	li.button-save
-		a#item_save.project-mode-edit(
+		a#item_save.project-mode-edit.btn.btn-sm.btn-outline-success.mx-2(
 			href="#",
 			title="Save changes")
 			i.button-save-icon.pi-check
@@ -80,22 +79,26 @@ ul.project-edit-tools
 
 		| {% endfor %}
 
-		ul.project-edit-tools.bottom
+		hr
+
+		ul.project-edit-tools.justify-content-end.h-auto
 			li.button-cancel
-				a#item_cancel.project-mode-edit(
+				a#item_cancel.project-mode-edit.btn.btn-link(
 					href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
 					title="Cancel changes")
-					i.button-cancel-icon.pi-back
+					i.button-cancel-icon.pi-angle-left
 					| Go to Project
 
 			li.button-save
-				a#item_save.project-mode-edit(
+				a#item_save.project-mode-edit.btn.btn-outline-success.ml-2(
 					href="#",
 					title="Save changes")
 					i.button-save-icon.pi-check
 					| Save Changes
 
 | {% endblock %}
+
+| {% block footer_container %}{% endblock %}
 
 | {% block footer_scripts %}
 script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.ui.widget.min.js') }}")
@@ -105,7 +108,8 @@ script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets
 
 script(type="text/javascript").
 
-	$('.project-mode-edit').show();
+	// Show edit mode buttons (save, cancel).
+	$('.project-mode-edit').displayAs('inline-block');
 
 	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: true, nodeId: ''});
 	var convert = new Markdown.getSanitizingConverter().makeHtml;

@@ -1,0 +1,29 @@
+body
+	height: 100%
+
+	+media-sm
+		width: 100%
+		max-width: 100%
+		min-width: auto
+
+	+media-xs
+		width: 100%
+		max-width: 100%
+		min-width: auto
+
+.container
+	+media-xs
+		max-width: 100%
+		min-width: auto
+		padding:
+			left: 0
+			right: 0
+
+	&.box
+		+container-box
+
+.page-content
+	background-color: $white
+
+.container-box
+	+container-box

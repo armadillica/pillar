@@ -1,0 +1,38 @@
+/* Inputs */
+input, input.form-control,
+textarea, textarea.form-control,
+select, select.form-control
+	+input-generic
+
+label, label.control-label
+	+label-generic
+
+select, select.form-control
+	border-top-left-radius: 3px
+	border-top-right-radius: 3px
+	background-color: $color-background-light
+
+	option
+		background-color: white
+
+input.fileupload
+	background-color: transparent
+	display: block
+	margin-top: 10px
+
+textarea
+	resize: vertical
+
+button, .btn
+	&.disabled
+		opacity: .5 !important
+		pointer-events: none !important
+		text-shadow: none !important
+		user-select: none !important
+
+.input-group-flex
+	display: flex
+
+.input-group-separator
+	margin: 10px 0
+	border-top: thin solid $color-background

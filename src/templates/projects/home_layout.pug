@@ -1,77 +1,15 @@
 | {% extends 'layout.html' %}
-| {% from '_macros/_navigation.html' import navigation_tabs %}
-
 | {% set title = 'home' %}
-
-| {% block og %}
-meta(property="og:type", content="website")
-meta(property="og:url", content="https://cloud.blender.org{{ request.path }}")
-
-meta(property="og:title", content="Blender Cloud - Home")
-meta(name="twitter:title", content="Blender Cloud")
-
-meta(property="og:image", content="{{ url_for('static', filename='assets/img/backgrounds/cloud_services_oti.jpg')}}")
-meta(name="twitter:image", content="{{ url_for('static', filename='assets/img/backgrounds/cloud_services_oti.jpg')}}")
-| {% endblock %}
 
 | {% block page_title %}
 | {{current_user.full_name}}
 | {% endblock %}
 
 | {% block body %}
-.dashboard-container
-	section.dashboard-main
-		| {{ navigation_tabs(title) }}
+.p-5.text-center
+	h2 Home Layout
+	p.lead.
+		See Blender Cloud for reference.
 
-		section#projects
-
-			nav#sub-nav-tabs.home
-				ul#sub-nav-tabs__list
-					li.nav-tabs__list-tab#subtab-blender_sync(data-tab-url="{{ url_for('projects.home_project')}}")
-						i.pi-blender
-						| Blender Sync
-
-					li.nav-tabs__list-tab#subtab-images(data-tab-url="{{ url_for('projects.home_project_shared_images')}}")
-						i.pi-picture
-						| Images
-			| {% block currenttab %}{% endblock %}
-
-	section.dashboard-secondary
-		section.announcement
-			img.header(
-				src="{{ url_for('static', filename='assets/img/blender_sync_header.jpg') }}")
-			.text
-				| {% block side_announcement %}
-				.title
-					a(href="https://cloud.blender.org/blog/introducing-blender-sync") Blender Sync
-
-				.lead
-					span.
-						Save your settings once. Use them anywhere.
-						Carry your Blender configuration with you, use our free add-on to sync your keymaps and preferences.
-						<hr/>
-						Syncing is free for everyone. No subscription required.
-				| {% endblock %}
-				| {% if show_addon_download_buttons %}
-				.buttons
-					a.btn.btn-default.btn-outline.orange(
-						href="https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip")
-						i.pi-download
-						| Download <small>v</small>{{ config.BLENDER_CLOUD_ADDON_VERSION }}
-					a.btn.btn-default.btn-outline.blue(
-						href="{{ learn_more_btn_url }}")
-						| Learn More
-				| {% endif %}
-| {% endblock %}
-
-
-| {% block footer_scripts %}
-script.
-	$(document).ready(function () {
-		$('#subtab-{{ subtab }}').addClass('active');
-		var $nav_tabs = $('#sub-nav-tabs__list').find('li.nav-tabs__list-tab');
-		$nav_tabs.on('click', function (e) {
-			window.location = $(this).attr('data-tab-url');
-		});
-	});
+	| {% block currenttab %}{% endblock currenttab %}
 | {% endblock %}

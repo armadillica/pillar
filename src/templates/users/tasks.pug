@@ -137,7 +137,7 @@ script().
 				$('td', row).eq(4).html(render_timing(data.timing));
 				$('td', row).eq(5).html(render_status_label(data, data.name));
 
-				var view_tag = '<span class="btn btn-default btn-xs load-shot-view" shot-view-url="' + data.url_edit + '"><i class="glyphicon glyphicon-edit"></i> View</span>';
+				var view_tag = '<span class="btn btn-outline-secondary btn-xs load-shot-view" shot-view-url="' + data.url_edit + '"><i class="glyphicon glyphicon-edit"></i> View</span>';
 				$('td', row).eq(6).html(view_tag);
 			}
 		});

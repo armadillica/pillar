@@ -61,7 +61,7 @@ script(type="text/javascript").
 		}
 
 		{% if node.has_method('PUT') %}
-			$('.project-mode-view').show();
+			$('.project-mode-view').displayAs('inline-block');
 		{% else %}
 			$('.project-mode-view').hide();
 		{% endif %}

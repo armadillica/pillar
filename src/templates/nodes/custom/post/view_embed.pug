@@ -1,19 +1,9 @@
 | {% import 'nodes/custom/blog/_macros.html' as blogmacros %}
 
-#blog_container(class="{% if project and project._id == config.MAIN_PROJECT_ID %}cloud-blog{% endif %}")
+| {{ blogmacros.render_blog_post(node, project=project) }}
 
-	#blog_index-container.expand-image-links
-		.blog-action
-			| {% if node.has_method('PUT') %}
-			a.btn.btn-default.button-edit(href="{{url_for('nodes.edit', node_id=node._id)}}")
-				i.pi-edit
-				| Edit Post
-			| {% endif %}
-
-		| {{ blogmacros.render_blog_post(node, project=project) }}
-
-		#comments-embed
-			.comments-list-loading
-				i.pi-spin
+#comments-embed.comments-compact
+	.comments-list-loading
+		i.pi-spin
 
 include ../_scripts

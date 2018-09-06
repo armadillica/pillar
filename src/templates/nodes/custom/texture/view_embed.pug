@@ -91,11 +91,11 @@
 						a(href="{{ f.file.link }}",,
 							title="Download texture",
 							download="{{ f.file.filename }}")
-							button.btn.btn-default(type="button")
+							button.btn.btn-outline-secondary(type="button")
 								i.pi-download
 								|  Download
 						| {% else %}
-						button.btn.btn-default.disabled.sorry(type="button")
+						button.btn.btn-outline-secondary.disabled.sorry(type="button")
 							i.pi-lock
 							| Download
 						| {% endif %}

@@ -5,7 +5,7 @@
 #project-container
 	#project-side-container
 		#project_sidebar
-			ul.project-tabs
+			ul.project-tabs.p-0
 				li.tabs-thumbnail(
 					title="About",
 					data-toggle="tooltip",
@@ -51,13 +51,13 @@
 
 		#project_nav
 			#project_nav-container
-				#project_nav-header
-					.project-title
-						a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-							| {{ project.name }}
+				#project_nav-header.bg-white
+					a.project-title.p-2.font-weight-bold.text-dark(
+						href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+						| {{ project.name }}
 
 				// TODO - make list a macro
-				#project_tree.edit
+				#project_tree.edit.bg-white
 					ul.project_nav-edit-list
 						li(class="{% if title == 'edit' %}active{% endif %}")
 							a(href="{{ url_for('projects.edit', project_url=project.url) }}")
@@ -77,10 +77,9 @@
 								i(class="pi-{{ext.icon}}")
 								| {{ext.name | title}}
 						| {% endfor %}
-				.project_split(title="Toggle Navigation [T]")
 
 	#project_context-container
-		#project_context-header
+		#project_context-header.bg-white
 			span#status-bar
 			| {% block project_context_header %}
 			| {% endblock %}

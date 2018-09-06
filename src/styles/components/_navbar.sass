@@ -1,0 +1,201 @@
+// Navigation.
+
+.navbar
+	box-shadow: inset 0 -2px  $color-background
+
+.navbar,
+nav.sidebar
+	border: none
+	color: $color-text-dark-secondary
+	padding: 0
+	z-index: $z-index-base + 5 /* Flowplayer seems to take up to 11, project container is 12 */
+
+	nav
+		margin-left: auto
+		margin-right: 0
+
+		.navbar-nav
+			margin-right: 0
+			+media-xs
+				margin: 0
+				width: 100%
+
+	.navbar-item
+		align-items: center
+		display: flex
+		user-select: none
+		color: inherit
+
+		+media-sm
+			padding-left: 10px
+			padding-right: 10px
+
+		&:hover, &:focus
+			color: $primary
+			background-color: transparent
+			box-shadow: inset 0 -3px 0 $primary
+			text-decoration: none
+
+		&:focus
+			box-shadow: inset 0 -3px 0 $primary
+
+		&.active
+			color: $primary
+			box-shadow: inset 0 -3px 0 $primary
+
+	li
+		user-select: none
+		position: relative
+
+		img.gravatar
+			border-radius: 999em
+			height: 32px
+			width: 32px
+			box-shadow: 1px 1px 0 rgba(black, .2)
+			position: relative
+
+		.special
+			width: 18px
+			height: 18px
+			border-radius: 999em
+			position: absolute
+			background-color: white
+			z-index: 2
+			display: inline-block
+			top: 10px
+			left: 38px
+			font-size: 1.2em
+			box-shadow: 1px 1px 1px rgba(black, .2)
+
+			&.subscriber
+				background-color: $color-success
+				color: white
+				font-size: .6em
+
+			&.demo
+				background-color: $color-info
+				color: white
+				font-size: .6em
+
+			&.none
+				color: $color-danger
+
+			i
+				+position-center-translate
+
+	.dropdown
+		min-width: 60px // navbar avatar size
+
+		span.fa-stack
+			position: absolute
+			top: 50%
+			left: 50%
+			transform: translate(-50%, -50%)
+
+		ul.dropdown-menu
+			li
+				a
+					white-space: nowrap
+
+					&:hover
+						box-shadow: none // removes underline
+
+					&.subitem // e.g. "Not Sintel? Log out"
+						font-size: .8em
+						padding-top: 0
+						text-transform: initial
+
+				i
+					width: 30px
+
+				&.subscription-status
+					&.none a
+						color: $color-danger
+
+					&.subscriber a
+						color: $color-success
+
+					&.demo a
+						color: $color-info
+
+					span.info
+						display: block
+
+						span.renew
+							display: block
+							color: $color-text-dark-primary
+							font-size: .9em
+
+
+// Secondary navigation for
+.nav-secondary
+	align-items: center
+	box-shadow: inset 0 -2px 0 0 $color-background
+
+	.nav-link
+		color: $color-text
+		cursor: pointer
+		transition: box-shadow 150ms ease-in-out
+
+		&:hover,
+		&.active
+			box-shadow: inset 0 -2px 0 0 $primary
+
+
+.navbar-overlay
+	+media-lg
+		display: block
+	bottom: 0
+	display: none
+	left: 0
+	height: 100%
+	position: absolute
+	right: 0
+	top: 0
+	transition: background-color 350ms ease-in-out
+	width: 100%
+	z-index: 0
+
+	&.is-active
+		background-color: $color-background-nav
+		text-shadow: none
+
+.navbar-brand
+	color: inherit
+	padding-left: 4px
+
+	&:hover
+		color: $primary
+
+nav.navbar
+	.navbar-collapse
+		> ul > li > .navbar-item
+			padding: $navbar-nav-link-padding-x
+			height: $nav-link-height
+
+
+.navbar-backdrop-container
+	width: 100%
+	height: 100%
+	position: absolute
+	top: 0
+	left: 0
+	right: 0
+	bottom: 0
+
+	img
+		display: none
+		position: fixed
+		width: 100%
+		align-self: flex-start
+		+media-md
+			display: block
+		+media-lg
+			display: block
+
+
+.nav-tabs .dropdown-menu, .nav-pills .dropdown-menu
+	margin-top: 0
+
+.navbar+.page-content
+	padding-top: $nav-link-height

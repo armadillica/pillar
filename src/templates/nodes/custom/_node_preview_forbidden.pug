@@ -5,21 +5,21 @@ section.node-preview-forbidden
 
 	div
 		p Available to Blender Cloud subscribers
-		hr
+		hr.bg-white
 		| {% if current_user.has_cap('can-renew-subscription') %}
 		p
 			small You have a subscription, it just needs to be renewed.
-		a.btn(href="/renew")
+		a.btn.btn-light(href="/renew")
 			| #[i.pi-heart] Renew Subscription
 		| {% else %}
 		p
 			small Support Blender and get awesome stuff!
-		a.btn(href="{{ url_for('cloud.join') }}")
+		a.btn.btn-light(href="{{ url_for('cloud.join') }}")
 			| #[i.pi-heart] Get a Subscription
 		| {% endif %}
 
 		| {% if current_user.is_anonymous %}
 		p(style="margin-top: 15px")
 			small
-				a(href="{{ url_for('users.login') }}") Already a subscriber? Log in
+				a.text-white(href="{{ url_for('users.login') }}") Already a subscriber? Log in
 		| {% endif %}

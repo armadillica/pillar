@@ -38,18 +38,21 @@
 
 		| {% elif field.type == 'HiddenField' %}
 		| {{ field }}
+
 		| {% elif field.name == 'attachments' %}
+		hr
 		#attachments-actions
 			.btn.btn-info#attachments-action-add
 				i.pi-plus
 				| Add New Attachment
 
-			p.text-muted
+			p.text-muted.mt-3
 				| Attachments can be included in any MarkDown field by using the #[code {attachment slug}] shortcode
 				| (#[a(href='https://pillarframework.org/shortcodes/#attachments', target='_blank') help]).
 				| This shortcode is placed on your copy-paste buffer by clicking "Copy to clipboard".
 
 		| {{ render_field(field, field.name) }}
+		hr
 
 		| {% elif field.name == 'files' %}
 		#files-actions
@@ -66,20 +69,23 @@
 
 		| {% endfor %}
 
-		ul.project-edit-tools.bottom
+		hr
+
+		ul.project-edit-tools.justify-content-end.h-auto
 			li.button-cancel
-				a#item_cancel.item-cancel.project-mode-edit(
+				a#item_cancel.item-cancel.project-mode-edit.btn.btn-outline-secondary(
 					href="javascript:void(0);",
 					title="Cancel changes")
 					i.button-cancel-icon.pi-cancel
 					| Cancel
 
 			li.button-save
-				a#item_save.item-save.project-mode-edit(
+				a#item_save.item-save.project-mode-edit.btn.btn-outline-success.ml-2(
 					href="javascript:void(0);",
 					title="Save changes")
 					i.button-save-icon.pi-check
 					| Save Changes
+
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.ui.widget.min.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.iframe-transport.min.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.fileupload.min.js') }}")
