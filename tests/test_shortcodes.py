@@ -187,11 +187,11 @@ class AttachmentTest(AbstractPillarTest):
             ],
             'filename': 'cute_kitten.jpg',
         })
-        node_props = {
+        node_doc = {'properties': {
             'attachments': {
                 'img': {'oid': oid},
             }
-        }
+        }}
 
         # We have to get the file document again, because retrieving it via the
         # API (which is what the shortcode rendering is doing) will change its
@@ -204,20 +204,20 @@ class AttachmentTest(AbstractPillarTest):
                           f'<img src="{link}" alt="cute_kitten.jpg"/></a>'
             self.assertEqual(
                 self_linked,
-                render('{attachment img link}', context=node_props).strip()
+                render('{attachment img link}', context=node_doc).strip()
             )
             self.assertEqual(
                 self_linked,
-                render('{attachment img link=self}', context=node_props).strip()
+                render('{attachment img link=self}', context=node_doc).strip()
             )
             self.assertEqual(
                 f'<img src="{link}" alt="cute_kitten.jpg"/>',
-                render('{attachment img}', context=node_props).strip()
+                render('{attachment img}', context=node_doc).strip()
             )
 
             tag_link = 'https://i.imgur.com/FmbuPNe.jpg'
             self.assertEqual(
                 f'<a href="{tag_link}" target="_blank">'
                 f'<img src="{link}" alt="cute_kitten.jpg"/></a>',
-                render('{attachment img link=%r}' % tag_link, context=node_props).strip()
+                render('{attachment img link=%r}' % tag_link, context=node_doc).strip()
             )

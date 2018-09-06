@@ -230,7 +230,7 @@ class Attachment:
 
         from pillar.web import system_util
 
-        attachments = node_properties.get('attachments', {})
+        attachments = node_properties.get('properties', {}).get('attachments', {})
         attachment = attachments.get(slug)
         if not attachment:
             raise self.NoSuchSlug(slug)
