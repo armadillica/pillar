@@ -114,7 +114,6 @@ script(type="text/javascript").
 			}
 		}
 
-
 		$(page_overlay).find('.nav-prev').click(function(e){
 			e.stopPropagation();
 			e.preventDefault();
@@ -132,10 +131,6 @@ script(type="text/javascript").
 		$('#node-overlay').click(function(){
 			$(this).removeClass('active').hide().html();
 		});
-
-		if (typeof $().popover != 'undefined'){
-			$('#asset-license').popover();
-		}
 
 	{% endif %}
 
