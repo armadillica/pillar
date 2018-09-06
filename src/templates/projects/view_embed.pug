@@ -23,7 +23,7 @@
 
 	section.node-details-container.project
 		h2.px-3.pt-3
-			a(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
+			a.text-muted(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
 
 		| {% if project.description %}
 		.node-details-description
@@ -125,6 +125,5 @@ script.
 			displayNode($(this).data('node_id'));
 		});
 	});
-
 
 | {% endblock %}
