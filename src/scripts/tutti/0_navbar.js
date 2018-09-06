@@ -32,7 +32,7 @@ var DocumentTitleAPI = {
 };
 
 
-/* Status Bar */
+/* Status Bar * DEPRECATED * USE TOASTR INSTEAD */
 function statusBarClear(delay_class, delay_html){
 	var statusBar = $("#status-bar");
 
@@ -54,6 +54,7 @@ function statusBarClear(delay_class, delay_html){
 	}
 }
 
+/* Status Bar * DEPRECATED - USE TOASTR INSTEAD * */
 function statusBarSet(classes, html, icon_name, time){
 	/* Utility to notify the user by temporarily flashing text on the project header
 		 Usage:

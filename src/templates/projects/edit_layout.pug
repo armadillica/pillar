@@ -51,11 +51,6 @@
 
 		#project_nav
 			#project_nav-container
-				#project_nav-header.bg-white
-					a.project-title.p-2.font-weight-bold.text-dark(
-						href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-						| {{ project.name }}
-
 				// TODO - make list a macro
 				#project_tree.edit.bg-white
 					ul.project_nav-edit-list
@@ -80,7 +75,6 @@
 
 	#project_context-container
 		#project_context-header.bg-white
-			span#status-bar
 			| {% block project_context_header %}
 			| {% endblock %}
 

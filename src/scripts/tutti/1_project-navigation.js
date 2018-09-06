@@ -66,7 +66,9 @@ function containerResizeY(window_height){
 
 	var project_container = document.getElementById('project-container');
 	var container_offset = project_container.offsetTop;
-	var nav_header_height = $('#project_nav-header').height();
+	// TODO (pablo) - see if it's used at all
+	// var nav_header_height = $('#project_context-header').height();
+	var nav_header_height = 40;
 	var container_height = window_height - container_offset.top;
 	var container_height_wheader = window_height - container_offset.top - nav_header_height;
 	var window_height_minus_nav = window_height - nav_header_height - 1; // 1 is border width

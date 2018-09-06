@@ -22,6 +22,7 @@ body.blog
 #project-container
 	display: flex
 	flex-direction: row
+	margin-top: $project_header-height
 	min-height: 300px
 	position: relative
 	z-index: $z-index-base
@@ -36,9 +37,6 @@ body.blog
 	+media-xs
 		flex-direction: column-reverse
 
-#project-side-container+#project_context-header
-	width: 100%
-	left: 0
 
 #project_nav-container
 	+media-lg
@@ -112,13 +110,6 @@ body.blog
 					height: $project-sidebar-width
 					width: $project-sidebar-width
 
-				#project-loading
-					align-items: center
-					display: flex
-					height: $project-sidebar-width
-					justify-content: center
-					width: $project-sidebar-width
-
 
 #search-container #project_sidebar ul.project-tabs li.tabs-thumbnail
 	background-color: $color-background-nav-dark
@@ -150,77 +141,12 @@ body.blog
 
 
 /* Header with name and node edit tools */
-#project_nav-header,
 #project_context-header
-	align-items: center
-	color: white
-	display: flex
-	position: relative
-
-#project_context-header
-	align-items: center
-	color: $color-text-dark-secondary
-	display: flex
-	height: $project_header-height
-	min-height: $project_header-height
-	position: fixed
-	top: $project_header-height + 1
 	transition: box-shadow 250ms ease-in-out
 	z-index: $z-index-base + 3
 
 	&.is-offset
 		box-shadow: 0 0 25px rgba(black, .2)
-
-	span#status-bar
-		text-align: left
-
-#project_nav-header
-	left: 0
-	position: absolute
-	top: 0
-	width: 100%
-	z-index: $z-index-base + 3
-
-	/* Name of the project */
-	.project-title
-		+text-overflow-ellipsis
-		height: 100%
-		max-width: 100%
-		width: 100%
-
-span#status-bar
-	position: absolute
-	left: 0
-	top: 10px
-	min-width: 33%
-	padding: 5px 15px
-	color: $color-text-dark
-	opacity: 0
-	z-index: 1
-	font-weight: 400
-	white-space: nowrap
-	transition: all 250ms ease-in-out
-
-	+media-xs
-		left: 0
-		min-width: 100%
-
-	i
-		margin-right: 5px
-
-	&.info
-		color: $color-info
-	&.error
-		color: $danger
-	&.warning
-		color: $color-warning
-	&.success
-		color: $color-success
-	&.default
-		color: $color-text-light
-
-	&.active
-		opacity: 1
 
 span#project-edit-title
 	position: absolute
@@ -238,17 +164,6 @@ span#project-edit-title
 	display: none
 
 ul.project-edit-tools
-	align-items: center
-	display: flex
-	list-style-type: none
-	margin: 0 0 0 auto
-	padding: 0
-
-	+media-xs
-		width: 100%
-		margin: 0 auto
-		justify-content: space-around
-
 	li
 		a, button
 			padding: $dropdown-item-padding-y ($dropdown-item-padding-x / 2)
@@ -353,13 +268,9 @@ ul.project-edit-tools
 		background-color: rgba($color-background-nav-dark, .7)
 		opacity: 1
 
-		i
-			+spin
-			animation-duration: .5s
 
-#project-header+#project_tree,
-#project-header+#project_context-container
-	margin-top: $project_header-height
+#project-container
+
 
 
 ul.project_nav-edit-list
