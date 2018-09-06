@@ -1,43 +1,8 @@
 | {% extends 'projects/home_layout.html' %}
-| {% set subtab = 'blender_sync' %}
-| {% set learn_more_btn_url = '/blog/introducing-blender-sync' %}
 | {% block currenttab %}
-section.nav-tabs__tab.active#tab-blender_sync
-	.tab_header-container
-		.tab_header-intro(
-			style="background-image: url({{ url_for('static', filename='assets/img/backgrounds/pattern_01.jpg')}})")
-			.tab_header-intro_text
-				h2 Connect Blender with the Cloud
-				p
-					| Save your Blender preferences once, load them anywhere.
-					<br/>
-					| Use the
-					=' '
-					a(href='https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip') Blender Cloud add-on
-					=' '
-					| to synchronise your settings from within Blender.
-			.tab_header-intro_icons
-				i.pi-blender
-				i.pi-heart-filled
-				i.pi-blender-cloud
-
-		| {% for version in synced_versions %}
-		.blender_sync-main
-			.blender_sync-main-header
-				h2.blender_sync-main-title
-					i.pi-blender
-					| Blender {{ version.version }}
-				.blender_sync-main-last
-					| Last synced on: {{ version.date|pretty_date }}
-		| {% else %}
-		.blender_sync-main.empty
-			.blender_sync-main-header
-				span.blender_sync-main-title
-					| No settings synced yet
-					<hr/>
-					a.download(
-						href='https://cloud.blender.org/r/downloads/blender_cloud-latest-bundle.zip')
-						| Download add-on
-		| {% endfor %}
+.p-5.text-center
+	h2 Home Index
+	p.lead.
+		See Blender Cloud for reference.
 | {% endblock %}
 
