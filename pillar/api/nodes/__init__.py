@@ -1,6 +1,7 @@
 import base64
 import functools
 import logging
+import typing
 import urllib.parse
 
 import pymongo.errors
@@ -87,6 +88,48 @@ def share_node(node_id):
             return '', 204
 
     return jsonify(short_link_info(short_code), status=status)
+
+
+@blueprint.route('/tagged/')
+@blueprint.route('/tagged/<tag>')
+def tagged(tag=''):
+    """Return all tagged nodes of public projects as JSON."""
+
+    # We explicitly register the tagless endpoint to raise a 404, otherwise the PATCH
+    # handler on /api/nodes/<node_id> will return a 405 Method Not Allowed.
+    if not tag:
+        raise wz_exceptions.NotFound()
+
+    return _tagged(tag)
+
+
+def _tagged(tag: str):
+    """Fetch all public nodes with the given tag.
+
+    This function is cached, see setup_app().
+    """
+    nodes_coll = current_app.db('nodes')
+    agg = nodes_coll.aggregate([
+        {'$match': {'properties.tags': tag,
+                    '_deleted': {'$ne': True}}},
+
+        # Only get nodes from public projects. This is done after matching the
+        # tagged nodes, because most likely nobody else will be able to tag
+        # nodes anyway.
+        {'$lookup': {
+            'from': 'projects',
+            'localField': 'project',
+            'foreignField': '_id',
+            'as': '_project',
+        }},
+        {'$match': {'_project.is_private': False}},
+
+        # Don't return the entire project for each node.
+        {'$project': {'_project': False}},
+
+        {'$sort': {'_created': -1}}
+    ])
+    return jsonify(list(agg))
 
 
 def generate_and_store_short_code(node):
@@ -442,6 +485,11 @@ def parse_markdowns(items):
 
 
 def setup_app(app, url_prefix):
+    global _tagged
+
+    cached = app.cache.memoize(timeout=300)
+    _tagged = cached(_tagged)
+
     from . import patch
     patch.setup_app(app, url_prefix=url_prefix)
 

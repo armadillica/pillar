@@ -1,10 +1,13 @@
 import json
+import typing
+from unittest import mock
 
-import pillar.tests.common_test_data as ctd
+import flask
 from bson import ObjectId
-from mock import mock
-from pillar.tests import AbstractPillarTest
 from werkzeug.exceptions import UnprocessableEntity
+
+from pillar.tests import AbstractPillarTest
+import pillar.tests.common_test_data as ctd
 
 
 class NodeContentTypeTest(AbstractPillarTest):
@@ -474,3 +477,82 @@ class TextureSortFilesTest(AbstractPillarTest):
         node = resp.get_json()
         self.assertNotIn('files', node['properties'])
 
+
+class TaggedNodesTest(AbstractPillarTest):
+    def test_tagged_nodes_api(self):
+        from pillar.api.utils import utcnow
+        from datetime import timedelta
+
+        pid, _ = self.ensure_project_exists()
+        file_id, _ = self.ensure_file_exists()
+        uid = self.create_user()
+
+        now = utcnow()
+        base_node = {
+            'name': 'Just a node name',
+            'project': pid,
+            'description': '',
+            'node_type': 'asset',
+            'user': uid,
+        }
+        base_props = {'status': 'published',
+                      'file': file_id,
+                      'content_type': 'video',
+                      'order': 0}
+        # No tags, should never be returned.
+        self.create_node({
+            '_created': now,
+            'properties': base_props,
+            **base_node})
+        # Empty tag list, should never be returned.
+        self.create_node({
+            '_created': now + timedelta(seconds=1),
+            'properties': {'tags': [], **base_props},
+            **base_node})
+        # Empty string as tag, should never be returned.
+        self.create_node({
+            '_created': now + timedelta(seconds=1),
+            'properties': {'tags': [''], **base_props},
+            **base_node})
+        nid_single_tag = self.create_node({
+            '_created': now + timedelta(seconds=2),
+            # 'एनिमेशन' is 'animation' in Hindi.
+            'properties': {'tags': ['एनिमेशन'], **base_props},
+            **base_node,
+        })
+        nid_double_tag = self.create_node({
+            '_created': now + timedelta(hours=3),
+            'properties': {'tags': ['एनिमेशन', 'rigging'], **base_props},
+            **base_node,
+        })
+        nid_other_tag = self.create_node({
+            '_deleted': False,
+            '_created': now + timedelta(days=4),
+            'properties': {'tags': ['producción'], **base_props},
+            **base_node,
+        })
+        # Matching tag but deleted node, should never be returned.
+        self.create_node({
+            '_created': now + timedelta(seconds=1),
+            '_deleted': True,
+            'properties': {'tags': ['एनिमेशन'], **base_props},
+            **base_node})
+
+        def do_query(tag_name: str, expected_ids: typing.List[ObjectId]):
+            with self.app.app_context():
+                url = flask.url_for('nodes_api.tagged', tag=tag_name)
+                resp = self.get(url)
+            resp_ids = [ObjectId(node['_id']) for node in resp.json]
+            self.assertEqual(expected_ids, resp_ids)
+
+        # Should return the newest node first.
+        do_query('एनिमेशन', [nid_double_tag, nid_single_tag])
+        do_query('rigging', [nid_double_tag])
+        do_query('producción', [nid_other_tag])
+        do_query('nonexistant', [])
+        do_query(' ', [])
+
+        # Empty tag should not be allowed.
+        with self.app.app_context():
+            invalid_url = flask.url_for('nodes_api.tagged', tag='')
+            self.get(invalid_url, expected_status=404)

@@ -760,6 +760,8 @@ class PillarServer(BlinkerCompatibleEve):
         coll.create_index([('properties.status', pymongo.ASCENDING),
                            ('node_type', pymongo.ASCENDING),
                            ('_created', pymongo.DESCENDING)])
+        # Used for asset tags
+        coll.create_index([('properties.tags', pymongo.ASCENDING)])
 
         coll = db['projects']
         # This index is used for statistics, and for fetching public projects.
