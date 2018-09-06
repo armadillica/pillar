@@ -2,11 +2,8 @@
 | {% import 'nodes/custom/blog/_macros.html' as blogmacros %}
 
 | {% block body %}
-.container-fluid
-	#blog_container.cloud-blog
-		#blog_index-container
-			.blog_index-header
-				h3 Blog Archive
+.container
+	h3 Blog Archive
 
-			| {{ blogmacros.render_archive(project, posts, posts_meta) }}
+	| {{ blogmacros.render_archive(project, posts, posts_meta) }}
 | {% endblock body %}

@@ -9,9 +9,7 @@ link(href="{{ url_for('static_pillar', filename='assets/css/blog.css') }}", rel=
 | {% endblock %}
 
 | {% block project_context %}
-#blog_container
-	#blog_index-container.expand-image-links
-		| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta) }}
+| {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta) }}
 | {% endblock %}
 
 | {% block project_tree %}
