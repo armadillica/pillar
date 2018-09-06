@@ -140,8 +140,6 @@ class PillarServer(BlinkerCompatibleEve):
 
         self.org_manager = pillar.api.organizations.OrgManager()
 
-        self.before_first_request(self.setup_db_indices)
-
         # Make CSRF protection available to the application. By default it is
         # disabled on all endpoints. More info at WTF_CSRF_CHECK_DEFAULT in config.py
         self.csrf = CSRFProtect(self)
@@ -704,6 +702,8 @@ class PillarServer(BlinkerCompatibleEve):
     def finish_startup(self):
         self.log.info('Using MongoDB database %r', self.config['MONGO_DBNAME'])
 
+        with self.app_context():
+            self.setup_db_indices()
         self._config_celery()
 
         api.setup_app(self)
