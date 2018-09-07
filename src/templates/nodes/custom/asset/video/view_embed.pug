@@ -52,7 +52,6 @@ script(type="text/javascript").
 	{% if node.video_sources %}
 
 	var videoPlayer = document.getElementById('videoplayer');
-
 	var options = {
 		controlBar: {
 			volumePanel: { inline: false }
@@ -65,7 +64,62 @@ script(type="text/javascript").
 			'eventCategory' : '{{ node.project }}',
 			'eventsToTrack' : ['start', 'error', 'percentsPlayed']
 		});
-		this.hotkeys();
+
+		this.hotkeys({
+			enableVolumeScroll: false,
+			customKeys: {
+				KeyL: {
+					key: function(event) {
+						return (event.which === 76);
+					},
+					handler: function(player, options, event) {
+						videoPlayerToggleLoop(videoPlayer, videoPlayerLoopButton);
+					}
+				}
+			}
+		});
+
+		// Generic utility to add-buttons to the player.
+		function addVideoPlayerButton(data) {
+
+			var controlBar,
+					newButton = document.createElement('button'),
+					buttonContent = document.createElement('span');
+
+			newButton.className = 'vjs-control vjs-button ' + data.class;
+			buttonContent.className = 'vjs-icon-placeholder';
+			newButton.setAttribute('title', data.title);
+
+			newButton.appendChild(buttonContent);
+			controlBar = document.getElementsByClassName('vjs-control-bar')[0];
+			insertBeforeButton = document.getElementsByClassName('vjs-fullscreen-control')[0];
+			controlBar.insertBefore(newButton, insertBeforeButton);
+
+			return newButton;
+		}
+
+		// Video loop stuff. TODO: Move it to video_plugins.js
+		var videoPlayerLoopButton = addVideoPlayerButton({
+			player: videoPlayer,
+			class: 'vjs-loop-button',
+			icon: 'pi-replay',
+			title: 'Loop'
+		});
+
+		function videoPlayerToggleLoop(videoPlayer, videoPlayerLoopButton) {
+			if (videoPlayer.loop){
+				videoPlayer.loop = false;
+				$(videoPlayerLoopButton).removeClass('vjs-control-active');
+			} else {
+				videoPlayer.loop = true;
+				$(videoPlayerLoopButton).addClass('vjs-control-active');
+			}
+		}
+
+		videoPlayerLoopButton.onclick = function() {
+			videoPlayerToggleLoop(videoPlayer, videoPlayerLoopButton);
+		};
+
 		this.rememberVolumePlugin();
 
 		{% if current_user.is_authenticated %}
@@ -75,44 +129,9 @@ script(type="text/javascript").
 			'report_url': report_url,
 			'fetch_progress_url': fetch_progress_url,
 		});
+
 		{% endif %}
 	});
-
-	function addVideoPlayerButton(data) {
-
-		var controlBar,
-				newButton = document.createElement('button'),
-				buttonContent = document.createElement('span');
-
-		newButton.className = 'vjs-control vjs-button ' + data.class;
-		buttonContent.className = 'vjs-icon-placeholder';
-		newButton.setAttribute('title', data.title);
-
-		newButton.appendChild(buttonContent);
-		controlBar = document.getElementsByClassName('vjs-control-bar')[0];
-		insertBeforeButton = document.getElementsByClassName('vjs-fullscreen-control')[0];
-		controlBar.insertBefore(newButton, insertBeforeButton);
-
-		return newButton;
-	}
-
-	var videoPlayerLoopButton = addVideoPlayerButton({
-		player: videoPlayer,
-		class: 'vjs-loop-button',
-		icon: 'pi-replay',
-		title: 'Loop'
-	});
-
-	videoPlayerLoopButton.onclick = function() {
-		if (videoPlayer.loop){
-			videoPlayer.loop = false;
-			$(this).removeClass('vjs-control-active');
-
-		} else {
-			videoPlayer.loop = true;
-			$(this).addClass('vjs-control-active');
-		}
-	};
 
 	{% endif %} // if node.video_sources
 
