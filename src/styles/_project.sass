@@ -143,17 +143,11 @@ body.blog
 #project_context-header
 	transition: box-shadow 250ms ease-in-out
 	z-index: $z-index-base + 3
+	left: 0
+	width: 100%
 
 	&.is-offset
 		box-shadow: 0 0 25px rgba(black, .2)
-
-span#project-edit-title
-	position: absolute
-	padding: 15px 20px
-	font:
-		size: 1.1em
-		weight: 400
-	white-space: nowrap
 
 
 /* Edit Asset buttons */
@@ -241,56 +235,6 @@ ul.project-edit-tools
 	/* // Extra asset tools in dropdown */
 /* // Edit Asset buttons */
 
-
-ul.project_nav-edit-list
-	list-style: none
-	padding: 0
-	margin: $project_header-height 0 0 0
-
-	li
-		background-color: $color-background
-		border-bottom: 1px solid $color-background-dark
-		color: $color-text-dark
-		position: relative
-
-		&:hover
-			cursor: pointer
-			background-color: $color-background-light
-		a
-			padding: 10px 15px
-			display: inline-block
-			width: 100%
-			text-decoration: none
-			color: $color-text-dark
-
-		i
-			padding-right: 15px
-
-		&.active
-			background-color: white
-
-			a
-				color: $color-primary-dark
-
-.project_nav-toggle-btn
-	position: absolute
-	bottom: 0
-	width: 100%
-	padding: 10px
-	text-align: center
-	color: $color-text-light-hint
-	cursor: pointer
-
-	&:hover
-		color: $color-text-light
-
-	i
-		font-size: 1.3em
-
-	+media-xs
-		visibility: hidden
-		display: none
-
 #project_context
 	position: relative
 	display: flex
@@ -299,6 +243,8 @@ ul.project_nav-edit-list
 	height: 100%
 	background-color: white
 
+// Add padding to project_context because project_context-header is fixed on top.
+// It contains the New, Edit, Save Changes, etc. buttons.
 #project_context-header+#project_context
 	padding-top: $project_header-height
 
@@ -1678,9 +1624,6 @@ section.node-children
 		padding: 20px
 
 		.form-group
-			position: relative
-			margin: 0 auto 30px auto
-
 			&.tags .select2-container
 				.select2-selection
 					+input-generic

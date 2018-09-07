@@ -1,29 +1,34 @@
 | {% extends 'projects/edit_layout.html' %}
-| {% set title = 'edit' %}
+
 | {% block page_title %}Edit {{ project.name }}{% endblock %}
+| {% set title = 'edit' %}
 
 | {% block project_context_header %}
-span#project-edit-title
-	| Edit Project
+#project_context-header.d-flex.justify-content-end.position-fixed.bg-white
+	ul.d-flex.list-unstyled.p-2.mb-0.h-auto.justify-content-end(
+		class="project-edit-tools disabled")
 
-ul.project-edit-tools
-	// Edit Mode
-	li.button-cancel
-		a#item_cancel.project-mode-edit.btn.btn-sm.btn-link(
-			href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
-			title="Cancel changes")
-			i.button-cancel-icon.pi-angle-left
-			| Go to Project
+		li.button-cancel
+			a#item_cancel.project-mode-edit.btn.btn-sm.btn-link(
+				href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
+				title="Cancel changes")
+				i.button-cancel-icon.pi-angle-left
+				| Go to Project
 
-	li.button-save
-		a#item_save.project-mode-edit.btn.btn-sm.btn-outline-success.mx-2(
-			href="#",
-			title="Save changes")
-			i.button-save-icon.pi-check
-			| Save Changes
+		li.button-save
+			a.btn.btn-sm.btn-outline-success.ml-2.px-3.text-capitalize(
+				id="item_save",
+				class="project-mode-edit",
+				href="#",
+				title="Save changes")
+				i.button-save-icon.pi-check
+				| Save Changes
 | {% endblock %}
 
 | {% block project_context %}
+.row
+	.col-md-12
+		h5.pt-3.pl-3 Project Overview
 #node-edit-container
 	form(
 		id="node-edit-form"
@@ -81,7 +86,8 @@ ul.project-edit-tools
 
 		hr
 
-		ul.project-edit-tools.justify-content-end.h-auto
+		ul.d-flex.list-unstyled.p-2.mb-0.h-auto.justify-content-end(
+			class="project-edit-tools disabled")
 			li.button-cancel
 				a#item_cancel.project-mode-edit.btn.btn-link(
 					href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
@@ -90,7 +96,9 @@ ul.project-edit-tools
 					| Go to Project
 
 			li.button-save
-				a#item_save.project-mode-edit.btn.btn-outline-success.ml-2(
+				a.btn.btn-sm.btn-outline-success.ml-2.px-3.text-capitalize(
+					id="item_save",
+					class="project-mode-edit",
 					href="#",
 					title="Save changes")
 					i.button-save-icon.pi-check

@@ -127,19 +127,50 @@ nav.sidebar
 							font-size: .9em
 
 
-// Secondary navigation for
+// Secondary navigation
+$nav-secondary-bar-size: -2px
 .nav-secondary
 	align-items: center
-	box-shadow: inset 0 -2px 0 0 $color-background
+	box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 
 	.nav-link
 		color: $color-text
 		cursor: pointer
 		transition: box-shadow 150ms ease-in-out
+		box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 
+		// Blue bar on the bottom.
 		&:hover,
 		&.active
-			box-shadow: inset 0 -2px 0 0 $primary
+			box-shadow: inset 0 $nav-secondary-bar-size 0 0 $primary
+
+			i
+				color: $primary
+
+	&.nav-secondary-vertical
+		align-items: flex-start
+		flex-direction: column
+		box-shadow: none // Last item on the list already has a box-shadow.
+
+		> li
+			width: 100% // span across the whole width.
+
+		// Blue bar on the side.
+		.nav-link
+			box-shadow: inset 0 -1px 0 0 $color-background, inset -1px 0 0 0 $color-background
+
+			&:hover,
+			&.active
+				box-shadow: inset 0 -1px 0 0 $color-background, inset ($nav-secondary-bar-size * 1.5) 0 0 0 $primary
+
+// Strange 1px offset when nav-secondary is in the topbar.
+// To fix .nav-link and .nav-item must be height: 100%, but this
+// makes it misalign vertically since nav.navbar has align-items: center.
+// Let's just add this exception for now.
+nav.navbar
+	> .nav-secondary
+		position: relative
+		top: 1px
 
 
 .navbar-overlay

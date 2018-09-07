@@ -1,28 +1,28 @@
 | {% extends 'layout.html' %}
+include ../mixins/components
+
 | {% block page_title %}Edit {{ project.name }}{% endblock %}
+
+| {% block navigation_tabs %}
++nav-secondary()
+	+nav-secondary-link(
+		class="px-0 font-weight-bold",
+		href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+		| {{ project.name }}
+| {% endblock navigation_tabs %}
 
 | {% block body %}
 #project-container
 	#project-side-container
 		#project_sidebar
 			ul.project-tabs.p-0
-				li.tabs-thumbnail(
-					title="About",
-					data-toggle="tooltip",
-					data-placement="left",
-					class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
-					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-						| {% if project.picture_square %}
-						img(src="{{ project.picture_square.thumbnail('b', api=api) }}")
-						| {% else %}
-						i.pi-home
-						| {% endif %}
 				li.tabs-browse(
 					title="Browse",
 					data-toggle="tooltip",
 					data-placement="left")
 					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 						i.pi-folder
+
 				| {% if not project.is_private %}
 				li.tabs-search(
 					title="Search",
@@ -41,40 +41,42 @@
 						i.pi-cog
 				| {% endif %}
 
-				.project_nav-toggle-btn(
-					title="Expand Navigation [T]",
-					data-toggle="tooltip",
-					data-placement="right")
-					i.pi-angle-double-left
 
 		#project_nav
 			#project_nav-container
 				// TODO - make list a macro
 				#project_tree.edit.bg-white
-					ul.project_nav-edit-list
-						li(class="{% if title == 'edit' %}active{% endif %}")
-							a(href="{{ url_for('projects.edit', project_url=project.url) }}")
-								i.pi-list
-								| Overview
-						li(class="{% if title == 'sharing' %}active{% endif %}")
-							a(href="{{ url_for('projects.sharing', project_url=project.url) }}")
-								i.pi-share
-								| Sharing
-						li(class="{% if title == 'edit_node_types' %}active{% endif %}")
-							a(href="{{ url_for('projects.edit_node_types', project_url=project.url) }}")
-								i.pi-puzzle
-								| Node Types
+					+nav-secondary()(class="nav-secondary-vertical")
+						+nav-secondary-link(
+							class="{% if title == 'edit' %}active{% endif %}",
+							href="{{ url_for('projects.edit', project_url=project.url) }}")
+							i.pr-3.pi-list
+							| Overview
+
+						+nav-secondary-link(
+							class="{% if title == 'sharing' %}active{% endif %}",
+							href="{{ url_for('projects.sharing', project_url=project.url) }}")
+							i.pr-3.pi-share
+							| Sharing
+
+						+nav-secondary-link(
+							class="{% if title == 'edit_node_types' %}active{% endif %}",
+							href="{{ url_for('projects.edit_node_types', project_url=project.url) }}")
+							i.pr-3.pi-puzzle
+							| Node Types
+
 						| {% for ext in ext_pages %}
-						li(class="{% if title == ext.name %}active{% endif %}")
-							a(href="{{ url_for('projects.edit_extension', project_url=project.url, extension_name=ext.name) }}")
-								i(class="pi-{{ext.icon}}")
-								| {{ext.name | title}}
+						+nav-secondary-link(
+							class="{% if title == ext.name %}active{% endif %}",
+							href="{{ url_for('projects.edit_extension', project_url=project.url, extension_name=ext.name) }}")
+							i(class="pr-3 pi-{{ ext.icon }}")
+							| {{ ext.name | title }}
 						| {% endfor %}
 
-	#project_context-container
-		#project_context-header.bg-white
-			| {% block project_context_header %}
-			| {% endblock %}
+
+	#project_context-container.border-left
+		| {% block project_context_header %}
+		| {% endblock %}
 
 		#project_context
 			| {% block project_context %}
