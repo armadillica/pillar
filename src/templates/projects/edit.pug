@@ -5,7 +5,7 @@
 
 | {% block project_context_header %}
 #project_context-header.d-flex.justify-content-end.position-fixed.bg-white
-	ul.d-flex.list-unstyled.p-2.mb-0.h-auto.justify-content-end(
+	ul.d-flex.list-unstyled.py-1.px-2.mb-0.h-auto.justify-content-end(
 		class="project-edit-tools disabled")
 
 		li.button-cancel
@@ -21,14 +21,16 @@
 				class="project-mode-edit",
 				href="#",
 				title="Save changes")
-				i.button-save-icon.pi-check
+				i.pi-check.pr-2.button-save-icon
 				| Save Changes
 | {% endblock %}
 
 | {% block project_context %}
-.row
-	.col-md-12
-		h5.pt-3.pl-3 Project Overview
+.container-fluid
+	.row
+		.col-md-12
+			h5.pl-2.mb-0 Project Overview
+
 #node-edit-container
 	form(
 		id="node-edit-form"
@@ -86,7 +88,7 @@
 
 		hr
 
-		ul.d-flex.list-unstyled.p-2.mb-0.h-auto.justify-content-end(
+		ul.d-flex.list-unstyled.py-1.px-2.mb-0.h-auto.justify-content-end(
 			class="project-edit-tools disabled")
 			li.button-cancel
 				a#item_cancel.project-mode-edit.btn.btn-link(
@@ -101,7 +103,7 @@
 					class="project-mode-edit",
 					href="#",
 					title="Save changes")
-					i.button-save-icon.pi-check
+					i.pi-check.pr-2.button-save-icon
 					| Save Changes
 
 | {% endblock %}

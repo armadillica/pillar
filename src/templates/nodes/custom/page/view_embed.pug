@@ -11,19 +11,18 @@ header
 #node-container
 	#node-overlay
 
-	section.node-details-container.page
+	.node-details-container.page.expand-image-links.imgs-fluid
 
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
+		h2.pt-3.text-center {{node.name}}
+
+		hr
 
 		| {% if node.description %}
-		.node-details-description#node-description
-			| {{ node | markdowned('description') }}
+		| {{ node | markdowned('description') }}
 		| {% endif %}
 
-		.node-details-meta.footer
-			span.updated(title="created {{ node._created | pretty_date }}") updated {{ node._updated | pretty_date }}
+		small.text-muted
+			span(title="created {{ node._created | pretty_date }}") Updated {{ node._updated | pretty_date }}
 
 include ../_scripts
 

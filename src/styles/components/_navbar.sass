@@ -139,13 +139,14 @@ $nav-secondary-bar-size: -2px
 		transition: box-shadow 150ms ease-in-out
 		box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 
+	.nav-link:hover,
+	.nav-link.active,
+	.nav-item.dropdown.show .nav-link
 		// Blue bar on the bottom.
-		&:hover,
-		&.active
-			box-shadow: inset 0 $nav-secondary-bar-size 0 0 $primary
+		box-shadow: inset 0 $nav-secondary-bar-size 0 0 $primary
 
-			i
-				color: $primary
+		i
+			color: $primary
 
 	&.nav-secondary-vertical
 		align-items: flex-start
@@ -162,6 +163,13 @@ $nav-secondary-bar-size: -2px
 			&:hover,
 			&.active
 				box-shadow: inset 0 -1px 0 0 $color-background, inset ($nav-secondary-bar-size * 1.5) 0 0 0 $primary
+
+	&.nav-main
+		.nav-link
+			color: $color-text-dark-secondary
+
+			&:hover
+				color: $body-color
 
 // Strange 1px offset when nav-secondary is in the topbar.
 // To fix .nav-link and .nav-item must be height: 100%, but this

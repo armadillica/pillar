@@ -33,8 +33,8 @@ script(type="text/javascript").
 		} else if (node_type === 'group_hdri') {
 			node_type_str = 'HDRi Folder';
 		}
-		$('a', '.button-edit').html('<i class="pi-edit button-edit-icon"></i> Edit ' + node_type_str);
-		$('a', '.button-delete').html('<i class="pi-trash button-delete-icon"></i>Delete ' + node_type_str);
+		$('a', '.button-edit').html('<i class="pr-2 pi-edit button-edit-icon"></i> Edit ' + node_type_str);
+		$('a', '.button-delete').html('<i class="pr-2 pi-trash button-delete-icon"></i>Delete ' + node_type_str);
 
 		{% if parent %}
 		ProjectUtils.setProjectAttributes({parentNodeId: '{{parent._id}}'});

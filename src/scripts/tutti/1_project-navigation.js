@@ -78,8 +78,8 @@ function containerResizeY(window_height){
 		);
 
 		$('#project_nav-container, #project_tree, .project_split').css(
-			{'max-height': (window_height_minus_nav - 50) + 'px',
-			 'height': (window_height_minus_nav - 50) + 'px'}
+			{'max-height': (window_height_minus_nav) + 'px',
+			 'height': (window_height_minus_nav) + 'px'}
 		);
 
 		if (container_height > parseInt($('#project-container').css("min-height"))) {
