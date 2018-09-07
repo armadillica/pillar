@@ -164,12 +164,6 @@ span#project-edit-title
 
 ul.project-edit-tools
 	li
-		a, button
-			padding: $dropdown-item-padding-y ($dropdown-item-padding-x / 2)
-
-			i
-				padding-right: 10px
-
 		&.button-save
 			&.field-error
 				a
@@ -197,10 +191,6 @@ ul.project-edit-tools
 				cursor: default
 				+pulse-75
 
-		&.button-add,
-		&.button-edit
-			min-width: 80px
-
 		&.featured
 			a
 				color: $color-warning
@@ -217,8 +207,6 @@ ul.project-edit-tools
 
 		&.dropdown
 			li
-				padding: 0
-
 				a
 					color: $body-color
 					display: block
@@ -229,6 +217,9 @@ ul.project-edit-tools
 					&:hover
 						color: $primary
 						text-decoration: none
+
+					i
+						padding-right: 10px
 
 	/* Icons per asset type. */
 	i
@@ -799,12 +790,6 @@ section.node-preview.group
 				color: $color-success
 
 			&.download
-				.dropdown-toggle
-					// padding-right: 0
-
-				i.icon-dropdown-menu
-					// padding-left: 10px
-
 				/* Download dropdown options */
 				ul.dropdown-menu
 					min-width: 240px
