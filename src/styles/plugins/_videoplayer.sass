@@ -1,6 +1,8 @@
 $videoplayer-controls-color: white
 $videoplayer-background-color: darken($primary, 10%)
 
+$videoplayer-progress-bar-height: .5em
+
 .video-js
 	.vjs-big-play-button:before, .vjs-control:before, .vjs-modal-dialog
 		position: absolute
@@ -653,12 +655,12 @@ body.vjs-full-window
 		-moz-transition: all 0.2s
 		-o-transition: all 0.2s
 		transition: all 0.2s
-		height: 0.3em
+		height: $videoplayer-progress-bar-height
 
 		.vjs-play-progress
 			position: absolute
 			display: block
-			height: 0.3em
+			height: $videoplayer-progress-bar-height
 			margin: 0
 			padding: 0
 			width: 0
@@ -668,7 +670,7 @@ body.vjs-full-window
 		.vjs-load-progress
 			position: absolute
 			display: block
-			height: 0.3em
+			height: $videoplayer-progress-bar-height
 			margin: 0
 			padding: 0
 			width: 0
@@ -678,7 +680,7 @@ body.vjs-full-window
 			div
 				position: absolute
 				display: block
-				height: 0.3em
+				height: $videoplayer-progress-bar-height
 				margin: 0
 				padding: 0
 				width: 0
@@ -690,10 +692,11 @@ body.vjs-full-window
 
 	.vjs-play-progress
 		background-color: $videoplayer-controls-color
+		border-radius: 999em
 
 		&:before
 			position: absolute
-			top: -0.333333333333333em
+			top: -($videoplayer-progress-bar-height / 2) // halfway the height of the progress bar
 			right: -0.5em
 
 		&:after
@@ -849,9 +852,9 @@ body.vjs-full-window
 		font-size: 0.9em
 
 .vjs-slider-horizontal .vjs-volume-level
-	height: 0.3em
+	height: $videoplayer-progress-bar-height
 	&:before
-		top: -0.3em
+		top: -$videoplayer-progress-bar-height
 		right: -0.5em
 
 .vjs-menu-button-popup
