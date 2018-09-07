@@ -93,7 +93,7 @@
 						title="Download {{ node.properties.content_type | undertitle }}",
 						href="{{ node.file.link }}",
 						download="{{ node.file.filename }}")
-						button.btn(type="button")
+						button.btn.btn-outline-success.px-3(type="button")
 							i.pi-download
 							| Download
 					| {% endblock node_download %}

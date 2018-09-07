@@ -22,7 +22,6 @@ body.blog
 #project-container
 	display: flex
 	flex-direction: row
-	margin-top: $project_header-height
 	min-height: 300px
 	position: relative
 	z-index: $z-index-base
@@ -269,10 +268,6 @@ ul.project-edit-tools
 		opacity: 1
 
 
-#project-container
-
-
-
 ul.project_nav-edit-list
 	list-style: none
 	padding: 0
@@ -367,15 +362,12 @@ ul.project_nav-edit-list
 #project_tree
 	+media-xs
 		margin-top: 0
-
-	// margin-top: $project_header-height //so it's right below the project title.
 	overflow-y: auto // show vertical scrollbars when needed.
-	padding: 0 0 5px 0 // some padding on top/bottom of jstree.
+	padding: 5px 0 // some padding on top/bottom of jsTree.
 	position: relative
 
 	&.edit
 		margin-top: 0
-
 
 /* Node Context */
 =project-node-title
@@ -824,55 +816,37 @@ section.node-preview.group
 				color: $color-success
 
 			&.download
-				position: relative
-
-				button
-					+button($color-success, 3px)
-
 				.dropdown-toggle
-					padding-right: 0
+					// padding-right: 0
 
 				i.icon-dropdown-menu
-					padding-left: 10px
+					// padding-left: 10px
 
 				/* Download dropdown options */
 				ul.dropdown-menu
-					width: auto
 					min-width: 240px
-					padding: 0
-					margin: 0
-					top: initial
-					left: initial
-					right: 0
-					bottom: 35px
-					border: thin solid rgba(darken($color-background, 5%), .3)
-					border-top-left-radius: 3px
-					border-top-right-radius: 3px
-					border-bottom-left-radius: 0
-					border-bottom-right-radius: 0
 
 					li
-						padding: 0
-						text-align: right
-						clear: both
-						display: flex
-						align-items: center
+						display: block
 
 						a
+							display: flex
 							padding: 10px 15px
-							width: 100%
 
 							&:hover
-								color: $color-primary
-								background-color: transparent
+								text-decoration: none
 
 								span
+									color: $primary
+
 									&.length
 										color: lighten($color-primary, 10%)
 
 							span
+								color: $body-color
+
 								&.length
-									float: left
+									margin-right: auto
 									color: $color-text-dark-hint
 									padding-right: 15px
 								&.format
