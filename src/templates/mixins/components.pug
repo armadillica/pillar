@@ -1,0 +1,69 @@
+// {#
+// Header of landing pages. title or text can be skipped:
+// +jumbotron("{{ page_title }}", null, "{{ page_header_image }}")
+// Any extra attributes added (in a separate group) will be passed as is:
+// +jumbotron("{{ page_title }}", null, "{{ page_header_image }}")(data-node-id='{{ node._id }}')
+// #}
+mixin jumbotron(title, text, image, url)
+	if url
+		a.jumbotron.jumbotron-overlay.text-white(
+			style='background-image: url(' + image + ');',
+			href=url)&attributes(attributes)
+			.container
+				.row
+					.col-md-9
+						if title
+							.display-4.text-uppercase.font-weight-bold
+								=title
+						if text
+							.lead
+								=text
+	else
+		.jumbotron.jumbotron-overlay.text-white(style='background-image: url(' + image + ');')&attributes(attributes)
+			.container
+				.row
+					.col-md-9
+						if title
+							.display-4.text-uppercase.font-weight-bold
+								=title
+						if text
+							.lead
+								=text
+
+// {# Secondary navigation.
+// e.g. Workshops, Courses. #}
+mixin nav-secondary(title)
+	ul.nav.nav-secondary&attributes(attributes)
+		if title
+			li.font-weight-bold.px-2
+				=title
+
+		if block
+			block
+		else
+			p No items defined.
+
+mixin nav-secondary-link()
+	li.nav-item
+		a.nav-link&attributes(attributes)
+			block
+
+// {# Takes as argument the number of columns to use in this deck. 1-6 #}
+mixin card-deck(columns)
+	.card-deck.card-padless(class='card-' + columns + '-columns')
+		if block
+			block
+		else
+			p No cards defined.
+
+// {#
+// Passes all attributes to the card.
+// You can do fun stuff in a loop even like:
+// +card(data-url="{{ url_for('projects.view', project_url=project.url) }}", tabindex='{{ loop.index }}')
+// #}
+mixin card()
+	.card.card-fade.cursor-pointer.mb-4.js-project-go&attributes(attributes)
+		if block
+			block
+		else
+			p No card content defined.
