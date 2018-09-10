@@ -873,12 +873,6 @@
       "src": "fontawesome"
     },
     {
-      "uid": "31972e4e9d080eaa796290349ae6c1fd",
-      "css": "users",
-      "code": 59502,
-      "src": "fontawesome"
-    },
-    {
       "uid": "c8585e1e5b0467f28b70bce765d5840c",
       "css": "clipboard-copy",
       "code": 61637,
@@ -989,6 +983,30 @@
       "css": "download",
       "code": 59394,
       "src": "entypo"
+    },
+    {
+      "uid": "347c38a8b96a509270fdcabc951e7571",
+      "css": "database",
+      "code": 61888,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "3a6f0140c3a390bdb203f56d1bfdefcb",
+      "css": "speed",
+      "code": 59471,
+      "src": "entypo"
+    },
+    {
+      "uid": "4c1ef492f1d2c39a2250ae457cee2a6e",
+      "css": "social-instagram",
+      "code": 61805,
+      "src": "fontawesome"
+    },
+    {
+      "uid": "e36d581e4f2844db345bddc205d15dda",
+      "css": "users",
+      "code": 59507,
+      "src": "elusive"
     },
     {
       "uid": "053a214a098a9453877363eeb45f004e",
