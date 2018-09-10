@@ -370,6 +370,14 @@ def render_project(project, api, extra_context=None, template_name=None):
 
     extension_sidebar_links = current_app.extension_sidebar_links(project)
 
+    pages = Node.all({
+        'where': {'project': project._id, 'node_type': 'page', '_deleted': False},
+        'projection': {
+            'name': 1,
+            'url': 1
+            }
+        }, api=api)
+
     return render_template(template_name,
                            api=api,
                            project=project,
@@ -378,6 +386,7 @@ def render_project(project, api, extra_context=None, template_name=None):
                            show_project=True,
                            og_picture=project.picture_header,
                            activity_stream=activity_stream,
+                           pages=pages._items,
                            extension_sidebar_links=extension_sidebar_links,
                            **extra_context)
 
