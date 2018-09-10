@@ -453,20 +453,22 @@ body.vjs-full-window
 	list-style: none
 	margin: 0
 	padding: 0.2em 0
-	line-height: 1.4em
-	font-size: 1.2em
+	line-height: 1.8em
+	font-size: 1.1em
 	text-align: center
 	text-transform: lowercase
+
 	&:focus, &:hover
-		outline: 0
-		background-color: #73859f
-		background-color: rgba(115, 133, 159, 0.5)
+		background-color: darken($primary, 20%)
+
 	&.vjs-selected
 		background-color: $videoplayer-controls-color
 		color: $videoplayer-background-color
+
 		&:focus, &:hover
 			background-color: $videoplayer-controls-color
 			color: $videoplayer-background-color
+
 	&.vjs-menu-title
 		text-align: center
 		text-transform: uppercase
@@ -486,12 +488,13 @@ body.vjs-full-window
 	height: 0em
 	margin-bottom: 1.5em
 	border-top-color: $videoplayer-background-color
+
 	.vjs-menu-content
 		background-color: $videoplayer-background-color
 		position: absolute
 		width: 100%
 		bottom: 1.5em
-		max-height: 15em
+		max-height: 25em
 
 .vjs-workinghover .vjs-menu-button-popup:hover .vjs-menu, .vjs-menu-button-popup .vjs-menu.vjs-lock-showing
 	display: block
@@ -1023,14 +1026,15 @@ video::-webkit-media-text-track-display
 
 .vjs-playback-rate
 	.vjs-playback-rate-value
-		font-size: 1.5em
+		font-size: 1.25em
 		line-height: 2
 		position: absolute
-		top: 0
+		top: 3px
 		left: 0
 		width: 100%
 		height: 100%
 		text-align: center
+
 	.vjs-menu
 		width: 4em
 		left: 0em
