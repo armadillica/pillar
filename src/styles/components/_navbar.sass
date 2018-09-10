@@ -1,5 +1,4 @@
-// Navigation.
-
+/* Top level navigation bar. */
 .navbar
 	box-shadow: inset 0 -2px  $color-background
 
@@ -48,24 +47,22 @@ nav.sidebar
 		position: relative
 
 		img.gravatar
-			border-radius: 999em
-			height: 32px
-			width: 32px
-			box-shadow: 1px 1px 0 rgba(black, .2)
+			height: 28px
 			position: relative
+			width: 28px
 
 		.special
-			width: 18px
-			height: 18px
-			border-radius: 999em
-			position: absolute
 			background-color: white
-			z-index: 2
-			display: inline-block
-			top: 10px
-			left: 38px
-			font-size: 1.2em
+			border-radius: 999em
 			box-shadow: 1px 1px 1px rgba(black, .2)
+			display: inline-block
+			font-size: 1.2em
+			height: 18px
+			left: 28px
+			position: absolute
+			top: 3px
+			width: 18px
+			z-index: 2
 
 			&.subscriber
 				background-color: $color-success
@@ -84,7 +81,7 @@ nav.sidebar
 				+position-center-translate
 
 	.dropdown
-		min-width: 60px // navbar avatar size
+		min-width: 50px // navbar avatar size
 
 		span.fa-stack
 			position: absolute
@@ -100,44 +97,45 @@ nav.sidebar
 					&:hover
 						box-shadow: none // removes underline
 
-					&.subitem // e.g. "Not Sintel? Log out"
-						font-size: .8em
-						padding-top: 0
-						text-transform: initial
+				.subitem // e.g. "Not Sintel? Log out"
+					font-size: .8em
+					text-transform: initial
 
 				i
 					width: 30px
 
 				&.subscription-status
-					&.none a
-						color: $color-danger
+					a, a:hover
+						color: $white
 
-					&.subscriber a
-						color: $color-success
+					&.none
+						background-color: $color-danger
 
-					&.demo a
-						color: $color-info
+					&.subscriber
+						background-color: $color-success
+
+					&.demo
+						background-color: $color-info
 
 					span.info
 						display: block
 
 						span.renew
 							display: block
-							color: $color-text-dark-primary
 							font-size: .9em
 
 
-// Secondary navigation
+/* Secondary navigation. */
 $nav-secondary-bar-size: -2px
 .nav-secondary
 	align-items: center
 	box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 
 	.nav-link
+		box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 		color: $color-text
 		cursor: pointer
 		transition: box-shadow 150ms ease-in-out
-		box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 
 	.nav-link:hover,
 	.nav-link.active,
@@ -171,15 +169,6 @@ $nav-secondary-bar-size: -2px
 			&:hover
 				color: $body-color
 
-// Strange 1px offset when nav-secondary is in the topbar.
-// To fix .nav-link and .nav-item must be height: 100%, but this
-// makes it misalign vertically since nav.navbar has align-items: center.
-// Let's just add this exception for now.
-nav.navbar
-	> .nav-secondary
-		position: relative
-		top: 1px
-
 
 .navbar-overlay
 	+media-lg
@@ -201,7 +190,9 @@ nav.navbar
 
 .navbar-brand
 	color: inherit
-	padding-left: 4px
+	padding: 0 0 0 3px
+	position: relative
+	top: -2px
 
 	&:hover
 		color: $primary
