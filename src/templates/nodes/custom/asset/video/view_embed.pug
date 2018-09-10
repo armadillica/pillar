@@ -81,47 +81,6 @@ script(type="text/javascript").
 
 		this.rememberVolumePlugin();
 
-		// Generic utility to add-buttons to the player.
-		function addVideoPlayerButton(data) {
-
-			var controlBar,
-					newButton = document.createElement('button'),
-					buttonContent = document.createElement('span');
-
-			newButton.className = 'vjs-control vjs-button ' + data.class;
-			buttonContent.className = 'vjs-icon-placeholder';
-			newButton.setAttribute('title', data.title);
-
-			newButton.appendChild(buttonContent);
-			controlBar = document.getElementsByClassName('vjs-control-bar')[0];
-			insertBeforeButton = document.getElementsByClassName('vjs-fullscreen-control')[0];
-			controlBar.insertBefore(newButton, insertBeforeButton);
-
-			return newButton;
-		}
-
-		// Video loop stuff. TODO: Move it to video_plugins.js
-		var videoPlayerLoopButton = addVideoPlayerButton({
-			player: videoPlayer,
-			class: 'vjs-loop-button',
-			icon: 'pi-replay',
-			title: 'Loop'
-		});
-
-		function videoPlayerToggleLoop(videoPlayer, videoPlayerLoopButton) {
-			if (videoPlayer.loop){
-				videoPlayer.loop = false;
-				$(videoPlayerLoopButton).removeClass('vjs-control-active');
-			} else {
-				videoPlayer.loop = true;
-				$(videoPlayerLoopButton).addClass('vjs-control-active');
-			}
-		}
-
-		videoPlayerLoopButton.onclick = function() {
-			videoPlayerToggleLoop(videoPlayer, videoPlayerLoopButton);
-		};
-
 		{% if current_user.is_authenticated %}
 		let fetch_progress_url = '{{ url_for("users_api.get_video_progress", video_id=node._id) }}';
 		let report_url = '{{ url_for("users_api.set_video_progress", video_id=node._id) }}';
@@ -133,6 +92,47 @@ script(type="text/javascript").
 
 		{% endif %}
 	});
+
+	// Generic utility to add-buttons to the player.
+	function addVideoPlayerButton(data) {
+
+		var controlBar,
+				newButton = document.createElement('button'),
+				buttonContent = document.createElement('span');
+
+		newButton.className = 'vjs-control vjs-button ' + data.class;
+		buttonContent.className = 'vjs-icon-placeholder';
+		newButton.setAttribute('title', data.title);
+
+		newButton.appendChild(buttonContent);
+		controlBar = document.getElementsByClassName('vjs-control-bar')[0];
+		insertBeforeButton = document.getElementsByClassName('vjs-fullscreen-control')[0];
+		controlBar.insertBefore(newButton, insertBeforeButton);
+
+		return newButton;
+	}
+
+	// Video loop stuff. TODO: Move it to video_plugins.js
+	var videoPlayerLoopButton = addVideoPlayerButton({
+		player: videoPlayer,
+		class: 'vjs-loop-button',
+		icon: 'pi-replay',
+		title: 'Loop'
+	});
+
+	function videoPlayerToggleLoop(videoPlayer, videoPlayerLoopButton) {
+		if (videoPlayer.loop){
+			videoPlayer.loop = false;
+			$(videoPlayerLoopButton).removeClass('vjs-control-active');
+		} else {
+			videoPlayer.loop = true;
+			$(videoPlayerLoopButton).addClass('vjs-control-active');
+		}
+	}
+
+	videoPlayerLoopButton.onclick = function() {
+		videoPlayerToggleLoop(videoPlayer, videoPlayerLoopButton);
+	};
 
 	{% endif %} // if node.video_sources
 
