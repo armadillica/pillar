@@ -16,7 +16,7 @@ $search-hit-width_grid: 100px
 			.search-hit-name
 				font-weight: 400
 				padding-top: 8px
-				color: $color-primary-dark
+				color: $primary
 
 	.search-hit
 		padding: 0
@@ -35,7 +35,7 @@ $search-hit-width_grid: 100px
 		+clearfix
 
 		& em
-			color: $color-primary-dark
+			color: $primary
 			font-style: normal
 
 		&:hover
@@ -70,7 +70,7 @@ $search-hit-width_grid: 100px
 		min-width: 350px
 		border-bottom-left-radius: 3px
 		border-bottom-right-radius: 3px
-		border-top: 3px solid lighten($color-primary, 5%)
+		border-top: 3px solid lighten($primary, 5%)
 		overflow: hidden
 
 		.tt-suggestion
@@ -93,9 +93,7 @@ $search-hit-width_grid: 100px
 				background-color: lighten($color-background, 5%)
 
 #search-container
-	display: flex
 	min-height: 600px
-	background-color: white
 
 	+media-lg
 		padding-left: 0
@@ -103,8 +101,6 @@ $search-hit-width_grid: 100px
 
 	#search-list
 		width: 40%
-		height: 100%
-		padding: 0
 		position: relative
 		overflow-x: hidden
 		overflow-y: auto
@@ -117,48 +113,12 @@ $search-hit-width_grid: 100px
 			padding: 10px 15px
 			color: $color-text-dark-secondary
 
-		.search-hit
-			#search-loading
-				visibility: hidden
-				background-color: transparent
-				font:
-					size: 1.5em
-					weight: 600
-				position: absolute
-				top: 0
-				left: 0
-				right: 0
-				bottom: 0
-				z-index: $z-index-base + 5
-				opacity: 0
-				cursor: default
-				transition: opacity 50ms ease-in-out
-				&.active
-					visibility: visible
-					opacity: 1
-
-				.spinner
-					color: $color-background-nav
-					background-color: white
-					padding: 0
-					width: 20px
-					height: 20px
-					border-radius: 50%
-					position: absolute
-					top: 7px
-					right: 10px
-					span
-						padding: 5px
-						+pulse
-
 	#search-details
 		position: relative
 		width: 40%
-		border-left: 2px solid darken(white, 3%)
 
 		#search-hit-container
 			position: absolute // for scrollbars
-			width: 100%
 			overflow-y: auto
 
 			#error_container
@@ -334,7 +294,7 @@ $search-hit-width_grid: 100px
 	input.search-field
 		margin-bottom: 10px
 		border: none
-		border-bottom: 2px solid rgba($color-primary, .2)
+		border-bottom: 2px solid rgba($primary, .2)
 		border-radius: 0
 		width: 100%
 		transition: border 100ms ease-in-out
@@ -342,12 +302,12 @@ $search-hit-width_grid: 100px
 		&::placeholder
 			color: $color-text-dark-secondary
 		&:placeholder-shown
-			border-bottom-color: $color-primary
+			border-bottom-color: $primary
 
 		&:focus
 			outline: none
 			border: none
-			border-bottom: 2px solid lighten($color-primary, 5%)
+			border-bottom: 2px solid lighten($primary, 5%)
 
 	.search-list-filters
 		padding:
@@ -372,10 +332,10 @@ $search-hit-width_grid: 100px
 
 			&:hover
 				text-decoration: none
-				color: $color-primary
+				color: $primary
 
 			&.refined
-				color: $color-primary
+				color: $primary
 
 				&:hover
 					color: $color-danger
@@ -470,19 +430,12 @@ $search-hit-width_grid: 100px
 
 
 .search-hit
+	+clearfix
 	float: left
-	box-shadow: none
-	border: thin solid transparent
-	border-top-color: darken(white, 8%)
-	border-left: 3px solid transparent
-
-	color: $color-background-nav
-
-	width: 100%
-	position: relative
 	margin: 0
 	padding: 7px 10px 7px 10px
-	+clearfix
+	position: relative
+	width: 100%
 
 	&:first-child
 		border: thin solid transparent
@@ -492,11 +445,11 @@ $search-hit-width_grid: 100px
 		opacity: 1
 		text-decoration: none
 		cursor: default
-		color: darken($color-primary, 20%)
+		color: darken($primary, 20%)
 		background-color: $color-background-light
 
 		& .search-hit-name i
-			color: darken($color-primary, 20%)
+			color: darken($primary, 20%)
 
 		& .search-hit-thumbnail
 			& .search-hit-thumbnail-icon
@@ -505,7 +458,7 @@ $search-hit-width_grid: 100px
 		.search-hit-name
 			text-decoration: none
 			&:hover
-				color: darken($color-primary, 10%)
+				color: darken($primary, 10%)
 
 		.search-hit-thumbnail
 			cursor: pointer
@@ -516,20 +469,20 @@ $search-hit-width_grid: 100px
 	&:active
 		background-color: rgba($color-background, .5)
 		opacity: .8
-		color: $color-primary
+		color: $primary
 		& .search-hit-name i
-			color: $color-primary
+			color: $primary
 
 	&:focus
-		border-color: rgba($color-primary, .2)
+		border-color: rgba($primary, .2)
 
 	/* Class that gets added when we click on the item */
 	&.active
 		background-color: lighten($color-background, 2%)
-		border-left: 3px solid $color-primary
+		box-shadow: inset -3px 0 $primary
 
 		.search-hit-name
-			color: darken($color-primary, 10%)
+			color: darken($primary, 10%)
 
 		.search-hit-meta
 			span.when
@@ -598,7 +551,7 @@ $search-hit-width_grid: 100px
 			text-decoration: underline
 
 		em
-			color: darken($color-primary, 15%)
+			color: darken($primary, 15%)
 			font-style: normal
 
 	.search-hit-ribbon
@@ -660,12 +613,12 @@ $search-hit-width_grid: 100px
 	&:hover
 		cursor: pointer
 		.search-hit-name-user
-			color: $color-primary
+			color: $primary
 
 	&.users
 		em
 			font-style: normal
-			color: $color-primary
+			color: $primary
 
 		.search-hit-name
 			font-size: 1.2em
@@ -699,13 +652,13 @@ $search-hit-width_grid: 100px
 		transition: border-color 150ms ease-in-out
 
 		&.active
-			background-color: $color-primary
-			border-color: $color-primary
+			background-color: $primary
+			border-color: $primary
 
 			.search-hit-name
 				font-weight: 500
 				color: white
-				background-color: $color-primary
+				background-color: $primary
 
 		.search-hit-name
 			font-size: .9em
@@ -769,5 +722,5 @@ $search-hit-width_grid: 100px
 
 			&.active
 				color: white
-				background-color: $color-primary
+				background-color: $primary
 				border-color: transparent

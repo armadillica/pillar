@@ -28,7 +28,7 @@ script.
 	document.body.dataset["projectId"] = "{{project._id}}";
 | {% endif %}
 
-#search-container
+#search-container.d-flex
 
 	| {% if project %}
 	#project_sidebar.bg-white
@@ -79,12 +79,12 @@ script.
 		.search-list-stats
 			#stats
 
-	#search-list
+	#search-list.h-100
 		#hits
 
-	#search-details
+	#search-details.border-left
 		#search-error
-		#search-hit-container
+		#search-hit-container.w-100
 
 
 | {% raw %}
