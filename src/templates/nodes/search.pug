@@ -31,35 +31,25 @@ script.
 #search-container
 
 	| {% if project %}
-	#project_sidebar
-		ul.project-tabs
-			li.tabs-thumbnail(
-				title="About",
-				data-toggle="tooltip",
-				data-placement="left",
-				class="{% if title == 'about' %}active {% endif %}{% if project.picture_square %}image{% endif %}")
-				a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-					| {% if project.picture_square %}
-					img(src="{{ project.picture_square.thumbnail('b', api=api) }}")
-					| {% else %}
-					i.pi-home
-					| {% endif %}
+	#project_sidebar.bg-white
+		ul.project-tabs.p-0
 			li.tabs-browse(
 				title="Browse",
 				data-toggle="tooltip",
-				data-placement="left")
+				data-placement="right")
 				a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 					i.pi-folder
+
 			li.tabs-search.active(
 				title="Search",
 				data-toggle="tooltip",
-				data-placement="left")
+				data-placement="right")
 				a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
 					i.pi-search
 	| {% endif %}
 
 	#search-sidebar
-		input.search-field(
+		input.search-field.p-2.bg-white(
 				type="text",
 				name="q",
 				id="q",
@@ -121,9 +111,6 @@ script(type="text/template", id="facet-template")
 // Hit template
 script(type="text/template", id="hit-template")
 	.search-hit(data-hit-id='{{ objectID }}')
-		#search-loading.search-loading
-			.spinner
-				span.spin ·
 		.search-hit-thumbnail
 			| {{#picture}}
 			img(src="{{{ picture }}}")
@@ -184,22 +171,19 @@ script.
 			$('#search-hit-container').html(dataHtml);
 		})
 		.done(function(){
-			$('.search-loading').removeClass('active');
+			$('.loader-bar').removeClass('active');
 			$('#search-error').hide();
 			$('#search-hit-container').show();
 		})
 		.fail(function(data){
-			$('.search-loading').removeClass('active');
+			$('.loader-bar').removeClass('active');
 			$('#search-hit-container').hide();
 			$('#search-error').show().html('Houston!\n\n' + data.status + ' ' + data.statusText);
 		});
 	}
 
 	$('body').on('click', '.search-hit', function(){
-		if ($('.search-loading').hasClass('active')){
-			$(this).removeClass('active');
-		}
-		$(this).find('#search-loading').addClass('active');
+		$('.loader-bar').removeClass('active').addClass('active');
 
 		displayNode($(this).data('hit-id'));
 		$('.search-hit').removeClass('active');

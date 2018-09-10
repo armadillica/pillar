@@ -101,155 +101,6 @@ $search-hit-width_grid: 100px
 		padding-left: 0
 		padding-right: 0
 
-	#search-sidebar
-		width: 20%
-		background-color: $color-background-light
-
-		+media-lg
-			border-top-left-radius: 3px
-
-		input.search-field
-			background-color: $color-background-nav-dark
-			font-size: 1.1em
-			color: white
-			margin-bottom: 10px
-			border: none
-			border-bottom: 2px solid rgba($color-primary, .2)
-			border-radius: 0
-			width: 100%
-			padding: 5px 15px
-			height: 50px
-			transition: border 100ms ease-in-out
-
-			&::placeholder
-				color: $color-text-dark-secondary
-			&:placeholder-shown
-				border-bottom-color: $color-primary
-
-			&:focus
-				outline: none
-				border: none
-				border-bottom: 2px solid lighten($color-primary, 5%)
-
-		.search-list-filters
-			padding:
-				left: 10px
-				right: 10px
-
-			.panel.panel-default
-				margin-bottom: 10px
-				border-radius: 3px
-				border: none
-				background-color: white
-				box-shadow: 1px 1px 0 rgba(black, .1)
-
-			a
-				text-decoration: none
-
-			.toggleRefine
-				display: block
-				padding-left: 7px
-				color: $color-text-dark
-				text-transform: capitalize
-
-				&:hover
-					text-decoration: none
-					color: $color-primary
-
-				&.refined
-					color: $color-primary
-
-					&:hover
-						color: $color-danger
-
-						span
-							&:before
-								/* x icon */
-								content: '\e84b'
-								font-family: 'pillar-font'
-					span
-						&:before
-							/* circle with dot */
-							content: '\e82f'
-							font-family: 'pillar-font'
-							position: relative
-							left: -7px
-							font-size: .9em
-
-				span
-					&:before
-						/* empty circle */
-						content: '\e82c'
-						font-family: 'pillar-font'
-						position: relative
-						left: -7px
-						font-size: .9em
-			.facet_count
-				color: $color-text-dark-secondary
-
-
-			.panel-title, .panel-heading
-				color: $color-text-dark-secondary
-				font:
-					size: 1em
-					weight: 500
-
-			.panel-body
-				padding-top: 0
-
-			.panel-title
-				position: relative
-				&:after
-					content: '\e83b'
-					font-family: 'pillar-font'
-					position: absolute
-					right: 0
-					color: $color-text-dark-primary
-
-			.collapsed
-				.panel-title:after
-					content: '\e838'
-
-
-		.search-list-stats
-			color: $color-text-dark-hint
-			padding: 10px 15px 0 15px
-			text-align: center
-			font-size: .9em
-			+clearfix
-
-		#pagination
-			ul.search-pagination
-				text-align: center
-				list-style-type: none
-				margin: 0
-				padding: 0
-				width: 100%
-				display: flex
-				+clearfix
-
-				li
-					display: inline-block
-					margin: 5px auto
-
-					&:last-child
-						border-color: transparent
-
-					a
-						font-weight: 500
-						padding: 5px 4px
-						color: $color-text-dark-secondary
-
-						&:hover
-							color: $color-text-dark-primary
-
-					&.disabled
-						opacity: .6
-
-					&.active a
-						color: $color-text-dark-primary
-						font-weight: bold
-
 	#search-list
 		width: 40%
 		height: 100%
@@ -472,6 +323,151 @@ $search-hit-width_grid: 100px
 								padding: 5px 0 0 0
 								button
 									width: 100%
+
+#search-sidebar
+	width: 20%
+	background-color: $color-background-light
+
+	+media-lg
+		border-top-left-radius: 3px
+
+	input.search-field
+		margin-bottom: 10px
+		border: none
+		border-bottom: 2px solid rgba($color-primary, .2)
+		border-radius: 0
+		width: 100%
+		transition: border 100ms ease-in-out
+
+		&::placeholder
+			color: $color-text-dark-secondary
+		&:placeholder-shown
+			border-bottom-color: $color-primary
+
+		&:focus
+			outline: none
+			border: none
+			border-bottom: 2px solid lighten($color-primary, 5%)
+
+	.search-list-filters
+		padding:
+			left: 10px
+			right: 10px
+
+		.panel.panel-default
+			margin-bottom: 10px
+			border-radius: 3px
+			border: none
+			background-color: white
+			box-shadow: 1px 1px 0 rgba(black, .1)
+
+		a
+			text-decoration: none
+
+		.toggleRefine
+			display: block
+			padding-left: 7px
+			color: $color-text-dark
+			text-transform: capitalize
+
+			&:hover
+				text-decoration: none
+				color: $color-primary
+
+			&.refined
+				color: $color-primary
+
+				&:hover
+					color: $color-danger
+
+					span
+						&:before
+							/* x icon */
+							content: '\e84b'
+							font-family: 'pillar-font'
+				span
+					&:before
+						/* circle with dot */
+						content: '\e82f'
+						font-family: 'pillar-font'
+						position: relative
+						left: -7px
+						font-size: .9em
+
+			span
+				&:before
+					/* empty circle */
+					content: '\e82c'
+					font-family: 'pillar-font'
+					position: relative
+					left: -7px
+					font-size: .9em
+		.facet_count
+			color: $color-text-dark-secondary
+
+
+		.panel-title, .panel-heading
+			color: $color-text-dark-secondary
+			font:
+				size: 1em
+				weight: 500
+
+		.panel-body
+			padding-top: 0
+
+		.panel-title
+			position: relative
+			&:after
+				content: '\e83b'
+				font-family: 'pillar-font'
+				position: absolute
+				right: 0
+				color: $color-text-dark-primary
+
+		.collapsed
+			.panel-title:after
+				content: '\e838'
+
+
+	.search-list-stats
+		color: $color-text-dark-hint
+		padding: 10px 15px 0 15px
+		text-align: center
+		font-size: .9em
+		+clearfix
+
+	#pagination
+		ul.search-pagination
+			text-align: center
+			list-style-type: none
+			margin: 0
+			padding: 0
+			width: 100%
+			display: flex
+			+clearfix
+
+			li
+				display: inline-block
+				margin: 5px auto
+
+				&:last-child
+					border-color: transparent
+
+				a
+					font-weight: 500
+					padding: 5px 4px
+					color: $color-text-dark-secondary
+
+					&:hover
+						color: $color-text-dark-primary
+
+				&.disabled
+					opacity: .6
+
+				&.active a
+					color: $color-text-dark-primary
+					font-weight: bold
+
 
 .search-hit
 	float: left
