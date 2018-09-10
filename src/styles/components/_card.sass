@@ -5,6 +5,9 @@
 			min-width: 30%
 			max-width: 30%
 
+	.card.asset
+		margin-left: 10px
+		margin-right: 10px
 
 .card-padless
 	.card
@@ -21,3 +24,22 @@
 	&:hover
 		img
 			opacity: 1
+
+
+.card.asset
+	color: $color-text
+
+	&.free
+		overflow: hidden
+
+		&:after
+			+ribbon
+			content: 'FREE'
+			padding: 2px 50px
+
+	.card-body
+		font-size: $font-size-xs
+
+	.card-img-top
+		background-size: cover
+		background-position: center

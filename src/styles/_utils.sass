@@ -507,28 +507,22 @@
 
 =ribbon
 	background-color: $color-success
-	cursor: default
+	border: thin dashed rgba(white, .5)
+	color: white
+	pointer-events: none
+	font-size: 70%
 	overflow: hidden
-	white-space: nowrap
 	position: absolute
 	right: -40px
 	top: 10px
-	-webkit-transform: rotate(45deg)
-	-moz-transform: rotate(45deg)
-	-ms-transform: rotate(45deg)
-	-o-transform: rotate(45deg)
 	transform: rotate(45deg)
+	white-space: nowrap
 
 	span
-		border: thin dashed rgba(white, .5)
-		color: white
 		display: block
-		font-size: 70%
 		margin: 1px 0
 		padding: 3px 50px
-		text:
-			align: center
-			transform: uppercase
+
 
 @mixin text-background($text-color, $background-color, $roundness, $padding)
 	border-radius: $roundness
@@ -672,3 +666,6 @@
 	img
 		// Just re-use Bootstrap's mixin here.
 		+img-fluid
+
+.overflow-hidden
+	overflow: hidden

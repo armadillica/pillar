@@ -1,5 +1,6 @@
-| {% block body %}
+include ../mixins/components
 
+| {% block body %}
 #node-container
 	section.node-preview.project
 		| {% if header_video_file %}
@@ -34,54 +35,19 @@
 		a.learn-more(href="{{ url_for( 'projects.view', project_url=project.url) }}") LEARN MORE
 		| #}
 
-		.node-extra
-
+		.p-4
 			| {% if activity_stream %}
-			.node-updates
-				ul.node-updates-list
-					| {% for n in activity_stream %}
-					| {% if n.node_type not in ['comment'] %}
-					li.node-updates-list-item(
-						data-node_id="{{ n._id }}",
-						class="{{ n.node_type }} {{ n.properties.content_type | hide_none }}")
-						a.image(href="{{ url_for_node(node=n) }}")
-							| {% if n.picture %}
-							img(src="{{ n.picture.thumbnail('l', api=api) }}")
-							| {% endif %}
-
-							| {% if n.node_type == 'post' %}
-							i.pi-newspaper
-							| {% elif n.node_type == 'texture' or n.node_type == 'group_texture' %}
-							i.pi-texture
-							| {% elif n.properties.content_type == 'video' %}
-							i.pi-film-thick
-							| {% elif n.properties.content_type == 'image' %}
-							i.pi-picture
-							| {% elif n.properties.content_type == 'file' %}
-							i.pi-file-archive
-							| {% else %}
-							i.pi-folder
-							| {% endif %}
-
-							| {% if n.permissions.world %}
-							.ribbon
-								span free
-							| {% endif %}
-
-						.info
-							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
-							p.description(href="{{ url_for_node(node=n) }}")
-								| {% if n.node_type == 'post' %}
-								| {{ n.properties | markdowned('content') | striptags | truncate(140, end="... <small>read more</small>") | safe | hide_none }}
-								| {% else %}
-								| {{ n | markdowned('description') | striptags | truncate(140, end="... <small>read more</small>") | safe | hide_none }}
-								| {% endif %}
-							span.details
-								span.what {% if n.properties.content_type %}{{ n.properties.content_type | undertitle }}{% else %}{{ n.node_type | undertitle }}{% endif %} ·
-								span.when  {{ n._updated | pretty_date }} by
-								span.who {{ n.user.full_name }}
-					| {% endif %}
-					| {% endfor %}
+			+card-deck(3)
+				| {% for n in activity_stream %}
+				| {% if n.node_type not in ['comment'] %}
+				+list-asset(
+					'{{ n.name }}',
+					'{{ url_for_node(node=n) }}',
+					"{% if n.picture %}{{ n.picture.thumbnail('l', api=api) }}{% endif %}",
+					"{% if n.properties.content_type %}{{ n.properties.content_type | undertitle }}{% else %}{{ n.node_type | undertitle }}{% endif %}",
+					"{{ n._updated | pretty_date }}")(class="{% if n.permissions.world %}free{% endif %}")
+				| {% endif %}
+				| {% endfor %}
 			| {% endif %}
 
 include _scripts

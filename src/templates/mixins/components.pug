@@ -62,8 +62,28 @@ mixin card-deck(columns)
 // +card(data-url="{{ url_for('projects.view', project_url=project.url) }}", tabindex='{{ loop.index }}')
 // #}
 mixin card()
-	.card.card-fade.cursor-pointer.mb-4.js-project-go&attributes(attributes)
+	.card&attributes(attributes)
 		if block
 			block
 		else
 			p No card content defined.
+
+mixin list-asset(name, url, image, type, date)
+	a(href=url).card.asset&attributes(attributes)
+		if image
+			.embed-responsive.embed-responsive-16by9
+				.card-img-top.embed-responsive-item(style="background-image: url(" + image + ")")
+
+		.card-body
+			if name
+				h6.card-title.mb-1
+					=name
+
+			ul.card-text.list-unstyled.d-flex.text-black-50
+				if type
+					li.pr-2=type
+				if date
+					li=date
+
+		if block
+			block
