@@ -111,12 +111,17 @@
 				span {{ child.name }}
 
 			| {% if child.properties.content_type == 'video' %}
-			| {% set progress = current_user.nodes.view_progress[child._id] %}
-			| {% set progress_in_percent = progress.progress_in_percent %}
-			| {% set progress_done = progress.done %}
+			|     {% set view_progress = current_user.nodes.view_progress %}
+			|     {% if child._id in view_progress %}
+			|         {% set progress = current_user.nodes.view_progress[child._id] %}
+			|         {% set progress_in_percent = progress.progress_in_percent %}
+			|         {% set progress_done = progress.done %}
 			//- TODO(Pablo): turn this into a nice progress bar
 			span.progress(class="{% if progress.done %}done{% endif %}")
-				| {{ progress_in_percent }}%
+				|     {{ progress_in_percent }}%
+			|     {% else %}
+			span.jemoeder no progress because never watched
+			|     {% endif %}
 			| {% else %}
 			span.jemoeder no progress because not video
 			| {% endif %}
