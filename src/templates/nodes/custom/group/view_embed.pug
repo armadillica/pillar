@@ -1,26 +1,28 @@
-| {% from '_macros/_asset_video_progress.html' import video_progress_bar %}
+| {% from '_macros/_asset_list_item.html' import asset_list_item %}
 include ../../../mixins/components
 
 | {% block body %}
 #node-container
-	section.px-3.pt-3.d-flex
-		h4 {{node.name}}
-
-		.ml-auto
-			.btn.btn-sm.btn-browsetoggle(
-				title="Toggle between list/grid view",
-				data-toggle="tooltip",
-				data-placement="top")
-				i.pi-list
+	section.d-flex
+		h4.p-4 {{node.name}}
 
 	| {% if node.description %}
-	section.node-details-description.p-3
+	section.node-details-description.px-4
 		| {{ node | markdowned('description') }}
 	| {% endif %}
 
 	section.container-fluid
 		| {% if children %}
-		+card-deck(4)(class="pr-3 pl-1")
+
+		.d-flex.justify-content-end.mb-2
+			button.btn.btn-sm.btn-outline-secondary(
+				class="js-btn-browsetoggle",
+				title="Toggle between list/grid view",
+				data-toggle="tooltip",
+				data-placement="top")
+				i.pi-list
+
+		+card-deck(class="px-2")
 			| 	{% for child in children %}
 			| {# Browse type: List #}
 			a(
@@ -73,30 +75,7 @@ include ../../../mixins/components
 
 			| {# Browse type: Icon #}
 
-			| {% set node_type = child.properties.content_type if child.properties.content_type else child.node_type %}
-
-			| {% if child.properties.content_type == 'video' %}
-			| {% set view_progress = current_user.nodes.view_progress %}
-			| {% if child._id in view_progress %}
-			| {% set progress = current_user.nodes.view_progress[child._id] %}
-			| {% set progress_in_percent = progress.progress_in_percent %}
-			| {% set progress_done = progress.done %}
-			| {% endif %}
-			| {% endif %}
-
-			+list-asset(
-				'{{ child.name }}',
-				'{{ url_for_node(node=child) }}',
-				"{% if child.picture %}{{ child.picture.thumbnail('m', api=api) }}{% endif %}",
-				"{{ node_type | undertitle }}",
-				"{{ child._created | pretty_date }}")(
-				class="js-item-open pr-0 mx-0 mb-2 {% if child.permissions.world %}free{% endif %}",
-				data-node_id="{{ child._id }}",
-				title="{{ child.name }}")
-
-				| {% if child.properties.content_type == 'video' %}
-				| {{ video_progress_bar(child, current_user) }}
-				| {% endif %}
+			| {{ asset_list_item(child, current_user) }}
 
 			| {% endfor %}
 			| {% else %}
@@ -138,13 +117,13 @@ include ../../../mixins/components
 		function projectBrowseTypeIcon() {
 			$(".list-node-children-item.browse-list").hide();
 			$(".list-node-children-item.browse-icon").show();
-			$(".btn-browsetoggle").html('<i class="pi-list"></i>');
+			$(".js-btn-browsetoggle").html('<i class="pi-list"></i> List View');
 		};
 
 		function projectBrowseTypeList() {
 			$(".list-node-children-item.browse-list").show();
 			$(".list-node-children-item.browse-icon").hide();
-			$(".btn-browsetoggle").html('<i class="pi-layout"></i>');
+			$(".js-btn-browsetoggle").html('<i class="pi-layout"></i> Grid View');
 		};
 
 		function projectBrowseTypeCheck(){
@@ -184,7 +163,7 @@ include ../../../mixins/components
 			}
 		}
 
-		$('.btn-browsetoggle').on('click', function (e) {
+		$('.js-btn-browsetoggle').on('click', function (e) {
 			e.preventDefault();
 			projectBrowseToggle();
 		});

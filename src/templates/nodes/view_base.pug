@@ -5,9 +5,8 @@
 	| {% block node_preview %}
 	| {% if node.picture %}
 	| {% if current_user.has_cap('subscriber') or node.permissions.world %}
-	section#node-preview.node-preview.image.js-node-preview-image
-		img.node-preview-thumbnail#node-preview-thumbnail(
-			src="{{ node.picture.thumbnail('l', api=api) }}")
+	section.node-preview.image.js-node-preview-image
+		img.node-preview-thumbnail(src="{{ node.picture.thumbnail('l', api=api) }}")
 	| {% else %}
 	| {% include 'nodes/custom/_node_preview_forbidden.html' %}
 	| {% endif %}
@@ -15,19 +14,20 @@
 	| {% endblock node_preview %}
 
 	| {% block node_details %}
-	section.node-details-container
 
-		| {# NAME #}
-		h4.pt-4.px-4 {{node.name}}
+	| {# NAME #}
+	section.px-4
+		h4.pt-4.mb-3 {{node.name}}
 
 		| {# DESCRIPTION #}
 		| {% if node.description %}
-		.node-details-description.px-4
+		.node-details-description
 			| {{ node | markdowned('description') }}
 		| {% endif %}
 
 
-		| {# LICENSE #}
+	| {# LICENSE #}
+	section
 		| {% if node.properties.license_type %}
 		a.node-details-license(
 			href="https://creativecommons.org/licenses/",
@@ -41,80 +41,80 @@
 		| {% endif %}
 
 
-		| {# DETAILS #}
-		.node-details-meta
-			ul
-				| {% if node.has_method('PUT') and (node.properties.status != 'published') %}
-				li(class="status-{{ node.properties.status }}")
-					| {{ node.properties.status | undertitle }}
-				| {% endif %}
+	| {# DETAILS #}
+	section.node-details-meta
+		ul
+			| {% if node.has_method('PUT') and (node.properties.status != 'published') %}
+			li(class="status-{{ node.properties.status }}")
+				| {{ node.properties.status | undertitle }}
+			| {% endif %}
 
-				li(title="Author")
-					| {{ node.user.full_name }}
+			li(title="Author")
+				| {{ node.user.full_name }}
 
-				li(
-					title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
-					| {{ node._created | pretty_date }}
+			li(
+				title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
+				| {{ node._created | pretty_date }}
 
-				| {% if node.short_link %}
-				li.shared
-					a(href="{{ node.short_link }}")
-						i.pi-share
-						| Shared
-				| {% endif %}
+			| {% if node.short_link %}
+			li.shared
+				a(href="{{ node.short_link }}")
+					i.pi-share
+					| Shared
+			| {% endif %}
 
-				li.left-side
+			li.left-side
 
-				| {% if node.file %}
-				li(title="File size")
-					| {{ node.file.length | filesizeformat }}
-				li.js-type(title="File format")
-					| {{ node.file.content_type }}
-				| {% endif %}
+			| {% if node.file %}
+			li(title="File size")
+				| {{ node.file.length | filesizeformat }}
+			li.js-type(title="File format")
+				| {{ node.file.content_type }}
+			| {% endif %}
 
-				| {% if node.permissions.world %}
-				li.public(
-					data-toggle="tooltip",
-					data-placement="bottom",
-					title="Anybody can download. Share it!")
-					i.pi-lock-open
-					span Public
-				| {% endif %}
+			| {% if node.permissions.world %}
+			li.public(
+				data-toggle="tooltip",
+				data-placement="bottom",
+				title="Anybody can download. Share it!")
+				i.pi-lock-open
+				span Public
+			| {% endif %}
 
-				| {% block node_details_meta_extra %}{% endblock %}
+			| {% block node_details_meta_extra %}{% endblock %}
 
-				li.download
-					| {% if (current_user.has_cap('subscriber') or node.permissions.world) and (node.file or node.properties.files) %}
-					| {% block node_download %}
-					a(
-						title="Download {{ node.properties.content_type | undertitle }}",
-						href="{{ node.file.link }}",
-						download="{{ node.file.filename }}")
-						button.btn.btn-sm.btn-outline-primary.px-3(type="button")
-							i.pi-download.pr-2
-							| Download
-					| {% endblock node_download %}
-
-					| {% elif current_user.has_cap('can-renew-subscription') %}
-					a.btn.btn-success(
-						title="Renew your subscription to download",
-						target="_blank",
-						href="/renew")
-						i.pi-heart
-						| Renew Subscription
-
-					| {% elif current_user.is_authenticated %}
-					.btn.disabled
-						i.pi-lock
+			li.download
+				| {% if (current_user.has_cap('subscriber') or node.permissions.world) and (node.file or node.properties.files) %}
+				| {% block node_download %}
+				a(
+					title="Download {{ node.properties.content_type | undertitle }}",
+					href="{{ node.file.link }}",
+					download="{{ node.file.filename }}")
+					button.btn.btn-sm.btn-outline-primary.px-3(type="button")
+						i.pi-download.pr-2
 						| Download
+				| {% endblock node_download %}
 
-					| {% else %}
-					a.btn(
-						title="Login to download {{ node.properties.content_type | undertitle }}",
-						href="{{ url_for('users.login') }}")
-						i.pi-lock
-						| Download
-					| {% endif %}
+				| {% elif current_user.has_cap('can-renew-subscription') %}
+				a.btn.btn-success(
+					title="Renew your subscription to download",
+					target="_blank",
+					href="/renew")
+					i.pi-heart
+					| Renew Subscription
+
+				| {% elif current_user.is_authenticated %}
+				.btn.disabled
+					i.pi-lock
+					| Download
+
+				| {% else %}
+				a.btn(
+					title="Login to download {{ node.properties.content_type | undertitle }}",
+					href="{{ url_for('users.login') }}")
+					i.pi-lock
+					| Download
+				| {% endif %}
 
 	| {% endblock node_details %}
 

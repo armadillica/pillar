@@ -152,6 +152,15 @@ body.blog
 	display: none
 
 ul.project-edit-tools
+	li:not(.disabled)
+		.btn
+			background-color: $white
+
+			&:hover
+				border-color: $primary
+				background-color: $white
+				color: $primary
+
 	li
 		&.button-save
 			&.field-error
@@ -239,9 +248,6 @@ ul.project-edit-tools
 	background-color: white
 
 #node-container
-	background-color: white
-	flex: 1
-
 	/* For error messages (403) and other overlaid text*/
 	#node-overlay
 		z-index: $z-index-base + 2
@@ -515,7 +521,6 @@ section.node-preview
 	background-color: black
 	color: $color-text-light-primary
 	display: flex
-	flex: 1
 	justify-content: center
 	max-height: 500px
 	min-height: 200px
@@ -638,11 +643,6 @@ section.node-preview-forbidden
 	hr
 		opacity: .5
 
-section.node-details-container
-	background-color: white
-
-	&.project
-		padding-bottom: 15px
 
 /* Narrower details for about page (since it doesn't have navtree) */
 body.about

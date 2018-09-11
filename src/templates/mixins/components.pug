@@ -48,9 +48,8 @@ mixin nav-secondary-link()
 		a.nav-link&attributes(attributes)
 			block
 
-// {# Takes as argument the number of columns to use in this deck. 1-6 #}
-mixin card-deck(columns)
-	.card-deck.card-padless(class='card-' + columns + '-columns')&attributes(attributes)
+mixin card-deck()
+	.card-deck.card-padless.card-deck-responsive()&attributes(attributes)
 		if block
 			block
 		else
@@ -73,6 +72,10 @@ mixin list-asset(name, url, image, type, date)
 		if image
 			.embed-responsive.embed-responsive-16by9
 				.card-img-top.embed-responsive-item(style="background-image: url(" + image + ")")
+		else
+			.card-img-top
+				.card-icon
+					i.pi-blender
 
 		.card-body.py-2
 			if name

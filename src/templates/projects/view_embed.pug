@@ -1,54 +1,45 @@
+| {% from '_macros/_asset_list_item.html' import asset_list_item %}
 include ../mixins/components
 
 | {% block body %}
-#node-container
-	section.node-preview.project
-		| {% if header_video_file %}
-		video#videoplayer.video-js.vjs-fluid(
-			controls,
-			data-setup="{}",
-			preload="auto",
-			poster="{% if header_video_node.picture %}{{ header_video_node.picture.thumbnail('l', api=api) }}{% endif %}")
-			| {% for source in header_video_file.variations %}
-			source(
-				src="{{ source.link | safe }}",
-				type="{{ source.content_type }}")
-			| {% endfor %}
-			p.vjs-no-js.
-				To view this video please enable JavaScript, and consider upgrading to a web browser that
-				<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-		| {% elif project.picture_header %}
-		a(href="{{ url_for( 'projects.view', project_url=project.url) }}")
-			img.header(src="{{ project.picture_header.thumbnail('l', api=api) }}")
+section.node-preview.project
+	| {% if header_video_file %}
+	video#videoplayer.video-js.vjs-fluid(
+		controls,
+		data-setup="{}",
+		preload="auto",
+		poster="{% if header_video_node.picture %}{{ header_video_node.picture.thumbnail('l', api=api) }}{% endif %}")
+		| {% for source in header_video_file.variations %}
+		source(
+			src="{{ source.link | safe }}",
+			type="{{ source.content_type }}")
+		| {% endfor %}
+		p.vjs-no-js.
+			To view this video please enable JavaScript, and consider upgrading to a web browser that
+			<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+	| {% elif project.picture_header %}
+	a(href="{{ url_for( 'projects.view', project_url=project.url) }}")
+		img.header(src="{{ project.picture_header.thumbnail('l', api=api) }}")
+	| {% endif %}
+
+section.px-4
+	h4.pt-4
+		a.text-muted(href="{{ url_for( 'projects.view', project_url=project.url) }}")
+			| {{ project.name }}
+
+	| {% if project.description %}
+	.node-details-description
+		| {{ project | markdowned('description') }}
+	| {% endif %}
+
+	| {% if activity_stream %}
+	+card-deck(class="pt-4 border-top")
+		| {% for n in activity_stream %}
+		| {% if n.node_type not in ['comment'] %}
+		| {{ asset_list_item(n, current_user) }}
 		| {% endif %}
-
-	section.node-details-container.project
-		h2.px-3.pt-3
-			a.text-muted(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
-
-		| {% if project.description %}
-		.node-details-description
-			| {{ project | markdowned('description') }}
-		| {% endif %}
-
-		| {# Until we implement urls for pages
-		a.learn-more(href="{{ url_for( 'projects.view', project_url=project.url) }}") LEARN MORE
-		| #}
-
-		.p-4
-			| {% if activity_stream %}
-			+card-deck(3)
-				| {% for n in activity_stream %}
-				| {% if n.node_type not in ['comment'] %}
-				+list-asset(
-					'{{ n.name }}',
-					'{{ url_for_node(node=n) }}',
-					"{% if n.picture %}{{ n.picture.thumbnail('l', api=api) }}{% endif %}",
-					"{% if n.properties.content_type %}{{ n.properties.content_type | undertitle }}{% else %}{{ n.node_type | undertitle }}{% endif %}",
-					"{{ n._updated | pretty_date }}")(class="{% if n.permissions.world %}free{% endif %}")
-				| {% endif %}
-				| {% endfor %}
-			| {% endif %}
+		| {% endfor %}
+	| {% endif %}
 
 include _scripts
 
