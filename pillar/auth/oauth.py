@@ -1,8 +1,9 @@
 import abc
-import attr
 import json
 import logging
+import typing
 
+import attr
 from rauth import OAuth2Service
 from flask import current_app, url_for, request, redirect, session, Response
 
@@ -15,6 +16,8 @@ class OAuthUserResponse:
 
     id = attr.ib(validator=attr.validators.instance_of(str))
     email = attr.ib(validator=attr.validators.instance_of(str))
+    access_token = attr.ib(validator=attr.validators.instance_of(str))
+    scopes: typing.List[str] = attr.ib(validator=attr.validators.instance_of(list))
 
 
 class OAuthError(Exception):
@@ -127,6 +130,7 @@ class OAuthSignIn(metaclass=abc.ABCMeta):
 
 class BlenderIdSignIn(OAuthSignIn):
     provider_name = 'blender-id'
+    scopes = ['email', 'badge']
 
     def __init__(self):
         from urllib.parse import urljoin
@@ -145,7 +149,7 @@ class BlenderIdSignIn(OAuthSignIn):
 
     def authorize(self):
         return redirect(self.service.get_authorize_url(
-            scope='email',
+            scope=' '.join(self.scopes),
             response_type='code',
             redirect_uri=self.get_callback_url())
         )
@@ -159,7 +163,11 @@ class BlenderIdSignIn(OAuthSignIn):
 
         session['blender_id_oauth_token'] = access_token
         me = oauth_session.get('user').json()
-        return OAuthUserResponse(str(me['id']), me['email'])
+
+        # Blender ID doesn't tell us which scopes were granted by the user, so
+        # for now assume we got all the scopes we requested.
+        # (see https://github.com/jazzband/django-oauth-toolkit/issues/644)
+        return OAuthUserResponse(str(me['id']), me['email'], access_token, self.scopes)
 
 
 class FacebookSignIn(OAuthSignIn):
@@ -189,7 +197,7 @@ class FacebookSignIn(OAuthSignIn):
         me = oauth_session.get('me?fields=id,email').json()
         # TODO handle case when user chooses not to disclose en email
         # see https://developers.facebook.com/docs/graph-api/reference/user/
-        return OAuthUserResponse(me['id'], me.get('email'))
+        return OAuthUserResponse(me['id'], me.get('email'), '', [])
 
 
 class GoogleSignIn(OAuthSignIn):
@@ -217,4 +225,4 @@ class GoogleSignIn(OAuthSignIn):
         oauth_session = self.make_oauth_session()
 
         me = oauth_session.get('userinfo').json()
-        return OAuthUserResponse(str(me['id']), me['email'])
+        return OAuthUserResponse(str(me['id']), me['email'], '', [])

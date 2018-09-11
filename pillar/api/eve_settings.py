@@ -391,6 +391,13 @@ tokens_schema = {
             'type': 'string',
         },
     },
+
+    # OAuth scopes granted to this token.
+    'oauth_scopes': {
+        'type': 'list',
+        'default': [],
+        'schema': {'type': 'string'},
+    }
 }
 
 files_schema = {

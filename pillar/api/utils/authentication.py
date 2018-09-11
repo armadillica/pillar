@@ -235,8 +235,14 @@ def hash_auth_token(token: str) -> str:
     return base64.b64encode(digest).decode('ascii')
 
 
-def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False,
-                org_roles: typing.Set[str] = frozenset()):
+def store_token(user_id,
+                token: str,
+                token_expiry,
+                oauth_subclient_id=False,
+                *,
+                org_roles: typing.Set[str] = frozenset(),
+                oauth_scopes: typing.Optional[typing.List[str]] = None,
+                ):
     """Stores an authentication token.
 
     :returns: the token document from MongoDB
@@ -253,6 +259,8 @@ def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False,
         token_data['is_subclient_token'] = True
     if org_roles:
         token_data['org_roles'] = sorted(org_roles)
+    if oauth_scopes:
+        token_data['oauth_scopes'] = oauth_scopes
 
     r, _, _, status = current_app.post_internal('tokens', token_data)
 

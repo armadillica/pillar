@@ -69,7 +69,7 @@ class AuthenticationTests(AbstractPillarTest):
     @responses.activate
     def test_validate_token__force_not_logged_in(self):
         from pillar.api.utils import authentication as auth
-        from pillar.auth import UserClass, current_user
+        from pillar.auth import UserClass
 
         with self.app.test_request_context():
             from flask import g
@@ -160,8 +160,7 @@ class AuthenticationTests(AbstractPillarTest):
     def test_save_own_user(self):
         """Tests that a user can't change their own fields."""
 
-        from pillar.api.utils import authentication as auth
-        from pillar.api.utils import PillarJSONEncoder, remove_private_keys
+        from pillar.api.utils import remove_private_keys
 
         user_id = self.create_user(roles=['subscriber'], token='token')
 
