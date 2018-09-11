@@ -38,6 +38,7 @@ class UserClass(flask_login.UserMixin):
         self.groups: typing.List[str] = []  # NOTE: these are stringified object IDs.
         self.group_ids: typing.List[bson.ObjectId] = []
         self.capabilities: typing.Set[str] = set()
+        self.nodes: dict = {}  # see the 'nodes' key in eve_settings.py::user_schema.
 
         # Lazily evaluated
         self._has_organizations: typing.Optional[bool] = None
@@ -56,6 +57,11 @@ class UserClass(flask_login.UserMixin):
         user.email = db_user.get('email') or ''
         user.username = db_user.get('username') or ''
         user.full_name = db_user.get('full_name') or ''
+
+        # Be a little more specific than just db_user['nodes']
+        user.nodes = {
+            'view_progress': db_user.get('nodes', {}).get('view_progress', {}),
+        }
 
         # Derived properties
         user.objectid = str(user.user_id or '')

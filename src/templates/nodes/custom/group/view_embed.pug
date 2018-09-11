@@ -61,7 +61,6 @@
 				| {% if child.properties.status != 'published' %}
 				span.status {{ child.properties.status }}
 				| {% endif %}
-
 				span.type
 					| {% if child.properties.content_type %}
 					| {{ child.properties.content_type | undertitle }} ·
@@ -110,6 +109,17 @@
 
 			.list-node-children-item-name
 				span {{ child.name }}
+
+			| {% if child.properties.content_type == 'video' %}
+			| {% set progress = current_user.nodes.view_progress[child._id] %}
+			| {% set progress_in_percent = progress.progress_in_percent %}
+			| {% set progress_done = progress.done %}
+			//- TODO(Pablo): turn this into a nice progress bar
+			span.progress(class="{% if progress.done %}done{% endif %}")
+				| {{ progress_in_percent }}%
+			| {% else %}
+			span.jemoeder no progress because not video
+			| {% endif %}
 
 		| 	{% endfor %}
 		| {% else %}
