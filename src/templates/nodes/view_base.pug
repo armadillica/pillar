@@ -26,24 +26,20 @@
 		| {% endif %}
 
 
-	| {# LICENSE #}
-	section
-		| {% if node.properties.license_type %}
-		a.node-details-license(
-			href="https://creativecommons.org/licenses/",
-			target="_blank")
-			span.type
-				i(class="pi-license-{{ node.properties.license_type }}")
-				| License <span>{{ node.properties.license_type }}</span>
-			| {% if node.properties.license_notes %}
-			| &mdash; {{ node.properties.license_notes }}
-			| {% endif %}
-		| {% endif %}
-
-
 	| {# DETAILS #}
-	section.node-details-meta
-		ul
+	section.node-details-meta.px-4.py-2
+		ul.list-unstyled.m-0
+			| {% if node.properties.license_type %}
+			li
+				a.node-details-license(
+					href="https://creativecommons.org/licenses/",
+					target="_blank",
+					title="{{ node.properties.license_type }} {% if node.properties.license_notes %}{{ node.properties.license_notes }}{% endif %}",
+					data-toggle="tooltip",
+					data-placement="top")
+					i(class="pi-license-{{ node.properties.license_type }}")
+			| {% endif %}
+
 			| {% if node.has_method('PUT') and (node.properties.status != 'published') %}
 			li(class="status-{{ node.properties.status }}")
 				| {{ node.properties.status | undertitle }}
@@ -62,6 +58,8 @@
 					i.pi-share
 					| Shared
 			| {% endif %}
+
+
 
 			li.left-side
 

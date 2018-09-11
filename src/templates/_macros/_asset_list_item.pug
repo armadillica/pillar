@@ -4,38 +4,50 @@ include ../mixins/components
 
 | {% set node_type = asset.properties.content_type if asset.properties.content_type else asset.node_type %}
 
-+list-asset(
-	'{{ asset.name }}',
-	'{{ url_for_node(node=asset) }}',
-	"{% if asset.picture %}{{ asset.picture.thumbnail('m', api=api) }}{% endif %}",
-	"{{ node_type | undertitle }}",
-	"{{ asset._created | pretty_date }}")(
-	class="js-item-open pr-0 mx-0 mb-2 {% if asset.permissions.world %}free{% endif %}",
+a.card.asset.card-image-fade.pr-0.mx-0.mb-2(
+	class="js-item-open {% if asset.permissions.world %}free{% endif %}",
 	data-node_id="{{ asset._id }}",
-	title="{{ asset.name }}")
+	title="{{ asset.name }}",
+	href='{{ url_for_node(node=asset) }}')
+	.embed-responsive.embed-responsive-16by9
+		| {% if asset.picture %}
+		.card-img-top.embed-responsive-item(style="background-image: url({{ asset.picture.thumbnail('m', api=api) }})")
+		| {% else %}
+		.card-img-top.card-icon.embed-responsive-item
+			i(class="pi-{{ node_type }}")
+		| {% endif %}
 
-	| {% if asset.properties.content_type == 'video' %}
+	.card-body.py-2.d-flex.flex-column
+		.card-title.mb-1.font-weight-bold
+			| {{ asset.name }}
 
-	| {% set view_progress = current_user.nodes.view_progress %}
-	| {% if asset._id in view_progress %}
-	| {% set progress = current_user.nodes.view_progress[asset._id] %}
-	| {% set progress_in_percent = progress.progress_in_percent %}
-	| {% set progress_done = progress.done %}
-	| {% endif %}
+		ul.card-text.list-unstyled.d-flex.text-black-50.mt-auto
+			li.pr-2 {{ node_type | undertitle }}
+			li {{ asset._created | pretty_date }}
 
-	| {% if progress %}
-	.progress.rounded-0
-		.progress-bar(
-			role="progressbar",
-			style="width: {{ progress_in_percent }}%;",
-			aria-valuenow="{{ progress_in_percent }}",
-			aria-valuemin="0",
-			aria-valuemax="100")
 
-	| {% if progress.done %}
-	.card-label WATCHED
-	| {% endif %}
-	| {% endif %} {# endif progress #}
-	| {% endif %} {# endif video #}
+		| {% if asset.properties.content_type == 'video' %}
+
+		| {% set view_progress = current_user.nodes.view_progress %}
+		| {% if asset._id in view_progress %}
+		| {% set progress = current_user.nodes.view_progress[asset._id] %}
+		| {% set progress_in_percent = progress.progress_in_percent %}
+		| {% set progress_done = progress.done %}
+		| {% endif %}
+
+		| {% if progress %}
+		.progress.rounded-0
+			.progress-bar(
+				role="progressbar",
+				style="width: {{ progress_in_percent }}%;",
+				aria-valuenow="{{ progress_in_percent }}",
+				aria-valuemin="0",
+				aria-valuemax="100")
+
+		| {% if progress.done %}
+		.card-label WATCHED
+		| {% endif %}
+		| {% endif %} {# endif progress #}
+		| {% endif %} {# endif video #}
 
 | {% endmacro %}

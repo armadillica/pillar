@@ -29,21 +29,11 @@
 	.card-body
 		@extend .px-0
 
-.card-stretch
-	.card-body
-		@extend .d-flex
-		@extend .flex-column
-
-		.card-text
-			@extend .mt-auto
 
 .card-image-fade
-	.card-img-top
-		opacity: .9
-
 	&:hover
 		.card-img-top
-			opacity: 1
+			opacity: .9
 
 
 .card.asset
@@ -71,14 +61,22 @@
 		background-size: cover
 		background-position: center
 
+
 	.progress
 		height: 4px
 		position: absolute
 		top: -4px
 		width: 100%
 
-	&.group
+.card-img-top
+	&.card-icon
+		display: flex
+		align-items: center
+		justify-content: center
+		font-size: 2em
 
+		i
+			opacity: .2
 
 .card-label
 	background-color: rgba($black, .5)

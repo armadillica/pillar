@@ -39,12 +39,10 @@ $pillar-font-path: "../font" !default
     display: inline-block
     text-decoration: inherit
     width: 1em
-    margin-right: .2em
     text-align: center
     font-variant: normal
     text-transform: none
     line-height: 1em
-    margin-left: .2em
     -webkit-font-smoothing: antialiased
     -moz-osx-font-smoothing: grayscale
     position: relative
@@ -55,10 +53,28 @@ $pillar-font-path: "../font" !default
 .pi-svnman:before
   content: '\f1c0'
 
+/* Assets */
+.pi-group
+  @extend .pi-folder
+.pi-video
+  @extend .pi-film-thick
+.pi-file
+  @extend .pi-file-archive
+.pi-asset
+  @extend .pi-file-archive
+.pi-group_texture
+  @extend .pi-folder-texture
+.pi-post
+  @extend .pi-newspaper
+.pi-page
+  @extend .pi-document
+
+/* License */
 .pi-license-cc-zero:before
   content: '\e85a'
 .pi-license-cc-sa:before
   content: '\e858'
+  top: 1px
 .pi-license-cc-nd:before
   content: '\e859'
 .pi-license-cc-nc:before

@@ -68,25 +68,6 @@ mixin card()
 			p No card content defined.
 
 mixin list-asset(name, url, image, type, date)
-	a(href=url).card.asset.card-stretch.card-image-fade&attributes(attributes)
-		if image
-			.embed-responsive.embed-responsive-16by9
-				.card-img-top.embed-responsive-item(style="background-image: url(" + image + ")")
-		else
-			.card-img-top
-				.card-icon
-					i.pi-blender
+	if block
+		block
 
-		.card-body.py-2
-			if name
-				.card-title.mb-1.font-weight-bold
-					=name
-
-			if block
-				block
-
-			ul.card-text.list-unstyled.d-flex.text-black-50
-				if type
-					li.pr-2=type
-				if date
-					li=date

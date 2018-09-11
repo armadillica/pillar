@@ -24,6 +24,7 @@ body.blog
 	flex-direction: row
 	min-height: 300px
 	position: relative
+	overflow-y: auto
 	z-index: $z-index-base
 
 	+media-xs
@@ -215,9 +216,6 @@ ul.project-edit-tools
 					&:hover
 						color: $primary
 						text-decoration: none
-
-					i
-						padding-right: 10px
 
 	/* Icons per asset type. */
 	i
@@ -520,11 +518,11 @@ section.node-preview
 	align-items: center
 	background-color: black
 	color: $color-text-light-primary
-	display: flex
+	// display: flex
 	justify-content: center
 	max-height: 500px
-	min-height: 200px
-	overflow: hidden
+	// min-height: 200px
+	// overflow: hidden
 
 	iframe
 		width: 100%
@@ -545,6 +543,8 @@ section.node-preview
 
 	&.image
 		cursor: zoom-in
+		display: flex
+		overflow: hidden
 
 	&.video
 		background-color: black
@@ -671,26 +671,16 @@ section.node-details-container
 	+node-details-description
 
 .node-details-meta
-	background-color: $color-background-light
-	border-bottom: thin solid $color-background
-	display: flex
-	flex-direction: column
-	font-weight: lighter
-	padding: 10px 20px
-
 	> ul
 		align-items: center
 		display: flex
-		list-style-type: none
-		margin: 0
-		padding: 0
 
 		> li
 			align-items: baseline
 			color: $color-text-dark-secondary
 			display: flex
-			padding-left: 10px
-			margin-left: 10px
+			padding-left: 5px
+			margin-left: 5px
 
 			&:first-child
 				margin-left: 0
@@ -765,33 +755,19 @@ section.node-details-container
 					color: $color-text-dark
 
 .node-details-license
-	align-items: center
-	border-bottom: thin solid $color-background
-	color: $color-text-dark
-	display: flex
-	padding: 5px 20px
-	font-size: $font-size-sm
-
+	color: $color-text-dark-secondary
 	&:hover
-		color: $color-text-dark
+		color: $primary
 
-	span.type
-		i
-			color: $color-text-dark-primary
-			font-size: 1.2rem
-			margin-left: -5px
-			padding-right: 10px
+	i
+		font-size: 1.2rem
+		margin-left: -15px
 
-			&:after
-				top: 2px
-				left: -22px
-				position: relative
-			&:before
-				top: 2px
-				position: relative
+		&:after
+			left: -22px
+			position: relative
+			top: 1px
 
-		span
-			text-transform: uppercase
 
 section.node-details-container
 	&.storage
