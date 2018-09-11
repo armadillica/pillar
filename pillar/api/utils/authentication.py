@@ -200,7 +200,7 @@ def remove_token(token: str):
     tokens_coll = current_app.db('tokens')
     token_hashed = hash_auth_token(token)
 
-    # TODO: remove matching on unhashed tokens once all tokens have been hashed.
+    # TODO: remove matching on hashed tokens once all hashed tokens have expired.
     lookup = {'$or': [{'token': token}, {'token_hashed': token_hashed}]}
     del_res = tokens_coll.delete_many(lookup)
     log.debug('Removed token %r, matched %d documents', token, del_res.deleted_count)
@@ -212,7 +212,7 @@ def find_token(token, is_subclient_token=False, **extra_filters):
     tokens_coll = current_app.db('tokens')
     token_hashed = hash_auth_token(token)
 
-    # TODO: remove matching on unhashed tokens once all tokens have been hashed.
+    # TODO: remove matching on hashed tokens once all hashed tokens have expired.
     lookup = {'$or': [{'token': token}, {'token_hashed': token_hashed}],
               'is_subclient_token': True if is_subclient_token else {'$in': [False, None]},
               'expire_time': {"$gt": utcnow()}}
@@ -246,7 +246,7 @@ def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False,
 
     token_data = {
         'user': user_id,
-        'token_hashed': hash_auth_token(token),
+        'token': token,
         'expire_time': token_expiry,
     }
     if oauth_subclient_id:

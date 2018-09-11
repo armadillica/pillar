@@ -368,11 +368,11 @@ tokens_schema = {
     },
     'token': {
         'type': 'string',
-        'required': False,
+        'required': True,
     },
     'token_hashed': {
         'type': 'string',
-        'required': True,
+        'required': False,
     },
     'expire_time': {
         'type': 'datetime',

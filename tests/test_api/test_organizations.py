@@ -989,8 +989,6 @@ class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
             ]})
 
     def _test_api(self, headers: dict, env: dict):
-        from pillar.api.utils.authentication import hash_auth_token
-
         self.mock_blenderid_validate_happy()
         # This should check the IP of the user agains the organization IP ranges and update the
         # user in the database.
@@ -1003,7 +1001,7 @@ class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
         tokens_coll = self.app.db('tokens')
         token = tokens_coll.find_one({
             'user': bson.ObjectId(me['_id']),
-            'token_hashed': hash_auth_token('usertoken'),
+            'token': 'usertoken',
         })
         self.assertEqual(self.org_roles, set(token['org_roles']))
 
@@ -1033,7 +1031,6 @@ class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
         self._test_api_remote_addr('192.168.3.254')
 
     def _test_web_forwarded_for(self, ip_addr: str, ip_roles: typing.Set[str]):
-        from pillar.api.utils.authentication import hash_auth_token
         from pillar import auth
         self.mock_blenderid_validate_happy()
 
@@ -1053,7 +1050,7 @@ class IPRangeLoginRolesTest(AbstractIPRangeSingleOrgTest):
         tokens_coll = self.app.db('tokens')
         token = tokens_coll.find_one({
             'user': bson.ObjectId(my_id),
-            'token_hashed': hash_auth_token('usertoken'),
+            'token': 'usertoken',
             'expire_time': {'$gt': datetime.datetime.now(tz_util.utc)},
         })
         self.assertEqual(ip_roles, set(token.get('org_roles', [])))

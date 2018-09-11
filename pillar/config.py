@@ -29,6 +29,7 @@ DEBUG = False
 SECRET_KEY = ''
 
 # Authentication token hashing key. If empty falls back to UTF8-encoded SECRET_KEY with a warning.
+# Not used to hash new tokens, but it is used to check pre-existing hashed tokens.
 AUTH_TOKEN_HMAC_KEY = b''
 
 # Authentication settings
