@@ -69,7 +69,7 @@ mixin card()
 			p No card content defined.
 
 mixin list-asset(name, url, image, type, date)
-	a(href=url, class=type).card.asset.card-stretch.card-image-fade&attributes(attributes)
+	a(href=url).card.asset.card-stretch.card-image-fade&attributes(attributes)
 		if image
 			.embed-responsive.embed-responsive-16by9
 				.card-img-top.embed-responsive-item(style="background-image: url(" + image + ")")

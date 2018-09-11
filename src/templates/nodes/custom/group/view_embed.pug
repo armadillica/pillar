@@ -1,3 +1,4 @@
+| {% from '_macros/_asset_video_progress.html' import video_progress_bar %}
 include ../../../mixins/components
 
 | {% block body %}
@@ -75,6 +76,7 @@ include ../../../mixins/components
 			| {% set node_type = child.properties.content_type if child.properties.content_type else child.node_type %}
 
 			| {% if child.properties.content_type == 'video' %}
+			| {% set view_progress = current_user.nodes.view_progress %}
 			| {% if child._id in view_progress %}
 			| {% set progress = current_user.nodes.view_progress[child._id] %}
 			| {% set progress_in_percent = progress.progress_in_percent %}
@@ -87,22 +89,16 @@ include ../../../mixins/components
 				'{{ url_for_node(node=child) }}',
 				"{% if child.picture %}{{ child.picture.thumbnail('m', api=api) }}{% endif %}",
 				"{{ node_type | undertitle }}",
-				"{{ child._updated | pretty_date }}")(
-				class="js-item-open pr-0 mx-0 mb-2 {% if child.permissions.world %}free{% endif %} {% if progress and progress.done %}done{% endif %}",
+				"{{ child._created | pretty_date }}")(
+				class="js-item-open pr-0 mx-0 mb-2 {% if child.permissions.world %}free{% endif %}",
 				data-node_id="{{ child._id }}",
 				title="{{ child.name }}")
 
-				| {% if progress %}
-				.progress.rounded-0
-					.progress-bar(
-						role="progressbar",
-						style="width: {{ progress_in_percent }}%;",
-						aria-valuenow="{{ progress_in_percent }}",
-						aria-valuemin="0",
-						aria-valuemax="100")
+				| {% if child.properties.content_type == 'video' %}
+				| {{ video_progress_bar(child, current_user) }}
 				| {% endif %}
 
-			| 	{% endfor %}
+			| {% endfor %}
 			| {% else %}
 			.list-node-children-container
 				.list-node-children-empty No items... yet!
