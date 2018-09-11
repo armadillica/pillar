@@ -1,142 +1,118 @@
+include ../../../mixins/components
+
 | {% block body %}
 #node-container
+	section.px-3.pt-3.d-flex
+		h4 {{node.name}}
 
-	section.node-details-container
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
-
-			.node-details-meta-actions
-				.btn-browsetoggle(
-					title="Toggle between list/grid view",
-					data-toggle="tooltip",
-					data-placement="top")
-					i.pi-list
+		.ml-auto
+			.btn.btn-sm.btn-browsetoggle(
+				title="Toggle between list/grid view",
+				data-toggle="tooltip",
+				data-placement="top")
+				i.pi-list
 
 	| {% if node.description %}
-	.node-details-description
+	section.node-details-description.p-3
 		| {{ node | markdowned('description') }}
 	| {% endif %}
 
-
-	section.node-children.group
-
+	section.container-fluid
 		| {% if children %}
-		| 	{% for child in children %}
+		+card-deck(4)(class="pr-3 pl-1")
+			| 	{% for child in children %}
+			| {# Browse type: List #}
+			a(
+				href="{{ url_for_node(node=child) }}",
+				data-node_id="{{ child._id }}",
+				class="js-item-open list-node-children-item browse-list")
+				.list-node-children-item-thumbnail
 
-		| {# Browse type: List #}
-		a(
-			href="{{ url_for_node(node=child) }}",
-			data-node_id="{{ child._id }}",
-			class="item_icon list-node-children-item browse-list")
-			.list-node-children-item-thumbnail
-
-				| {% if child.picture %}
-				img(
-					src="{{ child.picture.thumbnail('t', api=api)}} ")
-				| {% else %}
-				.cloud-logo
-					i.pi-blender-cloud
-				| {% endif %}
-
-				| {% if child.permissions.world %}
-				.list-node-children-item-ribbon
-					span free
-				| {% endif %}
-
-				.list-node-children-item-thumbnail-icon
-					| {% if child.properties.content_type and child.properties.content_type == 'video' %}
-					i.pi-play
-					| {% elif child.properties.content_type and child.properties.content_type == 'image' %}
-					i.pi-image
-					| {% elif child.properties.content_type and child.properties.content_type == 'file' %}
-					i.pi-file-archive
+					| {% if child.picture %}
+					img(
+						src="{{ child.picture.thumbnail('t', api=api)}} ")
 					| {% else %}
-					i.pi-folder
+					.cloud-logo
+						i.pi-blender-cloud
 					| {% endif %}
 
-			.list-node-children-item-name {{ child.name }}
-
-			.list-node-children-item-meta
-				| {% if child.properties.status != 'published' %}
-				span.status {{ child.properties.status }}
-				| {% endif %}
-				span.type
-					| {% if child.properties.content_type %}
-					| {{ child.properties.content_type | undertitle }} ·
-					| {% elif child.node_type == 'group' %}
-					| Folder ·
-					| {% else %}
-					| {{ child.node_type | undertitle }} ·
+					| {% if child.permissions.world %}
+					.list-node-children-item-ribbon
+						span free
 					| {% endif %}
 
-				span(title="Created on {{ child._created }}") {{ child._created | pretty_date }}
+					.list-node-children-item-thumbnail-icon
+						| {% if child.properties.content_type and child.properties.content_type == 'video' %}
+						i.pi-play
+						| {% elif child.properties.content_type and child.properties.content_type == 'image' %}
+						i.pi-image
+						| {% elif child.properties.content_type and child.properties.content_type == 'file' %}
+						i.pi-file-archive
+						| {% else %}
+						i.pi-folder
+						| {% endif %}
 
-		| {# Browse type: Icon #}
-		a(href="{{ url_for_node(node=child) }}",
-			data-node_id="{{ child._id }}",
-			title="{{ child.name }}",
-			class="item_icon list-node-children-item browse-icon {% if child.picture %}has-picture{% endif %}")
-			.list-node-children-item-thumbnail
+				.list-node-children-item-name {{ child.name }}
 
-				| {% if child.picture %}
-				img(
-					src="{{ child.picture.thumbnail('m', api=api)}} ")
-				| {% else %}
-				.cloud-logo
-					i.pi-blender-cloud
-				| {% endif %}
-
-				.list-node-children-item-thumbnail-icon
-					| {% if child.properties.content_type and child.properties.content_type == 'video' %}
-					i.pi-play
-					| {% elif child.properties.content_type and child.properties.content_type == 'image' %}
-					i.pi-image
-					| {% elif child.properties.content_type and child.properties.content_type == 'file' %}
-					i.pi-file-archive
-					| {% else %}
-					i.pi-folder
+				.list-node-children-item-meta
+					| {% if child.properties.status != 'published' %}
+					span.status {{ child.properties.status }}
 					| {% endif %}
 
-				| {% if child.properties.status != 'published' %}
-				.list-node-children-item-status {{ child.properties.status }}
-				| {% endif %}
+					span.type
+						| {% if child.properties.content_type %}
+						| {{ child.properties.content_type | undertitle }} ·
+						| {% elif child.node_type == 'group' %}
+						| Folder ·
+						| {% else %}
+						| {{ child.node_type | undertitle }} ·
+						| {% endif %}
 
-				| {% if child.permissions.world %}
-				.list-node-children-item-ribbon
-					span free
-				| {% endif %}
+					span(title="Created on {{ child._created }}") {{ child._created | pretty_date }}
 
-			.list-node-children-item-name
-				span {{ child.name }}
+			| {# Browse type: Icon #}
+
+			| {% set node_type = child.properties.content_type if child.properties.content_type else child.node_type %}
 
 			| {% if child.properties.content_type == 'video' %}
-			|     {% set view_progress = current_user.nodes.view_progress %}
-			|     {% if child._id in view_progress %}
-			|         {% set progress = current_user.nodes.view_progress[child._id] %}
-			|         {% set progress_in_percent = progress.progress_in_percent %}
-			|         {% set progress_done = progress.done %}
-			//- TODO(Pablo): turn this into a nice progress bar
-			span.progress(class="{% if progress.done %}done{% endif %}")
-				|     {{ progress_in_percent }}%
-			|     {% else %}
-			span.jemoeder no progress because never watched
-			|     {% endif %}
-			| {% else %}
-			span.jemoeder no progress because not video
+			| {% if child._id in view_progress %}
+			| {% set progress = current_user.nodes.view_progress[child._id] %}
+			| {% set progress_in_percent = progress.progress_in_percent %}
+			| {% set progress_done = progress.done %}
+			| {% endif %}
 			| {% endif %}
 
-		| 	{% endfor %}
-		| {% else %}
-		.list-node-children-container
-			.list-node-children-empty No items... yet!
+			+list-asset(
+				'{{ child.name }}',
+				'{{ url_for_node(node=child) }}',
+				"{% if child.picture %}{{ child.picture.thumbnail('m', api=api) }}{% endif %}",
+				"{{ node_type | undertitle }}",
+				"{{ child._updated | pretty_date }}")(
+				class="js-item-open pr-0 mx-0 mb-2 {% if child.permissions.world %}free{% endif %} {% if progress and progress.done %}done{% endif %}",
+				data-node_id="{{ child._id }}",
+				title="{{ child.name }}")
+
+				| {% if progress %}
+				.progress.rounded-0
+					.progress-bar(
+						role="progressbar",
+						style="width: {{ progress_in_percent }}%;",
+						aria-valuenow="{{ progress_in_percent }}",
+						aria-valuemin="0",
+						aria-valuemax="100")
+				| {% endif %}
+
+			| 	{% endfor %}
+			| {% else %}
+			.list-node-children-container
+				.list-node-children-empty No items... yet!
 		| {% endif %}
 
 	script.
 		// Generate GA pageview
 		ga('send', 'pageview', location.pathname);
 
-		$('a.item_icon').unbind("click")
+		$('a.js-item-open').unbind("click")
 						.click(function(e){
 			e.preventDefault();
 

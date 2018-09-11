@@ -18,14 +18,11 @@
 	section.node-details-container
 
 		| {# NAME #}
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
-
+		h4.pt-4.px-4 {{node.name}}
 
 		| {# DESCRIPTION #}
 		| {% if node.description %}
-		.node-details-description#node-description
+		.node-details-description.px-4
 			| {{ node | markdowned('description') }}
 		| {% endif %}
 

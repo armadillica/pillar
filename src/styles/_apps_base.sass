@@ -429,15 +429,15 @@ $loader-bar-height: 2px
 		visibility: visible
 
 		&:before
-			animation: loader-bar-slide 2.5s linear infinite
+			animation: loader-bar-slide 2s linear infinite
 
 @keyframes loader-bar-slide
 	from
-		left: -$loader-bar-width
-		width: 0%
+		left: -($loader-bar-width / 2)
+		width: 3%
 
 	50%
-		width: 30%
+		width: 20%
 
 	70%
 		width: 70%

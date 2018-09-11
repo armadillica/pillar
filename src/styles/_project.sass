@@ -141,13 +141,8 @@ body.blog
 
 /* Header with name and node edit tools */
 #project_context-header
-	transition: box-shadow 250ms ease-in-out
+	right: 0
 	z-index: $z-index-base + 3
-	left: 0
-	width: 100%
-
-	&.is-offset
-		box-shadow: 0 0 25px rgba(black, .2)
 
 
 /* Edit Asset buttons */
@@ -242,11 +237,6 @@ ul.project-edit-tools
 	flex: 1
 	height: 100%
 	background-color: white
-
-// Add padding to project_context because project_context-header is fixed on top.
-// It contains the New, Edit, Save Changes, etc. buttons.
-#project_context-header+#project_context
-	padding-top: $project_header-height
 
 #node-container
 	background-color: white
@@ -604,12 +594,6 @@ section.node-preview
 							color: $color-warning
 							margin-right: 10px
 
-	&.group
-		align-items: center
-		display: flex
-		padding: 20px
-		position: relative
-
 	&.project
 		background-color: black
 		width: 100%
@@ -670,8 +654,7 @@ body.about
 .node-title
 	+project-node-title
 
-section.node-details-container,
-section.node-preview.group
+section.node-details-container
 	position: relative
 
 	.node-details-header
@@ -684,24 +667,8 @@ section.node-preview.group
 			width: 100%
 			max-width: 100%
 
-	.node-details-meta-actions
-		margin-left: auto
-
-		.btn-browsetoggle
-			+button(lighten($color-background-nav, 20%), 3px)
-			width: 48px
-			text-align: center
-			padding: 2px 4px
-			i
-				font-size: 1.3em
-				padding: 0
-				margin: 0
-
-
 .node-details-description
 	+node-details-description
-	padding-left: 20px
-	padding-right: 20px
 
 .node-details-meta
 	background-color: $color-background-light
@@ -1028,12 +995,6 @@ a.learn-more
 						.what
 							text-transform: capitalize
 
-
-section.node-children
-	&.group, &.storage
-		flex: 1
-		padding: 10px 0 25px 20px
-		+clearfix
 
 .list-node-children-container
 	position: relative

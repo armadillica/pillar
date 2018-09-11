@@ -50,7 +50,7 @@ mixin nav-secondary-link()
 
 // {# Takes as argument the number of columns to use in this deck. 1-6 #}
 mixin card-deck(columns)
-	.card-deck.card-padless(class='card-' + columns + '-columns')
+	.card-deck.card-padless(class='card-' + columns + '-columns')&attributes(attributes)
 		if block
 			block
 		else
@@ -69,21 +69,21 @@ mixin card()
 			p No card content defined.
 
 mixin list-asset(name, url, image, type, date)
-	a(href=url).card.asset&attributes(attributes)
+	a(href=url, class=type).card.asset.card-stretch.card-image-fade&attributes(attributes)
 		if image
 			.embed-responsive.embed-responsive-16by9
 				.card-img-top.embed-responsive-item(style="background-image: url(" + image + ")")
 
-		.card-body
+		.card-body.py-2
 			if name
-				h6.card-title.mb-1
+				.card-title.mb-1.font-weight-bold
 					=name
+
+			if block
+				block
 
 			ul.card-text.list-unstyled.d-flex.text-black-50
 				if type
 					li.pr-2=type
 				if date
 					li=date
-
-		if block
-			block

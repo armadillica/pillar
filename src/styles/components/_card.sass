@@ -1,33 +1,65 @@
 .card-deck
 	// Custom, as of bootstrap 4.1.3 there is no way to do this.
 	&.card-3-columns
-		.card
-			min-width: 30%
-			max-width: 30%
+		@extend .row
 
-	.card.asset
-		margin-left: 10px
-		margin-right: 10px
+		.card
+			@extend .col-md-4
+
+			+media-lg
+				background: green
+
+	&.card-4-columns
+		@extend .row
+
+		.card
+			@extend .col-md-3
+			+media-xs
+				flex: 1 0 50%
+				max-width: 50%
+
+			+media-sm
+				flex: 1 0 33%
+				max-width: 33%
+
+			+media-md
+				flex: 1 0 25%
+				max-width: 25%
+
+			+media-lg
+				flex: 1 0 20%
+				max-width: 20%
+
 
 .card-padless
 	.card
-		border: none
+		@extend .border-0
 
 	.card-body
-		padding: 15px 0
+		@extend .px-0
 
-.card-fade
-	img
-		opacity: .8
-		transition: opacity ease-in-out 150ms
+.card-stretch
+	.card-body
+		@extend .d-flex
+		@extend .flex-column
+
+		.card-text
+			@extend .mt-auto
+
+.card-image-fade
+	.card-img-top
+		opacity: .9
 
 	&:hover
-		img
+		.card-img-top
 			opacity: 1
 
 
 .card.asset
 	color: $color-text
+
+	&:hover
+		text-decoration: none
 
 	&.free
 		overflow: hidden
@@ -38,8 +70,21 @@
 			padding: 2px 50px
 
 	.card-body
-		font-size: $font-size-xs
+		position: relative // for placing the progress
+
+		.card-text
+			font-size: $font-size-xs
 
 	.card-img-top
+		background-color: $color-background
 		background-size: cover
 		background-position: center
+
+	.progress
+		height: 3px
+		position: absolute
+		top: -3px
+		width: 100%
+
+.progress-bar
+	background-color: $primary
