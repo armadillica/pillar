@@ -140,7 +140,7 @@ class BlenderIdSignIn(OAuthSignIn):
             client_secret=self.consumer_secret,
             authorize_url=urljoin(base_url, 'oauth/authorize'),
             access_token_url=urljoin(base_url, 'oauth/token'),
-            base_url='%s/api/' % base_url
+            base_url=urljoin(base_url, 'api/'),
         )
 
     def authorize(self):

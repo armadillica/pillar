@@ -3,6 +3,7 @@
 import copy
 import datetime
 import json
+from urllib.parse import urljoin
 
 import pillar.tests.common_test_data as ctd
 import responses
@@ -761,7 +762,7 @@ class UserCreationTest(AbstractPillarTest):
                     'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
 
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json=bid_resp,
                       status=200)
 
@@ -791,7 +792,7 @@ class UserCreationTest(AbstractPillarTest):
                              'id': ctd.BLENDER_ID_TEST_USERID},
                     'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json=bid_resp,
                       status=200)
 

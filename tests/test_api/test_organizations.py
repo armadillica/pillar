@@ -1,5 +1,6 @@
 import datetime
 import typing
+from urllib.parse import urljoin
 
 import bson
 from bson import tz_util
@@ -757,7 +758,7 @@ class UserCreationTest(AbstractPillarTest):
                                'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
 
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json=blender_id_response,
                       status=200)
 

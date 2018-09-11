@@ -11,11 +11,7 @@ import pathlib
 import sys
 import typing
 import unittest.mock
-
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib.parse import urlencode
+from urllib.parse import urlencode, urljoin
 
 from bson import ObjectId, tz_util
 
@@ -433,7 +429,7 @@ class AbstractPillarTest(TestMinimal):
         """Sets up Responses to mock unhappy validation flow."""
 
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json={'status': 'fail'},
                       status=403)
 
@@ -441,7 +437,7 @@ class AbstractPillarTest(TestMinimal):
         """Sets up Responses to mock happy validation flow."""
 
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json=BLENDER_ID_USER_RESPONSE,
                       status=200)
 

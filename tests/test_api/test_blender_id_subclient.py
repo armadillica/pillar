@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 import json
+from urllib.parse import urljoin
 
 import responses
 from bson import ObjectId
@@ -19,7 +20,7 @@ class BlenderIdSubclientTest(AbstractPillarTest):
     def test_store_scst_new_user_without_full_name(self):
 
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json={'status': 'success',
                             'user': {'email': TEST_EMAIL_ADDRESS,
                                      'full_name': None,
