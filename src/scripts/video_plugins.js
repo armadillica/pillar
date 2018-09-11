@@ -106,7 +106,7 @@ var VideoProgressPlugin = videojs.extend(Plugin, {
 
     inspect_progress: function(force_report) {
         // Don't report seeking when paused, only report actual playback.
-        if (this.player.paused()) return;
+        if (!force_report && this.player.paused()) return;
 
         let now_in_ms = new Date().getTime();
         if (!force_report && now_in_ms - this.last_wallclock_time_ms < PROGRESS_RELAXING_TIME_MSEC) {
