@@ -152,6 +152,14 @@ users_schema = {
         },
     },
 
+    'badges': {
+        'type': 'dict',
+        'schema': {
+            'html': {'type': 'string'},  # HTML fetched from Blender ID.
+            'expires': {'type': 'datetime'},  # When we should fetch it again.
+        },
+    },
+
     # Properties defined by extensions. Extensions should use their name (see the
     # PillarExtension.name property) as the key, and are free to use whatever they want as value,
     # but we suggest a dict for future extendability.

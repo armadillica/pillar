@@ -349,15 +349,21 @@ class AbstractPillarTest(TestMinimal):
             with flask.request_started.connected_to(signal_handler, self.app):
                 yield
 
-    def create_valid_auth_token(self, user_id, token='token'):
+    # TODO: rename to 'create_auth_token' now that 'expire_in_days' can be negative.
+    def create_valid_auth_token(self,
+                                user_id: ObjectId,
+                                token='token',
+                                *,
+                                oauth_scopes: typing.Optional[typing.List[str]]=None,
+                                expire_in_days=1) -> dict:
         from pillar.api.utils import utcnow
 
-        future = utcnow() + datetime.timedelta(days=1)
+        future = utcnow() + datetime.timedelta(days=expire_in_days)
 
         with self.app.test_request_context():
             from pillar.api.utils import authentication as auth
 
-            token_data = auth.store_token(user_id, token, future, None)
+            token_data = auth.store_token(user_id, token, future, oauth_scopes=oauth_scopes)
 
         return token_data
 

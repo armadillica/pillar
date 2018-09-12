@@ -70,6 +70,9 @@ def oauth_callback(provider):
     db_user = find_user_in_db(user_info, provider=provider)
     db_id, status = upsert_user(db_user)
 
+    # TODO(Sybren): If the user doesn't have any badges, but the access token
+    # does have 'badge' scope, we should fetch the badges in the background.
+
     if oauth_user.access_token:
         # TODO(Sybren): make nr of days configurable, or get from OAuthSignIn subclass.
         token_expiry = utcnow() + datetime.timedelta(days=15)

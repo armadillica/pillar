@@ -1,6 +1,8 @@
+from collections import defaultdict
+import datetime
 import os.path
 from os import getenv
-from collections import defaultdict
+
 import requests.certs
 
 # Certificate file for communication with other systems.
@@ -204,7 +206,17 @@ CELERY_BEAT_SCHEDULE = {
         'schedule': 600,  # every N seconds
         'args': ('gcs', 100)
     },
+    'refresh-blenderid-badges': {
+        'task': 'pillar.celery.badges.sync_badges_for_users',
+        'schedule': 600,  # every N seconds
+        'args': (540, ),  # time limit in seconds, keep shorter than 'schedule'
+    }
 }
+
+# Badges will be re-fetched every timedelta.
+# TODO(Sybren): A proper value should be determined after we actually have users with badges.
+BLENDER_ID_BADGE_EXPIRY = datetime.timedelta(hours=4)
+
 
 # Mapping from user role to capabilities obtained by users with that role.
 USER_CAPABILITIES = defaultdict(**{
