@@ -6,19 +6,6 @@ body.workshops
 	#project-container
 		+container-behavior
 
-body.blog
-	background-color: white
-
-	#project_nav,
-	#project_nav-container
-		+media-md
-			width: $project_nav-width * 1.4
-		+media-sm
-			width: $project_nav-width * 1.1
-		+media-xs
-			width: 100%
-		width: $project_nav-width * 1.5
-
 #project-container
 	display: flex
 	flex-direction: row
@@ -38,10 +25,18 @@ body.blog
 		flex-direction: column-reverse
 
 
+#project_nav,
 #project_nav-container
 	+media-lg
-		width: $project_nav-width * 1.33
+		width: $project_nav-width-lg
+	+media-sm
+		width: $project_nav-width-sm
+	+media-xs
+		width: $project_nav-width-xs
 
+	width: $project_nav-width
+
+#project_nav-container
 	+media-xs
 		display: block
 		width: 100%
@@ -50,8 +45,6 @@ body.blog
 
 	position: fixed
 	z-index: $z-index-base + 5
-	width: $project_nav-width
-
 
 #project_sidebar
 	width: $project-sidebar-width
@@ -77,18 +70,6 @@ body.blog
 			width: $project-sidebar-width
 			height: $project-sidebar-width
 			position: relative
-
-			+media-xs
-				border-bottom: 2px solid transparent
-			+media-sm
-				border-bottom: 2px solid transparent
-			+media-md
-				border-left: 2px solid transparent
-			+media-lg
-				border-left: 2px solid transparent
-
-			&:first-child
-				border-top: thin solid transparent
 
 			&:hover,
 			&.active
@@ -124,10 +105,11 @@ body.blog
 /* Container for navigation on the left */
 #project_nav
 	+media-lg
-		width: $project_nav-width * 1.33
-
+		width: $project_nav-width-lg
+	+media-sm
+		width: $project_nav-width-sm
 	+media-xs
-		width: initial
+		width: $project_nav-width-xs
 
 	display: block
 	left: 0
