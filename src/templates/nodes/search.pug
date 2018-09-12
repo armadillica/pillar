@@ -1,4 +1,7 @@
 | {% extends 'layout.html' %}
+| {% from '_macros/_asset_list_item.html' import asset_list_item %}
+include ../mixins/components
+
 | {% block page_title %}Search{% if project %} {{ project.name }}{% endif %}{% endblock %}
 
 | {% block head %}
@@ -28,61 +31,46 @@ script.
 	document.body.dataset["projectId"] = "{{project._id}}";
 | {% endif %}
 
-#search-container.d-flex
+| {% if project %}
+#project_sidebar.bg-white
+	ul.project-tabs.p-0
+		li.tabs-browse(
+			title="Browse",
+			data-toggle="tooltip",
+			data-placement="right")
+			a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+				i.pi-folder
 
-	| {% if project %}
-	#project_sidebar.bg-white
-		ul.project-tabs.p-0
-			li.tabs-browse(
-				title="Browse",
-				data-toggle="tooltip",
-				data-placement="right")
-				a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-					i.pi-folder
+		li.tabs-search.active(
+			title="Search",
+			data-toggle="tooltip",
+			data-placement="right")
+			a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
+				i.pi-search
+| {% endif %}
 
-			li.tabs-search.active(
-				title="Search",
-				data-toggle="tooltip",
-				data-placement="right")
-				a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
-					i.pi-search
-	| {% endif %}
 
-	#search-sidebar
+#search-container.d-flex(class="{% if project %}search-project{% endif %}")
+	.search-list
 		input.search-field.p-2.bg-white(
-				type="text",
-				name="q",
-				id="q",
-				autocomplete="off",
-				spellcheck="false",
-				autocorrect="false",
-				placeholder="Search by Title, Type...")
+			type="text",
+			name="q",
+			id="q",
+			autocomplete="off",
+			spellcheck="false",
+			autocorrect="false",
+			placeholder="Search by Title, Type...")
 
-		.search-list-filters
-			.filter-list
-				| View as:
-				ul.filter-list
-					li.filter-list-type.grid(
-						title="Browse as grid",
-						data-list-type="grid")
-						i.pi-layout
-					li.filter-list-type.list(
-						title="Browse as list",
-						data-list-type="list")
-						i.pi-list
+		#pagination.mt-3
 
-			#accordion.panel-group.accordion(role="tablist", aria-multiselectable="true")
-				#facets
+		//- #accordion.panel-group.accordion(role="tablist", aria-multiselectable="true")
+		#facets
 
-		#pagination
+		#stats.search-list-stats
 
-		.search-list-stats
-			#stats
+		+card-deck()(id='hits', class="h-100 m-0 pt-3 pr-2 card-deck-horizontal")
 
-	#search-list.h-100
-		#hits
-
-	#search-details.border-left
+	#search-details.border-left.search-details
 		#search-error
 		#search-hit-container.w-100
 
@@ -90,12 +78,12 @@ script.
 | {% raw %}
 // Facet template
 script(type="text/template", id="facet-template")
-	.panel.panel-default
+	.card
 		a(data-toggle='collapse', data-parent='#accordion', href='#filter_{{ facet }}', aria-expanded='true', aria-controls='filter_{{ facet }}')
-			.panel-heading(role='tab')
-				.panel-title {{ title }}
-		.panel-collapse.collapse.in(id='filter_{{ facet }}', role='tabpanel', aria-labelledby='headingOne')
-			.panel-body
+			.card-header(role='tab')
+				.card-title {{ title }}
+		.collapse.show(id='filter_{{ facet }}', role='tabpanel', aria-labelledby='headingOne')
+			.card-body
 				| {{#values}}
 				a.facet_link.toggleRefine(
 					class='{{#refined}}refined{{/refined}}',
@@ -110,35 +98,33 @@ script(type="text/template", id="facet-template")
 
 // Hit template
 script(type="text/template", id="hit-template")
-	.search-hit(data-hit-id='{{ objectID }}')
-		.search-hit-thumbnail
+	a.card.asset.card-image-fade.pl-0.mx-0.mb-1(
+		data-hit-id='{{ objectID }}',
+		href="/nodes/{{ objectID }}/redir",
+		class="js-search-hit {{#is_free}}free{{/is_free}}")
+		.embed-responsive.embed-responsive-16by9
 			| {{#picture}}
-			img(src="{{{ picture }}}")
+			.card-img-top.embed-responsive-item(style="background-image: url({{{ picture }}})")
 			| {{/picture}}
 			| {{^picture}}
-			.search-hit-thumbnail-icon
+			.card-img-top.card-icon.embed-responsive-item
 				| {{#media}}
 				i(class="pi-{{{ media }}}")
 				| {{/media}}
 				| {{^media}}
-				i.dark(class="pi-{{{ node_type }}}")
+				i(class="pi-{{{ node_type }}}")
 				| {{/media}}
 			| {{/picture}}
-			| {{#is_free}}
-			.search-hit-ribbon
-				span free
-			| {{/is_free}}
-		.search-hit-name
-			| {{ name }}
-		.search-hit-meta
-			span.project {{ project.name }}
-			span.node_type {{{ node_type }}}
-			| {{#media}}
-			span.media · {{{ media }}}
-			| {{/media}}
-			span.when {{{ created_at }}}
-			span.context
-				a(href="/nodes/{{ objectID }}/redir") view in context
+		.card-body.py-2.d-flex.flex-column
+			.card-title.mb-1.font-weight-bold
+				| {{ name }}
+
+			ul.card-text.list-unstyled.d-flex.text-black-50.mt-auto
+				li.pr-2.project {{ project.name }}
+				| {{#media}}
+				li.pr-2.text-capitalize {{{ media }}}
+				| {{/media}}
+				li.pr-2 {{{ created_at }}}
 
 
 // Pagination template
@@ -159,7 +145,6 @@ script(type="text/template", id="stats-template")
 | {% endblock %}
 
 | {% block footer_scripts %}
-script(src="//releases.flowplayer.org/6.0.5/flowplayer.min.js", async)
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/hogan.common-3.0.0.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/elasticsearch.min.js') }}")
 
@@ -182,17 +167,19 @@ script.
 		});
 	}
 
-	$('body').on('click', '.search-hit', function(){
+	$('body').on('click', '.js-search-hit', function(e){
+		e.preventDefault();
+
 		$('.loader-bar').removeClass('active').addClass('active');
 
 		displayNode($(this).data('hit-id'));
-		$('.search-hit').removeClass('active');
+		$('.js-search-hit').removeClass('active');
 		$(this).addClass('active');
 	});
 
-	// Remove focus from search input so that the click event bound to .search-hit
-	// can be fired on the first click.
-	$(searchList).hover(function(){
+	// Remove focus from search input so that the click event
+	// bound to .search-hit can be fired on the first click.
+	$('#search-list').hover(function(){
 		$('#q').blur();
 	});
 	$('#search-sidebar').hover(function(){
@@ -200,42 +187,6 @@ script.
 	});
 
 	/* UI Stuff */
-
-	/* List types, grid or list (default)*/
-	var uiListType = Cookies.getJSON('bcloud_ui');
-	var searchList = document.getElementById('search-list');
-
-	function uiSetListType(type){
-		$('.filter-list-type').removeClass('active');
-
-		if (type == 'grid'){
-			$(searchList).addClass('view-grid');
-			$('.filter-list-type.grid').addClass('active');
-		} else {
-			$(searchList).removeClass('view-grid');
-			$('.filter-list-type.list').addClass('active');
-		}
-	}
-
-	if (uiListType && uiListType.search_browse_type == 'grid'){
-		uiSetListType('grid');
-	} else {
-		uiSetListType('list');
-	}
-
-	$('.filter-list-type').on('click', function(){
-		if ($(this).attr('data-list-type') == 'grid'){
-			uiSetListType('grid');
-			setJSONCookie('bcloud_ui', 'search_browse_type', 'grid');
-		} else {
-			uiSetListType('list');
-			setJSONCookie('bcloud_ui', 'search_browse_type', 'list');
-		}
-	});
-
-	/* Hide site-wide search, kinda confusing */
-	$('.search-input').hide();
-
 	/* Resize container so we can have custom scrollbars */
 	container_offset = $('#search-container').offset();
 

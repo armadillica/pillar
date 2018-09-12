@@ -21,6 +21,25 @@
 				flex: 1 0 20%
 				max-width: 20%
 
+	&.card-deck-horizontal
+		@extend .flex-column
+		flex-wrap: initial
+
+		.card
+			@extend .w-100
+			@extend .flex-row
+			flex: initial
+			max-width: 100%
+
+			.card-img-top
+				@extend .rounded-0
+
+			.embed-responsive
+				@extend .mr-2
+				max-width: 120px
+
+		.card-body
+			@extend .overflow-hidden
 
 .card-padless
 	.card
@@ -90,3 +109,8 @@
 	position: absolute
 	padding: 1px 5px
 	z-index: 1
+
+.card
+	&.active
+		.card-title
+			color: $primary

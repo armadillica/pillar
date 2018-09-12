@@ -25,7 +25,6 @@ a.card.asset.card-image-fade.pr-0.mx-0.mb-2(
 			li.pr-2 {{ node_type | undertitle }}
 			li {{ asset._created | pretty_date }}
 
-
 		| {% if asset.properties.content_type == 'video' %}
 
 		| {% set view_progress = current_user.nodes.view_progress %}
