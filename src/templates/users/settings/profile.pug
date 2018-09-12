@@ -1,5 +1,23 @@
 | {% extends 'users/settings/page.html' %}
 | {% block settings_page_title %}{{ _("Profile") }}{% endblock %}
+| {% block css %}
+| {{ super() }}
+//- TODO(Pablo): properly style badges, and move the styling to one of the SASS files.
+style.
+	ul.blender-id-badges {
+		padding-left: 0;
+		list-style-type: none;
+		display: flex;
+	}
+	ul.blender-id-badges > li {
+		margin: 0;
+		padding: 0;
+	}
+	ul.blender-id-badges > li a {
+		display: block;
+		padding: 0.4em;
+	}
+| {% endblock %}
 | {% block settings_page_content %}
 .settings-form
 	form#settings-form(method='POST', action="{{url_for('settings.profile')}}")
@@ -21,6 +39,12 @@
 			.form-group
 				| {{ _("Change your full name, email, and password at") }} #[a(href="https://www.blender.org/id/settings/profile",target='_blank') Blender ID].
 
+			| {% if current_user.badges_html %}
+			.form-group
+				p Your Blender ID badges:
+				| {{ current_user.badges_html|safe }}
+				p.hint-text Note that updates to these badges may take a few minutes to be visible here.
+			| {% endif %}
 		.right
 			.settings-avatar
 				a(href="https://gravatar.com/")

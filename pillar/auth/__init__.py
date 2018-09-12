@@ -39,6 +39,7 @@ class UserClass(flask_login.UserMixin):
         self.group_ids: typing.List[bson.ObjectId] = []
         self.capabilities: typing.Set[str] = set()
         self.nodes: dict = {}  # see the 'nodes' key in eve_settings.py::user_schema.
+        self.badges_html: str = ''
 
         # Lazily evaluated
         self._has_organizations: typing.Optional[bool] = None
@@ -57,6 +58,7 @@ class UserClass(flask_login.UserMixin):
         user.email = db_user.get('email') or ''
         user.username = db_user.get('username') or ''
         user.full_name = db_user.get('full_name') or ''
+        user.badges_html = db_user.get('badges', {}).get('html') or ''
 
         # Be a little more specific than just db_user['nodes']
         user.nodes = {
