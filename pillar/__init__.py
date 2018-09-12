@@ -477,10 +477,10 @@ class PillarServer(BlinkerCompatibleEve):
 
         # Pillar-defined Celery task modules:
         celery_task_modules = [
-            'pillar.celery.tasks',
-            'pillar.celery.search_index_tasks',
-            'pillar.celery.file_link_tasks',
             'pillar.celery.email_tasks',
+            'pillar.celery.file_link_tasks',
+            'pillar.celery.search_index_tasks',
+            'pillar.celery.tasks',
         ]
 
         # Allow Pillar extensions from defining their own Celery tasks.
