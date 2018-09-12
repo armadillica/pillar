@@ -47,6 +47,7 @@
 
 			li(title="Author")
 				| {{ node.user.full_name }}
+				| {{ node.user.badges.html|safe }}
 
 			li(
 				title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
