@@ -50,6 +50,35 @@ class AbstractSyncTest(AbstractPillarTest):
         self.sync_user1 = badge_sync.SyncUser(self.uid1, 'find-this-token-uid1', '1947')
         self.sync_user2 = badge_sync.SyncUser(self.uid2, 'find-this-token-uid2', '4488')
 
+    def _update_badge_expiry(self, delta_minutes1, delta_minutes2):
+        """Make badges of userN expire in delta_minutesN minutes."""
+        from pillar.api.utils import utcnow, remove_private_keys
+        now = utcnow()
+
+        # Do the update via Eve so that that flow is covered too.
+        with self.app.app_context():
+            users_coll = self.app.db('users')
+            db_user1 = users_coll.find_one(self.uid1)
+            db_user1['badges'] = {
+                'html': 'badge for user 1',
+                'expires': now + datetime.timedelta(minutes=delta_minutes1)
+            }
+            r, _, _, status = self.app.put_internal('users',
+                                                    remove_private_keys(db_user1),
+                                                    _id=self.uid1)
+        self.assertEqual(200, status, r)
+
+        with self.app.app_context():
+            db_user2 = users_coll.find_one(self.uid2)
+            db_user2['badges'] = {
+                'html': 'badge for user 2',
+                'expires': now + datetime.timedelta(minutes=delta_minutes2)
+            }
+            r, _, _, status = self.app.put_internal('users',
+                                                    remove_private_keys(db_user2),
+                                                    _id=self.uid2)
+        self.assertEqual(200, status, r)
+
 
 class FindUsersToSyncTest(AbstractSyncTest):
     def test_no_badge_fetched_yet(self):
@@ -57,33 +86,6 @@ class FindUsersToSyncTest(AbstractSyncTest):
         with self.app.app_context():
             found = set(badge_sync.find_users_to_sync())
         self.assertEqual({self.sync_user1, self.sync_user2}, found)
-
-    def _update_badge_expiry(self, delta_minutes1, delta_minutes2):
-        """Make badges of userN expire in delta_minutesN minutes."""
-        from pillar.api.utils import utcnow, remove_private_keys
-        now = utcnow()
-
-        # Do the update via Eve so that that flow is covered too.
-        users_coll = self.app.db('users')
-        db_user1 = users_coll.find_one(self.uid1)
-        db_user1['badges'] = {
-            'html': 'badge for user 1',
-            'expires': now + datetime.timedelta(minutes=delta_minutes1)
-        }
-        r, _, _, status = self.app.put_internal('users',
-                                                remove_private_keys(db_user1),
-                                                _id=self.uid1)
-        self.assertEqual(200, status, r)
-
-        db_user2 = users_coll.find_one(self.uid2)
-        db_user2['badges'] = {
-            'html': 'badge for user 2',
-            'expires': now + datetime.timedelta(minutes=delta_minutes2)
-        }
-        r, _, _, status = self.app.put_internal('users',
-                                                remove_private_keys(db_user2),
-                                                _id=self.uid2)
-        self.assertEqual(200, status, r)
 
     def test_badge_fetched_recently(self):
         from pillar import badge_sync
@@ -111,7 +113,6 @@ class FetchHTMLTest(AbstractSyncTest):
     @httpmock.activate
     def test_happy(self):
         from pillar import badge_sync
-        from pillar.api.utils import utcnow
 
         def check_request(request: requests.PreparedRequest):
             if request.headers['Authorization'] != 'Bearer find-this-token-uid1':
@@ -122,12 +123,7 @@ class FetchHTMLTest(AbstractSyncTest):
 
         with self.app.app_context():
             badge_html = badge_sync.fetch_badge_html(requests.Session(), self.sync_user1, 's')
-            expected_expire = utcnow() + self.app.config['BLENDER_ID_BADGE_EXPIRY']
-
-        self.assertEqual('твоја мајка', badge_html.html)
-        margin = datetime.timedelta(minutes=1)
-        self.assertLess(expected_expire - margin, badge_html.expires)
-        self.assertGreater(expected_expire + margin, badge_html.expires)
+        self.assertEqual('твоја мајка', badge_html)
 
     @httpmock.activate
     def test_internal_server_error(self):
@@ -147,7 +143,7 @@ class FetchHTMLTest(AbstractSyncTest):
                      body='', status=204)
         with self.app.app_context():
             badge_html = badge_sync.fetch_badge_html(requests.Session(), self.sync_user1, 's')
-        self.assertIsNone(badge_html)
+        self.assertEqual('', badge_html)
 
     @httpmock.activate
     def test_no_such_user(self):
@@ -157,7 +153,7 @@ class FetchHTMLTest(AbstractSyncTest):
                      body='Not Found', status=404)
         with self.app.app_context():
             badge_html = badge_sync.fetch_badge_html(requests.Session(), self.sync_user1, 's')
-        self.assertIsNone(badge_html)
+        self.assertEqual('', badge_html)
 
     @httpmock.activate
     def test_no_connection_possible(self):
@@ -193,3 +189,29 @@ class RefreshAllTest(AbstractSyncTest):
         # hit the time limit, before doing any call to Blender ID.
         with self.app.app_context():
             badge_sync.refresh_all_badges(timelimit=datetime.timedelta(seconds=-4))
+
+    @httpmock.activate
+    def test_remove_badges(self):
+        from pillar import badge_sync
+        from pillar.api.utils import utcnow
+
+        # Make sure the user has a badge before getting the 204 No Content from Blender ID.
+        self._update_badge_expiry(-10, 10)
+
+        httpmock.add('GET', 'http://id.local:8001/api/badges/1947/html/s',
+                     body='', status=204)
+
+        with self.app.app_context():
+            badge_sync.refresh_all_badges(
+                only_user_id=self.uid1,
+                timelimit=datetime.timedelta(seconds=4))
+            expected_expire = utcnow() + self.app.config['BLENDER_ID_BADGE_EXPIRY']
+
+            # Get directly from MongoDB because JSON doesn't support datetimes.
+            users_coll = self.app.db('users')
+            db_user1 = users_coll.find_one(self.uid1)
+
+        self.assertEqual('', db_user1['badges']['html'])
+        margin = datetime.timedelta(minutes=1)
+        self.assertLess(expected_expire - margin, db_user1['badges']['expires'])
+        self.assertGreater(expected_expire + margin, db_user1['badges']['expires'])

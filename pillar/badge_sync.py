@@ -77,7 +77,7 @@ def find_users_to_sync() -> typing.Iterable[SyncUser]:
 
 
 def fetch_badge_html(session: requests.Session, user: SyncUser, size: str) \
-        -> typing.Optional[BadgeHTML]:
+        -> str:
     """Fetch a Blender ID badge for this user.
 
     :param session:
@@ -99,30 +99,24 @@ def fetch_badge_html(session: requests.Session, user: SyncUser, size: str) \
 
     if resp.status_code == 204:
         my_log.debug('No badges for user %s', user.user_id)
-        return None
+        return ''
     if resp.status_code == 403:
         my_log.warning('Tried fetching %s for user %s but received a 403: %s',
                        url, user.user_id, resp.text)
-        return None
+        return ''
     if resp.status_code == 400:
         my_log.warning('Blender ID did not accept our GET request at %s for user %s: %s',
                        url, user.user_id, resp.text)
-        return None
+        return ''
     if resp.status_code == 500:
         my_log.warning('Blender ID returned an internal server error on %s for user %s, '
                        'aborting all badge refreshes: %s', url, user.user_id, resp.text)
         raise StopRefreshing()
     if resp.status_code == 404:
         my_log.warning('Blender ID has no user %s for our user %s', user.bid_user_id, user.user_id)
-        return None
+        return ''
     resp.raise_for_status()
-
-    my_log.debug('Received new badge HTML from %s for user %s', url, user.user_id)
-    badge_expiry = badge_expiry_config()
-    return BadgeHTML(
-        html=resp.text,
-        expires=utcnow() + badge_expiry,
-    )
+    return resp.text
 
 
 def refresh_all_badges(only_user_id: typing.Optional[bson.ObjectId] = None, *,
@@ -164,18 +158,22 @@ def refresh_all_badges(only_user_id: typing.Optional[bson.ObjectId] = None, *,
             my_log.debug('Skipping user %s', user_info.user_id)
             continue
         try:
-            badge_info = fetch_badge_html(session, user_info, 's')
+            badge_html = fetch_badge_html(session, user_info, 's')
         except StopRefreshing:
             my_log.error('Blender ID has internal problems, stopping badge refreshing at user %s',
                          user_info)
             break
 
+        update = {'badges': {
+            'html': badge_html,
+            'expires': utcnow() + badge_expiry,
+        }}
         num_updates += 1
         my_log.info('Updating badges HTML for Blender ID %s, user %s',
                     user_info.bid_user_id, user_info.user_id)
         if not dry_run:
             result = users_coll.update_one({'_id': user_info.user_id},
-                                           {'$set': {'badges': badge_info._asdict()}})
+                                           {'$set': update})
             if result.matched_count != 1:
                 my_log.warning('Unable to update badges for user %s', user_info.user_id)
     my_log.info('Updated badges of %d users%s', num_updates, ' (dry-run)' if dry_run else '')
