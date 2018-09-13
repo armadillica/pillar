@@ -107,6 +107,19 @@ gulp.task('scripts_concat_tutti', function() {
 });
 
 
+/* Simply move these vendor scripts from node_modules. */
+gulp.task('scripts_move_vendor', function(done) {
+
+    let toMove = [
+    'node_modules/video.js/dist/video.min.js',
+    ];
+
+    gulp.src(toMove)
+    .pipe(gulp.dest(destination.js + '/vendor/'));
+    done();
+});
+
+
 // While developing, run 'gulp watch'
 gulp.task('watch',function() {
     // Only listen for live reloads if ran with --livereload
@@ -143,4 +156,5 @@ gulp.task('default', tasks.concat([
     'templates',
     'scripts',
     'scripts_concat_tutti',
+    'scripts_move_vendor',
 ]));
