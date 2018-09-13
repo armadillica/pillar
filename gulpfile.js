@@ -92,19 +92,6 @@ gulp.task('scripts_concat_tutti', function() {
         .pipe(gulpif(argv.livereload, livereload()));
 });
 
-gulp.task('scripts_concat_markdown', function() {
-    gulp.src('src/scripts/markdown/**/*.js')
-        .pipe(gulpif(enabled.failCheck, plumber()))
-        .pipe(gulpif(enabled.maps, sourcemaps.init()))
-        .pipe(concat("markdown.min.js"))
-        .pipe(gulpif(enabled.uglify, uglify()))
-        .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
-        .pipe(gulpif(enabled.chmod, chmod(644)))
-        .pipe(gulp.dest(destination.js))
-        .pipe(gulpif(argv.livereload, livereload()));
-});
-
-
 // Combine all needed Bootstrap JavaScript into a single file.
 gulp.task('scripts_concat_bootstrap', function() {
 
@@ -139,7 +126,6 @@ gulp.task('watch',function() {
     gulp.watch('src/templates/**/*.pug',['templates']);
     gulp.watch('src/scripts/*.js',['scripts']);
     gulp.watch('src/scripts/tutti/**/*.js',['scripts_concat_tutti']);
-    gulp.watch('src/scripts/markdown/**/*.js',['scripts_concat_markdown']);
 });
 
 // Erases all generated files in output directories.
@@ -164,6 +150,5 @@ gulp.task('default', tasks.concat([
     'templates',
     'scripts',
     'scripts_concat_tutti',
-    'scripts_concat_markdown',
     'scripts_concat_bootstrap',
 ]));
