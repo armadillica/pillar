@@ -32,6 +32,7 @@ var destination = {
 
 var source = {
     bootstrap: 'node_modules/bootstrap/',
+    jquery: 'node_modules/jquery/',
     popper: 'node_modules/popper.js/'
 }
 
@@ -78,35 +79,26 @@ gulp.task('scripts', function() {
 });
 
 
-/* Collection of scripts in src/scripts/tutti/ to merge into tutti.min.js */
-/* Since it's always loaded, it's only for functions that we want site-wide */
+/* Collection of scripts in src/scripts/tutti/ to merge into tutti.min.js
+ * Since it's always loaded, it's only for functions that we want site-wide.
+ * It also includes jQuery and Bootstrap (and its dependency popper), since
+ * the site doesn't work without it anyway.*/
 gulp.task('scripts_concat_tutti', function() {
-    gulp.src('src/scripts/tutti/**/*.js')
-        .pipe(gulpif(enabled.failCheck, plumber()))
-        .pipe(gulpif(enabled.maps, sourcemaps.init()))
-        .pipe(concat("tutti.min.js"))
-        .pipe(gulpif(enabled.uglify, uglify()))
-        .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
-        .pipe(gulpif(enabled.chmod, chmod(644)))
-        .pipe(gulp.dest(destination.js))
-        .pipe(gulpif(argv.livereload, livereload()));
-});
-
-// Combine all needed Bootstrap JavaScript into a single file.
-gulp.task('scripts_concat_bootstrap', function() {
 
     toUglify = [
+        source.jquery    + 'dist/jquery.min.js',
         source.popper    + 'dist/umd/popper.min.js',
         source.bootstrap + 'js/dist/index.js',
         source.bootstrap + 'js/dist/util.js',
         source.bootstrap + 'js/dist/tooltip.js',
         source.bootstrap + 'js/dist/dropdown.js',
+        'src/scripts/tutti/**/*.js'
     ];
 
     gulp.src(toUglify)
         .pipe(gulpif(enabled.failCheck, plumber()))
         .pipe(gulpif(enabled.maps, sourcemaps.init()))
-        .pipe(concat("bootstrap.min.js"))
+        .pipe(concat("tutti.min.js"))
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(gulpif(enabled.chmod, chmod(644)))
@@ -127,6 +119,7 @@ gulp.task('watch',function() {
     gulp.watch('src/scripts/*.js',['scripts']);
     gulp.watch('src/scripts/tutti/**/*.js',['scripts_concat_tutti']);
 });
+
 
 // Erases all generated files in output directories.
 gulp.task('cleanup', function() {
@@ -150,5 +143,4 @@ gulp.task('default', tasks.concat([
     'templates',
     'scripts',
     'scripts_concat_tutti',
-    'scripts_concat_bootstrap',
 ]));
