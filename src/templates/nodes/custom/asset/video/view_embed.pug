@@ -91,7 +91,30 @@ script(type="text/javascript").
 			'fetch_progress_url': fetch_progress_url,
 		});
 
+		this.endcard({
+			getRelatedContent: getRelatedContent
+		});
+
 		{% endif %}
+	});
+
+	function getRelatedContent(callback) {
+			var el = document.createElement('div');
+			el.className  = 'end-card-content';
+			el.innerHTML  = '<h4><button class="js-video-play my-3 px-5 btn btn-video-overlay"><i class="pi-play"></i> Play Again</button></h4>';
+			el.innerHTML += '<button class="js-video-loop px-4 btn btn-sm btn-video-overlay"><i class="pi-back"></i> Loop</button>';
+			setTimeout(function(){
+					callback([el])
+			}, 0);
+	}
+
+	$('body').on('click', '.js-video-play', function(){
+		videoPlayer.play();
+	});
+
+	$('body').on('click', '.js-video-loop', function(){
+		videoPlayerToggleLoop(videoPlayer, videoPlayerLoopButton);
+		videoPlayer.play();
 	});
 
 	// Generic utility to add-buttons to the player.

@@ -1365,3 +1365,28 @@ video::-webkit-media-text-track-display
 			position: absolute
 			bottom: 3em
 			left: 0.5em
+
+
+#player-endcard
+	background-color: rgba($black, .5)
+	bottom: 0
+	font-size: 1.5em
+	left: 0
+	position: absolute
+	right: 0
+	top: 0
+	z-index: 1
+
+	#related-content,
+	.end-card-content
+		@extend .align-items-center
+		@extend .d-flex
+		@extend .flex-column
+		@extend .h-100
+		@extend .justify-content-center
+
+	.btn-video-overlay
+		border: thin solid $white
+
+		&:hover
+			background-color: rgba($white, .5)
