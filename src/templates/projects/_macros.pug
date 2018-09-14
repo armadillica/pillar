@@ -9,7 +9,7 @@ include ../mixins/components
 | {% elif project.category == 'film' %}
 | {% set category_url = url_for('cloud.open_projects') %}
 | {% else %}
-| {% set category_url = url_for('main.index') %}
+| {% set category_url = url_for('main.homepage') %}
 | {% endif %}
 
 +nav-secondary()
