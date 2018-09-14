@@ -94,13 +94,31 @@ def share_node(node_id):
 @blueprint.route('/tagged/<tag>')
 def tagged(tag=''):
     """Return all tagged nodes of public projects as JSON."""
+    from pillar.auth import current_user
 
     # We explicitly register the tagless endpoint to raise a 404, otherwise the PATCH
     # handler on /api/nodes/<node_id> will return a 405 Method Not Allowed.
     if not tag:
         raise wz_exceptions.NotFound()
 
-    return _tagged(tag)
+    # Build the (cached) list of tagged nodes
+    agg_list = _tagged(tag)
+
+    # If the user is anonymous, no more information is needed and we return
+    if current_user.is_anonymous:
+        return jsonify(agg_list)
+
+    # If the user is authenticated, attach view_progress for video assets
+    view_progress = current_user.nodes['view_progress']
+    for node in agg_list:
+        node_id = str(node['_id'])
+        # View progress should be added only for nodes of type 'asset' and
+        # with content_type 'video', only if the video was already in the watched
+        # list for the current user.
+        if node_id in view_progress:
+            node['view_progress'] = view_progress[node_id]
+
+    return jsonify(agg_list)
 
 
 def _tagged(tag: str):
@@ -129,7 +147,8 @@ def _tagged(tag: str):
 
         {'$sort': {'_created': -1}}
     ])
-    return jsonify(list(agg))
+
+    return list(agg)
 
 
 def generate_and_store_short_code(node):

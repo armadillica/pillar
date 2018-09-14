@@ -479,61 +479,65 @@ class TextureSortFilesTest(AbstractPillarTest):
 
 
 class TaggedNodesTest(AbstractPillarTest):
-    def test_tagged_nodes_api(self):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+
+        self.pid, _ = self.ensure_project_exists()
+        self.file_id, _ = self.ensure_file_exists()
+        self.uid = self.create_user()
+
         from pillar.api.utils import utcnow
+        self.fake_now = utcnow()
+
+    def test_tagged_nodes_api(self):
         from datetime import timedelta
 
-        pid, _ = self.ensure_project_exists()
-        file_id, _ = self.ensure_file_exists()
-        uid = self.create_user()
-
-        now = utcnow()
         base_node = {
             'name': 'Just a node name',
-            'project': pid,
+            'project': self.pid,
             'description': '',
             'node_type': 'asset',
-            'user': uid,
+            'user': self.uid,
         }
         base_props = {'status': 'published',
-                      'file': file_id,
+                      'file': self.file_id,
                       'content_type': 'video',
                       'order': 0}
         # No tags, should never be returned.
         self.create_node({
-            '_created': now,
+            '_created': self.fake_now,
             'properties': base_props,
             **base_node})
         # Empty tag list, should never be returned.
         self.create_node({
-            '_created': now + timedelta(seconds=1),
+            '_created': self.fake_now + timedelta(seconds=1),
             'properties': {'tags': [], **base_props},
             **base_node})
         # Empty string as tag, should never be returned.
         self.create_node({
-            '_created': now + timedelta(seconds=1),
+            '_created': self.fake_now + timedelta(seconds=1),
             'properties': {'tags': [''], **base_props},
             **base_node})
         nid_single_tag = self.create_node({
-            '_created': now + timedelta(seconds=2),
+            '_created': self.fake_now + timedelta(seconds=2),
             # 'एनिमेशन' is 'animation' in Hindi.
             'properties': {'tags': ['एनिमेशन'], **base_props},
             **base_node,
         })
         nid_double_tag = self.create_node({
-            '_created': now + timedelta(hours=3),
+            '_created': self.fake_now + timedelta(hours=3),
             'properties': {'tags': ['एनिमेशन', 'rigging'], **base_props},
             **base_node,
         })
         nid_other_tag = self.create_node({
             '_deleted': False,
-            '_created': now + timedelta(days=4),
+            '_created': self.fake_now + timedelta(days=4),
             'properties': {'tags': ['producción'], **base_props},
             **base_node,
         })
         # Matching tag but deleted node, should never be returned.
         self.create_node({
-            '_created': now + timedelta(seconds=1),
+            '_created': self.fake_now + timedelta(seconds=1),
             '_deleted': True,
             'properties': {'tags': ['एनिमेशन'], **base_props},
             **base_node})
@@ -556,3 +560,76 @@ class TaggedNodesTest(AbstractPillarTest):
         with self.app.app_context():
             invalid_url = flask.url_for('nodes_api.tagged', tag='')
             self.get(invalid_url, expected_status=404)
+
+    def test_tagged_nodes_asset_video_with_progress_api(self):
+        from datetime import timedelta
+        from pillar.auth import current_user
+
+        base_node = {
+            'name': 'Spring hair rig setup',
+            'project': self.pid,
+            'description': '',
+            'node_type': 'asset',
+            'user': self.uid,
+        }
+        base_props = {'status': 'published',
+                      'file': self.file_id,
+                      'content_type': 'video',
+                      'order': 0}
+
+        # Create one node of type asset video
+        nid_single_tag = self.create_node({
+            '_created': self.fake_now + timedelta(seconds=2),
+            # 'एनिमेशन' is 'animation' in Hindi.
+            'properties': {'tags': ['एनिमेशन'], **base_props},
+            **base_node,
+        })
+
+        # Create another node
+        self.create_node({
+            '_created': self.fake_now + timedelta(seconds=2),
+            # 'एनिमेशन' is 'animation' in Hindi.
+            'properties': {'tags': ['एनिमेशन'], **base_props},
+            **base_node,
+        })
+
+        # Add video watch progress for the self.uid user
+        with self.app.app_context():
+            users_coll = self.app.db('users')
+            # Define video progress
+            progress_in_sec = 333
+            video_progress = {
+                'progress_in_sec': progress_in_sec,
+                'progress_in_percent': 70,
+                'done': False,
+                'last_watched': self.fake_now + timedelta(seconds=2),
+            }
+            users_coll.update_one(
+                {'_id': self.uid},
+                {'$set': {f'nodes.view_progress.{nid_single_tag}': video_progress}})
+
+        # Utility to fetch tagged nodes and return them as JSON list
+        def do_query():
+            animation_tags_url = flask.url_for('nodes_api.tagged', tag='एनिमेशन')
+            return self.get(animation_tags_url).json
+
+        # Ensure that anonymous users get videos with no view_progress info
+        with self.app.app_context():
+            resp = do_query()
+            for node in resp:
+                self.assertNotIn('view_progress', node)
+
+        # Ensure that an authenticated user gets view_progress info if the video was watched
+        with self.login_as(self.uid):
+            resp = do_query()
+            for node in resp:
+                if node['_id'] in current_user.nodes['view_progress']:
+                    self.assertIn('view_progress', node)
+                    self.assertEqual(progress_in_sec, node['view_progress']['progress_in_sec'])
+
+        # Ensure that another user with no view progress does not get any view progress info
+        other_user = self.create_user(user_id=ObjectId())
+        with self.login_as(other_user):
+            resp = do_query()
+            for node in resp:
+                self.assertNotIn('view_progress', node)
