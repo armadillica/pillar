@@ -61,16 +61,10 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
         post.picture = get_file(post.picture, api=api)
         post.url = url_for_node(node=post)
 
-    # Use the *_main_project.html template for the main blog
-    is_main_project = project_id == current_app.config['MAIN_PROJECT_ID']
-    main_project_template = '_main_project' if is_main_project else ''
-    main_project_template = '_main_project'
     index_arch = 'archive' if archive else 'index'
-    template_path = f'nodes/custom/blog/{index_arch}{main_project_template}.html',
+    template_path = f'nodes/custom/blog/{index_arch}.html',
 
     if url:
-        template_path = f'nodes/custom/post/view{main_project_template}.html',
-
         post = Node.find_one({
             'where': {'parent': blog._id, 'properties.url': url},
             'embedded': {'node_type': 1, 'user': 1},
@@ -95,6 +89,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
     can_create_blog_posts = project.node_type_has_method('post', 'POST', api=api)
 
     # Use functools.partial so we can later pass page=X.
+    is_main_project = project_id == current_app.config['MAIN_PROJECT_ID']
     if is_main_project:
         url_func = functools.partial(url_for, 'main.main_blog_archive')
     else:
@@ -121,7 +116,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
     return render_template(
         template_path,
         blog=blog,
-        node=post,
+        node=post,  # node is used by the generic comments rendering (see custom/_scripts.pug)
         posts=posts._items,
         posts_meta=pmeta,
         more_posts_available=pmeta['total'] > pmeta['max_results'],
