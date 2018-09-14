@@ -3,11 +3,6 @@
 | {% set title = 'blog' %}
 | {% block page_title %}Blog{% endblock%}
 
-| {% block css %}
-| {{ super() }}
-link(href="{{ url_for('static_pillar', filename='assets/css/blog.css') }}", rel="stylesheet")
-| {% endblock %}
-
 | {% block project_context %}
 | {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta) }}
 | {% endblock %}
