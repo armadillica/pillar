@@ -1,6 +1,7 @@
 $comments-width-max: 710px
 
 .comments-container
+	max-width: $comments-width-max
 	position: relative
 
 	#comments-reload
@@ -314,9 +315,6 @@ $comments-width-max: 710px
 					color: $color-success
 
 .comment-reply
-	&-container
-		background-color: $color-background
-
 	/* Little gravatar icon on the left */
 	&-avatar
 		img
@@ -333,7 +331,7 @@ $comments-width-max: 710px
 		width: 100%
 
 	&-field
-		background-color: $color-background-dark
+		background-color: $color-background-light
 		border-radius: 3px
 		box-shadow: inset 0 0 2px 0 rgba(darken($color-background-dark, 20%), .5)
 		display: flex
@@ -342,6 +340,7 @@ $comments-width-max: 710px
 
 		textarea
 			+node-details-description
+			background-color: $color-background-light
 			border-bottom-right-radius: 0
 			border-top-right-radius: 0
 			border: none
@@ -376,7 +375,6 @@ $comments-width-max: 710px
 
 		&.filled
 			textarea
-				background-color: $color-background-light
 				border-bottom: thin solid $color-background
 
 				&:focus

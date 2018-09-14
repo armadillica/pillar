@@ -669,3 +669,15 @@
 
 .overflow-hidden
 	overflow: hidden
+
+=text-gradient($color_from, $color_to)
+		background: linear-gradient(to right, $color_from, $color_to)
+		background-clip: text
+		-webkit-background-clip: text
+		-webkit-text-fill-color: transparent
+
+=active-gradient
+	+text-gradient(#0cc, $primary)
+
+	&:before
+		+text-gradient(#0cc, $primary)
