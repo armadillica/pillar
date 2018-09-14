@@ -18,11 +18,6 @@ meta(property="og:image", content="{{ node.picture.thumbnail('l', api=api) }}")
 
 | {% block page_title %}{{node.name}} - Blog{% endblock%}
 
-| {% block css %}
-| {{ super() }}
-link(href="{{ url_for('static_cloud', filename='assets/css/project-landing.css') }}", rel="stylesheet")
-| {% endblock css %}
-
 | {% set title = 'blog' %}
 
 | {% block body %}
