@@ -1,41 +1,46 @@
-| {% macro render_secondary_navigation(project, pages=None) %}
-nav.navbar-secondary
-	nav.collapse.navbar-collapse
-		ul.navbar-nav.navbar-right
-			li
-				a.navbar-item(
-					href="{{ url_for('projects.view', project_url=project.url) }}",
-					title="{{ project.name }} Homepage")
-					span
-						b {{ project.name }}
-			li
-				a.navbar-item(
-				href="{{ url_for('main.project_blog', project_url=project.url) }}",
-				title="Project Blog",
-				class="{% if category == 'blog' %}active{% endif %}")
-					span Blog
-			| {% if pages %}
-			| {% for p in pages %}
-			li
-				a.navbar-item(
-				href="{{ url_for('projects.view_node', project_url=project.url, node_id=p._id) }}",
-				title="{{ p.name }}",
-				class="{% if category == 'page' %}active{% endif %}")
-					span {{ p.name }}
-			| {% endfor %}
-			| {% endif %}
-			| {% if project.nodes_featured %}
-			| {# In some cases featured_nodes might might be embedded #}
-			| {% if '_id' in project.nodes_featured[0] %}
-			| {% set featured_node_id=project.nodes_featured[0]._id %}
-			| {% else %}
-			| {% set featured_node_id=project.nodes_featured[0] %}
-			| {% endif %}
-			li
-				a.navbar-item(
-				href="{{ url_for('projects.view_node', project_url=project.url, node_id=featured_node_id) }}",
-				title="Explore {{ project.name }}",
-				class="{% if category == 'blog' %}active{% endif %}")
-					span Explore
-			| {% endif %}
+include ../mixins/components
+
+| {% macro render_secondary_navigation(project, navigation_links, title) %}
+
+| {% if project.category == 'course' %}
+| {% set category_url = url_for('cloud.courses') %}
+| {% elif project.category == 'workshop' %}
+| {% set category_url = url_for('cloud.workshops') %}
+| {% elif project.category == 'film' %}
+| {% set category_url = url_for('cloud.open_projects') %}
+| {% else %}
+| {% set category_url = url_for('main.index') %}
+| {% endif %}
+
++nav-secondary()
+	li.text-capitalize
+		a.nav-link.text-muted.px-0(href="{{ category_url }}")
+			| {{ project.category }}
+	li.px-1
+		i.pi-angle-right
+
+	+nav-secondary-link(
+		class="px-0 font-weight-bold",
+		href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+		| {{ project.name }}
+
+	| {% if project.nodes_featured %}
+	| {# In some cases featured_nodes might might be embedded #}
+	| {% if '_id' in project.nodes_featured[0] %}
+	| {% set featured_node_id=project.nodes_featured[0]._id %}
+	| {% else %}
+	| {% set featured_node_id=project.nodes_featured[0] %}
+	| {% endif %}
+	+nav-secondary-link(
+			href="{{ url_for('projects.view_node', project_url=project.url, node_id=featured_node_id) }}",
+			title="Explore {{ project.name }}",
+			class="{% if title == 'project' %}active{% endif %}")
+			| Explore
+	| {% endif %}
+
+	| {% for link in navigation_links %}
+	+nav-secondary-link(href="{{ link['url'] }}")
+		| {{ link['label'] }}
+	| {% endfor %}
+
 | {% endmacro %}
