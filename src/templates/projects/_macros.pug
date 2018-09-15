@@ -26,7 +26,12 @@ include ../mixins/components
 		span {{ project.name }}
 	| {% endif %}
 
-	| {% if project.nodes_featured and (title !='project') %}
+	| {% for link in navigation_links %}
+	+nav-secondary-link(href="{{ link['url'] }}")
+		| {{ link['label'] }}
+	| {% endfor %}
+
+	| {% if project.nodes_featured %}
 	| {# In some cases featured_nodes might might be embedded #}
 	| {% if '_id' in project.nodes_featured[0] %}
 	| {% set featured_node_id=project.nodes_featured[0]._id %}
@@ -39,10 +44,5 @@ include ../mixins/components
 			class="{% if title == 'project' %}active{% endif %}")
 			span Explore
 	| {% endif %}
-
-	| {% for link in navigation_links %}
-	+nav-secondary-link(href="{{ link['url'] }}")
-		| {{ link['label'] }}
-	| {% endfor %}
 
 | {% endmacro %}
