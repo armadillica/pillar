@@ -225,12 +225,25 @@ class Attachment:
 
         return self.render(file_doc, pargs, kwargs)
 
-    def sdk_file(self, slug: str, node_properties: dict) -> pillarsdk.File:
+    def sdk_file(self, slug: str, document: dict) -> pillarsdk.File:
         """Return the file document for the attachment with this slug."""
 
         from pillar.web import system_util
 
-        attachments = node_properties.get('properties', {}).get('attachments', {})
+        # TODO (fsiddi) Make explicit what 'document' is.
+        # In some cases we pass the entire node or project documents, in other cases
+        # we pass node.properties. This should be unified at the level of do_markdown.
+        # For now we do a quick hack and first look for 'properties' in the doc,
+        # then we look for 'attachments'.
+
+        doc_properties = document.get('properties')
+        if doc_properties:
+            # We passed an entire document (all nodes must have 'properties')
+            attachments = doc_properties.get('attachments', {})
+        else:
+            # The value of document could have been defined as 'node.properties'
+            attachments = document.get('attachments', {})
+
         attachment = attachments.get(slug)
         if not attachment:
             raise self.NoSuchSlug(slug)

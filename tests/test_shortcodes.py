@@ -187,11 +187,16 @@ class AttachmentTest(AbstractPillarTest):
             ],
             'filename': 'cute_kitten.jpg',
         })
-        node_doc = {'properties': {
-            'attachments': {
-                'img': {'oid': oid},
-            }
+
+        node_properties = {'attachments': {
+            'img': {'oid': oid},
         }}
+
+        node_doc = {'properties': node_properties}
+
+        # Collect the two possible context that can be provided for attachemt
+        # rendering. See pillar.shortcodes.sdk_file for more info.
+        possible_contexts = [node_properties, node_doc]
 
         # We have to get the file document again, because retrieving it via the
         # API (which is what the shortcode rendering is doing) will change its
@@ -199,25 +204,31 @@ class AttachmentTest(AbstractPillarTest):
         db_file = self.get(f'/api/files/{oid}').get_json()
         link = db_file['variations'][0]['link']
 
-        with self.app.test_request_context():
-            self_linked = f'<a class="expand-image-links" href="{link}">' \
-                          f'<img src="{link}" alt="cute_kitten.jpg"/></a>'
-            self.assertEqual(
-                self_linked,
-                render('{attachment img link}', context=node_doc).strip()
-            )
-            self.assertEqual(
-                self_linked,
-                render('{attachment img link=self}', context=node_doc).strip()
-            )
-            self.assertEqual(
-                f'<img src="{link}" alt="cute_kitten.jpg"/>',
-                render('{attachment img}', context=node_doc).strip()
-            )
+        def do_render(context, link):
+            """Utility to run attachment rendering in different contexts."""
+            with self.app.test_request_context():
+                self_linked = f'<a class="expand-image-links" href="{link}">' \
+                              f'<img src="{link}" alt="cute_kitten.jpg"/></a>'
+                self.assertEqual(
+                    self_linked,
+                    render('{attachment img link}', context=context).strip()
+                )
+                self.assertEqual(
+                    self_linked,
+                    render('{attachment img link=self}', context=context).strip()
+                )
+                self.assertEqual(
+                    f'<img src="{link}" alt="cute_kitten.jpg"/>',
+                    render('{attachment img}', context=context).strip()
+                )
 
-            tag_link = 'https://i.imgur.com/FmbuPNe.jpg'
-            self.assertEqual(
-                f'<a href="{tag_link}" target="_blank">'
-                f'<img src="{link}" alt="cute_kitten.jpg"/></a>',
-                render('{attachment img link=%r}' % tag_link, context=node_doc).strip()
-            )
+                tag_link = 'https://i.imgur.com/FmbuPNe.jpg'
+                self.assertEqual(
+                    f'<a href="{tag_link}" target="_blank">'
+                    f'<img src="{link}" alt="cute_kitten.jpg"/></a>',
+                    render('{attachment img link=%r}' % tag_link, context=context).strip()
+                )
+
+        # Test both possible contexts for rendering attachments
+        for context in possible_contexts:
+            do_render(context, link)
