@@ -99,6 +99,8 @@
 .nav-link
 	@extend .d-flex
 
+.nav-title
+	white-space: nowrap
 
 .navbar-item
 	align-items: center
@@ -190,6 +192,13 @@ $nav-secondary-bar-size: -2px
 		.nav-link
 			@extend .pr-5
 			box-shadow: none
+
+			&.nav-see-more
+				color: $primary
+				font-size: $font-size-xxs
+
+				i, span
+					+active-gradient
 
 .navbar-overlay
 	+media-lg
