@@ -659,6 +659,9 @@
 .user-select-none
 	user-select: none
 
+.pointer-events-none
+	pointer-events: none
+
 // Bootstrap has .img-fluid, a class to limit the width of an image to 100%.
 // .imgs-fluid below is to be applied on a parent container when we can't add
 // classes to the images themselves. e.g. the blog.
@@ -677,7 +680,7 @@
 		-webkit-text-fill-color: transparent
 
 =active-gradient
-	+text-gradient(#0cc, $primary)
+	+text-gradient($primary-accent, $primary)
 
 	&:before
-		+text-gradient(#0cc, $primary)
+		+text-gradient($primary-accent, $primary)

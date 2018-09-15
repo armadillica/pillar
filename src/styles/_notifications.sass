@@ -24,13 +24,16 @@
 			color: $color-secondary
 
 #notifications-toggle
+	color: $color-text
 	cursor: pointer
-	font-size: 1.5em
 	position: relative
 	user-select: none
 
 	> i:before
 		content: '\e815'
+		font-size: 1.3em
+		position: relative
+		top: 2px
 
 	&.has-notifications
 		> i:before

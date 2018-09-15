@@ -411,10 +411,12 @@ $loader-bar-height: 2px
 	position: absolute
 	visibility: hidden
 	width: 100%
+	z-index: 20
 
 	&:before
 		animation: none
 		background-color: $primary
+		background-image: linear-gradient(to right, $primary-accent, $primary)
 		content: ''
 		display: block
 		height: $loader-bar-height
@@ -452,3 +454,4 @@ $loader-bar-height: 2px
 
 .progress-bar
 	background-color: $primary
+	background-image: linear-gradient(to right, $primary-accent, $primary)
