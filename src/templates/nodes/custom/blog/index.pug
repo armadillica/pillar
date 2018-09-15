@@ -11,11 +11,7 @@
 | {% endblock navigation_tabs %}
 
 | {% block body %}
-| {% if node %}
-| {{ blogmacros.render_blog_post(node, project=project) }}
-| {% else %}
 | {{ blogmacros.render_blog_index(project, posts, can_create_blog_posts, api, more_posts_available, posts_meta, pages=pages) }}
-| {% endif %}
 | {% endblock %}
 
 | {% block footer_scripts %}
