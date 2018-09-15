@@ -21,7 +21,7 @@ style.
 | {% block settings_page_content %}
 .settings-form
 	form#settings-form(method='POST', action="{{url_for('settings.profile')}}")
-		.left
+		.pb-3
 			.form-group
 				| {{ form.username.label }}
 				| {{ form.username(size=20, class='form-control') }}
@@ -45,14 +45,13 @@ style.
 				| {{ current_user.badges_html|safe }}
 				p.hint-text Note that updates to these badges may take a few minutes to be visible here.
 			| {% endif %}
-		.right
-			.settings-avatar
-				a(href="https://gravatar.com/")
-					img(src="{{ current_user.gravatar }}")
-					span {{ _("Change Gravatar") }}
+		.py-3
+			a(href="https://gravatar.com/")
+				img.rounded-circle(src="{{ current_user.gravatar }}")
+				span.p-3 {{ _("Change Gravatar") }}
 
-		.buttons
-			button.btn.btn-outline-success.button-submit(type='submit')
-				i.pi-check
+		.py-3
+			button.btn.btn-outline-success.px-5.button-submit(type='submit')
+				i.pi-check.pr-2
 				| {{ _("Save Changes") }}
 | {% endblock %}
