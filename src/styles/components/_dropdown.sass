@@ -24,3 +24,21 @@ ul.dropdown-menu
 nav .dropdown:hover
 	ul.dropdown-menu
 		display: block
+
+nav .dropdown.large:hover
+	.dropdown-menu
+		@extend .d-flex
+
+.dropdown.large.show
+	@extend .d-flex
+
+	.dropdown-menu.show
+		@extend .d-flex
+
+.dropdown-menu-tab
+	display: none
+	min-width: 100px
+
+
+	&.show // .dropdown-menu-tab.show
+		@extend .d-flex

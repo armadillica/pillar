@@ -35,8 +35,8 @@ mixin jumbotron(title, text, image, url)
 mixin nav-secondary(title)
 	ul.nav.nav-secondary&attributes(attributes)
 		if title
-			li.font-weight-bold.px-2
-				=title
+			li.nav-item
+				span.nav-link.font-weight-bold.pointer-events-none= title
 
 		if block
 			block

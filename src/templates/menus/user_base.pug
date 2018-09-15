@@ -12,25 +12,6 @@ li.dropdown
 	ul.dropdown-menu.dropdown-menu-right
 		| {% if not current_user.has_role('protected') %}
 		| {% block menu_list %}
-		li
-			a.navbar-item.px-2(
-				href="{{ url_for('projects.home_project') }}"
-				title="Home")
-				| #[i.pi-home] Home
-
-		li
-			a.navbar-item.px-2(
-				href="{{ url_for('projects.index') }}"
-				title="My Projects")
-				| #[i.pi-star] My Projects
-
-		| {% if current_user.has_organizations() %}
-		li
-			a.navbar-item.px-2(
-				href="{{ url_for('pillar.web.organizations.index') }}"
-				title="My Organizations")
-				| #[i.pi-users] My Organizations
-		| {% endif %}
 
 		li
 			a.navbar-item.px-2(

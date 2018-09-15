@@ -2,8 +2,7 @@
 .navbar
 	box-shadow: inset 0 -2px  $color-background
 
-.navbar,
-nav.sidebar
+.nav
 	border: none
 	color: $color-text-dark-secondary
 	padding: 0
@@ -18,29 +17,6 @@ nav.sidebar
 			+media-xs
 				margin: 0
 				width: 100%
-
-	.navbar-item
-		align-items: center
-		display: flex
-		user-select: none
-		color: inherit
-
-		+media-sm
-			padding-left: 10px
-			padding-right: 10px
-
-		&:hover, &:focus
-			color: $primary
-			background-color: transparent
-			box-shadow: inset 0 -3px 0 $primary
-			text-decoration: none
-
-		&:focus
-			box-shadow: inset 0 -3px 0 $primary
-
-		&.active
-			color: $primary
-			box-shadow: inset 0 -3px 0 $primary
 
 	li
 		user-select: none
@@ -80,49 +56,72 @@ nav.sidebar
 			i
 				+position-center-translate
 
-	.dropdown
-		min-width: 50px // navbar avatar size
+.dropdown
+	min-width: 50px // navbar avatar size
 
-		span.fa-stack
-			position: absolute
-			top: 50%
-			left: 50%
-			transform: translate(-50%, -50%)
+	.navbar-item
+		&:hover
+			box-shadow: none // Remove the blue underline usually on navbar, from dropdown items.
 
-		ul.dropdown-menu
-			li
-				a
-					white-space: nowrap
+	ul.dropdown-menu
+		li
+			a
+				white-space: nowrap
 
-					&:hover
-						box-shadow: none // removes underline
+			.subitem // e.g. "Not Sintel? Log out"
+				font-size: .8em
+				text-transform: initial
 
-				.subitem // e.g. "Not Sintel? Log out"
-					font-size: .8em
-					text-transform: initial
+			i
+				width: 30px
 
-				i
-					width: 30px
+			&.subscription-status
+				a, a:hover
+					color: $white
 
-				&.subscription-status
-					a, a:hover
-						color: $white
+				&.none
+					background-color: $color-danger
 
-					&.none
-						background-color: $color-danger
+				&.subscriber
+					background-color: $color-success
 
-					&.subscriber
-						background-color: $color-success
+				&.demo
+					background-color: $color-info
 
-					&.demo
-						background-color: $color-info
+				span.info
+					display: block
 
-					span.info
+					span.renew
 						display: block
+						font-size: .9em
 
-						span.renew
-							display: block
-							font-size: .9em
+
+.nav-link
+	@extend .d-flex
+
+
+.navbar-item
+	align-items: center
+	display: flex
+	user-select: none
+	color: inherit
+
+	+media-sm
+		padding-left: 10px
+		padding-right: 10px
+
+	&:hover, &:focus
+		color: $primary
+		background-color: transparent
+		box-shadow: inset 0 -3px 0 $primary
+		text-decoration: none
+
+	&:focus
+		box-shadow: inset 0 -3px 0 $primary
+
+	&.active
+		color: $primary
+		box-shadow: inset 0 -3px 0 $primary
 
 
 /* Secondary navigation. */
@@ -132,19 +131,36 @@ $nav-secondary-bar-size: -2px
 	box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 
 	.nav-link
-		box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 		color: $color-text
 		cursor: pointer
-		transition: box-shadow 150ms ease-in-out
+		transition: color 150ms ease-in-out
+
+		&:after
+			background-color: transparent
+			bottom: 0
+			content: ''
+			height: 2px
+			position: absolute
+			right: 0
+			left: 0
+			width: 0
+			transition: width 150ms ease-in-out
 
 	.nav-link:hover,
 	.nav-link.active,
-	.nav-item.dropdown.show .nav-link
+	.nav-item.dropdown.show > .nav-link
 		// Blue bar on the bottom.
-		box-shadow: inset 0 $nav-secondary-bar-size 0 0 $primary
+		&:after
+			background-color: $primary-accent
+			background-image: linear-gradient(to right, $primary-accent 70%, $primary)
+			height: 2px
+			width: 100%
+
+		span
+			+active-gradient
 
 		i
-			color: $primary
+			color: $primary-accent
 
 	&.nav-secondary-vertical
 		align-items: flex-start
@@ -156,19 +172,24 @@ $nav-secondary-bar-size: -2px
 
 		// Blue bar on the side.
 		.nav-link
-			box-shadow: inset 0 -1px 0 0 $color-background, inset -1px 0 0 0 $color-background
-
 			&:hover,
 			&.active
-				box-shadow: inset 0 -1px 0 0 $color-background, inset ($nav-secondary-bar-size * 1.5) 0 0 0 $primary
+				color: $primary
+				@extend .bg-white
 
-	&.nav-main
+				&:after
+					background-image: linear-gradient($primary-accent 70%, $primary)
+					height: 100%
+					left: initial
+					top: 0
+					width: 3px
+
+// Big navigation dropdown.
+.nav-main
+	.nav-secondary
 		.nav-link
-			color: $color-text-dark-secondary
-
-			&:hover
-				color: $body-color
-
+			@extend .pr-5
+			box-shadow: none
 
 .navbar-overlay
 	+media-lg
@@ -187,15 +208,6 @@ $nav-secondary-bar-size: -2px
 	&.is-active
 		background-color: $color-background-nav
 		text-shadow: none
-
-.navbar-brand
-	color: inherit
-	padding: 0 0 0 3px
-	position: relative
-	top: -2px
-
-	&:hover
-		color: $primary
 
 nav.navbar
 	.navbar-collapse

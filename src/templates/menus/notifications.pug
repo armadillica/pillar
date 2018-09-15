@@ -1,10 +1,11 @@
 | {% if current_user.is_authenticated %}
 
-li.nav-notifications
-	a.navbar-item#notifications-toggle.px-0(
-	title="Notifications",
-	data-toggle="tooltip",
-	data-placement="bottom")
+li.nav-notifications.nav-item
+	a.nav-link.px-2(
+		id="notifications-toggle",
+		title="Notifications",
+		data-toggle="tooltip",
+		data-placement="bottom")
 		i.pi-notifications-none.nav-notifications-icon
 		span#notifications-count
 			span
