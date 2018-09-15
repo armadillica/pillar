@@ -23,60 +23,8 @@ include ../../../mixins/components
 				i.pi-list
 
 		+card-deck(class="px-2")
-			| 	{% for child in children %}
-			| {# Browse type: List #}
-			a(
-				href="{{ url_for_node(node=child) }}",
-				data-node_id="{{ child._id }}",
-				class="js-item-open list-node-children-item browse-list")
-				.list-node-children-item-thumbnail
-
-					| {% if child.picture %}
-					img(
-						src="{{ child.picture.thumbnail('t', api=api)}} ")
-					| {% else %}
-					.cloud-logo
-						i.pi-blender-cloud
-					| {% endif %}
-
-					| {% if child.permissions.world %}
-					.list-node-children-item-ribbon
-						span free
-					| {% endif %}
-
-					.list-node-children-item-thumbnail-icon
-						| {% if child.properties.content_type and child.properties.content_type == 'video' %}
-						i.pi-play
-						| {% elif child.properties.content_type and child.properties.content_type == 'image' %}
-						i.pi-image
-						| {% elif child.properties.content_type and child.properties.content_type == 'file' %}
-						i.pi-file-archive
-						| {% else %}
-						i.pi-folder
-						| {% endif %}
-
-				.list-node-children-item-name {{ child.name }}
-
-				.list-node-children-item-meta
-					| {% if child.properties.status != 'published' %}
-					span.status {{ child.properties.status }}
-					| {% endif %}
-
-					span.type
-						| {% if child.properties.content_type %}
-						| {{ child.properties.content_type | undertitle }} ·
-						| {% elif child.node_type == 'group' %}
-						| Folder ·
-						| {% else %}
-						| {{ child.node_type | undertitle }} ·
-						| {% endif %}
-
-					span(title="Created on {{ child._created }}") {{ child._created | pretty_date }}
-
-			| {# Browse type: Icon #}
-
+			| {% for child in children %}
 			| {{ asset_list_item(child, current_user) }}
-
 			| {% endfor %}
 			| {% else %}
 			.list-node-children-container
@@ -115,14 +63,12 @@ include ../../../mixins/components
 
 		// Browse type: icon or list
 		function projectBrowseTypeIcon() {
-			$(".list-node-children-item.browse-list").hide();
-			$(".list-node-children-item.browse-icon").show();
+			$(".card-deck").removeClass('card-deck-vertical');
 			$(".js-btn-browsetoggle").html('<i class="pi-list"></i> List View');
 		};
 
 		function projectBrowseTypeList() {
-			$(".list-node-children-item.browse-list").show();
-			$(".list-node-children-item.browse-icon").hide();
+			$(".card-deck").addClass('card-deck-vertical');
 			$(".js-btn-browsetoggle").html('<i class="pi-layout"></i> Grid View');
 		};
 
