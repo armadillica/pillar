@@ -27,10 +27,10 @@
 
 
 	| {# DETAILS #}
-	section.node-details-meta.px-4.py-2
+	section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 		ul.list-unstyled.m-0
 			| {% if node.properties.license_type %}
-			li
+			li.px-2
 				a.node-details-license(
 					href="https://creativecommons.org/licenses/",
 					target="_blank",
@@ -41,15 +41,15 @@
 			| {% endif %}
 
 			| {% if node.has_method('PUT') and (node.properties.status != 'published') %}
-			li(class="status-{{ node.properties.status }}")
+			li.px-2(class="status-{{ node.properties.status }}")
 				| {{ node.properties.status | undertitle }}
 			| {% endif %}
 
-			li(title="Author")
+			li.px-2(title="Author")
 				| {{ node.user.full_name }}
 				| {{ node.user.badges.html|safe }}
 
-			li(
+			li.px-2(
 				title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
 				| {{ node._created | pretty_date }}
 
@@ -60,14 +60,12 @@
 					| Shared
 			| {% endif %}
 
-
-
-			li.left-side
+			li.ml-auto
 
 			| {% if node.file %}
-			li(title="File size")
+			li.px-2(title="File size")
 				| {{ node.file.length | filesizeformat }}
-			li.js-type(title="File format")
+			li.px-2.js-type(title="File format")
 				| {{ node.file.content_type }}
 			| {% endif %}
 
@@ -95,11 +93,11 @@
 				| {% endblock node_download %}
 
 				| {% elif current_user.has_cap('can-renew-subscription') %}
-				a.btn.btn-success(
+				a.btn.btn-outline-primary(
 					title="Renew your subscription to download",
 					target="_blank",
 					href="/renew")
-					i.pi-heart
+					i.pi-heart.pr-2
 					| Renew Subscription
 
 				| {% elif current_user.is_authenticated %}
