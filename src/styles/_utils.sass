@@ -171,17 +171,25 @@
 /* Small but wide: phablets, iPads
  **  Menu is collapsed, columns stack, no brand */
 =media-sm
-	@media (min-width: #{$screen-tablet}) and (max-width: #{$screen-desktop - 1px})
+	@include media-breakpoint-up(sm)
 		@content
 
 /* Tablets portrait.
  **  Menu is expanded, but columns stack, brand is shown */
 =media-md
-	@media (min-width: #{$screen-desktop})
+	@include media-breakpoint-up(md)
 		@content
 
 =media-lg
-	@media (min-width: #{$screen-lg-desktop})
+	@include media-breakpoint-up(lg)
+		@content
+
+=media-xl
+	@include media-breakpoint-up(xl)
+		@content
+
+=media-xxl
+	@include media-breakpoint-up(xxl)
 		@content
 
 =media-print
