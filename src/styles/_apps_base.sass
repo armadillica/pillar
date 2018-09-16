@@ -455,3 +455,12 @@ $loader-bar-height: 2px
 .progress-bar
 	background-color: $primary
 	background-image: linear-gradient(to right, $primary-accent, $primary)
+
+.node-details-description
+	+node-details-description
+
+	@include media-breakpoint-up(lg)
+		max-width: map-get($grid-breakpoints, "md")
+
+	@include media-breakpoint-up(xl)
+		max-width: map-get($grid-breakpoints, "lg")

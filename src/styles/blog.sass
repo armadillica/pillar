@@ -49,13 +49,6 @@
 @import _comments
 @import _notifications
 
-#blog_container
-	+media-xs
-		flex-direction: column
-		padding-top: 0
-
-	video
-		max-width: 100%
 
 #blog_post-edit-form
 	padding: 20px
@@ -128,7 +121,6 @@
 					margin-bottom: 15px
 					border-top: thin solid $color-text-dark-hint
 
-
 	.form-group.description,
 	.form-group.summary,
 	.form-group.content
@@ -198,62 +190,8 @@
 
 #blog_post-create-container,
 #blog_post-edit-container
-	padding: 25px
-
-.blog_index-item
-	.item-picture
-		position: relative
-		width: 100%
-		max-height: 350px
-		min-height: 200px
-		height: auto
-		overflow: hidden
-		border-top-left-radius: 3px
-		border-top-right-radius: 3px
-		+clearfix
-
-		img
-			+position-center-translate
-			width: 100%
-			border-top-left-radius: 3px
-			border-top-right-radius: 3px
-
-		+media-xs
-			min-height: 150px
-		+media-sm
-			min-height: 150px
-		+media-md
-			min-height: 250px
-		+media-lg
-			min-height: 250px
-
-	.item-content
-		+node-details-description
-
-		+media-xs
-			padding:
-				left: 0
-				right: 0
-
-		img
-			display: block
-			margin: 0 auto
-
-	.item-meta
-		color: $color-text-dark-secondary
-		padding:
-			left: 25px
-			right: 25px
-
-		+media-xs
-			padding:
-				left: 10px
-				right: 10px
-
-#blog_index-container,
-#blog_post-create-container,
-#blog_post-edit-container
 	+container-box
+	padding: 25px
 	width: 75%
 
 	+media-xs
@@ -267,11 +205,6 @@
 		width: 100%
 	+media-lg
 		width: 100%
-
-
-	.item-picture+.button-back+.button-edit
-		right: 20px
-		top: 20px
 
 #blog_post-edit-form
 	padding: 0
@@ -307,152 +240,3 @@
 
 	.form-upload-file-meta
 		width: initial
-
-#blog_post-edit-title
-	padding: 0
-	color: $color-text
-	font:
-		size: 1.8em
-		weight: 300
-	margin: 0 20px 15px 0
-
-#blog_index-sidebar
-	width: 25%
-	padding: 0 15px
-
-	+media-xs
-		width: 100%
-		clear: both
-		display: block
-		margin-top: 25px
-	+media-sm
-		width: 40%
-	+media-md
-		width: 30%
-	+media-lg
-		width: 25%
-
-	.button-back
-		+button($color-info, 6px, true)
-		display: block
-		width: 100%
-		margin: 15px 0 0 0
-
-	#blog_post-edit-form
-		.form-group
-			.form-control
-				background-color: white
-
-	.blog_index-sidebar,
-	.blog_project-sidebar
-		+container-box
-		background-color: lighten($color-background, 5%)
-		padding: 20px
-
-	.blog_project-card
-		position: relative
-		width: 100%
-		border-radius: 3px
-		overflow: hidden
-		background-color: white
-		color: lighten($color-text, 10%)
-		box-shadow: 0 0 30px rgba(black, .2)
-
-		margin:
-			top: 0
-			bottom: 15px
-			left: auto
-			right: auto
-
-
-		a.item-header
-			position: relative
-			width: 100%
-			height: 100px
-			display: block
-			background-size: 100% 100%
-
-			overflow: hidden
-
-			.overlay
-				z-index: 1
-				width: 100%
-				height: 100px
-				@include overlay(transparent, 0%, white, 100%)
-
-
-			img.background
-				width: 100%
-				transform: scale(1.4)
-
-		.card-thumbnail
-			position: absolute
-			z-index: 2
-			height: 90px
-			width: 90px
-			display: block
-			top: 35px
-			left: 50%
-			transform: translateX(-50%)
-			background-color: white
-			border-radius: 3px
-			overflow: hidden
-
-			&:hover
-				img.thumb
-					opacity: .9
-
-			img.thumb
-				width: 100%
-				border-radius: 3px
-				transition: opacity 150ms ease-in-out
-				+position-center-translate
-
-		.item-info
-			padding: 10px 20px
-			background-color: white
-			border-bottom-left-radius: 3px
-			border-bottom-right-radius: 3px
-
-			a.item-title
-				display: inline-block
-				width: 100%
-				padding: 30px 0 15px 0
-				color: $color-text-dark
-				text-align: center
-				font:
-					size: 1.6em
-					weight: 300
-
-				transition: color 150ms ease-in-out
-
-				&:hover
-					text-decoration: none
-					color: $color-primary
-
-
-// Specific tweaks for blogs in the context of a project.
-#project_context
-	.blog_index-item
-		+media-xs
-			margin-left: 0
-		padding: 0
-		margin-left: 10px
-
-		&.list
-			margin-left: 35px !important
-
-		.item-title,
-		.item-info
-			+media-xs
-				padding-left: 0
-			padding-left: 25px
-
-	#blog_container
-		.comments-container
-			+media-sm
-				margin-left: 10px
-			margin-left: 30px
-
-	.blog-archive-navigation
-		margin-left: 35px
