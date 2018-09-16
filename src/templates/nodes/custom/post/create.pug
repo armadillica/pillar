@@ -122,41 +122,38 @@ script(type="text/javascript").
 					.toLowerCase();
 	};
 
-	var convert = new Markdown.getSanitizingConverter().makeHtml;
-
 	/* Build the markdown preview when typing in textarea */
 	$(function() {
+		var $contentField = $('.form-group.description textarea'),
+				$contentPreview = $('<div class="node-edit-form-md-preview" />').insertAfter($contentField);
 
-		var $textarea = $('.form-group.content textarea'),
-				$loader = $('<div class="md-preview-loading"><i class="pi-spin spin"></i></div>').insertAfter($textarea),
-				$preview = $('<div class="node-edit-form-md-preview" />').insertAfter($loader);
+		function parseDescriptionContent(content) {
 
-		$loader.hide();
+			$.ajax({
+				url: "{{ url_for('nodes.preview_markdown')}}",
+				type: 'post',
+				data: {content: content},
+				headers: {"X-CSRFToken": csrf_token},
+				headers: {},
+				dataType: 'json'
+			})
+			.done(function (data) {
+				$contentPreview.html(data.content);
+			})
+			.fail(function (err) {
+				toastr.error(xhrErrorResponseMessage(err), 'Parsing failed');
+			});
+		}
 
-		// Delay function to not start converting heavy posts immediately
-		var delay = (function(){
-			var timer = 0;
-			return function(callback, ms){
-				clearTimeout (timer);
-				timer = setTimeout(callback, ms);
-			};
-		})();
+		var options = {
+			callback: parseDescriptionContent,
+			wait: 750,
+			highlight: false,
+			allowSubmit: false,
+			captureLength: 2
+		}
 
-		$textarea.keyup(function() {
-			/* If there's an iframe (YouTube embed), delay markdown convert 1.5s */
-			if (/iframe/i.test($textarea.val())) {
-				$loader.show();
-
-				delay(function(){
-					// Convert markdown
-					$preview.html(convert($textarea.val()));
-					$loader.hide();
-				}, 1500 );
-			} else {
-				// Convert markdown
-				$preview.html(convert($textarea.val()));
-			};
-		}).trigger('keyup');
+		$contentField.typeWatch(options);
 	});
 
 	$(function() {

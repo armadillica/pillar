@@ -122,7 +122,6 @@ script(type="text/javascript").
 	$('.project-mode-edit').displayAs('inline-block');
 
 	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: true, nodeId: ''});
-	var convert = new Markdown.getSanitizingConverter().makeHtml;
 
 	$('.button-save').on('click', function(e){
 		e.preventDefault();
@@ -136,36 +135,36 @@ script(type="text/javascript").
 	/* Build the markdown preview when typing in textarea */
 	$(function() {
 
-		var $textarea = $('.form-group.description textarea'),
-				$loader = $('<div class="md-preview-loading"><i class="pi-spin spin"></i></div>').insertAfter($textarea),
-				$preview = $('<div class="node-edit-form-md-preview" />').insertAfter($loader);
+		var $contentField = $('.form-group.description textarea'),
+				$contentPreview = $('<div class="node-edit-form-md-preview" />').insertAfter($contentField);
 
-		$loader.hide();
+		function parseDescriptionContent(content) {
 
-		// Delay function to not start converting heavy posts immediately
-		var delay = (function(){
-			var timer = 0;
-			return function(callback, ms){
-				clearTimeout (timer);
-				timer = setTimeout(callback, ms);
-			};
-		})();
+			$.ajax({
+				url: "{{ url_for('nodes.preview_markdown')}}",
+				type: 'post',
+				data: {content: content},
+				headers: {"X-CSRFToken": csrf_token},
+				headers: {},
+				dataType: 'json'
+			})
+			.done(function (data) {
+				$contentPreview.html(data.content);
+			})
+			.fail(function (err) {
+				toastr.error(xhrErrorResponseMessage(err), 'Parsing failed');
+			});
+		}
 
-		$textarea.keyup(function() {
-			/* If there's an iframe (YouTube embed), delay markdown convert 1.5s */
-			if (/iframe/i.test($textarea.val())) {
-				$loader.show();
+		var options = {
+			callback: parseDescriptionContent,
+			wait: 750,
+			highlight: false,
+			allowSubmit: false,
+			captureLength: 2
+		}
 
-				delay(function(){
-					// Convert markdown
-					$preview.html(convert($textarea.val()));
-					$loader.hide();
-				}, 1500 );
-			} else {
-				// Convert markdown
-				$preview.html(convert($textarea.val()));
-			};
-		}).trigger('keyup');
+		$contentField.typeWatch(options);
 
 		$('input, textarea').keypress(function () {
 			// Unused: save status of the page as 'edited'
