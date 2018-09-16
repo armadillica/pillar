@@ -25,7 +25,6 @@
 			| {{ node | markdowned('description') }}
 		| {% endif %}
 
-
 	| {# DETAILS #}
 	section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 		ul.list-unstyled.m-0
@@ -114,12 +113,32 @@
 				| {% endif %}
 
 	| {% endblock node_details %}
+.container-fluid
+	.row
+		| {% block node_comments %}
+		.col-md-8.col-sm-12
+			#comments-embed
+				.comments-list-loading
+					i.pi-spin
+		| {% endblock node_comments %}
 
-	| {% block node_comments %}
-	#comments-embed
-		.comments-list-loading
-			i.pi-spin
-	| {% endblock node_comments %}
+		| {% if node.properties.tags %}
+		.col-md-4.d-none.d-lg-block
+			script(src="{{ url_for('static_cloud', filename='assets/js/tagged_assets.min.js') }}")
+			script.
+				$(function() {
+					$('.js-asset-list').loadTaggedAssets(4, 0);
+				})
+			.tagged-similar.p-3
+				h6 Similar assets
+				| {% for tag in node.properties.tags[:3] %}
+				| {% if loop.index < 4 %}
+				.card-deck.card-padless.card-deck-vertical.mx-0(
+						class="js-asset-list",
+						data-asset-tag="{{ tag }}")
+				| {% endif %}
+				| {% endfor %}
+		| {% endif %}
 
 | {% include 'nodes/custom/_scripts.html' %}
 
