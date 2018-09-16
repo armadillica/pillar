@@ -1,26 +1,28 @@
 | {% extends 'projects/landing.html' %}
+include ../../../mixins/components
 
 | {% block body %}
-| {% if node.picture %}
-header
-	img.header(src="{{ node.picture.thumbnail('h', api=api) }}")
-| {% endif  %}
+.expand-image-links.imgs-fluid
+	| {% if node.picture %}
+	+jumbotron(
+		"{{ node.name }}",
+		"{{ node._created | pretty_date }}{% if node.user.full_name %} · {{ node.user.full_name }}{% endif %}",
+		"{{ node.picture.thumbnail('h', api=api) }}",
+		"{{ node.url }}")
+	| {% endif %}
 
-#node-container
-	#node-overlay
+.container.pb-5
+	.row
+		.col-8.mx-auto
+			h2.pt-5.text-center {{node.name}}
 
-	.node-details-container.page.expand-image-links.imgs-fluid
+			| {% if node.description %}
+			.node-details-description
+				| {{ node | markdowned('description') }}
+			| {% endif %}
 
-		h2.pt-3.text-center {{node.name}}
-
-		hr
-
-		| {% if node.description %}
-		| {{ node | markdowned('description') }}
-		| {% endif %}
-
-		small.text-muted
-			span(title="created {{ node._created | pretty_date }}") Updated {{ node._updated | pretty_date }}
+			small.text-muted
+				span(title="created {{ node._created | pretty_date }}") Updated {{ node._updated | pretty_date }}
 
 include ../_scripts
 
