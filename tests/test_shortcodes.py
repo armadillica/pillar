@@ -58,9 +58,11 @@ class YouTubeTest(AbstractPillarTest):
         from pillar.shortcodes import render
 
         self.assertEqual(
-            '<iframe class="shortcode youtube" width="560" height="315" '
+            '<div class="embed-responsive embed-responsive-16by9">'
+            '<iframe class="shortcode youtube embed-responsive-item" width="560" height="315" '
             'src="https://www.youtube.com/embed/ABCDEF?rel=0" frameborder="0" '
-            'allow="autoplay; encrypted-media" allowfullscreen></iframe>',
+            'allow="autoplay; encrypted-media" allowfullscreen>'
+            '</iframe></div>',
             render('{youtube ABCDEF}')
         )
 
@@ -68,9 +70,11 @@ class YouTubeTest(AbstractPillarTest):
         from pillar.shortcodes import render
 
         self.assertEqual(
-            '<iframe class="shortcode youtube" width="560" height="315" '
+            '<div class="embed-responsive embed-responsive-16by9">'
+            '<iframe class="shortcode youtube embed-responsive-item" width="560" height="315" '
             'src="https://www.youtube.com/embed/ABCDEF?rel=0" frameborder="0" '
-            'allow="autoplay; encrypted-media" allowfullscreen></iframe>',
+            'allow="autoplay; encrypted-media" allowfullscreen>'
+            '</iframe></div>',
             render('{youtube http://youtube.com/embed/ABCDEF}')
         )
 
@@ -78,9 +82,11 @@ class YouTubeTest(AbstractPillarTest):
         from pillar.shortcodes import render
 
         self.assertEqual(
-            '<iframe class="shortcode youtube" width="560" height="315" '
+            '<div class="embed-responsive embed-responsive-16by9">'
+            '<iframe class="shortcode youtube embed-responsive-item" width="560" height="315" '
             'src="https://www.youtube.com/embed/NwVGvcIrNWA?rel=0" frameborder="0" '
-            'allow="autoplay; encrypted-media" allowfullscreen></iframe>',
+            'allow="autoplay; encrypted-media" allowfullscreen>'
+            '</iframe></div>',
             render('{youtube https://youtu.be/NwVGvcIrNWA}')
         )
 
@@ -88,9 +94,11 @@ class YouTubeTest(AbstractPillarTest):
         from pillar.shortcodes import render
 
         self.assertEqual(
-            '<iframe class="shortcode youtube" width="560" height="315" '
+            '<div class="embed-responsive embed-responsive-16by9">'
+            '<iframe class="shortcode youtube embed-responsive-item" width="560" height="315" '
             'src="https://www.youtube.com/embed/NwVGvcIrNWA?rel=0" frameborder="0" '
-            'allow="autoplay; encrypted-media" allowfullscreen></iframe>',
+            'allow="autoplay; encrypted-media" allowfullscreen>'
+            '</iframe></div>',
             render('{youtube "https://www.youtube.com/watch?v=NwVGvcIrNWA"}')
         )
 
@@ -98,9 +106,11 @@ class YouTubeTest(AbstractPillarTest):
         from pillar.shortcodes import render
 
         self.assertEqual(
-            '<iframe class="shortcode youtube" width="5" height="3" '
+            '<div class="embed-responsive embed-responsive-16by9">'
+            '<iframe class="shortcode youtube embed-responsive-item" width="5" height="3" '
             'src="https://www.youtube.com/embed/NwVGvcIrNWA?rel=0" frameborder="0" '
-            'allow="autoplay; encrypted-media" allowfullscreen></iframe>',
+            'allow="autoplay; encrypted-media" allowfullscreen>'
+            '</iframe></div>',
             render('{youtube "https://www.youtube.com/watch?v=NwVGvcIrNWA" width=5 height="3"}')
         )
 
