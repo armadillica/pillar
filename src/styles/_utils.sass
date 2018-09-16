@@ -130,7 +130,6 @@
 	transform: translate(-50%, -50%)
 
 =input-generic
-	// padding: 5px 5px 5px 0
 	color: $color-text-dark
 	background-color: transparent
 
@@ -361,16 +360,15 @@
 
 =node-details-description
 	+clearfix
-	color: darken($color-text-dark, 5%)
-	font:
-		weight: 300
-		size: 1.2em
-
+	color: $color-text
+	font-size: 1.33em
 	word-break: break-word
 
 	+media-xs
 		font-size: 1.1em
 
+	/* Style links without a class. Usually regular
+	 * links in a comment or node description. */
 	a:not([class])
 		color: $color-text-dark-primary
 		text-decoration: underline
@@ -382,11 +380,6 @@
 		margin-bottom: 20px
 		line-height: 1.5em
 		word-wrap: break-word
-
-	h1, h2, h3, h4, h5, h6
-		padding:
-			top: 20px
-			right: 20px
 
 	blockquote
 		background-color: lighten($color-background-light, 5%)
@@ -408,10 +401,10 @@
 	img,
 	p img,
 	ul li img
+		@extend .d-block
+		@extend .mx-auto
+		@extend .my-3
 		max-width: 100%
-		padding:
-			bottom: 25px
-			top: 25px
 
 		&.emoji
 			display: inline-block
@@ -424,25 +417,13 @@
 			font-size: 1.5em
 
 	/* e.g. YouTube embed */
-	iframe
-		height: auto
-		margin: 15px auto
+	iframe, video
 		max-width: 100%
-		min-height: 500px
-		width: 100%
+		@extend .mx-auto
 
-	+media-sm
-		iframe
-			min-height: 314px
-	+media-xs
-		iframe
-			min-height: 314px
-
-	iframe[src^="https://www.youtube"]
-		+media-xs
-			iframe
-				min-height: 420px
-		min-height: 500px
+	.embed-responsive,
+	video
+		@extend .my-3
 
 	iframe[src^="https://w.soundcloud"]
 		min-height: auto
@@ -570,9 +551,7 @@
 
 /* Bootstrap's img-responsive class */
 =img-responsive
-	display: block
-	max-width: 100%
-	height: auto
+	@extend .img-fluid
 
 /* Set the color for a specified property
  * 1: $property: e.g. background-color
