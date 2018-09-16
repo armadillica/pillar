@@ -14,11 +14,13 @@ include ../mixins/components
 
 +nav-secondary()
 	| {% if project.url != 'blender-cloud' %}
+	| {% if not project.is_private %}
 	li.text-capitalize
 		a.nav-link.text-muted.px-0(href="{{ category_url }}")
 			span {{ project.category }}
 	li.px-1
 		i.pi-angle-right
+	| {% endif %}
 
 	+nav-secondary-link(
 		class="px-1 font-weight-bold",
