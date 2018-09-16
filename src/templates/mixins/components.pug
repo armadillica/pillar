@@ -48,8 +48,8 @@ mixin nav-secondary-link()
 		a.nav-link&attributes(attributes)
 			block
 
-mixin card-deck()
-	.card-deck.card-padless.card-deck-responsive()&attributes(attributes)
+mixin card-deck(max_columns)
+	.card-deck.card-padless.card-deck-responsive(class="card-" + max_columns + "-columns")&attributes(attributes)
 		if block
 			block
 		else

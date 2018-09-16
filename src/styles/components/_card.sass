@@ -4,22 +4,36 @@
 		@extend .row
 
 		.card
-			@extend .col-md-3
-			+media-xs
+			@extend .col-md-4
+
+			+media-sm
 				flex: 1 0 50%
 				max-width: 50%
 
-			+media-sm
+			+media-md
 				flex: 1 0 33%
 				max-width: 33%
 
-			+media-md
+			+media-lg
+				flex: 1 0 33%
+				max-width: 33%
+
+			+media-xl
 				flex: 1 0 25%
 				max-width: 25%
 
-			+media-lg
+			+media-xxl
 				flex: 1 0 20%
 				max-width: 20%
+
+		&.card-3-columns .card
+			+media-xl
+				flex: 1 0 33%
+				max-width: 33%
+
+			+media-xxl
+				flex: 1 0 33%
+				max-width: 33%
 
 	&.card-deck-vertical
 		@extend .flex-column
