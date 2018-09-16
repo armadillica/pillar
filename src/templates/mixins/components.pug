@@ -6,7 +6,7 @@
 // #}
 mixin jumbotron(title, text, image, url)
 	if url
-		a.jumbotron.jumbotron-overlay.text-white(
+		a.jumbotron.text-white(
 			style='background-image: url(' + image + ');',
 			href=url)&attributes(attributes)
 			.container
@@ -19,7 +19,7 @@ mixin jumbotron(title, text, image, url)
 							.lead
 								=text
 	else
-		.jumbotron.jumbotron-overlay.text-white(style='background-image: url(' + image + ');')&attributes(attributes)
+		.jumbotron.text-white(style='background-image: url(' + image + ');')&attributes(attributes)
 			.container
 				.row
 					.col-md-9
