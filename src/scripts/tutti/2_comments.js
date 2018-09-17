@@ -40,11 +40,6 @@ $(document).on('click','body .comment-action-reply',function(e){
 	parentDiv.after(commentForm);
 	// document.getElementById('comment_field').focus();
 	$(commentField).focus();
-
-	// Convert Markdown
-	var convert = new Markdown.getSanitizingConverter().makeHtml;
-	var preview = $('.comment-reply-preview-md');
-	preview.html(convert($(commentField).val()));
 	$('.comment-reply-field').addClass('filled');
 });
 
@@ -59,10 +54,6 @@ $(document).on('click','body .comment-action-cancel',function(e){
 	delete commentField.dataset.originalParentId;
 
 	$(commentField).val('');
-	// Convert Markdown
-	var convert = new Markdown.getSanitizingConverter().makeHtml;
-	var preview = $('.comment-reply-preview-md');
-	preview.html(convert($(commentField).val()));
 
 	$('.comment-reply-field').removeClass('filled');
 	$('.comment-container').removeClass('is-replying');
