@@ -361,7 +361,7 @@
 =node-details-description
 	+clearfix
 	color: $color-text
-	font-size: 1.33em
+	font-size: 1.25em
 	word-break: break-word
 
 	+media-xs
@@ -671,3 +671,17 @@
 
 	&:before
 		+text-gradient($primary-accent, $primary)
+
+.title-underline
+	padding-bottom: 5px
+	position: relative
+	margin-bottom: 20px
+
+	&:before
+		background-color: $primary
+		content: ' '
+		display: block
+		height: 2px
+		top: 125%
+		position: absolute
+		width: 50px
