@@ -1,10 +1,17 @@
 $node-latest-thumbnail-size: 160px
 
-body.open-projects,
-body.courses,
-body.workshops
-	#project-container
-		+container-behavior
+/* Dark navbar when browsing a project. */
+body.project
+	nav.navbar
+		@extend .bg-dark
+		box-shadow: 0 2px $gray-700
+
+		.nav-link, .text-muted
+			color: $gray-400 !important
+
+		.nav-main .nav-link
+			@extend .text-dark
+
 
 #project-container
 	display: flex
@@ -26,22 +33,26 @@ body.workshops
 
 
 #project_nav,
+#project_tree,
 #project_nav-container
-	+media-lg
-		width: $project_nav-width-lg
-	+media-sm
-		width: $project_nav-width-sm
 	+media-xs
 		width: $project_nav-width-xs
+	+media-sm
+		width: $project_nav-width-sm
+	+media-md
+		width: $project_nav-width-md
+	+media-lg
+		width: $project_nav-width-lg
+	+media-xl
+		width: $project_nav-width-xl
 
 	width: $project_nav-width
 
 #project_nav-container
 	+media-xs
 		display: block
-		width: 100%
-		position: relative
 		height: initial !important
+		position: relative
 
 	position: fixed
 	z-index: $z-index-base + 5
@@ -94,34 +105,9 @@ body.workshops
 					width: $project-sidebar-width
 
 
-#search-container #project_sidebar ul.project-tabs li.tabs-thumbnail
-	background-color: $color-background-nav-dark
-	&:hover
-		background-color: $color-background-nav-light
-
 #project-nav,
 #project_context-container
 	flex: 1
-
-
-/* Container for navigation on the left */
-#project_nav
-	+media-lg
-		width: $project_nav-width-lg
-	+media-sm
-		width: $project_nav-width-sm
-	+media-xs
-		width: $project_nav-width-xs
-
-	display: block
-	left: 0
-	position: relative
-	visibility: visible
-	width: $project_nav-width
-
-	&.about
-		display: none
-		visibility: hidden
 
 
 /* Header with name and node edit tools */
@@ -494,40 +480,28 @@ $node-preview-max-height-lg: 700px
 				text-transform: uppercase
 
 section.node-preview
-	+media-md
-		max-height: $node-preview-max-height-md
-	+media-lg
-		max-height: $node-preview-max-height-lg
-
-	align-items: center
 	background-color: black
 	color: $color-text-light-primary
-	// display: flex
-	justify-content: center
-	max-height: 500px
-	// min-height: 200px
-	// overflow: hidden
+	flex-shrink: 0 // prevents content/comments to make preview dissappear
+	max-height: calc((9 / 16) * 133vh)
+  min-height: 200px
+	overflow: hidden
 
 	iframe
 		width: 100%
 
 	img
-		display: block
-		max-height: $node-preview-max-height-lg
+		@extend .d-block
+		@extend .mx-auto
 		max-width: 100%
 		object-fit: scale-down
+		flex: 1
 
 		+media-xs
 			width: 100%
 
-		+media-md
-			max-height: $node-preview-max-height-md
-		+media-lg
-			max-height: $node-preview-max-height-lg
-
 	&.image
 		cursor: zoom-in
-		display: flex
 		overflow: hidden
 
 	&.video
@@ -583,19 +557,10 @@ section.node-preview
 							color: $color-warning
 							margin-right: 10px
 
-	&.project
-		background-color: black
-		width: 100%
-
-		img
-			max-height: 800px
-			max-width: 100%
-			object-fit: cover
-			width: 100%
 
 section.node-preview-forbidden
 	align-items: center
-	background-color: $color-background-nav
+	background-color: $primary
 	color: $color-text-light
 	cursor: default
 	display: flex
@@ -1033,7 +998,7 @@ a.learn-more
 		width: auto
 		height: auto
 		background: black
-		box-shadow: 1px 1px 1px rgba(black, .5), 2px 2px 15px rgba(black, .5)
+		box-shadow: 1px 1px 1px rgba(black, .5), 2px 2px 25px rgba(black, .25)
 
 		visibility: hidden
 		display: none
@@ -1070,7 +1035,7 @@ a.learn-more
 			top: 0
 			left: 0
 			right: 0
-			@include overlay(rgba($color-background-nav, .9), 0%, transparent, 25%)
+			@include overlay(rgba(black, .9), 0%, transparent, 25%)
 
 			+text-overflow-ellipsis
 
@@ -1290,13 +1255,13 @@ a.learn-more
 
 		.list-node-children-item-thumbnail
 			height: $list-node-children-item-width
-			background-color: $color-background-nav
+			background-color: black
 
 		&:hover
 			opacity: 1
 
 			img
-				opacity: .15
+				opacity: .5
 
 			.list-node-children-item-name
 				opacity: 1
@@ -2021,5 +1986,3 @@ a.learn-more
 				padding: 5px 35px
 				text-align: center
 
-.ribbon
-	+ribbon

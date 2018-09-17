@@ -1,6 +1,6 @@
 /* Top level navigation bar. */
 .navbar
-	box-shadow: inset 0 -2px  $color-background
+	box-shadow: 0 2px  $color-background
 
 .nav
 	border: none
@@ -119,21 +119,21 @@
 	&:focus
 		box-shadow: inset 0 -3px 0 $primary
 
-	&.active
-		color: $primary
-		box-shadow: inset 0 -3px 0 $primary
-
 
 /* Secondary navigation. */
 $nav-secondary-bar-size: -2px
 .nav-secondary
 	align-items: center
-	box-shadow: inset 0 $nav-secondary-bar-size 0 0 $color-background
 
 	.nav-link
 		color: $color-text
 		cursor: pointer
+		margin-bottom: 2px
 		transition: color 150ms ease-in-out
+
+		span
+			position: relative
+			top: 2px
 
 		&:after
 			background-color: transparent
@@ -155,12 +155,16 @@ $nav-secondary-bar-size: -2px
 			background-image: linear-gradient(to right, $primary-accent 70%, $primary)
 			height: 2px
 			width: 100%
+			bottom: -2px
 
 		span
 			+active-gradient
 
 		i
 			color: $primary-accent
+
+	.nav-link.active
+		font-weight: bold
 
 	&.nav-secondary-vertical
 		align-items: flex-start
@@ -186,6 +190,8 @@ $nav-secondary-bar-size: -2px
 
 // Big navigation dropdown.
 .nav-main
+	min-width: initial
+
 	.nav-secondary
 		.nav-link
 			@extend .pr-5
