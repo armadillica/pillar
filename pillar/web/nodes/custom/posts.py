@@ -108,11 +108,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
     else:
         project.blog_archive_prev = None
 
-    title = 'blog_main' if is_main_project else 'blog'
-
-    pages = Node.all({
-        'where': {'project': project._id, 'node_type': 'page'},
-        'projection': {'name': 1}}, api=api)
+    navigation_links = project_navigation_links(project, api)
 
     return render_template(
         template_path,
@@ -122,11 +118,9 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
         posts_meta=pmeta,
         more_posts_available=pmeta['total'] > pmeta['max_results'],
         project=project,
-        title=title,
         node_type_post=project.get_node_type('post'),
         can_create_blog_posts=can_create_blog_posts,
         navigation_links=navigation_links,
-        pages=pages._items,
         api=api)
 
 
