@@ -15,7 +15,7 @@
 		span.texture-info-files {{ children|length }} item{% if children|length != 1 %}s{% endif %}
 	| {% endif %}
 
-	section.node-children.group.texture
+	section.node-children.group.texture.px-3
 
 		| {% for child in children %}
 		a.list-node-children-container(
@@ -49,7 +49,7 @@
 
 					| {% if child.permissions.world %}
 					.list-node-children-item-ribbon
-						span free
+						span FREE
 					| {% endif %}
 
 					| {% if child.node_type == 'texture' %}

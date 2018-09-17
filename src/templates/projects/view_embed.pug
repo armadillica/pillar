@@ -2,7 +2,7 @@
 include ../mixins/components
 
 | {% block body %}
-section.node-preview.project
+section.node-preview
 	| {% if header_video_file %}
 	.embed-responsive.embed-responsive-16by9
 		video#videoplayer.video-js.vjs-fluid.embed-responsive-item(
@@ -19,8 +19,7 @@ section.node-preview.project
 				To view this video please enable JavaScript, and consider upgrading to a web browser that
 				<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
 	| {% elif project.picture_header %}
-	a(href="{{ url_for( 'projects.view', project_url=project.url) }}")
-		img.header(src="{{ project.picture_header.thumbnail('l', api=api) }}")
+	img.node-preview-thumbnail(src="{{ project.picture_header.thumbnail('l', api=api) }}")
 	| {% endif %}
 
 section.px-4

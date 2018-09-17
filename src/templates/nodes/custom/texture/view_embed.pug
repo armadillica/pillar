@@ -1,10 +1,9 @@
 | {% block body %}
 
 #node-container.texture
-	#node-overlay
-
-	.texture-title#node-title
-		| {{node.name}}
+	section.px-4
+		h4.pt-4.mb-3(class="js-texture-title")
+			| {{node.name}}
 
 	| {% if node.properties.license_type %}
 	| {% if node.properties.license_notes %}
@@ -24,15 +23,6 @@
 	| {% endif %}
 	| {% endif %}
 
-	| {% if node.permissions.world %}
-	.texture-license.public(
-		data-toggle="tooltip",
-		data-placement="bottom",
-		title="Anybody can download. Share it!")
-		i.pi-lock-open
-		span Public
-	| {% endif %}
-
 	ul.node-row.texture-info
 		| {% if node.properties.files %}
 		li
@@ -44,9 +34,20 @@
 			i.pi-puzzle
 			| {% if not node.properties.is_tileable %}Not {% endif %}Seamless
 
+		li.ml-auto
+
+		| {% if node.permissions.world %}
+		li.text-success(
+			data-toggle="tooltip",
+			data-placement="left",
+			title="Anybody can download. Share it!")
+			i.pi-lock-open
+			span Public
+		| {% endif %}
+
 		| {# Display publishing status only to editors #}
 		| {% if node.has_method('PUT') %}
-		li.status(
+		li(
 			class="{{ node.properties.status }}",
 			title="Status")
 			| Status: #[strong {{ node.properties.status | undertitle }}]
@@ -68,37 +69,32 @@
 
 		section.node-details-container.texture
 
-			.node-details-header
-				.node-title {{map_type}}
+			.px-3.d-flex.flex-column.h-100
+				h5 {{ map_type }}
 
-			.node-details-attributes
-				span.sizes
-					span.x
-						| Width:
-						strong {{ f.file.width }}
-					span.y
-						| Height:
-						strong {{ f.file.height }}
-				span.length
-					| {{ f.file.length | filesizeformat }}
-				span.content_type
-					| {{ f.file.content_type }}
+				.d-flex.flex-column.text-black-50.h-100
+					span
+						| #[strong(title='Width') {{ f.file.width }}] x #[strong(title='Height') {{ f.file.height }}]
 
-			.node-details-meta
-				ul.node-details-meta-list
+					span.mt-auto {{ f.file.length | filesizeformat }}
+					span.text-uppercase.pt-1
+						| {{ f.file.content_type }}
+
+				ul.list-unstyled.mt-auto.pt-2
 					li.node-details-meta-list-item.texture.download
 						| {% if f.file.link %}
-						a(href="{{ f.file.link }}",,
+						a(href="{{ f.file.link }}",
 							title="Download texture",
 							download="{{ f.file.filename }}")
-							button.btn.btn-outline-secondary(type="button")
+							button.btn.btn-sm.btn-outline-primary.px-3.btn-block(type="button")
 								i.pi-download
 								|  Download
 						| {% else %}
-						button.btn.btn-outline-secondary.disabled.sorry(type="button")
+						button.btn.btn-sm.btn-outline-primary.px-3.btn-block.disabled(type="button")
 							i.pi-lock
 							| Download
 						| {% endif %}
+
 	| {% else %}
 	section.node-row
 		section.node-details-container.texture
@@ -116,9 +112,9 @@ script.
 	// Generate GA pageview
 	ga('send', 'pageview', location.pathname);
 
-	var str = $('.texture-title').text();
+	var str = $('.js-texture-title').text();
 	var to_replace = /_color|_bump|_specular|_normal|_translucency|_emission|_alpha|_tileable|.jpg|.png/g;
-	$('.texture-title').text(str.replace(to_replace,'').replace(/_/g,' '));
+	$('.js-texture-title').text(str.replace(to_replace,'').replace(/_/g,' '));
 
 	$('.node-preview-thumbnail').each(function(i){
 		$(this).closest('.node-preview').css({'height' : $(this).width() / $(this).data('aspect_ratio')});
@@ -175,12 +171,6 @@ script.
 			}
 		);
 
-	});
-
-	$('.sorry').click(function() {
-		$.get('/403', function(data) {
-			$('#node-overlay').html(data).show().addClass('active');
-		})
 	});
 
 	$('#node-overlay').click(function(){

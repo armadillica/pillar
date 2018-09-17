@@ -3,8 +3,11 @@
 | {% block node_preview %}
 | {% if node.picture %}
 | {% if current_user.has_cap('subscriber') or node.permissions.world %}
-section.node-preview.image.js-node-preview-image
-	img.node-preview-thumbnail(src="{{ node.picture.thumbnail('l', api=api) }}")
+section.node-preview.d-flex.justify-content-center(
+	class="js-node-preview-image")
+	img.node-preview-thumbnail(
+		src="{{ node.picture.thumbnail('l', api=api) }}",
+		alt="{{ node.name }}")
 | {% else %}
 | {% include 'nodes/custom/_node_preview_forbidden.html' %}
 | {% endif %}
@@ -120,7 +123,8 @@ section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 					i.pi-spin
 		| {% endblock node_comments %}
 
-		| {% if node.properties.tags %}
+		| {# Check if tags is defined and there is _actually_ a tag at least #}
+		| {% if node.properties.tags and node.properties.tags[0] %}
 		.col-md-4.d-none.d-lg-block
 			script(src="{{ url_for('static_cloud', filename='assets/js/tagged_assets.min.js') }}")
 			script.
