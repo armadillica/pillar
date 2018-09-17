@@ -330,7 +330,7 @@ def project_navigation_links(project, api) -> list:
     }, api=api)
 
     if blog:
-        links.append({'url': finders.find_url_for_node(blog), 'label': blog.name})
+        links.append({'url': finders.find_url_for_node(blog), 'label': blog.name, 'slug': 'blog'})
 
     # Fetch pages
     pages = Node.all({
@@ -343,8 +343,7 @@ def project_navigation_links(project, api) -> list:
 
     # Process the results and append the links to the list
     for p in pages._items:
-
-        links.append({'url': finders.find_url_for_node(p), 'label': p.name})
+        links.append({'url': finders.find_url_for_node(p), 'label': p.name, 'slug': p.properties.url})
 
     return links
 
