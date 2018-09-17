@@ -19,6 +19,7 @@ from pillar.web.nodes.routes import url_for_node
 from pillar.web.nodes.forms import get_node_form
 import pillar.web.nodes.attachments
 from pillar.web.projects.routes import project_update_nodes_list
+from pillar.web.projects.routes import project_navigation_links
 
 log = logging.getLogger(__name__)
 
@@ -124,6 +125,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
         title=title,
         node_type_post=project.get_node_type('post'),
         can_create_blog_posts=can_create_blog_posts,
+        navigation_links=navigation_links,
         pages=pages._items,
         api=api)
 
