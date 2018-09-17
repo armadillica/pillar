@@ -45,7 +45,7 @@ section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 			| {{ node.properties.status | undertitle }}
 		| {% endif %}
 
-		li.px-2(title="Author")
+		li.pr-2(title="Author")
 			| {{ node.user.full_name }}
 			| {{ node.user.badges.html|safe }}
 
@@ -87,7 +87,7 @@ section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 				title="Download {{ node.properties.content_type | undertitle }}",
 				href="{{ node.file.link }}",
 				download="{{ node.file.filename }}")
-				button.btn.btn-sm.btn-outline-primary.px-3(type="button")
+				button.btn.btn-outline-primary.px-3(type="button")
 					i.pi-download.pr-2
 					| Download
 			| {% endblock node_download %}
@@ -118,7 +118,7 @@ section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 	.row
 		| {% block node_comments %}
 		.col-md-8.col-sm-12
-			#comments-embed
+			#comments-embed.p-2
 				.comments-list-loading
 					i.pi-spin
 		| {% endblock node_comments %}

@@ -123,7 +123,6 @@ $tree-color-highlight-background-text: $primary
 
 			/* Selected item */
 			&.jstree-clicked
-				background-color: $tree-color-highlight-background !important
 				color: $tree-color-highlight-background-text !important
 				font-weight: bold
 
@@ -137,15 +136,11 @@ $tree-color-highlight-background-text: $primary
 
 				/* hover an active item */
 				&.jstree-hovered
-					background-color: lighten($tree-color-highlight-background, 10%) !important
 					box-shadow: none
 					color: $tree-color-highlight-background-text !important
 
 				&.jstree-hovered .jstree-icon
 					color: $tree-color-highlight-background-text !important
-
-			.jstree-hovered
-				background-color: rgba($tree-color-highlight, .1) !important
 
 	.jstree-leaf .jstree-clicked
 		width: 100% !important
@@ -193,63 +188,6 @@ $tree-color-highlight-background-text: $primary
 					&:after
 						display: none !important
 
-	&.blog
-		.jstree-anchor
-			padding: 6px 6px 6px 12px
-
-			&:hover
-				color: $tree-color-highlight
-
-			&.post
-				border-bottom: thin solid $color-background-dark
-
-			&.jstree-clicked
-				&.post
-					background-color: transparent !important
-
-					&:after
-						top: 8px
-						color: $tree-color-highlight !important
-
-					.tree-item-info
-						color: $color-text
-
-					.tree-item-title
-						color: $tree-color-highlight
-
-		.tree-item
-			line-height: initial
-			padding-right: 10px
-
-			&-title
-				font-size: 1.2em
-				overflow: initial
-				text-overflow: initial
-				white-space: normal
-
-			&-info
-				color: $color-text-dark-secondary
-				display: block
-				font-size: .8em
-				padding: 5px
-
-			&-thumbnail
-				align-items: center
-				background-color: $color-background
-				border-radius: 3px
-				color: $color-text-dark-secondary
-				display: flex
-				float: left
-				height: 70px
-				justify-content: center
-				margin: 0 10px 0 -5px
-				width: 70px
-
-				img
-					height: 70px
-					width: 70px
-
-
 .jstree-loading
 	padding: 5px
 	color: $color-text-light-secondary
@@ -276,11 +214,9 @@ $tree-color-highlight-background-text: $primary
 
 
 a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked
-	background-color: rgba($tree-color-highlight-background, .8) !important
 	color: $tree-color-highlight-background-text !important
 
 a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked
-	background-color: rgba($tree-color-highlight-background, .8) !important
 	color: $tree-color-highlight-background-text !important
 
 i.jstree-icon.jstree-ocl
