@@ -5,8 +5,7 @@ import pymongo.errors
 import werkzeug.exceptions as wz_exceptions
 from flask import current_app, Blueprint, request
 
-from pillar.api.nodes import hooks
-from pillar.api.nodes.hooks import short_link_info
+from pillar.api.nodes import eve_hooks
 from pillar.api.utils import str2id, jsonify
 from pillar.api.utils.authorization import check_permissions, require_login
 
@@ -47,7 +46,7 @@ def share_node(node_id):
         else:
             return '', 204
 
-    return jsonify(short_link_info(short_code), status=status)
+    return jsonify(eve_hooks.short_link_info(short_code), status=status)
 
 
 @blueprint.route('/tagged/')
@@ -195,26 +194,26 @@ def setup_app(app, url_prefix):
     from . import patch
     patch.setup_app(app, url_prefix=url_prefix)
 
-    app.on_fetched_item_nodes += hooks.before_returning_node
-    app.on_fetched_resource_nodes += hooks.before_returning_nodes
+    app.on_fetched_item_nodes += eve_hooks.before_returning_node
+    app.on_fetched_resource_nodes += eve_hooks.before_returning_nodes
 
-    app.on_replace_nodes += hooks.before_replacing_node
-    app.on_replace_nodes += hooks.parse_markdown
-    app.on_replace_nodes += hooks.texture_sort_files
-    app.on_replace_nodes += hooks.deduct_content_type
-    app.on_replace_nodes += hooks.node_set_default_picture
-    app.on_replaced_nodes += hooks.after_replacing_node
+    app.on_replace_nodes += eve_hooks.before_replacing_node
+    app.on_replace_nodes += eve_hooks.parse_markdown
+    app.on_replace_nodes += eve_hooks.texture_sort_files
+    app.on_replace_nodes += eve_hooks.deduct_content_type
+    app.on_replace_nodes += eve_hooks.node_set_default_picture
+    app.on_replaced_nodes += eve_hooks.after_replacing_node
 
-    app.on_insert_nodes += hooks.before_inserting_nodes
-    app.on_insert_nodes += hooks.parse_markdowns
-    app.on_insert_nodes += hooks.nodes_deduct_content_type
-    app.on_insert_nodes += hooks.nodes_set_default_picture
-    app.on_insert_nodes += hooks.textures_sort_files
-    app.on_inserted_nodes += hooks.after_inserting_nodes
+    app.on_insert_nodes += eve_hooks.before_inserting_nodes
+    app.on_insert_nodes += eve_hooks.parse_markdowns
+    app.on_insert_nodes += eve_hooks.nodes_deduct_content_type
+    app.on_insert_nodes += eve_hooks.nodes_set_default_picture
+    app.on_insert_nodes += eve_hooks.textures_sort_files
+    app.on_inserted_nodes += eve_hooks.after_inserting_nodes
 
-    app.on_update_nodes += hooks.texture_sort_files
+    app.on_update_nodes += eve_hooks.texture_sort_files
 
-    app.on_delete_item_nodes += hooks.before_deleting_node
-    app.on_deleted_item_nodes += hooks.after_deleting_node
+    app.on_delete_item_nodes += eve_hooks.before_deleting_node
+    app.on_deleted_item_nodes += eve_hooks.after_deleting_node
 
     app.register_api_blueprint(blueprint, url_prefix=url_prefix)
