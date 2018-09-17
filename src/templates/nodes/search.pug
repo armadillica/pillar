@@ -5,7 +5,7 @@ include ../mixins/components
 | {% block page_title %}Search{% if project %} {{ project.name }}{% endif %}{% endblock %}
 
 | {% block head %}
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-6.2.8.min.js') }}")
+script(src="{{ url_for('static_pillar', filename='assets/js/vendor/video.min.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-ga-0.4.2.min.js') }}")
 script(src="{{ url_for('static_pillar', filename='assets/js/vendor/videojs-hotkeys-0.2.20.min.js') }}")
 | {% endblock %}
@@ -31,27 +31,26 @@ script.
 	document.body.dataset["projectId"] = "{{project._id}}";
 | {% endif %}
 
-| {% if project %}
-#project_sidebar.bg-white
-	ul.project-tabs.p-0
-		li.tabs-browse(
-			title="Browse",
-			data-toggle="tooltip",
-			data-placement="right")
-			a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-				i.pi-folder
-
-		li.tabs-search.active(
-			title="Search",
-			data-toggle="tooltip",
-			data-placement="right")
-			a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
-				i.pi-search
-| {% endif %}
-
-
 #search-container.d-flex(class="{% if project %}search-project{% endif %}")
-	.search-list
+	| {% if project %}
+	#project_sidebar.bg-white
+		ul.project-tabs.p-0
+			li.tabs-browse(
+				title="Browse",
+				data-toggle="tooltip",
+				data-placement="right")
+				a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
+					i.pi-folder
+
+			li.tabs-search.active(
+				title="Search",
+				data-toggle="tooltip",
+				data-placement="right")
+				a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
+					i.pi-search
+	| {% endif %}
+
+	.search-settings#search-sidebar.bg-light
 		input.search-field.p-2.bg-white(
 			type="text",
 			name="q",
@@ -62,13 +61,12 @@ script.
 			placeholder="Search by Title, Type...")
 
 		#pagination.mt-3
-
-		//- #accordion.panel-group.accordion(role="tablist", aria-multiselectable="true")
 		#facets
-
 		#stats.search-list-stats
 
-		+card-deck()(id='hits', class="h-100 m-0 pt-3 pr-2 card-deck-vertical")
+	.border-left.search-list
+
+		+card-deck(0)(id='hits', class="m-0 px-2 card-deck-vertical")
 
 	#search-details.border-left.search-details
 		#search-error
@@ -78,22 +76,19 @@ script.
 | {% raw %}
 // Facet template
 script(type="text/template", id="facet-template")
-	.card
-		a(data-toggle='collapse', data-parent='#accordion', href='#filter_{{ facet }}', aria-expanded='true', aria-controls='filter_{{ facet }}')
-			.card-header(role='tab')
-				.card-title {{ title }}
-		.collapse.show(id='filter_{{ facet }}', role='tabpanel', aria-labelledby='headingOne')
-			.card-body
-				| {{#values}}
-				a.facet_link.toggleRefine(
-					class='{{#refined}}refined{{/refined}}',
-					data-facet='{{ facet }}',
-					data-value='{{ value }}',
-					href='#')
-					span
-						| {{ label }}
-						small.facet_count.pull-right {{ count }}
-				| {{/values}}
+	.card.border-0.p-0.m-2
+		.card-body.p-3.m-0
+			h6.text-muted {{ title }}
+			| {{#values}}
+			a.facet_link.toggleRefine(
+				class='{{#refined}}refined{{/refined}}',
+				data-facet='{{ facet }}',
+				data-value='{{ value }}',
+				href='#')
+				span
+					| {{ label }}
+					small.text-black-50.float-right {{ count }}
+			| {{/values}}
 
 
 // Hit template
@@ -177,6 +172,8 @@ script.
 		$(this).addClass('active');
 	});
 
+	projectBrowseTypeList();
+
 	// Remove focus from search input so that the click event
 	// bound to .search-hit can be fired on the first click.
 	$('#search-list').hover(function(){
@@ -210,5 +207,5 @@ script.
 
 | {% endblock %}
 
-| {% block footer_navigation %}{% endblock %}
+| {% block footer_container %}{% endblock %}
 | {% block footer %}{% endblock %}
