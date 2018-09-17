@@ -196,8 +196,6 @@ $comments-width-max: 710px
 						cursor: pointer
 						font-family: 'pillar-font'
 						height: 25px
-						position: relative
-						top: 4px
 						width: 16px
 
 					.comment-action-rating.up
@@ -286,10 +284,11 @@ $comments-width-max: 710px
 					color: $color-success
 
 			&.is-replying
-				box-shadow: inset 5px 0 0 $color-primary
+				box-shadow: -5px 0 0 $color-primary
+				@extend .pl-3
 
 			&.is-replying+.comment-reply-container
-				box-shadow: inset 5px 0 0 $color-primary
+				box-shadow: -5px 0 0 $color-primary
 				margin-left: 0
 				padding-left: 55px
 
