@@ -29,8 +29,10 @@ include ../mixins/components
 	| {% endif %}
 
 	| {% for link in navigation_links %}
-	+nav-secondary-link(href="{{ link['url'] }}")
-		| {{ link['label'] }}
+	+nav-secondary-link(
+		href="{{ link['url'] }}",
+		class="{% if link['slug'] == title %}active{% endif %}")
+		span {{ link['label'] }}
 	| {% endfor %}
 
 	| {% if project.nodes_featured %}
