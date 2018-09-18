@@ -8,7 +8,7 @@ include ../../../mixins/components
 	| {% if node.picture %}
 	+jumbotron(
 		"{{ node.name }}",
-		"{{ node._created | pretty_date }}{% if node.user.full_name %} · {{ node.user.full_name }}{% endif %}",
+		null,
 		"{{ node.picture.thumbnail('h', api=api) }}",
 		"{{ node.url }}")
 	| {% endif %}
@@ -16,10 +16,8 @@ include ../../../mixins/components
 .container.pb-5
 	.row
 		.col-8.mx-auto
-			h2.pt-5.pb-3.text-center {{ node.name }}
-
 			| {% if node.description %}
-			.node-details-description
+			.node-details-description.pt-5
 				| {{ node | markdowned('description') }}
 			| {% endif %}
 
