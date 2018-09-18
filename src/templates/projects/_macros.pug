@@ -17,7 +17,7 @@ include ../mixins/components
 	| {% if not project.is_private %}
 	li.text-capitalize
 		a.nav-link.text-muted.px-0(href="{{ category_url }}")
-			span {{ project.category }}
+			span {{ project.category }}s
 	li.px-1
 		i.pi-angle-right
 	| {% endif %}
@@ -46,7 +46,7 @@ include ../mixins/components
 			href="{{ url_for('projects.view_node', project_url=project.url, node_id=featured_node_id) }}",
 			title="Explore {{ project.name }}",
 			class="{% if title == 'project' %}active{% endif %}")
-			span Explore
+			span Browse
 	| {% endif %}
 
 | {% endmacro %}
