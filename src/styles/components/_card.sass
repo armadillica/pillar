@@ -27,10 +27,6 @@
 				max-width: 20%
 
 		&.card-3-columns .card
-			+media-xl
-				flex: 1 0 33%
-				max-width: 33%
-
 			+media-xxl
 				flex: 1 0 33%
 				max-width: 33%
@@ -42,6 +38,8 @@
 		.card
 			@extend .w-100
 			@extend .flex-row
+			@extend .p-0
+
 			flex: initial
 			flex-wrap: wrap
 			max-width: 100%
@@ -53,8 +51,19 @@
 				@extend .mr-2
 				max-width: 120px
 
+			&.asset
+				&.free
+					&:after
+						+ribbon
+						content: 'FREE'
+						left: -40px
+						right: initial
+						transform: rotate(-45deg)
+						padding: 1px 45px
+
 		.card-body
 			@extend .overflow-hidden
+			flex-basis: 0
 
 .card-padless
 	.card
