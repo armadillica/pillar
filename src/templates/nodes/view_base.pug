@@ -3,7 +3,7 @@
 | {% block node_preview %}
 | {% if node.picture %}
 | {% if current_user.has_cap('subscriber') or node.permissions.world %}
-section.node-preview.d-flex.justify-content-center(
+section.node-preview.d-flex.justify-content-center.cursor-zoom-in(
 	class="js-node-preview-image")
 	img.node-preview-thumbnail(
 		src="{{ node.picture.thumbnail('l', api=api) }}",

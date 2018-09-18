@@ -485,8 +485,8 @@ section.node-preview
 	color: $color-text-light-primary
 	flex-shrink: 0 // prevents content/comments to make preview dissappear
 	max-height: calc((9 / 16) * 133vh)
-  min-height: 200px
 	overflow: hidden
+	min-height: 200px
 
 	iframe
 		width: 100%
@@ -500,10 +500,6 @@ section.node-preview
 
 		+media-xs
 			width: 100%
-
-	&.image
-		cursor: zoom-in
-		overflow: hidden
 
 	&.video
 		background-color: black
