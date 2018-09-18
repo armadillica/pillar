@@ -40,7 +40,7 @@ class ProjectTest(AbstractPillarTest):
             navigation_links = project_navigation_links(project, api=api)
 
             # We expect only one link to be in the list
-            links = [{'url': '/p/default-project/about', 'label': 'About'}]
+            links = [{'url': '/p/default-project/about', 'slug': 'about', 'label': 'About'}]
             self.assertListEqual(links, navigation_links)
 
     def test_project_navigation_links_pages_and_blog(self):
@@ -89,9 +89,10 @@ class ProjectTest(AbstractPillarTest):
             project = find_project_or_404(self.project['url'], api=api)
             navigation_links = project_navigation_links(project, api=api)
             expected_list = [
-                {'url': '/blog/', 'label': 'Blog'},  # Blog is the first element of the list (since it's added first)
-                {'url': '/p/default-project/about', 'label': 'About'},
-                {'url': '/p/default-project/awards', 'label': 'Awards'}]
+                # Blog is the first element of the list (since it's added first)
+                {'url': '/blog/', 'slug': 'blog', 'label': 'Blog'},
+                {'url': '/p/default-project/about', 'slug': 'about', 'label': 'About'},
+                {'url': '/p/default-project/awards', 'slug': 'awards', 'label': 'Awards'}]
 
             self.assertListEqual(expected_list, navigation_links)
 
