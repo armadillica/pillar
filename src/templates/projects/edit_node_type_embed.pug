@@ -17,13 +17,16 @@ form(
 
 	.row
 		.col-md-9
-			h3 Editing: {{ node_type['name'] }}
+			h5.text-info {{ node_type['name'] | undertitle }}
+
 		.col-md-3
-			button.js-form-save.btn.btn-success.pull-right(style="margin-top: 15px;")
+			button.btn.btn-sm.btn-outline-success.float-right.px-3(
+				class="js-form-save")
+				i.pr-2.pi-check
 				| Save Changes
 
 	.row
-		.col-md-12
+		.col-md-12.pt-2
 			| {% for field in form %}
 			| {% if field.name == 'csrf_token' %}
 			| {{ field }}
@@ -46,7 +49,9 @@ form(
 			| {% endif %}
 			| {% endfor %}
 
-			button.js-form-save.btn.btn-success.pull-right
+			button.btn.btn-sm.btn-outline-success.float-right.px-3(
+				class="js-form-save")
+				i.pr-2.pi-check
 				| Save Changes
 
 

@@ -1,9 +1,8 @@
 /* jsTree overrides */
-
 $tree-color-text: $color-text-dark-primary
-$tree-color-highlight: hsl(hue($color-background-active), 40%, 50%)
-$tree-color-highlight-background: hsl(hue($color-background-active), 40%, 50%)
-$tree-color-highlight-background-text: white
+$tree-color-highlight: $color-primary-accent
+$tree-color-highlight-background: $white
+$tree-color-highlight-background-text: $primary
 
 .jstree-default
 	/* list item */
@@ -34,11 +33,10 @@ $tree-color-highlight-background-text: white
 
 		&[data-node-type="page"],
 		&[data-node-type="blog"]
-			color: darken($tree-color-highlight, 5%)
 			font-weight: bold
 
 			.jstree-anchor
-				padding: 5px 8px 1px 8px
+				padding: 0 6px
 
 				&:after
 					top: 3px !important
@@ -63,49 +61,48 @@ $tree-color-highlight-background-text: white
 		&.jstree-open
 			/* Text of children for an open tree (like a folder) */
 			.jstree-children > .jstree-node
-				padding-left: 15px !important
+				padding-left: 16px !important
 
 				.jstree-icon:empty
 					left: 20px !important
 
 					// Tweaks for specific icons
 					&.pi-file-archive
-						left: 22px !important
+						left: 25px !important
 					&.pi-folder
-						left: 21px !important
+						left: 20px !important
 						font-size: .9em !important
-					&.pi-film-thick
-						left: 22px !important
+					&.pi-splay
+						left: 20px !important
 						font-size: .85em !important
 
 				.jstree-anchor
-					box-shadow: inset 1px 0 0 0 rgba($tree-color-text, .2)
+					// box-shadow: inset 1px 0 0 0 $color-background
 
 		/* Closed Folder */
 		// &.jstree-closed
 
 		&.jstree-open .jstree-icon.jstree-ocl,
 		&.jstree-closed .jstree-icon.jstree-ocl
+			float: left
+			min-width: 30px
+			opacity: 0
 			position: absolute
 			z-index: 1
-			opacity: 0
-			min-width: 30px
-			float: left
 
 		/* The text of the last level item */
 		.jstree-anchor
 			+media-xs
-				width: 98%
 				padding: 0 !important
+				width: 98%
 			border: none
+			font-size: 13px
 			height: inherit
-			line-height: 26px
+			line-height: 24px
 			overflow: hidden
 			padding-left: 28px
 			padding-right: 10px
 			text-overflow: ellipsis
-			transition: none
-			transition: color 50ms ease-in-out, background-color 100ms ease-in-out
 			white-space: nowrap
 			width: 100%
 
@@ -113,7 +110,7 @@ $tree-color-highlight-background-text: white
 			&:after
 				content: '\e83a' !important
 				font-family: 'pillar-font'
-				color: white
+				color: $tree-color-highlight-background-text
 				display: none
 				position: absolute
 				right: 7px
@@ -121,34 +118,29 @@ $tree-color-highlight-background-text: white
 
 			// Icon, not selected
 			.jstree-icon
-				color: $color-text-dark-secondary
-				font-size: 95% !important
+				color: $tree-color-text
 				margin: 0 !important
 
 			/* Selected item */
 			&.jstree-clicked
-				background-color: $tree-color-highlight-background !important
-				color: white !important
+				color: $tree-color-highlight-background-text !important
+				font-weight: bold
 
 				&:after
 					display: block
-					color: white !important
+					color: $tree-color-highlight-background-text !important
 
 				.jstree-ocl,
 				.jstree-icon
-					color: white
+					color: $tree-color-highlight-background-text
 
 				/* hover an active item */
 				&.jstree-hovered
-					background-color: lighten($tree-color-highlight-background, 10%) !important
 					box-shadow: none
-					color: white !important
+					color: $tree-color-highlight-background-text !important
 
 				&.jstree-hovered .jstree-icon
-					color: white !important
-
-			.jstree-hovered
-				background-color: rgba($tree-color-highlight, .1) !important
+					color: $tree-color-highlight-background-text !important
 
 	.jstree-leaf .jstree-clicked
 		width: 100% !important
@@ -184,8 +176,8 @@ $tree-color-highlight-background-text: white
 		position: absolute
 
 		&:empty
-			line-height: 26px
-			left: 5px
+			line-height: 24px
+			left: 3px
 
 	&.is_subscriber
 		.jstree-node
@@ -195,63 +187,6 @@ $tree-color-highlight-background-text: white
 
 					&:after
 						display: none !important
-
-	&.blog
-		.jstree-anchor
-			padding: 6px 6px 6px 12px
-
-			&:hover
-				color: $tree-color-highlight
-
-			&.post
-				border-bottom: thin solid $color-background-dark
-
-			&.jstree-clicked
-				&.post
-					background-color: transparent !important
-
-					&:after
-						top: 8px
-						color: $tree-color-highlight !important
-
-					.tree-item-info
-						color: $color-text
-
-					.tree-item-title
-						color: $tree-color-highlight
-
-		.tree-item
-			line-height: initial
-			padding-right: 10px
-
-			&-title
-				font-size: 1.2em
-				overflow: initial
-				text-overflow: initial
-				white-space: normal
-
-			&-info
-				color: $color-text-dark-secondary
-				display: block
-				font-size: .8em
-				padding: 5px
-
-			&-thumbnail
-				align-items: center
-				background-color: $color-background
-				border-radius: 3px
-				color: $color-text-dark-secondary
-				display: flex
-				float: left
-				height: 70px
-				justify-content: center
-				margin: 0 10px 0 -5px
-				width: 70px
-
-				img
-					height: 70px
-					width: 70px
-
 
 .jstree-loading
 	padding: 5px
@@ -269,7 +204,7 @@ $tree-color-highlight-background-text: white
 
 .jstree-default .jstree-node.jstree-closed .jstree-icon.jstree-ocl + .jstree-anchor,
 .jstree-default .jstree-node.jstree-open .jstree-icon.jstree-ocl + .jstree-anchor
-	padding-left: 28px !important
+	padding-left: 24px !important
 
 /* hovered text */
 .jstree-default .jstree-hovered,
@@ -279,12 +214,10 @@ $tree-color-highlight-background-text: white
 
 
 a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked
-	background-color: rgba($tree-color-highlight-background, .8) !important
-	color: white !important
+	color: $tree-color-highlight-background-text !important
 
 a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked+ul li a.jstree-anchor.jstree-clicked
-	background-color: rgba($tree-color-highlight-background, .8) !important
-	color: white !important
+	color: $tree-color-highlight-background-text !important
 
 i.jstree-icon.jstree-ocl
 	color: rgba($tree-color-text, .5) !important

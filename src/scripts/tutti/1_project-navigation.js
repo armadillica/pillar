@@ -66,12 +66,9 @@ function containerResizeY(window_height){
 
 	var project_container = document.getElementById('project-container');
 	var container_offset = project_container.offsetTop;
-	var nav_header_height = $('#project_nav-header').height();
 	var container_height = window_height - container_offset.top;
-	var container_height_wheader = window_height - container_offset.top - nav_header_height;
-	var window_height_minus_nav = window_height - nav_header_height - 1; // 1 is border width
-
-	$('#project_context-header').width($('#project_context-container').width());
+	var container_height_wheader = window_height - container_offset;
+	var window_height_minus_nav = window_height - container_offset;
 
 	if ($(window).width() > 768) {
 		$('#project-container').css(
@@ -79,13 +76,14 @@ function containerResizeY(window_height){
 			 'height': window_height_minus_nav + 'px'}
 		);
 
-		$('#project_nav-container, #project_tree, .project_split').css(
-			{'max-height': (window_height_minus_nav - 50) + 'px',
-			 'height': (window_height_minus_nav - 50) + 'px'}
+		$('#project_nav-container, #project_tree').css(
+			{'max-height': (window_height_minus_nav) + 'px',
+			 'height': (window_height_minus_nav) + 'px'}
 		);
 
 		if (container_height > parseInt($('#project-container').css("min-height"))) {
 			if (typeof projectTree !== "undefined"){
+
 				$(projectTree).css(
 					{'max-height': container_height_wheader + 'px',
 					 'height': container_height_wheader + 'px'}

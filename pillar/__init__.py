@@ -140,8 +140,6 @@ class PillarServer(BlinkerCompatibleEve):
 
         self.org_manager = pillar.api.organizations.OrgManager()
 
-        self.before_first_request(self.setup_db_indices)
-
         # Make CSRF protection available to the application. By default it is
         # disabled on all endpoints. More info at WTF_CSRF_CHECK_DEFAULT in config.py
         self.csrf = CSRFProtect(self)
@@ -479,10 +477,11 @@ class PillarServer(BlinkerCompatibleEve):
 
         # Pillar-defined Celery task modules:
         celery_task_modules = [
-            'pillar.celery.tasks',
-            'pillar.celery.search_index_tasks',
-            'pillar.celery.file_link_tasks',
+            'pillar.celery.badges',
             'pillar.celery.email_tasks',
+            'pillar.celery.file_link_tasks',
+            'pillar.celery.search_index_tasks',
+            'pillar.celery.tasks',
         ]
 
         # Allow Pillar extensions from defining their own Celery tasks.
@@ -704,6 +703,8 @@ class PillarServer(BlinkerCompatibleEve):
     def finish_startup(self):
         self.log.info('Using MongoDB database %r', self.config['MONGO_DBNAME'])
 
+        with self.app_context():
+            self.setup_db_indices()
         self._config_celery()
 
         api.setup_app(self)
@@ -760,6 +761,8 @@ class PillarServer(BlinkerCompatibleEve):
         coll.create_index([('properties.status', pymongo.ASCENDING),
                            ('node_type', pymongo.ASCENDING),
                            ('_created', pymongo.DESCENDING)])
+        # Used for asset tags
+        coll.create_index([('properties.tags', pymongo.ASCENDING)])
 
         coll = db['projects']
         # This index is used for statistics, and for fetching public projects.

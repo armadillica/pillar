@@ -2,29 +2,30 @@
 | {% set title = 'edit_node_types' %}
 | {% block page_title %}Node Types: {{ project.name }}{% endblock %}
 
-| {% block project_context_header %}
-span#project-edit-title
-	| Edit Project Node Types
-| {% endblock %}
-
 | {% block project_context %}
 #node-edit-container
-	div(id="node-edit-form")
+	#node-edit-form
 		.row
-			.col-md-9
-				p.
+			.col-md-12
+				h5 Everything is a Node
+
+				p.mb-1.
 					Nodes are all the items that can be found in a project.
-					Everything is a node: a file, a folder, a comment. They are
-					defined with custom properties to be properly displayed.
+					A file, a folder, a comment, everything is a node.
+					#[br]
+					They are defined with custom properties to be properly displayed.
+
+		hr
+
 		.row
 			.col-md-4.col-sm-6
-				h3 Node Types
+				h5 Node Types
 
 				| {% if current_user.has_cap('edit-project-node-types') %}
 				ul.list-generic
 					| {% for node_type in project.node_types %}
 					li
-						a.js-item-open(
+						a.js-item-open.text-muted(
 							href="{{ url_for('projects.edit_node_type', project_url=project.url, node_type_name=node_type.name) }}",
 							data-url="{{ url_for('projects.edit_node_type', project_url=project.url, node_type_name=node_type.name) }}")
 							| {{ node_type.name | undertitle }}
@@ -33,7 +34,7 @@ span#project-edit-title
 					| {% endfor %}
 				| {% endif %}
 
-			.col-md-8.col-sm-6
+			.col-md-8.col-sm-6.border-left
 				#node-edit-embed
 
 | {% endblock %}
@@ -44,6 +45,9 @@ script.
 
 	$('.js-item-open').on('click', function(e){
 		e.preventDefault();
+
+		$('.js-item-open').removeClass('active');
+		$(this).addClass('active');
 
 		var item_url = $(this).data('url');
 

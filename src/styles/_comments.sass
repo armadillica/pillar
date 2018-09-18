@@ -1,7 +1,9 @@
 $comments-width-max: 710px
 
 .comments-container
+	max-width: $comments-width-max
 	position: relative
+	width: 100%
 
 	#comments-reload
 		text-align: center
@@ -30,7 +32,7 @@ $comments-width-max: 710px
 		.comment-reply-container
 			display: flex
 			position: relative
-			padding: 15px 0 20px 0
+			padding: 15px 0
 			transition: background-color 150ms ease-in-out, padding 150ms ease-in-out, margin 150ms ease-in-out
 
 			&.comment-linked
@@ -194,8 +196,6 @@ $comments-width-max: 710px
 						cursor: pointer
 						font-family: 'pillar-font'
 						height: 25px
-						position: relative
-						top: 4px
 						width: 16px
 
 					.comment-action-rating.up
@@ -284,10 +284,11 @@ $comments-width-max: 710px
 					color: $color-success
 
 			&.is-replying
-				box-shadow: inset 5px 0 0 $color-primary
+				box-shadow: -5px 0 0 $color-primary
+				@extend .pl-3
 
 			&.is-replying+.comment-reply-container
-				box-shadow: inset 5px 0 0 $color-primary
+				box-shadow: -5px 0 0 $color-primary
 				margin-left: 0
 				padding-left: 55px
 
@@ -314,9 +315,6 @@ $comments-width-max: 710px
 					color: $color-success
 
 .comment-reply
-	&-container
-		background-color: $color-background
-
 	/* Little gravatar icon on the left */
 	&-avatar
 		img
@@ -333,7 +331,7 @@ $comments-width-max: 710px
 		width: 100%
 
 	&-field
-		background-color: $color-background-dark
+		background-color: $color-background-light
 		border-radius: 3px
 		box-shadow: inset 0 0 2px 0 rgba(darken($color-background-dark, 20%), .5)
 		display: flex
@@ -342,6 +340,7 @@ $comments-width-max: 710px
 
 		textarea
 			+node-details-description
+			background-color: $color-background-light
 			border-bottom-right-radius: 0
 			border-top-right-radius: 0
 			border: none
@@ -376,7 +375,6 @@ $comments-width-max: 710px
 
 		&.filled
 			textarea
-				background-color: $color-background-light
 				border-bottom: thin solid $color-background
 
 				&:focus
@@ -453,12 +451,17 @@ $comments-width-max: 710px
 		transition: background-color 150ms ease-in-out, color 150ms ease-in-out
 		width: 100px
 
+		// The actual button for submitting the comment.
 		button.comment-action-submit
+			align-items: center
 			background: transparent
 			border: none
 			border-top-left-radius: 0
 			border-bottom-left-radius: 0
 			color: $color-success
+			cursor: pointer
+			display: flex
+			justify-content: center
 			flex-direction: column
 			height: 100%
 			position: relative
@@ -466,8 +469,12 @@ $comments-width-max: 710px
 			white-space: nowrap
 			width: 100%
 
+			&:hover
+				background: rgba($color-success, .1)
+
 			&:focus
 				background: lighten($color-success, 10%)
+				color: $white
 
 			&.submitting
 				color: $color-info

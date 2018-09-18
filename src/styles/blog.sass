@@ -1,33 +1,58 @@
-@import _normalize
+// Bootstrap variables and utilities.
+@import "../../node_modules/bootstrap/scss/functions"
+@import "../../node_modules/bootstrap/scss/variables"
+@import "../../node_modules/bootstrap/scss/mixins"
+
 @import _config
 @import _utils
 
+// Bootstrap components.
+@import "../../node_modules/bootstrap/scss/root"
+@import "../../node_modules/bootstrap/scss/reboot"
+
+@import "../../node_modules/bootstrap/scss/type"
+@import "../../node_modules/bootstrap/scss/images"
+
+@import "../../node_modules/bootstrap/scss/code"
+@import "../../node_modules/bootstrap/scss/grid"
+@import "../../node_modules/bootstrap/scss/buttons"
+@import "../../node_modules/bootstrap/scss/dropdown"
+@import "../../node_modules/bootstrap/scss/custom-forms"
+
+@import "../../node_modules/bootstrap/scss/nav"
+@import "../../node_modules/bootstrap/scss/navbar"
+
+@import "../../node_modules/bootstrap/scss/card"
+@import "../../node_modules/bootstrap/scss/jumbotron"
+@import "../../node_modules/bootstrap/scss/media"
+@import "../../node_modules/bootstrap/scss/close"
+@import "../../node_modules/bootstrap/scss/modal"
+@import "../../node_modules/bootstrap/scss/tooltip"
+
+@import "../../node_modules/bootstrap/scss/utilities"
+
+// Pillar components.
+@import "apps_base"
+@import "components/base"
+
+@import "components/card"
+@import "components/jumbotron"
+@import "components/navbar"
+@import "components/dropdown"
+@import "components/footer"
+@import "components/shortcode"
+@import "components/flyout"
+@import "components/buttons"
+@import "components/tooltip"
+@import "components/overlay"
+
 @import _comments
-@import _error
-@import _search
-
-.container-fluid.blog
-	padding: 0
-
-#blog_container
-	+media-xs
-		flex-direction: column
-		padding-top: 0
-	display: flex
-	padding:
-		bottom: 15px
-
-	video
-		max-width: 100%
+@import _notifications
 
 #blog_post-edit-form
 	padding: 20px
 
 	.form-group
-		position: relative
-		margin: 0 auto 30px auto
-		font-family: $font-body
-
 		input, textarea, select
 			+input-generic
 
@@ -94,7 +119,6 @@
 				div[id^='attachments-']
 					margin-bottom: 15px
 					border-top: thin solid $color-text-dark-hint
-
 
 	.form-group.description,
 	.form-group.summary,
@@ -165,12 +189,8 @@
 
 #blog_post-create-container,
 #blog_post-edit-container
-	padding: 25px
-
-#blog_index-container,
-#blog_post-create-container,
-#blog_post-edit-container
 	+container-box
+	padding: 25px
 	width: 75%
 
 	+media-xs
@@ -184,133 +204,6 @@
 		width: 100%
 	+media-lg
 		width: 100%
-
-	.blog_index-header
-		border-top-left-radius: 3px
-		border-top-right-radius: 3px
-		display: block
-		overflow: hidden
-		position: relative
-		text-align: center
-		width: 100%
-
-		img
-			width: 100%
-
-	.blog_index-item
-		+media-lg
-			max-width: 780px
-		+media-md
-			max-width: 780px
-		+media-sm
-			max-width: 780px
-
-		margin: 15px auto
-
-		&:hover
-			.item-info a
-				color: $color-primary
-
-		.item-picture
-			position: relative
-			width: 100%
-			max-height: 350px
-			min-height: 200px
-			height: auto
-			overflow: hidden
-			border-top-left-radius: 3px
-			border-top-right-radius: 3px
-			+clearfix
-
-			img
-				+position-center-translate
-				width: 100%
-				border-top-left-radius: 3px
-				border-top-right-radius: 3px
-
-			+media-xs
-				min-height: 150px
-			+media-sm
-				min-height: 150px
-			+media-md
-				min-height: 250px
-			+media-lg
-				min-height: 250px
-
-		.item-title
-			color: $color-text-dark
-			display: block
-			font:
-				family: $font-body
-				size: 1.8em
-
-			padding: 10px 25px 10px
-
-		ul.meta
-			+list-meta
-			font-size: .9em
-			padding: 0px 25px 5px
-
-		.item-content
-			+node-details-description
-			font-size: 1.3em
-			padding: 15px 25px 25px
-
-			+media-xs
-				padding:
-					left: 0
-					right: 0
-
-			img
-				display: block
-				margin: 0 auto
-
-		.item-meta
-			color: $color-text-dark-secondary
-			padding:
-				left: 25px
-				right: 25px
-
-			+media-xs
-				padding:
-					left: 10px
-					right: 10px
-
-	.button-create,
-	.button-edit
-		+button($color-success, 3px, true)
-
-	.item-picture+.button-back+.button-edit
-		right: 20px
-		top: 20px
-
-	.comments-container
-		padding:
-			left: 20px
-			right: 20px
-		max-width: 680px
-		margin: 0 auto
-
-		+media-lg
-			padding:
-				left: 0
-				right: 0
-
-		.comment-reply-container
-			background-color: transparent
-
-			.comment-reply-field
-				textarea, .comment-reply-meta
-					background-color: $color-background-light
-
-				&.filled
-					.comment-reply-meta
-						background-color: $color-success
-
-		.comment-reply-form
-			+media-xs
-				padding:
-					left: 0
 
 #blog_post-edit-form
 	padding: 0
@@ -346,294 +239,3 @@
 
 	.form-upload-file-meta
 		width: initial
-
-#blog_post-edit-title
-	padding: 0
-	color: $color-text
-	font:
-		size: 1.8em
-		weight: 300
-	margin: 0 20px 15px 0
-
-#blog_index-sidebar
-	width: 25%
-	padding: 0 15px
-
-	+media-xs
-		width: 100%
-		clear: both
-		display: block
-		margin-top: 25px
-	+media-sm
-		width: 40%
-	+media-md
-		width: 30%
-	+media-lg
-		width: 25%
-
-	.button-create
-		display: block
-		width: 100%
-		+button($color-success, 6px)
-		margin: 0
-
-	.button-back
-		+button($color-info, 6px, true)
-		display: block
-		width: 100%
-		margin: 15px 0 0 0
-
-	#blog_post-edit-form
-		.form-group
-			.form-control
-				background-color: white
-
-	.blog_index-sidebar,
-	.blog_project-sidebar
-		+container-box
-		background-color: lighten($color-background, 5%)
-		padding: 20px
-
-	.blog_project-card
-		position: relative
-		width: 100%
-		border-radius: 3px
-		overflow: hidden
-		background-color: white
-		color: lighten($color-text, 10%)
-		box-shadow: 0 0 30px rgba(black, .2)
-
-		margin:
-			top: 0
-			bottom: 15px
-			left: auto
-			right: auto
-
-
-		a.item-header
-			position: relative
-			width: 100%
-			height: 100px
-			display: block
-			background-size: 100% 100%
-
-			overflow: hidden
-
-			.overlay
-				z-index: 1
-				width: 100%
-				height: 100px
-				@include overlay(transparent, 0%, white, 100%)
-
-
-			img.background
-				width: 100%
-				transform: scale(1.4)
-
-		.card-thumbnail
-			position: absolute
-			z-index: 2
-			height: 90px
-			width: 90px
-			display: block
-			top: 35px
-			left: 50%
-			transform: translateX(-50%)
-			background-color: white
-			border-radius: 3px
-			overflow: hidden
-
-			&:hover
-				img.thumb
-					opacity: .9
-
-			img.thumb
-				width: 100%
-				border-radius: 3px
-				transition: opacity 150ms ease-in-out
-				+position-center-translate
-
-		.item-info
-			padding: 10px 20px
-			background-color: white
-			border-bottom-left-radius: 3px
-			border-bottom-right-radius: 3px
-
-			a.item-title
-				display: inline-block
-				width: 100%
-				padding: 30px 0 15px 0
-				color: $color-text-dark
-				text-align: center
-				font:
-					size: 1.6em
-					weight: 300
-
-				transition: color 150ms ease-in-out
-
-				&:hover
-					text-decoration: none
-					color: $color-primary
-
-
-#blog_container
-	&.cloud-blog
-		#blog_index-container,
-		#blog_post-create-container,
-		#blog_post-edit-container
-			width: 100%
-			padding: 25px 30px 20px 30px
-
-		#blog_index-container+#blog_index-sidebar
-			display: none
-
-	#blog_index-container,
-	&.cloud-blog #blog_index-container
-		+media-sm
-			width: 100%
-
-		+media-xs
-			width: 100%
-
-		padding: 0 0 50px 0
-		margin: 0 auto
-
-		.blog_index-item
-			+media-xs
-				width: 100%
-				padding: 10px 25px
-
-			&.list
-				margin: 0 auto
-				padding: 15px 0
-				margin: 0 auto
-				border-bottom: thin solid $color-background
-
-				&:last-child
-					border-bottom: none
-
-				+media-xs
-					width: 100%
-					padding: 15px 10px
-					margin: 0
-
-				a.item-title
-					padding:
-						top: 0
-						bottom: 5px
-					font:
-						size: 1.6em
-						weight: 400
-						family: $font-body
-
-				.item-info
-					color: $color-text-dark-secondary
-					font-size: .9em
-					padding:
-						left: 25px
-						right: 25px
-
-				.item-header
-					width: 50px
-					height: 50px
-					position: absolute
-					top: 20px
-					border-radius: 3px
-					background-color: $color-background
-					overflow: hidden
-
-					img
-						+position-center-translate
-						width: 100%
-
-					i
-						+position-center-translate
-						font-size: 1.2em
-						color: $color-text-dark-hint
-
-					&.nothumb
-						border-radius: 50%
-
-				a.item-title, .item-info
-					padding-left: 70px
-
-#blog_index-container
-	.blog_index-item
-		position: relative
-
-		+media-xs
-			padding: 25px 0 20px 0
-
-		&.list
-			padding: 15px 10px
-			margin: 0
-
-			+media-xs
-				width: 100%
-				padding: 15px 10px
-				margin: 0
-
-
-.blog-archive-navigation
-	+media-xs
-		font-size: 1em
-		max-width: initial
-
-	border-bottom: thin solid $color-background-dark
-	display: flex
-	font:
-		size: 1.2em
-		weight: 300
-	margin: 0 auto
-	max-width: 780px
-	text-align: center
-	+text-overflow-ellipsis
-
-	&:last-child
-		border: none
-
-	a, span
-		+media-xs
-			padding: 10px
-
-		flex: 1
-		padding: 25px 15px
-
-	span
-		color: $color-text-dark-secondary
-		pointer-events: none
-
-.blog-action
-	display: flex
-	padding: 10px
-	position: absolute
-	right: 0
-	top: 0
-	z-index: 1
-
-
-// Specific tweaks for blogs in the context of a project
-#project_context
-	.blog_index-item
-		+media-xs
-			margin-left: 0
-		padding: 0
-		margin-left: 10px
-
-		&.list
-			margin-left: 35px !important
-
-		.item-title,
-		.item-info
-			+media-xs
-				padding-left: 0
-			padding-left: 25px
-
-	#blog_container
-		.comments-container
-			+media-sm
-				margin-left: 10px
-			margin-left: 30px
-
-	.blog-archive-navigation
-		margin-left: 35px

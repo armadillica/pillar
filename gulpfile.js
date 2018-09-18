@@ -12,15 +12,16 @@ var pug          = require('gulp-pug');
 var rename       = require('gulp-rename');
 var sass         = require('gulp-sass');
 var sourcemaps   = require('gulp-sourcemaps');
-var uglify       = require('gulp-uglify');
+var uglify       = require('gulp-uglify-es').default;
 
 var enabled = {
     uglify: argv.production,
-    maps: argv.production,
+    maps: !argv.production,
     failCheck: !argv.production,
     prettyPug: !argv.production,
     cachify: !argv.production,
     cleanup: argv.production,
+    chmod: argv.production,
 };
 
 var destination = {
@@ -29,6 +30,11 @@ var destination = {
     js: 'pillar/web/static/assets/js',
 }
 
+var source = {
+    bootstrap: 'node_modules/bootstrap/',
+    jquery: 'node_modules/jquery/',
+    popper: 'node_modules/popper.js/'
+}
 
 /* CSS */
 gulp.task('styles', function() {
@@ -67,36 +73,52 @@ gulp.task('scripts', function() {
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(rename({suffix: '.min'}))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
-        .pipe(chmod(644))
+        .pipe(gulpif(enabled.chmod, chmod(644)))
         .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
 });
 
 
-/* Collection of scripts in src/scripts/tutti/ to merge into tutti.min.js */
-/* Since it's always loaded, it's only for functions that we want site-wide */
+/* Collection of scripts in src/scripts/tutti/ to merge into tutti.min.js
+ * Since it's always loaded, it's only for functions that we want site-wide.
+ * It also includes jQuery and Bootstrap (and its dependency popper), since
+ * the site doesn't work without it anyway.*/
 gulp.task('scripts_concat_tutti', function() {
-    gulp.src('src/scripts/tutti/**/*.js')
+
+    toUglify = [
+        source.jquery    + 'dist/jquery.min.js',
+        source.popper    + 'dist/umd/popper.min.js',
+        source.bootstrap + 'js/dist/index.js',
+        source.bootstrap + 'js/dist/util.js',
+        source.bootstrap + 'js/dist/alert.js',
+        source.bootstrap + 'js/dist/collapse.js',
+        source.bootstrap + 'js/dist/dropdown.js',
+        source.bootstrap + 'js/dist/tooltip.js',
+        'src/scripts/tutti/**/*.js'
+    ];
+
+    gulp.src(toUglify)
         .pipe(gulpif(enabled.failCheck, plumber()))
         .pipe(gulpif(enabled.maps, sourcemaps.init()))
         .pipe(concat("tutti.min.js"))
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
-        .pipe(chmod(644))
+        .pipe(gulpif(enabled.chmod, chmod(644)))
         .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
 });
 
-gulp.task('scripts_concat_markdown', function() {
-    gulp.src('src/scripts/markdown/**/*.js')
-        .pipe(gulpif(enabled.failCheck, plumber()))
-        .pipe(gulpif(enabled.maps, sourcemaps.init()))
-        .pipe(concat("markdown.min.js"))
-        .pipe(gulpif(enabled.uglify, uglify()))
-        .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
-        .pipe(chmod(644))
-        .pipe(gulp.dest(destination.js))
-        .pipe(gulpif(argv.livereload, livereload()));
+
+/* Simply move these vendor scripts from node_modules. */
+gulp.task('scripts_move_vendor', function(done) {
+
+    let toMove = [
+    'node_modules/video.js/dist/video.min.js',
+    ];
+
+    gulp.src(toMove)
+    .pipe(gulp.dest(destination.js + '/vendor/'));
+    done();
 });
 
 
@@ -111,8 +133,8 @@ gulp.task('watch',function() {
     gulp.watch('src/templates/**/*.pug',['templates']);
     gulp.watch('src/scripts/*.js',['scripts']);
     gulp.watch('src/scripts/tutti/**/*.js',['scripts_concat_tutti']);
-    gulp.watch('src/scripts/markdown/**/*.js',['scripts_concat_markdown']);
 });
+
 
 // Erases all generated files in output directories.
 gulp.task('cleanup', function() {
@@ -136,5 +158,5 @@ gulp.task('default', tasks.concat([
     'templates',
     'scripts',
     'scripts_concat_tutti',
-    'scripts_concat_markdown',
+    'scripts_move_vendor',
 ]));

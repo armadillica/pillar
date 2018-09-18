@@ -62,6 +62,8 @@ class OAuthTests(AbstractPillarTest):
             cb = oauth_provider.callback()
             self.assertEqual(cb.id, '7')
             self.assertEqual(cb.email, 'harry@blender.org')
+            self.assertEqual(cb.access_token, 'successful-token')
+            self.assertEqual(cb.scopes, ['email', 'badge'])
 
     @responses.activate
     def test_provider_callback_missing_code(self):

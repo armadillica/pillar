@@ -33,8 +33,8 @@ script(type="text/javascript").
 		} else if (node_type === 'group_hdri') {
 			node_type_str = 'HDRi Folder';
 		}
-		$('a', '.button-edit').html('<i class="pi-edit button-edit-icon"></i> Edit ' + node_type_str);
-		$('a', '.button-delete').html('<i class="pi-trash button-delete-icon"></i>Delete ' + node_type_str);
+
+		$('a', '.button-delete').html('<i class="pr-2 pi-trash button-delete-icon"></i>Delete ' + node_type_str);
 
 		{% if parent %}
 		ProjectUtils.setProjectAttributes({parentNodeId: '{{parent._id}}'});
@@ -61,7 +61,7 @@ script(type="text/javascript").
 		}
 
 		{% if node.has_method('PUT') %}
-			$('.project-mode-view').show();
+			$('.project-mode-view').displayAs('inline-block');
 		{% else %}
 			$('.project-mode-view').hide();
 		{% endif %}
@@ -114,7 +114,6 @@ script(type="text/javascript").
 			}
 		}
 
-
 		$(page_overlay).find('.nav-prev').click(function(e){
 			e.stopPropagation();
 			e.preventDefault();
@@ -132,10 +131,6 @@ script(type="text/javascript").
 		$('#node-overlay').click(function(){
 			$(this).removeClass('active').hide().html();
 		});
-
-		if (typeof $().popover != 'undefined'){
-			$('#asset-license').popover();
-		}
 
 	{% endif %}
 

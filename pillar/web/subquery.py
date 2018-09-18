@@ -33,7 +33,8 @@ def get_user_info(user_id):
     # TODO: put those fields into a config var or module-level global.
     return {'email': user.email,
             'full_name': user.full_name,
-            'username': user.username}
+            'username': user.username,
+            'badges_html': (user.badges and user.badges.html) or ''}
 
 
 def setup_app(app):

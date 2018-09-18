@@ -26,7 +26,6 @@
 	display: inline-flex
 	align-items: center
 	justify-content: center
-	font-family: $font-body
 	padding: 5px 12px
 	border-radius: $roundness
 
@@ -83,6 +82,15 @@
 			text-shadow: none
 
 
+=disabled-stripes
+	color: $color-text-dark
+	cursor: not-allowed
+	background: repeating-linear-gradient(-45deg, lighten($color-text-dark-hint, 15%), lighten($color-text-dark-hint, 15%) 10px, lighten($color-text-dark-hint, 5%) 10px, lighten($color-text-dark-hint, 5%) 20px)
+	border-color: darken($color-text-dark-hint, 5%)
+	pointer-events: none
+	opacity: .6
+
+
 @mixin overlay($from-color, $from-percentage, $to-color, $to-percentage)
 	position: absolute
 	top: 0
@@ -122,24 +130,16 @@
 	transform: translate(-50%, -50%)
 
 =input-generic
-	padding: 5px 5px 5px 0
 	color: $color-text-dark
-	box-shadow: none
-	font-family: $font-body
-	border: thin solid transparent
-	border-radius: 0
-	border-bottom-color: $color-background-dark
 	background-color: transparent
-	transition: border-color 150ms ease-in-out, box-shadow 150ms ease-in-out
 
 	&:hover
 		border-bottom-color: $color-background
 
 	&:focus
 		outline: 0
-		border: thin solid transparent
-		border-bottom-color: $color-primary
-		box-shadow: 0 1px 0 0 $color-primary
+		border-color: $primary
+		box-shadow: none
 
 =label-generic
 	color: $color-text-dark-primary
@@ -170,17 +170,25 @@
 /* Small but wide: phablets, iPads
  **  Menu is collapsed, columns stack, no brand */
 =media-sm
-	@media (min-width: #{$screen-tablet}) and (max-width: #{$screen-desktop - 1px})
+	@include media-breakpoint-up(sm)
 		@content
 
 /* Tablets portrait.
  **  Menu is expanded, but columns stack, brand is shown */
 =media-md
-	@media (min-width: #{$screen-desktop})
+	@include media-breakpoint-up(md)
 		@content
 
 =media-lg
-	@media (min-width: #{$screen-lg-desktop})
+	@include media-breakpoint-up(lg)
+		@content
+
+=media-xl
+	@include media-breakpoint-up(xl)
+		@content
+
+=media-xxl
+	@include media-breakpoint-up(xxl)
 		@content
 
 =media-print
@@ -352,17 +360,15 @@
 
 =node-details-description
 	+clearfix
-	color: darken($color-text-dark, 5%)
-	font:
-		family: $font-body
-		weight: 300
-		size: 1.2em
-
+	color: $color-text
+	font-size: 1.25em
 	word-break: break-word
 
 	+media-xs
 		font-size: 1.1em
 
+	/* Style links without a class. Usually regular
+	 * links in a comment or node description. */
 	a:not([class])
 		color: $color-text-dark-primary
 		text-decoration: underline
@@ -374,11 +380,6 @@
 		margin-bottom: 20px
 		line-height: 1.5em
 		word-wrap: break-word
-
-	h1, h2, h3, h4, h5, h6
-		padding:
-			top: 20px
-			right: 20px
 
 	blockquote
 		background-color: lighten($color-background-light, 5%)
@@ -400,10 +401,10 @@
 	img,
 	p img,
 	ul li img
+		@extend .d-block
+		@extend .mx-auto
+		@extend .my-3
 		max-width: 100%
-		padding:
-			bottom: 25px
-			top: 25px
 
 		&.emoji
 			display: inline-block
@@ -416,25 +417,13 @@
 			font-size: 1.5em
 
 	/* e.g. YouTube embed */
-	iframe
-		height: auto
-		margin: 15px auto
+	iframe, video
 		max-width: 100%
-		min-height: 500px
-		width: 100%
+		@extend .mx-auto
 
-	+media-sm
-		iframe
-			min-height: 314px
-	+media-xs
-		iframe
-			min-height: 314px
-
-	iframe[src^="https://www.youtube"]
-		+media-xs
-			iframe
-				min-height: 420px
-		min-height: 500px
+	.embed-responsive,
+	video
+		@extend .my-3
 
 	iframe[src^="https://w.soundcloud"]
 		min-height: auto
@@ -507,28 +496,24 @@
 
 =ribbon
 	background-color: $color-success
-	cursor: default
+	border: thin dashed rgba(white, .5)
+	color: white
+	pointer-events: none
+	font-size: 70%
 	overflow: hidden
-	white-space: nowrap
 	position: absolute
 	right: -40px
 	top: 10px
-	-webkit-transform: rotate(45deg)
-	-moz-transform: rotate(45deg)
-	-ms-transform: rotate(45deg)
-	-o-transform: rotate(45deg)
 	transform: rotate(45deg)
+	white-space: nowrap
 
 	span
-		border: thin dashed rgba(white, .5)
-		color: white
 		display: block
-		font-size: 70%
 		margin: 1px 0
 		padding: 3px 50px
-		text:
-			align: center
-			transform: uppercase
+
+.ribbon
+	+ribbon
 
 @mixin text-background($text-color, $background-color, $roundness, $padding)
 	border-radius: $roundness
@@ -568,9 +553,7 @@
 
 /* Bootstrap's img-responsive class */
 =img-responsive
-	display: block
-	max-width: 100%
-	height: auto
+	@extend .img-fluid
 
 /* Set the color for a specified property
  * 1: $property: e.g. background-color
@@ -642,9 +625,7 @@
 				#{$property}: $color-status-review
 
 =sidebar-button-active
-	background-color: $color-background-nav
-	box-shadow: inset 2px 0 0 $color-primary
-	color: white
+	color: $primary
 
 .flash-on
 	background-color: lighten($color-success, 50%) !important
@@ -660,3 +641,52 @@
 	transition: all 1s ease-out
 	img
 		transition: all 1s ease-out
+
+.cursor-pointer
+	cursor: pointer
+
+.cursor-zoom-in
+	cursor: zoom-in
+
+.user-select-none
+	user-select: none
+
+.pointer-events-none
+	pointer-events: none
+
+// Bootstrap has .img-fluid, a class to limit the width of an image to 100%.
+// .imgs-fluid below is to be applied on a parent container when we can't add
+// classes to the images themselves. e.g. the blog.
+.imgs-fluid
+	img
+		// Just re-use Bootstrap's mixin here.
+		+img-fluid
+
+.overflow-hidden
+	overflow: hidden
+
+=text-gradient($color_from, $color_to)
+		background: linear-gradient(to right, $color_from, $color_to)
+		background-clip: text
+		-webkit-background-clip: text
+		-webkit-text-fill-color: transparent
+
+=active-gradient
+	+text-gradient($primary-accent, $primary)
+
+	&:before
+		+text-gradient($primary-accent, $primary)
+
+.title-underline
+	padding-bottom: 5px
+	position: relative
+	margin-bottom: 20px
+
+	&:before
+		background-color: $primary
+		content: ' '
+		display: block
+		height: 2px
+		top: 125%
+		position: absolute
+		width: 50px

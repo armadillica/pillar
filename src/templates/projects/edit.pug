@@ -1,30 +1,36 @@
 | {% extends 'projects/edit_layout.html' %}
-| {% set title = 'edit' %}
+
 | {% block page_title %}Edit {{ project.name }}{% endblock %}
+| {% set title = 'edit' %}
 
 | {% block project_context_header %}
-span#project-edit-title
-	| Edit Project
+#project_context-header.d-flex.justify-content-end.position-fixed.bg-white
+	ul.d-flex.list-unstyled.py-1.px-2.mb-0.h-auto.justify-content-end(
+		class="project-edit-tools disabled")
 
-ul.project-edit-tools
+		li.button-cancel
+			a#item_cancel.project-mode-edit.btn.btn-sm.btn-link(
+				href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
+				title="Cancel changes")
+				i.button-cancel-icon.pi-angle-left
+				| Go to Project
 
-	// Edit Mode
-	li.button-cancel
-		a#item_cancel.project-mode-edit(
-			href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
-			title="Cancel changes")
-			i.button-cancel-icon.pi-back
-			| Go to Project
-
-	li.button-save
-		a#item_save.project-mode-edit(
-			href="#",
-			title="Save changes")
-			i.button-save-icon.pi-check
-			| Save Changes
+		li.button-save
+			a.btn.btn-sm.btn-outline-success.ml-2.px-3.text-capitalize(
+				id="item_save",
+				class="project-mode-edit",
+				href="#",
+				title="Save changes")
+				i.pi-check.pr-2.button-save-icon
+				| Save Changes
 | {% endblock %}
 
 | {% block project_context %}
+.container-fluid
+	.row
+		.col-md-12
+			h5.pl-2.mb-0.pt-3 Project Overview
+
 #node-edit-container
 	form(
 		id="node-edit-form"
@@ -80,22 +86,29 @@ ul.project-edit-tools
 
 		| {% endfor %}
 
-		ul.project-edit-tools.bottom
+		hr
+
+		ul.d-flex.list-unstyled.py-1.px-2.mb-0.h-auto.justify-content-end(
+			class="project-edit-tools disabled")
 			li.button-cancel
-				a#item_cancel.project-mode-edit(
+				a#item_cancel.project-mode-edit.btn.btn-link(
 					href="{{url_for('projects.view', project_url=project.url, _external=True)}}",
 					title="Cancel changes")
-					i.button-cancel-icon.pi-back
+					i.button-cancel-icon.pi-angle-left
 					| Go to Project
 
 			li.button-save
-				a#item_save.project-mode-edit(
+				a.btn.btn-sm.btn-outline-success.ml-2.px-3.text-capitalize(
+					id="item_save",
+					class="project-mode-edit",
 					href="#",
 					title="Save changes")
-					i.button-save-icon.pi-check
+					i.pi-check.pr-2.button-save-icon
 					| Save Changes
 
 | {% endblock %}
+
+| {% block footer_container %}{% endblock %}
 
 | {% block footer_scripts %}
 script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.ui.widget.min.js') }}")
@@ -105,10 +118,10 @@ script(type='text/javascript', src="{{ url_for('static_pillar', filename='assets
 
 script(type="text/javascript").
 
-	$('.project-mode-edit').show();
+	// Show edit mode buttons (save, cancel).
+	$('.project-mode-edit').displayAs('inline-block');
 
 	ProjectUtils.setProjectAttributes({projectId: "{{project._id}}", isProject: true, nodeId: ''});
-	var convert = new Markdown.getSanitizingConverter().makeHtml;
 
 	$('.button-save').on('click', function(e){
 		e.preventDefault();
@@ -122,36 +135,36 @@ script(type="text/javascript").
 	/* Build the markdown preview when typing in textarea */
 	$(function() {
 
-		var $textarea = $('.form-group.description textarea'),
-				$loader = $('<div class="md-preview-loading"><i class="pi-spin spin"></i></div>').insertAfter($textarea),
-				$preview = $('<div class="node-edit-form-md-preview" />').insertAfter($loader);
+		var $contentField = $('.form-group.description textarea'),
+				$contentPreview = $('<div class="node-edit-form-md-preview" />').insertAfter($contentField);
 
-		$loader.hide();
+		function parseDescriptionContent(content) {
 
-		// Delay function to not start converting heavy posts immediately
-		var delay = (function(){
-			var timer = 0;
-			return function(callback, ms){
-				clearTimeout (timer);
-				timer = setTimeout(callback, ms);
-			};
-		})();
+			$.ajax({
+				url: "{{ url_for('nodes.preview_markdown')}}",
+				type: 'post',
+				data: {content: content},
+				headers: {"X-CSRFToken": csrf_token},
+				headers: {},
+				dataType: 'json'
+			})
+			.done(function (data) {
+				$contentPreview.html(data.content);
+			})
+			.fail(function (err) {
+				toastr.error(xhrErrorResponseMessage(err), 'Parsing failed');
+			});
+		}
 
-		$textarea.keyup(function() {
-			/* If there's an iframe (YouTube embed), delay markdown convert 1.5s */
-			if (/iframe/i.test($textarea.val())) {
-				$loader.show();
+		var options = {
+			callback: parseDescriptionContent,
+			wait: 750,
+			highlight: false,
+			allowSubmit: false,
+			captureLength: 2
+		}
 
-				delay(function(){
-					// Convert markdown
-					$preview.html(convert($textarea.val()));
-					$loader.hide();
-				}, 1500 );
-			} else {
-				// Convert markdown
-				$preview.html(convert($textarea.val()));
-			};
-		}).trigger('keyup');
+		$contentField.typeWatch(options);
 
 		$('input, textarea').keypress(function () {
 			// Unused: save status of the page as 'edited'

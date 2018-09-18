@@ -48,6 +48,10 @@ def oauth_authorize(provider):
 
 @blueprint.route('/oauth/<provider>/authorized')
 def oauth_callback(provider):
+    import datetime
+    from pillar.api.utils.authentication import store_token
+    from pillar.api.utils import utcnow
+
     if current_user.is_authenticated:
         return redirect(url_for('main.homepage'))
 
@@ -65,7 +69,17 @@ def oauth_callback(provider):
     user_info = {'id': oauth_user.id, 'email': oauth_user.email, 'full_name': ''}
     db_user = find_user_in_db(user_info, provider=provider)
     db_id, status = upsert_user(db_user)
-    token = generate_and_store_token(db_id)
+
+    # TODO(Sybren): If the user doesn't have any badges, but the access token
+    # does have 'badge' scope, we should fetch the badges in the background.
+
+    if oauth_user.access_token:
+        # TODO(Sybren): make nr of days configurable, or get from OAuthSignIn subclass.
+        token_expiry = utcnow() + datetime.timedelta(days=15)
+        token = store_token(db_id, oauth_user.access_token, token_expiry,
+                            oauth_scopes=oauth_user.scopes)
+    else:
+        token = generate_and_store_token(db_id)
 
     # Login user
     pillar.auth.login_user(token['token'], load_from_db=True)

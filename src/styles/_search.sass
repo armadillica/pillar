@@ -16,7 +16,7 @@ $search-hit-width_grid: 100px
 			.search-hit-name
 				font-weight: 400
 				padding-top: 8px
-				color: $color-primary-dark
+				color: $primary
 
 	.search-hit
 		padding: 0
@@ -29,14 +29,13 @@ $search-hit-width_grid: 100px
 		font:
 			size: .9em
 			weight: 400
-			family: $font-body
 			style: initial
 		width: 100%
 		+text-overflow-ellipsis
 		+clearfix
 
 		& em
-			color: $color-primary-dark
+			color: $primary
 			font-style: normal
 
 		&:hover
@@ -71,7 +70,7 @@ $search-hit-width_grid: 100px
 		min-width: 350px
 		border-bottom-left-radius: 3px
 		border-bottom-right-radius: 3px
-		border-top: 3px solid lighten($color-primary, 5%)
+		border-top: 3px solid lighten($primary, 5%)
 		overflow: hidden
 
 		.tt-suggestion
@@ -93,235 +92,68 @@ $search-hit-width_grid: 100px
 			&.tt-cursor:hover .search-hit
 				background-color: lighten($color-background, 5%)
 
-#search-container
-	display: flex
-	min-height: 600px
-	background-color: white
+.search-list
+	width: 50%
 
-	+media-lg
-		padding-left: 0
-		padding-right: 0
+	.embed-responsive
+		width: 100px
+		min-width: 100px
 
-	#search-sidebar
-		width: 20%
-		background-color: $color-background-light
+	.card-deck.card-deck-vertical
+		.card
+			flex-wrap: initial
 
-		+media-lg
-			border-top-left-radius: 3px
+.search-settings
+	width: 30%
 
-		input.search-field
-			background-color: $color-background-nav-dark
-			font-size: 1.1em
-			color: white
-			margin-bottom: 10px
+	.card-deck.card-deck-vertical
+		.card .embed-responsive
+			max-width: 80px
+
+	input.search-field
+		border: none
+		border-bottom: 2px solid rgba($primary, .2)
+		border-radius: 0
+		width: 100%
+		transition: border 100ms ease-in-out
+
+		&::placeholder
+			color: $color-text-dark-secondary
+		&:placeholder-shown
+			border-bottom-color: $primary
+
+		&:focus
+			outline: none
 			border: none
-			border-bottom: 2px solid rgba($color-primary, .2)
-			border-radius: 0
-			width: 100%
-			padding: 5px 15px
-			height: 50px
-			transition: border 100ms ease-in-out
+			border-bottom: 2px solid lighten($primary, 5%)
 
-			&::placeholder
-				color: $color-text-dark-secondary
-			&:placeholder-shown
-				border-bottom-color: $color-primary
+.search-details
+	width: 70%
 
-			&:focus
-				outline: none
-				border: none
-				border-bottom: 2px solid lighten($color-primary, 5%)
+	.container-fluid .col-md-8
+		flex: 1
+		max-width: 100%
+		width: 100%
 
-		.search-list-filters
-			padding:
-				left: 10px
-				right: 10px
+#search-details
+	position: relative
 
-			.panel.panel-default
-				margin-bottom: 10px
-				border-radius: 3px
-				border: none
-				background-color: white
-				box-shadow: 1px 1px 0 rgba(black, .1)
-
-			a
-				text-decoration: none
-
-			.toggleRefine
-				display: block
-				padding-left: 7px
-				color: $color-text-dark
-				text-transform: capitalize
-
-				&:hover
-					text-decoration: none
-					color: $color-primary
-
-				&.refined
-					color: $color-primary
-
-					&:hover
-						color: $color-danger
-
-						span
-							&:before
-								/* x icon */
-								content: '\e84b'
-								font-family: 'pillar-font'
-					span
-						&:before
-							/* circle with dot */
-							content: '\e82f'
-							font-family: 'pillar-font'
-							position: relative
-							left: -7px
-							font-size: .9em
-
-				span
-					&:before
-						/* empty circle */
-						content: '\e82c'
-						font-family: 'pillar-font'
-						position: relative
-						left: -7px
-						font-size: .9em
-			.facet_count
-				color: $color-text-dark-secondary
-
-
-			.panel-title, .panel-heading
-				color: $color-text-dark-secondary
-				font:
-					size: 1em
-					weight: 500
-
-			.panel-body
-				padding-top: 0
-
-			.panel-title
-				position: relative
-				&:after
-					content: '\e83b'
-					font-family: 'pillar-font'
-					position: absolute
-					right: 0
-					color: $color-text-dark-primary
-
-			.collapsed
-				.panel-title:after
-					content: '\e838'
-
-
-		.search-list-stats
-			color: $color-text-dark-hint
-			padding: 10px 15px 0 15px
-			text-align: center
-			font-size: .9em
-			+clearfix
-
-		#pagination
-			ul.search-pagination
-				text-align: center
-				list-style-type: none
-				margin: 0
-				padding: 0
-				width: 100%
-				display: flex
-				+clearfix
-
-				li
-					display: inline-block
-					margin: 5px auto
-
-					&:last-child
-						border-color: transparent
-
-					a
-						font-weight: 500
-						padding: 5px 4px
-						color: $color-text-dark-secondary
-
-						&:hover
-							color: $color-text-dark-primary
-
-					&.disabled
-						opacity: .6
-
-					&.active a
-						color: $color-text-dark-primary
-						font-weight: bold
-
-	#search-list
-		width: 40%
-		height: 100%
-		padding: 0
-		position: relative
-		overflow-x: hidden
+	#search-hit-container
+		position: absolute // for scrollbars
 		overflow-y: auto
 
-		#hits
+		#error_container
 			position: relative
-			width: 100%
+			background: white
+			padding: 20px
 
-		#no-hits
-			padding: 10px 15px
-			color: $color-text-dark-secondary
+	#search-error
+		display: none
+		margin: 20px auto
+		color: $color-danger
+		text-align: center
 
-		.search-hit
-			#search-loading
-				visibility: hidden
-				background-color: transparent
-				font:
-					size: 1.5em
-					weight: 600
-				position: absolute
-				top: 0
-				left: 0
-				right: 0
-				bottom: 0
-				z-index: $z-index-base + 5
-				opacity: 0
-				cursor: default
-				transition: opacity 50ms ease-in-out
-				&.active
-					visibility: visible
-					opacity: 1
-
-				.spinner
-					color: $color-background-nav
-					background-color: white
-					padding: 0
-					width: 20px
-					height: 20px
-					border-radius: 50%
-					position: absolute
-					top: 7px
-					right: 10px
-					span
-						padding: 5px
-						+pulse
-
-	#search-details
-		position: relative
-		width: 40%
-		border-left: 2px solid darken(white, 3%)
-
-		#search-hit-container
-			position: absolute // for scrollbars
-			width: 100%
-			overflow-y: auto
-
-			#error_container
-				position: relative
-				background: white
-				padding: 20px
-
-		#search-error
-			display: none
-			margin: 20px auto
-			color: $color-danger
-			text-align: center
-
+#search-container
 	#node-container
 		width: 100%
 		max-width: 100%
@@ -416,9 +248,7 @@ $search-hit-width_grid: 100px
 
 		&.texture
 			.texture-title
-				font:
-					size: 2em
-					family: $font-body
+				font-size: 2em
 				padding: 15px 10px 10px 15px
 			.node-row
 				background: white
@@ -476,215 +306,88 @@ $search-hit-width_grid: 100px
 								button
 									width: 100%
 
-.search-hit
-	float: left
-	box-shadow: none
-	border: thin solid transparent
-	border-top-color: darken(white, 8%)
-	border-left: 3px solid transparent
+.search-project
+	li.project
+		display: none
 
-	color: $color-background-nav
-
-	width: 100%
-	position: relative
-	margin: 0
-	padding: 7px 10px 7px 10px
-	+clearfix
-
-	&:first-child
-		border: thin solid transparent
-		border-left: 3px solid transparent
-
-	&:hover
-		opacity: 1
-		text-decoration: none
-		cursor: default
-		color: darken($color-primary, 20%)
-		background-color: $color-background-light
-
-		& .search-hit-name i
-			color: darken($color-primary, 20%)
-
-		& .search-hit-thumbnail
-			& .search-hit-thumbnail-icon
-				transform: translate(-50%, -50%) scale(1.1)
-
-		.search-hit-name
-			text-decoration: none
-			&:hover
-				color: darken($color-primary, 10%)
-
-		.search-hit-thumbnail
-			cursor: pointer
-
-			.search-hit-thumbnail-icon
-				transform: translate(-50%, -50%) scale(1)
-
-	&:active
-		background-color: rgba($color-background, .5)
-		opacity: .8
-		color: $color-primary
-		& .search-hit-name i
-			color: $color-primary
-
-	&:focus
-		border-color: rgba($color-primary, .2)
-
-	/* Class that gets added when we click on the item */
-	&.active
-		background-color: lighten($color-background, 2%)
-		border-left: 3px solid $color-primary
-
-		.search-hit-name
-			color: darken($color-primary, 10%)
-
-		.search-hit-meta
-			span.when
-				display: none
-			span.context
-				display: inline-block
-
-	.search-hit-thumbnail
-		position: relative
-		float: left
-		min-width: $search-hit-width_list * 1.49
-		max-width: $search-hit-width_list * 1.49
-		height: $search-hit-width_list
-		border-radius: 3px
-		background: $color-background
-		margin-right: 12px
-		text-align: center
-		overflow: hidden
-		+media-xs
-			display: none
-		+media-sm
-			min-width: $search-hit-width_list
-			max-width: $search-hit-width_list
-
-		img
-			height: $search-hit-width_list
-			width: auto
-
-
-		.pi-video:before, .pi-file:before,
-		.pi-group:before
-			font-family: 'pillar-font'
-		.pi-video:before
-			content: '\e81d'
-		.pi-file:before
-			content: '\e825'
-		.pi-group:before
-			content: '\e80d'
-
-		.search-hit-thumbnail-icon
-			position: absolute
-			top: 50%
-			left: 50%
-			transform: translate(-50%, -50%)
-			color: white
-			font-size: 1.2em
-			transition: none
-			color: $color-text-dark-secondary
-
-			.dark
-				text-shadow: none
-				font-size: 1.3em
-
-	.search-hit-name
-		position: relative
-		font-size: 1.1em
-		color: $color-text-dark-primary
-		background-color: initial
-		width: initial
-		max-width: initial
-		+text-overflow-ellipsis
-		padding-top: 5px
+#search-sidebar
+	.toggleRefine
+		display: block
+		padding-left: 7px
+		color: $color-text-dark
+		text-transform: capitalize
 
 		&:hover
-			cursor: pointer
-			text-decoration: underline
+			text-decoration: none
+			color: $primary
 
-		em
-			color: darken($color-primary, 15%)
-			font-style: normal
+		&.refined
+			color: $primary
 
-	.search-hit-ribbon
-		+ribbon
-		right: -30px
-		top: 5px
+			&:hover
+				color: $color-danger
+
+				span
+					&:before
+						/* x icon */
+						content: '\e84b'
+						font-family: 'pillar-font'
+			span
+				&:before
+					/* circle with dot */
+					content: '\e82f'
+					font-family: 'pillar-font'
+					position: relative
+					left: -7px
+					font-size: .9em
 
 		span
-			font-size: 60%
-			margin: 1px 0
-			padding: 2px 35px
+			&:before
+				/* empty circle */
+				content: '\e82c'
+				font-family: 'pillar-font'
+				position: relative
+				left: -7px
+				font-size: .9em
 
-	.search-hit-meta
-		position: relative
+	.search-list-stats
+		color: $color-text-dark-hint
+		padding: 10px 15px 0 15px
+		text-align: center
 		font-size: .9em
-		color: $color-text-dark-secondary
-		background-color: initial
-		padding: 3px 0 0 0
-		text-decoration: none
-		+text-overflow-ellipsis
+		+clearfix
 
-		span
-			&.project
-				color: $color-text-dark-secondary
-				margin-right: 3px
-			&.updated
-				color: $color-text-dark-hint
-			&.status
-				font-size: .8em
-				color: $color-text-dark-secondary
-				border: thin solid $color-text-dark-hint
-				padding: 3px 8px
-				text-transform: uppercase
-				border-radius: 3px
-				margin-right: 5px
-			&.media, &.node_type
-				color: $color-text-dark-secondary
-				text-transform: capitalize
-				margin: 0 3px
+.search-pagination
+	text-align: center
+	list-style-type: none
+	margin: 0
+	padding: 0
+	width: 100%
+	display: flex
+	+clearfix
 
-			&.when
-				margin: 0 3px
-				float: right
-				display: block
-				+media-lg
-					display: block
-				+media-md
-					display: block
-				+media-sm
-					display: none
-				+media-xs
-					display: none
+	li
+		display: inline-block
+		margin: 5px auto
 
-			&.context
-				margin: 0
-				float: right
-				display: none
+		&:last-child
+			border-color: transparent
 
-	&:hover
-		cursor: pointer
-		.search-hit-name-user
-			color: $color-primary
-
-	&.users
-		em
-			font-style: normal
-			color: $color-primary
-
-		.search-hit-name
-			font-size: 1.2em
-
-			small
-				margin-left: 5px
-				color: $color-text-dark-secondary
-
-		.search-hit-roles
-			font-size: .9em
+		a
+			font-weight: 500
+			padding: 5px 4px
 			color: $color-text-dark-secondary
-			margin-left: 15px
+
+			&:hover
+				color: $color-text-dark-primary
+
+		&.disabled
+			opacity: .6
+
+		&.active a
+			color: $color-text-dark-primary
+			font-weight: bold
+
 
 .view-grid
 	display: flex
@@ -706,13 +409,13 @@ $search-hit-width_grid: 100px
 		transition: border-color 150ms ease-in-out
 
 		&.active
-			background-color: $color-primary
-			border-color: $color-primary
+			background-color: $primary
+			border-color: $primary
 
 			.search-hit-name
 				font-weight: 500
 				color: white
-				background-color: $color-primary
+				background-color: $primary
 
 		.search-hit-name
 			font-size: .9em
@@ -776,5 +479,5 @@ $search-hit-width_grid: 100px
 
 			&.active
 				color: white
-				background-color: $color-primary
+				background-color: $primary
 				border-color: transparent

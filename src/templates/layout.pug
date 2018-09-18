@@ -29,32 +29,20 @@ html(lang="en")
 		meta(name="twitter:image", content="")
 		| {% endblock %}
 
-		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery-3.1.0.min.js')}}")
+		script(src="{{ url_for('static_pillar', filename='assets/js/tutti.min.js') }}")
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.typeahead-0.11.1.min.js')}}")
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/js.cookie-2.0.3.min.js')}}")
 		| {% if current_user.is_authenticated %}
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/clipboard.min.js')}}")
 		| {% endif %}
 
-		script.
-
-			!function(e){"use strict";e.loadCSS=function(t,n,o){var r,i=e.document,l=i.createElement("link");if(n)r=n;else{var d=(i.body||i.getElementsByTagName("head")[0]).childNodes;r=d[d.length-1]}var a=i.styleSheets;l.rel="stylesheet",l.href=t,l.media="only x",r.parentNode.insertBefore(l,n?r:r.nextSibling);var f=function(e){for(var t=l.href,n=a.length;n--;)if(a[n].href===t)return e();setTimeout(function(){f(e)})};return l.onloadcssdefined=f,f(function(){l.media=o||"all"}),l},"undefined"!=typeof module&&(module.exports=e.loadCSS)}(this);
-
-			loadCSS( "//fonts.googleapis.com/css?family=Roboto:300,400" );
-
-		script(src="{{ url_for('static_pillar', filename='assets/js/markdown.min.js') }}")
-		script(src="{{ url_for('static_pillar', filename='assets/js/tutti.min.js') }}")
-
 		link(href="{{ url_for('static', filename='assets/img/favicon.png') }}", rel="shortcut icon")
 		link(href="{{ url_for('static', filename='assets/img/apple-touch-icon-precomposed.png') }}", rel="icon apple-touch-icon-precomposed", sizes="192x192")
-
-		link(href="{{ url_for('static_pillar', filename='assets/css/vendor/bootstrap.min.css') }}", rel="stylesheet")
 
 		| {% block head %}{% endblock %}
 
 		| {% block css %}
 		link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css') }}", rel="stylesheet")
-		link(href="{{ url_for('static_pillar', filename='assets/css/base.css') }}", rel="stylesheet")
 		| {% if title == 'blog' %}
 		link(href="{{ url_for('static_pillar', filename='assets/css/blog.css') }}", rel="stylesheet")
 		| {% else %}
@@ -66,10 +54,9 @@ html(lang="en")
 		| {% if not title %}{% set title="default" %}{% endif %}
 
 	body(class="{{ title }}")
-		.container-page
-			.page-content
-				.page-body
-					| {% block body %}{% endblock %}
+		.page-content
+			.page-body
+				| {% block body %}{% endblock %}
 
 		| {% block footer_container %}
 		#footer-container
@@ -83,8 +70,6 @@ html(lang="en")
 					i.pi-angle-up
 			| {% endblock footer %}
 		| {% endblock footer_container%}
-
-		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.bootstrap-3.3.7.min.js') }}")
 
 		| {% if current_user.is_authenticated %}
 		script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.typewatch-3.0.0.min.js') }}")

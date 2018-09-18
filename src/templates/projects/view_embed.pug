@@ -1,9 +1,11 @@
-| {% block body %}
+| {% from '_macros/_asset_list_item.html' import asset_list_item %}
+include ../mixins/components
 
-#node-container
-	section.node-preview.project
-		| {% if header_video_file %}
-		video#videoplayer.video-js.vjs-fluid(
+| {% block body %}
+section.node-preview
+	| {% if header_video_file %}
+	.embed-responsive.embed-responsive-16by9
+		video#videoplayer.video-js.vjs-fluid.embed-responsive-item(
 			controls,
 			data-setup="{}",
 			preload="auto",
@@ -16,116 +18,29 @@
 			p.vjs-no-js.
 				To view this video please enable JavaScript, and consider upgrading to a web browser that
 				<a href="http://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
-		| {% elif project.picture_header %}
-		a(href="{{ url_for( 'projects.view', project_url=project.url) }}")
-			img.header(src="{{ project.picture_header.thumbnail('l', api=api) }}")
+	| {% elif project.picture_header %}
+	img.node-preview-thumbnail(src="{{ project.picture_header.thumbnail('l', api=api) }}")
+	| {% endif %}
+
+section.px-4
+	h4.pt-4
+		a.text-muted(href="{{ url_for( 'projects.view', project_url=project.url) }}")
+			| {{ project.name }}
+
+	| {% if project.description %}
+	.node-details-description
+		| {{ project | markdowned('description') }}
+	| {% endif %}
+
+	| {% if activity_stream %}
+	+card-deck(class="pt-4 border-top")
+		| {% for n in activity_stream %}
+		| {% if n.node_type not in ['comment'] %}
+		| {{ asset_list_item(n, current_user) }}
 		| {% endif %}
-
-	section.node-details-container.project
-		.node-details-title
-			h1
-				a(href="{{ url_for( 'projects.view', project_url=project.url) }}") {{ project.name }}
-
-		| {% if project.description %}
-		.node-details-description
-			| {{ project | markdowned('description') }}
-		| {% endif %}
-
-		| {# Until we implement urls for pages
-		a.learn-more(href="{{ url_for( 'projects.view', project_url=project.url) }}") LEARN MORE
-		| #}
-
-		.node-extra
-
-			| {% if activity_stream %}
-			.node-updates
-				ul.node-updates-list
-					| {% for n in activity_stream %}
-					| {% if n.node_type not in ['comment'] %}
-					li.node-updates-list-item(
-						data-node_id="{{ n._id }}",
-						class="{{ n.node_type }} {{ n.properties.content_type | hide_none }}")
-						a.image(href="{{ url_for_node(node=n) }}")
-							| {% if n.picture %}
-							img(src="{{ n.picture.thumbnail('l', api=api) }}")
-							| {% endif %}
-
-							| {% if n.node_type == 'post' %}
-							i.pi-newspaper
-							| {% elif n.node_type == 'texture' or n.node_type == 'group_texture' %}
-							i.pi-texture
-							| {% elif n.properties.content_type == 'video' %}
-							i.pi-film-thick
-							| {% elif n.properties.content_type == 'image' %}
-							i.pi-picture
-							| {% elif n.properties.content_type == 'file' %}
-							i.pi-file-archive
-							| {% else %}
-							i.pi-folder
-							| {% endif %}
-
-							| {% if n.permissions.world %}
-							.ribbon
-								span free
-							| {% endif %}
-
-						.info
-							a.title(href="{{ url_for_node(node=n) }}") {{ n.name }}
-							p.description(href="{{ url_for_node(node=n) }}")
-								| {% if n.node_type == 'post' %}
-								| {{ n.properties | markdowned('content') | striptags | truncate(140, end="... <small>read more</small>") | safe | hide_none }}
-								| {% else %}
-								| {{ n | markdowned('description') | striptags | truncate(140, end="... <small>read more</small>") | safe | hide_none }}
-								| {% endif %}
-							span.details
-								span.what {% if n.properties.content_type %}{{ n.properties.content_type | undertitle }}{% else %}{{ n.node_type | undertitle }}{% endif %} ·
-								span.when  {{ n._updated | pretty_date }} by
-								span.who {{ n.user.full_name }}
-					| {% endif %}
-					| {% endfor %}
-			| {% endif %}
+		| {% endfor %}
+	| {% endif %}
 
 include _scripts
 
-script(src="{{ url_for('static_pillar', filename='assets/js/vendor/jquery.montage.min.js') }}")
-script.
-	function montage(){
-		var $container 	= $('#featured-list'),
-			$imgs		= $container.find('img').hide(),
-			totalImgs	= $imgs.length,
-			cnt			= 0;
-
-		$imgs.each(function(i) {
-			var $img	= $(this);
-			$('<img/>').on('load', function() {
-				++cnt;
-				if( cnt === totalImgs ) {
-					$imgs.show();
-					$container.montage({
-						fillLastRow	: true,
-							alternateHeight	: true,
-							alternateHeightRange : {
-								min	: 180,
-								max	: 240
-							},
-							margin : 3
-					});
-				}
-			}).attr('src',$img.attr('src'));
-			$img.parent().removeClass('hidden');
-		});
-	}
-
-	$(function() {
-		montage();
-
-		$(".node-updates-list-item.asset, .node-updates-list-item.group")
-				.unbind('click')
-				.click(function(e) {
-			e.preventDefault();
-			displayNode($(this).data('node_id'));
-		});
-	});
-
-
-| {% endblock %}
+| {% endblock body %}

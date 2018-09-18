@@ -1,30 +1,24 @@
-$project-sidebar-background: lighten($color-background, 5%)
 $node-latest-thumbnail-size: 160px
 
-body.open-projects,
-body.courses,
-body.workshops
-	#project-container
-		+container-behavior
+/* Dark navbar when browsing a project. */
+body.project
+	nav.navbar
+		@extend .bg-dark
+		box-shadow: 0 2px $gray-700
 
-body.blog
-	background-color: white
+		.nav-link, .text-muted
+			color: $gray-400 !important
 
-	#project_nav,
-	#project_nav-container
-		+media-md
-			width: $project_nav-width * 1.4
-		+media-sm
-			width: $project_nav-width * 1.1
-		+media-xs
-			width: 100%
-		width: $project_nav-width * 1.5
+		.nav-main .nav-link
+			@extend .text-dark
+
 
 #project-container
 	display: flex
 	flex-direction: row
 	min-height: 300px
 	position: relative
+	overflow-y: auto
 	z-index: $z-index-base
 
 	+media-xs
@@ -37,30 +31,35 @@ body.blog
 	+media-xs
 		flex-direction: column-reverse
 
-#project-side-container+#project_context-header
-	width: 100%
-	left: 0
 
-#project_context-header
-	span#status-bar
-		text-align: left
+#project_nav,
+#project_tree,
+#project_nav-container
+	+media-xs
+		width: $project_nav-width-xs
+	+media-sm
+		width: $project_nav-width-sm
+	+media-md
+		width: $project_nav-width-md
+	+media-lg
+		width: $project_nav-width-lg
+	+media-xl
+		width: $project_nav-width-xl
+
+	width: $project_nav-width
 
 #project_nav-container
-	+media-lg
-		width: $project_nav-width * 1.33
-
 	+media-xs
 		display: block
-		width: 100%
-		position: relative
 		height: initial !important
+		position: relative
 
 	position: fixed
 	z-index: $z-index-base + 5
-	width: $project_nav-width
-
 
 #project_sidebar
+	box-shadow: inset -1px 0 0 0 $color-background
+	flex-shrink: 0
 	width: $project-sidebar-width
 	z-index: $z-index-base + 6
 
@@ -68,11 +67,6 @@ body.blog
 		width: 100%
 
 	ul.project-tabs
-		background-color: $color-background-nav
-		margin: 0
-		padding: 0
-		list-style: none
-
 		position: fixed
 		width: $project-sidebar-width
 		top: $project_header-height
@@ -85,232 +79,42 @@ body.blog
 			width: 100%
 
 		li
-			display: flex
-			align-items: center
-			justify-content: center
 			width: $project-sidebar-width
 			height: $project-sidebar-width
 			position: relative
-			color: white
-			background-color: $color-background-nav
-			border-left: 2px solid transparent
-			transition: all 100ms ease-in-out
 
-			+media-xs
-				border-bottom: 2px solid transparent
-			+media-sm
-				border-bottom: 2px solid transparent
-			+media-md
-				border-left: 2px solid transparent
-			+media-lg
-				border-left: 2px solid transparent
-
-			&:first-child
-				border-top: thin solid transparent
-
-			&:hover
-				background-color: $color-background-nav-light
+			&:hover,
+			&.active
 				cursor: pointer
 
-				+media-xs
-					border-bottom: 2px solid $color-background-nav-light
-				+media-sm
-					border-bottom: 2px solid $color-background-nav-light
-				+media-md
-					border-left: 2px solid $color-background-nav-light
-				+media-lg
-					border-left: 2px solid $color-background-nav-light
+				a
+					color: $primary
+					i
+						+active-gradient
 
 			a
-				width: $project-sidebar-width
-				height: $project-sidebar-width
-				display: flex
 				align-items: center
+				color: $color-text
+				display: flex
 				justify-content: center
-				color: $color-text-light-primary
-
-			i
-				font-size: 1.1em
-
-			&.active
-				background-color: $color-background-nav-light
-
-				// The tiny triangle
-				&:after
-					+media-xs
-						border-top-color: $project-sidebar-background
-						border-right-color: transparent
-						left: 50%
-						right: initial
-						transform: translateX(-50%)
-						top: 0
-
-					border: 7px solid transparent
-					border-right-color: $project-sidebar-background
-					content: ''
-					display: block
-					position: absolute
-					right: 0
-					top: 50%
-					transform: translateY(-50%)
-
-				a
-					color: white
+				height: $project-sidebar-width
+				width: $project-sidebar-width
 
 			&.tabs-thumbnail
-				height: $project-sidebar-width
-				border-bottom: 2px solid $color-background-nav-light
-
 				img
-					width: $project-sidebar-width
 					height: $project-sidebar-width
-
-				&.image
-					border-left: none
-
-				#project-loading
-					position: absolute
 					width: $project-sidebar-width
-					height: $project-sidebar-width
-					display: flex
-					align-items: center
-					justify-content: center
-					i
-						position: relative
-						top: -1px
-						font-size: 1em
-						color: white
 
-#search-container #project_sidebar ul.project-tabs li.tabs-thumbnail
-	background-color: $color-background-nav-dark
-	&:hover
-		background-color: $color-background-nav-light
 
 #project-nav,
 #project_context-container
 	flex: 1
 
 
-/* Container for navigation on the left */
-#project_nav
-	+media-lg
-		width: $project_nav-width * 1.33
-
-	+media-xs
-		width: initial
-
-	background-color: $project-sidebar-background
-	display: block
-	left: 0
-	position: relative
-	visibility: visible
-	width: $project_nav-width
-
-	&.about
-		display: none
-		visibility: hidden
-
-
 /* Header with name and node edit tools */
-#project_nav-header,
 #project_context-header
-	align-items: center
-	color: white
-	display: flex
-	position: relative
-
-#project_context-header
-	align-items: center
-	background-color: white
-	background-color: $color-background-light
-	border-bottom: thin solid lighten($color-text-dark-hint, 10%)
-	box-shadow: none
-	color: $color-text-dark-secondary
-	display: flex
-	height: $project_header-height
-	min-height: $project_header-height
-	position: fixed
-	top: $project_header-height
-	transition: box-shadow 250ms ease-in-out
-	width: auto
+	right: 0
 	z-index: $z-index-base + 3
-
-	&.is-offset
-		box-shadow: 0 0 25px rgba(black, .2)
-
-#project_nav-header
-	z-index: $z-index-base + 3
-	position: absolute
-	top: 0
-	left: 0
-	height: $project_header-height
-	min-height: $project_header-height
-	width: 100%
-	background-color: $color-background-light
-	border-bottom: thin solid $color-background-dark
-
-	/* Name of the project */
-	.project-title
-		width: 100%
-		max-width: 100%
-		height: 100%
-		transition: background-color 150ms ease-in-out
-
-		a
-			display: block
-			width: 100%
-			color: $color-text-dark
-			padding: 15px
-			font-size: 1.1em
-			+text-overflow-ellipsis
-
-			&:hover, &:active
-				color: $color-primary
-				text-decoration: none
-				outline: none
-
-span#status-bar
-	position: absolute
-	left: 0
-	top: 10px
-	min-width: 33%
-	padding: 5px 15px
-	color: $color-text-dark
-	opacity: 0
-	z-index: 1
-	background-color: $color-background-light
-	font-weight: 400
-	white-space: nowrap
-	transition: all 250ms ease-in-out
-
-	+media-xs
-		left: 0
-		min-width: 100%
-
-	i
-		margin-right: 5px
-
-	&.info
-		color: $color-info
-	&.error
-		color: $color-danger
-	&.warning
-		color: $color-warning
-	&.success
-		color: $color-success
-	&.default
-		color: $color-text-light
-
-	&.active
-		opacity: 1
-
-span#project-edit-title
-	position: absolute
-	padding: 15px 20px
-	font:
-		size: 1.1em
-		weight: 400
-	white-space: nowrap
 
 
 /* Edit Asset buttons */
@@ -320,71 +124,21 @@ span#project-edit-title
 	display: none
 
 ul.project-edit-tools
-	display: flex
-	align-items: center
-	height: 100%
-	padding: 0
-	margin:
-		top: 0
-		left: auto
-		right: 5px
-		bottom: 0
-	color: $color-text-dark-hint
+	li:not(.disabled)
+		.btn
+			background-color: $white
 
-	list-style-type: none
-	font-size: .9em
-
-	+media-xs
-		width: 100%
-		margin: 0 auto
-		justify-content: space-around
-
-	/* Bottons at the end of a form, like Save Changes */
-	&.bottom
-		+clearfix
-		padding: 20px 0 25px 0
-		border-top: thin solid $color-text-dark-hint
-		justify-content: flex-end
-		width: 100%
-		height: initial
+			&:hover
+				border-color: $primary
+				background-color: $white
+				color: $primary
 
 	li
-		margin: 0
-		padding: 0
-		position: relative
-		float: left
-		user-select: none
-
-		a
-			min-width: 110px
-			user-select: none
-
-			&:focus, &:active
-				text-decoration: none
-				outline: none
-
 		&.button-save
-
-			&.disabled
-				border-bottom: none
-
-				a
-					color: white
-					border-color: darken($color-success, 10%)
-
-			a
-				border-color: $color-success
-				background-color: $color-success
-				color: white
-				margin-right: 10px
-
-				&:hover
-					background-color: lighten($color-success, 5%)
-
 			&.field-error
 				a
-					background-color: $color-danger
-					border-color: $color-danger
+					background-color: $danger
+					border-color: $danger
 					color: white
 
 			&.saving
@@ -407,35 +161,6 @@ ul.project-edit-tools
 				cursor: default
 				+pulse-75
 
-		&.button-add,
-		&.button-edit
-			min-width: 80px
-
-
-		&.button-dropdown
-			min-width: 50px
-			cursor: pointer
-			i
-				margin: auto
-				padding: 0
-
-				&.button-add-icon
-					margin-right: 5px
-
-			a.dropdown-toggle
-				display: inline-block
-				min-width: auto
-
-			&.open
-				a.dropdown-toggle
-					color: $color-text-light
-					background-color: $color-primary
-					border-color: darken($color-primary, 5%)
-
-				li.button-delete:hover
-					a
-						color: $color-danger
-
 		&.featured
 			a
 				color: $color-warning
@@ -445,211 +170,43 @@ ul.project-edit-tools
 					background-color: rgba($color-warning, .1)
 
 		&.disabled
-			cursor: not-allowed
-			border-bottom: thin solid $color-text-dark-hint
+			+disabled-stripes
 
 			a
-				pointer-events: none
-				background: repeating-linear-gradient(-45deg, lighten($color-text-dark-hint, 15%), lighten($color-text-dark-hint, 15%) 10px, lighten($color-text-dark-hint, 5%) 10px, lighten($color-text-dark-hint, 5%) 20px)
-				border-color: darken($color-text-dark-hint, 5%)
-				opacity: .6
-				color: $color-text-dark
+				+disabled-stripes
 
-		&.button-dropdown.disabled
-			border-bottom: none
-
-	a
-		margin: 5px
-		padding: 5px 15px
-		color: $color-text-dark-primary
-		border-radius: 3px
-		border: thin solid $color-text-dark-primary
-		text-align: center
-		text-transform: uppercase
-		transition: background-color 150ms ease-in-out
-		background-color: $color-background-light
-
-		i
-			margin-right: 5px
-
-		&:hover
-			background-color: $color-background-active-dark
-			border-color: darken($color-background-active-dark, 5%)
-			color: $color-text-light
-			text-decoration: none
-
-		&:focus, &:active
-			text-decoration: none
-			outline: none
-
-
-		&#item_save,
-		&#item_cancel
-			i
-				font-size: 1em
-
-		&#item_add,
-		&#item_edit,
-		&#item_move,
-		&#item_featured
+		&.dropdown
 			li
-				i
-					margin-right: 10px
+				a
+					color: $body-color
+					display: block
+					padding: $dropdown-item-padding-y $dropdown-item-padding-x
+					padding-left: 15px
+					user-select: none
 
-		&#item_delete
-			li i
-				margin-right: 0
-		// &:not(:last-of-type)
-			// border-right: thin solid darken($color-background, 50%)
+					&:hover
+						color: $primary
+						text-decoration: none
 
-	/* ul.project-edit-tools */
-
-	/* Extra asset tools in dropdown */
-	ul.dropdown-menu
-		width: auto
-		min-width: 180px
-		padding: 0
-		margin: 0
-		top: 44px
-		left: initial
-		right: 10px
-		bottom: initial
-		border: thin solid $color-text-dark-hint
-		border-bottom-left-radius: 3px
-		border-bottom-right-radius: 3px
-		border-top-left-radius: 0
-		border-top-right-radius: 0
-		background-color: white
-		color: $color-text-dark-primary
-		box-shadow: 1px 1px 25px rgba(black, .2)
-
-		li
-			padding: 0
-			clear: both
-			display: flex
-			align-items: center
-			width: 100%
-
-			a
-				margin: 0
-				padding: 10px 15px
-				width: 100%
-				border: 0
-				font-size: .9em
-				width: 100%
-				text-align: left
-
-				&:hover
-					color: $color-primary
-					background-color: transparent
-				&:active, &:focus
-					color: $color-primary
-					background-color: transparent
-
-				i
-					display: inline-block
-					margin: 0 15px 0 0
-
-					&.icon-group:after
-						content: '\e80d'
-					&.icon-group_texture:after,
-					&.icon-group_hdri:after
-						content: '\e80b'
-						font-size: 1.1em
-					&.icon-asset:after
-						content: '\e825'
-					&.icon-page:after
-						content: '\e824'
-					&.icon-texture:after
-						content: '\e80a'
-					&.icon-hdri:after
-						content: '\f019'
+	/* Icons per asset type. */
+	i
+		&.icon-group:after
+			content: '\e80d'
+		&.icon-group_texture:after,
+		&.icon-group_hdri:after
+			content: '\e80b'
+			font-size: 1.1em
+		&.icon-asset:after
+			content: '\e825'
+		&.icon-page:after
+			content: '\e824'
+		&.icon-texture:after
+			content: '\e80a'
+		&.icon-hdri:after
+			content: '\f019'
 
 	/* // Extra asset tools in dropdown */
-
-	&.open
-		button
-			box-shadow: none
-
 /* // Edit Asset buttons */
-
-#project-loading
-	color: $color-text-light-primary
-	margin-left: auto
-	display: inline-block
-	background-color: transparent
-	opacity: 0
-	transition: opacity 150ms ease-in-out
-	+position-center-translate
-
-	i
-		position: relative
-		top: 2px
-
-	&.active
-		background-color: rgba($color-background-nav-dark, .7)
-		opacity: 1
-
-		i
-			+spin
-			animation-duration: .5s
-
-#project-header+#project_tree,
-#project-header+#project_context-container
-	margin-top: $project_header-height
-
-
-ul.project_nav-edit-list
-	list-style: none
-	padding: 0
-	margin: $project_header-height 0 0 0
-
-	li
-		background-color: $color-background
-		border-bottom: 1px solid $color-background-dark
-		font:
-			weight: 400
-			family: $font-body
-		color: $color-text-dark
-		position: relative
-
-		&:hover
-			cursor: pointer
-			background-color: $color-background-light
-		a
-			padding: 10px 15px
-			display: inline-block
-			width: 100%
-			text-decoration: none
-			color: $color-text-dark
-
-		i
-			padding-right: 15px
-
-		&.active
-			background-color: white
-
-			a
-				color: $color-primary-dark
-
-.project_nav-toggle-btn
-	position: absolute
-	bottom: 0
-	width: 100%
-	padding: 10px
-	text-align: center
-	color: $color-text-light-hint
-	cursor: pointer
-
-	&:hover
-		color: $color-text-light
-
-	i
-		font-size: 1.3em
-
-	+media-xs
-		visibility: hidden
-		display: none
 
 #project_context
 	position: relative
@@ -659,14 +216,7 @@ ul.project_nav-edit-list
 	height: 100%
 	background-color: white
 
-#project_context-header+#project_context
-	padding-top: $project_header-height
-
 #node-container
-	flex: 1
-	color: $color-text-dark
-	background-color: white
-
 	/* For error messages (403) and other overlaid text*/
 	#node-overlay
 		z-index: $z-index-base + 2
@@ -687,8 +237,6 @@ ul.project_nav-edit-list
 /* Project context on the right of the navigation */
 /* Contains #project_context */
 #project_context-container
-	background-color: $color-background-nav
-
 	iframe#server_error
 		width: 100%
 		min-height: 800px
@@ -699,23 +247,16 @@ ul.project_nav-edit-list
 #project_tree
 	+media-xs
 		margin-top: 0
-
-	background-color: $project-sidebar-background
-	border-right: thin solid $color-background
-	margin-top: $project_header-height
-	overflow-y: auto
-	padding: 0 0 5px 0// some padding on top/bottom of jstree
+	overflow-y: auto // show vertical scrollbars when needed.
+	padding: 5px 0 // some padding on top/bottom of jsTree.
 	position: relative
 
 	&.edit
 		margin-top: 0
 
-
 /* Node Context */
 =project-node-title
-	font:
-		family: $font-body
-		size: 1.5em
+	font-size: 1.5em
 	color: $color-text-dark-primary
 
 $node-preview-max-height-sm: 300px
@@ -825,7 +366,7 @@ $node-preview-max-height-lg: 700px
 				margin-left: auto
 
 			&.pending
-				color: $color-danger
+				color: $danger
 
 	section.node-preview.texture
 		overflow: hidden
@@ -897,7 +438,6 @@ $node-preview-max-height-lg: 700px
 			.node-title
 				color: $color-text-dark-primary
 				font:
-					family: $font-body
 					weight: 500
 					size: 1.5em
 				+text-overflow-ellipsis
@@ -941,40 +481,25 @@ $node-preview-max-height-lg: 700px
 				text-transform: uppercase
 
 section.node-preview
-	+media-md
-		max-height: $node-preview-max-height-md
-	+media-lg
-		max-height: $node-preview-max-height-lg
-
-	align-items: center
 	background-color: black
 	color: $color-text-light-primary
-	display: flex
-	flex: 1
-	justify-content: center
-	max-height: 500px
-	min-height: 200px
+	flex-shrink: 0 // prevents content/comments to make preview dissappear
+	max-height: calc((9 / 16) * 133vh)
 	overflow: hidden
+	min-height: 200px
 
 	iframe
 		width: 100%
 
 	img
-		display: block
-		max-height: $node-preview-max-height-lg
+		@extend .d-block
+		@extend .mx-auto
 		max-width: 100%
 		object-fit: scale-down
+		flex: 1
 
 		+media-xs
 			width: 100%
-
-		+media-md
-			max-height: $node-preview-max-height-md
-		+media-lg
-			max-height: $node-preview-max-height-lg
-
-	&.image
-		cursor: zoom-in
 
 	&.video
 		background-color: black
@@ -1029,31 +554,17 @@ section.node-preview
 							color: $color-warning
 							margin-right: 10px
 
-	&.group
-		align-items: center
-		display: flex
-		padding: 20px
-		position: relative
-
-	&.project
-		background-color: black
-		width: 100%
-
-		img
-			max-height: 800px
-			max-width: 100%
-			object-fit: cover
-			width: 100%
 
 section.node-preview-forbidden
 	align-items: center
-	background-color: $color-background-nav
+	background-color: $primary
 	color: $color-text-light
 	cursor: default
 	display: flex
 	justify-content: center
 	min-height: 400px
 	position: relative
+	overflow: hidden
 
 	img
 		height: 130%
@@ -1075,21 +586,9 @@ section.node-preview-forbidden
 	span
 		display: block
 
-	a
-		color: $color-text-light
-
-		&.btn
-			border-color: white
-			color: white
-
 	hr
 		opacity: .5
 
-section.node-details-container
-	background-color: white
-
-	&.project
-		padding-bottom: 15px
 
 /* Narrower details for about page (since it doesn't have navtree) */
 body.about
@@ -1101,8 +600,7 @@ body.about
 .node-title
 	+project-node-title
 
-section.node-details-container,
-section.node-preview.group
+section.node-details-container
 	position: relative
 
 	.node-details-header
@@ -1115,110 +613,54 @@ section.node-preview.group
 			width: 100%
 			max-width: 100%
 
-	.node-details-meta-actions
-		margin-left: auto
-
-		.btn-browsetoggle
-			+button(lighten($color-background-nav, 20%), 3px)
-			width: 48px
-			text-align: center
-			padding: 2px 4px
-			i
-				font-size: 1.3em
-				padding: 0
-				margin: 0
-
-	&.project
-		.node-details-title
-			padding: 10px 20px 0 20px
-
-.node-details-description
-	+node-details-description
-	padding-left: 20px
-	padding-right: 20px
-
 .node-details-meta
-	background-color: $color-background-light
-	border-bottom: thin solid $color-background
-	display: flex
-	flex-direction: column
-	font-weight: lighter
-	padding: 10px 20px
-
 	> ul
 		align-items: center
 		display: flex
-		list-style-type: none
-		margin: 0
-		padding: 0
 
 		> li
 			align-items: baseline
 			color: $color-text-dark-secondary
 			display: flex
-			padding-left: 10px
-			margin-left: 10px
+			padding-left: 5px
+			margin-left: 5px
 
 			&:first-child
 				margin-left: 0
 				padding-left: 0
 
 			&.status-pending
-				color: $color-danger
+				color: $danger
 
 			&.public
 				color: $color-success
 
 			&.download
-				position: relative
-
-				button
-					+button($color-success, 3px)
-
-				.dropdown-toggle
-					padding-right: 0
-
-				i.icon-dropdown-menu
-					padding-left: 10px
-
 				/* Download dropdown options */
 				ul.dropdown-menu
-					width: auto
 					min-width: 240px
-					padding: 0
-					margin: 0
-					top: initial
-					left: initial
-					right: 0
-					bottom: 35px
-					border: thin solid rgba(darken($color-background, 5%), .3)
-					border-top-left-radius: 3px
-					border-top-right-radius: 3px
-					border-bottom-left-radius: 0
-					border-bottom-right-radius: 0
 
 					li
-						padding: 0
-						text-align: right
-						clear: both
-						display: flex
-						align-items: center
+						display: block
 
 						a
+							display: flex
 							padding: 10px 15px
-							width: 100%
 
 							&:hover
-								color: $color-primary
-								background-color: transparent
+								text-decoration: none
 
 								span
+									color: $primary
+
 									&.length
 										color: lighten($color-primary, 10%)
 
 							span
+								color: $body-color
+
 								&.length
-									float: left
+									margin-right: auto
 									color: $color-text-dark-hint
 									padding-right: 15px
 								&.format
@@ -1255,34 +697,38 @@ section.node-preview.group
 				&.status
 					color: $color-text-dark
 
+	ul.blender-id-badges
+		padding-left: 0
+		list-style-type: none
+		display: flex
+
+		> li
+			margin: 0
+			padding: 0
+
+			> a
+				display: block
+				padding: 2px
+
+			img
+				// TODO(Pablo): fix this so that it keeps the aspect ratio okay when the original image isn't square.
+				max-width: 16px
+				max-height: 16px
+
 .node-details-license
-	align-items: center
-	border-bottom: thin solid $color-background
-	color: $color-text-dark
-	display: flex
-	font-weight: lighter
-	padding: 10px 20px
-
+	color: $color-text-dark-secondary
 	&:hover
-		color: $color-text-dark
+		color: $primary
 
-	span.type
-		i
-			color: $color-text-dark-primary
-			font-size: 1.8rem
-			margin-left: -5px
-			padding-right: 10px
+	i
+		font-size: 1.2rem
+		margin-left: -15px
 
-			&:after
-				top: 2px
-				left: -22px
-				position: relative
-			&:before
-				top: 2px
-				position: relative
+		&:after
+			left: -22px
+			position: relative
+			top: 1px
 
-		span
-			text-transform: uppercase
 
 section.node-details-container
 	&.storage
@@ -1354,7 +800,7 @@ section.node-details-container
 					opacity: 1
 
 .error-node-type-not-found
-	color: $color-danger
+	color: $danger
 	clear: both
 
 a.learn-more
@@ -1453,9 +899,6 @@ a.learn-more
 							font-size: 1.6em
 							left: 7px
 
-					.ribbon
-						+ribbon
-
 				.info
 					width: 100%
 					height: 100%
@@ -1489,14 +932,6 @@ a.learn-more
 						.what
 							text-transform: capitalize
 
-
-section.node-children
-	background-color: white
-
-	&.group, &.storage
-		flex: 1
-		padding: 10px 0 25px 20px
-		+clearfix
 
 .list-node-children-container
 	position: relative
@@ -1560,7 +995,7 @@ section.node-children
 		width: auto
 		height: auto
 		background: black
-		box-shadow: 1px 1px 1px rgba(black, .5), 2px 2px 15px rgba(black, .5)
+		box-shadow: 1px 1px 1px rgba(black, .5), 2px 2px 25px rgba(black, .25)
 
 		visibility: hidden
 		display: none
@@ -1597,7 +1032,7 @@ section.node-children
 			top: 0
 			left: 0
 			right: 0
-			@include overlay(rgba($color-background-nav, .9), 0%, transparent, 25%)
+			@include overlay(rgba(black, .9), 0%, transparent, 25%)
 
 			+text-overflow-ellipsis
 
@@ -1817,13 +1252,13 @@ section.node-children
 
 		.list-node-children-item-thumbnail
 			height: $list-node-children-item-width
-			background-color: $color-background-nav
+			background-color: black
 
 		&:hover
 			opacity: 1
 
 			img
-				opacity: .15
+				opacity: .5
 
 			.list-node-children-item-name
 				opacity: 1
@@ -1911,7 +1346,6 @@ section.node-children
 
 			.node_index-collection-name
 				font:
-					family: $font-body
 					size: 4em
 					weight: 600
 				margin-bottom: -5px
@@ -2034,7 +1468,6 @@ section.node-children
 				color: $color-text-dark
 				font:
 					size: 1.5em
-					family: $font-body
 					weight: 500
 				text-decoration: none
 
@@ -2086,9 +1519,6 @@ section.node-children
 		padding: 20px
 
 		.form-group
-			position: relative
-			margin: 0 auto 30px auto
-
 			&.tags .select2-container
 				.select2-selection
 					+input-generic
@@ -2101,15 +1531,15 @@ section.node-children
 				text-transform: capitalize
 
 			&.error
-				color: $color-danger
+				color: $danger
 				background-color: $color-background-light
 				padding: 10px 15px
-				border: thin solid lighten($color-danger, 10%)
-				border-top: 2px solid $color-danger
+				border: thin solid lighten($danger, 10%)
+				border-top: 2px solid $danger
 				border-bottom-left-radius: 3px
 				border-bottom-right-radius: 3px
 				label
-					color: $color-danger
+					color: $danger
 					font-weight: 500
 
 			&.file
@@ -2176,7 +1606,7 @@ section.node-children
 					outline: none
 
 				&.field-error
-					border-color: $color-danger
+					border-color: $danger
 
 			.md-preview-loading
 				position: absolute
@@ -2307,7 +1737,7 @@ section.node-children
 	box-shadow: 0 5px 35px rgba(black, .2)
 	color: $color-text-dark-primary
 	position: absolute
-	top: 0
+	top: -$project_header-height
 	left: 0
 	right: 0
 	width: 80%
@@ -2335,7 +1765,7 @@ section.node-children
 	&.visible
 		visibility: visible
 		opacity: 1
-		top: $project_header-height
+		top: 0
 
 		.overlay-container
 			.title
@@ -2423,7 +1853,7 @@ section.node-children
 		.cancel
 			+button($color-warning, 3px)
 		.delete
-			+button($color-danger, 3px)
+			+button($danger, 3px)
 		.toggle
 			margin: 0 20px
 
@@ -2434,7 +1864,7 @@ section.node-children
 			&.cancel
 				+button($color-warning, 3px)
 			&.delete
-				+button($color-danger, 3px)
+				+button($danger, 3px)
 
 			&.create
 				+button($color-success, 3px)
@@ -2552,3 +1982,4 @@ section.node-children
 				margin: 25px 0 0 0
 				padding: 5px 35px
 				text-align: center
+

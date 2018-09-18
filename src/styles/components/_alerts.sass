@@ -1,0 +1,72 @@
+.alert
+	margin-bottom: 0
+	text-align: center
+	padding: 10px 20px
+	z-index: 16
+
+	// overriden by alert types
+	color: $color-text-dark
+	background-color: $color-background
+
+	&.alert-danger,
+	&.alert-error
+		background-color: lighten($color-danger, 35%)
+		color: $color-danger
+		.alert-icon, .close
+			color: $color-danger
+
+	&.alert-warning
+		background-color: lighten($color-warning, 20%)
+		color: darken($color-warning, 20%)
+		.alert-icon, .close
+			color: darken($color-warning, 20%)
+
+	&.alert-success
+		background-color: lighten($color-success, 45%)
+		color: $color-success
+
+		.alert-icon, .close
+			color: $color-success
+
+	&.alert-info
+		background-color: lighten($color-info, 30%)
+		color: darken($color-info, 10%)
+		.alert-icon, .close
+			color: darken($color-info, 10%)
+
+	button.close
+		position: absolute
+		right: 10px
+
+		i
+			font-size: .8em
+
+	i.alert-icon
+		&:before
+			font-family: "pillar-font"
+			padding-right: 10px
+
+		&.success:before
+			content: '\e801'
+		&.info:before
+			content: "\e80c"
+		&.warning:before
+			content: "\e80b"
+		&.danger:before,
+		&.error:before
+			content: "\e83d"
+
+
+/* When there's an alert, disable the fixed top */
+.alert+.navbar-fixed-top
+	position: relative
+	margin-bottom: 0
+
+	&+.container
+		padding-top: 0
+
+.alert+.navbar
+	position: relative
+
+.alert+.navbar+.page-content
+	padding-top: 0

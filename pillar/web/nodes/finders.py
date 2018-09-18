@@ -94,6 +94,16 @@ def find_for_post(project, node):
                    url=node.properties.url)
 
 
+@register_node_finder('page')
+def find_for_page(project, node):
+    """Returns the URL for a page."""
+
+    project_id = project['_id']
+
+    the_project = project_url(project_id, project=project)
+    return url_for('projects.view_node', project_url=the_project.url, node_id=node.properties.url)
+
+
 def find_for_other(project, node):
     """Fallback: Assets, textures, and other node types.
 

@@ -1,6 +1,6 @@
 """Flask configuration file for unit testing."""
 
-BLENDER_ID_ENDPOINT = 'http://id.local:8001'  # Non existant server
+BLENDER_ID_ENDPOINT = 'http://id.local:8001/'  # Non existant server
 
 SERVER_NAME = 'localhost.local'
 PILLAR_SERVER_ENDPOINT = 'http://localhost.local/api/'

@@ -1,131 +1,146 @@
 | {% block body %}
-#node-container
-	#node-overlay
 
-	| {% block node_preview %}
-	| {% if node.picture %}
-	| {% if current_user.has_cap('subscriber') or node.permissions.world %}
-	section#node-preview.node-preview.image.js-node-preview-image
-		img.node-preview-thumbnail#node-preview-thumbnail(
-			src="{{ node.picture.thumbnail('l', api=api) }}")
-	| {% else %}
-	| {% include 'nodes/custom/_node_preview_forbidden.html' %}
+| {% block node_preview %}
+| {% if node.picture %}
+| {% if current_user.has_cap('subscriber') or node.permissions.world %}
+section.node-preview.d-flex.justify-content-center.cursor-zoom-in(
+	class="js-node-preview-image")
+	img.node-preview-thumbnail(
+		src="{{ node.picture.thumbnail('l', api=api) }}",
+		alt="{{ node.name }}")
+| {% else %}
+| {% include 'nodes/custom/_node_preview_forbidden.html' %}
+| {% endif %}
+| {% endif %}
+| {% endblock node_preview %}
+
+| {% block node_details %}
+
+| {# NAME #}
+section.px-4
+	h4.pt-4.mb-3 {{node.name}}
+
+	| {# DESCRIPTION #}
+	| {% if node.description %}
+	.node-details-description
+		| {{ node | markdowned('description') }}
 	| {% endif %}
-	| {% endif %}
-	| {% endblock node_preview %}
 
-	| {% block node_details %}
-	section.node-details-container
-
-		| {# NAME #}
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
-
-
-		| {# DESCRIPTION #}
-		| {% if node.description %}
-		.node-details-description#node-description
-			| {{ node | markdowned('description') }}
-		| {% endif %}
-
-
-		| {# LICENSE #}
+| {# DETAILS #}
+section.node-details-meta.pl-4.pr-2.py-2.border-bottom
+	ul.list-unstyled.m-0
 		| {% if node.properties.license_type %}
-		a.node-details-license(
-			href="https://creativecommons.org/licenses/",
-			target="_blank")
-			span.type
+		li.px-2
+			a.node-details-license(
+				href="https://creativecommons.org/licenses/",
+				target="_blank",
+				title="{{ node.properties.license_type }} {% if node.properties.license_notes %}{{ node.properties.license_notes }}{% endif %}",
+				data-toggle="tooltip",
+				data-placement="top")
 				i(class="pi-license-{{ node.properties.license_type }}")
-				| License <span>{{ node.properties.license_type }}</span>
-			| {% if node.properties.license_notes %}
-			| &mdash; {{ node.properties.license_notes }}
-			| {% endif %}
 		| {% endif %}
 
+		| {% if node.has_method('PUT') and (node.properties.status != 'published') %}
+		li.px-2(class="status-{{ node.properties.status }}")
+			| {{ node.properties.status | undertitle }}
+		| {% endif %}
 
-		| {# DETAILS #}
-		.node-details-meta
-			ul
-				| {% if node.has_method('PUT') and (node.properties.status != 'published') %}
-				li(class="status-{{ node.properties.status }}")
-					| {{ node.properties.status | undertitle }}
+		li.pr-2(title="Author")
+			| {{ node.user.full_name }}
+			| {{ node.user.badges.html|safe }}
+
+		li.px-2(
+			title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
+			| {{ node._created | pretty_date }}
+
+		| {% if node.short_link %}
+		li.shared
+			a(href="{{ node.short_link }}")
+				i.pi-share
+				| Shared
+		| {% endif %}
+
+		li.ml-auto
+
+		| {% if node.file %}
+		li.px-2(title="File size")
+			| {{ node.file.length | filesizeformat }}
+		li.px-2.js-type(title="File format")
+			| {{ node.file.content_type }}
+		| {% endif %}
+
+		| {% if node.permissions.world %}
+		li.public(
+			data-toggle="tooltip",
+			data-placement="bottom",
+			title="Anybody can download. Share it!")
+			i.pi-lock-open
+			span Public
+		| {% endif %}
+
+		| {% block node_details_meta_extra %}{% endblock %}
+
+		li.download
+			| {% if (current_user.has_cap('subscriber') or node.permissions.world) and (node.file or node.properties.files) %}
+			| {% block node_download %}
+			a(
+				title="Download {{ node.properties.content_type | undertitle }}",
+				href="{{ node.file.link }}",
+				download="{{ node.file.filename }}")
+				button.btn.btn-outline-primary.px-3(type="button")
+					i.pi-download.pr-2
+					| Download
+			| {% endblock node_download %}
+
+			| {% elif current_user.has_cap('can-renew-subscription') %}
+			a.btn.btn-outline-primary(
+				title="Renew your subscription to download",
+				target="_blank",
+				href="/renew")
+				i.pi-heart.pr-2
+				| Renew Subscription
+
+			| {% elif current_user.is_authenticated %}
+			.btn.disabled
+				i.pi-lock
+				| Download
+
+			| {% else %}
+			a.btn(
+				title="Login to download {{ node.properties.content_type | undertitle }}",
+				href="{{ url_for('users.login') }}")
+				i.pi-lock
+				| Download
+			| {% endif %}
+
+| {% endblock node_details %}
+.container-fluid
+	.row
+		| {% block node_comments %}
+		.col-md-8.col-sm-12
+			#comments-embed.p-2
+				.comments-list-loading
+					i.pi-spin
+		| {% endblock node_comments %}
+
+		| {# Check if tags is defined and there is _actually_ a tag at least #}
+		| {% if node.properties.tags and node.properties.tags[0] %}
+		.col-md-4.d-none.d-lg-block
+			script(src="{{ url_for('static_cloud', filename='assets/js/tagged_assets.min.js') }}")
+			script.
+				$(function() {
+					$('.js-asset-list').loadTaggedAssets(4, 0);
+				})
+			.tagged-similar.p-3
+				h6 Similar assets
+				| {% for tag in node.properties.tags[:3] %}
+				| {% if loop.index < 4 %}
+				.card-deck.card-padless.card-deck-vertical.mx-0(
+						class="js-asset-list",
+						data-asset-tag="{{ tag }}")
 				| {% endif %}
-
-				li(title="Author")
-					| {{ node.user.full_name }}
-
-				li(
-					title="Created {{ node._created }} (updated {{ node._updated | pretty_date_time }})")
-					| {{ node._created | pretty_date }}
-
-				| {% if node.short_link %}
-				li.shared
-					a(href="{{ node.short_link }}")
-						i.pi-share
-						| Shared
-				| {% endif %}
-
-				li.left-side
-
-				| {% if node.file %}
-				li(title="File size")
-					| {{ node.file.length | filesizeformat }}
-				li.js-type(title="File format")
-					| {{ node.file.content_type }}
-				| {% endif %}
-
-				| {% if node.permissions.world %}
-				li.public(
-					data-toggle="tooltip",
-					data-placement="bottom",
-					title="Anybody can download. Share it!")
-					i.pi-lock-open
-					span Public
-				| {% endif %}
-
-				| {% block node_details_meta_extra %}{% endblock %}
-
-				li.download
-					| {% if (current_user.has_cap('subscriber') or node.permissions.world) and (node.file or node.properties.files) %}
-					| {% block node_download %}
-					a(
-						title="Download {{ node.properties.content_type | undertitle }}",
-						href="{{ node.file.link }}",
-						download="{{ node.file.filename }}")
-						button.btn(type="button")
-							i.pi-download
-							| Download
-					| {% endblock node_download %}
-
-					| {% elif current_user.has_cap('can-renew-subscription') %}
-					a.btn.btn-success(
-						title="Renew your subscription to download",
-						target="_blank",
-						href="/renew")
-						i.pi-heart
-						| Renew Subscription
-
-					| {% elif current_user.is_authenticated %}
-					.btn.disabled
-						i.pi-lock
-						| Download
-
-					| {% else %}
-					a.btn(
-						title="Login to download {{ node.properties.content_type | undertitle }}",
-						href="{{ url_for('users.login') }}")
-						i.pi-lock
-						| Download
-					| {% endif %}
-
-	| {% endblock node_details %}
-
-	| {% block node_comments %}
-	#comments-embed
-		.comments-list-loading
-			i.pi-spin
-	| {% endblock node_comments %}
+				| {% endfor %}
+		| {% endif %}
 
 | {% include 'nodes/custom/_scripts.html' %}
 

@@ -3,6 +3,7 @@
 import copy
 import datetime
 import json
+from urllib.parse import urljoin
 
 import pillar.tests.common_test_data as ctd
 import responses
@@ -68,7 +69,7 @@ class AuthenticationTests(AbstractPillarTest):
     @responses.activate
     def test_validate_token__force_not_logged_in(self):
         from pillar.api.utils import authentication as auth
-        from pillar.auth import UserClass, current_user
+        from pillar.auth import UserClass
 
         with self.app.test_request_context():
             from flask import g
@@ -114,15 +115,16 @@ class AuthenticationTests(AbstractPillarTest):
             past = now - datetime.timedelta(days=1)
             subclient = self.app.config['BLENDER_ID_SUBCLIENT_ID']
 
+        with self.app.test_request_context():
             auth.store_token(user_id, 'nonexpired-main', future, None)
             auth.store_token(user_id, 'nonexpired-sub', future, subclient)
             token3 = auth.store_token(user_id, 'expired-sub', past, subclient)
 
-            # We should not find the given tokens as unhashed tokens.
+            # We should find the given tokens as unhashed tokens.
             tokens_coll = self.app.db('tokens')
-            self.assertIsNone(tokens_coll.find_one({'token': 'nonespired-main'}))
-            self.assertIsNone(tokens_coll.find_one({'token': 'nonespired-sub'}))
-            self.assertIsNone(tokens_coll.find_one({'token': 'expired-sub'}))
+            self.assertIsNotNone(tokens_coll.find_one({'token': 'nonexpired-main'}))
+            self.assertIsNotNone(tokens_coll.find_one({'token': 'nonexpired-sub'}))
+            self.assertIsNotNone(tokens_coll.find_one({'token': 'expired-sub'}))
 
         with self.app.test_request_context(
                 headers={'Authorization': self.make_header('nonexpired-main')}):
@@ -158,8 +160,7 @@ class AuthenticationTests(AbstractPillarTest):
     def test_save_own_user(self):
         """Tests that a user can't change their own fields."""
 
-        from pillar.api.utils import authentication as auth
-        from pillar.api.utils import PillarJSONEncoder, remove_private_keys
+        from pillar.api.utils import remove_private_keys
 
         user_id = self.create_user(roles=['subscriber'], token='token')
 
@@ -206,19 +207,19 @@ class AuthenticationTests(AbstractPillarTest):
         with self.app.test_request_context():
             from pillar.api.utils import authentication as auth
 
-            tokdat_le = auth.store_token(user_id, 'long-expired',
-                                         now - datetime.timedelta(days=365), None)
-            tokdat_se = auth.store_token(user_id, 'short-expired',
-                                         now - datetime.timedelta(seconds=5), None)
-            tokdat_ne = auth.store_token(user_id, 'not-expired',
-                                         now + datetime.timedelta(days=1), None)
+            auth.store_token(user_id, 'long-expired',
+                             now - datetime.timedelta(days=365), None)
+            auth.store_token(user_id, 'short-expired',
+                             now - datetime.timedelta(seconds=5), None)
+            auth.store_token(user_id, 'not-expired',
+                             now + datetime.timedelta(days=1), None)
 
             # Validation should clean up old tokens.
             auth.validate_this_token('je', 'moeder')
 
             token_coll = self.app.data.driver.db['tokens']
-            self.assertEqual({tokdat_se['token_hashed'], tokdat_ne['token_hashed']},
-                             {item['token_hashed'] for item in token_coll.find()})
+            self.assertEqual({'short-expired', 'not-expired'},
+                             {item['token'] for item in token_coll.find()})
 
     def test_token_hashing_cli(self):
         from dateutil.parser import parse
@@ -760,7 +761,7 @@ class UserCreationTest(AbstractPillarTest):
                     'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
 
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json=bid_resp,
                       status=200)
 
@@ -790,7 +791,7 @@ class UserCreationTest(AbstractPillarTest):
                              'id': ctd.BLENDER_ID_TEST_USERID},
                     'token_expires': 'Mon, 1 Jan 2218 01:02:03 GMT'}
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json=bid_resp,
                       status=200)
 

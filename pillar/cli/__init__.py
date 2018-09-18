@@ -13,6 +13,7 @@ from pillar.cli.maintenance import manager_maintenance
 from pillar.cli.operations import manager_operations
 from pillar.cli.setup import manager_setup
 from pillar.cli.elastic import manager_elastic
+from . import badges
 
 from pillar.cli import translations
 
@@ -24,3 +25,4 @@ manager.add_command("maintenance", manager_maintenance)
 manager.add_command("setup", manager_setup)
 manager.add_command("operations", manager_operations)
 manager.add_command("elastic", manager_elastic)
+manager.add_command("badges", badges.manager)

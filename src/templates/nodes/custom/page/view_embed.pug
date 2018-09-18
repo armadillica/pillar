@@ -1,29 +1,28 @@
 | {% extends 'projects/landing.html' %}
+include ../../../mixins/components
+
+| {% set title = node.properties.url %}
 
 | {% block body %}
-| {% if node.picture %}
-header
-	img.header(src="{{ node.picture.thumbnail('h', api=api) }}")
-| {% endif  %}
-| {% block navbar_secondary %}
-| {{ super() }}
-| {% endblock navbar_secondary %}
-#node-container
-	#node-overlay
+.expand-image-links.imgs-fluid
+	| {% if node.picture %}
+	+jumbotron(
+		"{{ node.name }}",
+		null,
+		"{{ node.picture.thumbnail('h', api=api) }}",
+		"{{ node.url }}")
+	| {% endif %}
 
-	section.node-details-container.page
+.container.pb-5
+	.row
+		.col-8.mx-auto
+			| {% if node.description %}
+			.node-details-description.pt-5
+				| {{ node | markdowned('description') }}
+			| {% endif %}
 
-		.node-details-header
-			.node-title#node-title
-				| {{node.name}}
-
-		| {% if node.description %}
-		.node-details-description#node-description
-			| {{ node | markdowned('description') }}
-		| {% endif %}
-
-		.node-details-meta.footer
-			span.updated(title="created {{ node._created | pretty_date }}") updated {{ node._updated | pretty_date }}
+			small.text-muted
+				span(title="created {{ node._created | pretty_date }}") Updated {{ node._updated | pretty_date }}
 
 include ../_scripts
 

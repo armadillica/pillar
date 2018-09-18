@@ -5,15 +5,20 @@
 	class="{% if is_reply %}is-reply{% else %}is-first{% endif %}")
 
 	.comment-avatar
-		img(src="{{ comment._user.email | gravatar }}")
+		img(src="{{ comment._user.email | gravatar }}", alt="{{ comment._user.full_name }}")
 
 	.comment-content
 		.comment-body
 			p.comment-author {{ comment._user.full_name }}
+			| {#
+			//- TODO(Pablo): due to the broad styling done on the .comment-content class the
+			//- styling for the badges that I put in _project.sass isn't applied properly here.
+			| {{ comment._user.badges_html|safe }}
+			| #}
 
 			span {{comment.properties | markdowned('content') }}
 
-		// TODO: Markdown preview when editing
+		| {# TODO(Pablo): Markdown preview when editing #}
 
 		.comment-meta
 			.comment-rating(

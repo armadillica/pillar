@@ -38,6 +38,8 @@ class UserClass(flask_login.UserMixin):
         self.groups: typing.List[str] = []  # NOTE: these are stringified object IDs.
         self.group_ids: typing.List[bson.ObjectId] = []
         self.capabilities: typing.Set[str] = set()
+        self.nodes: dict = {}  # see the 'nodes' key in eve_settings.py::user_schema.
+        self.badges_html: str = ''
 
         # Lazily evaluated
         self._has_organizations: typing.Optional[bool] = None
@@ -56,6 +58,12 @@ class UserClass(flask_login.UserMixin):
         user.email = db_user.get('email') or ''
         user.username = db_user.get('username') or ''
         user.full_name = db_user.get('full_name') or ''
+        user.badges_html = db_user.get('badges', {}).get('html') or ''
+
+        # Be a little more specific than just db_user['nodes']
+        user.nodes = {
+            'view_progress': db_user.get('nodes', {}).get('view_progress', {}),
+        }
 
         # Derived properties
         user.objectid = str(user.user_id or '')
@@ -210,6 +218,11 @@ def login_user(oauth_token: str, *, load_from_db=False):
         user = _load_user(oauth_token)
     else:
         user = UserClass(oauth_token)
+    login_user_object(user)
+
+
+def login_user_object(user: UserClass):
+    """Log in the given user."""
     flask_login.login_user(user, remember=True)
     g.current_user = user
     user_authenticated.send(None)

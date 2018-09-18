@@ -24,6 +24,7 @@ from pillar import current_app
 from pillar.api.utils import utcnow
 from pillar.web import system_util
 from pillar.web import utils
+from pillar.web.nodes import finders
 from pillar.web.utils.jstree import jstree_get_children
 import pillar.extension
 
@@ -302,6 +303,51 @@ def view(project_url):
                                          'header_video_node': header_video_node})
 
 
+def project_navigation_links(project, api) -> list:
+    """Returns a list of nodes for the project, for top navigation display.
+
+    Args:
+        project: A Project object.
+        api: the api client credential.
+
+    Returns:
+        A list of links for the Project.
+        For example we display a link to the project blog if present, as well
+        as pages. The list is structured as follows:
+
+        [{'url': '/p/spring/about', 'label': 'About'},
+        {'url': '/p/spring/blog', 'label': 'Blog'}]
+    """
+
+    links = []
+
+    # Fetch the blog
+    blog = Node.find_first({
+        'where': {'project': project._id, 'node_type': 'blog', '_deleted': {'$ne': True}},
+        'projection': {
+            'name': 1,
+        }
+    }, api=api)
+
+    if blog:
+        links.append({'url': finders.find_url_for_node(blog), 'label': blog.name, 'slug': 'blog'})
+
+    # Fetch pages
+    pages = Node.all({
+        'where': {'project': project._id, 'node_type': 'page', '_deleted': {'$ne': True}},
+        'projection': {
+            'name': 1,
+            'properties.url': 1
+        }
+    }, api=api)
+
+    # Process the results and append the links to the list
+    for p in pages._items:
+        links.append({'url': finders.find_url_for_node(p), 'label': p.name, 'slug': p.properties.url})
+
+    return links
+
+
 def render_project(project, api, extra_context=None, template_name=None):
     project.picture_square = utils.get_file(project.picture_square, api=api)
     project.picture_header = utils.get_file(project.picture_header, api=api)
@@ -370,6 +416,8 @@ def render_project(project, api, extra_context=None, template_name=None):
 
     extension_sidebar_links = current_app.extension_sidebar_links(project)
 
+    navigation_links = project_navigation_links(project, api)
+
     return render_template(template_name,
                            api=api,
                            project=project,
@@ -378,6 +426,7 @@ def render_project(project, api, extra_context=None, template_name=None):
                            show_project=True,
                            og_picture=project.picture_header,
                            activity_stream=activity_stream,
+                           navigation_links=navigation_links,
                            extension_sidebar_links=extension_sidebar_links,
                            **extra_context)
 
@@ -447,16 +496,14 @@ def view_node(project_url, node_id):
 
     # Append _theatre to load the proper template
     theatre = '_theatre' if theatre_mode else ''
+    navigation_links = project_navigation_links(project, api)
 
     if node.node_type == 'page':
-        pages = Node.all({
-            'where': {'project': project._id, 'node_type': 'page'},
-            'projection': {'name': 1}}, api=api)
         return render_template('nodes/custom/page/view_embed.html',
                                api=api,
                                node=node,
                                project=project,
-                               pages=pages._items,
+                               navigation_links=navigation_links,
                                og_picture=og_picture,)
 
     extension_sidebar_links = current_app.extension_sidebar_links(project)
@@ -468,6 +515,7 @@ def view_node(project_url, node_id):
                            show_node=True,
                            show_project=False,
                            og_picture=og_picture,
+                           navigation_links=navigation_links,
                            extension_sidebar_links=extension_sidebar_links)
 
 

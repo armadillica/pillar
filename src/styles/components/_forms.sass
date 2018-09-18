@@ -1,0 +1,132 @@
+/* File Upload forms */
+.fieldlist
+	list-style: none
+	padding: 0
+	margin: 10px 0 0 0
+
+	li.fieldlist-item
+		background-color: $color-background-light
+		border: thin solid $color-background
+		border-left: 3px solid $color-primary
+		border-top-right-radius: 3px
+		border-bottom-right-radius: 3px
+
+		margin-bottom: 10px
+		padding: 10px
+		+clearfix
+
+		.form-group
+			margin-bottom: 0 !important // override bs
+			width: 100%
+
+			input.form-control
+				background-color: white !important
+				padding: 0 10px !important
+				border: thin solid $color-background-dark !important
+
+		div[class$="slug"]
+			width: 50%
+			float: left
+			display: flex
+			align-items: center
+
+			label
+				margin-right: 10px
+
+		.fieldlist-action-button
+			+button($color-success, 3px)
+			margin: 0 0 0 10px
+			padding: 5px 10px
+			text-transform: initial
+
+.form-upload-file
+	margin-bottom: 10px
+	display: flex
+	flex-direction: column
+
+	.form-upload-progress
+		margin-top: 10px
+
+		.form-upload-progress-bar
+			margin-top: 5px
+			background-color: $color-success
+			height: 5px
+			min-width: 0
+			border-radius: 3px
+
+			&.progress-uploading
+				background-color: hsl(hue($color-success), 80%, 65%) !important
+
+			&.progress-processing
+				+stripes($color-success, lighten($color-success, 15%), -45deg, 25px)
+				+stripes-animate
+				animation-duration: 1s
+
+			&.progress-error
+				background-color: $color-danger !important
+
+	.preview-thumbnail
+		width: 50px
+		height: 50px
+		min-width: 50px
+		min-height: 50px
+		margin-right: 10px
+		margin-top: 5px
+		border-radius: 3px
+		background-color: $color-background
+
+	.form-upload-file-meta-container
+		display: flex
+
+	.form-upload-file-meta
+		list-style: none
+		padding: 0
+		margin: 0
+		width: 100%
+		display: flex
+		flex-wrap: wrap
+		flex: 1
+
+		li
+			display: inline-block
+			padding: 5px 10px
+
+			&:first-child
+				padding-left: 0
+
+			&.dimensions, &.size
+				color: $color-text-dark-secondary
+
+			&.delete
+				margin-left: auto
+
+			&.name
+				+text-overflow-ellipsis
+
+		.file_delete
+			color: $color-danger
+
+	.form-upload-file-actions
+		list-style: none
+		padding: 0
+		margin: 0
+		display: flex
+		flex-wrap: wrap
+
+		li
+			display: inline-block
+			padding: 5px 10px
+
+		.file_delete
+			color: $color-danger
+
+.form-group
+	&.error
+		.form-control, input
+			border-color: $color-danger !important
+
+	ul.error
+		padding: 5px 0 0 0
+		margin: 0
+		color: $color-danger
+		list-style-type: none

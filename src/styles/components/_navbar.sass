@@ -1,0 +1,255 @@
+/* Top level navigation bar. */
+.navbar
+	box-shadow: 0 2px  $color-background
+
+.nav
+	border: none
+	color: $color-text-dark-secondary
+	padding: 0
+	z-index: $z-index-base + 5
+
+	nav
+		margin-left: auto
+		margin-right: 0
+
+		.navbar-nav
+			margin-right: 0
+			+media-xs
+				margin: 0
+				width: 100%
+
+	li
+		user-select: none
+		position: relative
+
+		img.gravatar
+			height: 28px
+			position: relative
+			width: 28px
+
+		.special
+			background-color: white
+			border-radius: 999em
+			box-shadow: 1px 1px 1px rgba(black, .2)
+			display: inline-block
+			font-size: 1.2em
+			height: 18px
+			left: 28px
+			position: absolute
+			top: 3px
+			width: 18px
+			z-index: 2
+
+			&.subscriber
+				background-color: $color-success
+				color: white
+				font-size: .6em
+
+			&.demo
+				background-color: $color-info
+				color: white
+				font-size: .6em
+
+			&.none
+				color: $color-danger
+
+			i
+				+position-center-translate
+
+.dropdown
+	.navbar-item
+		&:hover
+			box-shadow: none // Remove the blue underline usually on navbar, from dropdown items.
+
+	ul.dropdown-menu
+		li
+			a
+				white-space: nowrap
+
+			.subitem // e.g. "Not Sintel? Log out"
+				font-size: .8em
+				text-transform: initial
+
+			i
+				width: 30px
+
+			&.subscription-status
+				a, a:hover
+					color: $white
+
+				&.none
+					background-color: $color-danger
+
+				&.subscriber
+					background-color: $color-success
+
+				&.demo
+					background-color: $color-info
+
+				span.info
+					display: block
+
+					span.renew
+						display: block
+						font-size: .9em
+
+
+.nav-link
+	@extend .d-flex
+
+.nav-title
+	white-space: nowrap
+
+.navbar-item
+	align-items: center
+	display: flex
+	user-select: none
+	color: inherit
+
+	+media-sm
+		padding-left: 10px
+		padding-right: 10px
+
+	&:hover, &:focus
+		color: $primary
+		background-color: transparent
+		box-shadow: inset 0 -3px 0 $primary
+		text-decoration: none
+
+	&:focus
+		box-shadow: inset 0 -3px 0 $primary
+
+
+/* Secondary navigation. */
+$nav-secondary-bar-size: -2px
+.nav-secondary
+	align-items: center
+
+	.nav-link
+		color: $color-text
+		cursor: pointer
+		margin-bottom: 2px
+		transition: color 150ms ease-in-out
+
+		span
+			position: relative
+			top: 2px
+
+		&:after
+			background-color: transparent
+			bottom: 0
+			content: ''
+			height: 2px
+			position: absolute
+			right: 0
+			left: 0
+			width: 0
+			transition: width 150ms ease-in-out
+
+	.nav-link:hover,
+	.nav-link.active,
+	.nav-item.dropdown.show > .nav-link
+		// Blue bar on the bottom.
+		&:after
+			background-color: $primary-accent
+			background-image: linear-gradient(to right, $primary-accent 70%, $primary)
+			height: 2px
+			width: 100%
+			bottom: -2px
+
+		span
+			+active-gradient
+
+		i
+			color: $primary-accent
+
+	.nav-link.active
+		font-weight: bold
+
+	&.nav-secondary-vertical
+		align-items: flex-start
+		flex-direction: column
+		box-shadow: none // Last item on the list already has a box-shadow.
+
+		> li
+			width: 100% // span across the whole width.
+
+		// Blue bar on the side.
+		.nav-link
+			&:hover,
+			&.active
+				color: $primary
+				@extend .bg-white
+
+				&:after
+					background-image: linear-gradient($primary-accent 70%, $primary)
+					height: 100%
+					left: initial
+					top: 0
+					width: 3px
+
+// Big navigation dropdown.
+.nav-main
+	min-width: initial
+
+	.nav-secondary
+		.nav-link
+			@extend .pr-5
+			box-shadow: none
+
+			&.nav-see-more
+				color: $primary
+
+				i, span
+					+active-gradient
+
+.navbar-overlay
+	+media-lg
+		display: block
+	bottom: 0
+	display: none
+	left: 0
+	height: 100%
+	position: absolute
+	right: 0
+	top: 0
+	transition: background-color 350ms ease-in-out
+	width: 100%
+	z-index: 0
+
+	&.is-active
+		background-color: $color-background-nav
+		text-shadow: none
+
+nav.navbar
+	.navbar-collapse
+		> ul > li > .navbar-item
+			padding: $navbar-nav-link-padding-x
+			height: $nav-link-height
+
+
+.navbar-backdrop-container
+	width: 100%
+	height: 100%
+	position: absolute
+	top: 0
+	left: 0
+	right: 0
+	bottom: 0
+
+	img
+		display: none
+		position: fixed
+		width: 100%
+		align-self: flex-start
+		+media-md
+			display: block
+		+media-lg
+			display: block
+
+
+.nav-tabs .dropdown-menu, .nav-pills .dropdown-menu
+	margin-top: 0
+
+.navbar+.page-content
+	padding-top: $nav-link-height

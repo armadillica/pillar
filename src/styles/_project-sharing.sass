@@ -92,19 +92,6 @@ ul.sharing-users-list
 					&:hover
 						color: lighten($color-danger, 10%)
 
-.sharing-users-intro,
-.sharing-users-info
-	h4
-		font-family: $font-body
-
-.sharing-users-info
-	padding-left: 15px
-	border-left: thin solid $color-text-dark-hint
-
-	p
-		font:
-			size: 1.1em
-			weight: 300
 
 .sharing-users-search
 	.disabled
@@ -162,24 +149,26 @@ ul.list-generic
 	list-style: none
 
 	> li
-		padding: 5px 0
-		display: flex
 		align-items: center
 		border-top: thin solid $color-background
+		display: flex
+		padding: 5px 0
 
 		&:first-child
 			border-top: none
 
 		&:hover .item a
-			color: $color-primary
+			color: $primary
 
 		a
 			flex: 1
 
+			&.active
+				color: $primary !important
+				font-weight: bold
+
 		.actions
 			margin-left: auto
-			.btn
-				font-size: .7em
 
 			span
 				color: $color-text-dark-secondary

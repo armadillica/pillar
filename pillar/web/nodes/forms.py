@@ -1,9 +1,10 @@
+import functools
 import logging
+import typing
 
 from datetime import datetime
 from datetime import date
 import pillarsdk
-from flask import current_app
 from flask_wtf import FlaskForm
 from wtforms import StringField
 from wtforms import DateField
@@ -17,6 +18,8 @@ from wtforms import DateTimeField
 from wtforms import SelectMultipleField
 from wtforms import FieldList
 from wtforms.validators import DataRequired
+
+from pillar import current_app
 from pillar.web.utils import system_util
 from pillar.web.utils.forms import FileSelectField
 from pillar.web.utils.forms import CustomFormField
@@ -44,6 +47,13 @@ def iter_node_properties(node_type):
         yield prop_name, prop_schema, prop_fschema
 
 
+@functools.lru_cache(maxsize=1)
+def tag_choices() -> typing.List[typing.Tuple[str, str]]:
+    """Return (value, label) tuples for the NODE_TAGS config setting."""
+    tags = current_app.config.get('NODE_TAGS') or []
+    return [(tag, tag.title()) for tag in tags]  # (value, label) tuples
+
+
 def add_form_properties(form_class, node_type):
     """Add fields to a form based on the node and form schema provided.
     :type node_schema: dict
@@ -60,7 +70,9 @@ def add_form_properties(form_class, node_type):
         # Recursive call if detects a dict
         field_type = schema_prop['type']
 
-        if field_type == 'dict':
+        if prop_name == 'tags' and field_type == 'list':
+            field = SelectMultipleField(choices=tag_choices())
+        elif field_type == 'dict':
             assert prop_name == 'attachments'
             field = attachments.attachment_form_group_create(schema_prop)
         elif field_type == 'list':

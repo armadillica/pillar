@@ -1,0 +1,25 @@
+/* Flyouts (only used on notifications for now) */
+.flyout
+	background-color: $color-background
+	border-radius: 3px
+	border: thin solid darken($color-background, 3%)
+	box-shadow: 1px 2px 2px rgba(black, .2)
+	display: block
+	font-size: .9em
+
+	& .flyout-title
+		cursor: default
+		display: block
+		float: left
+		font-size: 1.1em
+		font-weight: 600
+		padding: 8px 10px 5px 10px
+
+	&.notifications
+		max-height: 1000%
+		overflow-x: hidden
+		position: absolute
+		right: 0
+		top: 40px
+		width: 420px
+		z-index: 9999

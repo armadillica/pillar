@@ -1,0 +1,142 @@
+.card-deck
+	// Custom, as of bootstrap 4.1.3 there is no way to do this.
+	&.card-deck-responsive
+		@extend .row
+
+		.card
+			@extend .col-md-4
+
+			+media-sm
+				flex: 1 0 50%
+				max-width: 50%
+
+			+media-md
+				flex: 1 0 33%
+				max-width: 33%
+
+			+media-lg
+				flex: 1 0 33%
+				max-width: 33%
+
+			+media-xl
+				flex: 1 0 25%
+				max-width: 25%
+
+			+media-xxl
+				flex: 1 0 20%
+				max-width: 20%
+
+		&.card-3-columns .card
+			+media-xxl
+				flex: 1 0 33%
+				max-width: 33%
+
+	&.card-deck-vertical
+		@extend .flex-column
+		flex-wrap: initial
+
+		.card
+			@extend .w-100
+			@extend .flex-row
+			@extend .p-0
+
+			flex: initial
+			flex-wrap: wrap
+			max-width: 100%
+
+			.card-img-top
+				@extend .rounded-0
+
+			.embed-responsive
+				@extend .mr-2
+				max-width: 120px
+
+			&.asset
+				&.free
+					&:after
+						+ribbon
+						content: 'FREE'
+						font-size: .6rem
+						left: -40px
+						padding: 1px 45px
+						right: initial
+						transform: rotate(-45deg)
+
+		.card-body
+			@extend .overflow-hidden
+			flex-basis: 0
+
+.card-padless
+	.card
+		@extend .border-0
+
+	.card-body
+		@extend .px-0
+
+
+.card-image-fade
+	&:hover
+		.card-img-top
+			opacity: .9
+
+
+.card.asset
+	color: $color-text
+
+	&:hover
+		text-decoration: none
+
+	&.free
+		overflow: hidden
+
+		&:after
+			+ribbon
+			content: 'FREE'
+			padding: 2px 50px
+
+	.card-body
+		position: relative // for placing the progress
+
+		.card-text
+			font-size: $font-size-xs
+
+	.card-img-top
+		background-color: $color-background
+		background-size: cover
+		background-position: center
+
+
+	$card-progress-height: 5px
+	.progress
+		height: $card-progress-height
+		position: absolute
+		top: -$card-progress-height
+		width: 100%
+
+.card-img-top
+	&.card-icon
+		display: flex
+		align-items: center
+		justify-content: center
+		font-size: 2em
+
+		i
+			opacity: .2
+
+/* Tiny label for cards. e.g. 'WATCHED' on videos. */
+.card-label
+	background-color: rgba($black, .5)
+	border-radius: 3px
+	color: $white
+	display: block
+	font-size: $font-size-xxs
+	left: 5px
+	top: -27px // enough to be above the progress-bar
+	position: absolute
+	padding: 1px 5px
+	z-index: 1
+
+.card
+	&.active
+		.card-title
+			color: $primary

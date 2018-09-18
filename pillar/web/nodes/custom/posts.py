@@ -19,6 +19,7 @@ from pillar.web.nodes.routes import url_for_node
 from pillar.web.nodes.forms import get_node_form
 import pillar.web.nodes.attachments
 from pillar.web.projects.routes import project_update_nodes_list
+from pillar.web.projects.routes import project_navigation_links
 
 log = logging.getLogger(__name__)
 
@@ -61,16 +62,10 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
         post.picture = get_file(post.picture, api=api)
         post.url = url_for_node(node=post)
 
-    # Use the *_main_project.html template for the main blog
-    is_main_project = project_id == current_app.config['MAIN_PROJECT_ID']
-    main_project_template = '_main_project' if is_main_project else ''
-    main_project_template = '_main_project'
     index_arch = 'archive' if archive else 'index'
-    template_path = f'nodes/custom/blog/{index_arch}{main_project_template}.html',
+    template_path = f'nodes/custom/blog/{index_arch}.html',
 
     if url:
-        template_path = f'nodes/custom/post/view{main_project_template}.html',
-
         post = Node.find_one({
             'where': {'parent': blog._id, 'properties.url': url},
             'embedded': {'node_type': 1, 'user': 1},
@@ -95,6 +90,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
     can_create_blog_posts = project.node_type_has_method('post', 'POST', api=api)
 
     # Use functools.partial so we can later pass page=X.
+    is_main_project = project_id == current_app.config['MAIN_PROJECT_ID']
     if is_main_project:
         url_func = functools.partial(url_for, 'main.main_blog_archive')
     else:
@@ -112,24 +108,19 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
     else:
         project.blog_archive_prev = None
 
-    title = 'blog_main' if is_main_project else 'blog'
-
-    pages = Node.all({
-        'where': {'project': project._id, 'node_type': 'page'},
-        'projection': {'name': 1}}, api=api)
+    navigation_links = project_navigation_links(project, api)
 
     return render_template(
         template_path,
         blog=blog,
-        node=post,
+        node=post,  # node is used by the generic comments rendering (see custom/_scripts.pug)
         posts=posts._items,
         posts_meta=pmeta,
         more_posts_available=pmeta['total'] > pmeta['max_results'],
         project=project,
-        title=title,
         node_type_post=project.get_node_type('post'),
         can_create_blog_posts=can_create_blog_posts,
-        pages=pages._items,
+        navigation_links=navigation_links,
         api=api)
 
 

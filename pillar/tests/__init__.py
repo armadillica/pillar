@@ -1,6 +1,7 @@
 # -*- encoding: utf-8 -*-
 
 import base64
+import contextlib
 import copy
 import datetime
 import json
@@ -10,11 +11,7 @@ import pathlib
 import sys
 import typing
 import unittest.mock
-
-try:
-    from urllib.parse import urlencode
-except ImportError:
-    from urllib.parse import urlencode
+from urllib.parse import urlencode, urljoin
 
 from bson import ObjectId, tz_util
 
@@ -186,7 +183,7 @@ class AbstractPillarTest(TestMinimal):
         else:
             self.ensure_project_exists()
 
-        with self.app.test_request_context():
+        with self.app.app_context():
             files_collection = self.app.data.driver.db['files']
             assert isinstance(files_collection, pymongo.collection.Collection)
 
@@ -327,15 +324,46 @@ class AbstractPillarTest(TestMinimal):
 
         return user
 
-    def create_valid_auth_token(self, user_id, token='token'):
+    @contextlib.contextmanager
+    def login_as(self, user_id: typing.Union[str, ObjectId]):
+        """Context manager, within the context the app context is active and the user logged in.
+
+        The logging-in happens when a request starts, so it's only active when
+        e.g. self.get() or self.post() or somesuch request is used.
+        """
+        from pillar.auth import UserClass, login_user_object
+
+        if isinstance(user_id, str):
+            user_oid = ObjectId(user_id)
+        elif isinstance(user_id, ObjectId):
+            user_oid = user_id
+        else:
+            raise TypeError(f'invalid type {type(user_id)} for parameter user_id')
+        user_doc = self.fetch_user_from_db(user_oid)
+
+        def signal_handler(sender, **kwargs):
+            login_user_object(user)
+
+        with self.app.app_context():
+            user = UserClass.construct('', user_doc)
+            with flask.request_started.connected_to(signal_handler, self.app):
+                yield
+
+    # TODO: rename to 'create_auth_token' now that 'expire_in_days' can be negative.
+    def create_valid_auth_token(self,
+                                user_id: ObjectId,
+                                token='token',
+                                *,
+                                oauth_scopes: typing.Optional[typing.List[str]]=None,
+                                expire_in_days=1) -> dict:
         from pillar.api.utils import utcnow
 
-        future = utcnow() + datetime.timedelta(days=1)
+        future = utcnow() + datetime.timedelta(days=expire_in_days)
 
         with self.app.test_request_context():
             from pillar.api.utils import authentication as auth
 
-            token_data = auth.store_token(user_id, token, future, None)
+            token_data = auth.store_token(user_id, token, future, oauth_scopes=oauth_scopes)
 
         return token_data
 
@@ -365,7 +393,7 @@ class AbstractPillarTest(TestMinimal):
 
         return user_id
 
-    def create_node(self, node_doc):
+    def create_node(self, node_doc) -> ObjectId:
         """Creates a node, returning its ObjectId. """
 
         with self.app.test_request_context():
@@ -407,7 +435,7 @@ class AbstractPillarTest(TestMinimal):
         """Sets up Responses to mock unhappy validation flow."""
 
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json={'status': 'fail'},
                       status=403)
 
@@ -415,7 +443,7 @@ class AbstractPillarTest(TestMinimal):
         """Sets up Responses to mock happy validation flow."""
 
         responses.add(responses.POST,
-                      '%s/u/validate_token' % self.app.config['BLENDER_ID_ENDPOINT'],
+                      urljoin(self.app.config['BLENDER_ID_ENDPOINT'], 'u/validate_token'),
                       json=BLENDER_ID_USER_RESPONSE,
                       status=200)
 

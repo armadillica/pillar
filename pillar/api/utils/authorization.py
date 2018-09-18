@@ -1,5 +1,6 @@
 import logging
 import functools
+import typing
 
 from bson import ObjectId
 from flask import g
@@ -12,8 +13,9 @@ CHECK_PERMISSIONS_IMPLEMENTED_FOR = {'projects', 'nodes', 'flamenco_jobs'}
 log = logging.getLogger(__name__)
 
 
-def check_permissions(collection_name, resource, method, append_allowed_methods=False,
-                      check_node_type=None):
+def check_permissions(collection_name: str, resource: dict, method: str,
+                      append_allowed_methods=False,
+                      check_node_type: typing.Optional[str] = None):
     """Check user permissions to access a node. We look up node permissions from
     world to groups to users and match them with the computed user permissions.
     If there is not match, we raise 403.
@@ -93,8 +95,9 @@ def compute_allowed_methods(collection_name, resource, check_node_type=None):
     return allowed_methods
 
 
-def has_permissions(collection_name, resource, method, append_allowed_methods=False,
-                    check_node_type=None):
+def has_permissions(collection_name: str, resource: dict, method: str,
+                    append_allowed_methods=False,
+                    check_node_type: typing.Optional[str] = None):
     """Check user permissions to access a node. We look up node permissions from
     world to groups to users and match them with the computed user permissions.
 

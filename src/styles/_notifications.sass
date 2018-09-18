@@ -9,7 +9,6 @@
 		color: $color-primary
 		cursor: pointer
 		float: right
-		font-family: $font-body
 		height: initial
 		margin: 0
 		padding: 8px 10px 0 10px
@@ -25,13 +24,16 @@
 			color: $color-secondary
 
 #notifications-toggle
+	color: $color-text
 	cursor: pointer
-	font-size: 1.5em
 	position: relative
 	user-select: none
 
 	> i:before
 		content: '\e815'
+		font-size: 1.3em
+		position: relative
+		top: 2px
 
 	&.has-notifications
 		> i:before
@@ -46,10 +48,10 @@
 		border-color: transparent transparent $color-background transparent
 		border-style: solid
 		border-width: 0 8px 8px 8px
-		bottom: -15px
+		bottom: -10px
 		height: 0
 		position: absolute
-		right: 22px
+		right: 7px
 		visibility: hidden
 		width: 0
 

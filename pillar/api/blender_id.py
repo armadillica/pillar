@@ -220,7 +220,7 @@ def fetch_blenderid_user() -> dict:
 
     my_log = log.getChild('fetch_blenderid_user')
 
-    bid_url = '%s/api/user' % current_app.config['BLENDER_ID_ENDPOINT']
+    bid_url = urljoin(current_app.config['BLENDER_ID_ENDPOINT'], 'api/user')
     my_log.debug('Fetching user info from %s', bid_url)
 
     credentials = current_app.config['OAUTH_CREDENTIALS']['blender-id']

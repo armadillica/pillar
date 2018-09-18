@@ -1,36 +1,34 @@
 | {% extends 'layout.html' %}
+include ../../mixins/components
+
 //- Don't extend this base file directly. Instead, extend page.html so that Pillar extensions
 //- can provide overrides.
 | {% block body %}
-.container
-	#settings
-		#settings-sidebar
+.container.py-4
+	.row
+		.col-md-3
 			| {% block settings_sidebar %}
-			.settings-header
-				.settings-title Settings
-			.settings-content
-				ul
-					| {% block settings_sidebar_menu %}
-					a(class="{% if title == 'profile' %}active{% endif %}",
-						href="{{ url_for('settings.profile') }}")
-						li
-							i.pi-vcard
-							| Profile
-					| {% endblock settings_sidebar_menu %}
-					| {% block settings_sidebar_menu_bottom %}
-					a(class="{% if title == 'roles' %}active{% endif %}",
-						href="{{ url_for('settings.roles') }}")
-						li
-							i.pi-cog
-							| Roles &amp; Capabilities
-					| {% endblock settings_sidebar_menu_bottom %}
+			+nav-secondary('Settings')(class="nav-secondary-vertical bg-light")
+				| {% block settings_sidebar_menu %}
+				+nav-secondary-link(
+					class="{% if title == 'profile' %}active{% endif %} border-top",
+					href="{{ url_for('settings.profile') }}")
+					i.pr-3.pi-vcard
+					span Profile
+				| {% endblock settings_sidebar_menu %}
+
+				| {% block settings_sidebar_menu_bottom %}
+				+nav-secondary-link(
+					class="{% if title == 'roles' %}active{% endif %}",
+					href="{{ url_for('settings.roles') }}")
+					i.pr-3.pi-cog
+					span Roles &amp; Capabilities
+				| {% endblock settings_sidebar_menu_bottom %}
 			| {% endblock %}
 
-		#settings-container
-			.settings-header
-				.settings-title {% block settings_page_title %}{{ _("Title not set") }}{% endblock %}
+		.col-md-9
+			h3.py-1 {% block settings_page_title %}{{ _("Title not set") }}{% endblock %}
 
-			.settings-content
-				| {% block settings_page_content %}No content set, update your template.{% endblock %}
+			| {% block settings_page_content %}No content set, update your template.{% endblock %}
 
 | {% endblock %}

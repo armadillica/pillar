@@ -559,50 +559,6 @@ def replace_pillar_node_type_schemas(project_url=None, all_projects=False, missi
              projects_changed, projects_seen)
 
 
-@manager_maintenance.command
-def remarkdown_comments():
-    """Retranslates all Markdown to HTML for all comment nodes.
-    """
-
-    from pillar.api.nodes import convert_markdown
-
-    nodes_collection = current_app.db()['nodes']
-    comments = nodes_collection.find({'node_type': 'comment'},
-                                     projection={'properties.content': 1,
-                                                 'node_type': 1})
-
-    updated = identical = skipped = errors = 0
-    for node in comments:
-        convert_markdown(node)
-        node_id = node['_id']
-
-        try:
-            content_html = node['properties']['content_html']
-        except KeyError:
-            log.warning('Node %s has no content_html', node_id)
-            skipped += 1
-            continue
-
-        result = nodes_collection.update_one(
-            {'_id': node_id},
-            {'$set': {'properties.content_html': content_html}}
-        )
-        if result.matched_count != 1:
-            log.error('Unable to update node %s', node_id)
-            errors += 1
-            continue
-
-        if result.modified_count:
-            updated += 1
-        else:
-            identical += 1
-
-    log.info('updated  : %i', updated)
-    log.info('identical: %i', identical)
-    log.info('skipped  : %i', skipped)
-    log.info('errors   : %i', errors)
-
-
 @manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
                             help='Project URL')
 @manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,

@@ -13,7 +13,7 @@ import logging
 import typing
 
 import bson
-from flask import g, current_app
+from flask import g, current_app, session
 from flask import request
 from werkzeug import exceptions as wz_exceptions
 
@@ -103,7 +103,7 @@ def find_user_in_db(user_info: dict, provider='blender-id') -> dict:
     return db_user
 
 
-def validate_token(*, force=False):
+def validate_token(*, force=False) -> bool:
     """Validate the token provided in the request and populate the current_user
     flask.g object, so that permissions and access to a resource can be defined
     from it.
@@ -115,7 +115,7 @@ def validate_token(*, force=False):
     :returns: True iff the user is logged in with a valid Blender ID token.
     """
 
-    from pillar.auth import AnonymousUser
+    import pillar.auth
 
     # Trust a pre-existing g.current_user
     if not force:
@@ -133,16 +133,22 @@ def validate_token(*, force=False):
         oauth_subclient = ''
     else:
         # Check the session, the user might be logged in through Flask-Login.
-        from pillar import auth
 
-        token = auth.get_blender_id_oauth_token()
+        # The user has a logged-in session; trust only if this request passes a CSRF check.
+        # FIXME(Sybren): we should stop saving the token as 'user_id' in the sesion.
+        token = session.get('user_id')
+        if token:
+            log.debug('skipping token check because current user already has a session')
+            current_app.csrf.protect()
+        else:
+            token = pillar.auth.get_blender_id_oauth_token()
         oauth_subclient = None
 
     if not token:
         # If no authorization headers are provided, we are getting a request
         # from a non logged in user. Proceed accordingly.
         log.debug('No authentication headers, so not logged in.')
-        g.current_user = AnonymousUser()
+        g.current_user = pillar.auth.AnonymousUser()
         return False
 
     return validate_this_token(token, oauth_subclient) is not None
@@ -194,7 +200,7 @@ def remove_token(token: str):
     tokens_coll = current_app.db('tokens')
     token_hashed = hash_auth_token(token)
 
-    # TODO: remove matching on unhashed tokens once all tokens have been hashed.
+    # TODO: remove matching on hashed tokens once all hashed tokens have expired.
     lookup = {'$or': [{'token': token}, {'token_hashed': token_hashed}]}
     del_res = tokens_coll.delete_many(lookup)
     log.debug('Removed token %r, matched %d documents', token, del_res.deleted_count)
@@ -206,7 +212,7 @@ def find_token(token, is_subclient_token=False, **extra_filters):
     tokens_coll = current_app.db('tokens')
     token_hashed = hash_auth_token(token)
 
-    # TODO: remove matching on unhashed tokens once all tokens have been hashed.
+    # TODO: remove matching on hashed tokens once all hashed tokens have expired.
     lookup = {'$or': [{'token': token}, {'token_hashed': token_hashed}],
               'is_subclient_token': True if is_subclient_token else {'$in': [False, None]},
               'expire_time': {"$gt": utcnow()}}
@@ -229,8 +235,14 @@ def hash_auth_token(token: str) -> str:
     return base64.b64encode(digest).decode('ascii')
 
 
-def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False,
-                org_roles: typing.Set[str] = frozenset()):
+def store_token(user_id,
+                token: str,
+                token_expiry,
+                oauth_subclient_id=False,
+                *,
+                org_roles: typing.Set[str] = frozenset(),
+                oauth_scopes: typing.Optional[typing.List[str]] = None,
+                ):
     """Stores an authentication token.
 
     :returns: the token document from MongoDB
@@ -240,13 +252,15 @@ def store_token(user_id, token: str, token_expiry, oauth_subclient_id=False,
 
     token_data = {
         'user': user_id,
-        'token_hashed': hash_auth_token(token),
+        'token': token,
         'expire_time': token_expiry,
     }
     if oauth_subclient_id:
         token_data['is_subclient_token'] = True
     if org_roles:
         token_data['org_roles'] = sorted(org_roles)
+    if oauth_scopes:
+        token_data['oauth_scopes'] = oauth_scopes
 
     r, _, _, status = current_app.post_internal('tokens', token_data)
 
