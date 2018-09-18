@@ -90,8 +90,10 @@ gulp.task('scripts_concat_tutti', function() {
         source.popper    + 'dist/umd/popper.min.js',
         source.bootstrap + 'js/dist/index.js',
         source.bootstrap + 'js/dist/util.js',
-        source.bootstrap + 'js/dist/tooltip.js',
+        source.bootstrap + 'js/dist/alert.js',
+        source.bootstrap + 'js/dist/collapse.js',
         source.bootstrap + 'js/dist/dropdown.js',
+        source.bootstrap + 'js/dist/tooltip.js',
         'src/scripts/tutti/**/*.js'
     ];
 
