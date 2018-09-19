@@ -1,6 +1,23 @@
 | {% extends 'layout.html' %}
 | {% from '_macros/_asset_list_item.html' import asset_list_item %}
+| {% from 'projects/_macros.html' import render_secondary_navigation %}
+| {% from '_macros/_navigation.html' import navigation_homepage %}
 include ../mixins/components
+
+| {% if project %}
+| {% set title = 'search-project' %}
+| {{ render_secondary_navigation(project, navigation_links, title) }}
+| {% else %}
+| {% set title = 'search' %}
+| {% endif %}
+
+| {% block navigation_tabs %}
+| {% if project %}
+| {{ render_secondary_navigation(project, navigation_links, title) }}
+| {% else %}
+| {{ navigation_homepage(title) }}
+| {% endif %}
+| {% endblock navigation_tabs %}
 
 | {% block page_title %}Search{% if project %} {{ project.name }}{% endif %}{% endblock %}
 
@@ -171,8 +188,6 @@ script.
 		$('.js-search-hit').removeClass('active');
 		$(this).addClass('active');
 	});
-
-	projectBrowseTypeList();
 
 	// Remove focus from search input so that the click event
 	// bound to .search-hit can be fired on the first click.

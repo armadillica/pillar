@@ -1,14 +1,12 @@
 | {% extends 'layout.html' %}
+| {% from 'projects/_macros.html' import render_secondary_navigation %}
+
 include ../mixins/components
 
 | {% block page_title %}Edit {{ project.name }}{% endblock %}
 
 | {% block navigation_tabs %}
-+nav-secondary()
-	+nav-secondary-link(
-		class="px-0 font-weight-bold",
-		href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-		| {{ project.name }}
+| {{ render_secondary_navigation(project, navigation_links, title) }}
 | {% endblock navigation_tabs %}
 
 | {% block body %}
@@ -90,7 +88,5 @@ script.
 
 | {% endblock %}
 
-| {% block footer_navigation %}
-| {% endblock %}
-| {% block footer %}
+| {% block footer_container %}
 | {% endblock %}
