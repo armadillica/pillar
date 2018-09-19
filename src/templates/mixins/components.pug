@@ -18,6 +18,8 @@ mixin jumbotron(title, text, image, url)
 						if text
 							.lead
 								=text
+								if block
+									block
 	else
 		.jumbotron.text-white(style='background-image: url(' + image + ');')&attributes(attributes)
 			.container
@@ -29,6 +31,8 @@ mixin jumbotron(title, text, image, url)
 						if text
 							.lead
 								=text
+								if block
+									block
 
 // {# Secondary navigation.
 // e.g. Workshops, Courses. #}
