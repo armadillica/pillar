@@ -61,12 +61,12 @@
 
 	#notifications-count
 		align-items: center
-		background-color: $color-secondary
+		background-color: #f42942
 		border-radius: 50%
 		color: white
 		display: flex
 		font:
-			size: .5em
+			size: $font-size-xxs
 			weight: bolder
 			family: sans-serif
 		height: 18px
@@ -74,13 +74,19 @@
 		opacity: 0
 		padding: 0
 		position: absolute
-		right: 14px
+		right: 0
 		text-align: center
-		top: 10px
+		top: 8px
 		transform: scale(0)
 		transition: transform 250ms ease-in-out
 		user-select: none
 		width: 18px
+
+		/* The actual number. */
+		span
+			position: relative
+			top: 0
+
 
 
 #notifications-list
