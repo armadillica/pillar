@@ -23,7 +23,7 @@ include ../mixins/components
 	| {% endif %}
 
 	+nav-secondary-link(
-		class="px-1 font-weight-bold",
+		class="px-1 font-weight-bold{% if title == 'landing' %} active{% endif %}",
 		href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 		span {{ project.name }}
 	| {% endif %}
