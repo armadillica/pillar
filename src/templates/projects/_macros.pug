@@ -17,7 +17,11 @@ include ../mixins/components
 	| {% if not project.is_private %}
 	li.text-capitalize
 		a.nav-link.text-muted.px-0(href="{{ category_url }}")
+			| {% if project.category == 'film' %}
+			span Open Projects
+			| {% else %}
 			span {{ project.category }}{% if project.category != 'assets' %}s{% endif %}
+			| {% endif %}
 	li.px-1
 		i.pi-angle-right
 	| {% endif %}
