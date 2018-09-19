@@ -73,7 +73,7 @@ gulp.task('scripts', function() {
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(rename({suffix: '.min'}))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
-        .pipe(gulpif(enabled.chmod, chmod(644)))
+        .pipe(gulpif(enabled.chmod, chmod(0o644)))
         .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
 });
@@ -103,7 +103,7 @@ gulp.task('scripts_concat_tutti', function() {
         .pipe(concat("tutti.min.js"))
         .pipe(gulpif(enabled.uglify, uglify()))
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
-        .pipe(gulpif(enabled.chmod, chmod(644)))
+        .pipe(gulpif(enabled.chmod, chmod(0o644)))
         .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
 });
