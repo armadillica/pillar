@@ -8,9 +8,12 @@
 		repeat: no-repeat
 		size: cover
 	margin-bottom: 0
-	padding-top: 10em
-	padding-bottom: 10em
 	position: relative
+	word-break: break-word
+
+	+media-sm
+		padding-top: 10em
+		padding-bottom: 10em
 
 	&:after
 		background-color: rgba(black, .5)
@@ -45,3 +48,9 @@
 
 	&:hover
 		text-decoration: none
+
+	.display-4
+		font-size: $h2-font-size
+
+		+media-sm
+			font-size: $display4-size

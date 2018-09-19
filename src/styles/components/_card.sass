@@ -33,6 +33,7 @@
 
 	&.card-deck-vertical
 		@extend .flex-column
+		@extend .text-truncate
 		flex-wrap: initial
 
 		.card
@@ -51,6 +52,9 @@
 				@extend .mr-2
 				max-width: 120px
 
+			.card-title
+				@extend .text-truncate
+
 			&.asset
 				&.free
 					&:after
@@ -64,6 +68,7 @@
 
 		.card-body
 			@extend .overflow-hidden
+			@extend .text-truncate
 			flex-basis: 0
 
 .card-padless
@@ -102,9 +107,9 @@
 
 	.card-img-top
 		background-color: $color-background
-		background-size: cover
 		background-position: center
-
+		background-size: cover
+		object-fit: cover
 
 	$card-progress-height: 5px
 	.progress
