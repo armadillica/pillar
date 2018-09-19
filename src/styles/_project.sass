@@ -1,17 +1,11 @@
 $node-latest-thumbnail-size: 160px
 
 /* Dark navbar when browsing a project. */
-body.project
+body.project,
+body.edit, body.sharing, body.attract, body.flamenco,
+body.svnman, body.edit_node_types, body.search-project
 	nav.navbar
-		@extend .bg-dark
-		box-shadow: 0 2px $gray-700
-
-		.nav-link, .text-muted
-			color: $gray-400 !important
-
-		.nav-main .nav-link
-			@extend .text-dark
-
+		@extend .navbar-dark
 
 #project-container
 	display: flex

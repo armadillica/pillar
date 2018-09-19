@@ -2,6 +2,16 @@
 .navbar
 	box-shadow: 0 2px  $color-background
 
+.navbar-dark
+	@extend .bg-dark
+	box-shadow: 0 2px $gray-700
+
+	.nav-link, .text-muted
+		color: $gray-400 !important
+
+	.nav-main .nav-link
+		@extend .text-dark
+
 .nav
 	border: none
 	color: $color-text-dark-secondary
@@ -222,13 +232,6 @@ $nav-secondary-bar-size: -2px
 	&.is-active
 		background-color: $color-background-nav
 		text-shadow: none
-
-nav.navbar
-	.navbar-collapse
-		> ul > li > .navbar-item
-			padding: $navbar-nav-link-padding-x
-			height: $nav-link-height
-
 
 .navbar-backdrop-container
 	width: 100%
