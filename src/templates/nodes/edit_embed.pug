@@ -168,7 +168,7 @@ script(type="text/javascript").
 
 		/* Let us know started saving */
 		$("li.button-save").addClass('saving');
-		$("li.button-save a#item_save").html('<i class="pi-spin spin"></i> Saving...');
+		$("li.button-save a#item_save").html('<i class="pi-spin pr-2 spin"></i> Saving...');
 
 		$.ajax({
 			url: "{{url_for('nodes.edit', node_id=node._id)}}",
