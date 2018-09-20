@@ -1,19 +1,17 @@
 | {% extends 'layout.html' %}
 | {% from '_macros/_asset_list_item.html' import asset_list_item %}
-| {% from 'projects/_macros.html' import render_secondary_navigation %}
-| {% from '_macros/_navigation.html' import navigation_homepage %}
+| {% from '_macros/_navigation.html' import navigation_homepage, navigation_project %}
 include ../mixins/components
 
 | {% if project %}
 | {% set title = 'search-project' %}
-| {{ render_secondary_navigation(project, navigation_links, title) }}
 | {% else %}
 | {% set title = 'search' %}
 | {% endif %}
 
 | {% block navigation_tabs %}
 | {% if project %}
-| {{ render_secondary_navigation(project, navigation_links, title) }}
+| {{ navigation_project(project, navigation_links, title) }}
 | {% else %}
 | {{ navigation_homepage(title) }}
 | {% endif %}

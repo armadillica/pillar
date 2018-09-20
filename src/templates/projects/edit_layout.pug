@@ -1,12 +1,12 @@
 | {% extends 'layout.html' %}
-| {% from 'projects/_macros.html' import render_secondary_navigation %}
+| {% from '_macros/_navigation.html' import navigation_project %}
 
 include ../mixins/components
 
 | {% block page_title %}Edit {{ project.name }}{% endblock %}
 
 | {% block navigation_tabs %}
-| {{ render_secondary_navigation(project, navigation_links, title) }}
+| {{ navigation_project(project, navigation_links, title) }}
 | {% endblock navigation_tabs %}
 
 | {% block body %}

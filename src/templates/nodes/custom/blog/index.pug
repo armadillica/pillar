@@ -1,7 +1,6 @@
 | {% extends 'layout.html' %}
 | {% import 'nodes/custom/blog/_macros.html' as blogmacros %}
-| {% from 'projects/_macros.html' import render_secondary_navigation %}
-| {% from '_macros/_navigation.html' import navigation_homepage %}
+| {% from '_macros/_navigation.html' import navigation_homepage, navigation_project %}
 
 | {% set title = 'blog' %}
 
@@ -11,7 +10,7 @@
 | {% if project.url == 'blender-cloud' %}
 | {{ navigation_homepage(title) }}
 | {% else %}
-| {{ render_secondary_navigation(project, navigation_links, title) }}
+| {{ navigation_project(project, navigation_links, title) }}
 | {% endif %}
 | {% endblock navigation_tabs %}
 
