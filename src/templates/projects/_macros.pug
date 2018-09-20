@@ -19,8 +19,10 @@ include ../mixins/components
 		a.nav-link.text-muted.px-0(href="{{ category_url }}")
 			| {% if project.category == 'film' %}
 			span Open Projects
+			| {% elif project.category == 'assets' %}
+			span Libraries
 			| {% else %}
-			span {{ project.category }}{% if project.category != 'assets' %}s{% endif %}
+			span {{ project.category }}
 			| {% endif %}
 	li.px-1
 		i.pi-angle-right
