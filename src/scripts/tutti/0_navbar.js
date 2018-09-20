@@ -98,3 +98,15 @@ function statusBarSet(classes, html, icon_name, time){
 	statusBarClear(time, 250);
 };
 
+
+/* Loading Bar
+ * Sets .loader-bar in layout.pug as active when
+ * loading an asset or performing actions.
+ */
+function loadingBarShow(){
+	$('.loading-bar').addClass('active');
+}
+
+function loadingBarHide(){
+	$('.loading-bar').removeClass('active');
+}

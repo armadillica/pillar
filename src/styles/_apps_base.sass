@@ -400,10 +400,10 @@ nav.sidebar
 			left: -19px
 			z-index: 1
 
-$loader-bar-width: 100px
-$loader-bar-height: 2px
-.loader-bar
-	bottom: -$loader-bar-height
+$loading-bar-width: 100px
+$loading-bar-height: 2px
+.loading-bar
+	bottom: -$loading-bar-height
 	content: ''
 	display: none
 	height: 0
@@ -419,22 +419,22 @@ $loader-bar-height: 2px
 		background-image: linear-gradient(to right, $primary-accent, $primary)
 		content: ''
 		display: block
-		height: $loader-bar-height
-		left: -$loader-bar-width
+		height: $loading-bar-height
+		left: -$loading-bar-width
 		position: absolute
-		width: $loader-bar-width
+		width: $loading-bar-width
 
 	&.active
 		display: block
-		height: $loader-bar-height
+		height: $loading-bar-height
 		visibility: visible
 
 		&:before
-			animation: loader-bar-slide 2s linear infinite
+			animation: loading-bar-slide 2s linear infinite
 
-@keyframes loader-bar-slide
+@keyframes loading-bar-slide
 	from
-		left: -($loader-bar-width / 2)
+		left: -($loading-bar-width / 2)
 		width: 3%
 
 	50%

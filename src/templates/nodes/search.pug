@@ -166,12 +166,12 @@ script.
 			$('#search-hit-container').html(dataHtml);
 		})
 		.done(function(){
-			$('.loader-bar').removeClass('active');
+			loadingBarHide();
 			$('#search-error').hide();
 			$('#search-hit-container').show();
 		})
 		.fail(function(data){
-			$('.loader-bar').removeClass('active');
+			loadingBarHide();
 			$('#search-hit-container').hide();
 			$('#search-error').show().html('Houston!\n\n' + data.status + ' ' + data.statusText);
 		});
@@ -180,7 +180,8 @@ script.
 	$('body').on('click', '.js-search-hit', function(e){
 		e.preventDefault();
 
-		$('.loader-bar').removeClass('active').addClass('active');
+		loadingBarHide();
+		loadingBarShow();
 
 		displayNode($(this).data('hit-id'));
 		$('.js-search-hit').removeClass('active');
