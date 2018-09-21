@@ -16,9 +16,9 @@ style.
 
 | {% block body %}
 
-#search-container
-	#search-sidebar
-		input.search-field(
+#search-container.d-flex
+	.search-settings#search-sidebar.bg-light
+		input.search-field.p-2.bg-white(
 				type="text",
 				name="q",
 				id="q",
@@ -32,46 +32,42 @@ style.
 			#accordion.panel-group.accordion(role="tablist", aria-multiselectable="true")
 				#facets
 
-		#pagination
+		#pagination.mt-3
+		#facets
+		#stats.search-list-stats
 
-		.search-list-stats
-			#stats
-
-	#search-list
+	.border-left.search-list#search-list
 		#hits
 
-	#search-details
-		#search-hit-container
+	#search-details.border-left.search-details
+		#search-error
+		#search-hit-container.w-100
 
 
 | {% raw %}
 // Facet template
 script(type="text/template", id="facet-template")
-	.panel.panel-default
-		a(data-toggle='collapse', data-parent='#accordion', href='#filter_{{ facet }}', aria-expanded='true', aria-controls='filter_{{ facet }}')
-			.panel-heading(role='tab')
-				.panel-title {{ title }}
-		.panel-collapse.collapse.in(id='filter_{{ facet }}', role='tabpanel', aria-labelledby='headingOne')
-			.panel-body
-				| {{#values}}
-				a.facet_link.toggleRefine(
-					class='{{#refined}}refined{{/refined}}',
-					data-facet='{{ facet }}',
-					data-value='{{ value }}',
-					href='#')
-					span
-						| {{ label }}
-						small.facet_count.text-muted.pull-right {{ count }}
-				| {{/values}}
+	.card.border-0.p-0.m-2
+		.card-body.p-3.m-0
+			h6.text-muted {{ title }}
+			| {{#values}}
+			a.facet_link.toggleRefine(
+				class='{{#refined}}refined{{/refined}}',
+				data-facet='{{ facet }}',
+				data-value='{{ value }}',
+				href='#')
+				span
+					| {{ label }}
+					small.text-black-50.float-right {{ count }}
+			| {{/values}}
 
 
 // Hit template
 script(type="text/template", id="hit-template")
-	.search-hit.users(data-user-id='{{ objectID }}')
-		.search-hit-name
-			| {{ full_name }}
-			small ({{ username }})
-		.search-hit-roles
+	.search-hit.users.cursor-pointer.p-2.border-bottom(data-user-id='{{ objectID }}')
+		h6.mb-0.font-weight-bold {{ full_name }}
+		small {{ username }}
+		small.d-block.search-hit-roles.text-info
 			| {{ roles }}
 
 
@@ -86,8 +82,8 @@ script(type="text/template", id="pagination-template")
 
 // Stats template
 script(type="text/template", id="stats-template")
-	h5 {{ nbHits }} result{{#nbHits_plural}}s{{/nbHits_plural}}
-		span  ({{ processingTimeMS }}ms)
+	span {{ nbHits }} result{{#nbHits_plural}}s{{/nbHits_plural}}
+		small  ({{ processingTimeMS }}ms)
 | {% endraw %}
 
 | {% endblock %}
