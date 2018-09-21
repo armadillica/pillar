@@ -215,6 +215,39 @@ $nav-secondary-bar-size: -2px
 				i, span
 					+active-gradient
 
+body.is-mobile
+	.nav-main, .dropdown-menu-tab
+		@extend .position-fixed
+		@extend .w-100
+		bottom: 0
+		font-size: 1.05rem
+		left: 0
+		overflow-y: auto
+		right: 0
+		top: 40px
+		width: 100%
+		z-index: 9999
+		transition: all 150ms ease-in-out
+
+		.nav
+			@extend .w-100
+
+		.nav-link
+			@extend .py-3
+
+			i
+				@extend .pl-2
+				@extend .pr-5
+
+	.dropdown-menu-tab
+		@extend .bg-white
+		@extend .w-100
+
+		&.show
+			box-shadow: 0 0 25px rgba(black, .3)
+			left: 75px
+
+
 .navbar-overlay
 	+media-lg
 		display: block

@@ -110,3 +110,74 @@ function loadingBarShow(){
 function loadingBarHide(){
 	$('.loading-bar').removeClass('active');
 }
+
+
+$(document).ready(function() {
+
+	/* Mobile check. */
+	var isMobileScreen = window.matchMedia("only screen and (max-width: 760px)");
+
+	function isMobile(){
+		return isMobileScreen.matches;
+	}
+
+	// Every element that is a tab.
+	$dropdownTabs = $('[data-dropdown-tab]');
+	// Every menu element that toggles a tab.
+	$dropdownTabsToggle = $('[data-toggle="dropdown-tab"]');
+
+	function dropdownTabHideAll(){
+		$dropdownTabs.removeClass('show');
+	}
+
+	function dropdownTabShow(tab){
+		dropdownTabHideAll(); // First hide them all.
+		$('[data-dropdown-tab="' + tab + '"]').addClass('show'); // Show the one we want.
+	}
+
+	// Mobile adjustments
+	if (isMobile()) {
+		// Add a class to the body for site-wide styling.
+		document.body.className += ' ' + 'is-mobile';
+
+		// Main dropdown menu stuff.
+		// Click on a first level link.
+		$dropdownTabsToggle.on('click', function(e){
+			e.preventDefault(); // Don't go to the link (we'll show a menu instead)
+			e.stopPropagation(); // Don't hide the menu (it'd trigger 'hide.bs.dropdown' event from bootstrap)
+
+			let tab = $(this).data('tab-target');
+
+			// Then display the corresponding sub-menu.
+			dropdownTabShow(tab);
+		});
+
+	} else {
+		// If we're not on mobile, then we use hover on the menu items to trigger.
+		$dropdownTabsToggle.hover(function(){
+			let tab = $(this).data('tab-target');
+
+			// On mouse hover the tab names, style it the 'active' class.
+			$dropdownTabsToggle.removeClass('active'); // First make them all inactive.
+			$(this).addClass('active'); // Make active the one we want.
+
+			// Then display the corresponding sub-menu.
+			dropdownTabShow(tab);
+		});
+	}
+
+	// When toggling the main dropdown, also hide the tabs.
+	// Otherwise they'll be already open the next time we toggle the main dropdown.
+	$('.dropdown').on('hidden.bs.dropdown', function (e) {
+		dropdownTabHideAll();
+	});
+
+	// Make it so clicking anywhere in the empty space in first level dropdown
+	// also hides the tabs, that way we can 'go back' to browse the first level back and forth.
+	$('.nav-main ul.nav:first').on('click', function (e) {
+		if ($(this).parent().hasClass('show')){
+			e.stopPropagation();
+		}
+		dropdownTabHideAll();
+	});
+});

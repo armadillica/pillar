@@ -19,14 +19,15 @@ ul.dropdown-menu
 		border-bottom-left-radius: $border-radius
 		border-bottom-right-radius: $border-radius
 
-// Open dropdown on mouse hover dropdowns in the navbar.
-nav .dropdown:hover
-	ul.dropdown-menu
-		display: block
+// When not in mobile, open menus on mouse hover .dropdown in the navbar.
+body:not(.is-mobile)
+	nav .dropdown:hover
+		ul.dropdown-menu
+			display: block
 
-nav .dropdown.large:hover
-	.dropdown-menu
-		@extend .d-flex
+	nav .dropdown.large:hover
+		.dropdown-menu
+			@extend .d-flex
 
 .dropdown.large.show
 	@extend .d-flex
