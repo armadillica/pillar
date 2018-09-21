@@ -1,3 +1,4 @@
+import copy
 import json
 import typing
 from unittest import mock
@@ -633,3 +634,56 @@ class TaggedNodesTest(AbstractPillarTest):
             resp = do_query()
             for node in resp:
                 self.assertNotIn('view_progress', node)
+
+
+class NodesReferencedByProjectTest(AbstractPillarTest):
+    def setUp(self, **kwargs):
+        super().setUp(**kwargs)
+        node = copy.deepcopy(ctd.EXAMPLE_NODE)
+        self.pid, self.project = self.ensure_project_exists(
+            project_overrides={'picture_header':None,
+                               'picture_square': None}
+        )
+        self.create_valid_auth_token(ctd.EXAMPLE_PROJECT_OWNER_ID, 'token')
+
+        node['project'] = self.pid
+        self.node_id = self.create_node(node)
+        self.node_etag = node['_etag']
+
+        with self.app.app_context():
+            self.app.db('projects').update(
+                {'_id': self.pid},
+                {'$set': {
+                    'header_node': self.node_id,
+                    'nodes_blog': [self.node_id],
+                    'nodes_featured': [self.node_id],
+                    'nodes_latest': [self.node_id],
+                }}
+            )
+
+    def test_delete_node(self):
+        with self.app.app_context():
+            self.delete(f'/api/nodes/{self.node_id}',
+                        auth_token='token',
+                        headers={'If-Match': self.node_etag},
+                        expected_status=204)
+
+            node_after = self.app.db('nodes').find_one(self.node_id)
+            self.assertTrue(node_after.get('_deleted'))
+
+            project_after = self.app.db('projects').find_one(self.pid)
+            self.assertIsNone(project_after.get('header_node'))
+            self.assertNotEqual(self.project['_etag'], project_after['_etag'])
+            self.assertNotIn(self.node_id, project_after['nodes_blog'])
+            self.assertNotIn(self.node_id, project_after['nodes_featured'])
+            self.assertNotIn(self.node_id, project_after['nodes_latest'])
+
+        # Verifying that the project is still valid
+        from pillar.api.utils import remove_private_keys
+        self.put(f'/api/projects/{self.pid}', json=remove_private_keys(project_after),
+                 etag=project_after['_etag'],
+                 auth_token='token')
+
+
+
+

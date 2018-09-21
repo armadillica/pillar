@@ -1,14 +1,17 @@
+import collections
 import functools
 import logging
 import urllib.parse
+
 from bson import ObjectId
-from flask import current_app
 from werkzeug import exceptions as wz_exceptions
 
+from pillar import current_app
 import pillar.markdown
 from pillar.api.activities import activity_subscribe, activity_object_add
 from pillar.api.file_storage_backends.gcs import update_file_name
 from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
+from pillar.api.utils import random_etag
 from pillar.api.utils.authorization import check_permissions
 
 log = logging.getLogger(__name__)
@@ -243,6 +246,44 @@ def nodes_set_default_picture(nodes):
 
 def before_deleting_node(node: dict):
     check_permissions('nodes', node, 'DELETE')
+    remove_project_references(node)
+
+
+def remove_project_references(node):
+    project_id = node.get('project')
+    if not project_id:
+        return
+
+    node_id = node['_id']
+    log.info('Removing references to node %s from project %s', node_id, project_id)
+
+    projects_col = current_app.db('projects')
+    project = projects_col.find_one({'_id': project_id})
+    updates = collections.defaultdict(dict)
+
+    if project.get('header_node') == node_id:
+        updates['$unset']['header_node'] = node_id
+
+    project_reference_lists = ('nodes_blog', 'nodes_featured', 'nodes_latest')
+    for list_name in project_reference_lists:
+        references = project.get(list_name)
+        if not references:
+            continue
+        try:
+            references.remove(node_id)
+        except ValueError:
+            continue
+
+        updates['$set'][list_name] = references
+
+    if not updates:
+        return
+
+    updates['$set']['_etag'] = random_etag()
+    result = projects_col.update_one({'_id': project_id}, updates)
+    if result.modified_count != 1:
+        log.warning('Removing references to node %s from project %s resulted in %d modified documents (expected 1)',
+                    node_id, project_id, result.modified_count)
 
 
 def after_deleting_node(item):
