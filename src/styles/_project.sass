@@ -801,7 +801,7 @@ a.learn-more
 	font-size: .9em
 	margin-left: 20px
 	padding: 5px 10px
-	+button($color-info, 3px)
+	+button($color-info, $btn-border-radius)
 
 .node-extra
 	display: flex
@@ -1683,7 +1683,7 @@ a.learn-more
 			width: 100%
 
 		#files-action-add
-			+button($color-success, 3px, true)
+			+button($color-success, $btn-border-radius, true)
 			width: 200px
 			padding: 5px 10px
 			margin-bottom: 10px
@@ -1816,10 +1816,10 @@ a.learn-more
 
 
 			button.cancel
-				+button($color-text-dark-primary, 3px)
+				+button($color-text-dark-primary, $btn-border-radius)
 
 			button.move
-				+button($color-success, 3px, true)
+				+button($color-success, $btn-border-radius, true)
 
 				&.disabled
 					pointer-events: none
@@ -1841,27 +1841,27 @@ a.learn-more
 	.fileupload-buttonbar
 		padding: 10px 0
 		.fileinput-button
-			+button($color-success, 3px)
+			+button($color-success, $btn-border-radius)
 		.start
-			+button($color-info, 3px)
+			+button($color-info, $btn-border-radius)
 		.cancel
-			+button($color-warning, 3px)
+			+button($color-warning, $btn-border-radius)
 		.delete
-			+button($danger, 3px)
+			+button($danger, $btn-border-radius)
 		.toggle
 			margin: 0 20px
 
 	.files
 		.btn
 			&.start
-				+button($color-info, 3px)
+				+button($color-info, $btn-border-radius)
 			&.cancel
-				+button($color-warning, 3px)
+				+button($color-warning, $btn-border-radius)
 			&.delete
-				+button($danger, 3px)
+				+button($danger, $btn-border-radius)
 
 			&.create
-				+button($color-success, 3px)
+				+button($color-success, $btn-border-radius)
 
 	.template-upload,
 	.template-download
@@ -1928,11 +1928,11 @@ a.learn-more
 
 	a.cta
 		padding: 5px 35px
-		+button($color-primary, 3px, true)
+		+button($color-primary, $btn-border-radius, true)
 
 	a.cta-learn-more
 		padding: 5px 20px
-		+button(white, 3px)
+		+button(white, $btn-border-radius)
 		display: inline-block
 		margin: 25px 0 25px 15px
 		padding: 5px 35px
