@@ -48,9 +48,13 @@ class FlaskInternalApiTest(AbstractPillarTest):
         return asset
 
     def test_delete_asset(self):
+        from pillarsdk import ResourceNotFound
+
         asset = self.test_create_asset()
         with self.app.test_request_context():
             asset.delete(api=self.sdk_api)
+            with self.assertRaises(ResourceNotFound):
+                pillarsdk.Node.find_one({'_id': asset['_id']}, api=self.sdk_api)
 
     def test_upload_file_to_project(self):
         with self.app.test_request_context():
