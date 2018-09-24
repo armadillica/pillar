@@ -87,7 +87,7 @@
 		.card-img-top
 			opacity: .9
 
-
+$card-progress-height: 5px
 .card.asset
 	color: $color-text
 
@@ -114,12 +114,13 @@
 		background-size: cover
 		object-fit: cover
 
-	$card-progress-height: 5px
+
 	.progress
 		height: $card-progress-height
 		position: absolute
-		top: -$card-progress-height
+		bottom: 0
 		width: 100%
+		z-index: 1
 
 .card-img-top
 	&.card-icon
@@ -139,7 +140,7 @@
 	display: block
 	font-size: $font-size-xxs
 	left: 5px
-	top: -27px // enough to be above the progress-bar
+	bottom: $card-progress-height + 3px // enough to be above the progress-bar
 	position: absolute
 	padding: 1px 5px
 	z-index: 1
