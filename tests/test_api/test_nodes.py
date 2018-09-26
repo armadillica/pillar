@@ -484,7 +484,13 @@ class TaggedNodesTest(AbstractPillarTest):
         super().setUp(**kwargs)
 
         self.pid, _ = self.ensure_project_exists()
-        self.file_id, _ = self.ensure_file_exists()
+        self.file_id, _ = self.ensure_file_exists(file_overrides={
+            'variations': [
+                {'format': 'mp4',
+                 'duration': 3661 # 01:01:01
+                 },
+            ],
+        })
         self.uid = self.create_user()
 
         from pillar.api.utils import utcnow
@@ -634,6 +640,38 @@ class TaggedNodesTest(AbstractPillarTest):
             resp = do_query()
             for node in resp:
                 self.assertNotIn('view_progress', node)
+
+    def test_tagged_nodes_metadata(self):
+        from datetime import timedelta
+
+        base_node = {
+            'name': 'Just a node name',
+            'project': self.pid,
+            'description': '',
+            'node_type': 'asset',
+            'user': self.uid,
+        }
+        base_props = {'status': 'published',
+                      'file': self.file_id,
+                      'content_type': 'video',
+                      'order': 0}
+
+        self.create_node({
+            '_created': self.fake_now - timedelta(minutes=5),
+            # 'एनिमेशन' is 'animation' in Hindi.
+            'properties': {'tags': ['एनिमेशन'], **base_props},
+            **base_node,
+        })
+
+        with self.app.app_context():
+            with mock.patch('pillar.api.utils.utcnow') as mock_utcnow:
+                mock_utcnow.return_value = self.fake_now
+                url = flask.url_for('nodes_api.tagged', tag='एनिमेशन')
+                resp = self.get(url).json[0]
+                self.assertEquals('01:01:01', resp['video_duration'])
+                self.assertEquals('Unittest project', resp['project']['name'])
+                self.assertEquals('default-project', resp['project']['url'])
+                self.assertEquals('5m ago', resp['pretty_created'])
 
 
 class NodesReferencedByProjectTest(AbstractPillarTest):

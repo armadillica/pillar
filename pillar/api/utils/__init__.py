@@ -64,6 +64,14 @@ class PillarJSONEncoder(json.JSONEncoder):
         if isinstance(obj, datetime.datetime):
             return obj.strftime(RFC1123_DATE_FORMAT)
 
+        if isinstance(obj, datetime.timedelta):
+            hours, seconds = divmod(obj.seconds, 3600)
+            minutes, seconds = divmod(seconds, 60)
+            if hours > 0:
+                return f'{hours:02}:{minutes:02}:{seconds:02}'
+            else:
+                return f'{minutes:02}:{seconds:02}'
+
         if isinstance(obj, bson.ObjectId):
             return str(obj)
 

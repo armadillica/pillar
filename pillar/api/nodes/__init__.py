@@ -1,4 +1,5 @@
 import base64
+import datetime
 import logging
 
 import pymongo.errors
@@ -8,6 +9,7 @@ from flask import current_app, Blueprint, request
 from pillar.api.nodes import eve_hooks
 from pillar.api.utils import str2id, jsonify
 from pillar.api.utils.authorization import check_permissions, require_login
+from pillar.web.utils import pretty_date
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('nodes_api', __name__)
@@ -63,6 +65,13 @@ def tagged(tag=''):
     # Build the (cached) list of tagged nodes
     agg_list = _tagged(tag)
 
+    for node in agg_list:
+        if node.get('video_duration_seconds'):
+            node['video_duration'] = datetime.timedelta(seconds=node['video_duration_seconds'])
+
+        if node.get('_created') is not None:
+            node['pretty_created'] = pretty_date(node['_created'])
+
     # If the user is anonymous, no more information is needed and we return
     if current_user.is_anonymous:
         return jsonify(agg_list)
@@ -99,11 +108,26 @@ def _tagged(tag: str):
             'foreignField': '_id',
             'as': '_project',
         }},
+        {'$lookup': {
+            'from': 'files',
+            'localField': 'properties.file',
+            'foreignField': '_id',
+            'as': '_file',
+        }},
+        {'$unwind': '$_file'},
+        {'$unwind': '$_project'},
         {'$match': {'_project.is_private': False}},
+        {'$addFields': {
+            'project._id': '$_project._id',
+            'project.name': '$_project.name',
+            'project.url': '$_project.url',
+            'video_duration_seconds': {'$arrayElemAt': ['$_file.variations.duration', 0]},
+        }},
 
-        # Don't return the entire project for each node.
-        {'$project': {'_project': False}},
-
+        # Don't return the entire project/file for each node.
+        {'$project': {'_project': False,
+                      '_file': False}
+         },
         {'$sort': {'_created': -1}}
     ])
 
