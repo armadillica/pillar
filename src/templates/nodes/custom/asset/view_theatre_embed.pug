@@ -1,4 +1,4 @@
-#theatre-media
+#theatre-media.d-flex.justify-content-center.align-items-center.bg-dark
 	img(src="{{ node.picture.thumbnail('h', api=api) }}", onmousedown="return false")
 
 	ul#theatre-tools
@@ -18,19 +18,21 @@
 				i.pi-download
 		| {% endif %}
 
-#theatre-info
-	.theatre-info-header
-		.theatre-info-title {{ node.name }}
-		.theatre-info-user {{ node.user.full_name }}
-		.theatre-info-date {{ node._created | pretty_date_time }}
+#theatre-info.bg-white.h-100
+	h5.p-3 {{ node.name }}
+	small.d-flex.text-secondary.pl-3
+		span.font-weight-bold {{ node.user.full_name }}
+		span.px-3 {{ node._created | pretty_date_time }}
 
-	ul.theatre-info-details
+	ul.theatre-info-details.border-bottom.mb-3.p-3.list-unstyled
 		li
 			span Type
 			span {{ node.file.content_type }}
+		| {% if node.file.width %}
 		li
 			span Dimensions
 			span {{ node.file.width }} <small>x</small> {{ node.file.height }}
+		| {% endif %}
 		li
 			span Size
 			span {{ node.file.length | filesizeformat }}
@@ -41,21 +43,22 @@
 		| {% endif %}
 
 	#comments-embed
-		.comments-list-loading
-			i.pi-spin
 
 include ../_scripts
 
 script.
 	$(function () {
 
-		var file_width = {{ node.file.width }};
-		var file_height = {{ node.file.height }};
+		var file_width = '{{ node.file.width }}';
+		var file_height = '{{ node.file.height }}';
 		var theatre_media = document.getElementById('theatre-media');
 		var $theatre_media = $(theatre_media);
 
 		function canZoom() {
-			return theatre_media.scrollWidth < file_width ||
+			// If there is no width/height defined, let's just let it zoom.
+			// It might just be a non-image asset, like a file.
+			return file_width == 'None' ||
+					theatre_media.scrollWidth < file_width ||
 					theatre_media.scrollHeight < file_height;
 		}
 
@@ -90,7 +93,7 @@ script.
 			theatreZoom();
 		});
 
-		$('ul.nav.navbar-nav a.navbar-item.info').on('click', function (e) {
+		$('.js-toggle-info').on('click', function (e) {
 			e.preventDefault();
 			$('#theatre-container').toggleClass('with-info');
 		});

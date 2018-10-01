@@ -21,10 +21,10 @@ meta(property="twitter:image", content="{{ og_picture.thumbnail('l', api=api) }}
 
 | {% block navigation_search %}{% endblock %}
 | {% block navigation_sections %}
-li
-	a.navbar-item.info(
-		href="",
-		title="Toggle info & sidebar")
+li.nav-item
+	a.nav-link.js-toggle-info(
+		href="#",
+		title="Toggle sidebar")
 		i.pi-info
 | {% endblock %}
 
@@ -34,7 +34,8 @@ link(href="{{ url_for('static_pillar', filename='assets/css/theatre.css') }}", r
 | {% endblock %}
 
 | {% block body %}
-#theatre-container(class="{% if current_user.is_authenticated %}with-info{% endif %}")
+#theatre-container.d-flex.position-relative.h-100.overflow-hidden(
+	class="{% if current_user.is_authenticated %}with-info{% endif %}")
 
 | {% endblock %}
 
@@ -48,5 +49,4 @@ script.
 	});
 | {% endblock %}
 
-| {% block footer %}{% endblock %}
-| {% block footer_navigation %}{% endblock %}
+| {% block footer_container %}{% endblock %}
