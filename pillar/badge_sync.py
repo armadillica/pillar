@@ -33,7 +33,7 @@ def find_users_to_sync() -> typing.Iterable[SyncUser]:
         {'$match': {
             'token': {'$exists': True},
             'oauth_scopes': 'badge',
-            'expire_time': {'$gt': now},
+            'expire_time': {'$gt': now},  # TODO(Sybren): save real token expiry time but keep checking tokens hourly when they are used!
         }},
         {'$lookup': {
             'from': 'users',
@@ -62,7 +62,6 @@ def find_users_to_sync() -> typing.Iterable[SyncUser]:
             'token': True,
             'user._id': True,
             'user.auth.user_id': True,
-            'user.badges.expires': True,
         }},
     ])
 
@@ -101,6 +100,7 @@ def fetch_badge_html(session: requests.Session, user: SyncUser, size: str) \
         my_log.debug('No badges for user %s', user.user_id)
         return ''
     if resp.status_code == 403:
+        # TODO(Sybren): this indicates the token is invalid, so we could just as well delete it.
         my_log.warning('Tried fetching %s for user %s but received a 403: %s',
                        url, user.user_id, resp.text)
         return ''
