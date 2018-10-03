@@ -70,6 +70,7 @@ def latest_assets():
                           {'name': 1, 'node_type': 1,
                            'parent': 1, 'picture': 1, 'properties.status': 1,
                            'properties.content_type': 1,
+                           'properties.duration_seconds': 1,
                            'permissions.world': 1},
                           12)
 

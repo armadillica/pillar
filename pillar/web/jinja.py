@@ -13,6 +13,7 @@ import werkzeug.exceptions as wz_exceptions
 import pillarsdk
 
 import pillar.api.utils
+from pillar.api.utils import pretty_duration
 from pillar.web.utils import pretty_date
 from pillar.web.nodes.routes import url_for_node
 import pillar.markdown
@@ -26,6 +27,10 @@ def format_pretty_date(d):
 
 def format_pretty_date_time(d):
     return pretty_date(d, detail=True)
+
+
+def format_pretty_duration(s):
+    return pretty_duration(s)
 
 
 def format_undertitle(s):
@@ -203,6 +208,7 @@ def do_yesno(value, arg=None):
 def setup_jinja_env(jinja_env, app_config: dict):
     jinja_env.filters['pretty_date'] = format_pretty_date
     jinja_env.filters['pretty_date_time'] = format_pretty_date_time
+    jinja_env.filters['pretty_duration'] = format_pretty_duration
     jinja_env.filters['undertitle'] = format_undertitle
     jinja_env.filters['hide_none'] = do_hide_none
     jinja_env.filters['pluralize'] = do_pluralize

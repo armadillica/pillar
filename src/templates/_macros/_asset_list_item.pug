@@ -37,6 +37,9 @@ a.card.asset.card-image-fade.pr-0.mx-0.mb-2(
 		.card-label WATCHED
 		| {% endif %}
 		| {% endif %} {# endif progress #}
+		| {% if asset.properties.duration_seconds %}
+		.card-label.right {{ asset.properties.duration_seconds | pretty_duration }}
+		| {% endif %}
 		| {% endif %} {# endif video #}
 
 

@@ -165,7 +165,7 @@ def after_inserting_nodes(items):
         )
 
 
-def deduct_content_type(node_doc, original=None):
+def deduct_content_type_and_duration(node_doc, original=None):
     """Deduct the content type from the attached file, if any."""
 
     if node_doc['node_type'] != 'asset':
@@ -184,7 +184,8 @@ def deduct_content_type(node_doc, original=None):
 
     files = current_app.data.driver.db['files']
     file_doc = files.find_one({'_id': file_id},
-                              {'content_type': 1})
+                              {'content_type': 1,
+                               'variations': 1})
     if not file_doc:
         log.warning('deduct_content_type: Node %s refers to non-existing file %s, rejecting.',
                     node_id, file_id)
@@ -201,10 +202,17 @@ def deduct_content_type(node_doc, original=None):
 
     node_doc['properties']['content_type'] = content_type
 
+    if content_type == 'video':
+        duration = file_doc['variations'][0].get('duration')
+        if duration:
+            node_doc['properties']['duration_seconds'] = duration
+        else:
+            log.warning('Video file %s has no duration', file_id)
 
-def nodes_deduct_content_type(nodes):
+
+def nodes_deduct_content_type_and_duration(nodes):
     for node in nodes:
-        deduct_content_type(node)
+        deduct_content_type_and_duration(node)
 
 
 def node_set_default_picture(node, original=None):

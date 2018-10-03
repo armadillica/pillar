@@ -44,6 +44,38 @@ class JSTreeTest(AbstractPillarTest):
             'custom_view': False,
         })
 
+    def test_jstree_parse_video_node(self):
+        from pillar.web.utils.jstree import jstree_parse_node
+
+        node_doc = {'_id': ObjectId('55f338f92beb3300c4ff99fe'),
+                    '_created': parse('2015-09-11T22:26:33.000+0200'),
+                    '_updated': parse('2015-10-30T22:44:27.000+0100'),
+                    '_etag': '5248485b4ea7e55e858ff84b1bd4aae88917a37c',
+                    'picture': ObjectId('55f338f92beb3300c4ff99de'),
+                    'description': 'Play the full movie and see how it was cobbled together.',
+                    'parent': ObjectId('55f338f92beb3300c4ff99f9'),
+                    'project': self.project_id,
+                    'node_type': 'asset',
+                    'user': ObjectId('552b066b41acdf5dec4436f2'),
+                    'properties': {'status': 'published',
+                                   'file': ObjectId('55f338f92beb3300c4ff99c2'),
+                                   'content_type': 'video',
+                                   },
+                    'name': 'Live <strong>Edit</strong>'}
+
+        with self.app.test_request_context():
+            parsed = jstree_parse_node(Node(node_doc))
+
+        self.assertEqual(parsed, {
+            'id': 'n_55f338f92beb3300c4ff99fe',
+            'a_attr': {'href': f"/p/{self.project['url']}/55f338f92beb3300c4ff99fe"},
+            'li_attr': {'data-node-type': 'asset'},
+            'text': Markup('Live &lt;strong&gt;Edit&lt;/strong&gt;'),
+            'type': 'video',
+            'children': False,
+            'custom_view': False,
+        })
+
     def test_jstree_parse_blog_node(self):
         from pillar.web.utils.jstree import jstree_parse_node
 

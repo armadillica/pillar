@@ -57,6 +57,18 @@ def remove_private_keys(document):
     return doc_copy
 
 
+def pretty_duration(seconds):
+    if seconds is None:
+        return ''
+    seconds = round(seconds)
+    hours, seconds = divmod(seconds, 3600)
+    minutes, seconds = divmod(seconds, 60)
+    if hours > 0:
+        return f'{hours:02}:{minutes:02}:{seconds:02}'
+    else:
+        return f'{minutes:02}:{seconds:02}'
+
+
 class PillarJSONEncoder(json.JSONEncoder):
     """JSON encoder with support for Pillar resources."""
 
@@ -65,12 +77,7 @@ class PillarJSONEncoder(json.JSONEncoder):
             return obj.strftime(RFC1123_DATE_FORMAT)
 
         if isinstance(obj, datetime.timedelta):
-            hours, seconds = divmod(obj.seconds, 3600)
-            minutes, seconds = divmod(seconds, 60)
-            if hours > 0:
-                return f'{hours:02}:{minutes:02}:{seconds:02}'
-            else:
-                return f'{minutes:02}:{seconds:02}'
+            return pretty_duration(obj.total_seconds())
 
         if isinstance(obj, bson.ObjectId):
             return str(obj)

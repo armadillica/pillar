@@ -1022,3 +1022,156 @@ def delete_orphan_files():
         log.warning('Soft-deletion modified %d of %d files', res.modified_count, file_count)
 
     log.info('%d files have been soft-deleted', res.modified_count)
+
+
+@manager_maintenance.command
+def find_video_files_without_duration():
+    """Finds video files without any duration
+
+    This is a heavy operation. Use with care.
+    """
+    from pathlib import Path
+
+    output_fpath = Path(current_app.config['STORAGE_DIR']) / 'video_files_without_duration.txt'
+    if output_fpath.exists():
+        log.error('Output filename %s already exists, remove it first.', output_fpath)
+        return 1
+
+    start_timestamp = datetime.datetime.now()
+    files_coll = current_app.db('files')
+    starts_with_video = re.compile("^video", re.IGNORECASE)
+    aggr = files_coll.aggregate([
+        {'$match': {'content_type': starts_with_video,
+                    '_deleted': {'$ne': True}}},
+        {'$unwind': '$variations'},
+        {'$match': {
+            'variations.duration': {'$not': {'$gt': 0}}
+        }},
+        {'$project': {'_id': 1}}
+    ])
+
+    file_ids = [str(f['_id']) for f in aggr]
+    nbr_files = len(file_ids)
+    log.info('Total nbr video files without duration: %d', nbr_files)
+
+    end_timestamp = datetime.datetime.now()
+    duration = end_timestamp - start_timestamp
+    log.info('Finding files took %s', duration)
+
+    log.info('Writing Object IDs to %s', output_fpath)
+    with output_fpath.open('w', encoding='ascii') as outfile:
+        outfile.write('\n'.join(sorted(file_ids)))
+
+@manager_maintenance.command
+def find_video_nodes_without_duration():
+    """Finds video nodes without any duration
+
+    This is a heavy operation. Use with care.
+    """
+    from pathlib import Path
+
+    output_fpath = Path(current_app.config['STORAGE_DIR']) / 'video_nodes_without_duration.txt'
+    if output_fpath.exists():
+        log.error('Output filename %s already exists, remove it first.', output_fpath)
+        return 1
+
+    start_timestamp = datetime.datetime.now()
+    nodes_coll = current_app.db('nodes')
+
+    aggr = nodes_coll.aggregate([
+        {'$match': {'node_type': 'asset',
+                    'properties.content_type': 'video',
+                    '_deleted': {'$ne': True},
+                    'properties.duration_seconds': {'$not': {'$gt': 0}}}},
+        {'$project': {'_id': 1}}
+    ])
+
+    file_ids = [str(f['_id']) for f in aggr]
+    nbr_files = len(file_ids)
+    log.info('Total nbr video nodes without duration: %d', nbr_files)
+
+    end_timestamp = datetime.datetime.now()
+    duration = end_timestamp - start_timestamp
+    log.info('Finding nodes took %s', duration)
+
+    log.info('Writing Object IDs to %s', output_fpath)
+    with output_fpath.open('w', encoding='ascii') as outfile:
+        outfile.write('\n'.join(sorted(file_ids)))
+
+
+@manager_maintenance.option('-n', '--nodes', dest='nodes_to_update', nargs='*',
+                            help='List of nodes to update')
+@manager_maintenance.option('-a', '--all', dest='all_nodes', action='store_true', default=False,
+                            help='Update on all video nodes.')
+@manager_maintenance.option('-g', '--go', dest='go', action='store_true', default=False,
+                            help='Actually perform the changes (otherwise just show as dry-run).')
+def reconcile_node_video_duration(nodes_to_update=None, all_nodes=False, go=False):
+    """Copy video duration from file.variations.duration to node.properties.duraion_seconds
+
+    This is a heavy operation. Use with care.
+    """
+    from pillar.api.utils import random_etag, utcnow
+
+    if bool(nodes_to_update) == all_nodes:
+        log.error('Use either --nodes or --all.')
+        return 1
+
+    start_timestamp = datetime.datetime.now()
+
+    nodes_coll = current_app.db('nodes')
+    node_subset = []
+    if nodes_to_update:
+        node_subset = [{'$match': {'_id': {'$in': [ObjectId(nid) for nid in nodes_to_update]}}}]
+    files = nodes_coll.aggregate(
+        [
+            *node_subset,
+            {'$match': {
+                'node_type': 'asset',
+                'properties.content_type': 'video',
+                '_deleted': {'$ne': True}}
+            },
+            {'$lookup': {
+                'from': 'files',
+                'localField': 'properties.file',
+                'foreignField': '_id',
+                'as': '_files',
+            }},
+            {'$unwind': '$_files'},
+            {'$unwind': '$_files.variations'},
+            {'$match': {'_files.variations.duration': {'$gt': 0}}},
+            {'$addFields': {
+                'need_update': {'$ne': ['$_files.variations.duration', '$properties.duration_seconds']}
+            }},
+            {'$match': {'need_update': True}},
+            {'$project': {
+                '_id': 1,
+                'duration': '$_files.variations.duration',
+            }}]
+    )
+
+    if not go:
+        log.info('Would try to update %d nodes', len(list(files)))
+        return 0
+
+    modified_count = 0
+    for f in files:
+        log.debug('Updating node %s with duration %d', f['_id'], f['duration'])
+        new_etag = random_etag()
+        now = utcnow()
+        resp = nodes_coll.update_one(
+            {'_id': f['_id']},
+            {'$set': {
+                'properties.duration_seconds': f['duration'],
+                '_etag': new_etag,
+                '_updated': now,
+            }}
+        )
+        if resp.modified_count == 0:
+            log.debug('Node %s was already up to date', f['_id'])
+        modified_count += resp.modified_count
+
+    log.info('Updated %d nodes', modified_count)
+    end_timestamp = datetime.datetime.now()
+    duration = end_timestamp - start_timestamp
+    log.info('Operation took %s', duration)
+    return 0

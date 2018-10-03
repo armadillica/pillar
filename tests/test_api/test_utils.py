@@ -212,3 +212,17 @@ class TestRating(unittest.TestCase):
         sorted_by_hot = sorted(cases, key=lambda tup: tup[0])
         for idx, t in enumerate(sorted_by_hot):
             self.assertEqual(cases[idx][0], t[0])
+
+
+class TestPrettyDuration(unittest.TestCase):
+    def test_formatting(self):
+        from pillar.api.utils import pretty_duration
+        pretty_duration(500)
+        self.assertEquals('00:00', pretty_duration(0))
+        self.assertEquals('00:15', pretty_duration(15))
+        self.assertEquals('01:05', pretty_duration(65))
+        self.assertEquals('42:53', pretty_duration(2573))
+        self.assertEquals('01:11:22', pretty_duration(4282))
+        self.assertEquals('01:41', pretty_duration(100.85))
+        self.assertEquals('25:00:00', pretty_duration(90000))  # More than a day
+        self.assertEquals('', pretty_duration(None))

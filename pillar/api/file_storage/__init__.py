@@ -130,6 +130,67 @@ def _process_image(bucket: Bucket,
     src_file['status'] = 'complete'
 
 
+def _video_duration_seconds(filename: pathlib.Path) -> typing.Optional[int]:
+    """Get the duration of a video file using ffprobe
+    https://superuser.com/questions/650291/how-to-get-video-duration-in-seconds
+
+    :param filename: file path to video
+    :return: video duration in seconds
+    """
+    import subprocess
+
+    def run(cli_args):
+        if log.isEnabledFor(logging.INFO):
+            import shlex
+            cmd = ' '.join(shlex.quote(s) for s in cli_args)
+            log.info('Calling %s', cmd)
+
+        ffprobe = subprocess.run(
+            cli_args,
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            timeout=10,  # seconds
+        )
+
+        if ffprobe.returncode:
+            import shlex
+            cmd = ' '.join(shlex.quote(s) for s in cli_args)
+            log.error('Error running %s: stopped with return code %i',
+                      cmd, ffprobe.returncode)
+            log.error('Output was: %s', ffprobe.stdout)
+            return None
+
+        try:
+            return int(float(ffprobe.stdout))
+        except ValueError as e:
+            log.exception('ffprobe produced invalid number: %s', ffprobe.stdout)
+            return None
+
+    ffprobe_from_container_args = [
+        current_app.config['BIN_FFPROBE'],
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        str(filename),
+    ]
+
+    ffprobe_from_stream_args = [
+        current_app.config['BIN_FFPROBE'],
+        '-v', 'error',
+        '-hide_banner',
+        '-select_streams', 'v:0',  # we only care about the first video stream
+        '-show_entries', 'stream=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        str(filename),
+    ]
+
+    duration = run(ffprobe_from_stream_args) or\
+               run(ffprobe_from_container_args) or\
+               None
+    return duration
+
+
 def _video_size_pixels(filename: pathlib.Path) -> typing.Tuple[int, int]:
     """Figures out the size (in pixels) of the video file.
 
@@ -220,8 +281,10 @@ def _process_video(gcs,
     # by determining the video size here we already have this information in the file
     # document before Zencoder calls our notification URL. It also opens up possibilities
     # for other encoding backends that don't support this functionality.
-    video_width, video_height = _video_size_pixels(pathlib.Path(local_file.name))
+    video_path = pathlib.Path(local_file.name)
+    video_width, video_height = _video_size_pixels(video_path)
     capped_video_width, capped_video_height = _video_cap_at_1080(video_width, video_height)
+    video_duration = _video_duration_seconds(video_path)
 
     # Create variations
     root, _ = os.path.splitext(src_file['file_path'])
@@ -234,12 +297,13 @@ def _process_video(gcs,
         content_type='video/{}'.format(v),
         file_path='{}-{}.{}'.format(root, v, v),
         size='',
-        duration=0,
         width=capped_video_width,
         height=capped_video_height,
         length=0,
         md5='',
     )
+    if video_duration:
+        file_variation['duration'] = video_duration
     # Append file variation. Originally mp4 and webm were the available options,
     # that's why we build a list.
     src_file['variations'].append(file_variation)

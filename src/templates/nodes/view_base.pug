@@ -62,6 +62,10 @@ section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 
 		li.ml-auto
 
+		| {% if node.properties.duration_seconds %}
+		li.px-2(title="Duration")
+			| {{ node.properties.duration_seconds | pretty_duration }}
+		| {% endif %}
 		| {% if node.file %}
 		li.px-2(title="File size")
 			| {{ node.file.length | filesizeformat }}

@@ -24,6 +24,10 @@ node_type_asset = {
         'content_type': {
             'type': 'string'
         },
+        # The duration of a video asset in seconds.
+        'duration_seconds': {
+            'type': 'integer'
+        },
         # We point to the original file (and use it to extract any relevant
         # variation useful for our scope).
         'file': _file_embedded_schema,
@@ -58,6 +62,7 @@ node_type_asset = {
     },
     'form_schema': {
         'content_type': {'visible': False},
+        'duration_seconds': {'visible': False},
         'order': {'visible': False},
         'tags': {'visible': False},
         'categories': {'visible': False},

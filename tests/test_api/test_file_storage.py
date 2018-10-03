@@ -280,3 +280,23 @@ class VideoSizeTest(AbstractPillarTest):
         size = file_storage._video_cap_at_1080(2048, 2000)
         self.assertIsInstance(size[0], int)
         self.assertIsInstance(size[1], int)
+
+
+class VideoDurationTest(AbstractPillarTest):
+    def test_video_duration_from_container(self):
+        from pillar.api import file_storage
+        from pathlib import Path
+
+        with self.app.test_request_context():
+            fname = Path(__file__).with_name('video-tiny.mkv')
+
+            self.assertEqual(1, file_storage._video_duration_seconds(fname))
+
+    def test_video_duration_from_stream(self):
+        from pillar.api import file_storage
+        from pathlib import Path
+
+        with self.app.test_request_context():
+            fname = Path(__file__).with_name('video-tiny.mp4')
+
+            self.assertEqual(2, file_storage._video_duration_seconds(fname))

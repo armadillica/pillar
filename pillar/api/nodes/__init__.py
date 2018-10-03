@@ -66,8 +66,8 @@ def tagged(tag=''):
     agg_list = _tagged(tag)
 
     for node in agg_list:
-        if node.get('video_duration_seconds'):
-            node['video_duration'] = datetime.timedelta(seconds=node['video_duration_seconds'])
+        if node['properties'].get('duration_seconds'):
+            node['properties']['duration'] = datetime.timedelta(seconds=node['properties']['duration_seconds'])
 
         if node.get('_created') is not None:
             node['pretty_created'] = pretty_date(node['_created'])
@@ -108,26 +108,16 @@ def _tagged(tag: str):
             'foreignField': '_id',
             'as': '_project',
         }},
-        {'$lookup': {
-            'from': 'files',
-            'localField': 'properties.file',
-            'foreignField': '_id',
-            'as': '_file',
-        }},
-        {'$unwind': '$_file'},
         {'$unwind': '$_project'},
         {'$match': {'_project.is_private': False}},
         {'$addFields': {
             'project._id': '$_project._id',
             'project.name': '$_project.name',
             'project.url': '$_project.url',
-            'video_duration_seconds': {'$arrayElemAt': ['$_file.variations.duration', 0]},
         }},
 
         # Don't return the entire project/file for each node.
-        {'$project': {'_project': False,
-                      '_file': False}
-         },
+        {'$project': {'_project': False}},
         {'$sort': {'_created': -1}}
     ])
 
@@ -224,13 +214,13 @@ def setup_app(app, url_prefix):
     app.on_replace_nodes += eve_hooks.before_replacing_node
     app.on_replace_nodes += eve_hooks.parse_markdown
     app.on_replace_nodes += eve_hooks.texture_sort_files
-    app.on_replace_nodes += eve_hooks.deduct_content_type
+    app.on_replace_nodes += eve_hooks.deduct_content_type_and_duration
     app.on_replace_nodes += eve_hooks.node_set_default_picture
     app.on_replaced_nodes += eve_hooks.after_replacing_node
 
     app.on_insert_nodes += eve_hooks.before_inserting_nodes
     app.on_insert_nodes += eve_hooks.parse_markdowns
-    app.on_insert_nodes += eve_hooks.nodes_deduct_content_type
+    app.on_insert_nodes += eve_hooks.nodes_deduct_content_type_and_duration
     app.on_insert_nodes += eve_hooks.nodes_set_default_picture
     app.on_insert_nodes += eve_hooks.textures_sort_files
     app.on_inserted_nodes += eve_hooks.after_inserting_nodes
