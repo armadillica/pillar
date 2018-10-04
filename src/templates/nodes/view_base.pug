@@ -133,7 +133,8 @@ section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 			script(src="{{ url_for('static_cloud', filename='assets/js/tagged_assets.min.js') }}")
 			script.
 				$(function() {
-					$('.js-asset-list').loadTaggedAssets(4, 0);
+					let is_subscriber = {{ current_user.has_cap('subscriber')|string|lower }};
+					$('.js-asset-list').loadTaggedAssets(4, 0, is_subscriber);
 				})
 			.tagged-similar.p-3
 				h6 Similar assets

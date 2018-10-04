@@ -3,7 +3,7 @@
 | {% set node_type = asset.properties.content_type if asset.properties.content_type else asset.node_type %}
 
 a.card.asset.card-image-fade.pr-0.mx-0.mb-2(
-	class="js-item-open {% if asset.permissions.world %}free{% endif %}",
+	class="js-item-open {% if asset.permissions.world and not current_user.has_cap('subscriber') %}free{% endif %}",
 	data-node_id="{{ asset._id }}",
 	title="{{ asset.name }}",
 	href='{{ url_for_node(node=asset) }}')
