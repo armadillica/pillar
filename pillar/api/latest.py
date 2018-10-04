@@ -29,7 +29,6 @@ def latest_nodes(db_filter, projection, limit):
     proj = {
         '_created': 1,
         '_updated': 1,
-        'user.full_name': 1,
         'project._id': 1,
         'project.url': 1,
         'project.name': 1,
@@ -81,7 +80,7 @@ def latest_assets():
 def latest_comments():
     latest = latest_nodes({'node_type': 'comment',
                            'properties.status': 'published'},
-                          {'parent': 1,
+                          {'parent': 1, 'user.full_name': 1,
                            'properties.content': 1, 'node_type': 1,
                            'properties.status': 1,
                            'properties.is_reply': 1},

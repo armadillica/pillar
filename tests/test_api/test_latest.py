@@ -145,6 +145,7 @@ class LatestAssetsTest(AbstractPillarTest):
             asset = latest_assets[0]
             self.assertEquals(str(ok_id), asset['_id'])
             self.assertEquals('Just a node name', asset['name'])
+            self.assertNotIn('user', asset)
 
 
 class LatestCommentsTest(AbstractPillarTest):
@@ -301,3 +302,4 @@ class LatestCommentsTest(AbstractPillarTest):
             self.assertEquals(str(ok_id), comment['_id'])
             self.assertEquals('Comment', comment['name'])
             self.assertEquals('एनिमेशन is animation in Hindi', comment['properties']['content'])
+            self.assertEquals('คนรักของผัดไทย', comment['user']['full_name'])

@@ -48,9 +48,17 @@ a.card.asset.card-image-fade.pr-0.mx-0.mb-2(
 			| {{ asset.name | hide_none }}
 
 		ul.card-text.list-unstyled.d-flex.text-black-50.mt-auto.mb-0.text-truncate
-			li.pr-2.font-weight-bold {{ node_type | undertitle | hide_none }}
-			li.pr-2.text-truncate {{ asset.project.name | hide_none }}
-			li.pr-2.text-truncate {{ asset.user.full_name | hide_none }}
-			li.text-truncate {{ asset._created | pretty_date | hide_none }}
+			| {% if node_type %}
+			li.pr-2.font-weight-bold {{ node_type | undertitle }}
+			| {% endif %}
+			| {% if asset.project.name %}
+			li.pr-2.text-truncate {{ asset.project.name }}
+			| {% endif %}
+			| {% if asset.user.full_name %}
+			li.pr-2.text-truncate {{ asset.user.full_name }}
+			| {% endif %}
+			| {% if asset._created %}
+			li.text-truncate {{ asset._created | pretty_date }}
+			| {% endif %}
 
 | {% endmacro %}
