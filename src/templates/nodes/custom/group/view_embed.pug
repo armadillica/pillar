@@ -16,13 +16,14 @@ include ../../../mixins/components
 
 		.d-flex.justify-content-end.mb-2
 			button.btn.btn-sm.btn-outline-secondary(
+				id="asset_list_toogle_{{node._id}}",
 				class="js-btn-browsetoggle",
 				title="Toggle between list/grid view",
 				data-toggle="tooltip",
 				data-placement="top")
 				i.pi-list
 
-		+card-deck(class="px-2")
+		+card-deck(id="asset_list_{{node._id}}",class="px-2")
 			| {% for child in children %}
 			| {{ asset_list_item(child, current_user) }}
 			| {% endfor %}
@@ -63,13 +64,13 @@ include ../../../mixins/components
 
 		// Browse type: icon or list
 		function projectBrowseTypeIcon() {
-			$(".card-deck").removeClass('card-deck-vertical');
-			$(".js-btn-browsetoggle").html('<i class="pi-list"></i> List View');
+			$("#asset_list_{{node._id}}").removeClass('card-deck-vertical');
+			$("#asset_list_toogle_{{node._id}}").html('<i class="pi-list"></i> List View');
 		};
 
 		function projectBrowseTypeList() {
-			$(".card-deck").addClass('card-deck-vertical');
-			$(".js-btn-browsetoggle").html('<i class="pi-layout"></i> Grid View');
+			$("#asset_list_{{node._id}}").addClass('card-deck-vertical');
+			$("#asset_list_toogle_{{node._id}}").html('<i class="pi-layout"></i> Grid View');
 		};
 
 		function projectBrowseTypeCheck(){
@@ -109,7 +110,7 @@ include ../../../mixins/components
 			}
 		}
 
-		$('.js-btn-browsetoggle').on('click', function (e) {
+		$("#asset_list_toogle_{{node._id}}").on('click', function (e) {
 			e.preventDefault();
 			projectBrowseToggle();
 		});
