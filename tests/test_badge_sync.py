@@ -109,6 +109,46 @@ class FindUsersToSyncTest(AbstractSyncTest):
         self.assertEqual([], found)
 
 
+class FindUserSyncInfoTest(AbstractSyncTest):
+    def test_no_badge_fetched_yet(self):
+        from pillar import badge_sync
+
+        with self.app.app_context():
+            found1 = badge_sync.find_user_to_sync(self.uid1)
+            found2 = badge_sync.find_user_to_sync(self.uid2)
+        self.assertEqual(self.sync_user1, found1)
+        self.assertEqual(self.sync_user2, found2)
+
+    def test_badge_fetched_recently(self):
+        # This should be the same for all cases, as a single user
+        # is always refreshed.
+        from pillar import badge_sync
+
+        # Badges of user1 expired, user2 didn't yet.
+        with self.app.app_context():
+            self._update_badge_expiry(-5, 5)
+            found1 = badge_sync.find_user_to_sync(self.uid1)
+            found2 = badge_sync.find_user_to_sync(self.uid2)
+        self.assertEqual(self.sync_user1, found1)
+        self.assertEqual(self.sync_user2, found2)
+
+        # Badges of both users expired, but user2 expired longer ago.
+        with self.app.app_context():
+            self._update_badge_expiry(-5, -10)
+            found1 = badge_sync.find_user_to_sync(self.uid1)
+            found2 = badge_sync.find_user_to_sync(self.uid2)
+        self.assertEqual(self.sync_user1, found1)
+        self.assertEqual(self.sync_user2, found2)
+
+        # Badges of both not expired yet.
+        with self.app.app_context():
+            self._update_badge_expiry(2, 3)
+            found1 = badge_sync.find_user_to_sync(self.uid1)
+            found2 = badge_sync.find_user_to_sync(self.uid2)
+        self.assertEqual(self.sync_user1, found1)
+        self.assertEqual(self.sync_user2, found2)
+
+
 class FetchHTMLTest(AbstractSyncTest):
     @httpmock.activate
     def test_happy(self):
@@ -215,3 +255,21 @@ class RefreshAllTest(AbstractSyncTest):
         margin = datetime.timedelta(minutes=1)
         self.assertLess(expected_expire - margin, db_user1['badges']['expires'])
         self.assertGreater(expected_expire + margin, db_user1['badges']['expires'])
+
+
+class RefreshSingleTest(AbstractSyncTest):
+    @httpmock.activate
+    def test_happy(self):
+        from pillar import badge_sync
+
+        httpmock.add('GET', 'http://id.local:8001/api/badges/1947/html/s',
+                     body='badges for Agent 47')
+
+        db_user1 = self.get('/api/users/me', auth_token=self.sync_user1.token).json
+        self.assertNotIn('badges', db_user1)
+
+        with self.app.app_context():
+            badge_sync.refresh_single_user(self.uid1)
+
+        db_user1 = self.get('/api/users/me', auth_token=self.sync_user1.token).json
+        self.assertEqual('badges for Agent 47', db_user1['badges']['html'])

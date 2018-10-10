@@ -14,6 +14,7 @@ from pillar import current_app
 
 # The sender is the user that was just authenticated.
 user_authenticated = blinker.Signal('Sent whenever a user was authenticated')
+user_logged_in = blinker.Signal('Sent whenever a user logged in on the web')
 
 log = logging.getLogger(__name__)
 
@@ -227,7 +228,8 @@ def login_user_object(user: UserClass):
     """Log in the given user."""
     flask_login.login_user(user, remember=True)
     g.current_user = user
-    user_authenticated.send(sender=user)
+    user_authenticated.send(user)
+    user_logged_in.send(user)
 
 
 def logout_user():
