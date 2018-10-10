@@ -39,14 +39,12 @@ style.
 			.form-group
 				| {{ _("Change your full name, email, and password at") }} #[a(href="https://www.blender.org/id/settings/profile",target='_blank') Blender ID].
 
-			| {#
 			| {% if current_user.badges_html %}
 			.form-group
 				p Your Blender ID badges:
 				| {{ current_user.badges_html|safe }}
 				p.hint-text Note that updates to these badges may take a few minutes to be visible here.
 			| {% endif %}
-			| #}
 
 		.py-3
 			a(href="https://gravatar.com/")
