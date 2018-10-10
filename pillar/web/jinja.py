@@ -1,6 +1,7 @@
 """Our custom Jinja filters and other template stuff."""
 
 import functools
+import json
 import logging
 import typing
 import urllib.parse
@@ -205,6 +206,12 @@ def do_yesno(value, arg=None):
     return no
 
 
+def do_json(some_object) -> str:
+    if isinstance(some_object, pillarsdk.Resource):
+        some_object = some_object.to_dict()
+    return json.dumps(some_object)
+
+
 def setup_jinja_env(jinja_env, app_config: dict):
     jinja_env.filters['pretty_date'] = format_pretty_date
     jinja_env.filters['pretty_date_time'] = format_pretty_date_time
@@ -218,6 +225,7 @@ def setup_jinja_env(jinja_env, app_config: dict):
     jinja_env.filters['yesno'] = do_yesno
     jinja_env.filters['repr'] = repr
     jinja_env.filters['urljoin'] = functools.partial(urllib.parse.urljoin, allow_fragments=True)
+    jinja_env.filters['json'] = do_json
     jinja_env.globals['url_for_node'] = do_url_for_node
     jinja_env.globals['abs_url'] = functools.partial(flask.url_for,
                                                      _external=True,
