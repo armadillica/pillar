@@ -12,7 +12,9 @@ from werkzeug.local import LocalProxy
 
 from pillar import current_app
 
+# The sender is the user that was just authenticated.
 user_authenticated = blinker.Signal('Sent whenever a user was authenticated')
+
 log = logging.getLogger(__name__)
 
 # Mapping from user role to capabilities obtained by users with that role.
@@ -225,7 +227,7 @@ def login_user_object(user: UserClass):
     """Log in the given user."""
     flask_login.login_user(user, remember=True)
     g.current_user = user
-    user_authenticated.send(None)
+    user_authenticated.send(sender=user)
 
 
 def logout_user():
