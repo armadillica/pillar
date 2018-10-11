@@ -208,8 +208,8 @@ CELERY_BEAT_SCHEDULE = {
     },
     'refresh-blenderid-badges': {
         'task': 'pillar.celery.badges.sync_badges_for_users',
-        'schedule': 600,  # every N seconds
-        'args': (540, ),  # time limit in seconds, keep shorter than 'schedule'
+        'schedule': 10 * 60,  # every N seconds
+        'args': (9 * 60, ),  # time limit in seconds, keep shorter than 'schedule'
     }
 }
 
