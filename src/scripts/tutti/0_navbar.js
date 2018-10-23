@@ -104,12 +104,30 @@ function statusBarSet(classes, html, icon_name, time){
  * loading an asset or performing actions.
  */
 function loadingBarShow(){
+	/* NEVER call this directly! Trigger pillar:workStart event instead */
 	$('.loading-bar').addClass('active');
 }
 
 function loadingBarHide(){
+	/* NEVER call this directly! Trigger pillar:workStop event instead */
 	$('.loading-bar').removeClass('active');
 }
+
+(function loadingbar () {
+	var busyCounter = 0;
+
+	$(window)
+		.on('pillar:workStart', function(e) {
+			busyCounter += 1;
+			loadingBarShow();
+		})
+		.on('pillar:workStop', function() {
+			busyCounter -= 1;
+			if(busyCounter === 0) {
+				loadingBarHide();
+			}
+		})
+})();
 
 
 $(document).ready(function() {
