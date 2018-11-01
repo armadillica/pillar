@@ -712,6 +712,10 @@ class PillarServer(BlinkerCompatibleEve):
 
         authentication.setup_app(self)
 
+        # Register Flask Debug Toolbar (disabled by default).
+        from flask_debugtoolbar import DebugToolbarExtension
+        DebugToolbarExtension(self)
+
         for ext in self.pillar_extensions.values():
             self.log.info('Setting up extension %s', ext.name)
             ext.setup_app(self)
@@ -722,6 +726,7 @@ class PillarServer(BlinkerCompatibleEve):
         self._config_user_caps()
 
         # Only enable this when debugging.
+        # TODO(fsiddi): Consider removing this in favor of the routes tab in Flask Debug Toolbar.
         # self._list_routes()
 
     def setup_db_indices(self):

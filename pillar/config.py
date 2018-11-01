@@ -270,3 +270,14 @@ STATIC_FILE_HASH = ''
 # all API endpoints do not need it. On the views that require it, we use the
 # current_app.csrf.protect() method.
 WTF_CSRF_CHECK_DEFAULT = False
+
+# Flask Debug Toolbar. Enable it by overriding DEBUG_TB_ENABLED in config_local.py.
+DEBUG_TB_ENABLED = False
+DEBUG_TB_PANELS = [
+    'flask_debugtoolbar.panels.versions.VersionDebugPanel',
+    'flask_debugtoolbar.panels.headers.HeaderDebugPanel',
+    'flask_debugtoolbar.panels.request_vars.RequestVarsDebugPanel',
+    'flask_debugtoolbar.panels.config_vars.ConfigVarsDebugPanel',
+    'flask_debugtoolbar.panels.template.TemplateDebugPanel',
+    'flask_debugtoolbar.panels.logger.LoggingPanel',
+    'flask_debugtoolbar.panels.route_list.RouteListDebugPanel']
