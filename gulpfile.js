@@ -1,20 +1,20 @@
-var argv         = require('minimist')(process.argv.slice(2));
-var autoprefixer = require('gulp-autoprefixer');
-var cache        = require('gulp-cached');
-var chmod        = require('gulp-chmod');
-var concat       = require('gulp-concat');
-var git          = require('gulp-git');
-var gulpif       = require('gulp-if');
-var gulp         = require('gulp');
-var livereload   = require('gulp-livereload');
-var plumber      = require('gulp-plumber');
-var pug          = require('gulp-pug');
-var rename       = require('gulp-rename');
-var sass         = require('gulp-sass');
-var sourcemaps   = require('gulp-sourcemaps');
-var uglify       = require('gulp-uglify-es').default;
+let argv         = require('minimist')(process.argv.slice(2));
+let autoprefixer = require('gulp-autoprefixer');
+let cache        = require('gulp-cached');
+let chmod        = require('gulp-chmod');
+let concat       = require('gulp-concat');
+let git          = require('gulp-git');
+let gulpif       = require('gulp-if');
+let gulp         = require('gulp');
+let livereload   = require('gulp-livereload');
+let plumber      = require('gulp-plumber');
+let pug          = require('gulp-pug');
+let rename       = require('gulp-rename');
+let sass         = require('gulp-sass');
+let sourcemaps   = require('gulp-sourcemaps');
+let uglify       = require('gulp-uglify-es').default;
 
-var enabled = {
+let enabled = {
     uglify: argv.production,
     maps: !argv.production,
     failCheck: !argv.production,
@@ -24,20 +24,20 @@ var enabled = {
     chmod: argv.production,
 };
 
-var destination = {
+let destination = {
     css: 'pillar/web/static/assets/css',
     pug: 'pillar/web/templates',
     js: 'pillar/web/static/assets/js',
 }
 
-var source = {
+let source = {
     bootstrap: 'node_modules/bootstrap/',
     jquery: 'node_modules/jquery/',
     popper: 'node_modules/popper.js/'
 }
 
-/* CSS */
-gulp.task('styles', function() {
+/* Stylesheets */
+gulp.task('styles', function(done) {
     gulp.src('src/styles/**/*.sass')
         .pipe(gulpif(enabled.failCheck, plumber()))
         .pipe(gulpif(enabled.maps, sourcemaps.init()))
@@ -48,11 +48,12 @@ gulp.task('styles', function() {
         .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
         .pipe(gulp.dest(destination.css))
         .pipe(gulpif(argv.livereload, livereload()));
+    done();
 });
 
 
-/* Templates - Pug */
-gulp.task('templates', function() {
+/* Templates */
+gulp.task('templates', function(done) {
     gulp.src('src/templates/**/*.pug')
         .pipe(gulpif(enabled.failCheck, plumber()))
         .pipe(gulpif(enabled.cachify, cache('templating')))
@@ -61,11 +62,12 @@ gulp.task('templates', function() {
         }))
         .pipe(gulp.dest(destination.pug))
         .pipe(gulpif(argv.livereload, livereload()));
+    done();
 });
 
 
 /* Individual Uglified Scripts */
-gulp.task('scripts', function() {
+gulp.task('scripts', function(done) {
     gulp.src('src/scripts/*.js')
         .pipe(gulpif(enabled.failCheck, plumber()))
         .pipe(gulpif(enabled.cachify, cache('scripting')))
@@ -76,6 +78,7 @@ gulp.task('scripts', function() {
         .pipe(gulpif(enabled.chmod, chmod(0o644)))
         .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
+    done();
 });
 
 
@@ -83,7 +86,7 @@ gulp.task('scripts', function() {
  * Since it's always loaded, it's only for functions that we want site-wide.
  * It also includes jQuery and Bootstrap (and its dependency popper), since
  * the site doesn't work without it anyway.*/
-gulp.task('scripts_concat_tutti', function() {
+gulp.task('scripts_concat_tutti', function(done) {
 
     toUglify = [
         source.jquery    + 'dist/jquery.min.js',
@@ -106,6 +109,7 @@ gulp.task('scripts_concat_tutti', function() {
         .pipe(gulpif(enabled.chmod, chmod(0o644)))
         .pipe(gulp.dest(destination.js))
         .pipe(gulpif(argv.livereload, livereload()));
+    done();
 });
 
 
@@ -117,28 +121,30 @@ gulp.task('scripts_move_vendor', function(done) {
     ];
 
     gulp.src(toMove)
-    .pipe(gulp.dest(destination.js + '/vendor/'));
+        .pipe(gulp.dest(destination.js + '/vendor/'));
     done();
 });
 
 
 // While developing, run 'gulp watch'
-gulp.task('watch',function() {
+gulp.task('watch',function(done) {
     // Only listen for live reloads if ran with --livereload
     if (argv.livereload){
         livereload.listen();
     }
 
-    gulp.watch('src/styles/**/*.sass',['styles']);
-    gulp.watch('src/templates/**/*.pug',['templates']);
-    gulp.watch('src/scripts/*.js',['scripts']);
-    gulp.watch('src/scripts/tutti/**/*.js',['scripts_concat_tutti']);
+    gulp.watch('src/styles/**/*.sass',gulp.series('styles'));
+    gulp.watch('src/templates/**/*.pug',gulp.series('templates'));
+    gulp.watch('src/scripts/*.js',gulp.series('scripts'));
+    gulp.watch('src/scripts/tutti/**/*.js',gulp.series('scripts_concat_tutti'));
+
+    done();
 });
 
 
 // Erases all generated files in output directories.
-gulp.task('cleanup', function() {
-    var paths = [];
+gulp.task('cleanup', function(done) {
+    let paths = [];
     for (attr in destination) {
         paths.push(destination[attr]);
     }
@@ -146,17 +152,19 @@ gulp.task('cleanup', function() {
     git.clean({ args: '-f -X ' + paths.join(' ') }, function (err) {
         if(err) throw err;
     });
-
+    done();
 });
 
 
 // Run 'gulp' to build everything at once
-var tasks = [];
+let tasks = [];
 if (enabled.cleanup) tasks.push('cleanup');
-gulp.task('default', tasks.concat([
+// gulp.task('default', gulp.parallel('styles', 'templates', 'scripts', 'scripts_tutti'));
+
+gulp.task('default', gulp.parallel(tasks.concat([
     'styles',
     'templates',
     'scripts',
     'scripts_concat_tutti',
     'scripts_move_vendor',
-]));
+])));

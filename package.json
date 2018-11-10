@@ -7,7 +7,7 @@
     "url": "git://git.blender.org/pillar.git"
   },
   "devDependencies": {
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-autoprefixer": "^6.0.0",
     "gulp-cached": "^1.1.1",
     "gulp-chmod": "^2.0.0",
