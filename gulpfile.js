@@ -13,6 +13,13 @@ let rename       = require('gulp-rename');
 let sass         = require('gulp-sass');
 let sourcemaps   = require('gulp-sourcemaps');
 let uglify       = require('gulp-uglify-es').default;
+let browserify   = require('browserify');
+let babelify     = require('babelify');
+let sourceStream = require('vinyl-source-stream');
+let glob         = require('glob');
+let es           = require('event-stream');
+let path         = require('path');
+let buffer = require('vinyl-buffer');
 
 let enabled = {
     uglify: argv.production,
@@ -81,6 +88,41 @@ gulp.task('scripts', function(done) {
     done();
 });
 
+function browserify_base(entry) {
+    return browserify({
+        entries: [entry],
+        standalone: 'pillar.' + path.basename(entry, '.js'),
+    })
+    .transform(babelify, { "presets": ["@babel/preset-env"] })
+    .bundle()
+    .pipe(gulpif(enabled.failCheck, plumber()))
+    .pipe(sourceStream(path.basename(entry)))
+    .pipe(buffer())
+    .pipe(rename({
+        extname: '.min.js'
+    }));
+}
+
+function browserify_common() {
+    return glob.sync('src/scripts/js/es6/common/*.js').map(browserify_base);
+}
+
+gulp.task('scripts_browserify', function(done) {
+    glob('src/scripts/js/es6/individual/*.js', function(err, files) {
+        if(err) done(err);
+
+        var tasks = files.map(function(entry) {
+            return browserify_base(entry)
+            .pipe(gulpif(enabled.maps, sourcemaps.init()))
+            .pipe(gulpif(enabled.uglify, uglify()))
+            .pipe(gulpif(enabled.maps, sourcemaps.write(".")))
+            .pipe(gulp.dest(destination.js));
+        });
+
+        es.merge(tasks).on('end', done);
+    })
+});
+
 
 /* Collection of scripts in src/scripts/tutti/ to merge into tutti.min.js
  * Since it's always loaded, it's only for functions that we want site-wide.
@@ -88,7 +130,7 @@ gulp.task('scripts', function(done) {
  * the site doesn't work without it anyway.*/
 gulp.task('scripts_concat_tutti', function(done) {
 
-    toUglify = [
+    let toUglify = [
         source.jquery    + 'dist/jquery.min.js',
         source.popper    + 'dist/umd/popper.min.js',
         source.bootstrap + 'js/dist/index.js',
@@ -100,7 +142,7 @@ gulp.task('scripts_concat_tutti', function(done) {
         'src/scripts/tutti/**/*.js'
     ];
 
-    gulp.src(toUglify)
+    es.merge(gulp.src(toUglify), ...browserify_common())
         .pipe(gulpif(enabled.failCheck, plumber()))
         .pipe(gulpif(enabled.maps, sourcemaps.init()))
         .pipe(concat("tutti.min.js"))
@@ -137,7 +179,7 @@ gulp.task('watch',function(done) {
     gulp.watch('src/templates/**/*.pug',gulp.series('templates'));
     gulp.watch('src/scripts/*.js',gulp.series('scripts'));
     gulp.watch('src/scripts/tutti/**/*.js',gulp.series('scripts_concat_tutti'));
-
+    gulp.watch('src/scripts/js/**/*.js',gulp.series(['scripts_browserify', 'scripts_concat_tutti']));
     done();
 });
 
@@ -167,4 +209,5 @@ gulp.task('default', gulp.parallel(tasks.concat([
     'scripts',
     'scripts_concat_tutti',
     'scripts_move_vendor',
+    'scripts_browserify',
 ])));
