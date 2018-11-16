@@ -303,7 +303,7 @@ def view(project_url):
                                          'header_video_node': header_video_node})
 
 
-def project_navigation_links(project, api) -> list:
+def project_navigation_links(project: typing.Type[Project], api) -> list:
     """Returns a list of nodes for the project, for top navigation display.
 
     Args:
@@ -466,6 +466,7 @@ def view_node(project_url, node_id):
     api = system_util.pillar_api()
     # First we check if it's a simple string, in which case we are looking for
     # a static page. Maybe we could use bson.objectid.ObjectId.is_valid(node_id)
+    project: typing.Optional[Project] = None
     if not utils.is_valid_id(node_id):
         # raise wz_exceptions.NotFound('No such node')
         project, node = render_node_page(project_url, node_id, api)
@@ -483,21 +484,21 @@ def view_node(project_url, node_id):
             project = Project.find_one({'where': {"url": project_url, '_id': node.project}},
                                        api=api)
         except ResourceNotFound:
-            # In theatre mode, we don't need access to the project at all.
             if theatre_mode:
-                project = None
+                pass  # In theatre mode, we don't need access to the project at all.
             else:
                 raise wz_exceptions.NotFound('No such project')
 
+    navigation_links = []
     og_picture = node.picture = utils.get_file(node.picture, api=api)
     if project:
         if not node.picture:
             og_picture = utils.get_file(project.picture_header, api=api)
         project.picture_square = utils.get_file(project.picture_square, api=api)
+        navigation_links = project_navigation_links(project, api)
 
     # Append _theatre to load the proper template
     theatre = '_theatre' if theatre_mode else ''
-    navigation_links = project_navigation_links(project, api)
 
     if node.node_type == 'page':
         return render_template('nodes/custom/page/view_embed.html',
