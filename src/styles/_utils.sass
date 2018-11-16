@@ -130,16 +130,19 @@
 	transform: translate(-50%, -50%)
 
 =input-generic
-	color: $color-text-dark
 	background-color: transparent
+	border-color: $color-background-dark
+	color: $color-text
+	transition: background-color 150ms ease-in-out, border-color 150ms ease-in-out
 
 	&:hover
-		border-bottom-color: $color-background
+		border-color: $color-background-light
 
 	&:focus
-		outline: 0
+		background-color: unset
 		border-color: $primary
 		box-shadow: none
+		color: $color-text
 
 =label-generic
 	color: $color-text-dark-primary
