@@ -351,14 +351,17 @@
 
 =list-bullets
 	ul
-		padding-left: 20px
+		padding-left: 25px
 		list-style: none
+
+		li
+			position: relative
 
 		li:before
 			content: '·'
 			font-weight: 400
-			position: relative
-			left: -10px
+			left: -20px
+			position: absolute
 
 
 =node-details-description
@@ -435,7 +438,6 @@
 
 	ul
 		margin-bottom: 25px
-		padding-left: 40px
 
 		li
 			margin-bottom: 7px
