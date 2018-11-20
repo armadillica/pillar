@@ -17,28 +17,49 @@
  *  continue_from: 123456.2 // python timestamp
  * }
  */
+const DEFAULT_URL = '/api/timeline';
+const transformPlaceholder = pillar.utils.transformPlaceholder;
 
 class Timeline {
-    constructor(target, params, builder) {
-        this._$targetDom = $(target)
-        this._url = params['url'];
-        this._queryParams = params['queryParams'] || {};
+    constructor(target, builder) {
+        this._$targetDom = $(target);
+        this._url;
+        this._queryParams = {};
         this._builder = builder;
         this._init();
     }
 
     _init() {
         this._workStart();
+        this._setUrl();
+        this._setQueryParams();
         this._thenLoadMore()
             .then((it)=>{
-                this._$targetDom.empty();
-                this._$targetDom.append(it);
-                if (this._hasMore()) {
-                    let btn = this._create$LoadMoreBtn();
-                    this._$targetDom.append(btn);
-                }
+                transformPlaceholder(this._$targetDom, () => {
+                    this._$targetDom.empty()
+                            .append(it);
+                        if (this._hasMore()) {
+                            let btn = this._create$LoadMoreBtn();
+                            this._$targetDom.append(btn);
+                        }
+                })
             })
             .always(this._workStop.bind(this));
+    }
+
+    _setUrl() {
+        let projectId = this._$targetDom.data('project-id');
+        this._url = DEFAULT_URL
+        if (projectId) {
+            this._url += '/p/' + projectId
+        }
+    }
+
+    _setQueryParams() {
+        let sortDirection = this._$targetDom.data('sort-dir');
+        if (sortDirection) {
+            this._queryParams['dir'] = sortDirection;
+        }
     }
 
     _loadMore(event) {
@@ -122,6 +143,7 @@ class GroupBuilder {
             content = content.concat(group['groups'].map(this.build$Group.bind(this, level+1)));
         }
         return $('<div>')
+            .addClass('group')
             .append(
                 $label,
                 content
@@ -167,10 +189,9 @@ class GroupBuilder {
  }
 
 $.fn.extend({
-    timeline: function(params) {
+    timeline: function() {
         this.each(function(i, target) {
             new Timeline(target,
-                params || {},
                 new GroupBuilder()
             );
         });

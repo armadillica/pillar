@@ -250,7 +250,7 @@ def global_timeline():
     return _global_timeline(continue_from, nbr_of_weeks, sort_direction)
 
 
-@blueprint.route('/p/<string(length=24):str_pid>', methods=['GET'])
+@blueprint.route('/p/<string(length=24):pid_path>', methods=['GET'])
 def project_timeline(pid_path: str):
     continue_from_str = request.args.get('from')
     continue_from = parse_continue_from(continue_from_str)

@@ -73,3 +73,15 @@ mixin list-asset(name, url, image, type, date)
 	if block
 		block
 
+// used together with timeline.js
+mixin timeline(projectid, sortdirection)
+	section.timeline.placeholder(
+		data-project-id=projectid,
+		data-sort-dir=sortdirection,
+	)
+		// TODO: Make nicer reuseable placeholder
+		.h1.text-center
+			i.pi-spin.spin
+	
+
+

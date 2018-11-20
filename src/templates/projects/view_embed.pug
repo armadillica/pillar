@@ -40,6 +40,9 @@ section.px-4
 		| {% endif %}
 		| {% endfor %}
 	| {% endif %}
+	| {% if project.category in ['film', 'assets'] %}
+	+timeline("{{ project._id }}")
+	| {% endif %}
 
 include _scripts
 
