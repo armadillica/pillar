@@ -63,7 +63,7 @@ class Timeline {
     }
 
     _loadMore(event) {
-        let $spinner = $('<i>').addClass('pi-spin spinner');
+        let $spinner = $('<i>').addClass('ml-2 pi-spin spinner');
         let $loadmoreBtn = $(event.target)
             .append($spinner)
             .addClass('disabled');
@@ -109,7 +109,7 @@ class Timeline {
 
     _create$LoadMoreBtn() {
         return $('<a>')
-            .addClass('btn btn-outline-primary js-load-next')
+            .addClass('btn btn-outline-primary btn-block js-load-next mb-3')
             .attr('href', 'javascript:void(0);')
             .click(this._loadMore.bind(this))
             .text('Load More Weeks');
@@ -163,7 +163,7 @@ class GroupBuilder {
         if (secondaryNodes) {
             content.push(
                 $('<div>')
-                    .addClass('card-deck card-padless card-deck-responsive card-undefined-columns js-asset-list py-3')
+                    .addClass('card-deck card-padless card-deck-responsive js-asset-list py-3')
                     .append(pillar.templates.Nodes.createListOf$nodeItems(secondaryNodes))
             );
         }
@@ -171,19 +171,19 @@ class GroupBuilder {
     }
 
     _create$Label(level, label, url) {
-        let size = level == 0 ? 'h5' : 'h6'
+        let type = level == 0 ? 'h6 float-right py-2' : 'h6 py-2 group-title'
         if (url) {
             return $('<div>')
-                .addClass(size +' sticky-top')
+                .addClass(type + ' sticky-top')
                 .append(
                     $('<a>')
-                        .addClass('text-muted')
+                        .addClass('text-muted font-weight-bold')
                         .attr('href', url)
                         .text(label)
             );
         }
         return $('<div>')
-            .addClass(size + ' text-muted sticky-top')
+            .addClass(type + ' text-secondary sticky-top')
             .text(label);
     }
  }
