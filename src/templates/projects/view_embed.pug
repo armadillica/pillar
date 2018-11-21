@@ -23,9 +23,7 @@ section.node-preview
 	| {% endif %}
 
 section.px-4
-	h4.pt-4
-		a.text-muted(href="{{ url_for( 'projects.view', project_url=project.url) }}")
-			| {{ project.name }}
+	h4.pt-4.pb-2 {{ project.name }}
 
 	| {% if project.description %}
 	.node-details-description
@@ -33,14 +31,20 @@ section.px-4
 	| {% endif %}
 
 	| {% if activity_stream %}
-	+card-deck(class="pt-4 border-top")
+	h5.py-4.border-top
+		.text-secondary Featured Content
+
+	+card-deck(class="pl-3 pb-3")
 		| {% for n in activity_stream %}
 		| {% if n.node_type not in ['comment'] %}
 		| {{ asset_list_item(n, current_user) }}
 		| {% endif %}
 		| {% endfor %}
 	| {% endif %}
+
 	| {% if project.category in ['film', 'assets'] %}
+	h5.py-4.border-top
+		.text-secondary Latest Updates
 	+timeline("{{ project._id }}")
 	| {% endif %}
 
