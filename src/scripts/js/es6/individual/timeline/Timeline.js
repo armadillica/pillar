@@ -112,7 +112,7 @@ export class Timeline {
             .addClass('btn btn-outline-primary btn-block js-load-next mb-3')
             .attr('href', 'javascript:void(0);')
             .click(this._loadMore.bind(this))
-            .text('Load More Weeks');
+            .text('Show More Weeks');
     }
 
     _workStart() {
@@ -163,7 +163,7 @@ class GroupBuilder {
         if (secondaryNodes) {
             content.push(
                 $('<div>')
-                    .addClass('card-deck card-padless card-deck-responsive js-asset-list py-3')
+                    .addClass('card-deck card-padless card-deck-responsive js-asset-list border-bottom p-3 pb-5 mb-5')
                     .append(pillar.templates.Nodes.createListOf$nodeItems(secondaryNodes))
             );
         }

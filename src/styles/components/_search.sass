@@ -34,12 +34,15 @@
 	visibility: visible
 
 .qs-input
+	&.show input
+		width: 50vw
+
 	input
 		border-style: solid
 		border-radius: $border-radius
 		height: $input-height-inner
 		padding: $input-padding-y 25px $input-padding-y $input-padding-x
-		width: 30vw
+		width: auto
 
 		&:focus
 			&+i+select
