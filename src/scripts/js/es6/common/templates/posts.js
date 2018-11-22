@@ -14,7 +14,7 @@ class Posts extends NodesFactoryInterface {
                     content,
                     $('<div>')
                         .addClass('node-details-description mx-auto')
-                        .html(post['properties']['_content_html'])
+                        .html(post['properties']['pretty_content'])
                 );
 
         return $post;

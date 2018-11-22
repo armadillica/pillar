@@ -8,6 +8,8 @@ import bson
 import pymongo
 from flask import Blueprint, current_app, request, url_for
 
+import pillar
+from pillar import shortcodes
 from pillar.api.utils import jsonify, pretty_duration, str2id
 from pillar.web.utils import pretty_date
 
@@ -211,6 +213,10 @@ class TimeLineBuilder:
         duration_seconds = node['properties'].get('duration_seconds')
         if duration_seconds is not None:
             node['properties']['duration'] = pretty_duration(duration_seconds)
+        if node['node_type'] == 'post':
+            html = _get_markdowned_html(node['properties'], 'content')
+            html = shortcodes.render_commented(html, context=node['properties'])
+            node['properties']['pretty_content'] = html
         return node
 
     @classmethod
@@ -238,6 +244,15 @@ def _public_project_ids() -> typing.List[bson.ObjectId]:
     proj_coll = current_app.db('projects')
     result = proj_coll.find({'is_private': False}, {'_id': 1})
     return [p['_id'] for p in result]
+
+
+def _get_markdowned_html(document: dict, field_name: str) -> str:
+    cache_field_name = pillar.markdown.cache_field_name(field_name)
+    html = document.get(cache_field_name)
+    if html is None:
+        markdown_src = document.get(field_name) or ''
+        html = pillar.markdown.markdown(markdown_src)
+    return html
 
 
 @blueprint.route('/', methods=['GET'])
