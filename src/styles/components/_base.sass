@@ -11,6 +11,17 @@ body
 		max-width: 100%
 		min-width: auto
 
+body.has-overlay
+	overflow: hidden
+	padding-right: 5px
+
+	.page-body
+		filter: blur(15px)
+		transition: filter $short-transition
+
+	.card
+		box-shadow: 1px 1px rgba(black, .1), 1px 10px 25px rgba(black, .05)
+
 .page-content
 	background-color: $white
 

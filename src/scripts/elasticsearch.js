@@ -11,10 +11,8 @@ $(document).ready(function() {
     var what = '';
 
     // Templates binding
-    var hitTemplate = Hogan.compile($('#hit-template').text());
     var statsTemplate = Hogan.compile($('#stats-template').text());
     var facetTemplate = Hogan.compile($('#facet-template').text());
-    var sliderTemplate = Hogan.compile($('#slider-template').text());
     var paginationTemplate = Hogan.compile($('#pagination-template').text());
 
     // defined in tutti/4_search.js
@@ -47,6 +45,7 @@ $(document).ready(function() {
         renderFacets(content);
         renderPagination(content);
         renderFirstHit($(hits).children('.search-hit:first'));
+        updateUrlParams();
     });
 
     /***************
@@ -66,7 +65,7 @@ $(document).ready(function() {
 
         window.setTimeout(function() {
             // Ignore getting that first result when there is none.
-            var hit_id = firstHit.attr('data-hit-id');
+            var hit_id = firstHit.attr('data-node-id');
             if (hit_id === undefined) {
                 done();
                 return;
@@ -87,12 +86,6 @@ $(document).ready(function() {
     // Initial search
     initWithUrlParams();
 
-    function convertTimestamp(iso8601) {
-        var d = new Date(iso8601)
-        return d.toLocaleDateString();
-    }
-
-
     function renderStats(content) {
         var stats = {
             nbHits: numberWithDelimiter(content.count),
@@ -103,20 +96,17 @@ $(document).ready(function() {
     }
 
     function renderHits(content) {
-        var hitsHtml = '';
-        for (var i = 0; i < content.hits.length; ++i) {
-            var created = content.hits[i].created_at;
-            if (created) {
-                content.hits[i].created_at = convertTimestamp(created);
-            }
-            var updated = content.hits[i].updated_at;
-            if (updated) {
-                content.hits[i].updated_at = convertTimestamp(updated);
-            }
-            hitsHtml += hitTemplate.render(content.hits[i]);
+        $hits.empty();
+        if (content.hits.length === 0) {
+            $hits.html('<p id="no-hits">We didn\'t find any items. Try searching something else.</p>');
         }
-        if (content.hits.length === 0) hitsHtml = '<p id="no-hits">We didn\'t find any items. Try searching something else.</p>';
-        $hits.html(hitsHtml);
+        else {
+            listof$hits = content.hits.map(function(hit){
+                return pillar.templates.Component.create$listItem(hit)
+                    .addClass('js-search-hit cursor-pointer search-hit');
+            })
+            $hits.append(listof$hits);
+        }
     }
 
     function renderFacets(content) {
@@ -133,7 +123,7 @@ $(document).ready(function() {
                 var refined = search.isRefined(label, item.key);
                 values.push({
                     facet: label,
-                    label: item.key,
+                    label: item.key_as_string || item.key,
                     value: item.key,
                     count: item.doc_count,
                     refined: refined,
@@ -153,7 +143,7 @@ $(document).ready(function() {
 
             buckets.forEach(storeValue(values, label));
             facets.push({
-                title: label,
+                title: removeUnderscore(label),
                 values: values.slice(0),
             });
         }
@@ -218,6 +208,9 @@ $(document).ready(function() {
         $pagination.html(paginationTemplate.render(pagination));
     }
 
+    function removeUnderscore(s) {
+    	return s.replace(/_/g, ' ')
+    }
 
     // Event bindings
     // Click binding
@@ -300,37 +293,46 @@ $(document).ready(function() {
     };
 
     function initWithUrlParams() {
-        var sPageURL = location.hash;
-        if (!sPageURL || sPageURL.length === 0) {
-            return true;
+        var pageURL = decodeURIComponent(window.location.search.substring(1)),
+            urlVariables = pageURL.split('&'),
+            query,
+            i;
+        for (i = 0; i < urlVariables.length; i++) {
+            var parameterPair = urlVariables[i].split('='),
+                key = parameterPair[0],
+                sValue = parameterPair[1];
+            if (!key) continue;
+            if (key === 'q') {
+                query = sValue;
+                continue;
+            }
+            if (key === 'page') {
+                var page = Number.parseInt(sValue)
+                search.setCurrentPage(isNaN(page) ? 0 : page)
+                continue;
+            }
+            if (key === 'project') {
+                continue;  // We take the project from the path
+            }
+            if (sValue !== undefined) {
+            	var iValue = Number.parseInt(sValue),
+            	    value = isNaN(iValue) ? sValue : iValue;
+                search.toggleTerm(key, value);
+                continue;
+            }
+            console.log('Unhandled url parameter pair:', parameterPair)
         }
-        var sURLVariables = sPageURL.split('&');
-        if (!sURLVariables || sURLVariables.length === 0) {
-            return true;
-        }
-        var query = decodeURIComponent(sURLVariables[0].split('=')[1]);
         $inputField.val(query);
-        search.setQuery(query, what);
-
-        for (var i = 2; i < sURLVariables.length; i++) {
-            var sParameterName = sURLVariables[i].split('=');
-            var facet = decodeURIComponent(sParameterName[0]);
-            var value = decodeURIComponent(sParameterName[1]);
-        }
-        // Page has to be set in the end to avoid being overwritten
-        var page = decodeURIComponent(sURLVariables[1].split('=')[1]) - 1;
-        search.setCurrentPage(page);
+        do_search(query || '');
     }
 
-    function setURLParams(state) {
-        var urlParams = '?';
-        var currentQuery = state.query;
-        urlParams += 'q=' + encodeURIComponent(currentQuery);
-        var currentPage = state.page + 1;
-        urlParams += '&page=' + currentPage;
-        location.replace(urlParams);
+    function updateUrlParams() {
+        var prevState = history.state,
+            prevTitle = document.title,
+            params = search.getParams(),
+            newUrl = window.location.pathname + '?';
+        delete params['project']  // We take the project from the path
+        newUrl += jQuery.param(params)
+        history.replaceState(prevState, prevTitle, newUrl);
     }
-
-    // do empty search to fill aggregations
-    do_search('');
 });

@@ -1,5 +1,4 @@
-import { Assets } from '../assets'
-import {} from ''
+import { Assets } from '../nodes/Assets'
 
 jest.useFakeTimers();
 
@@ -8,11 +7,16 @@ describe('Assets', () => {
         let nodeDoc;
         let spyGet;
         beforeEach(()=>{
+            // mock now to get a stable pretty printed created
+            Date.now = jest.fn(() => new Date(Date.UTC(2018,
+                10, //November! zero based month!
+                28, 11, 46, 30)).valueOf()); // A Tuesday
+
             nodeDoc = {
                 _id: 'my-asset-id',
                 name: 'My Asset',
-                pretty_created: '2 hours ago',
                 node_type: 'asset',
+                _created: "Wed, 07 Nov 2018 16:35:09 GMT",
                 project: {
                     name: 'My Project',
                     url: 'url-to-project'
@@ -52,8 +56,9 @@ describe('Assets', () => {
                 let $card = Assets.create$listItem(nodeDoc);
                 jest.runAllTimers();
                 expect($card.length).toEqual(1);
-                expect($card.prop('tagName')).toEqual('A');
-                expect($card.hasClass('card asset')).toBeTruthy();
+                expect($card.prop('tagName')).toEqual('A'); // <a>
+                expect($card.hasClass('asset')).toBeTruthy();
+                expect($card.hasClass('card')).toBeTruthy();
                 expect($card.attr('href')).toEqual('/nodes/my-asset-id/redir');
                 expect($card.attr('title')).toEqual('My Asset');
     
@@ -77,14 +82,17 @@ describe('Assets', () => {
 
                 let $watched = $card.find('.card-label');
                 expect($watched.length).toEqual(0);
+
+                expect($card.find(':contains(3 weeks ago)').length).toBeTruthy();
                 done();
             });
 
             test('node without picture', done => {
                 let $card = Assets.create$listItem(nodeDoc);
                 expect($card.length).toEqual(1);
-                expect($card.prop('tagName')).toEqual('A');
-                expect($card.hasClass('card asset')).toBeTruthy();
+                expect($card.prop('tagName')).toEqual('A'); // <a>
+                expect($card.hasClass('asset')).toBeTruthy();
+                expect($card.hasClass('card')).toBeTruthy();
                 expect($card.attr('href')).toEqual('/nodes/my-asset-id/redir');
                 expect($card.attr('title')).toEqual('My Asset');
     
@@ -107,9 +115,10 @@ describe('Assets', () => {
 
                 let $watched = $card.find('.card-label');
                 expect($watched.length).toEqual(0);
+                
+                expect($card.find(':contains(3 weeks ago)').length).toBeTruthy();
                 done();
             });
         });
     })
 });
-

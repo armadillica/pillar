@@ -1,11 +1,10 @@
-import { NodesFactoryInterface } from './nodes'
+import { NodesBase } from "./NodesBase";
 
-class Posts extends NodesFactoryInterface {
+export class Posts extends NodesBase {
     static create$item(post) {
         let content = [];
-        let $title = $('<a>')
-            .attr('href', '/nodes/' + post._id + '/redir')
-            .addClass('h2 text-uppercase font-weight-bold d-block pb-3')
+        let $title = $('<div>')
+            .addClass('display-4 text-uppercase font-weight-bold')
             .text(post.name);
         content.push($title);
         let $post = $('<div>')
@@ -20,5 +19,3 @@ class Posts extends NodesFactoryInterface {
         return $post;
     }
 }
-
-export { Posts };

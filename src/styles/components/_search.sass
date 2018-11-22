@@ -1,87 +1,67 @@
 #search-overlay
-	position: absolute
+	position: fixed
 	top: 0
 	left: 0
 	right: 0
 	bottom: 0
 	width: 100%
 	height: 100%
-	pointer-events: none
 	visibility: hidden
 	opacity: 0
-	z-index: $z-index-base + 4
-	transition: opacity 150ms ease-in-out
+	overflow-y: scroll
+	z-index: $zindex-sticky + 1
+	transition: visibility $long-transition, opacity $long-transition
 
-	&.active
+	&.show
 		opacity: 1
 		visibility: visible
-		background-color: rgba($color-background-nav, .7)
+		background-color: rgba($body-bg, .7)
 
-.search-input
-	+media-lg
-		max-width: 350px
-	+media-md
-		max-width: 350px
-	+media-sm
-		max-width: 120px
-	+media-xs
-		display: block
-		margin: 0 10px
-		position: absolute
-		z-index: $z-index-base
-		right: 5px
-	position: relative
-	float: left
-	padding: 0
-	margin: 0
+	.qs-result
+		max-width: 80vw
 
-	.search-icon
-		position: absolute
-		top: 4px
-		left: 10px
-		cursor: pointer
+#qs-toggle
+	opacity: 1
+	visibility: visible
 
-		&:after
-			@extend .tooltip-inner
+.quick-search
+	opacity: 0
+	transition: opacity $short-transition
+	visibility: hidden
 
-			content: 'Use advanced search...'
-			font-size: .85em
-			font-style: normal
-			left: -10px
-			opacity: 0
-			pointer-events: none
-			position: absolute
-			top: 30px
-			transition: top 150ms ease-in-out, opacity 150ms ease-in-out
-			width: 150px
+.quick-search.show
+	opacity: 1
+	visibility: visible
 
-		&:hover
-			&:after
-				opacity: 1
-				top: 35px
-
-
-	#cloud-search, .tt-hint
-		+text-overflow-ellipsis
-		border: thin solid $color-background
-		border-radius: 3px
-		font:
-			size: 1em
-			weight: 400
-		margin: 0
-		min-height: 32px
-		outline: none
-		padding: 0 20px 0 40px
-		transition: border 100ms ease-in-out
+.qs-input
+	input
+		border-style: solid
+		border-radius: $border-radius
+		height: $input-height-inner
+		padding: $input-padding-y 25px $input-padding-y $input-padding-x
+		width: 30vw
 
 		&:focus
-			box-shadow: none
-			border: none
+			&+i+select
+				border-color: $color-primary
 
-		&::placeholder
-			color: rgba($color-text, .5)
-			transition: color 150ms ease-in-out
+		&.multi-scope // has a select next to it
+			border-right: none
+			border-bottom-right-radius: 0
+			border-top-right-radius: 0
 
-		&:hover
-			&::placeholder
-				color: rgba($color-text, .6)
+	select
+		border-width: 2px
+		border-left: none
+		border-bottom-right-radius: $border-radius
+		border-top-right-radius: $border-radius
+		height: $input-height-inner
+		margin-left: 5px
+		padding: $input-padding-y $input-padding-x
+
+		&:focus, option
+			// background-color: $dark
+			// color: $light
+
+	.qs-busy-symbol
+		margin-left: -2em

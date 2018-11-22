@@ -291,3 +291,18 @@ body.is-mobile
 
 .navbar+.page-content
 	padding-top: $nav-link-height
+
+body.has-overlay
+	nav.navbar
+		background-color: $white !important
+		box-shadow: none !important
+		padding: 5px
+		transition: padding-top $short-transition ease-in-out, padding-bottom $short-transition ease-in-out
+
+	.nav-secondary
+		&:not(.keep-when-overlay)
+			opacity: 0
+			transition: opacity $short-transition, visibility $short-transition
+			visibility: hidden
+			display: none !important
+

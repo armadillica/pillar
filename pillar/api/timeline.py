@@ -11,7 +11,6 @@ from flask import Blueprint, current_app, request, url_for
 import pillar
 from pillar import shortcodes
 from pillar.api.utils import jsonify, pretty_duration, str2id
-from pillar.web.utils import pretty_date
 
 blueprint = Blueprint('timeline', __name__)
 
@@ -209,7 +208,6 @@ class TimeLineBuilder:
 
     @classmethod
     def node_prettyfy(cls, node: dict)-> dict:
-        node['pretty_created'] = pretty_date(node['_created'])
         duration_seconds = node['properties'].get('duration_seconds')
         if duration_seconds is not None:
             node['properties']['duration'] = pretty_duration(duration_seconds)

@@ -89,9 +89,11 @@ gulp.task('scripts', function(done) {
 });
 
 function browserify_base(entry) {
+    let pathSplited = path.dirname(entry).split(path.sep);
+    let moduleName = pathSplited[pathSplited.length - 1];
     return browserify({
         entries: [entry],
-        standalone: 'pillar.' + path.basename(entry, '.js'),
+        standalone: 'pillar.' + moduleName,
     })
     .transform(babelify, { "presets": ["@babel/preset-env"] })
     .bundle()
@@ -99,16 +101,17 @@ function browserify_base(entry) {
     .pipe(sourceStream(path.basename(entry)))
     .pipe(buffer())
     .pipe(rename({
+        basename: moduleName,
         extname: '.min.js'
     }));
 }
 
 function browserify_common() {
-    return glob.sync('src/scripts/js/es6/common/*.js').map(browserify_base);
+    return glob.sync('src/scripts/js/es6/common/**/init.js').map(browserify_base);
 }
 
 gulp.task('scripts_browserify', function(done) {
-    glob('src/scripts/js/es6/individual/*.js', function(err, files) {
+    glob('src/scripts/js/es6/individual/**/init.js', function(err, files) {
         if(err) done(err);
 
         var tasks = files.map(function(entry) {

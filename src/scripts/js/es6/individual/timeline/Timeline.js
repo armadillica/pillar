@@ -20,7 +20,7 @@
 const DEFAULT_URL = '/api/timeline';
 const transformPlaceholder = pillar.utils.transformPlaceholder;
 
-class Timeline {
+export class Timeline {
     constructor(target, builder) {
         this._$targetDom = $(target);
         this._url;
@@ -197,5 +197,3 @@ $.fn.extend({
         });
     }
 })
-
-export { Timeline };

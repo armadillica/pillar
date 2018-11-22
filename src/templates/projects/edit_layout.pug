@@ -21,15 +21,6 @@ include ../mixins/components
 					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
 						i.pi-folder
 
-				| {% if not project.is_private %}
-				li.tabs-search(
-					title="Search",
-					data-toggle="tooltip",
-					data-placement="left")
-					a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
-						i.pi-search
-				| {% endif %}
-
 				| {% if project.has_method('PUT') %}
 				li.active(
 					title="Edit Project",

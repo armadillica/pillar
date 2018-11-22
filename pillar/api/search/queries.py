@@ -3,16 +3,18 @@ import logging
 import typing
 
 from elasticsearch import Elasticsearch
-from elasticsearch_dsl import Search, Q
+from elasticsearch_dsl import Search, Q, MultiSearch
 from elasticsearch_dsl.query import Query
 
 from pillar import current_app
 
 log = logging.getLogger(__name__)
 
-NODE_AGG_TERMS = ['node_type', 'media', 'tags', 'is_free']
+BOOLEAN_TERMS = ['is_free']
+NODE_AGG_TERMS = ['node_type', 'media', 'tags', *BOOLEAN_TERMS]
 USER_AGG_TERMS = ['roles', ]
 ITEMS_PER_PAGE = 10
+USER_SOURCE_INCLUDE = ['full_name', 'objectID', 'username']
 
 # Will be set in setup_app()
 client: Elasticsearch = None
@@ -27,26 +29,25 @@ def add_aggs_to_search(search, agg_terms):
         search.aggs.bucket(term, 'terms', field=term)
 
 
-def make_must(must: list, terms: dict) -> list:
+def make_filter(must: list, terms: dict) -> list:
     """ Given term parameters append must queries to the must list """
 
     for field, value in terms.items():
-        if value:
-            must.append({'match': {field: value}})
+        if value not in (None, ''):
+            must.append({'term': {field: value}})
 
     return must
 
 
-def nested_bool(must: list, should: list, terms: dict, *, index_alias: str) -> Search:
+def nested_bool(filters: list, should: list, terms: dict, *, index_alias: str) -> Search:
     """
     Create a nested bool, where the aggregation selection is a must.
 
     :param index_alias: 'USER' or 'NODE', see ELASTIC_INDICES config.
     """
-    must = make_must(must, terms)
+    filters = make_filter(filters, terms)
     bool_query = Q('bool', should=should)
-    must.append(bool_query)
-    bool_query = Q('bool', must=must)
+    bool_query = Q('bool', must=bool_query, filter=filters)
 
     index = current_app.config['ELASTIC_INDICES'][index_alias]
     search = Search(using=client, index=index)
@@ -55,12 +56,34 @@ def nested_bool(must: list, should: list, terms: dict, *, index_alias: str) -> S
     return search
 
 
+def do_multi_node_search(queries: typing.List[dict]) -> typing.List[dict]:
+    """
+    Given user query input and term refinements
+    search for public published nodes
+    """
+    search = create_multi_node_search(queries)
+    return _execute_multi(search)
+
+
 def do_node_search(query: str, terms: dict, page: int, project_id: str='') -> dict:
     """
     Given user query input and term refinements
     search for public published nodes
     """
+    search = create_node_search(query, terms, page, project_id)
+    return _execute(search)
 
+
+def create_multi_node_search(queries: typing.List[dict]) -> MultiSearch:
+    search = MultiSearch(using=client)
+    for q in queries:
+        search = search.add(create_node_search(**q))
+
+    return search
+
+
+def create_node_search(query: str, terms: dict, page: int, project_id: str='') -> Search:
+    terms = _transform_terms(terms)
     should = [
         Q('match', name=query),
 
@@ -71,52 +94,30 @@ def do_node_search(query: str, terms: dict, page: int, project_id: str='') -> di
         Q('term', media=query),
         Q('term', tags=query),
     ]
-
-    must = []
+    filters = []
     if project_id:
-        must.append({'term': {'project.id': project_id}})
-
+        filters.append({'term': {'project.id': project_id}})
     if not query:
         should = []
-
-    search = nested_bool(must, should, terms, index_alias='NODE')
+    search = nested_bool(filters, should, terms, index_alias='NODE')
     if not query:
         search = search.sort('-created_at')
     add_aggs_to_search(search, NODE_AGG_TERMS)
     search = paginate(search, page)
-
     if log.isEnabledFor(logging.DEBUG):
         log.debug(json.dumps(search.to_dict(), indent=4))
-
-    response = search.execute()
-
-    if log.isEnabledFor(logging.DEBUG):
-        log.debug(json.dumps(response.to_dict(), indent=4))
-
-    return response.to_dict()
+    return search
 
 
 def do_user_search(query: str, terms: dict, page: int) -> dict:
     """ return user objects represented in elasicsearch result dict"""
 
-    must, should = _common_user_search(query)
-    search = nested_bool(must, should, terms, index_alias='USER')
-    add_aggs_to_search(search, USER_AGG_TERMS)
-    search = paginate(search, page)
-
-    if log.isEnabledFor(logging.DEBUG):
-        log.debug(json.dumps(search.to_dict(), indent=4))
-
-    response = search.execute()
-
-    if log.isEnabledFor(logging.DEBUG):
-        log.debug(json.dumps(response.to_dict(), indent=4))
-
-    return response.to_dict()
+    search = create_user_search(query, terms, page)
+    return _execute(search)
 
 
 def _common_user_search(query: str) -> (typing.List[Query], typing.List[Query]):
-    """Construct (must,shoud) for regular + admin user search."""
+    """Construct (filter,should) for regular + admin user search."""
     if not query:
         return [], []
 
@@ -144,8 +145,31 @@ def do_user_search_admin(query: str, terms: dict, page: int) -> dict:
     search all user fields and provide aggregation information
     """
 
-    must, should = _common_user_search(query)
+    search = create_user_admin_search(query, terms, page)
+    return _execute(search)
 
+
+def _execute(search: Search) -> dict:
+    if log.isEnabledFor(logging.DEBUG):
+        log.debug(json.dumps(search.to_dict(), indent=4))
+    resp = search.execute()
+    if log.isEnabledFor(logging.DEBUG):
+        log.debug(json.dumps(resp.to_dict(), indent=4))
+    return resp.to_dict()
+
+
+def _execute_multi(search: typing.List[Search]) -> typing.List[dict]:
+    if log.isEnabledFor(logging.DEBUG):
+        log.debug(json.dumps(search.to_dict(), indent=4))
+    resp = search.execute()
+    if log.isEnabledFor(logging.DEBUG):
+        log.debug(json.dumps(resp.to_dict(), indent=4))
+    return [r.to_dict() for r in resp]
+
+
+def create_user_admin_search(query: str, terms: dict, page: int) -> Search:
+    terms = _transform_terms(terms)
+    filters, should = _common_user_search(query)
     if query:
         # We most likely got and id field. we should find it.
         if len(query) == len('563aca02c379cf0005e8e17d'):
@@ -155,24 +179,32 @@ def do_user_search_admin(query: str, terms: dict, page: int) -> dict:
                     'boost': 100,  # how much more it counts for the score
                 }
             }})
-
-    search = nested_bool(must, should, terms, index_alias='USER')
+    search = nested_bool(filters, should, terms, index_alias='USER')
     add_aggs_to_search(search, USER_AGG_TERMS)
     search = paginate(search, page)
+    return search
 
-    if log.isEnabledFor(logging.DEBUG):
-        log.debug(json.dumps(search.to_dict(), indent=4))
 
-    response = search.execute()
-
-    if log.isEnabledFor(logging.DEBUG):
-        log.debug(json.dumps(response.to_dict(), indent=4))
-
-    return response.to_dict()
+def create_user_search(query: str, terms: dict, page: int) -> Search:
+    search = create_user_admin_search(query, terms, page)
+    return search.source(include=USER_SOURCE_INCLUDE)
 
 
 def paginate(search: Search, page_idx: int) -> Search:
     return search[page_idx * ITEMS_PER_PAGE:(page_idx + 1) * ITEMS_PER_PAGE]
+
+
+def _transform_terms(terms: dict) -> dict:
+    """
+    Ugly hack! Elastic uses 1/0 for boolean values in its aggregate response,
+    but expects true/false in queries.
+    """
+    transformed = terms.copy()
+    for t in BOOLEAN_TERMS:
+        orig = transformed.get(t)
+        if orig in ('1', '0'):
+            transformed[t] = bool(int(orig))
+    return transformed
 
 
 def setup_app(app):

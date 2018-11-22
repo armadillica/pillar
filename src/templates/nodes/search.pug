@@ -17,6 +17,8 @@ include ../mixins/components
 | {% endif %}
 | {% endblock navigation_tabs %}
 
+| {% block navigation_search %}{% endblock navigation_search %}
+
 | {% block page_title %}Search{% if project %} {{ project.name }}{% endif %}{% endblock %}
 
 | {% block head %}
@@ -82,7 +84,7 @@ script.
 
 	.border-left.search-list
 
-		+card-deck(0)(id='hits', class="m-0 px-2 card-deck-vertical")
+		+card-deck()(id='hits', class="m-0 px-2 card-deck-vertical")
 
 	#search-details.border-left.search-details
 		#search-error
@@ -94,7 +96,7 @@ script.
 script(type="text/template", id="facet-template")
 	.card.border-0.p-0.m-2
 		.card-body.p-3.m-0
-			h6.text-muted {{ title }}
+			h6.text-muted.facet-title {{ title }}
 			| {{#values}}
 			a.facet_link.toggleRefine(
 				class='{{#refined}}refined{{/refined}}',
@@ -105,38 +107,6 @@ script(type="text/template", id="facet-template")
 					| {{ label }}
 					small.text-black-50.float-right {{ count }}
 			| {{/values}}
-
-
-// Hit template
-script(type="text/template", id="hit-template")
-	a.card.asset.card-image-fade.pl-0.mx-0.mb-1(
-		data-hit-id='{{ objectID }}',
-		href="/nodes/{{ objectID }}/redir",
-		class="js-search-hit {{#is_free}}free{{/is_free}}")
-		.embed-responsive.embed-responsive-16by9
-			| {{#picture}}
-			.card-img-top.embed-responsive-item(style="background-image: url({{{ picture }}})")
-			| {{/picture}}
-			| {{^picture}}
-			.card-img-top.card-icon.embed-responsive-item
-				| {{#media}}
-				i(class="pi-{{{ media }}}")
-				| {{/media}}
-				| {{^media}}
-				i(class="pi-{{{ node_type }}}")
-				| {{/media}}
-			| {{/picture}}
-		.card-body.py-2.d-flex.flex-column
-			.card-title.mb-1.font-weight-bold
-				| {{ name }}
-
-			ul.card-text.list-unstyled.d-flex.text-black-50.mt-auto
-				li.pr-2.project {{ project.name }}
-				| {{#media}}
-				li.pr-2.text-capitalize {{{ media }}}
-				| {{/media}}
-				li.pr-2 {{{ created_at }}}
-
 
 // Pagination template
 script(type="text/template", id="pagination-template")
@@ -184,7 +154,7 @@ script.
 		loadingBarHide();
 		loadingBarShow();
 
-		displayNode($(this).data('hit-id'));
+		displayNode($(this).data('node-id'));
 		$('.js-search-hit').removeClass('active');
 		$(this).addClass('active');
 	});

@@ -1,4 +1,6 @@
 import logging
+
+import bleach
 from bson import ObjectId
 
 from pillar import current_app
@@ -10,7 +12,7 @@ from pillar.api.search import algolia_indexing
 log = logging.getLogger(__name__)
 
 
-INDEX_ALLOWED_NODE_TYPES = {'asset', 'texture', 'group', 'hdri'}
+INDEX_ALLOWED_NODE_TYPES = {'asset', 'texture', 'group', 'hdri', 'post'}
 
 
 SEARCH_BACKENDS = {
@@ -26,34 +28,6 @@ def _get_node_from_id(node_id: str):
     node = nodes_coll.find_one({'_id': node_oid})
 
     return node
-
-
-def _handle_picture(node: dict, to_index: dict):
-    """Add picture URL in-place to the to-be-indexed node."""
-
-    picture_id = node.get('picture')
-    if not picture_id:
-        return
-
-    files_collection = current_app.data.driver.db['files']
-    lookup = {'_id': ObjectId(picture_id)}
-    picture = files_collection.find_one(lookup)
-
-    for item in picture.get('variations', []):
-        if item['size'] != 't':
-            continue
-
-        # Not all files have a project...
-        pid = picture.get('project')
-        if pid:
-            link = generate_link(picture['backend'],
-                                 item['file_path'],
-                                 str(pid),
-                                 is_public=True)
-        else:
-            link = item['link']
-        to_index['picture'] = link
-        break
 
 
 def prepare_node_data(node_id: str, node: dict=None) -> dict:
@@ -86,24 +60,29 @@ def prepare_node_data(node_id: str, node: dict=None) -> dict:
     users_collection = current_app.data.driver.db['users']
     user = users_collection.find_one({'_id': ObjectId(node['user'])})
 
+    clean_description = bleach.clean(node.get('_description_html') or '', strip=True)
+    if not clean_description and node['node_type'] == 'post':
+        clean_description = bleach.clean(node['properties'].get('_content_html') or '', strip=True)
+
     to_index = {
         'objectID': node['_id'],
         'name': node['name'],
         'project': {
             '_id': project['_id'],
-            'name': project['name']
+            'name': project['name'],
+            'url': project['url'],
         },
         'created': node['_created'],
         'updated': node['_updated'],
         'node_type': node['node_type'],
+        'picture': node.get('picture') or '',
         'user': {
             '_id': user['_id'],
             'full_name': user['full_name']
         },
-        'description': node.get('description'),
+        'description': clean_description or None,
+        'is_free': False
     }
-
-    _handle_picture(node, to_index)
 
     # If the node has world permissions, compute the Free permission
     if 'world' in node.get('permissions', {}):

@@ -2,16 +2,16 @@
 
 | {% set node_type = asset.properties.content_type if asset.properties.content_type else asset.node_type %}
 
-a.card.asset.card-image-fade.pr-0.mx-0.mb-2(
+a.card.asset.card-image-fade.mb-2(
 	class="js-item-open {% if asset.permissions.world and not current_user.has_cap('subscriber') %}free{% endif %}",
 	data-node_id="{{ asset._id }}",
 	title="{{ asset.name }}",
 	href='{{ url_for_node(node=asset) }}')
-	.embed-responsive.embed-responsive-16by9
+	.card-thumbnail
 		| {% if asset.picture %}
-		.card-img-top.embed-responsive-item(style="background-image: url({{ asset.picture.thumbnail('m', api=api) }})")
+		img.card-img-top(src="{{ asset.picture.thumbnail('m', api=api) }}", alt="{{ asset.name }}")
 		| {% else %}
-		.card-img-top.card-icon.embed-responsive-item
+		.card-img-top.card-icon
 			i(class="pi-{{ node_type }}")
 		| {% endif %}
 

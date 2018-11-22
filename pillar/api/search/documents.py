@@ -81,6 +81,7 @@ class Node(es.DocType):
         fields={
             'id': es.Keyword(),
             'name': es.Keyword(),
+            'url': es.Keyword(),
         }
     )
 
@@ -153,18 +154,21 @@ def create_doc_from_node_data(node_to_index: dict) -> typing.Optional[Node]:
     doc.objectID = str(node_to_index['objectID'])
     doc.node_type = node_to_index['node_type']
     doc.name = node_to_index['name']
+    doc.description = node_to_index.get('description')
     doc.user.id = str(node_to_index['user']['_id'])
     doc.user.name = node_to_index['user']['full_name']
     doc.project.id = str(node_to_index['project']['_id'])
     doc.project.name = node_to_index['project']['name']
+    doc.project.url = node_to_index['project']['url']
 
     if node_to_index['node_type'] == 'asset':
         doc.media = node_to_index['media']
 
-    doc.picture = node_to_index.get('picture')
+    doc.picture = str(node_to_index.get('picture'))
 
     doc.tags = node_to_index.get('tags')
     doc.license_notes = node_to_index.get('license_notes')
+    doc.is_free = node_to_index.get('is_free')
 
     doc.created_at = node_to_index['created']
     doc.updated_at = node_to_index['updated']

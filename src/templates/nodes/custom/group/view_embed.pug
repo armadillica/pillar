@@ -23,7 +23,7 @@ include ../../../mixins/components
 				data-placement="top")
 				i.pi-list
 
-		+card-deck(id="asset_list_{{node._id}}",class="px-2")
+		+card-deck(id="asset_list_{{node._id}}",class="pl-4")
 			| {% for child in children %}
 			| {{ asset_list_item(child, current_user) }}
 			| {% endfor %}

@@ -65,18 +65,21 @@ var elasticSearcher = (function() {
       return false;
     }),
 
-    //get response from elastic and rebuild json
-    //so we  can be a drop in of angolia
-    execute: (function(){
-      params = {
+    getParams:(function(){
+      var params = {
         q: deze.query,
         page: deze.page,
         project: deze.project_id,
       };
       //add term filters
       Object.assign(params, deze.terms);
+      return params;
+    }),
 
-      var pstr = jQuery.param( params );
+    //get response from elastic and rebuild json
+    //so we  can be a drop in of angolia
+    execute: (function(){
+      var pstr = jQuery.param( deze.getParams() );
       if (pstr === deze.last_query) return;
 
       $.getJSON("/api/newsearch" + deze.url + "?"+ pstr)
@@ -117,6 +120,7 @@ var elasticSearcher = (function() {
     page: deze.page,
     toggleTerm: deze.toggleTerm,
     isRefined: deze.isRefined,
+    getParams: deze.getParams,
   };
 
 })();
@@ -155,114 +159,3 @@ var elasticSearch = (function($, url) {
 
 }(jQuery));
 
-
-$(document).ready(function() {
-
-  var searchInput = $('#cloud-search');
-  if (!searchInput.length) return;
-
-  var tu = searchInput.typeahead({hint: true}, {
-    //source: algoliaIndex.ttAdapter(),
-    source: elasticSearch($),
-    async: true,
-    displayKey: 'name',
-    limit: 9,  //  Above 10 it stops working from
-               //  some magic reason
-    minLength: 0,
-    templates: {
-      suggestion: function(hit) {
-        var hitFree = (hit.is_free ? '<div class="search-hit-ribbon"><span>free</span></div>' : '');
-        var hitPicture;
-
-        if (hit.picture){
-          hitPicture = '<img src="' + hit.picture + '"/>';
-        } else {
-          hitPicture = '<div class="search-hit-thumbnail-icon">';
-          hitPicture += (hit.media ? '<i class="pi-' + hit.media + '"></i>' : '<i class="dark pi-'+ hit.node_type + '"></i>');
-          hitPicture += '</div>';
-        }
-        var $span = $('<span>').addClass('project').text(hit.project.name);
-        var $searchHitName = $('<div>').addClass('search-hit-name')
-          .attr('title', hit.name)
-          .text(hit.name);
-
-        const $nodeType = $('<span>').addClass('node_type').text(hit.node_type);
-        const hitMedia = (hit.media ? ' · ' + $('<span>').addClass('media').text(hit.media)[0].outerHTML : '');
-
-        return $('<a/>', {
-              href: '/nodes/'+ hit.objectID + '/redir',
-              class: "search-site-result",
-              id: hit.objectID
-           }).append(
-             '<div class="search-hit">' +
-               '<div class="search-hit-thumbnail">' +
-                 hitPicture +
-                 hitFree +
-               '</div>' +
-               $searchHitName.html() +
-               '<div class="search-hit-meta">' +
-                 $span.html() + ' · ' +
-                 $nodeType.html() +
-                 hitMedia +
-               '</div>' +
-             '</div>'
-          )
-      }
-    }
-  });
-
-  $('.search-site-result.advanced, .search-icon').on('click', function(e){
-    e.stopPropagation();
-    e.preventDefault();
-    window.location.href = '/search?q='+ $("#cloud-search").val() + '&page=1';
-  });
-
-
-  searchInput.bind('typeahead:select', function(ev, hit) {
-    $('.search-icon').removeClass('pi-search').addClass('pi-spin spin');
-
-    window.location.href = '/nodes/'+ hit.objectID + '/redir';
-  });
-
-  searchInput.bind('typeahead:active', function() {
-    $('#search-overlay').addClass('active');
-    $('.page-body').addClass('blur');
-  });
-
-  searchInput.bind('typeahead:close', function() {
-    $('#search-overlay').removeClass('active');
-    $('.page-body').removeClass('blur');
-  });
-
-  searchInput.keyup(function(e) {
-    if ( $('.tt-dataset').is(':empty') ){
-      if(e.keyCode == 13){
-        window.location.href = '/search#q='+ $("#cloud-search").val() + '&page=1';
-      }
-    }
-  });
-
-  searchInput.bind('typeahead:render', function(event, suggestions, async, dataset) {
-    if( suggestions != undefined && $('.tt-all-results').length <= 0){
-      $('.tt-dataset').append(
-        $("<a/>", {
-           id: "search-advanced",
-           href: '/search?q='+ $("#cloud-search").val() + '&page=1',
-           class: "search-site-result advanced tt-suggestion",
-        }).append(
-          '<div class="search-hit">' +
-            '<div class="search-hit-thumbnail">' +
-              '<div class="search-hit-thumbnail-icon">' +
-                '<i class="pi-search"></i>' +
-              '</div>' +
-            '</div>' +
-            '<div class="search-hit-name">' +
-              'Use Advanced Search' +
-            '</div>' +
-          '</div>'
-        )
-      );
-    }
-  });
-
-});
