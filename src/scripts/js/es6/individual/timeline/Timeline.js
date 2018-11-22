@@ -163,7 +163,7 @@ class GroupBuilder {
         if (secondaryNodes) {
             content.push(
                 $('<div>')
-                    .addClass('card-deck card-padless card-deck-responsive js-asset-list border-bottom p-3 pb-5 mb-5')
+                    .addClass('card-deck card-padless card-deck-responsive js-asset-list p-3 pb-5 mb-5')
                     .append(pillar.templates.Nodes.createListOf$nodeItems(secondaryNodes))
             );
         }
@@ -171,19 +171,18 @@ class GroupBuilder {
     }
 
     _create$Label(level, label, url) {
-        let type = level == 0 ? 'h6 float-right py-2' : 'h6 py-2 group-title'
+        let type = level == 0 ? 'h6 float-right py-2 group-date' : 'h6 py-2 group-title'
         if (url) {
             return $('<div>')
                 .addClass(type + ' sticky-top')
                 .append(
                     $('<a>')
-                        .addClass('text-muted font-weight-bold')
                         .attr('href', url)
                         .text(label)
             );
         }
         return $('<div>')
-            .addClass(type + ' text-secondary sticky-top')
+            .addClass(type + ' sticky-top')
             .text(label);
     }
  }

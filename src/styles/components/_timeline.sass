@@ -3,8 +3,16 @@
         opacity: 0
         animation: fade-in 500ms forwards
 
+    .group-date
+        color: rgba($color-text, .4)
+
     .group-title
-        background-color: $white
+        @extend .border-bottom
+        @extend .bg-white
+        @extend .text-uppercase
+        @extend .font-weight-bold
+        a
+            color: $color-text
 
 body.homepage
     .timeline

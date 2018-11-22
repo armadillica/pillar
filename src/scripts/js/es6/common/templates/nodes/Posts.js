@@ -4,7 +4,7 @@ export class Posts extends NodesBase {
     static create$item(post) {
         let content = [];
         let $title = $('<div>')
-            .addClass('h2 text-uppercase font-weight-bold mt-4 mb-3')
+            .addClass('h1 text-uppercase mt-4 mb-3')
             .text(post.name);
         content.push($title);
         let $post = $('<div>')
@@ -12,7 +12,7 @@ export class Posts extends NodesBase {
                 .append(
                     content,
                     $('<div>')
-                        .addClass('node-details-description mx-auto')
+                        .addClass('node-details-description')
                         .html(post['properties']['pretty_content'])
                 );
 
