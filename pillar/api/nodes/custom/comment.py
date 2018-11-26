@@ -6,6 +6,7 @@ from flask import current_app
 import werkzeug.exceptions as wz_exceptions
 
 from pillar.api.utils import authorization, authentication, jsonify
+from pillar.api.utils.rating import confidence
 
 from . import register_patch_handler
 
@@ -24,6 +25,13 @@ def patch_comment(node_id, patch):
     else:
         assert patch['op'] == 'edit', 'Invalid patch operation %s' % patch['op']
         result, node = edit_comment(user_id, node_id, patch)
+
+    # Calculate and update confidence.
+    rating_confidence = confidence(
+        node['properties']['rating_positive'], node['properties']['rating_negative'])
+    current_app.data.driver.db['nodes'].update_one(
+        {'_id': node_id},
+        {'$set': {'properties.confidence': rating_confidence}})
 
     return jsonify({'_status': 'OK',
                     'result': result,

@@ -179,6 +179,14 @@ class VoteCommentTest(AbstractPatchCommentTest):
         ], patched_node['properties'].get('ratings', []))
 
 
+class CommentsSortingTest(AbstractPatchCommentTest):
+    def default_sorting(self):
+        pass
+
+    def sorting_with_confidence(self):
+        pass
+
+
 class EditCommentTest(AbstractPatchCommentTest):
     def test_comment_edit_happy(self, token='owner-token'):
         pre_node = self.get(self.node_url, auth_token=token).get_json()
