@@ -147,19 +147,14 @@ def comments_for_node(node_id):
 def render_comments_for_node(node_id: str, *, can_post_comments: bool):
     """Render the list of comments for a node.
 
-    Comments are first sorted by confidence, see:
-    https://redditblog.com/2009/10/15/reddits-new-comment-sorting-system/
-    and then by creation date.
+    Comments are first sorted by rating_positive and then by creation date.
     """
-
-    # TODO(fsiddi) Implement confidence calculation on node rating in Pillar core.
-    # Currently this feature is being developed in the Dillo extension.
     api = system_util.pillar_api()
 
     # Query for all children, i.e. comments on the node.
     comments = Node.all({
         'where': {'node_type': 'comment', 'parent': node_id},
-        'sort': [('properties.confidence', -1), ('_created', -1)],
+        'sort': [('properties.rating_positive', -1), ('_created', -1)],
     }, api=api)
 
     def enrich(some_comment):
@@ -180,7 +175,7 @@ def render_comments_for_node(node_id: str, *, can_post_comments: bool):
         # Query for all grandchildren, i.e. replies to comments on the node.
         comment['_replies'] = Node.all({
             'where': {'node_type': 'comment', 'parent': comment['_id']},
-            'sort': [('properties.confidence', -1), ('_created', -1)],
+            'sort': [('properties.rating_positive', -1), ('_created', -1)],
         }, api=api)
 
         enrich(comment)
