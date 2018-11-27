@@ -44,7 +44,13 @@ export class MultiSearch {
 
     thenExecute() {
         let data = JSON.stringify(this.getAllParams());
-        let rawAjax = $.getJSON(this.apiUrl, data);
+        let rawAjax = $.ajax({
+            url: this.apiUrl,
+            type: 'POST',
+            data: data,
+            dataType: 'json',
+            contentType: 'application/json; charset=UTF-8'
+        });
         let prettyPromise = rawAjax.then(this.parseResult.bind(this));
         prettyPromise['abort'] = rawAjax.abort.bind(rawAjax); // Hack to be able to abort the promise down the road
         return prettyPromise;

@@ -49,13 +49,12 @@ def search_nodes():
     result = queries.do_node_search(searchword, terms, page_idx, project_id)
     return jsonify(result)
 
-@blueprint_search.route('/multisearch', methods=['GET'])
+@blueprint_search.route('/multisearch', methods=['POST'])
 def multi_search_nodes():
-    import json
     if len(request.args) != 1:
         log.info(f'Expected 1 argument, received {len(request.args)}')
 
-    json_obj = json.loads([a for a in request.args][0])
+    json_obj = request.json
     q = []
     for row in json_obj:
         q.append({
