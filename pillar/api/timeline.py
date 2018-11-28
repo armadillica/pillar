@@ -46,6 +46,7 @@ class SearchHelper:
                 created = {'_created': {'$gt': continue_from}}
         return {'_deleted': {'$ne': True},
                 'node_type': {'$in': ['asset', 'post']},
+                'properties.status': {'$eq': 'published'},
                 'project': {'$in': self._project_ids},
                 **created,
                 }
