@@ -48,7 +48,10 @@ def find_for_comment(project, node):
             continue
 
         try:
-            parent = Node.find(parent.parent, api=api)
+            parent = Node.find_one({'where': {
+                '_id': parent.parent,
+                '_deleted': {'$ne': True}
+            }}, api=api)
         except ResourceNotFound:
             log.warning(
                 'url_for_node(node_id=%r): Unable to find parent node %r',
