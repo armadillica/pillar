@@ -412,9 +412,9 @@ class DeleteProjectlessFilesTest(AbstractPillarTest):
         assert project1_id != project2_id
 
         # Project exists and is not soft-deleted:
-        file1_id, _ = self.ensure_file_exists()
+        file1_id, file1_doc = self.ensure_file_exists()
         # Project exists but is soft-deleted:
-        file2_id, _ = self.ensure_file_exists(file_overrides={
+        file2_id, file2_doc = self.ensure_file_exists(file_overrides={
             '_id': ObjectId(),
             'project': project2_id,
         })
@@ -442,3 +442,20 @@ class DeleteProjectlessFilesTest(AbstractPillarTest):
             self.assertIn('_deleted', found3, found3)
             self.assertTrue(found2['_deleted'], found2)
             self.assertTrue(found3['_deleted'], found3)
+
+            self.assertLess(file2_doc['_updated'], found2['_updated'])
+            self.assertLess(file3_doc['_updated'], found3['_updated'])
+
+            self.assertNotEqual(file2_doc['_etag'], found2['_etag'])
+            self.assertNotEqual(file3_doc['_etag'], found3['_etag'])
+
+            # Delete the keys that should be changed so we can compare the rest.
+            for key in {'_updated', '_etag', '_deleted'}:
+                file2_doc.pop(key, ...)
+                file3_doc.pop(key, ...)
+                found2.pop(key, ...)
+                found3.pop(key, ...)
+
+            self.assertEqual(file1_doc, found1)
+            self.assertEqual(file3_doc, found3)
+            self.assertEqual(file3_doc, found3)
