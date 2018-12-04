@@ -195,7 +195,7 @@ BLENDER_CLOUD_ADDON_VERSION = '1.4'
 TLS_CERT_FILE = requests.certs.where()
 
 CELERY_BACKEND = 'redis://redis/1'
-CELERY_BROKER = 'amqp://guest:guest@rabbit//'
+CELERY_BROKER = 'redis://redis/2'
 
 # This configures the Celery task scheduler in such a way that we don't
 # have to import the pillar.celery.XXX modules. Remember to run
