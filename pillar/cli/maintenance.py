@@ -1064,6 +1064,7 @@ def find_video_files_without_duration():
     with output_fpath.open('w', encoding='ascii') as outfile:
         outfile.write('\n'.join(sorted(file_ids)))
 
+
 @manager_maintenance.command
 def find_video_nodes_without_duration():
     """Finds video nodes without any duration
@@ -1142,7 +1143,8 @@ def reconcile_node_video_duration(nodes_to_update=None, all_nodes=False, go=Fals
             {'$unwind': '$_files.variations'},
             {'$match': {'_files.variations.duration': {'$gt': 0}}},
             {'$addFields': {
-                'need_update': {'$ne': ['$_files.variations.duration', '$properties.duration_seconds']}
+                'need_update': {
+                    '$ne': ['$_files.variations.duration', '$properties.duration_seconds']}
             }},
             {'$match': {'need_update': True}},
             {'$project': {

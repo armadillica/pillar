@@ -316,7 +316,8 @@ class ReconcileNodeDurationTest(AbstractPillarTest):
             with mock.patch('pillar.api.utils.utcnow') as mock_utcnow:
                 mock_utcnow.return_value = self.fake_now
 
-                to_reconcile = [str(self.node_id0), str(self.node_id1), str(self.node_id2), str(self.node_id5)]
+                to_reconcile = [str(self.node_id0), str(self.node_id1), str(self.node_id2),
+                                str(self.node_id5)]
                 reconcile_node_video_duration(nodes_to_update=to_reconcile, go=False)  # Dry run
                 self.assertAllUnchanged()
 
