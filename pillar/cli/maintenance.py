@@ -12,6 +12,8 @@ from flask_script import Manager
 import pymongo
 
 from pillar import current_app
+import pillar.api.utils
+
 
 # Collections to skip when finding file references (during orphan file detection).
 # This collection can be added to from PillarExtension.setup_app().
@@ -1175,3 +1177,60 @@ def reconcile_node_video_duration(nodes_to_update=None, all_nodes=False, go=Fals
     duration = end_timestamp - start_timestamp
     log.info('Operation took %s', duration)
     return 0
+
+
+@manager_maintenance.option('-g', '--go', dest='go', action='store_true', default=False,
+                            help='Actually perform the changes (otherwise just show as dry-run).')
+def delete_projectless_files(go=False):
+    """Soft-deletes files of projects that have been deleted."""
+
+    start_timestamp = datetime.datetime.now()
+
+    files_coll = current_app.db('files')
+    aggr = files_coll.aggregate([
+        {'$match': {'_deleted': {'$ne': True}}},
+        {'$lookup': {
+            'from': 'projects',
+            'localField': 'project',
+            'foreignField': '_id',
+            'as': '_project'
+        }},
+        {'$match': {'$or': [
+            {'_project': []},
+            {'_project._deleted': True},
+        ]}},
+        {'$project': {'_id': True}},
+    ])
+
+    files_to_delete: typing.List[ObjectId] = [doc['_id'] for doc in aggr]
+    orphan_count = len(files_to_delete)
+    log.info('Total number of files to soft-delete: %d', orphan_count)
+
+    total_count = files_coll.count_documents({'_deleted': {'$ne': True}})
+    log.info('Total nr of orphan files: %d', orphan_count)
+    log.info('Total nr of files       : %d', total_count)
+    log.info('Orphan percentage       : %d%%', 100 * orphan_count / total_count)
+
+    if go:
+        log.info('Soft-deleting all %d projectless files', orphan_count)
+        now = pillar.api.utils.utcnow()
+        etag = pillar.api.utils.random_etag()
+        result = files_coll.update_many(
+            {'_id': {'$in': files_to_delete}},
+            {'$set': {
+                '_deleted': True,
+                '_updated': now,
+                '_etag': etag,
+            }},
+        )
+        log.info('Matched count:  %d', result.matched_count)
+        log.info('Modified count: %d', result.modified_count)
+
+    end_timestamp = datetime.datetime.now()
+    duration = end_timestamp - start_timestamp
+
+    if go:
+        verb = 'Soft-deleting'
+    else:
+        verb = 'Finding'
+    log.info('%s orphans took %s', verb, duration)

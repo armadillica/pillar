@@ -399,3 +399,45 @@ class ReconcileNodeDurationTest(AbstractPillarTest):
         return self.create_node({
             'properties': props,
             **node})
+
+
+class DeleteProjectlessFilesTest(AbstractPillarTest):
+    def test_delete_projectless_files(self):
+        project1_id, _ = self.ensure_project_exists()
+        project2_id, _ = self.ensure_project_exists(project_overrides={
+            '_id': ObjectId(),
+            '_deleted': True,
+        })
+        assert project1_id != project2_id
+
+        # Project exists and is not soft-deleted:
+        file1_id, _ = self.ensure_file_exists()
+        # Project exists but is soft-deleted:
+        file2_id, _ = self.ensure_file_exists(file_overrides={
+            '_id': ObjectId(),
+            'project': project2_id,
+        })
+        # Project does not exist:
+        file3_id, file3_doc = self.ensure_file_exists(file_overrides={
+            '_id': ObjectId(),
+            'project': ObjectId(),
+        })
+        with self.app.app_context():
+            self.app.db('projects').delete_one({'_id': file3_doc['project']})
+
+        assert len({file1_id, file2_id, file3_id}) == 3
+
+        from pillar.cli.maintenance import delete_projectless_files
+
+        with self.app.app_context():
+            delete_projectless_files(go=True)
+
+            files_doc = self.app.db('files')
+            found1 = files_doc.find_one(file1_id)
+            found2 = files_doc.find_one(file2_id)
+            found3 = files_doc.find_one(file3_id)
+            self.assertNotIn('_deleted', found1, found1)
+            self.assertIn('_deleted', found2, found2)
+            self.assertIn('_deleted', found3, found3)
+            self.assertTrue(found2['_deleted'], found2)
+            self.assertTrue(found3['_deleted'], found3)
