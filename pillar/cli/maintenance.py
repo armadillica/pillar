@@ -1,7 +1,9 @@
+import collections
 import copy
 import datetime
+import json
 import logging
-from pathlib import PurePosixPath
+from pathlib import PurePosixPath, Path
 import re
 import typing
 
@@ -13,7 +15,6 @@ import pymongo
 
 from pillar import current_app
 import pillar.api.utils
-
 
 # Collections to skip when finding file references (during orphan file detection).
 # This collection can be added to from PillarExtension.setup_app().
@@ -884,14 +885,38 @@ def _db_projects(proj_url: str, all_projects: bool, project_id='', *, go: bool) 
     log.info('Command took %s', duration)
 
 
+def find_object_ids(something: typing.Any) -> typing.Iterable[bson.ObjectId]:
+    """Generator, yields all ObjectIDs referenced by the given object.
+
+    Assumes 'something' comes from a MongoDB. This function wasn't made for
+    generic Python objects.
+    """
+    if isinstance(something, bson.ObjectId):
+        yield something
+    elif isinstance(something, str) and len(something) == 24:
+        try:
+            yield bson.ObjectId(something)
+        except (bson.objectid.InvalidId, TypeError):
+            # It apparently wasn't an ObjectID after all.
+            pass
+    elif isinstance(something, (list, set, tuple)):
+        for item in something:
+            yield from find_object_ids(item)
+    elif isinstance(something, dict):
+        for item in something.keys():
+            yield from find_object_ids(item)
+        for item in something.values():
+            yield from find_object_ids(item)
+
+
 def _find_orphan_files() -> typing.Set[bson.ObjectId]:
-    """Finds all non-referenced files for the given project.
+    """Finds all non-referenced files.
 
     Returns an iterable of all orphan file IDs.
     """
     log.debug('Finding orphan files')
 
-    # Get all file IDs that belong to this project.
+    # Get all file IDs and make a set; we'll remove any referenced object ID later.
     files_coll = current_app.db('files')
     cursor = files_coll.find({'_deleted': {'$ne': True}}, projection={'_id': 1})
     file_ids = {doc['_id'] for doc in cursor}
@@ -901,22 +926,6 @@ def _find_orphan_files() -> typing.Set[bson.ObjectId]:
 
     total_file_count = len(file_ids)
     log.debug('Found %d files in total', total_file_count)
-
-    def find_object_ids(something: typing.Any) -> typing.Iterable[bson.ObjectId]:
-        if isinstance(something, bson.ObjectId):
-            yield something
-        elif isinstance(something, str) and len(something) == 24:
-            try:
-                yield bson.ObjectId(something)
-            except (bson.objectid.InvalidId, TypeError):
-                # It apparently wasn't an ObjectID after all.
-                pass
-        elif isinstance(something, (list, set, tuple)):
-            for item in something:
-                yield from find_object_ids(item)
-        elif isinstance(something, dict):
-            for item in something.values():
-                yield from find_object_ids(item)
 
     # Find all references by iterating through the project itself and every document that has a
     # 'project' key set to this ObjectId.
@@ -947,7 +956,6 @@ def find_orphan_files():
     This is a heavy operation that inspects *everything* in MongoDB. Use with care.
     """
     from jinja2.filters import do_filesizeformat
-    from pathlib import Path
 
     output_fpath = Path(current_app.config['STORAGE_DIR']) / 'orphan-files.txt'
     if output_fpath.exists():
@@ -993,7 +1001,6 @@ def delete_orphan_files():
     Use 'find_orphan_files' first to generate orphan-files.txt.
     """
     import pymongo.results
-    from pathlib import Path
 
     output_fpath = Path(current_app.config['STORAGE_DIR']) / 'orphan-files.txt'
     with output_fpath.open('r', encoding='ascii') as infile:
@@ -1032,7 +1039,6 @@ def find_video_files_without_duration():
 
     This is a heavy operation. Use with care.
     """
-    from pathlib import Path
 
     output_fpath = Path(current_app.config['STORAGE_DIR']) / 'video_files_without_duration.txt'
     if output_fpath.exists():
@@ -1071,7 +1077,6 @@ def find_video_nodes_without_duration():
 
     This is a heavy operation. Use with care.
     """
-    from pathlib import Path
 
     output_fpath = Path(current_app.config['STORAGE_DIR']) / 'video_nodes_without_duration.txt'
     if output_fpath.exists():
@@ -1184,7 +1189,11 @@ def reconcile_node_video_duration(nodes_to_update=None, all_nodes=False, go=Fals
 @manager_maintenance.option('-g', '--go', dest='go', action='store_true', default=False,
                             help='Actually perform the changes (otherwise just show as dry-run).')
 def delete_projectless_files(go=False):
-    """Soft-deletes files of projects that have been deleted."""
+    """Soft-deletes file documents of projects that have been deleted.
+
+    WARNING: this also soft-deletes file documents that do not have a project
+    property at all.
+    """
 
     start_timestamp = datetime.datetime.now()
 
@@ -1236,3 +1245,132 @@ def delete_projectless_files(go=False):
     else:
         verb = 'Finding'
     log.info('%s orphans took %s', verb, duration)
+
+
+@manager_maintenance.command
+def find_projects_for_files():
+    """For file documents without project, tries to find in which project files are used.
+
+    This is a heavy operation that inspects *everything* in MongoDB. Use with care.
+    """
+
+    output_fpath = Path(current_app.config['STORAGE_DIR']) / 'files-without-project.json'
+    if output_fpath.exists():
+        log.error('Output filename %s already exists, remove it first.', output_fpath)
+        return 1
+
+    start_timestamp = datetime.datetime.now()
+
+    log.info('Finding files to fix...')
+    files_coll = current_app.db('files')
+    query = {'project': {'$exists': False},
+             '_deleted': {'$ne': True}}
+
+    files_to_fix = {file_doc['_id']: None for file_doc in files_coll.find(query)}
+    if not files_to_fix:
+        log.info('No files without projects found, congratulations.')
+        return 0
+
+    # Find all references by iterating through every node and project, and
+    # hoping that they reference the file.
+    projects_coll = current_app.db('projects')
+    existing_projects: typing.MutableSet[ObjectId] = set()
+    for doc in projects_coll.find():
+        project_id = doc['_id']
+        existing_projects.add(project_id)
+
+        for obj_id in find_object_ids(doc):
+            if obj_id not in files_to_fix:
+                continue
+
+            files_to_fix[obj_id] = project_id
+
+    nodes_coll = current_app.db('nodes')
+    for doc in nodes_coll.find():
+        project_id = doc.get('project')
+        if not project_id:
+            log.warning('Skipping node %s, as it is not part of any project', doc['_id'])
+            continue
+        if project_id not in existing_projects:
+            log.warning('Skipping node %s, as its project %s does not exist',
+                        doc['_id'], project_id)
+            continue
+
+        for obj_id in find_object_ids(doc):
+            if obj_id not in files_to_fix:
+                continue
+
+            files_to_fix[obj_id] = project_id
+
+    orphans = {oid for oid, project_id in files_to_fix.items()
+               if project_id is None}
+    fixable = {str(oid): str(project_id)
+               for oid, project_id in files_to_fix.items()
+               if project_id is not None}
+
+    log.info('Total nr of orphan files : %d', len(orphans))
+    log.info('Total nr of fixable files: %d', len(fixable))
+
+    projects = set(fixable.values())
+    log.info('Fixable project count    : %d', len(projects))
+    for project_id in projects:
+        project = projects_coll.find_one(ObjectId(project_id))
+        log.info('    - %40s /p/%-20s  created on %s, ',
+                 project['name'], project['url'], project['_created'])
+
+    end_timestamp = datetime.datetime.now()
+    duration = end_timestamp - start_timestamp
+    log.info('Finding projects took %s', duration)
+
+    log.info('Writing {file_id: project_id} mapping to %s', output_fpath)
+    with output_fpath.open('w', encoding='ascii') as outfile:
+        json.dump(fixable, outfile, indent=4, sort_keys=True)
+
+
+@manager_maintenance.option('filepath', type=Path,
+                            help='JSON file produced by find_projects_for_files')
+@manager_maintenance.option('-g', '--go', dest='go', action='store_true', default=False,
+                            help='Actually perform the changes (otherwise just show as dry-run).')
+def fix_projects_for_files(filepath: Path, go=False):
+    """Assigns file documents to projects.
+
+    Use 'manage.py maintenance find_projects_for_files` to produce the JSON
+    file that contains the file ID to project ID mapping.
+    """
+
+    log.info('Loading %s', filepath)
+    with filepath.open('r', encoding='ascii') as infile:
+        mapping: typing.Mapping[str, str] = json.load(infile)
+
+    # Group IDs per project for more efficient querying.
+    log.info('Grouping per project')
+    project_to_file_ids: typing.Mapping[ObjectId, typing.List[ObjectId]] = \
+        collections.defaultdict(list)
+    for file_id, project_id in mapping.items():
+        project_to_file_ids[ObjectId(project_id)].append(ObjectId(file_id))
+
+    MockUpdateResult = collections.namedtuple('MockUpdateResult', 'matched_count modified_count')
+
+    files_coll = current_app.db('files')
+    total_matched = total_modified = 0
+    for project_oid, file_oids in project_to_file_ids.items():
+        query = {'_id': {'$in': file_oids}}
+
+        if go:
+            result = files_coll.update_many(query, {'$set': {'project': project_oid}})
+        else:
+            found = files_coll.count_documents(query)
+            result = MockUpdateResult(found, 0)
+
+        total_matched += result.matched_count
+        total_modified += result.modified_count
+
+        if result.matched_count != len(file_oids):
+            log.warning('Matched only %d of %d files; modified %d; for project %s',
+                        result.matched_count, len(file_oids), result.modified_count, project_oid)
+        else:
+            log.info('Matched all %d files; modified %d; for project %s',
+                     result.matched_count, result.modified_count, project_oid)
+
+    log.info('Done updating %d files (found %d, modified %d) on %d projects',
+             len(mapping), total_matched, total_modified, len(project_to_file_ids))
