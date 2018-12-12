@@ -42,7 +42,9 @@
 			a(href="{{ node.short_link }}") {{ node.short_link }}
 		| {% endif %}
 
-	#comments-embed
+	comments-tree#comments-embed(
+		parent-id="{{ node._id }}"
+	)
 
 include ../_scripts
 

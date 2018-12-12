@@ -1,3 +1,5 @@
+from pillar.api.node_types import attachments_embedded_schema
+
 node_type_comment = {
     'name': 'comment',
     'description': 'Comments for asset nodes, pages, etc.',
@@ -51,7 +53,8 @@ node_type_comment = {
             }
         },
         'confidence': {'type': 'float'},
-        'is_reply': {'type': 'boolean'}
+        'is_reply': {'type': 'boolean'},
+        'attachments': attachments_embedded_schema,
     },
     'form_schema': {},
     'parent': ['asset', 'comment'],

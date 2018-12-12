@@ -5,7 +5,7 @@ import logging
 from flask import current_app
 import werkzeug.exceptions as wz_exceptions
 
-from pillar.api.utils import authorization, authentication, jsonify
+from pillar.api.utils import authorization, authentication, jsonify, remove_private_keys
 
 from . import register_patch_handler
 
@@ -135,10 +135,7 @@ def edit_comment(user_id, node_id, patch):
     # we can pass this stuff to Eve's patch_internal; that way the validation &
     # authorisation system has enough info to work.
     nodes_coll = current_app.data.driver.db['nodes']
-    projection = {'user': 1,
-                  'project': 1,
-                  'node_type': 1}
-    node = nodes_coll.find_one(node_id, projection=projection)
+    node = nodes_coll.find_one(node_id)
     if node is None:
         log.warning('User %s wanted to patch non-existing node %s' % (user_id, node_id))
         raise wz_exceptions.NotFound('Node %s not found' % node_id)
@@ -146,14 +143,14 @@ def edit_comment(user_id, node_id, patch):
     if node['user'] != user_id and not authorization.user_has_role('admin'):
         raise wz_exceptions.Forbidden('You can only edit your own comments.')
 
-    # Use Eve to PATCH this node, as that also updates the etag.
-    r, _, _, status = current_app.patch_internal('nodes',
-                                                 {'properties.content': patch['content'],
-                                                  'project': node['project'],
-                                                  'user': node['user'],
-                                                  'node_type': node['node_type']},
-                                                 concurrency_check=False,
-                                                 _id=node_id)
+    node = remove_private_keys(node)
+    node['properties']['content'] = patch['content']
+    node['properties']['attachments'] = patch.get('attachments', {})
+    # Use Eve to PUT this node, as that also updates the etag and we want to replace attachments.
+    r, _, _, status = current_app.put_internal('nodes',
+                                               node,
+                                               concurrency_check=False,
+                                               _id=node_id)
     if status != 200:
         log.error('Error %i editing comment %s for user %s: %s',
                   status, node_id, user_id, r)

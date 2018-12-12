@@ -1,4 +1,5 @@
-import { thenLoadImage, prettyDate } from '../utils';
+import { prettyDate } from '../../utils/prettydate';
+import { thenLoadImage } from '../utils';
 import { ComponentCreatorInterface } from '../component/ComponentCreatorInterface'
 
 export class NodesBase extends ComponentCreatorInterface {

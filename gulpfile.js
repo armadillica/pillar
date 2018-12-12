@@ -40,7 +40,8 @@ let destination = {
 let source = {
     bootstrap: 'node_modules/bootstrap/',
     jquery: 'node_modules/jquery/',
-    popper: 'node_modules/popper.js/'
+    popper: 'node_modules/popper.js/',
+    vue: 'node_modules/vue/',
 }
 
 /* Stylesheets */
@@ -135,6 +136,7 @@ gulp.task('scripts_concat_tutti', function(done) {
 
     let toUglify = [
         source.jquery    + 'dist/jquery.min.js',
+        source.vue       + 'dist/vue.min.js',
         source.popper    + 'dist/umd/popper.min.js',
         source.bootstrap + 'js/dist/index.js',
         source.bootstrap + 'js/dist/util.js',

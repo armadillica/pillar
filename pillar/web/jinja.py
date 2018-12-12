@@ -14,6 +14,7 @@ import werkzeug.exceptions as wz_exceptions
 import pillarsdk
 
 import pillar.api.utils
+from pillar import auth
 from pillar.api.utils import pretty_duration
 from pillar.web.utils import pretty_date
 from pillar.web.nodes.routes import url_for_node
@@ -206,9 +207,24 @@ def do_yesno(value, arg=None):
     return no
 
 
+def user_to_dict(user: auth.UserClass) -> dict:
+    return dict(
+        user_id=str(user.user_id),
+        username=user.username,
+        full_name=user.full_name,
+        gravatar=user.gravatar,
+        email=user.email,
+        capabilities=list(user.capabilities),
+        badges_html=user.badges_html,
+        is_authenticated=user.is_authenticated
+    )
+
+
 def do_json(some_object) -> str:
     if isinstance(some_object, pillarsdk.Resource):
         some_object = some_object.to_dict()
+    if isinstance(some_object, auth.UserClass):
+        some_object = user_to_dict(some_object)
     return json.dumps(some_object)
 
 

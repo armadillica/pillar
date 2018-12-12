@@ -4,6 +4,7 @@ import logging
 from datetime import datetime
 
 import pillarsdk
+from pillar import shortcodes
 from pillarsdk import Node
 from pillarsdk import Project
 from pillarsdk.exceptions import ResourceNotFound
@@ -487,11 +488,14 @@ def preview_markdown():
     current_app.csrf.protect()
 
     try:
-        content = request.form['content']
+        content = request.json['content']
     except KeyError:
         return jsonify({'_status': 'ERR',
                         'message': 'The field "content" was not specified.'}), 400
-    return jsonify(content=markdown(content))
+    html = markdown(content)
+    attachmentsdict = request.json.get('attachments', {})
+    html = shortcodes.render_commented(html, context={'attachments': attachmentsdict})
+    return jsonify(content=html)
 
 
 def ensure_lists_exist_as_empty(node_doc, node_type):
@@ -605,4 +609,4 @@ def url_for_node(node_id=None, node=None):
 
 
 # Import of custom modules (using the same nodes decorator)
-from .custom import comments, groups, storage, posts
+from .custom import groups, storage, posts

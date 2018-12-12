@@ -1,4 +1,4 @@
-import { prettyDate } from '../utils'
+import { prettyDate } from '../init'
 
 describe('prettydate', () => {
     beforeEach(() => {
@@ -28,7 +28,7 @@ describe('prettydate', () => {
         expect(pd({minutes: -5, detailed: true})).toBe('5m ago')
         expect(pd({days: -7, detailed: true})).toBe('last Tuesday at 11:46')
         expect(pd({days: -8, detailed: true})).toBe('1 week ago at 11:46')
-        // summer time bellow
+        // summer time below
         expect(pd({days: -14, detailed: true})).toBe('2 weeks ago at 10:46')
         expect(pd({days: -31, detailed: true})).toBe('8 Oct at 10:46')
         expect(pd({days: -(31 + 366), detailed: true})).toBe('8 Oct 2015 at 10:46')

@@ -6,14 +6,14 @@ import pymongo.errors
 import werkzeug.exceptions as wz_exceptions
 from flask import current_app, Blueprint, request
 
-from pillar.api.nodes import eve_hooks
+from pillar.api.nodes import eve_hooks, comments
 from pillar.api.utils import str2id, jsonify
 from pillar.api.utils.authorization import check_permissions, require_login
 from pillar.web.utils import pretty_date
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('nodes_api', __name__)
-ROLES_FOR_SHARING = {'subscriber', 'demo'}
+ROLES_FOR_SHARING = ROLES_FOR_COMMENTING ={'subscriber', 'demo'}
 
 
 @blueprint.route('/<node_id>/share', methods=['GET', 'POST'])
@@ -49,6 +49,41 @@ def share_node(node_id):
             return '', 204
 
     return jsonify(eve_hooks.short_link_info(short_code), status=status)
+
+
+@blueprint.route('/<string(length=24):node_path>/comments', methods=['GET'])
+def get_node_comments(node_path: str):
+    node_id = str2id(node_path)
+    return comments.get_node_comments(node_id)
+
+
+@blueprint.route('/<string(length=24):node_path>/comments', methods=['POST'])
+@require_login(require_roles=ROLES_FOR_COMMENTING)
+def post_node_comment(node_path: str):
+    node_id = str2id(node_path)
+    msg = request.json['msg']
+    attachments = request.json.get('attachments', {})
+    return comments.post_node_comment(node_id, msg, attachments)
+
+
+@blueprint.route('/<string(length=24):node_path>/comments/<string(length=24):comment_path>', methods=['PATCH'])
+@require_login(require_roles=ROLES_FOR_COMMENTING)
+def patch_node_comment(node_path: str, comment_path: str):
+    node_id = str2id(node_path)
+    comment_id = str2id(comment_path)
+    msg = request.json['msg']
+    attachments = request.json.get('attachments', {})
+    return comments.patch_node_comment(node_id, comment_id, msg, attachments)
+
+
+@blueprint.route('/<string(length=24):node_path>/comments/<string(length=24):comment_path>/vote', methods=['POST'])
+@require_login(require_roles=ROLES_FOR_COMMENTING)
+def post_node_comment_vote(node_path: str, comment_path: str):
+    node_id = str2id(node_path)
+    comment_id = str2id(comment_path)
+    vote_str = request.json['vote']
+    vote = int(vote_str)
+    return comments.post_node_comment_vote(node_id, comment_id, vote)
 
 
 @blueprint.route('/tagged/')

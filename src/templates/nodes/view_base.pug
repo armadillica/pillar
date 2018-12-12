@@ -122,9 +122,9 @@ section.node-details-meta.pl-4.pr-2.py-2.border-bottom
 	.row
 		| {% block node_comments %}
 		.col-md-8.col-sm-12
-			#comments-embed.p-2
-				.comments-list-loading
-					i.pi-spin
+			comments-tree#comments-embed(
+				parent-id="{{ node._id }}"
+			)
 		| {% endblock node_comments %}
 
 		| {# Check if tags is defined and there is _actually_ a tag at least #}

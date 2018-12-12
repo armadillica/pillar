@@ -56,8 +56,7 @@ script(type="text/javascript").
 		}
 
 		if (ProjectUtils.nodeType() == 'asset' || ProjectUtils.nodeType() == 'post') {
-			var commentsUrl = "{{ url_for('nodes.comments_for_node', node_id=node._id) }}";
-			loadComments(commentsUrl);
+			new Vue({el:'#comments-embed'});
 		}
 
 		{% if node.has_method('PUT') %}
