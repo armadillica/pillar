@@ -409,19 +409,8 @@ $comments-width-max: 710px
 			box-shadow: 0 0 0 0.2em $color-background-light
 
 	.drag-hover
-		&:before
-			background-color: $color-success
-			content: " "
-			display: block
-			height: 100%
-			position: absolute
-			top: 0
-			left: 0
-			width: 100%
-			z-index: $z-index-base + 1
-			opacity: 0.2
-			border-radius: 1em
+		outline-style: solid
+		outline-color: $color-success
 
 		&.unsupported-drop
-			&:before
-				background-color: $color-danger
+			outline-color: $color-danger
