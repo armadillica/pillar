@@ -9,7 +9,7 @@ var Droptarget = {
         return {
             droptargetCounter: 0,
             droptargetCanHandle: false
-        } 
+        }
     },
     computed: {
         isDragingOver() {
