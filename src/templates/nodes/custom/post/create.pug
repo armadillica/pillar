@@ -128,15 +128,7 @@ script(type="text/javascript").
 				$contentPreview = $('<div class="node-edit-form-md-preview" />').insertAfter($contentField);
 
 		function parseDescriptionContent(content) {
-
-			$.ajax({
-				url: "{{ url_for('nodes.preview_markdown')}}",
-				type: 'post',
-				data: {content: content},
-				headers: {"X-CSRFToken": csrf_token},
-				headers: {},
-				dataType: 'json'
-			})
+			pillar.api.thenMarkdownToHtml(content)
 			.done(function (data) {
 				$contentPreview.html(data.content);
 			})
