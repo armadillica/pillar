@@ -64,7 +64,7 @@ var Droptarget = {
         _onDragEnd() {
             this.droptargetCounter = 0;
         },
-        _onDragOver() {
+        _onDragOver(event) {
             event.preventDefault();
             event.stopPropagation();
         },
