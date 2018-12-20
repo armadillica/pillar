@@ -2,6 +2,7 @@ import { ComponentCreatorInterface } from '../component/ComponentCreatorInterfac
 
 export class Users extends ComponentCreatorInterface {
     static create$listItem(userDoc) {
+        let roles = userDoc.roles || [];
         return $('<div>')
             .addClass('users p-2 border-bottom')
             .attr('data-user-id', userDoc._id || userDoc.objectID )
@@ -13,7 +14,7 @@ export class Users extends ComponentCreatorInterface {
                     .text(userDoc.username),
                 $('<small>')
                     .addClass('d-block roles text-info')
-                    .text(userDoc.roles.join(', '))
+                    .text(roles.join(', '))
             )
     }
 
