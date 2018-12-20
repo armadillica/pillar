@@ -185,8 +185,8 @@ def _video_duration_seconds(filename: pathlib.Path) -> typing.Optional[int]:
         str(filename),
     ]
 
-    duration = run(ffprobe_from_stream_args) or\
-               run(ffprobe_from_container_args) or\
+    duration = run(ffprobe_from_stream_args) or \
+               run(ffprobe_from_container_args) or \
                None
     return duration
 
