@@ -609,6 +609,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
     import gcloud.exceptions
 
     my_log = log.getChild(f'refresh_links_for_backend.{backend_name}')
+    start_time = time.time()
 
     # Retrieve expired links.
     files_collection = current_app.data.driver.db['files']
@@ -632,10 +633,10 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
         return
 
     if 0 < chunk_size == document_count:
-        my_log.info('Found %d documents to refresh, probably limited by the chunk size.',
-                    document_count)
+        my_log.info('Found %d documents to refresh, probably limited by the chunk size %d',
+                    document_count, chunk_size)
     else:
-        my_log.info('Found %d documents to refresh.', document_count)
+        my_log.info('Found %d documents to refresh, chunk size=%d', document_count, chunk_size)
 
     refreshed = 0
     report_chunks = min(max(5, document_count // 25), 100)
@@ -679,8 +680,10 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
                            'links', refreshed)
             return
 
-    my_log.info('Refreshed %i links', refreshed)
+    if refreshed % report_chunks != 0:
+        my_log.info('Refreshed %i links', refreshed)
 
+    my_log.info('Refresh took %s', datetime.timedelta(seconds=time.time() - start))
 
 @require_login()
 def create_file_doc(name, filename, content_type, length, project,
