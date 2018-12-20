@@ -5,6 +5,7 @@ import mimetypes
 import os
 import pathlib
 import tempfile
+import time
 import typing
 import uuid
 from hashlib import md5
@@ -683,7 +684,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
     if refreshed % report_chunks != 0:
         my_log.info('Refreshed %i links', refreshed)
 
-    my_log.info('Refresh took %s', datetime.timedelta(seconds=time.time() - start))
+    my_log.info('Refresh took %s', datetime.timedelta(seconds=time.time() - start_time))
 
 @require_login()
 def create_file_doc(name, filename, content_type, length, project,
