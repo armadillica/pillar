@@ -351,13 +351,15 @@ class AbstractPillarTest(TestMinimal):
 
     # TODO: rename to 'create_auth_token' now that 'expire_in_days' can be negative.
     def create_valid_auth_token(self,
-                                user_id: ObjectId,
+                                user_id: typing.Union[str, ObjectId],
                                 token='token',
                                 *,
                                 oauth_scopes: typing.Optional[typing.List[str]]=None,
                                 expire_in_days=1) -> dict:
         from pillar.api.utils import utcnow
 
+        if isinstance(user_id, str):
+            user_id = ObjectId(user_id)
         future = utcnow() + datetime.timedelta(days=expire_in_days)
 
         with self.app.test_request_context():
