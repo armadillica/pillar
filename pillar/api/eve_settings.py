@@ -1,5 +1,6 @@
 import os
 
+STORAGE_BACKENDS = ["local", "pillar", "cdnsun", "gcs", "unittest"]
 URL_PREFIX = 'api'
 
 # Enable reads (GET), inserts (POST) and DELETE for resources/collections
@@ -463,7 +464,7 @@ files_schema = {
     'backend': {
         'type': 'string',
         'required': True,
-        'allowed': ["local", "pillar", "cdnsun", "gcs", "unittest"]
+        'allowed': STORAGE_BACKENDS,
     },
 
     # Where the file is in the backend storage itself. In the case of GCS,
