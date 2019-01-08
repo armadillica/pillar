@@ -156,6 +156,18 @@ def project_id(project_url: str) -> ObjectId:
     return proj['_id']
 
 
+def get_project_url(project_id: ObjectId) -> str:
+    """Returns the project URL, or raises a ValueError when not found."""
+
+    proj_coll = current_app.db('projects')
+    proj = proj_coll.find_one({'_id': project_id, '_deleted': {'$ne': True}},
+                              projection={'url': True})
+
+    if not proj:
+        raise ValueError(f'project with id={project_id} not found')
+    return proj['url']
+
+
 def get_project(project_url: str) -> dict:
     """Find a project in the database, raises ValueError if not found.
 
