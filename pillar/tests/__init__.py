@@ -174,6 +174,10 @@ class AbstractPillarTest(TestMinimal):
         for modname in remove:
             del sys.modules[modname]
 
+    def url_for(self, endpoint, **values):
+        with self.app.app_context():
+            return flask.url_for(endpoint, **values)
+
     def ensure_file_exists(self, file_overrides=None, *, example_file=None) -> (ObjectId, dict):
         if example_file is None:
             example_file = ctd.EXAMPLE_FILE
