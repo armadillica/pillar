@@ -7,6 +7,7 @@ from werkzeug.exceptions import abort
 
 from pillar import current_app
 from pillar.auth import current_user
+from pillar.api import file_storage_backends
 
 log = logging.getLogger(__name__)
 
@@ -187,3 +188,14 @@ def put_project(project: dict):
     if status_code != 200:
         raise ValueError(f"Can't update project {pid}, "
                          f"status {status_code} with issues: {result}")
+
+
+def storage(project_id: ObjectId) -> file_storage_backends.Bucket:
+    """Return the storage bucket for this project.
+
+    For now this returns a bucket in the default storage backend, since
+    individual projects do not have a 'storage backend' setting (this is
+    set per file, not per project).
+    """
+
+    return file_storage_backends.default_storage_backend(str(project_id))
