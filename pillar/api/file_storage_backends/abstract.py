@@ -90,11 +90,10 @@ class Blob(metaclass=abc.ABCMeta):
 
     def __init__(self, name: str, bucket: Bucket) -> None:
         self.name = name
+        """Name of this blob in the bucket."""
+
         self.bucket = bucket
         self._size_in_bytes: typing.Optional[int] = None
-
-        self.filename: str = None
-        """Name of the file for the Content-Disposition header when downloading it."""
 
         self._log = logging.getLogger(f'{__name__}.Blob')
 
