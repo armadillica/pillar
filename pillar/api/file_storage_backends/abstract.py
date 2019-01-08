@@ -132,10 +132,17 @@ class Blob(metaclass=abc.ABCMeta):
                                   file_size=file_size)
 
     @abc.abstractmethod
-    def update_filename(self, filename: str):
+    def update_filename(self, filename: str, *, is_attachment=True):
         """Sets the filename which is used when downloading the file.
         
         Not all storage backends support this, and will use the on-disk filename instead.
+        """
+
+    @abc.abstractmethod
+    def update_content_type(self, content_type: str, content_encoding: str = ''):
+        """Set the content type (and optionally content encoding).
+
+        Not all storage backends support this.
         """
 
     @abc.abstractmethod

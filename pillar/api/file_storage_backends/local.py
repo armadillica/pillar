@@ -113,9 +113,12 @@ class LocalBlob(Blob):
 
         self._size_in_bytes = file_size
 
-    def update_filename(self, filename: str):
+    def update_filename(self, filename: str, *, is_attachment=True):
         # TODO: implement this for local storage.
         self._log.info('update_filename(%r) not supported', filename)
+
+    def update_content_type(self, content_type: str, content_encoding: str = ''):
+        self._log.info('update_content_type(%r, %r) not supported', content_type, content_encoding)
 
     def make_public(self):
         # No-op on this storage backend.

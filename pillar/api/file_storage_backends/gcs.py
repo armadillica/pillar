@@ -174,7 +174,7 @@ class GoogleCloudStorageBlob(Blob):
         self.gblob.reload()
         self._size_in_bytes = self.gblob.size
 
-    def update_filename(self, filename: str):
+    def update_filename(self, filename: str, *, is_attachment=True):
         """Set the ContentDisposition metadata so that when a file is downloaded
         it has a human-readable name.
         """
@@ -182,7 +182,17 @@ class GoogleCloudStorageBlob(Blob):
         if '"' in filename:
             raise ValueError(f'Filename is not allowed to have double quote in it: {filename!r}')
 
-        self.gblob.content_disposition = f'attachment; filename="{filename}"'
+        if is_attachment:
+            self.gblob.content_disposition = f'attachment; filename="{filename}"'
+        else:
+            self.gblob.content_disposition = f'filename="{filename}"'
+        self.gblob.patch()
+
+    def update_content_type(self, content_type: str, content_encoding: str = ''):
+        """Set the content type (and optionally content encoding)."""
+
+        self.gblob.content_type = content_type
+        self.gblob.content_encoding = content_encoding
         self.gblob.patch()
 
     def get_url(self, *, is_public: bool) -> str:
