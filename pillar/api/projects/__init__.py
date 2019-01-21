@@ -9,6 +9,7 @@ def setup_app(app, api_prefix):
     app.on_replace_projects += hooks.override_is_private_field
     app.on_replace_projects += hooks.before_edit_check_permissions
     app.on_replace_projects += hooks.protect_sensitive_fields
+    app.on_replace_projects += hooks.parse_markdown
 
     app.on_update_projects += hooks.override_is_private_field
     app.on_update_projects += hooks.before_edit_check_permissions
@@ -19,6 +20,8 @@ def setup_app(app, api_prefix):
 
     app.on_insert_projects += hooks.before_inserting_override_is_private_field
     app.on_insert_projects += hooks.before_inserting_projects
+    app.on_insert_projects += hooks.parse_markdowns
+
     app.on_inserted_projects += hooks.after_inserting_projects
 
     app.on_fetched_item_projects += hooks.before_returning_project_permissions

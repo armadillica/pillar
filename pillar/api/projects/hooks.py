@@ -3,6 +3,7 @@ import logging
 
 from flask import request, abort
 
+import pillar
 from pillar import current_app
 from pillar.api.node_types.asset import node_type_asset
 from pillar.api.node_types.comment import node_type_comment
@@ -246,3 +247,33 @@ def project_node_type_has_method(response):
 def projects_node_type_has_method(response):
     for project in response['_items']:
         project_node_type_has_method(project)
+
+
+def parse_markdown(project, original=None):
+    schema = current_app.config['DOMAIN']['projects']['schema']
+
+    def find_markdown_fields(schema, project):
+        """Find and process all makrdown validated fields."""
+        for k, v in schema.items():
+            if not isinstance(v, dict):
+                continue
+
+            if v.get('validator') == 'markdown':
+                # If there is a match with the validator: markdown pair, assign the sibling
+                # property (following the naming convention _<property>_html)
+                # the processed value.
+                if k in project:
+                    html = pillar.markdown.markdown(project[k])
+                    field_name = pillar.markdown.cache_field_name(k)
+                    project[field_name] = html
+            if isinstance(project, dict) and k in project:
+                find_markdown_fields(v, project[k])
+
+    find_markdown_fields(schema, project)
+
+    return 'ok'
+
+
+def parse_markdowns(items):
+    for item in items:
+        parse_markdown(item)
