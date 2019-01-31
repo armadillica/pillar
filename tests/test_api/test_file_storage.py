@@ -288,6 +288,7 @@ class VideoDurationTest(AbstractPillarTest):
         from pathlib import Path
 
         with self.app.test_request_context():
+            # This MKV file does not have container-level duration information.
             fname = Path(__file__).with_name('video-tiny.mkv')
 
             self.assertEqual(1, file_storage._video_duration_seconds(fname))
@@ -299,4 +300,6 @@ class VideoDurationTest(AbstractPillarTest):
         with self.app.test_request_context():
             fname = Path(__file__).with_name('video-tiny.mp4')
 
-            self.assertEqual(2, file_storage._video_duration_seconds(fname))
+            # FFmpeg 3.x reports 2 seconds, FFmpeg 4.x reports 1.6 seconds which
+            # is truncated to 1.
+            self.assertEqual(1, file_storage._video_duration_seconds(fname))
