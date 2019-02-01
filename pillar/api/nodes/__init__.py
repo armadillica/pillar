@@ -13,7 +13,8 @@ from pillar.web.utils import pretty_date
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('nodes_api', __name__)
-ROLES_FOR_SHARING = ROLES_FOR_COMMENTING ={'subscriber', 'demo'}
+# TODO(fsiddi) Propose changes to make commenting roles a configuration value.
+ROLES_FOR_SHARING = ROLES_FOR_COMMENTING = set()
 
 
 @blueprint.route('/<node_id>/share', methods=['GET', 'POST'])

@@ -50,6 +50,7 @@ def iter_node_properties(node_type):
 @functools.lru_cache(maxsize=1)
 def tag_choices() -> typing.List[typing.Tuple[str, str]]:
     """Return (value, label) tuples for the NODE_TAGS config setting."""
+    #TODO(fsiddi) consider allowing tags based on custom_properties in the project.
     tags = current_app.config.get('NODE_TAGS') or []
     return [(tag, tag.title()) for tag in tags]  # (value, label) tuples
 
@@ -70,9 +71,7 @@ def add_form_properties(form_class, node_type):
         # Recursive call if detects a dict
         field_type = schema_prop['type']
 
-        if prop_name == 'tags' and field_type == 'list':
-            field = SelectMultipleField(choices=tag_choices())
-        elif field_type == 'dict':
+        if field_type == 'dict':
             assert prop_name == 'attachments'
             field = attachments.attachment_form_group_create(schema_prop)
         elif field_type == 'list':
