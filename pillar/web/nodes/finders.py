@@ -53,7 +53,7 @@ def find_for_comment(project, node):
                 '_deleted': {'$ne': True}
             }}, api=api)
         except ResourceNotFound:
-            log.warning(
+            log.debug(
                 'url_for_node(node_id=%r): Unable to find parent node %r',
                 node['_id'], parent.parent)
             raise ValueError('Unable to find parent node %r' % parent.parent)
