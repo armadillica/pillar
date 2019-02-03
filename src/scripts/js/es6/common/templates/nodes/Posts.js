@@ -3,8 +3,10 @@ import { NodesBase } from "./NodesBase";
 export class Posts extends NodesBase {
     static create$item(post) {
         let content = [];
-        let $title = $('<div>')
-            .addClass('h1 text-uppercase mt-4 mb-3')
+        let $title = $('<a>')
+            .attr('href', '/nodes/' + post._id + '/redir')
+            .attr('title', post.name)
+            .addClass('h1 text-uppercase font-weight-bold d-block pt-5 pb-2')
             .text(post.name);
         content.push($title);
         let $post = $('<div>')
