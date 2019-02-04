@@ -3,7 +3,7 @@ import { UnitOfWorkTracker } from '../mixins/UnitOfWorkTracker'
 import { thenVoteComment } from '../../api/comments'
 const TEMPLATE = `
 <div class="comment-rating"
-    :class="{rated: hasRating, positive: isPositive }"
+    :class="{rated: currentUserHasRated, positive: currentUserRatedPositive }"
     >
     <div class="comment-rating-value" title="Number of likes">{{ rating }}</div>
     <div class="comment-action-rating up" title="Like comment"
@@ -27,11 +27,11 @@ Vue.component('comment-rating', {
         rating() {
             return this.positiveRating - this.negativeRating;
         },
-        isPositive() {
-            return this.rating > 0;
+        currentUserRatedPositive() {
+            return this.comment.current_user_rating === true;
         },
-        hasRating() {
-            return (this.positiveRating || this.negativeRating) !== 0;
+        currentUserHasRated() {
+            return typeof this.comment.current_user_rating === "boolean" ;
         },
         canVote() {
             return this.comment.user.id !== pillar.utils.getCurrentUser().user_id;
