@@ -415,9 +415,8 @@ def render_project(project, api, extra_context=None, template_name=None):
             embed_string = ''
         template_name = "projects/view{0}.html".format(embed_string)
 
-    extension_sidebar_links = current_app.extension_sidebar_links(project)
-
     navigation_links = project_navigation_links(project, api)
+    extension_sidebar_links = current_app.extension_sidebar_links(project)
 
     return render_template(template_name,
                            api=api,
@@ -490,12 +489,14 @@ def view_node(project_url, node_id):
                 raise wz_exceptions.NotFound('No such project')
 
     navigation_links = []
+    extension_sidebar_links = ''
     og_picture = node.picture = utils.get_file(node.picture, api=api)
     if project:
         if not node.picture:
             og_picture = utils.get_file(project.picture_header, api=api)
         project.picture_square = utils.get_file(project.picture_square, api=api)
         navigation_links = project_navigation_links(project, api)
+        extension_sidebar_links = current_app.extension_sidebar_links(project)
 
     # Append _theatre to load the proper template
     theatre = '_theatre' if theatre_mode else ''
@@ -506,9 +507,8 @@ def view_node(project_url, node_id):
                                node=node,
                                project=project,
                                navigation_links=navigation_links,
+                               extension_sidebar_links=extension_sidebar_links,
                                og_picture=og_picture,)
-
-    extension_sidebar_links = current_app.extension_sidebar_links(project)
 
     return render_template('projects/view{}.html'.format(theatre),
                            api=api,
@@ -518,7 +518,7 @@ def view_node(project_url, node_id):
                            show_project=False,
                            og_picture=og_picture,
                            navigation_links=navigation_links,
-                           extension_sidebar_links=extension_sidebar_links)
+                           extension_sidebar_links=extension_sidebar_links,)
 
 
 def find_project_or_404(project_url, embedded=None, api=None):

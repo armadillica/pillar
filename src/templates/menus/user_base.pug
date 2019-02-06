@@ -15,6 +15,12 @@ li.dropdown
 
 		li
 			a.navbar-item.px-2(
+				href="{{ url_for('projects.home_project') }}"
+				title="My cloud")
+				| #[i.pi-home] My cloud
+
+		li
+			a.navbar-item.px-2(
 				href="{{ url_for('settings.profile') }}"
 				title="Settings")
 				| #[i.pi-cog] Settings

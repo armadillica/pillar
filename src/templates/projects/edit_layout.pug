@@ -6,30 +6,12 @@ include ../mixins/components
 | {% block page_title %}Edit {{ project.name }}{% endblock %}
 
 | {% block navigation_tabs %}
-| {{ navigation_project(project, navigation_links, title) }}
+| {{ navigation_project(project, navigation_links, extension_sidebar_links, title) }}
 | {% endblock navigation_tabs %}
 
 | {% block body %}
 #project-container
 	#project-side-container
-		#project_sidebar
-			ul.project-tabs.p-0
-				li.tabs-browse(
-					title="Browse",
-					data-toggle="tooltip",
-					data-placement="left")
-					a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-						i.pi-folder
-
-				| {% if project.has_method('PUT') %}
-				li.active(
-					title="Edit Project",
-					data-toggle="tooltip",
-					data-placement="right")
-					a(href="{{ url_for('projects.edit', project_url=project.url) }}")
-						i.pi-cog
-				| {% endif %}
-
 
 		#project_nav
 			#project_nav-container

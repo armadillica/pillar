@@ -4,13 +4,20 @@
 
 | {% set title = 'blog' %}
 
+| {% block css %}
+| {{ super() }}
+| {% if project.url != 'blender-cloud' %}
+link(href="{{ url_for('static_cloud', filename='assets/css/project-main.css') }}", rel="stylesheet")
+| {% endif %}
+| {% endblock %}
+
 | {% block page_title %}Blog{% endblock%}
 
 | {% block navigation_tabs %}
 | {% if project.url == 'blender-cloud' %}
 | {{ navigation_homepage(title) }}
 | {% else %}
-| {{ navigation_project(project, navigation_links, title) }}
+| {{ navigation_project(project, navigation_links, extension_sidebar_links, title) }}
 | {% endif %}
 | {% endblock navigation_tabs %}
 

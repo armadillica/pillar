@@ -11,7 +11,7 @@ include ../mixins/components
 
 | {% block navigation_tabs %}
 | {% if project %}
-| {{ navigation_project(project, navigation_links, title) }}
+| {{ navigation_project(project, navigation_links, extension_sidebar_links, title) }}
 | {% else %}
 | {{ navigation_homepage(title) }}
 | {% endif %}
@@ -50,23 +50,6 @@ script.
 | {% endif %}
 
 #search-container.d-flex(class="{% if project %}search-project{% endif %}")
-	| {% if project %}
-	#project_sidebar.bg-white
-		ul.project-tabs.p-0
-			li.tabs-browse(
-				title="Browse",
-				data-toggle="tooltip",
-				data-placement="right")
-				a(href="{{url_for('projects.view', project_url=project.url, _external=True)}}")
-					i.pi-folder
-
-			li.tabs-search.active(
-				title="Search",
-				data-toggle="tooltip",
-				data-placement="right")
-				a(href="{{url_for('projects.search', project_url=project.url, _external=True)}}")
-					i.pi-search
-	| {% endif %}
 
 	.search-settings#search-sidebar.bg-light
 		input.search-field.p-2.bg-white(

@@ -23,15 +23,18 @@
 #qs-toggle
 	opacity: 1
 	visibility: visible
+	display: block
 
 .quick-search
 	opacity: 0
 	transition: opacity $short-transition
 	visibility: hidden
+	display: none
 
-.quick-search.show
-	opacity: 1
-	visibility: visible
+	&.show
+		opacity: 1
+		visibility: visible
+		display: block
 
 .qs-input
 	&.show input

@@ -109,6 +109,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
         project.blog_archive_prev = None
 
     navigation_links = project_navigation_links(project, api)
+    extension_sidebar_links = current_app.extension_sidebar_links(project)
 
     return render_template(
         template_path,
@@ -121,6 +122,7 @@ def posts_view(project_id=None, project_url=None, url=None, *, archive=False, pa
         node_type_post=project.get_node_type('post'),
         can_create_blog_posts=can_create_blog_posts,
         navigation_links=navigation_links,
+        extension_sidebar_links=extension_sidebar_links,
         api=api)
 
 
