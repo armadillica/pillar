@@ -13,7 +13,7 @@ export function prettyDate(time, detail=false) {
     let second_diff = Math.round((now - theDate) / 1000);
     
     let day_diff = Math.round(second_diff / 86400); // seconds per day (60*60*24)
-
+    
     if ((day_diff < 0) && (theDate.getFullYear() !== now.getFullYear())) {
         // "Jul 16, 2018"
         pretty = theDate.toLocaleDateString('en-NL',{day: 'numeric', month: 'short', year: 'numeric'});
@@ -29,7 +29,7 @@ export function prettyDate(time, detail=false) {
         else
             pretty = "in " + week_count +" weeks";
     }
-    else if (day_diff < -1)
+    else if (day_diff < 0)
         // "next Tuesday"
         pretty = 'next ' + theDate.toLocaleDateString('en-NL',{weekday: 'long'});
     else if (day_diff === 0) {

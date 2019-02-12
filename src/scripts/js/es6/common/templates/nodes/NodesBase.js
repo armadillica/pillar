@@ -1,5 +1,4 @@
 import { prettyDate } from '../../utils/prettydate';
-import { thenLoadImage } from '../utils';
 import { ComponentCreatorInterface } from '../component/ComponentCreatorInterface'
 
 export class NodesBase extends ComponentCreatorInterface {
@@ -20,7 +19,7 @@ export class NodesBase extends ComponentCreatorInterface {
         }
         else {
             $(window).trigger('pillar:workStart');
-            thenLoadImage(node.picture)
+            pillar.utils.thenLoadImage(node.picture)
                 .fail(warnNoPicture)
                 .then((imgVariation) => {
                     let img = $('<img class="card-img-top">')

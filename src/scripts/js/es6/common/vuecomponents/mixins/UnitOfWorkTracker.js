@@ -42,7 +42,15 @@ var UnitOfWorkTracker = {
     methods: {
         unitOfWork(promise) {
             this.unitOfWorkBegin();
-            return promise.always(this.unitOfWorkDone);
+            if (promise.always) {
+                // jQuery Promise
+                return promise.always(this.unitOfWorkDone);
+            }
+            if (promise.finally) {
+                // Native js Promise
+                return promise.finally(this.unitOfWorkDone);
+            }
+            throw Error('Unsupported promise type');
         },
         unitOfWorkBegin() {
             this.unitOfWorkCounter++;
