@@ -114,147 +114,6 @@ class UpgradeAttachmentSchemaTest(AbstractPillarTest):
             self.assertEqual({}, db_node_type['form_schema'])
 
 
-class UpgradeAttachmentUsageTest(AbstractPillarTest):
-    def setUp(self, **kwargs):
-        super().setUp(**kwargs)
-        self.pid, self.uid = self.create_project_with_admin(user_id=24 * 'a')
-
-        with self.app.app_context():
-            files_coll = self.app.db('files')
-
-            res = files_coll.insert_one({
-                **ctd.EXAMPLE_FILE,
-                'project': self.pid,
-                'user': self.uid,
-            })
-            self.fid = res.inserted_id
-
-    def test_image_link(self):
-        with self.app.app_context():
-            nodes_coll = self.app.db('nodes')
-            res = nodes_coll.insert_one({
-                **ctd.EXAMPLE_NODE,
-                'picture': self.fid,
-                'project': self.pid,
-                'user': self.uid,
-                'description': "# Title\n\n@[slug 0]\n@[slug1]\n@[slug2]\nEitje van Fabergé.",
-                'properties': {
-                    'status': 'published',
-                    'content_type': 'image',
-                    'file': self.fid,
-                    'attachments': {
-                        'slug 0': {
-                            'oid': self.fid,
-                            'link': 'self',
-                        },
-                        'slug1': {
-                            'oid': self.fid,
-                            'link': 'custom',
-                            'link_custom': 'https://cloud.blender.org/',
-                        },
-                        'slug2': {
-                            'oid': self.fid,
-                        },
-                    }
-                }
-            })
-            nid = res.inserted_id
-
-        from pillar.cli.maintenance import upgrade_attachment_usage
-
-        with self.app.app_context():
-            upgrade_attachment_usage(proj_url=ctd.EXAMPLE_PROJECT['url'], go=True)
-            node = nodes_coll.find_one({'_id': nid})
-
-            self.assertEqual(
-                "# Title\n\n"
-                "{attachment 'slug-0' link='self'}\n"
-                "{attachment 'slug1' link='https://cloud.blender.org/'}\n"
-                "{attachment 'slug2'}\n"
-                "Eitje van Fabergé.",
-                node['description'],
-                'The description should be updated')
-            self.assertEqual(
-                "<h1>Title</h1>\n"
-                "<!-- {attachment 'slug-0' link='self'} -->\n"
-                "<!-- {attachment 'slug1' link='https://cloud.blender.org/'} -->\n"
-                "<!-- {attachment 'slug2'} -->\n"
-                "<p>Eitje van Fabergé.</p>\n",
-                node['_description_html'],
-                'The _description_html should be updated')
-
-            self.assertEqual(
-                {'slug-0': {'oid': self.fid},
-                 'slug1': {'oid': self.fid},
-                 'slug2': {'oid': self.fid},
-                 },
-                node['properties']['attachments'],
-                'The link should have been removed from the attachment')
-
-    def test_post(self):
-        """This requires checking the dynamic schema of the node."""
-        with self.app.app_context():
-            nodes_coll = self.app.db('nodes')
-            res = nodes_coll.insert_one({
-                **ctd.EXAMPLE_NODE,
-                'node_type': 'post',
-                'project': self.pid,
-                'user': self.uid,
-                'picture': self.fid,
-                'description': "meh",
-                'properties': {
-                    'status': 'published',
-                    'content': "# Title\n\n@[slug0]\n@[slug1]\n@[slug2]\nEitje van Fabergé.",
-                    'attachments': {
-                        'slug0': {
-                            'oid': self.fid,
-                            'link': 'self',
-                        },
-                        'slug1': {
-                            'oid': self.fid,
-                            'link': 'custom',
-                            'link_custom': 'https://cloud.blender.org/',
-                        },
-                        'slug2': {
-                            'oid': self.fid,
-                        },
-                    }
-                }
-            })
-            nid = res.inserted_id
-
-        from pillar.cli.maintenance import upgrade_attachment_usage
-
-        with self.app.app_context():
-            upgrade_attachment_usage(proj_url=ctd.EXAMPLE_PROJECT['url'], go=True)
-            node = nodes_coll.find_one({'_id': nid})
-
-            self.assertEqual(
-                "# Title\n\n"
-                "{attachment 'slug0' link='self'}\n"
-                "{attachment 'slug1' link='https://cloud.blender.org/'}\n"
-                "{attachment 'slug2'}\n"
-                "Eitje van Fabergé.",
-                node['properties']['content'],
-                'The content should be updated')
-            self.assertEqual(
-                "<h1>Title</h1>\n"
-                "<!-- {attachment 'slug0' link='self'} -->\n"
-                "<!-- {attachment 'slug1' link='https://cloud.blender.org/'} -->\n"
-                "<!-- {attachment 'slug2'} -->\n"
-                "<p>Eitje van Fabergé.</p>\n",
-                node['properties']['_content_html'],
-                'The _content_html should be updated')
-
-            self.assertEqual(
-                {'slug0': {'oid': self.fid},
-                 'slug1': {'oid': self.fid},
-                 'slug2': {'oid': self.fid},
-                 },
-                node['properties']['attachments'],
-                'The link should have been removed from the attachment')
-
-
 class ReconcileNodeDurationTest(AbstractPillarTest):
     def setUp(self, **kwargs):
         super().setUp(**kwargs)
@@ -459,3 +318,52 @@ class DeleteProjectlessFilesTest(AbstractPillarTest):
             self.assertEqual(file1_doc, found1)
             self.assertEqual(file3_doc, found3)
             self.assertEqual(file3_doc, found3)
+
+
+class FixMissingActivitiesSubscription(AbstractPillarTest):
+    def test_fix_missing_activities_subscription(self):
+        from pillar.cli.maintenance import fix_missing_activities_subscription_defaults
+
+        with self.app.app_context():
+            subscriptions_collection = self.app.db('activities-subscriptions')
+
+            invalid_subscription = {
+                'user': ObjectId(),
+                'context_object_type': 'node',
+                'context_object': ObjectId(),
+            }
+
+            valid_subscription = {
+                'user': ObjectId(),
+                'context_object_type': 'node',
+                'context_object': ObjectId(),
+                'is_subscribed': False,
+                'notifications': {'web': False, }
+            }
+
+            result = subscriptions_collection.insert_one(
+                invalid_subscription,
+                bypass_document_validation=True)
+
+            id_invalid = result.inserted_id
+
+            result = subscriptions_collection.insert_one(
+                valid_subscription,
+                bypass_document_validation=True)
+
+            id_valid = result.inserted_id
+
+            fix_missing_activities_subscription_defaults()  # Dry run. Nothing should change
+            invalid_subscription = subscriptions_collection.find_one({'_id': id_invalid})
+            self.assertNotIn('is_subscribed', invalid_subscription.keys())
+            self.assertNotIn('notifications', invalid_subscription.keys())
+
+            fix_missing_activities_subscription_defaults(go=True)  # Real run. Invalid should be updated
+            invalid_subscription = subscriptions_collection.find_one({'_id': id_invalid})
+            self.assertTrue(invalid_subscription['is_subscribed'])
+            self.assertTrue(invalid_subscription['notifications']['web'])
+
+            # Was already ok. Should not have been updated
+            valid_subscription = subscriptions_collection.find_one({'_id': id_valid})
+            self.assertFalse(valid_subscription['is_subscribed'])
+            self.assertFalse(valid_subscription['notifications']['web'])

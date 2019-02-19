@@ -44,10 +44,16 @@ def remove_private_keys(document):
     """Removes any key that starts with an underscore, returns result as new
     dictionary.
     """
+    def do_remove(doc):
+        for key in list(doc.keys()):
+            if key.startswith('_'):
+                del doc[key]
+            elif isinstance(doc[key], dict):
+                doc[key] = do_remove(doc[key])
+        return doc
+
     doc_copy = copy.deepcopy(document)
-    for key in list(doc_copy.keys()):
-        if key.startswith('_'):
-            del doc_copy[key]
+    do_remove(doc_copy)
 
     try:
         del doc_copy['allowed_methods']

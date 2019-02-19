@@ -122,47 +122,50 @@ def before_inserting_nodes(items):
         # Default the 'user' property to the current user.
         item.setdefault('user', current_user.user_id)
 
+def get_comment_verb_and_context_object_id(comment):
+    nodes_collection = current_app.data.driver.db['nodes']
+    verb = 'commented'
+    parent = nodes_collection.find_one({'_id': comment['parent']})
+    context_object_id = comment['parent']
+    while parent['node_type'] == 'comment':
+        # If the parent is a comment, we provide its own parent as
+        # context. We do this in order to point the user to an asset
+        # or group when viewing the notification.
+        verb = 'replied'
+        context_object_id = parent['parent']
+        parent = nodes_collection.find_one({'_id': parent['parent']})
+    return verb, context_object_id
+
 
 def after_inserting_nodes(items):
     for item in items:
-        # Skip subscriptions for first level items (since the context is not a
-        # node, but a project).
+        context_object_id = None
         # TODO: support should be added for mixed context
-        if 'parent' not in item:
-            return
-        context_object_id = item['parent']
-        if item['node_type'] == 'comment':
-            nodes_collection = current_app.data.driver.db['nodes']
-            parent = nodes_collection.find_one({'_id': item['parent']})
-            # Always subscribe to the parent node
-            activity_subscribe(item['user'], 'node', item['parent'])
-            if parent['node_type'] == 'comment':
-                # If the parent is a comment, we provide its own parent as
-                # context. We do this in order to point the user to an asset
-                # or group when viewing the notification.
-                verb = 'replied'
-                context_object_id = parent['parent']
-                # Subscribe to the parent of the parent comment (post or group)
-                activity_subscribe(item['user'], 'node', parent['parent'])
-            else:
-                activity_subscribe(item['user'], 'node', item['_id'])
-                verb = 'commented'
-        elif item['node_type'] in PILLAR_NAMED_NODE_TYPES:
-            verb = 'posted'
+        if item['node_type'] in PILLAR_NAMED_NODE_TYPES:
             activity_subscribe(item['user'], 'node', item['_id'])
-        else:
-            # Don't automatically create activities for non-Pillar node types,
-            # as we don't know what would be a suitable verb (among other things).
-            continue
+            verb = 'posted'
+            context_object_id = item.get('parent')
+            if item['node_type'] == 'comment':
+                # Always subscribe to the parent node
+                activity_subscribe(item['user'], 'node', item['parent'])
+                verb, context_object_id = get_comment_verb_and_context_object_id(item)
+                # Subscribe to the parent of the parent comment (post or group)
+                activity_subscribe(item['user'], 'node', context_object_id)
 
-        activity_object_add(
-            item['user'],
-            verb,
-            'node',
-            item['_id'],
-            'node',
-            context_object_id
-        )
+
+        if context_object_id and item['node_type'] in PILLAR_NAMED_NODE_TYPES:
+            # * Skip activity for first level items (since the context is not a
+            # node, but a project).
+            # * Don't automatically create activities for non-Pillar node types,
+            # as we don't know what would be a suitable verb (among other things).
+            activity_object_add(
+                item['user'],
+                verb,
+                'node',
+                item['_id'],
+                'node',
+                context_object_id
+            )
 
 
 def deduct_content_type_and_duration(node_doc, original=None):
@@ -320,46 +323,6 @@ def texture_sort_files(node, original=None):
 def textures_sort_files(nodes):
     for node in nodes:
         texture_sort_files(node)
-
-
-def parse_markdown(node, original=None):
-    import copy
-
-    projects_collection = current_app.data.driver.db['projects']
-    project = projects_collection.find_one({'_id': node['project']}, {'node_types': 1})
-    # Query node type directly using the key
-    node_type = next(nt for nt in project['node_types']
-                     if nt['name'] == node['node_type'])
-
-    # Create a copy to not overwrite the actual schema.
-    schema = copy.deepcopy(current_app.config['DOMAIN']['nodes']['schema'])
-    schema['properties'] = node_type['dyn_schema']
-
-    def find_markdown_fields(schema, node):
-        """Find and process all makrdown validated fields."""
-        for k, v in schema.items():
-            if not isinstance(v, dict):
-                continue
-
-            if v.get('validator') == 'markdown':
-                # If there is a match with the validator: markdown pair, assign the sibling
-                # property (following the naming convention _<property>_html)
-                # the processed value.
-                if k in node:
-                    html = pillar.markdown.markdown(node[k])
-                    field_name = pillar.markdown.cache_field_name(k)
-                    node[field_name] = html
-            if isinstance(node, dict) and k in node:
-                find_markdown_fields(v, node[k])
-
-    find_markdown_fields(schema, node)
-
-    return 'ok'
-
-
-def parse_markdowns(items):
-    for item in items:
-        parse_markdown(item)
 
 
 def short_link_info(short_code):

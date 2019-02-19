@@ -1,17 +1,14 @@
 from pillar.api.node_types import attachments_embedded_schema
+from pillar.api.node_types.utils import markdown_fields
 
 node_type_post = {
     'name': 'post',
     'description': 'A blog post, for any project',
     'dyn_schema': {
-        'content': {
-            'type': 'string',
-            'minlength': 5,
-            'maxlength': 90000,
-            'required': True,
-            'validator': 'markdown',
-        },
-        '_content_html': {'type': 'string'},
+        **markdown_fields('content',
+                          minlength=5,
+                          maxlength=90000,
+                          required=True),
         'status': {
             'type': 'string',
             'allowed': [
