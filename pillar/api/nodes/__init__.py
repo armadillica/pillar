@@ -248,14 +248,12 @@ def setup_app(app, url_prefix):
     app.on_fetched_resource_nodes += eve_hooks.before_returning_nodes
 
     app.on_replace_nodes += eve_hooks.before_replacing_node
-    app.on_replace_nodes += eve_hooks.parse_markdown
     app.on_replace_nodes += eve_hooks.texture_sort_files
     app.on_replace_nodes += eve_hooks.deduct_content_type_and_duration
     app.on_replace_nodes += eve_hooks.node_set_default_picture
     app.on_replaced_nodes += eve_hooks.after_replacing_node
 
     app.on_insert_nodes += eve_hooks.before_inserting_nodes
-    app.on_insert_nodes += eve_hooks.parse_markdowns
     app.on_insert_nodes += eve_hooks.nodes_deduct_content_type_and_duration
     app.on_insert_nodes += eve_hooks.nodes_set_default_picture
     app.on_insert_nodes += eve_hooks.textures_sort_files

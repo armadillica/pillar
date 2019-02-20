@@ -1,5 +1,7 @@
 import os
 
+from pillar.api.node_types.utils import markdown_fields
+
 STORAGE_BACKENDS = ["local", "pillar", "cdnsun", "gcs", "unittest"]
 URL_PREFIX = 'api'
 
@@ -184,12 +186,7 @@ organizations_schema = {
         'maxlength': 128,
         'required': True
     },
-    'description': {
-        'type': 'string',
-        'maxlength': 256,
-        'validator': 'markdown',
-    },
-    '_description_html': {'type': 'string'},
+    **markdown_fields('description', maxlength=256),
     'website': {
         'type': 'string',
         'maxlength': 256,
@@ -322,11 +319,7 @@ nodes_schema = {
         'maxlength': 128,
         'required': True,
     },
-    'description': {
-        'type': 'string',
-        'validator': 'markdown',
-    },
-    '_description_html': {'type': 'string'},
+    **markdown_fields('description'),
     'picture': _file_embedded_schema,
     'order': {
         'type': 'integer',
@@ -576,11 +569,7 @@ projects_schema = {
         'maxlength': 128,
         'required': True,
     },
-    'description': {
-        'type': 'string',
-        'validator': 'markdown',
-    },
-    '_description_html': {'type': 'string'},
+    **markdown_fields('description'),
     # Short summary for the project
     'summary': {
         'type': 'string',

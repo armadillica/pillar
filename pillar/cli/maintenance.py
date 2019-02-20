@@ -739,113 +739,6 @@ def iter_markdown(proj_node_types: dict, some_node: dict, callback: typing.Calla
             doc[key] = new_value
 
 
-@manager_maintenance.option('-p', '--project', dest='proj_url', nargs='?',
-                            help='Project URL')
-@manager_maintenance.option('-a', '--all', dest='all_projects', action='store_true', default=False,
-                            help='Replace on all projects.')
-@manager_maintenance.option('-g', '--go', dest='go', action='store_true', default=False,
-                            help='Actually perform the changes (otherwise just show as dry-run).')
-def upgrade_attachment_usage(proj_url=None, all_projects=False, go=False):
-    """Replaces '@[slug]' with '{attachment slug}'.
-
-    Also moves links from the attachment dict to the attachment shortcode.
-    """
-    if bool(proj_url) == all_projects:
-        log.error('Use either --project or --all.')
-        return 1
-
-    import html
-    from pillar.api.projects.utils import node_type_dict
-    from pillar.api.utils import remove_private_keys
-    from pillar.api.utils.authentication import force_cli_user
-
-    force_cli_user()
-
-    nodes_coll = current_app.db('nodes')
-    total_nodes = 0
-    failed_node_ids = set()
-
-    # Use a mixture of the old slug RE that still allowes spaces in the slug
-    # name and the new RE that allows dashes.
-    old_slug_re = re.compile(r'@\[([a-zA-Z0-9_\- ]+)\]')
-    for proj in _db_projects(proj_url, all_projects, go=go):
-        proj_id = proj['_id']
-        proj_url = proj.get('url', '-no-url-')
-        nodes = nodes_coll.find({
-            '_deleted': {'$ne': True},
-            'project': proj_id,
-            'properties.attachments': {'$exists': True},
-        })
-        node_count = nodes.count()
-        if node_count == 0:
-            log.debug('Skipping project %s (%s)', proj_url, proj_id)
-            continue
-
-        proj_node_types = node_type_dict(proj)
-
-        for node in nodes:
-            attachments = node['properties']['attachments']
-            replaced = False
-
-            # Inner functions because of access to the node's attachments.
-            def replace(match):
-                nonlocal replaced
-                slug = match.group(1)
-                log.debug('    - OLD STYLE attachment slug %r', slug)
-                try:
-                    att = attachments[slug]
-                except KeyError:
-                    log.info("Attachment %r not found for node %s", slug, node['_id'])
-                    link = ''
-                else:
-                    link = att.get('link', '')
-                    if link == 'self':
-                        link = " link='self'"
-                    elif link == 'custom':
-                        url = att.get('link_custom')
-                        if url:
-                            link = " link='%s'" % html.escape(url)
-                replaced = True
-                return '{attachment %r%s}' % (slug.replace(' ', '-'), link)
-
-            def update_markdown(value: str) -> str:
-                return old_slug_re.sub(replace, value)
-
-            iter_markdown(proj_node_types, node, update_markdown)
-
-            # Remove no longer used properties from attachments
-            new_attachments = {}
-            for slug, attachment in attachments.items():
-                replaced |= 'link' in attachment  # link_custom implies link
-                attachment.pop('link', None)
-                attachment.pop('link_custom', None)
-                new_attachments[slug.replace(' ', '-')] = attachment
-            node['properties']['attachments'] = new_attachments
-
-            if replaced:
-                total_nodes += 1
-            else:
-                # Nothing got replaced,
-                continue
-
-            if go:
-                # Use Eve to PUT, so we have schema checking.
-                db_node = remove_private_keys(node)
-                r, _, _, status = current_app.put_internal('nodes', db_node, _id=node['_id'])
-                if status != 200:
-                    log.error('Error %i storing altered node %s %s', status, node['_id'], r)
-                    failed_node_ids.add(node['_id'])
-                    # raise SystemExit('Error storing node; see log.')
-                log.debug('Updated node %s: %s', node['_id'], r)
-
-        log.info('Project %s (%s) has %d nodes with attachments',
-                 proj_url, proj_id, node_count)
-    log.info('%s %d nodes', 'Updated' if go else 'Would update', total_nodes)
-    if failed_node_ids:
-        log.warning('Failed to update %d of %d nodes: %s', len(failed_node_ids), total_nodes,
-                    ', '.join(str(nid) for nid in failed_node_ids))
-
-
 def _db_projects(proj_url: str, all_projects: bool, project_id='', *, go: bool) \
         -> typing.Iterable[dict]:
     """Yields a subset of the projects in the database.
@@ -1374,3 +1267,69 @@ def fix_projects_for_files(filepath: Path, go=False):
 
     log.info('Done updating %d files (found %d, modified %d) on %d projects',
              len(mapping), total_matched, total_modified, len(project_to_file_ids))
+
+
+@manager_maintenance.option('-u', '--user', dest='user', nargs='?',
+                            help='Update subscriptions for single user.')
+@manager_maintenance.option('-o', '--object', dest='context_object', nargs='?',
+                            help='Update subscriptions for context_object.')
+@manager_maintenance.option('-g', '--go', dest='go', action='store_true', default=False,
+                            help='Actually perform the changes (otherwise just show as dry-run).')
+def fix_missing_activities_subscription_defaults(user=None, context_object=None, go=False):
+    """Assign default values to activities-subscriptions documents where values are missing.
+    """
+
+    subscriptions_collection = current_app.db('activities-subscriptions')
+    lookup_is_subscribed = {
+        'is_subscribed': {'$exists': False},
+    }
+
+    lookup_notifications = {
+        'notifications.web': {'$exists': False},
+    }
+
+    if user:
+        lookup_is_subscribed['user'] = ObjectId(user)
+        lookup_notifications['user'] = ObjectId(user)
+
+    if context_object:
+        lookup_is_subscribed['context_object'] = ObjectId(context_object)
+        lookup_notifications['context_object'] = ObjectId(context_object)
+
+    num_need_is_subscribed_update = subscriptions_collection.count(lookup_is_subscribed)
+    log.info("Found %d documents that needs to be update 'is_subscribed'", num_need_is_subscribed_update)
+    num_need_notification_web_update = subscriptions_collection.count(lookup_notifications)
+    log.info("Found %d documents that needs to be update 'notifications.web'", num_need_notification_web_update)
+
+    if not go:
+        return
+
+    if num_need_is_subscribed_update > 0:
+        log.info("Updating 'is_subscribed'")
+        resp = subscriptions_collection.update(
+            lookup_is_subscribed,
+            {
+                '$set': {'is_subscribed': True}
+            },
+            multi=True,
+            upsert=False
+        )
+        if resp['nModified'] is not num_need_is_subscribed_update:
+            log.warning("Expected % documents to be update, was %d",
+                        num_need_is_subscribed_update, resp['nModified'])
+
+    if num_need_notification_web_update > 0:
+        log.info("Updating 'notifications.web'")
+        resp = subscriptions_collection.update(
+            lookup_notifications,
+            {
+                '$set': {'notifications.web': True}
+            },
+            multi=True,
+            upsert=False
+        )
+        if resp['nModified'] is not num_need_notification_web_update:
+            log.warning("Expected % documents to be update, was %d",
+                        num_need_notification_web_update, resp['nModified'])
+
+    log.info("Done updating 'activities-subscriptions' documents")

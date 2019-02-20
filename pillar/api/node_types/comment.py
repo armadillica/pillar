@@ -1,17 +1,15 @@
 from pillar.api.node_types import attachments_embedded_schema
+from pillar.api.node_types.utils import markdown_fields
 
 node_type_comment = {
     'name': 'comment',
     'description': 'Comments for asset nodes, pages, etc.',
     'dyn_schema': {
         # The actual comment content
-        'content': {
-            'type': 'string',
-            'minlength': 5,
-            'required': True,
-            'validator': 'markdown',
-        },
-        '_content_html': {'type': 'string'},
+        **markdown_fields(
+            'content',
+            minlength=5,
+            required=True),
         'status': {
             'type': 'string',
             'allowed': [

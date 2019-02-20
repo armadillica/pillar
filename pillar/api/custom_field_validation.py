@@ -1,4 +1,3 @@
-import copy
 from datetime import datetime
 import logging
 
@@ -6,36 +5,12 @@ from bson import ObjectId, tz_util
 from eve.io.mongo import Validator
 from flask import current_app
 
-import pillar.markdown
+from pillar import markdown
 
 log = logging.getLogger(__name__)
 
 
 class ValidateCustomFields(Validator):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Will be reference to the actual document being validated, so that we can
-        # modify it during validation.
-        self.__real_document = None
-
-    def validate(self, document, *args, **kwargs):
-        # Keep a reference to the actual document, because Cerberus validates copies.
-        self.__real_document = document
-        result = super().validate(document, *args, **kwargs)
-
-        # Store the in-place modified document as self.document, so that Eve's post_internal
-        # can actually pick it up as the validated document. We need to make a copy so that
-        # further modifications (like setting '_etag' etc.) aren't done in-place.
-        self.document = copy.deepcopy(document)
-
-        return result
-
-    def _get_child_validator(self, *args, **kwargs):
-        child = super()._get_child_validator(*args, **kwargs)
-        # Pass along our reference to the actual document.
-        child.__real_document = self.__real_document
-        return child
 
     # TODO: split this into a convert_property(property, schema) and call that from this function.
     def convert_properties(self, properties, node_schema):
@@ -137,8 +112,7 @@ class ValidateCustomFields(Validator):
         if val:
             # This ensures the modifications made by v's coercion rules are
             # visible to this validator's output.
-            # TODO(fsiddi): this no longer works due to Cerberus internal changes.
-            # self.current[field] = v.current
+            self.document[field] = v.document
             return True
 
         log.warning('Error validating properties for node %s: %s', self.document, v.errors)
@@ -183,36 +157,18 @@ class ValidateCustomFields(Validator):
         if ip.prefixlen() == 0:
             self._error(field_name, 'Zero-length prefix is not allowed')
 
-    def _validator_markdown(self, field, value):
-        """Convert MarkDown.
+    def _normalize_coerce_markdown(self, markdown_field: str) -> str:
         """
-        my_log = log.getChild('_validator_markdown')
+        Cache markdown as html.
 
-        # Find this field inside the original document
-        my_subdoc = self._subdoc_in_real_document()
-        if my_subdoc is None:
-            # If self.update==True we are validating an update document, which
-            # may not contain all fields, so then a missing field is fine.
-            if not self.update:
-                self._error(field, f'validator_markdown: unable to find sub-document '
-                                   f'for path {self.document_path}')
-            return
-
-        my_log.debug('validating field %r with value %r', field, value)
-        save_to = pillar.markdown.cache_field_name(field)
-        html = pillar.markdown.markdown(value)
-        my_log.debug('saving result to %r in doc with id %s', save_to, id(my_subdoc))
-        my_subdoc[save_to] = html
-
-    def _subdoc_in_real_document(self):
-        """Return a reference to the current sub-document inside the real document.
-
-        This allows modification of the document being validated.
+        :param markdown_field: name of the field containing mark down
+        :return: html string
         """
-        my_subdoc = getattr(self, 'persisted_document') or self.__real_document
-        for item in self.document_path:
-            my_subdoc = my_subdoc[item]
-        return my_subdoc
+        my_log = log.getChild('_normalize_coerce_markdown')
+        mdown = self.document.get(markdown_field, '')
+        html = markdown.markdown(mdown)
+        my_log.debug('Generated html for markdown field %s in doc with id %s', markdown_field, id(self.document))
+        return html
 
 
 if __name__ == '__main__':

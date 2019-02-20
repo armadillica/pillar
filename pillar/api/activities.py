@@ -119,6 +119,8 @@ def activity_subscribe(user_id, context_object_type, context_object_id):
 
     # If no subscription exists, we create one
     if not subscription:
+        # Workaround for issue: https://github.com/pyeve/eve/issues/1174
+        lookup['notifications'] = {}
         current_app.post_internal('activities-subscriptions', lookup)
 
 

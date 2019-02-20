@@ -1,6 +1,7 @@
 export { transformPlaceholder } from './placeholder'
 export { prettyDate } from './prettydate'
 export { getCurrentUser, initCurrentUser } from './currentuser'
+export { thenLoadImage } from './files'
 
 
 export function debounced(fn, delay=1000) {

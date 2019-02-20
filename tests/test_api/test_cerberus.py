@@ -4,6 +4,8 @@ This'll help us upgrade to new versions of Cerberus.
 """
 
 import unittest
+
+from pillar.api.node_types.utils import markdown_fields
 from pillar.tests import AbstractPillarTest
 
 from bson import ObjectId
@@ -219,10 +221,9 @@ class MarkdownValidatorTest(AbstractSchemaValidationTest):
         'schema': {
             'type': 'dict',
             'schema': {
-                'content': {'type': 'string', 'required': True, 'validator': 'markdown'},
-                '_content_html': {'type': 'string'},
-                'descr': {'type': 'string', 'required': True, 'validator': 'markdown'},
-                '_descr_html': {'type': 'string'},
+                **markdown_fields('content', required=True),
+                **markdown_fields('descr', required=True),
+                'my_default_value': {'type': 'string', 'default': 'my default value'},
             }
         },
     }}
@@ -239,6 +240,7 @@ class MarkdownValidatorTest(AbstractSchemaValidationTest):
             '_content_html': '<h1>Header</h1>\n<p>Some text</p>\n',
             'descr': 'je moeder',
             '_descr_html': '<p>je moeder</p>\n',
+            'my_default_value': 'my default value'
         }]}
 
-        self.assertEqual(expect, doc)
+        self.assertEqual(expect, self.validator.document)
