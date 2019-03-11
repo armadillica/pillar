@@ -79,7 +79,9 @@ class CommentTreeBuilder:
         self.nbr_of_Comments: int = 0
 
     def build(self) -> CommentTreeDO:
-        enriched_comments = self.child_comments(self.node_id)
+        enriched_comments = self.child_comments(self.node_id,
+                                                sort={'properties.rating_positive': pymongo.DESCENDING,
+                                                      '_created': pymongo.DESCENDING})
         project_id = self.get_project_id()
         return CommentTreeDO(
             node_id=self.node_id,
@@ -88,14 +90,15 @@ class CommentTreeBuilder:
             comments=enriched_comments
         )
 
-    def child_comments(self, node_id: bson.ObjectId) -> typing.List[CommentDO]:
-        raw_comments = self.mongodb_comments(node_id)
+    def child_comments(self, node_id: bson.ObjectId, sort: dict) -> typing.List[CommentDO]:
+        raw_comments = self.mongodb_comments(node_id, sort)
         return [self.enrich(comment) for comment in raw_comments]
 
     def enrich(self, mongo_comment: dict) -> CommentDO:
         self.nbr_of_Comments += 1
         comment = to_comment_data_object(mongo_comment)
-        comment.replies = self.child_comments(mongo_comment['_id'])
+        comment.replies = self.child_comments(mongo_comment['_id'],
+                                              sort={'_created': pymongo.ASCENDING})
         return comment
 
     def get_project_id(self):
@@ -104,7 +107,7 @@ class CommentTreeBuilder:
         return result['project']
 
     @classmethod
-    def mongodb_comments(cls, node_id: bson.ObjectId) -> typing.Iterator:
+    def mongodb_comments(cls, node_id: bson.ObjectId, sort: dict) -> typing.Iterator:
         nodes_coll = current_app.db('nodes')
         return nodes_coll.aggregate([
             {'$match': {'node_type': 'comment',
@@ -116,8 +119,7 @@ class CommentTreeBuilder:
                          "foreignField": "_id",
                          "as": "user"}},
             {'$unwind': {'path': "$user"}},
-            {'$sort': {'properties.rating_positive': pymongo.DESCENDING,
-                       '_created': pymongo.DESCENDING}},
+            {'$sort': sort},
         ])
 
 
