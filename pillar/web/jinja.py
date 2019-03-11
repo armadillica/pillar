@@ -35,6 +35,10 @@ def format_pretty_duration(s):
     return pretty_duration(s)
 
 
+def format_pretty_duration_fractional(s):
+    return pillar.api.utils.pretty_duration_fractional(s)
+
+
 def format_undertitle(s):
     """Underscore-replacing title filter.
 
@@ -232,6 +236,7 @@ def setup_jinja_env(jinja_env, app_config: dict):
     jinja_env.filters['pretty_date'] = format_pretty_date
     jinja_env.filters['pretty_date_time'] = format_pretty_date_time
     jinja_env.filters['pretty_duration'] = format_pretty_duration
+    jinja_env.filters['pretty_duration_fractional'] = format_pretty_duration_fractional
     jinja_env.filters['undertitle'] = format_undertitle
     jinja_env.filters['hide_none'] = do_hide_none
     jinja_env.filters['pluralize'] = do_pluralize

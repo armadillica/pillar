@@ -63,7 +63,7 @@ def remove_private_keys(document):
     return doc_copy
 
 
-def pretty_duration(seconds):
+def pretty_duration(seconds: typing.Union[None, int, float]):
     if seconds is None:
         return ''
     seconds = round(seconds)
@@ -73,6 +73,27 @@ def pretty_duration(seconds):
         return f'{hours:02}:{minutes:02}:{seconds:02}'
     else:
         return f'{minutes:02}:{seconds:02}'
+
+
+def pretty_duration_fractional(seconds: typing.Union[None, int, float]):
+    if seconds is None:
+        return ''
+
+    # Remove fraction of seconds from the seconds so that the rest is done as integers.
+    seconds, fracs = divmod(seconds, 1)
+    hours, seconds = divmod(int(seconds), 3600)
+    minutes, seconds = divmod(seconds, 60)
+    msec = int(round(fracs * 1000))
+
+    if msec == 0:
+        msec_str = ''
+    else:
+        msec_str = f'.{msec:03}'
+
+    if hours > 0:
+        return f'{hours:02}:{minutes:02}:{seconds:02}{msec_str}'
+    else:
+        return f'{minutes:02}:{seconds:02}{msec_str}'
 
 
 class PillarJSONEncoder(json.JSONEncoder):

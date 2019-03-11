@@ -41,3 +41,12 @@ class MarkdownTest(unittest.TestCase):
             '<h1>Title</h1>\n<p>Before</p>\n'
             '<dl><dt>test</dt><dt>a</dt><dd>b</dd><dt>c</dt><dd>d</dd></dl>\n',
             jinja.do_markdowned({'eek': '# Title\n\nBefore\n{test a="b" c="d"}'}, 'eek'))
+
+    def test_pretty_duration_fractional(self):
+        from pillar.web import jinja
+
+        self.assertEqual('03:04.568', jinja.format_pretty_duration_fractional(184.5678911111))
+        self.assertEqual('02:03:04.568', jinja.format_pretty_duration_fractional(7384.5678911111))
+
+        self.assertEqual('03:04', jinja.format_pretty_duration_fractional(184.00049))
+        self.assertEqual('02:03:04', jinja.format_pretty_duration_fractional(7384.00049))
