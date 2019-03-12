@@ -1,7 +1,7 @@
 @import ../config
 
+$select2-dropdown-width: 180px
 .select2-container
-	width: 100% !important
 	box-sizing: border-box
 	display: inline-block
 	margin: 0
@@ -20,9 +20,8 @@
 			display: block
 			padding-left: 8px
 			padding-right: 20px
-			overflow: hidden
-			text-overflow: ellipsis
-			white-space: nowrap
+			+text-overflow-ellipsis
+			max-width: $select2-dropdown-width
 
 		.select2-selection__clear
 			position: relative
