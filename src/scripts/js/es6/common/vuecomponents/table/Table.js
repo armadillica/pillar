@@ -137,15 +137,24 @@ let PillarTable = Vue.component('pillar-table-base', {
         },
         onItemClicked(clickEvent, itemId) {
             if(!this.canChangeSelectionCB()) return;
-
-            if(this.isMultiSelectClick(clickEvent) && this.canMultiSelect) {
+            if(this.isMultiToggleClick(clickEvent) && this.canMultiSelect) {
                 let slectedIdsWithoutClicked = this.selectedIds.filter(id => id !== itemId);
                 if (slectedIdsWithoutClicked.length < this.selectedIds.length) {
                     this.selectedIds = slectedIdsWithoutClicked;
                 } else {
                     this.selectedIds = [itemId, ...this.selectedIds];
                 }
-            } else {
+            } else if(this.isSelectBetween(clickEvent) && this.canMultiSelect) {
+                if (this.selectedIds.length > 0) {
+                    let betweenA = this.selectedIds[this.selectedIds.length -1];
+                    let betweenB = itemId;
+                    this.selectedIds = this.rowsBetween(betweenA, betweenB).map(it => it.getId());
+
+                } else {
+                    this.selectedIds = [itemId];
+                }
+            }
+            else {
                 if (this.selectedIds.length === 1 && this.selectedIds[0] === itemId) {
                     this.selectedIds = [];
                 } else {
@@ -153,9 +162,26 @@ let PillarTable = Vue.component('pillar-table-base', {
                 }
             }
         },
-        isMultiSelectClick(clickEvent) {
-            return clickEvent.ctrlKey;
+        isSelectBetween(clickEvent) {
+            return clickEvent.shiftKey;
         },
+        isMultiToggleClick(clickEvent) {
+            return clickEvent.ctrlKey ||
+                   clickEvent.metaKey; // Mac command key
+        },
+        rowsBetween(id1, id2) {
+            let hasFoundFirst = false;
+            let hasFoundLast = false;
+            return this.visibleRowObjects.filter((it) => {
+                if (hasFoundLast) return false;
+                if (!hasFoundFirst) {
+                    hasFoundFirst = [id1, id2].includes(it.getId());
+                    return hasFoundFirst;
+                }
+                hasFoundLast = [id1, id2].includes(it.getId());
+                return true;
+            })
+        }
     }
 });
 
