@@ -6,6 +6,7 @@ const TEMPLATE =`
     :rowObject="rowObject"
     :column="column"
     :rawCellValue="rawCellValue"
+    @item-clicked="$emit('item-clicked', ...arguments)"
 />
 `;
 

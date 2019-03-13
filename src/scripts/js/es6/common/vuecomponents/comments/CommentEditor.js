@@ -202,7 +202,10 @@ Vue.component('comment-editor', {
             this.unitOfWork(
                 this.thenSubmit()
                 .fail((err) => {toastr.error(pillar.utils.messageFromError(err), 'Failed to submit comment')})
-            );
+            )
+            .then(() => {
+                EventBus.$emit(Events.EDIT_DONE, this.comment._id);
+            });
         },
         thenSubmit() {
             if (this.mode === 'reply') {
@@ -220,7 +223,6 @@ Vue.component('comment-editor', {
             return thenCreateComment(this.parentId, this.msg, this.attachmentsAsObject)
             .then((newComment) => {
                 EventBus.$emit(Events.NEW_COMMENT, newComment);
-                EventBus.$emit(Events.EDIT_DONE, newComment.id );
                 this.cleanUp();
             })
         },
@@ -228,7 +230,6 @@ Vue.component('comment-editor', {
             return thenUpdateComment(this.comment.parent, this.comment.id, this.msg, this.attachmentsAsObject)
             .then((updatedComment) => {
                 EventBus.$emit(Events.UPDATED_COMMENT, updatedComment);
-                EventBus.$emit(Events.EDIT_DONE, updatedComment.id);
                 this.cleanUp();
             })
         },

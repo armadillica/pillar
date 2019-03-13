@@ -91,6 +91,9 @@ Vue.component('comments-tree', {
             } else {
                 $(document).trigger('pillar:workStop');
             }
+        },
+        parentId() {
+            this.fetchComments();
         }
     },
     created() {
@@ -98,24 +101,31 @@ Vue.component('comments-tree', {
         EventBus.$on(Events.EDIT_DONE, this.showReplyComponent);
         EventBus.$on(Events.NEW_COMMENT, this.onNewComment);
         EventBus.$on(Events.UPDATED_COMMENT, this.onCommentUpdated);
-        this.unitOfWork(
-            thenGetComments(this.parentId)
-            .then((commentsTree) => {
-                this.nbrOfComments = commentsTree['nbr_of_comments'];
-                this.comments = commentsTree['comments'];
-                this.projectId = commentsTree['project'];
-            })
-            .fail((err) => {toastr.error(pillar.utils.messageFromError(err), 'Failed to load comments')})
-            .always(()=>this.showLoadingPlaceholder = false)
-        );
+        this.fetchComments()
     },
     beforeDestroy() {
         EventBus.$off(Events.BEFORE_SHOW_EDITOR, this.doHideEditors);
         EventBus.$off(Events.EDIT_DONE, this.showReplyComponent);
         EventBus.$off(Events.NEW_COMMENT, this.onNewComment);
         EventBus.$off(Events.UPDATED_COMMENT, this.onCommentUpdated);
+        if(this.isBusyWorking) {
+            $(document).trigger('pillar:workStop');
+        }
     },
     methods: {
+        fetchComments() {
+            this.showLoadingPlaceholder = true;
+            this.unitOfWork(
+                thenGetComments(this.parentId)
+                .then((commentsTree) => {
+                    this.nbrOfComments = commentsTree['nbr_of_comments'];
+                    this.comments = commentsTree['comments'];
+                    this.projectId = commentsTree['project'];
+                })
+                .fail((err) => {toastr.error(pillar.utils.messageFromError(err), 'Failed to load comments')})
+                .always(()=>this.showLoadingPlaceholder = false)
+            );
+        },
         doHideEditors() {
             this.replyHidden = true;
         },
@@ -134,6 +144,7 @@ Vue.component('comments-tree', {
                 parentArray = parentComment.replies;
             }
             parentArray.unshift(newComment);
+            this.$emit('new-comment');
         },
         onCommentUpdated(updatedComment) {
             let commentInTree = this.findComment(this.comments, (comment) => {

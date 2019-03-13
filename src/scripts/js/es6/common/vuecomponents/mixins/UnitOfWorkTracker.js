@@ -39,6 +39,11 @@ var UnitOfWorkTracker = {
             }
         }
     },
+    beforeDestroy() {
+        if(this.unitOfWorkCounter !== 0) {
+            this.$emit('unit-of-work', -this.unitOfWorkCounter);
+        }
+    },
     methods: {
         unitOfWork(promise) {
             this.unitOfWorkBegin();

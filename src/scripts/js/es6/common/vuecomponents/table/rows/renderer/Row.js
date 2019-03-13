@@ -1,14 +1,17 @@
 import '../../cells/renderer/CellProxy'
 
+
 const TEMPLATE =`
 <div class="pillar-table-row"
     :class="rowClasses"
+    @click.prevent.stop="$emit('item-clicked', arguments[0], rowObject.getId())"
 >
     <pillar-cell-proxy
         v-for="c in columns"
         :rowObject="rowObject"
         :column="c"
         :key="c._id"
+        @item-clicked="$emit('item-clicked', ...arguments)"
     />
 </div>
 `;
@@ -21,7 +24,9 @@ Vue.component('pillar-table-row', {
     },
     computed: {
         rowClasses() {
-            return this.rowObject.getRowClasses();
+            let classes = this.rowObject.getRowClasses()
+            classes['active'] = this.rowObject.isSelected;
+            return classes;
         }
-    }
+    },
 });

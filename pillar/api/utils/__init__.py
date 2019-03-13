@@ -223,7 +223,8 @@ def doc_diff(doc1, doc2, *, falsey_is_equal=True, superkey: str = None):
     function won't report differences between DoesNotExist, False, '', and 0.
     """
 
-    private_keys = {'_id', '_etag', '_deleted', '_updated', '_created'}
+    def is_private(key):
+        return str(key).startswith('_')
 
     def combine_key(some_key):
         """Combine this key with the superkey.
@@ -244,7 +245,7 @@ def doc_diff(doc1, doc2, *, falsey_is_equal=True, superkey: str = None):
 
     if isinstance(doc1, dict) and isinstance(doc2, dict):
         for key in set(doc1.keys()).union(set(doc2.keys())):
-            if key in private_keys:
+            if is_private(key):
                 continue
 
             val1 = doc1.get(key, DoesNotExist)
