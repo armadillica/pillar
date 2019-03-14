@@ -152,6 +152,11 @@ let PillarTable = Vue.component('pillar-table-base', {
                 return this.rowsSource.thenInit();
             })
             .then(() => {
+                let currentlySelectedIds = this.selectedItems.map(it => it._id);
+                if (currentlySelectedIds.length > 0) {
+                    // User has clicked on a row while we inited the rows. Keep that selection!
+                    tableState.selectedIds = currentlySelectedIds;
+                }
                 this.rowAndChildObjects.forEach(tableState.applyRowState.bind(tableState));
                 this.isInitialized = true;
             })
