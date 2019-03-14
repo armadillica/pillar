@@ -7,6 +7,9 @@ const TEMPLATE =`
 </div>
 `;
 
+/**
+ * @emits visibleRowObjectsChanged(rowObjects) When the what objects to be visible has changed.
+ */
 let RowFilter = Vue.component('pillar-table-row-filter', {
     template: TEMPLATE,
     props: {

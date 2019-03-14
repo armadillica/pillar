@@ -10,22 +10,39 @@ const TEMPLATE =`
 />
 `;
 
+/**
+ * Renders the cell that the column requests.
+ * 
+ * @emits item-clicked(mouseEvent,itemId) Re-emits if real cell is emitting it
+ */
 let CellProxy = Vue.component('pillar-cell-proxy', {
     template: TEMPLATE,
     props: {
-        column: Object,
-        rowObject: Object
+        column: Object, // ColumnBase
+        rowObject: Object // RowObject
     },
     computed: {
+        /**
+         * Raw unformated cell value
+         */
         rawCellValue() {
             return this.column.getRawCellValue(this.rowObject) || '';
         },
+        /**
+         * Name of the cell render component to be rendered
+         */
         cellRenderer() {
             return this.column.getCellRenderer(this.rowObject);
         },
+        /**
+         * Css classes to apply to the cell
+         */
         cellClasses() {
             return this.column.getCellClasses(this.rawCellValue, this.rowObject);
         },
+        /**
+         * Cell tooltip
+         */
         cellTitle() {
             return this.column.getCellTitle(this.rawCellValue, this.rowObject);
         }

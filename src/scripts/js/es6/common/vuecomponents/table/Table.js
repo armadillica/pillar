@@ -3,7 +3,25 @@ import './rows/renderer/Row'
 import './filter/ColumnFilter'
 import './filter/RowFilter'
 import {UnitOfWorkTracker} from '../mixins/UnitOfWorkTracker'
-import {RowState} from './rows/RowObjectBase'
+
+/**
+ * Table State
+ * 
+ * Used to restore a table to a given state.
+ */
+class TableState {
+    constructor(selectedIds) {
+        this.selectedIds = selectedIds || [];
+    }
+
+    /**
+     * Apply state to row
+     * @param {RowBase} rowObject 
+     */
+    applyRowState(rowObject) {
+        rowObject.isSelected = this.selectedIds.includes(rowObject.getId());
+    }
+}
 
 const TEMPLATE =`
 <div class="pillar-table-container"
@@ -40,6 +58,20 @@ const TEMPLATE =`
 </div>
 `;
 
+/**
+ * The table renders RowObject instances for the rows, and ColumnBase instances for the Columns.
+ * Extend the table to fit your needs. 
+ * 
+ * Usage:
+ * Extend RowBase to wrap the data you want in your row
+ * Extend ColumnBase once per column type you need
+ * Extend RowObjectsSourceBase to fetch and initialize your rows
+ * Extend ColumnFactoryBase to create the rows for your table
+ * Extend This Table with your ColumnFactory and RowSource
+ * 
+ * @emits isInitialized When all rows has been fetched, and are initialized.
+ * @emits selectItemsChanged(selectedItems) When selected rows has changed.
+ */
 let PillarTable = Vue.component('pillar-table-base', {
     template: TEMPLATE,
     mixins: [UnitOfWorkTracker],
@@ -64,15 +96,18 @@ let PillarTable = Vue.component('pillar-table-base', {
             visibleRowObjects: [],
             rowsSource: {},
             isInitialized: false,
-            compareRows: (row1, row2) => 0
+            compareRowsCB: (row1, row2) => 0
         }
     },
     computed: {
         rowObjects() {
             return this.rowsSource.rowObjects || [];
         },
+        /**
+         * Rows sorted with a column sorter
+         */
         sortedRowObjects() {
-            return this.rowObjects.concat().sort(this.compareRows);
+            return this.rowObjects.concat().sort(this.compareRowsCB);
         },
         rowAndChildObjects() {
             let all = [];
@@ -105,19 +140,19 @@ let PillarTable = Vue.component('pillar-table-base', {
         let columnFactory = new this.$options.columnFactory(this.projectId);
         this.rowsSource = new this.$options.rowsSource(this.projectId);
 
-        let rowState = new RowState(this.selectedIds);
+        let tableState = new TableState(this.selectedIds);
 
         this.unitOfWork(
             Promise.all([
                 columnFactory.thenGetColumns(),
-                this.rowsSource.thenFetchObjects()
+                this.rowsSource.thenGetRowObjects()
             ])
             .then((resp) => {
                 this.columns = resp[0];
                 return this.rowsSource.thenInit();
             })
             .then(() => {
-                this.rowAndChildObjects.forEach(rowState.applyState.bind(rowState));
+                this.rowAndChildObjects.forEach(tableState.applyRowState.bind(tableState));
                 this.isInitialized = true;
             })
         );
@@ -133,10 +168,11 @@ let PillarTable = Vue.component('pillar-table-base', {
             function compareRows(r1, r2) {
                 return column.compareRows(r1, r2) * direction;
             }
-            this.compareRows = compareRows;
+            this.compareRowsCB = compareRows;
         },
         onItemClicked(clickEvent, itemId) {
             if(!this.canChangeSelectionCB()) return;
+
             if(this.isMultiToggleClick(clickEvent) && this.canMultiSelect) {
                 let slectedIdsWithoutClicked = this.selectedIds.filter(id => id !== itemId);
                 if (slectedIdsWithoutClicked.length < this.selectedIds.length) {
@@ -144,7 +180,7 @@ let PillarTable = Vue.component('pillar-table-base', {
                 } else {
                     this.selectedIds = [itemId, ...this.selectedIds];
                 }
-            } else if(this.isSelectBetween(clickEvent) && this.canMultiSelect) {
+            } else if(this.isSelectBetweenClick(clickEvent) && this.canMultiSelect) {
                 if (this.selectedIds.length > 0) {
                     let betweenA = this.selectedIds[this.selectedIds.length -1];
                     let betweenB = itemId;
@@ -162,13 +198,19 @@ let PillarTable = Vue.component('pillar-table-base', {
                 }
             }
         },
-        isSelectBetween(clickEvent) {
+        isSelectBetweenClick(clickEvent) {
             return clickEvent.shiftKey;
         },
         isMultiToggleClick(clickEvent) {
             return clickEvent.ctrlKey ||
                    clickEvent.metaKey; // Mac command key
         },
+        /**
+         * Get visible rows between id1 and id2
+         * @param {String} id1 
+         * @param {String} id2 
+         * @returns {Array(RowObjects)}
+         */
         rowsBetween(id1, id2) {
             let hasFoundFirst = false;
             let hasFoundLast = false;
@@ -185,4 +227,4 @@ let PillarTable = Vue.component('pillar-table-base', {
     }
 });
 
-export { PillarTable }
+export { PillarTable, TableState }

@@ -1,10 +1,16 @@
+/**
+ * Provides the columns that are available in a table.
+ */
 class ColumnFactoryBase{
     constructor(projectId) {
         this.projectId = projectId;
         this.projectPromise;
     }
 
-    // Override this
+    /**
+     * To be overridden for your purposes
+     * @returns {Promise(ColumnBase)} The columns that are available in the table.
+     */
     thenGetColumns() {
         throw Error('Not implemented')
     }
@@ -19,3 +25,4 @@ class ColumnFactoryBase{
 }
 
 export { ColumnFactoryBase }
+

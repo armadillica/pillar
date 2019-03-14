@@ -15,7 +15,9 @@ const TEMPLATE =`
     />
 </div>
 `;
-
+/**
+ * @emits item-clicked(mouseEvent,itemId) When a RowObject has been clicked
+ */
 Vue.component('pillar-table-row', {
     template: TEMPLATE,
     props: {

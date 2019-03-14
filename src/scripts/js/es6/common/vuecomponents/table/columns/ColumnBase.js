@@ -1,5 +1,9 @@
 import { CellDefault } from '../cells/renderer/CellDefault'
 
+/**
+ * Column logic
+ */
+
 let nextColumnId = 0;
 export class ColumnBase {
     constructor(displayName, columnType) {
@@ -13,13 +17,18 @@ export class ColumnBase {
 
     /**
      * 
-     * @param {*} rowObject 
+     * @param {RowObject} rowObject 
      * @returns {String} Name of the Cell renderer component
      */
     getCellRenderer(rowObject) {
         return CellDefault.options.name;
     }
 
+    /**
+     * 
+     * @param {RowObject} rowObject 
+     * @returns {*} Raw unformated value
+     */
     getRawCellValue(rowObject) {
         // Should be overridden
         throw Error('Not implemented');
@@ -38,7 +47,7 @@ export class ColumnBase {
 
     /**
      * Object with css classes to use on the header cell
-     * @returns {Any} Object with css classes
+     * @returns {Object} Object with css classes
      */
     getHeaderCellClasses() {
         // Should be overridden

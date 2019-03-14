@@ -25,14 +25,27 @@ const TEMPLATE =`
 </div>
 `;
 
+class ColumnState{
+    constructor(id, displayName, isVisible) {
+        this.id = id;
+        this.displayName = displayName;
+        this.isVisible = isVisible;
+    }
+}
+
+/**
+ * Component to select what columns to render in the table.
+ * 
+ * @emits visibleColumnsChanged(columns) When visible columns has changed
+ */
 let Filter = Vue.component('pillar-table-column-filter', {
     template: TEMPLATE,
     props: {
-        columns: Array,
+        columns: Array, // Instances of ColumnBase
     },
     data() {
         return {
-            columnStates: [],
+            columnStates: [], // Instances of ColumnState
         }
     },
     computed: {
@@ -57,18 +70,16 @@ let Filter = Vue.component('pillar-table-column-filter', {
         setColumnStates() {
             return this.columns.reduce((states, c) => {
                 if (!c.isMandatory) {
-                    states.push({
-                        _id: c._id,
-                        displayName: c.displayName,
-                        isVisible: true,
-                    });
+                    states.push(
+                        new ColumnState(c._id, c.displayName, true)
+                        );
                 }
                 return states;
             }, [])
         },
         isColumnStateVisible(column) {
             for (let state of this.columnStates) {
-                if (state._id === column._id) {
+                if (state.id === column._id) {
                     return state.isVisible;
                 }
             }

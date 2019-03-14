@@ -22,6 +22,11 @@ const TEMPLATE =`
 </div>
 `;
 
+/**
+ * A cell in the Header of the table
+ * 
+ * @emits sort(column,direction) When user clicks column sort arrows.
+ */
 Vue.component('pillar-head-cell', {
     template: TEMPLATE,
     props: {

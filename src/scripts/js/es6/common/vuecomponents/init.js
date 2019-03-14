@@ -2,13 +2,13 @@ import './comments/CommentTree'
 import './customdirectives/click-outside'
 import { UnitOfWorkTracker } from './mixins/UnitOfWorkTracker'
 import { BrowserHistoryState, StateSaveMode } from './mixins/BrowserHistoryState'
-import { PillarTable } from './table/Table'
+import { PillarTable, TableState } from './table/Table'
 import { CellPrettyDate } from './table/cells/renderer/CellPrettyDate'
 import { CellDefault } from './table/cells/renderer/CellDefault'
 import { ColumnBase } from './table/columns/ColumnBase'
 import { ColumnFactoryBase } from './table/columns/ColumnFactoryBase'
 import { RowObjectsSourceBase } from './table/rows/RowObjectsSourceBase'
-import { RowBase, RowState } from './table/rows/RowObjectBase'
+import { RowBase } from './table/rows/RowObjectBase'
 import { RowFilter } from './table/filter/RowFilter'
 
 let mixins = {
@@ -19,6 +19,7 @@ let mixins = {
 
 let table = {
     PillarTable,
+    TableState,
     columns: {
         ColumnBase,
         ColumnFactoryBase,
@@ -32,7 +33,6 @@ let table = {
     rows: {
         RowObjectsSourceBase,
         RowBase,
-        RowState,
     },
     filter: {
         RowFilter

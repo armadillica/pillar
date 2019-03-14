@@ -4,6 +4,10 @@ const TEMPLATE =`
 </div>
 `;
 
+/**
+ * Default cell renderer. Takes raw cell value and formats it.
+ * Override for custom formatting of value.
+ */
 let CellDefault = Vue.component('pillar-cell-default', {
     template: TEMPLATE,
     props: {
