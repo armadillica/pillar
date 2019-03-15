@@ -75,8 +75,6 @@ const TEMPLATE =`
 let PillarTable = Vue.component('pillar-table-base', {
     template: TEMPLATE,
     mixins: [UnitOfWorkTracker],
-    // columnFactory,
-    // rowsSource,
     props: {
         projectId: String,
         selectedIds: Array,
@@ -94,7 +92,8 @@ let PillarTable = Vue.component('pillar-table-base', {
             columns: [],
             visibleColumns: [],
             visibleRowObjects: [],
-            rowsSource: {},
+            rowsSource: undefined, // Override with your implementations of ColumnFactoryBase
+            columnFactory: undefined, // Override with your implementations of RowSource
             isInitialized: false,
             compareRowsCB: (row1, row2) => 0
         }
@@ -137,14 +136,11 @@ let PillarTable = Vue.component('pillar-table-base', {
         }
     },
     created() {
-        let columnFactory = new this.$options.columnFactory(this.projectId);
-        this.rowsSource = new this.$options.rowsSource(this.projectId);
-
         let tableState = new TableState(this.selectedIds);
 
         this.unitOfWork(
             Promise.all([
-                columnFactory.thenGetColumns(),
+                this.columnFactory.thenGetColumns(),
                 this.rowsSource.thenGetRowObjects()
             ])
             .then((resp) => {
@@ -160,6 +156,7 @@ let PillarTable = Vue.component('pillar-table-base', {
                 this.rowAndChildObjects.forEach(tableState.applyRowState.bind(tableState));
                 this.isInitialized = true;
             })
+            .catch((err) => {toastr.error(pillar.utils.messageFromError(err), 'Loading table failed')})
         );
     },
     methods: {

@@ -3,8 +3,7 @@
  * Extend to fit your purpose.
  */
 class RowObjectsSourceBase {
-    constructor(projectId) {
-        this.projectId = projectId;
+    constructor() {
         this.rowObjects = [];
     }
 
