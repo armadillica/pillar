@@ -289,7 +289,8 @@ def require_login(*, require_roles=set(),
                   require_cap='',
                   require_all=False,
                   redirect_to_login=False,
-                  error_view=None):
+                  error_view=None,
+                  error_headers: typing.Optional[typing.Dict[str, str]]=None):
     """Decorator that enforces users to authenticate.
 
     Optionally only allows access to users with a certain role and/or capability.
@@ -313,6 +314,7 @@ def require_login(*, require_roles=set(),
         requests, and mimicks the flask_login behaviour.
     :param error_view: Callable that returns a Flask response object. This is
         sent back to the client instead of the default 403 Forbidden.
+    :param error_headers: HTTP headers to include in error responses.
     """
 
     from flask import request, redirect, url_for, Response
@@ -331,9 +333,18 @@ def require_login(*, require_roles=set(),
 
     def render_error() -> Response:
         if error_view is None:
-            abort(403)
-        resp: Response = error_view()
+            resp = Forbidden().get_response()
+        else:
+            resp = error_view()
         resp.status_code = 403
+        if error_headers:
+            for header_name, header_value in error_headers.items():
+                resp.headers.set(header_name, header_value)
+
+            if 'Access-Control-Allow-Origin' in error_headers:
+                origin = request.headers.get('Origin', '')
+                resp.headers.set('Access-Control-Allow-Origin', origin)
+
         return resp
 
     def decorator(func):
