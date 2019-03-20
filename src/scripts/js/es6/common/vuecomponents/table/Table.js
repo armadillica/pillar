@@ -76,8 +76,10 @@ let PillarTable = Vue.component('pillar-table-base', {
     template: TEMPLATE,
     mixins: [UnitOfWorkTracker],
     props: {
-        projectId: String,
-        selectedIds: Array,
+        selectedIds: {
+            type: Array,
+            default: []
+        },
         canChangeSelectionCB: {
             type: Function,
             default: () => true
