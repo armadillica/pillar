@@ -26,9 +26,7 @@ Vue.component('pillar-table-row', {
     },
     computed: {
         rowClasses() {
-            let classes = this.rowObject.getRowClasses()
-            classes['active'] = this.rowObject.isSelected;
-            return classes;
+            return this.rowObject.getRowClasses();
         }
     },
 });

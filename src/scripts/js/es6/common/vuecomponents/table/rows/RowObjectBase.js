@@ -5,6 +5,7 @@ class RowBase {
     constructor(underlyingObject) {
         this.underlyingObject = underlyingObject;
         this.isInitialized = false;
+        this.isCorrupt = false;
         this.isSelected = false;
     }
 
@@ -14,7 +15,12 @@ class RowBase {
     thenInit() {
         return this._thenInitImpl()
             .then(() => {
-                this.isInitialized = true
+                this.isInitialized = true;
+            })
+            .catch((err) => {
+                console.warn(err);
+                this.isCorrupt = true;
+                throw err;
             })
     }
 
@@ -42,7 +48,9 @@ class RowBase {
      */
     getRowClasses() {
         return {
-            "is-busy": !this.isInitialized
+            "active": this.isSelected,
+            "is-busy": !this.isInitialized,
+            "is-corrupt": this.isCorrupt
         }
     }
 
