@@ -1,0 +1,146 @@
+$thumbnail-max-width: 110px
+$thumbnail-max-height: calc(110px * (9/16))
+
+.pillar-table-container
+    background-color: white
+    height: 100%
+
+.pillar-table
+    display: flex
+    flex-direction: column
+    width: 100%
+    height: 95% // TODO: Investigate why some rows are outside screen if 100%
+
+.pillar-table-head
+    display: flex
+    flex-direction: row
+    position: relative
+    box-shadow: 0 5 $color-background-dark
+
+    .cell-content
+        display: flex
+        flex-direction: row
+        align-items: center
+        height: 100%
+        font-size: .9em
+
+        .column-sort
+            display: flex
+            opacity: 0
+            flex-direction: column
+
+            .sort-action
+                &:hover
+                    background-color: $color-background-active
+        &:hover
+            .column-sort
+                opacity: 1
+
+.pillar-table-row-group
+    display: block
+    overflow-y: auto
+    height: 100%
+
+    .pillar-table-row:nth-child(odd)
+        background-color: $color-background-dark
+
+    .pillar-table-row
+        display: flex
+        flex-direction: row
+        transition: all 250ms ease-in-out
+        background-color: $color-background-light
+        cursor: pointer
+
+        &:hover
+            background-color: $color-background-active
+
+        &.is-busy
+            +stripes-animate
+            +stripes(transparent, rgba($color-background-active, .6), -45deg, 4em)
+            animation-duration: 4s
+        
+        &.is-corrupt
+            background-color: $color-warning
+        
+        &.active
+            border-left: 0.5em solid $color-background-active
+
+.pillar-cell
+    display: flex
+    flex-direction: column
+    flex-grow: 1
+    flex-basis: 0
+    overflow: hidden
+    white-space: nowrap
+    text-overflow: ellipsis
+    justify-content: center
+
+    &.highlight
+        background-color: rgba($color-background-active, .4)
+
+    &.warning
+        background-color: rgba($color-warning, .4)
+    
+    &.header-cell
+        text-transform: capitalize
+        color: $color-text-dark-secondary
+
+    &.thumbnail
+        flex: 0
+        flex-basis: $thumbnail-max-width
+        text-align: center
+        
+        img
+            max-width: $thumbnail-max-width
+            height: auto
+
+    a
+        overflow: hidden
+        text-overflow: ellipsis
+
+    @include status-color-property(background-color, '', '')
+
+    
+.pillar-table-menu
+    display: flex
+    flex-direction: row
+
+    .settings-menu
+        display: flex
+        flex-direction: column
+        position: absolute
+        background-color: white
+        list-style: none
+        margin: 0
+        padding: 0
+        text-transform: capitalize
+        z-index: $z-index-base + 1
+        box-shadow: 0 2px 5px rgba(black, .4)
+
+    .pillar-table-row-filter
+        display: flex
+        flex-direction: row
+
+    .pillar-table-actions
+        margin-left: auto
+        
+        .action
+            cursor: pointer
+            vertical-align: middle
+            color: $color-primary
+            border: none
+            background: none
+
+            &:hover
+                text-decoration-line: underline
+    
+    .pillar-table-column-filter
+        margin-left: auto
+        .settings-menu
+            right: 0em
+
+.pillar-table-row-item 
+    display: inline-block
+
+.pillar-table-row-enter, .pillar-table-row-leave-to
+    opacity: 0
