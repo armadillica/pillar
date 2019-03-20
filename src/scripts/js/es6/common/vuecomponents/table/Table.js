@@ -129,7 +129,11 @@ let PillarTable = Vue.component('pillar-table-base', {
             });
         },
         selectedItems(newValue, oldValue) {
-            this.$emit('selectItemsChanged', newValue);
+            // Deep compare to avoid spamming un needed events
+            let hasChanged =  JSON.stringify(newValue ) === JSON.stringify(oldValue);
+            if (!hasChanged) {
+                this.$emit('selectItemsChanged', newValue);
+            }
         },
         isInitialized(newValue) {
             if (newValue) {
