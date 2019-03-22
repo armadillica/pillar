@@ -199,11 +199,7 @@ let PillarTable = Vue.component('pillar-table-base', {
                 }
             }
             else {
-                if (this.selectedIds.length === 1 && this.selectedIds[0] === itemId) {
-                    this.selectedIds = [];
-                } else {
-                    this.selectedIds = [itemId];
-                }
+                this.selectedIds = [itemId];
             }
         },
         isSelectBetweenClick(clickEvent) {
