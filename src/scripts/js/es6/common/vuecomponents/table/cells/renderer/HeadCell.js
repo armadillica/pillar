@@ -5,7 +5,11 @@ const TEMPLATE =`
     @mouseleave="onMouseLeave"
 >
     <div class="cell-content">
-        {{ column.displayName }}
+        <div class="header-label"
+            :title="column.displayName"
+        >
+            {{ column.displayName }}
+        </div>
         <div class="column-sort"
             v-if="column.isSortable"
         >
