@@ -46,14 +46,23 @@ export class ColumnBase {
     }
 
     /**
+     * Object with css classes to use on the column
+     * @returns {Object} Object with css classes
+     */
+    getColumnClasses() {
+        // Should be overridden
+        let classes = {}
+        classes[this.columnType] = true;
+        return classes;
+    }
+
+    /**
      * Object with css classes to use on the header cell
      * @returns {Object} Object with css classes
      */
     getHeaderCellClasses() {
         // Should be overridden
-        let classes = {}
-        classes[this.columnType] = true;
-        return classes;
+        return this.getColumnClasses();
     }
 
     /**
@@ -64,8 +73,7 @@ export class ColumnBase {
      */
     getCellClasses(rawCellValue, rowObject) {
         // Should be overridden
-        let classes = {}
-        classes[this.columnType] = true;
+        let classes = this.getColumnClasses();
         classes['highlight'] = !!this.isHighLighted;
         return classes;
     }
