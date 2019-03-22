@@ -41,6 +41,9 @@ $thumbnail-max-height: calc(110px * (9/16))
     overflow-y: auto
     height: 100%
 
+    .pillar-cell
+        padding-left: 0.3em
+
     .pillar-table-row:nth-child(odd)
         background-color: $color-background-dark
 
@@ -74,6 +77,7 @@ $thumbnail-max-height: calc(110px * (9/16))
     white-space: nowrap
     text-overflow: ellipsis
     justify-content: center
+    min-width: 2em
 
     &.highlight
         background-color: rgba($color-background-active, .4)
@@ -84,6 +88,9 @@ $thumbnail-max-height: calc(110px * (9/16))
     &.header-cell
         text-transform: capitalize
         color: $color-text-dark-secondary
+
+        .header-label
+            overflow: hidden
 
     &.thumbnail
         flex: 0
