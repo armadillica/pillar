@@ -84,4 +84,18 @@ mixin timeline(projectid, sortdirection)
 			i.pi-spin.spin
 
 
+//- Category listing (Learn, Libraries, etc).
+mixin category_list_item(title, text, url, image)
+	.row.pb-2.my-2
+		.col-md-3
+			a(href=url, title=title)
+				img.img-fluid(alt=title, src=image)
+		.col-md-9
+			a(href=url, title=title)
+				h3.font-weight-bold
+					=title
+			.lead
+				=text
 
+			if block
+				block
