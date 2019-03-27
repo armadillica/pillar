@@ -25,6 +25,10 @@ class EventName {
     static deleted(nodeId) {
         return `pillar:node:${nodeId}:deleted`;
     }
+
+    static loaded() {
+        return `pillar:node:loaded`;
+    }
 }
 
 function trigger(eventName, data) {
@@ -139,6 +143,23 @@ class Nodes {
             EventName.deleted(nodeId),
             cb);
     }
+
+    static triggerLoaded(nodeId) {
+        trigger(EventName.loaded(), {nodeId: nodeId});
+    }
+
+    /**
+     * Listen to events of nodes being loaded for display
+     * @param {Function(Event)} cb
+     */
+    static onLoaded(cb) {
+        on(EventName.loaded(), cb);
+    }
+
+    static offLoaded(cb) {
+        off(EventName.loaded(), cb);
+    }
+
 }
 
 export { Nodes }

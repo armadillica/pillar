@@ -1,3 +1,4 @@
+import './breadcrumbs/Breadcrumbs'
 import './comments/CommentTree'
 import './customdirectives/click-outside'
 import { UnitOfWorkTracker } from './mixins/UnitOfWorkTracker'
