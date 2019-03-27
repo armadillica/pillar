@@ -23,3 +23,16 @@ body.is-mobile
 	.timeline
 		.js-asset-list
 			@extend .card-deck-vertical
+
+.timeline-dark
+	.group-date
+		color: $color-text-light-hint
+
+	.group-title
+		@extend .bg-transparent
+		border-bottom-color: rgba($color-background, .2) !important
+		color: rgba($color-background, .6)
+
+	blockquote
+		background-color: rgba($color-background, .1)
+		box-shadow: inset 5px 0 0 rgba($color-background, .2)
