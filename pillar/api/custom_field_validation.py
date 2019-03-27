@@ -161,7 +161,7 @@ class ValidateCustomFields(Validator):
         """
         Cache markdown as html.
 
-        :param markdown_field: name of the field containing mark down
+        :param markdown_field: name of the field containing Markdown
         :return: html string
         """
         my_log = log.getChild('_normalize_coerce_markdown')
