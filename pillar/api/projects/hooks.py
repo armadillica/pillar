@@ -253,25 +253,29 @@ def parse_markdown(project, original=None):
     schema = current_app.config['DOMAIN']['projects']['schema']
 
     def find_markdown_fields(schema, project):
-        """Find and process all makrdown validated fields."""
-        for k, v in schema.items():
-            if not isinstance(v, dict):
+        """Find and process all Markdown coerced fields.
+
+        - look for fields with a 'coerce': 'markdown' property
+        - parse the name of the field and generate the sibling field name (_<field_name>_html -> <field_name>)
+        - parse the content of the <field_name> field as markdown and save it in _<field_name>_html
+        """
+        for field_name, field_value in schema.items():
+            if not isinstance(field_value, dict):
+                continue
+            if field_value.get('coerce') != 'markdown':
+                continue
+            if field_name not in project:
                 continue
 
-            if v.get('validator') == 'markdown':
-                # If there is a match with the validator: markdown pair, assign the sibling
-                # property (following the naming convention _<property>_html)
-                # the processed value.
-                if k in project:
-                    html = pillar.markdown.markdown(project[k])
-                    field_name = pillar.markdown.cache_field_name(k)
-                    project[field_name] = html
-            if isinstance(project, dict) and k in project:
-                find_markdown_fields(v, project[k])
+            # Construct markdown source field name (strip the leading '_' and the trailing '_html')
+            source_field_name = field_name[1:-5]
+            html = pillar.markdown.markdown(project[source_field_name])
+            project[field_name] = html
+
+            if isinstance(project, dict) and field_name in project:
+                find_markdown_fields(field_value, project[field_name])
 
     find_markdown_fields(schema, project)
-
-    return 'ok'
 
 
 def parse_markdowns(items):
