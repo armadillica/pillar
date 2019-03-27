@@ -1,5 +1,3 @@
-from unittest import mock
-
 from bson import ObjectId
 from dateutil.parser import parse
 from flask import Markup
