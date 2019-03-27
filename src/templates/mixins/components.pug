@@ -11,7 +11,7 @@ mixin jumbotron(title, text, image, url)
 			href=url)&attributes(attributes)
 			.container
 				.row
-					.col-md-9
+					.col-md-8
 						if title
 							.display-4.text-uppercase.font-weight-bold
 								=title
@@ -24,7 +24,7 @@ mixin jumbotron(title, text, image, url)
 		.jumbotron.text-white(style='background-image: url(' + image + ');')&attributes(attributes)
 			.container
 				.row
-					.col-md-9
+					.col-md-6
 						if title
 							.display-4.text-uppercase.font-weight-bold
 								=title
