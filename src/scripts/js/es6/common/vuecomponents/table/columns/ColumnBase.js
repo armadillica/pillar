@@ -4,13 +4,12 @@ import { CellDefault } from '../cells/renderer/CellDefault'
  * Column logic
  */
 
-let nextColumnId = 0;
 export class ColumnBase {
     constructor(displayName, columnType) {
-        this._id = nextColumnId++;
         this.displayName = displayName;
         this.columnType = columnType;
         this.isMandatory = false;
+        this.includedByDefault = true;
         this.isSortable = true;
         this.isHighLighted = 0;
     }

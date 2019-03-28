@@ -112,6 +112,9 @@ $thumbnail-max-height: calc(110px * (9/16))
     display: flex
     flex-direction: row
 
+    .action
+        cursor: pointer
+
     .settings-menu
         display: flex
         flex-direction: column
@@ -123,10 +126,17 @@ $thumbnail-max-height: calc(110px * (9/16))
         text-transform: capitalize
         z-index: $z-index-base + 1
         box-shadow: 0 2px 5px rgba(black, .4)
+        user-select: none
 
     .pillar-table-row-filter
         display: flex
         flex-direction: row
+    
+        input.filter-active
+            background-color: rgba($color-info, .50)
+
+        .pi-filter.filter-active
+            color: $color-info
 
     .pillar-table-actions
         margin-left: auto

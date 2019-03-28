@@ -1,8 +1,9 @@
 import './rows/renderer/Head'
 import './rows/renderer/Row'
-import './filter/ColumnFilter'
-import './filter/RowFilter'
+import './columns/filter/ColumnFilter'
+import './rows/filter/RowFilter'
 import {UnitOfWorkTracker} from '../mixins/UnitOfWorkTracker'
+import {RowFilter} from './rows/filter/RowFilter'
 
 /**
  * Table State
@@ -23,6 +24,19 @@ class TableState {
     }
 }
 
+class ComponentState {
+    /**
+     * Serializable state of this component.
+     * 
+     * @param {Object} rowFilter
+     * @param {Object} columnFilter
+     */
+    constructor(rowFilter, columnFilter) {
+        this.rowFilter = rowFilter;
+        this.columnFilter = columnFilter
+    }
+}
+
 const TEMPLATE =`
 <div class="pillar-table-container"
     :class="$options.name"
@@ -30,14 +44,19 @@ const TEMPLATE =`
     <div class="pillar-table-menu">
         <pillar-table-row-filter
             :rowObjects="sortedRowObjects"
+            :config="rowFilterConfig"
+            :componentState="(componentState || {}).rowFilter"
             @visibleRowObjectsChanged="onVisibleRowObjectsChanged"
+            @componentStateChanged="onRowFilterStateChanged"
         />
         <pillar-table-actions
             @item-clicked="onItemClicked"
         />
         <pillar-table-column-filter
             :columns="columns"
+            :componentState="(componentState || {}).columnFilter"
             @visibleColumnsChanged="onVisibleColumnsChanged"
+            @componentStateChanged="onColumnFilterStateChanged"
         />
     </div>
     <div class="pillar-table">
@@ -71,6 +90,7 @@ const TEMPLATE =`
  * 
  * @emits isInitialized When all rows has been fetched, and are initialized.
  * @emits selectItemsChanged(selectedItems) When selected rows has changed.
+ * @emits componentStateChanged(newState) When table state changed. Filtered rows, visible columns...
  */
 let PillarTable = Vue.component('pillar-table-base', {
     template: TEMPLATE,
@@ -88,15 +108,23 @@ let PillarTable = Vue.component('pillar-table-base', {
             type: Boolean,
             default: true
         },
+        componentState: {
+            // Instance of ComponentState
+            type: Object,
+            default: undefined
+        }
     },
     data: function() {
         return {
             columns: [],
             visibleColumns: [],
             visibleRowObjects: [],
-            rowsSource: undefined, // Override with your implementations of ColumnFactoryBase
-            columnFactory: undefined, // Override with your implementations of RowSource
+            rowsSource: undefined, // Override with your implementations of RowSource
+            columnFactory: undefined, // Override with your implementations of ColumnFactoryBase
+            rowFilterConfig: undefined,
             isInitialized: false,
+            rowFilterState: (this.componentState || {}).rowFilter,
+            columnFilterState: (this.componentState || {}).columnFilter,
             compareRowsCB: (row1, row2) => 0
         }
     },
@@ -120,6 +148,15 @@ let PillarTable = Vue.component('pillar-table-base', {
         selectedItems() {
             return this.rowAndChildObjects.filter(it => it.isSelected)
                 .map(it => it.underlyingObject);
+        },
+        currentComponentState() {
+            if (this.isInitialized) {
+                return new ComponentState(
+                    this.rowFilterState,
+                    this.columnFilterState
+                    );
+            }
+            return undefined;
         }
     },
     watch: {
@@ -130,14 +167,23 @@ let PillarTable = Vue.component('pillar-table-base', {
         },
         selectedItems(newValue, oldValue) {
             // Deep compare to avoid spamming un needed events
-            let hasChanged =  JSON.stringify(newValue ) === JSON.stringify(oldValue);
-            if (!hasChanged) {
+            let hasChanged =  JSON.stringify(newValue ) !== JSON.stringify(oldValue);
+            if (hasChanged) {
                 this.$emit('selectItemsChanged', newValue);
             }
         },
         isInitialized(newValue) {
             if (newValue) {
                 this.$emit('isInitialized');
+            }
+        },
+        currentComponentState(newValue, oldValue) {
+            if (this.isInitialized) {
+                // Deep compare to avoid spamming un needed events
+                let hasChanged =  JSON.stringify(newValue ) !== JSON.stringify(oldValue);
+                if (hasChanged) {
+                    this.$emit('componentStateChanged', newValue);
+                }
             }
         }
     },
@@ -169,8 +215,14 @@ let PillarTable = Vue.component('pillar-table-base', {
         onVisibleColumnsChanged(visibleColumns) {
             this.visibleColumns = visibleColumns;
         },
+        onColumnFilterStateChanged(newComponentState) {
+            this.columnFilterState = newComponentState;
+        },
         onVisibleRowObjectsChanged(visibleRowObjects) {
             this.visibleRowObjects = visibleRowObjects;
+        },
+        onRowFilterStateChanged(newComponentState) {
+            this.rowFilterState = newComponentState;
         },
         onSort(column, direction) {
             function compareRows(r1, r2) {
@@ -228,6 +280,9 @@ let PillarTable = Vue.component('pillar-table-base', {
                 return true;
             })
         }
+    },
+    components: {
+        'pillar-table-row-filter': RowFilter
     }
 });
 

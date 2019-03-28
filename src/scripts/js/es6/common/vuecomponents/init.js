@@ -9,7 +9,11 @@ import { ColumnBase } from './table/columns/ColumnBase'
 import { ColumnFactoryBase } from './table/columns/ColumnFactoryBase'
 import { RowObjectsSourceBase } from './table/rows/RowObjectsSourceBase'
 import { RowBase } from './table/rows/RowObjectBase'
-import { RowFilter } from './table/filter/RowFilter'
+import { RowFilter } from './table/rows/filter/RowFilter'
+import { EnumFilter } from './table/rows/filter/EnumFilter'
+import { StatusFilter } from './table/rows/filter/StatusFilter'
+import { TextFilter } from './table/rows/filter/TextFilter'
+import { NameFilter } from './table/rows/filter/NameFilter'
 
 let mixins = {
     UnitOfWorkTracker,
@@ -31,11 +35,15 @@ let table = {
         }
     },
     rows: {
+        filter: {
+            RowFilter,
+            EnumFilter,
+            StatusFilter,
+            TextFilter,
+            NameFilter
+        },
         RowObjectsSourceBase,
         RowBase,
-    },
-    filter: {
-        RowFilter
     },
 }
 
