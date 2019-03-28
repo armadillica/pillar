@@ -2,7 +2,7 @@ const TEMPLATE = `
 <div class='breadcrumbs' v-if="breadcrumbs.length">
     <ul>
         <li v-for="crumb in breadcrumbs">
-            <a :href="crumb.url" v-if="!crumb._self">{{ crumb.name }}</a>
+            <a :href="crumb.url" v-if="!crumb._self" @click.prevent="navigateToNode(crumb._id)">{{ crumb.name }}</a>
             <template v-else><span>{{ crumb.name }}</span></template>
         </li>
     </ul>
@@ -44,6 +44,9 @@ Vue.component("node-breadcrumbs", {
                 toastr.error(xhrErrorResponseMessage(error), "Unable to load breadcrumbs");
             })
             ;
+        },
+        navigateToNode(nodeId) {
+            this.$emit('navigate', nodeId);
         },
     },
 });
