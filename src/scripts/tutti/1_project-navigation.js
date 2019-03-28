@@ -68,12 +68,17 @@ function containerResizeY(window_height){
 	var container_offset = project_container.offsetTop;
 	var container_height = window_height - container_offset.top;
 	var container_height_wheader = window_height - container_offset;
-	var window_height_minus_nav = window_height - container_offset;
+	var breadcrumbs_height = $('.breadcrumbs-container').first().height();
+	var window_height_minus_nav = (window_height - container_offset);
 
 	if ($(window).width() > 768) {
 		$('#project-container').css(
 			{'max-height': window_height_minus_nav + 'px',
 			 'height': window_height_minus_nav + 'px'}
+		);
+
+		$('#project_context, #project_context-header').css(
+			{'top' : breadcrumbs_height}
 		);
 
 		$('#project_nav-container, #project_tree').css(
