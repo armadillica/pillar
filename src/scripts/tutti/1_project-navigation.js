@@ -93,3 +93,40 @@ function containerResizeY(window_height){
 
 	};
 };
+
+function loadProjectSidebar(){
+
+	var bcloud_ui = Cookies.getJSON('bcloud_ui');
+
+	if (bcloud_ui && bcloud_ui.show_project_sidebar) {
+		showProjectSidebar();
+	} else {
+		hideProjectSidebar();
+	};
+}
+
+function showProjectSidebar(){
+	setJSONCookie('bcloud_ui', 'show_project_sidebar', true);
+
+	$('#project-container').addClass('is-sidebar-visible');
+	$('#project-side-container').removeClass('d-none');
+	$('.breadcrumbs-container .project-sidebar-toggle').hide();
+}
+
+function hideProjectSidebar(){
+	Cookies.remove('bcloud_ui', 'show_project_sidebar');
+
+	$('#project-container').removeClass('is-sidebar-visible');
+	$('#project-side-container').addClass('d-none');
+	$('.breadcrumbs-container .project-sidebar-toggle').show();
+}
+
+function toggleProjectSidebar(){
+	let $projectSidebar = $('#project-side-container');
+
+	if ($projectSidebar.hasClass('d-none')) {
+		showProjectSidebar();
+	} else {
+		hideProjectSidebar();
+	};
+}
