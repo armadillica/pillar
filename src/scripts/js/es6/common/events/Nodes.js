@@ -5,7 +5,9 @@
  * function myCallback(event) {
  *     console.log('Updated node:', event.detail);
  * }
+ * // Register a callback:
  * Nodes.onUpdated('5c1cc4a5a013573d9787164b', myCallback);
+ * // When changing the node, notify the listeners:
  * Nodes.triggerUpdated(myUpdatedNode);
  */
 
