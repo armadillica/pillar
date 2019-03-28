@@ -9,6 +9,7 @@ import { CellDefault } from './table/cells/renderer/CellDefault'
 import { ColumnBase } from './table/columns/ColumnBase'
 import { Created } from './table/columns/Created'
 import { Updated } from './table/columns/Updated'
+import { DateColumnBase } from './table/columns/DateColumnBase'
 import { ColumnFactoryBase } from './table/columns/ColumnFactoryBase'
 import { RowObjectsSourceBase } from './table/rows/RowObjectsSourceBase'
 import { RowBase } from './table/rows/RowObjectBase'
@@ -31,6 +32,7 @@ let table = {
         ColumnBase,
         Created,
         Updated,
+        DateColumnBase,
         ColumnFactoryBase,
     },
     cells: {
