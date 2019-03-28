@@ -7,6 +7,8 @@ import { PillarTable, TableState } from './table/Table'
 import { CellPrettyDate } from './table/cells/renderer/CellPrettyDate'
 import { CellDefault } from './table/cells/renderer/CellDefault'
 import { ColumnBase } from './table/columns/ColumnBase'
+import { Created } from './table/columns/Created'
+import { Updated } from './table/columns/Updated'
 import { ColumnFactoryBase } from './table/columns/ColumnFactoryBase'
 import { RowObjectsSourceBase } from './table/rows/RowObjectsSourceBase'
 import { RowBase } from './table/rows/RowObjectBase'
@@ -18,7 +20,7 @@ import { NameFilter } from './table/rows/filter/NameFilter'
 
 let mixins = {
     UnitOfWorkTracker,
-    BrowserHistoryState, 
+    BrowserHistoryState,
     StateSaveMode
 }
 
@@ -27,6 +29,8 @@ let table = {
     TableState,
     columns: {
         ColumnBase,
+        Created,
+        Updated,
         ColumnFactoryBase,
     },
     cells: {
