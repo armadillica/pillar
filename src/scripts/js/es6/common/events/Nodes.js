@@ -130,7 +130,7 @@ class Nodes {
     }
 
     /**
-     * Listen to events of new nodes where _id === nodeId
+     * Listen to events of nodes being deleted where _id === nodeId
      * @param {String} nodeId 
      * @param {Function(Event)} cb 
      */
