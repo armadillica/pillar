@@ -3,7 +3,7 @@ const TEMPLATE = `
     <ul>
         <li v-for="crumb in breadcrumbs">
             <a :href="crumb.url" v-if="!crumb._self">{{ crumb.name }}</a>
-            <template v-else>{{ crumb.name }}</template>
+            <template v-else><span>{{ crumb.name }}</span></template>
         </li>
     </ul>
 </div>
