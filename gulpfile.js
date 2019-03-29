@@ -107,10 +107,26 @@ function browserify_base(entry) {
     }));
 }
 
+/**
+ * Transcompile and package common modules to be included in tutti.js.
+ *
+ * Example:
+ * src/scripts/js/es6/common/api/init.js
+ * src/scripts/js/es6/common/events/init.js
+ * Everything exported in api/init.js will end up in module pillar.api.*, and everything exported in events/init.js
+ * will end up in pillar.events.*
+ */
 function browserify_common() {
     return glob.sync('src/scripts/js/es6/common/**/init.js').map(browserify_base);
 }
 
+/**
+ * Transcompile and package individual modules.
+ *
+ * Example:
+ * src/scripts/js/es6/individual/coolstuff/init.js
+ * Will create a coolstuff.js and everything exported in init.js will end up in namespace pillar.coolstuff.*
+ */
 gulp.task('scripts_browserify', function(done) {
     glob('src/scripts/js/es6/individual/**/init.js', function(err, files) {
         if(err) done(err);
@@ -128,7 +144,7 @@ gulp.task('scripts_browserify', function(done) {
 });
 
 
-/* Collection of scripts in src/scripts/tutti/ to merge into tutti.min.js
+/* Collection of scripts in src/scripts/tutti/ and src/scripts/js/es6/common/ to merge into tutti.min.js
  * Since it's always loaded, it's only for functions that we want site-wide.
  * It also includes jQuery and Bootstrap (and its dependency popper), since
  * the site doesn't work without it anyway.*/
