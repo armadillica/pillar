@@ -17,6 +17,9 @@ body.svnman, body.edit_node_types, body.search-project
 	z-index: $z-index-base
 
 	&.is-sidebar-visible
+		#project-side-container
+			@extend .d-flex
+
 		.breadcrumbs-container
 			+media-xs
 				left: $project_nav-width-xs
@@ -30,7 +33,7 @@ body.svnman, body.edit_node_types, body.search-project
 				left: $project_nav-width-xl
 
 #project-side-container
-	display: flex
+	display: none
 
 	+media-xs
 		position: fixed

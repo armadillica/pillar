@@ -100,38 +100,39 @@ function containerResizeY(window_height){
 };
 
 function loadProjectSidebar(){
-
 	var bcloud_ui = Cookies.getJSON('bcloud_ui');
 
-	if (bcloud_ui && bcloud_ui.show_project_sidebar) {
-		showProjectSidebar();
-	} else {
+	if (bcloud_ui && bcloud_ui.hide_project_sidebar) {
 		hideProjectSidebar();
+	} else {
+		showProjectSidebar();
 	};
 }
 
 function showProjectSidebar(){
-	setJSONCookie('bcloud_ui', 'show_project_sidebar', true);
+	Cookies.remove('bcloud_ui', 'hide_project_sidebar');
 
 	$('#project-container').addClass('is-sidebar-visible');
-	$('#project-side-container').removeClass('d-none');
+
+	// Hide the toggle button.
 	$('.breadcrumbs-container .project-sidebar-toggle').hide();
 }
 
 function hideProjectSidebar(){
-	Cookies.remove('bcloud_ui', 'show_project_sidebar');
+	setJSONCookie('bcloud_ui', 'hide_project_sidebar', true);
 
 	$('#project-container').removeClass('is-sidebar-visible');
-	$('#project-side-container').addClass('d-none');
+
+	// Show the toggle button.
 	$('.breadcrumbs-container .project-sidebar-toggle').show();
 }
 
 function toggleProjectSidebar(){
-	let $projectSidebar = $('#project-side-container');
+	let $projectContainer = $('#project-container');
 
-	if ($projectSidebar.hasClass('d-none')) {
-		showProjectSidebar();
-	} else {
+	if ($projectContainer.hasClass('is-sidebar-visible')) {
 		hideProjectSidebar();
+	} else {
+		showProjectSidebar();
 	};
 }
