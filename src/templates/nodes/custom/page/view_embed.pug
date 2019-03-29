@@ -5,14 +5,14 @@ include ../../../mixins/components
 | {% block bodyclasses %}{% endblock %}
 
 | {% block body %}
+| {% if node.picture %}
 .expand-image-links.imgs-fluid
-	| {% if node.picture %}
 	+jumbotron(
 		"{{ node.name }}",
 		null,
 		"{{ node.picture.thumbnail('h', api=api) }}",
 		"{{ node.url }}")
-	| {% endif %}
+| {% endif %}
 
 .container.pb-5
 	.row
