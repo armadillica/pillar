@@ -2,7 +2,7 @@
 include ../../../mixins/components
 
 //- Remove custom classes applied by the landing template (that turn background black).
-| {% block bodyclasses %}{% endblock %}
+| {% block bodyclasses %}page{% endblock %}
 
 | {% block body %}
 | {% if project and project.has_method('PUT') %}
