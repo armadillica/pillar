@@ -109,6 +109,11 @@ def view(node_id, extra_template_args: dict=None):
 
     node_type_name = node.node_type
 
+    if node_type_name == 'page':
+        # HACK: The 'edit node' page GETs this endpoint, but for pages it's plain wrong,
+        # so we just redirect to the correct URL.
+        return redirect(url_for_node(node=node))
+
     if node_type_name == 'post' and not request.args.get('embed'):
         # Posts shouldn't be shown at this route (unless viewed embedded, tipically
         # after an edit. Redirect to the correct one.
