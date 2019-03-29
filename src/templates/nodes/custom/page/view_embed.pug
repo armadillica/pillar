@@ -5,6 +5,14 @@ include ../../../mixins/components
 | {% block bodyclasses %}{% endblock %}
 
 | {% block body %}
+| {% if project and project.has_method('PUT') %}
++nav-secondary
+	+nav-secondary-link(
+		href="{{ url_for('nodes.edit', node_id=node._id) }}")
+		i.pi-edit.pr-2
+		span Edit Post
+| {% endif %}
+
 | {% if node.picture %}
 .expand-image-links.imgs-fluid
 	+jumbotron(
