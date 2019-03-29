@@ -1,5 +1,9 @@
 import { ComponentCreatorInterface } from '../component/ComponentCreatorInterface'
 
+/**
+ * Create $elements from user objects
+ * @deprecated use vue instead
+ */
 export class Users extends ComponentCreatorInterface {
     static create$listItem(userDoc) {
         let roles = userDoc.roles || [];

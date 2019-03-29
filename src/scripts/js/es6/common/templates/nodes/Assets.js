@@ -1,6 +1,10 @@
 import { NodesBase } from "./NodesBase";
 import { thenLoadVideoProgress } from '../utils';
 
+/**
+ * Create $element from a node of type asset
+ * @deprecated use vue instead
+ */
 export class Assets extends NodesBase{
     static create$listItem(node) {
         var markIfPublic = true;

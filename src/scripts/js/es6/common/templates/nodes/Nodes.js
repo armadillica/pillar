@@ -3,6 +3,10 @@ import { ComponentCreatorInterface } from '../component/ComponentCreatorInterfac
 
 let CREATE_NODE_ITEM_MAP = {}
 
+/**
+ * Create $element from node object
+ * @deprecated use vue instead
+ */
 export class Nodes extends ComponentCreatorInterface {
     /**
      * Creates a small list item out of a node document
@@ -37,7 +41,7 @@ export class Nodes extends ComponentCreatorInterface {
             let $link = $('<a>')
                 .addClass('btn btn-outline-primary px-5 mb-auto btn-block js-load-next')
                 .attr('href', 'javascript:void(0);')
-                .click((e)=> { 
+                .click((e)=> {
                     let $target = $(e.target);
                     $target.replaceWith(Nodes.createListOf$nodeItems(nodesLeftToRender, loadNext, loadNext));
                  })
