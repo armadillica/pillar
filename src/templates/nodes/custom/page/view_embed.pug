@@ -1,6 +1,8 @@
 | {% extends 'projects/landing.html' %}
 include ../../../mixins/components
 
+//- Remove custom classes applied by the landing template (that turn background black).
+| {% block bodyclasses %}{% endblock %}
 
 | {% block body %}
 .expand-image-links.imgs-fluid
