@@ -167,7 +167,8 @@ class ValidateCustomFields(Validator):
         my_log = log.getChild('_normalize_coerce_markdown')
         mdown = self.document.get(markdown_field, '')
         html = markdown.markdown(mdown)
-        my_log.debug('Generated html for markdown field %s in doc with id %s', markdown_field, id(self.document))
+        my_log.debug('Generated html for markdown field %s in doc with id %s',
+                     markdown_field, id(self.document))
         return html
 
 
