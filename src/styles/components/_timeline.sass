@@ -1,4 +1,10 @@
 .timeline
+
+	// Shown briefly while the timeline is loading.
+	&.placeholder
+		color: $color-text-dark-hint
+		height: 75vh // Timelines are usually long, so scale the placeholder to almost viewport height.
+
 	.group
 		opacity: 0
 		animation: fade-in 500ms forwards

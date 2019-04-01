@@ -80,9 +80,10 @@ mixin timeline(projectid, sortdirection)
 		data-project-id=projectid,
 		data-sort-dir=sortdirection,
 	)
-		// TODO: Make nicer reuseable placeholder
-		.h3.text-center.text-secondary.p-5.border-bottom
-			i.pi-spin.spin
+		.d-flex.w-100.h-100
+			//- TODO: Make nicer reuseable placeholder
+			.h3.text-muted.m-auto
+				i.pi-spin.spin
 
 
 //- Category listing (Learn, Libraries, etc).
