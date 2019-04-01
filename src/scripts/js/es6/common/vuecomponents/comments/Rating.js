@@ -45,7 +45,7 @@ Vue.component('comment-rating', {
                 .then((updatedComment) => {
                     EventBus.$emit(Events.UPDATED_COMMENT, updatedComment);
                 })
-                .fail((err) => {toastr.error(pillar.utils.messageFromError(err), 'Faied to vote on comment')})
+                .fail((err) => {toastr.error(pillar.utils.messageFromError(err), 'Failed to vote on comment')})
             );
         }
     }
