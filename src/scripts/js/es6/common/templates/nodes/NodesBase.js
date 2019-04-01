@@ -1,6 +1,9 @@
 import { prettyDate } from '../../utils/prettydate';
 import { ComponentCreatorInterface } from '../component/ComponentCreatorInterface'
 
+/**
+ * @deprecated use vue instead
+ */
 export class NodesBase extends ComponentCreatorInterface {
     static create$listItem(node) {
         let nid = (node._id || node.objectID); // To support both mongo and elastic nodes

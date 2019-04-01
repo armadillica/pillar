@@ -1,5 +1,9 @@
 import { NodesBase } from "./NodesBase";
 
+/**
+ * Create $element from a node of type post
+ * @deprecated use vue instead
+ */
 export class Posts extends NodesBase {
     static create$item(post) {
         let content = [];

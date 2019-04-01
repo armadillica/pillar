@@ -1,5 +1,4 @@
 import os
-import json
 import logging
 from datetime import datetime
 
@@ -18,15 +17,12 @@ from flask import request
 from flask import jsonify
 from flask import abort
 from flask_login import current_user
-from flask_wtf.csrf import validate_csrf
 
 import werkzeug.exceptions as wz_exceptions
 from wtforms import SelectMultipleField
 from flask_login import login_required
 from jinja2.exceptions import TemplateNotFound
 
-from pillar.api.utils.authorization import check_permissions
-from pillar.web.utils import caching
 from pillar.markdown import markdown
 from pillar.web.nodes.forms import get_node_form
 from pillar.web.nodes.forms import process_node_form
@@ -108,6 +104,11 @@ def view(node_id, extra_template_args: dict=None):
         return render_template('errors/403_embed.html')
 
     node_type_name = node.node_type
+
+    if node_type_name == 'page':
+        # HACK: The 'edit node' page GETs this endpoint, but for pages it's plain wrong,
+        # so we just redirect to the correct URL.
+        return redirect(url_for_node(node=node))
 
     if node_type_name == 'post' and not request.args.get('embed'):
         # Posts shouldn't be shown at this route (unless viewed embedded, tipically
@@ -606,6 +607,95 @@ def url_for_node(node_id=None, node=None):
             raise wz_exceptions.NotFound('Unable to find node %r' % node_id)
 
     return finders.find_url_for_node(node)
+
+
+@blueprint.route("/<node_id>/breadcrumbs")
+def breadcrumbs(node_id: str):
+    """Return breadcrumbs for the given node, as JSON.
+
+    Note that a missing parent is still returned in the breadcrumbs,
+    but with `{_exists: false, name: '-unknown-'}`.
+
+    The breadcrumbs start with the top-level parent, and end with the node
+    itself (marked by {_self: true}). Returns JSON like this:
+
+    {breadcrumbs: [
+        ...,
+        {_id: "parentID",
+         name: "The Parent Node",
+         node_type: "group",
+         url: "/p/project/parentID"},
+        {_id: "deadbeefbeefbeefbeeffeee",
+         _self: true,
+         name: "The Node Itself",
+         node_type: "asset",
+         url: "/p/project/nodeID"},
+    ]}
+
+    When a parent node is missing, it has a breadcrumb like this:
+
+    {_id: "deadbeefbeefbeefbeeffeee",
+     _exists': false,
+     name': '-unknown-'}
+    """
+
+    api = system_util.pillar_api()
+    is_self = True
+
+    def make_crumb(some_node: None) -> dict:
+        """Construct a breadcrumb for this node."""
+        nonlocal is_self
+
+        crumb = {
+            '_id': some_node._id,
+            'name': some_node.name,
+            'node_type': some_node.node_type,
+            'url': finders.find_url_for_node(some_node),
+        }
+        if is_self:
+            crumb['_self'] = True
+            is_self = False
+        return crumb
+
+    def make_missing_crumb(some_node_id: None) -> dict:
+        """Construct 'missing parent' breadcrumb."""
+
+        return {
+            '_id': some_node_id,
+            '_exists': False,
+            'name': '-unknown-',
+        }
+
+    # The first node MUST exist.
+    try:
+        node = Node.find(node_id, api=api)
+    except ResourceNotFound:
+        log.warning('breadcrumbs(node_id=%r): Unable to find node', node_id)
+        raise wz_exceptions.NotFound(f'Unable to find node {node_id}')
+    except ForbiddenAccess:
+        log.warning('breadcrumbs(node_id=%r): access denied to current user', node_id)
+        raise wz_exceptions.Forbidden(f'No access to node {node_id}')
+
+    crumbs = []
+    while True:
+        crumbs.append(make_crumb(node))
+
+        child_id = node._id
+        node_id = node.parent
+        if not node_id:
+            break
+
+        # If a subsequent node doesn't exist any more, include that in the breadcrumbs.
+        # Forbidden nodes are handled as if they don't exist.
+        try:
+            node = Node.find(node_id, api=api)
+        except (ResourceNotFound, ForbiddenAccess):
+            log.warning('breadcrumbs: Unable to find node %r but it is marked as parent of %r',
+                        node_id, child_id)
+            crumbs.append(make_missing_crumb(node_id))
+            break
+
+    return jsonify({'breadcrumbs': list(reversed(crumbs))})
 
 
 # Import of custom modules (using the same nodes decorator)

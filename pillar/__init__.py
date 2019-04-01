@@ -790,7 +790,7 @@ class PillarServer(BlinkerCompatibleEve):
         return 'basic ' + base64.b64encode('%s:%s' % (username, subclient_id))
 
     def post_internal(self, resource: str, payl=None, skip_validation=False):
-        """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
+        """Workaround for Eve issue https://github.com/pyeve/eve/issues/810"""
         from eve.methods.post import post_internal
 
         url = self.config['URLS'][resource]
@@ -800,7 +800,7 @@ class PillarServer(BlinkerCompatibleEve):
 
     def put_internal(self, resource: str, payload=None, concurrency_check=False,
                      skip_validation=False, **lookup):
-        """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
+        """Workaround for Eve issue https://github.com/pyeve/eve/issues/810"""
         from eve.methods.put import put_internal
 
         url = self.config['URLS'][resource]
@@ -811,7 +811,7 @@ class PillarServer(BlinkerCompatibleEve):
 
     def patch_internal(self, resource: str, payload=None, concurrency_check=False,
                        skip_validation=False, **lookup):
-        """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
+        """Workaround for Eve issue https://github.com/pyeve/eve/issues/810"""
         from eve.methods.patch import patch_internal
 
         url = self.config['URLS'][resource]
@@ -822,7 +822,7 @@ class PillarServer(BlinkerCompatibleEve):
 
     def delete_internal(self, resource: str, concurrency_check=False,
                         suppress_callbacks=False, **lookup):
-        """Workaround for Eve issue https://github.com/nicolaiarocci/eve/issues/810"""
+        """Workaround for Eve issue https://github.com/pyeve/eve/issues/810"""
         from eve.methods.delete import deleteitem_internal
 
         url = self.config['URLS'][resource]

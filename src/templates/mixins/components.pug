@@ -11,7 +11,7 @@ mixin jumbotron(title, text, image, url)
 			href=url)&attributes(attributes)
 			.container
 				.row
-					.col-md-9
+					.col-md-8
 						if title
 							.display-4.text-uppercase.font-weight-bold
 								=title
@@ -24,7 +24,7 @@ mixin jumbotron(title, text, image, url)
 		.jumbotron.text-white(style='background-image: url(' + image + ');')&attributes(attributes)
 			.container
 				.row
-					.col-md-9
+					.col-md-6
 						if title
 							.display-4.text-uppercase.font-weight-bold
 								=title
@@ -73,15 +73,31 @@ mixin list-asset(name, url, image, type, date)
 	if block
 		block
 
-// used together with timeline.js
+
+//- Used together with timeline.js
 mixin timeline(projectid, sortdirection)
 	section.timeline.placeholder(
 		data-project-id=projectid,
 		data-sort-dir=sortdirection,
 	)
-		// TODO: Make nicer reuseable placeholder
-		.h3.text-center.text-secondary.p-5.border-bottom
-			i.pi-spin.spin
+		.d-flex.w-100.h-100
+			//- TODO: Make nicer reuseable placeholder
+			.h3.text-muted.m-auto
+				i.pi-spin.spin
 
 
+//- Category listing (Learn, Libraries, etc).
+mixin category_list_item(title, text, url, image)
+	.row.pb-2.my-2
+		.col-md-3
+			a(href=url, title=title)
+				img.img-fluid(alt=title, src=image)
+		.col-md-9
+			a(href=url, title=title)
+				h3.font-weight-bold
+					=title
+			.lead
+				=text
 
+			if block
+				block

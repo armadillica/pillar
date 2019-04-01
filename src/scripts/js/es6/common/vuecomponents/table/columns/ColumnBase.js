@@ -1,25 +1,33 @@
 import { CellDefault } from '../cells/renderer/CellDefault'
 
-let nextColumnId = 0;
+/**
+ * Column logic
+ */
+
 export class ColumnBase {
     constructor(displayName, columnType) {
-        this._id = nextColumnId++;
         this.displayName = displayName;
         this.columnType = columnType;
         this.isMandatory = false;
+        this.includedByDefault = true;
         this.isSortable = true;
         this.isHighLighted = 0;
     }
 
     /**
      * 
-     * @param {*} rowObject 
+     * @param {RowObject} rowObject 
      * @returns {String} Name of the Cell renderer component
      */
     getCellRenderer(rowObject) {
         return CellDefault.options.name;
     }
 
+    /**
+     * 
+     * @param {RowObject} rowObject 
+     * @returns {*} Raw unformated value
+     */
     getRawCellValue(rowObject) {
         // Should be overridden
         throw Error('Not implemented');
@@ -37,14 +45,23 @@ export class ColumnBase {
     }
 
     /**
-     * Object with css classes to use on the header cell
-     * @returns {Any} Object with css classes
+     * Object with css classes to use on the column
+     * @returns {Object} Object with css classes
      */
-    getHeaderCellClasses() {
+    getColumnClasses() {
         // Should be overridden
         let classes = {}
         classes[this.columnType] = true;
         return classes;
+    }
+
+    /**
+     * Object with css classes to use on the header cell
+     * @returns {Object} Object with css classes
+     */
+    getHeaderCellClasses() {
+        // Should be overridden
+        return this.getColumnClasses();
     }
 
     /**
@@ -55,8 +72,7 @@ export class ColumnBase {
      */
     getCellClasses(rawCellValue, rowObject) {
         // Should be overridden
-        let classes = {}
-        classes[this.columnType] = true;
+        let classes = this.getColumnClasses();
         classes['highlight'] = !!this.isHighLighted;
         return classes;
     }

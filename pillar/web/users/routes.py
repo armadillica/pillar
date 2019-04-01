@@ -31,8 +31,10 @@ def check_oauth_provider(provider):
 
 @blueprint.route('/authorize/<provider>')
 def oauth_authorize(provider):
-    if not current_user.is_anonymous:
-        return redirect(url_for('main.homepage'))
+    if current_user.is_authenticated:
+        next_after_login = session.pop('next_after_login', None) or url_for('main.homepage')
+        log.debug('Redirecting user to %s', next_after_login)
+        return redirect(next_after_login)
 
     try:
         oauth = OAuthSignIn.get_provider(provider)
@@ -52,8 +54,10 @@ def oauth_callback(provider):
     from pillar.api.utils.authentication import store_token
     from pillar.api.utils import utcnow
 
+    next_after_login = session.pop('next_after_login', None) or url_for('main.homepage')
     if current_user.is_authenticated:
-        return redirect(url_for('main.homepage'))
+        log.debug('Redirecting user to %s', next_after_login)
+        return redirect(next_after_login)
 
     oauth = OAuthSignIn.get_provider(provider)
     try:
@@ -63,7 +67,7 @@ def oauth_callback(provider):
         raise wz_exceptions.Forbidden()
     if oauth_user.id is None:
         log.debug('Authentication failed for user with {}'.format(provider))
-        return redirect(url_for('main.homepage'))
+        return redirect(next_after_login)
 
     # Find or create user
     user_info = {'id': oauth_user.id, 'email': oauth_user.email, 'full_name': ''}
@@ -88,11 +92,8 @@ def oauth_callback(provider):
         # Check with Blender ID to update certain user roles.
         update_subscription()
 
-    next_after_login = session.pop('next_after_login', None)
-    if next_after_login:
-        log.debug('Redirecting user to %s', next_after_login)
-        return redirect(next_after_login)
-    return redirect(url_for('main.homepage'))
+    log.debug('Redirecting user to %s', next_after_login)
+    return redirect(next_after_login)
 
 
 @blueprint.route('/login')

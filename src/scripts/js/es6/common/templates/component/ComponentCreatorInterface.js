@@ -1,6 +1,10 @@
+/**
+ * @deprecated use vue instead
+ */
 export class ComponentCreatorInterface {
     /**
-     * @param {JSON} doc 
+     * Create a $element to render document in a list
+     * @param {Object} doc
      * @returns {$element}
      */
     static create$listItem(doc) {
@@ -8,8 +12,8 @@ export class ComponentCreatorInterface {
     }
 
     /**
-     * 
-     * @param {JSON} doc 
+     * Create a $element to render the full doc
+     * @param {Object} doc
      * @returns {$element}
      */
     static create$item(doc) {
@@ -17,9 +21,8 @@ export class ComponentCreatorInterface {
     }
 
     /**
-     * 
-     * @param {JSON} candidate
-     * @returns {boolean} 
+     * @param {Object} candidate
+     * @returns {boolean}
      */
     static canCreate(candidate) {
         throw 'Not Implemented';

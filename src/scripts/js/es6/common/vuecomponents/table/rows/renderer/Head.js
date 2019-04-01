@@ -9,7 +9,9 @@ const TEMPLATE =`
     />
 </div>
 `;
-
+/**
+ * @emits sort(column,direction) When a column head has been clicked
+ */
 Vue.component('pillar-table-head', {
     template: TEMPLATE,
     props: {

@@ -1,0 +1,43 @@
+.breadcrumbs
+	@extend .bg-dark
+	@extend .text-secondary
+	flex: 1
+	font-size: $font-size-xs
+
+	ul
+		@extend .d-flex
+		@extend .list-unstyled
+		@extend .m-0
+		@extend .align-items-center
+
+		li
+			@extend .position-relative
+			@extend .pr-1
+
+			// Triangle indicator on the right of items.
+			&:after
+				content: '\e83a'
+				font-family: "pillar-font"
+				position: absolute
+				right: 0
+				top: $font-size-xs / 2.2
+
+			// Remove indicator on the last item.
+			&:last-child
+				&:after
+					display: none
+
+			a, span
+				@extend .d-block
+				@extend .py-1
+				@extend .px-2
+
+			a
+				@extend .text-white
+
+			span
+				cursor: default
+
+	// .breadcrumbs-container
+	&-container
+		@extend .d-flex

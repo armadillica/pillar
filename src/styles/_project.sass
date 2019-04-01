@@ -16,22 +16,41 @@ body.svnman, body.edit_node_types, body.search-project
 	overflow-y: auto
 	z-index: $z-index-base
 
-	+media-xs
-		flex-direction: column-reverse
-		min-height: auto
+	&.is-sidebar-visible
+		#project-side-container
+			@extend .d-flex
+
+		.breadcrumbs-container
+			+media-xs
+				left: $project_nav-width-xs
+			+media-sm
+				left: $project_nav-width-sm
+			+media-md
+				left: $project_nav-width-md
+			+media-lg
+				left: $project_nav-width-lg
+			+media-xl
+				left: $project_nav-width-xl
 
 #project-side-container
-	display: flex
+	display: none
 
 	+media-xs
-		flex-direction: column-reverse
+		position: fixed
+		bottom: 0
+		right: 0
+		top: $project_header-height
+		left: 0
+		z-index: 1
+		height: 100%
 
 
 #project_nav,
 #project_tree,
 #project_nav-container
 	+media-xs
-		width: $project_nav-width-xs
+		height: 100vh
+		width: 100%
 	+media-sm
 		width: $project_nav-width-sm
 	+media-md
@@ -44,13 +63,12 @@ body.svnman, body.edit_node_types, body.search-project
 	width: $project_nav-width
 
 #project_nav-container
-	+media-xs
-		display: block
-		height: initial !important
-		position: relative
-
 	position: fixed
 	z-index: $z-index-base + 5
+
+	.project-sidebar-toggle
+		right: 5px
+		z-index: 1
 
 #project_sidebar
 	box-shadow: inset -1px 0 0 0 $color-background
@@ -111,6 +129,8 @@ body.svnman, body.edit_node_types, body.search-project
 	right: 0
 	z-index: $z-index-base + 3
 
+	+media-xs
+		bottom: 0
 
 /* Edit Asset buttons */
 .project-mode-view,
@@ -237,11 +257,21 @@ ul.project-edit-tools
 		min-height: 800px
 		border: none
 
+	.breadcrumbs-container
+		top: $project_header-height + 1
+
+#project_context
+	.node-details-description
+		font:
+			size: 1.2em
+			weight: 200
+
+		img
+			margin-bottom: 2rem
+			margin-top: 2rem
 
 /* The actual navigation tree container */
 #project_tree
-	+media-xs
-		margin-top: 0
 	overflow-y: auto // show vertical scrollbars when needed.
 	padding: 5px 0 // some padding on top/bottom of jsTree.
 	position: relative
@@ -1978,3 +2008,7 @@ a.learn-more
 				padding: 5px 35px
 				text-align: center
 
+// Node Type: Page
+.page
+	.node-details-description
+		font-size: 1.3em

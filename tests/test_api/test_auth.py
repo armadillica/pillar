@@ -631,21 +631,25 @@ class RequireRolesTest(AbstractPillarTest):
     def test_some_roles_required(self):
         from pillar.api.utils.authorization import require_login
 
-        called = [False]
+        called = False
 
         @require_login(require_roles={'admin'})
         def call_me():
-            called[0] = True
+            nonlocal called
+            called = True
+            return None
 
         with self.app.test_request_context():
             self.login_api_as(ObjectId(24 * 'a'), ['succubus'])
-            self.assertRaises(Forbidden, call_me)
-        self.assertFalse(called[0])
+            resp = call_me()
+            self.assertEqual(403, resp.status_code)
+        self.assertFalse(called, 'Forbidden function should not have been called')
 
         with self.app.test_request_context():
             self.login_api_as(ObjectId(24 * 'a'), ['admin'])
-            call_me()
-        self.assertTrue(called[0])
+            resp = call_me()
+            self.assertIsNone(resp)
+        self.assertTrue(called)
 
     def test_all_roles_required(self):
         from pillar.api.utils.authorization import require_login
@@ -659,17 +663,20 @@ class RequireRolesTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             self.login_api_as(ObjectId(24 * 'a'), ['admin'])
-            self.assertRaises(Forbidden, call_me)
+            resp = call_me()
+            self.assertEqual(403, resp.status_code)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
             self.login_api_as(ObjectId(24 * 'a'), ['service'])
-            self.assertRaises(Forbidden, call_me)
+            resp = call_me()
+            self.assertEqual(403, resp.status_code)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
             self.login_api_as(ObjectId(24 * 'a'), ['badger'])
-            self.assertRaises(Forbidden, call_me)
+            resp = call_me()
+            self.assertEqual(403, resp.status_code)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():
@@ -702,7 +709,8 @@ class RequireRolesTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             self.login_api_as(ObjectId(24 * 'a'), ['succubus'])
-            self.assertRaises(Forbidden, call_me)
+            resp = call_me()
+            self.assertEqual(403, resp.status_code)
         self.assertFalse(called[0])
 
         with self.app.test_request_context():

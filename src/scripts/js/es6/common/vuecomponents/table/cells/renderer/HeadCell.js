@@ -5,7 +5,11 @@ const TEMPLATE =`
     @mouseleave="onMouseLeave"
 >
     <div class="cell-content">
-        {{ column.displayName }}
+        <div class="header-label"
+            :title="column.displayName"
+        >
+            {{ column.displayName }}
+        </div>
         <div class="column-sort"
             v-if="column.isSortable"
         >
@@ -22,6 +26,11 @@ const TEMPLATE =`
 </div>
 `;
 
+/**
+ * A cell in the Header of the table
+ * 
+ * @emits sort(column,direction) When user clicks column sort arrows.
+ */
 Vue.component('pillar-head-cell', {
     template: TEMPLATE,
     props: {

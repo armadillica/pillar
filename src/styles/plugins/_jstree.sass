@@ -20,12 +20,11 @@ $tree-color-highlight-background-text: $primary
 		&[data-node-type="texture"],
 		&[data-node-type="hdri"]
 			.jstree-anchor
-				padding-right: 20px
+				padding-right: 20px // Make room for the angle-right icon.
 
 			&[is_free='true']
 				.jstree-anchor
 					padding-right: initial
-
 					&:after
 						color: $tree-color-highlight
 						content: '\e84e' !important
@@ -36,7 +35,7 @@ $tree-color-highlight-background-text: $primary
 			font-weight: bold
 
 			.jstree-anchor
-				padding: 0 6px
+				padding: 0 5px
 
 				&:after
 					top: 3px !important
@@ -61,34 +60,21 @@ $tree-color-highlight-background-text: $primary
 		&.jstree-open
 			/* Text of children for an open tree (like a folder) */
 			.jstree-children > .jstree-node
-				padding-left: 16px !important
+				padding-left: 25px !important
+
+				&:before
+					box-shadow: inset 5px 0 0 rgba($tree-color-text, .1)
+					content: ' '
+					height: 100%
+					width: 2px
+					position: absolute
+					left: 8px
 
 				.jstree-icon:empty
-					left: 20px !important
-
-					// Tweaks for specific icons
-					&.pi-file-archive
-						left: 25px !important
-					&.pi-folder
-						left: 20px !important
-						font-size: .9em !important
-					&.pi-splay
-						left: 20px !important
-						font-size: .85em !important
-
-				.jstree-anchor
-					// box-shadow: inset 1px 0 0 0 $color-background
+					left: 25px !important
 
 		/* Closed Folder */
 		// &.jstree-closed
-
-		&.jstree-open .jstree-icon.jstree-ocl,
-		&.jstree-closed .jstree-icon.jstree-ocl
-			float: left
-			min-width: 30px
-			opacity: 0
-			position: absolute
-			z-index: 1
 
 		/* The text of the last level item */
 		.jstree-anchor
@@ -97,11 +83,8 @@ $tree-color-highlight-background-text: $primary
 				width: 98%
 			border: none
 			font-size: 13px
-			height: inherit
-			line-height: 24px
 			overflow: hidden
-			padding-left: 28px
-			padding-right: 10px
+			padding-left: 25px
 			text-overflow: ellipsis
 			white-space: nowrap
 			width: 100%
@@ -150,9 +133,7 @@ $tree-color-highlight-background-text: $primary
 	.jstree-clicked > .jstree-ocl
 		color: $tree-color-highlight-background-text !important
 		background-color: transparent !important
-		border-radius: 0
 		box-shadow: none
-		border-bottom: thin solid transparent
 
 	.jstree-ocl:before
 		+media-xs
@@ -177,14 +158,13 @@ $tree-color-highlight-background-text: $primary
 
 		&:empty
 			line-height: 24px
-			left: 3px
+			left: 1px
 
 	&.is_subscriber
 		.jstree-node
 			&[is_free='true']
 				.jstree-anchor
 					padding-right: initial
-
 					&:after
 						display: none !important
 
@@ -204,7 +184,7 @@ $tree-color-highlight-background-text: $primary
 
 .jstree-default .jstree-node.jstree-closed .jstree-icon.jstree-ocl + .jstree-anchor,
 .jstree-default .jstree-node.jstree-open .jstree-icon.jstree-ocl + .jstree-anchor
-	padding-left: 24px !important
+	padding-left: 25px !important
 
 /* hovered text */
 .jstree-default .jstree-hovered,

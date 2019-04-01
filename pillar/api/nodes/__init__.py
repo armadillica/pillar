@@ -6,7 +6,7 @@ import pymongo.errors
 import werkzeug.exceptions as wz_exceptions
 from flask import current_app, Blueprint, request
 
-from pillar.api.nodes import eve_hooks, comments
+from pillar.api.nodes import eve_hooks, comments, activities
 from pillar.api.utils import str2id, jsonify
 from pillar.api.utils.authorization import check_permissions, require_login
 from pillar.web.utils import pretty_date
@@ -85,6 +85,12 @@ def post_node_comment_vote(node_path: str, comment_path: str):
     vote_str = request.json['vote']
     vote = int(vote_str)
     return comments.post_node_comment_vote(node_id, comment_id, vote)
+
+
+@blueprint.route('/<string(length=24):node_path>/activities', methods=['GET'])
+def activities_for_node(node_path: str):
+    node_id = str2id(node_path)
+    return jsonify(activities.for_node(node_id))
 
 
 @blueprint.route('/tagged/')
@@ -265,3 +271,5 @@ def setup_app(app, url_prefix):
     app.on_deleted_item_nodes += eve_hooks.after_deleting_node
 
     app.register_api_blueprint(blueprint, url_prefix=url_prefix)
+
+    activities.setup_app(app)

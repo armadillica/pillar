@@ -1,6 +1,6 @@
 const TEMPLATE =`
 <div class="pillar-dropdown">
-    <div class="pillar-dropdown-button"
+    <div class="pillar-dropdown-button action"
         :class="buttonClasses"
         @click="toggleShowMenu"
     >

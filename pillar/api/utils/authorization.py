@@ -331,8 +331,9 @@ def require_login(*, require_roles=set(),
 
     def render_error() -> Response:
         if error_view is None:
-            abort(403)
-        resp: Response = error_view()
+            resp = Forbidden().get_response()
+        else:
+            resp = error_view()
         resp.status_code = 403
         return resp
 

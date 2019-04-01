@@ -1,25 +1,59 @@
 .timeline
-    .group
-        opacity: 0
-        animation: fade-in 500ms forwards
 
-    .group-date
-        color: rgba($color-text, .4)
+	// Shown briefly while the timeline is loading.
+	&.placeholder
+		color: $color-text-dark-hint
+		height: 75vh // Timelines are usually long, so scale the placeholder to almost viewport height.
 
-    .group-title
-        @extend .border-bottom
-        @extend .bg-white
-        @extend .text-uppercase
-        @extend .font-weight-bold
-        a
-            color: $color-text
+	.group
+		opacity: 0
+		animation: fade-in 500ms forwards
+
+		&-date // .group-date
+			color: $color-text-dark-hint
+
+		&-title // .group-title
+			@extend .border-bottom
+			@extend .bg-white
+			@extend .text-uppercase
+			@extend .font-weight-bold
+			a
+				color: $color-text
+
+	.node-details-description
+		font:
+			size: 1.2em
+			weight: 200
+
+		img
+			margin-bottom: 2rem
+			margin-top: 2rem
 
 body.homepage
-    .timeline
-        .sticky-top
-            top: 2.5rem
+	.timeline
+		.sticky-top
+			top: 2.5rem
 
 body.is-mobile
-        .timeline
-            .js-asset-list
-                @extend .card-deck-vertical
+	.timeline
+		.js-asset-list
+			@extend .card-deck-vertical
+
+
+// Overrides for when the timeline is against a dark background.
+.timeline-dark
+	.group
+		animation: fade-in 500ms forwards
+		opacity: 0
+
+		&-date // .group-date
+			color: $color-text-light-hint
+
+		&-title // .group-title
+			@extend .bg-transparent
+			border-bottom-color: rgba($color-background, .2) !important
+			color: rgba($color-background, .6)
+
+	blockquote
+		background-color: rgba($color-background, .1)
+		box-shadow: inset 5px 0 0 rgba($color-background, .2)
