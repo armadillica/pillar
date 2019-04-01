@@ -24,6 +24,14 @@ include ../../../mixins/components
 		"{{ node.url }}")
 | {% endif %}
 
+.container.pt-5
+	.row
+		.col-12.text-center
+			h2.text-uppercase.font-weight-bold
+				| {{ node.name }}
+
+			hr.pb-2
+
 .container.pb-5
 	.row
 		.col-8.mx-auto
