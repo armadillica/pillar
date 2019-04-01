@@ -3,16 +3,16 @@
 		opacity: 0
 		animation: fade-in 500ms forwards
 
-	.group-date
-		color: rgba($color-text, .4)
+		&-date // .group-date
+			color: $color-text-dark-hint
 
-	.group-title
-		@extend .border-bottom
-		@extend .bg-white
-		@extend .text-uppercase
-		@extend .font-weight-bold
-		a
-			color: $color-text
+		&-title // .group-title
+			@extend .border-bottom
+			@extend .bg-white
+			@extend .text-uppercase
+			@extend .font-weight-bold
+			a
+				color: $color-text
 
 	.node-details-description
 		font:
@@ -33,14 +33,20 @@ body.is-mobile
 		.js-asset-list
 			@extend .card-deck-vertical
 
-.timeline-dark
-	.group-date
-		color: $color-text-light-hint
 
-	.group-title
-		@extend .bg-transparent
-		border-bottom-color: rgba($color-background, .2) !important
-		color: rgba($color-background, .6)
+// Overrides for when the timeline is against a dark background.
+.timeline-dark
+	.group
+		animation: fade-in 500ms forwards
+		opacity: 0
+
+		&-date // .group-date
+			color: $color-text-light-hint
+
+		&-title // .group-title
+			@extend .bg-transparent
+			border-bottom-color: rgba($color-background, .2) !important
+			color: rgba($color-background, .6)
 
 	blockquote
 		background-color: rgba($color-background, .1)
