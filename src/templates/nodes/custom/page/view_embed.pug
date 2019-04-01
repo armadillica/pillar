@@ -8,7 +8,7 @@ include ../../../mixins/components
 
 | {% block body %}
 | {% if project and project.has_method('PUT') %}
-+nav-secondary
++nav-secondary(class="bg-light border-bottom")
 	+nav-secondary-link(
 		href="{{ url_for('nodes.edit', node_id=node._id) }}")
 		i.pi-edit.pr-2
