@@ -1,12 +1,14 @@
 const TEMPLATE = `
 <div class="user-avatar">
-    <img 
+    <img
         :src="user.gravatar"
         :alt="user.full_name">
 </div>
 `;
 
-Vue.component('user-avatar', {
+let UserAvatar = Vue.component('user-avatar', {
     template: TEMPLATE,
     props: {user: Object},
 });
+
+export {UserAvatar}

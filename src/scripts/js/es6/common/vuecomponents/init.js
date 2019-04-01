@@ -18,6 +18,7 @@ import { EnumFilter } from './table/rows/filter/EnumFilter'
 import { StatusFilter } from './table/rows/filter/StatusFilter'
 import { TextFilter } from './table/rows/filter/TextFilter'
 import { NameFilter } from './table/rows/filter/NameFilter'
+import { UserAvatar } from './user/Avatar'
 
 let mixins = {
     UnitOfWorkTracker,
@@ -54,4 +55,8 @@ let table = {
     },
 }
 
-export { mixins, table }
+let user = {
+    UserAvatar
+}
+
+export { mixins, table, user }
