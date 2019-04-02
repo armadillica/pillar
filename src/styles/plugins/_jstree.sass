@@ -73,8 +73,14 @@ $tree-color-highlight-background-text: $primary
 				.jstree-icon:empty
 					left: 25px !important
 
-		/* Closed Folder */
-		// &.jstree-closed
+		// Invisible element to expand/collapse folders.
+		&.jstree-open .jstree-icon.jstree-ocl,
+		&.jstree-closed .jstree-icon.jstree-ocl
+			float: left
+			min-width: 30px
+			opacity: 0
+			position: absolute
+			z-index: 1
 
 		/* The text of the last level item */
 		.jstree-anchor
