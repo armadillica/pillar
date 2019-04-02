@@ -1,32 +1,32 @@
 $comments-width-max: 710px
 
 .comments-tree
+	@extend .position-relative
+	@extend .w-100
 	max-width: $comments-width-max
-	position: relative
-	width: 100%
 
 	.comments-list-title
-		padding: 15px 0 10px 0
+		@extend .py-2
 		font-size: 1.1em
 		font-weight: 300
-		color: rgba($color-text, .5)
+		color: $color-text-dark-hint
 
 	/* Each comment on the list*/
 	.comment-container,
 	.comment-reply-container
-		display: flex
-		position: relative
-		padding: 15px 0
+		@extend .d-flex
+		@extend .py-2
+		@extend .position-relative
 		transition: background-color 150ms ease-in-out, padding 150ms ease-in-out, margin 150ms ease-in-out
 
 		&.comment-linked
+			@extend .px-3
 			background-color: $color-background-light !important
-			box-shadow: inset 3px 0 0 $color-info
-			padding-right: 20px
+			box-shadow: inset 5px 0 0 $color-primary
 
 			&:before
 				bottom: 15px
-				color: $color-info
+				color: $color-primary
 				content: 'Linked Comment'
 				font-size: .8em
 				position: absolute
@@ -108,18 +108,21 @@ $comments-width-max: 710px
 			padding-bottom: 0
 			width: 100%
 
+			strong
+				color: $color-text-dark-primary
+
 		&.is-reply
 			padding:
 				left: 20px
 				top: 5px
 			margin-left: 35px
-			box-shadow: inset 3px 0 0 $color-background
+			box-shadow: inset 5px 0 0 $color-background
 
 			+media-xs
 				padding-left: 15px
 
 			&.comment-linked
-				box-shadow: inset 3px 0 0 $color-info
+				box-shadow: inset 5px 0 0 $color-primary
 
 		&.is-first
 			border-top: 1px solid $color-background
@@ -154,13 +157,12 @@ $comments-width-max: 710px
 				.comment-action-rating.up:before
 					content: '\e83f' // Heart filled
 
-
 			.comment-rating-value
-				padding-right: 15px
 				color: $color-text-dark-secondary
 				cursor: default
 
 			.comment-action-rating
+				@extend .px-2
 				cursor: pointer
 				font-family: 'pillar-font'
 				height: 25px
@@ -169,22 +171,22 @@ $comments-width-max: 710px
 			.comment-action-rating.up
 				&:hover
 					color: $color-upvote
+
 				&:before
 					content: '\e83e' // Heart outlined
-					top: 2px
 					position: relative
+					top: 3px
 
 		.comment-action
-			color: $color-primary
 			padding-left: 10px
-			margin-left: 10px
 
 			.action
+				color: $color-primary
 				cursor: pointer
 				margin-left: 15px
+
 				&:hover
-					color: $color-primary
-					text-decoration: underline
+					color: lighten($color-primary, 10%)
 
 				&:before
 					color: $color-text-dark-secondary
@@ -386,21 +388,15 @@ $comments-width-max: 710px
 				content: ''
 				color: transparent
 
-	.user-badges ul.blender-id-badges
-		list-style: none
-		padding: 0
-		margin: 4px 0 0 0
-
-		li
-			margin: 2px 0 !important
-
-		li, li a, li img
-			padding: 0 !important
-		li
-			display: inline
+	.user-badges ul
+		@extend .list-unstyled
+		@extend .mt-1
 		img
-			width: 16px
 			height: 16px
+			width: 16px
+
+		li
+			line-height: 1.2em
 
 	.comment-avatar
 		@extend .d-flex
@@ -409,10 +405,10 @@ $comments-width-max: 710px
 
 	.user-avatar
 		img
-			border-radius: 50%
-			width: 2em
-			height: 2em
+			@extend .rounded-circle
 			box-shadow: 0 0 0 0.2em $color-background-light
+			height: 2em
+			width: 2em
 
 	.drag-hover
 		outline-style: solid
