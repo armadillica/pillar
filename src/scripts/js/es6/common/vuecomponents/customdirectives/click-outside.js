@@ -1,5 +1,14 @@
-// Code from https://stackoverflow.com/a/42389266
-
+/**
+ * Directive to detect clicks outside of component.
+ * Code from https://stackoverflow.com/a/42389266
+ *
+ * @example
+ * <div
+ *    v-click-outside="()=>{console.log('User clicked outside component')}"
+ * >
+ *    ...
+ * </div>
+ */
 Vue.directive('click-outside', {
     bind: function (el, binding, vnode) {
       el.clickOutsideEvent = function (event) {
