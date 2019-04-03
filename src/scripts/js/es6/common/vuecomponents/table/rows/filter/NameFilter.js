@@ -8,7 +8,7 @@ const TEMPLATE =`
     :valueExtractorCB="extractName"
     @visibleRowObjectsChanged="$emit('visibleRowObjectsChanged', ...arguments)"
     @componentStateChanged="$emit('componentStateChanged', ...arguments)"
->
+/>
 `;
 /**
  * Filter row objects based on there name. 
