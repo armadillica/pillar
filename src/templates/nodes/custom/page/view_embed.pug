@@ -21,7 +21,7 @@ include ../../../mixins/components
 		"{{ node.name }}",
 		null,
 		"{{ node.picture.thumbnail('h', api=api) }}",
-		"{{ node.url }}")
+		"{{ request.url }}")
 | {% else %}
 .container.pt-5
 	.row
