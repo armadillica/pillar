@@ -7,7 +7,7 @@ import {RowFilter} from './rows/filter/RowFilter'
 
 /**
  * Table State
- * 
+ *
  * Used to restore a table to a given state.
  */
 class TableState {
@@ -17,7 +17,7 @@ class TableState {
 
     /**
      * Apply state to row
-     * @param {RowBase} rowObject 
+     * @param {RowBase} rowObject
      */
     applyRowState(rowObject) {
         rowObject.isSelected = this.selectedIds.includes(rowObject.getId());
@@ -27,7 +27,7 @@ class TableState {
 class ComponentState {
     /**
      * Serializable state of this component.
-     * 
+     *
      * @param {Object} rowFilter
      * @param {Object} columnFilter
      */
@@ -79,15 +79,15 @@ const TEMPLATE =`
 
 /**
  * The table renders RowObject instances for the rows, and ColumnBase instances for the Columns.
- * Extend the table to fit your needs. 
- * 
+ * Extend the table to fit your needs.
+ *
  * Usage:
  * Extend RowBase to wrap the data you want in your row
  * Extend ColumnBase once per column type you need
  * Extend RowObjectsSourceBase to fetch and initialize your rows
  * Extend ColumnFactoryBase to create the rows for your table
  * Extend This Table with your ColumnFactory and RowSource
- * 
+ *
  * @emits isInitialized When all rows has been fetched, and are initialized.
  * @emits selectItemsChanged(selectedItems) When selected rows has changed.
  * @emits componentStateChanged(newState) When table state changed. Filtered rows, visible columns...
@@ -263,8 +263,8 @@ let PillarTable = Vue.component('pillar-table-base', {
         },
         /**
          * Get visible rows between id1 and id2
-         * @param {String} id1 
-         * @param {String} id2 
+         * @param {String} id1
+         * @param {String} id2
          * @returns {Array(RowObjects)}
          */
         rowsBetween(id1, id2) {

@@ -12,8 +12,8 @@ const TEMPLATE =`
 />
 `;
 /**
- * Filter row objects based on there status. 
- * 
+ * Filter row objects based on there status.
+ *
  * @emits visibleRowObjectsChanged(rowObjects) When the objects to be visible has changed.
  * @emits componentStateChanged(newState) When row filter state changed.
  */
