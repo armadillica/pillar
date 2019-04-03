@@ -12,7 +12,7 @@ include ../../../mixins/components
 	+nav-secondary-link(
 		href="{{ url_for('nodes.edit', node_id=node._id) }}")
 		i.pi-edit.pr-2
-		span Edit Post
+		span Edit Page
 | {% endif %}
 
 | {% if node.picture %}
@@ -22,8 +22,7 @@ include ../../../mixins/components
 		null,
 		"{{ node.picture.thumbnail('h', api=api) }}",
 		"{{ node.url }}")
-| {% endif %}
-
+| {% else %}
 .container.pt-5
 	.row
 		.col-12.text-center
@@ -31,6 +30,7 @@ include ../../../mixins/components
 				| {{ node.name }}
 
 			hr.pb-2
+| {% endif %}
 
 .container.pb-5
 	.row
