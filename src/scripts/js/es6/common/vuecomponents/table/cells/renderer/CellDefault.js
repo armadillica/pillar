@@ -13,7 +13,7 @@ let CellDefault = Vue.component('pillar-cell-default', {
     props: {
         column: Object,
         rowObject: Object,
-        rawCellValue: Object
+        rawCellValue: [String,Number,Boolean,Array,Object,Date,Function,Symbol,],
     },
     computed: {
         cellValue() {
