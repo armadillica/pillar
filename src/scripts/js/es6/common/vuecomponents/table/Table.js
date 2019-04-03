@@ -98,7 +98,7 @@ let PillarTable = Vue.component('pillar-table-base', {
     props: {
         selectedIds: {
             type: Array,
-            default: []
+            default: () => {return []}
         },
         canChangeSelectionCB: {
             type: Function,
@@ -282,7 +282,8 @@ let PillarTable = Vue.component('pillar-table-base', {
         }
     },
     components: {
-        'pillar-table-row-filter': RowFilter
+        'pillar-table-row-filter': RowFilter,
+        'pillar-table-actions': {template:'<div/>'},
     }
 });
 
