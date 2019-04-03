@@ -89,7 +89,7 @@ const TEMPLATE = `
         <comment
             v-for="c in comment.replies"
             @unit-of-work="childUnitOfWork"
-            isReply=true
+            :isReply="true"
             :readOnly="readOnly"
             :comment="c"
             :user="user"
