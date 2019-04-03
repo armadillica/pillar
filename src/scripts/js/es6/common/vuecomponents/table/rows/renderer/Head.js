@@ -4,7 +4,7 @@ const TEMPLATE =`
     <pillar-head-cell
         v-for="c in columns"
         :column="c"
-        key="c._id"
+        :key="c._id"
         @sort="(column, direction) => $emit('sort', column, direction)"
     />
 </div>
