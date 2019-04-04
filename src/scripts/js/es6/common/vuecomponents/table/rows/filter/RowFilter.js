@@ -2,7 +2,7 @@ import {NameFilter} from './NameFilter'
 
 const TEMPLATE =`
 <div class="pillar-table-row-filter">
-    <name-filter 
+    <name-filter
         :rowObjects="rowObjects"
         :componentState="componentState"
         @visible-row-objects-changed="$emit('visible-row-objects-changed', ...arguments)"

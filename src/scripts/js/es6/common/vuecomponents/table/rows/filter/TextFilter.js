@@ -1,5 +1,5 @@
 const TEMPLATE =`
-<input 
+<input
     :class="textInputClasses"
     :placeholder="placeholderText"
     v-model="textQuery"
@@ -9,7 +9,7 @@ const TEMPLATE =`
 class ComponentState {
     /**
      * Serializable state of this component.
-     * 
+     *
      * @param {String} textQuery
      */
     constructor(textQuery) {
@@ -19,7 +19,7 @@ class ComponentState {
 
 /**
  * Component to filter rowobjects by a text value
- * 
+ *
  * @emits visibleRowObjectsChanged(rowObjects) When the objects to be visible has changed.
  * @emits component-state-changed(newState) When row filter state changed. Filter query...
  */
