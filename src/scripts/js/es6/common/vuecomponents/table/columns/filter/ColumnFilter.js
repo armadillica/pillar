@@ -45,7 +45,7 @@ class ColumnState{
 class ComponentState {
     /**
      * Serializable state of this component.
-     * 
+     *
      * @param {Array} selected The columns that should be visible
      */
     constructor(selected) {
@@ -55,7 +55,7 @@ class ComponentState {
 
 /**
  * Component to select what columns to render in the table.
- * 
+ *
  * @emits visibleColumnsChanged(columns) When visible columns has changed
  * @emits componentStateChanged(newState) When column filter state changed.
  */

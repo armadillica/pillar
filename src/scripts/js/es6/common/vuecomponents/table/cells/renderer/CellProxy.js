@@ -15,7 +15,7 @@ const TEMPLATE =`
 
 /**
  * Renders the cell that the column requests.
- * 
+ *
  * @emits item-clicked(mouseEvent,itemId) Re-emits if real cell is emitting it
  */
 let CellProxy = Vue.component('pillar-cell-proxy', {

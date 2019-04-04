@@ -44,7 +44,7 @@ class EnumState{
 class ComponentState {
     /**
      * Serializable state of this component.
-     * 
+     *
      * @param {Array} selected The enums that should be visible
      */
     constructor(selected) {
@@ -53,8 +53,8 @@ class ComponentState {
 }
 
 /**
- * Filter row objects based on enumeratable values. 
- * 
+ * Filter row objects based on enumeratable values.
+ *
  * @emits visibleRowObjectsChanged(rowObjects) When the objects to be visible has changed.
  * @emits componentStateChanged(newState) When row filter state changed.
  */
