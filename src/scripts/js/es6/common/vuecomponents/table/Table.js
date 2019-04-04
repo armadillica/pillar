@@ -5,24 +5,6 @@ import './rows/filter/RowFilter'
 import {UnitOfWorkTracker} from '../mixins/UnitOfWorkTracker'
 import {RowFilter} from './rows/filter/RowFilter'
 
-/**
- * Table State
- *
- * Used to restore a table to a given state.
- */
-class TableState {
-    constructor(selectedIds) {
-        this.selectedIds = selectedIds || [];
-    }
-
-    /**
-     * Apply state to row
-     * @param {RowBase} rowObject
-     */
-    applyRowState(rowObject) {
-        rowObject.isSelected = this.selectedIds.includes(rowObject.getId());
-    }
-}
 
 class ComponentState {
     /**
@@ -116,6 +98,7 @@ let PillarTable = Vue.component('pillar-table-base', {
     },
     data: function() {
         return {
+            currentlySelectedIds: [],
             columns: [],
             visibleColumns: [],
             visibleRowObjects: [],
@@ -161,6 +144,9 @@ let PillarTable = Vue.component('pillar-table-base', {
     },
     watch: {
         selectedIds(newValue) {
+            this.currentlySelectedIds = newValue;
+        },
+        currentlySelectedIds(newValue) {
             this.rowAndChildObjects.forEach(item => {
                 item.isSelected = newValue.includes(item.getId());
             });
@@ -188,8 +174,6 @@ let PillarTable = Vue.component('pillar-table-base', {
         }
     },
     created() {
-        let tableState = new TableState(this.selectedIds);
-
         this.unitOfWork(
             Promise.all([
                 this.columnFactory.thenGetColumns(),
@@ -200,12 +184,11 @@ let PillarTable = Vue.component('pillar-table-base', {
                 return this.rowsSource.thenInit();
             })
             .then(() => {
-                let currentlySelectedIds = this.selectedItems.map(it => it._id);
-                if (currentlySelectedIds.length > 0) {
+                if (this.currentlySelectedIds.length === 0) {
+                    this.currentlySelectedIds = this.selectedIds;
+                } else {
                     // User has clicked on a row while we inited the rows. Keep that selection!
-                    tableState.selectedIds = currentlySelectedIds;
                 }
-                this.rowAndChildObjects.forEach(tableState.applyRowState.bind(tableState));
                 this.isInitialized = true;
             })
             .catch((err) => {toastr.error(pillar.utils.messageFromError(err), 'Loading table failed')})
@@ -234,24 +217,24 @@ let PillarTable = Vue.component('pillar-table-base', {
             if(!this.canChangeSelectionCB()) return;
 
             if(this.isMultiToggleClick(clickEvent) && this.canMultiSelect) {
-                let slectedIdsWithoutClicked = this.selectedIds.filter(id => id !== itemId);
-                if (slectedIdsWithoutClicked.length < this.selectedIds.length) {
-                    this.selectedIds = slectedIdsWithoutClicked;
+                let slectedIdsWithoutClicked = this.currentlySelectedIds.filter(id => id !== itemId);
+                if (slectedIdsWithoutClicked.length < this.currentlySelectedIds.length) {
+                    this.currentlySelectedIds = slectedIdsWithoutClicked;
                 } else {
-                    this.selectedIds = [itemId, ...this.selectedIds];
+                    this.currentlySelectedIds = [itemId, ...this.currentlySelectedIds];
                 }
             } else if(this.isSelectBetweenClick(clickEvent) && this.canMultiSelect) {
-                if (this.selectedIds.length > 0) {
-                    let betweenA = this.selectedIds[this.selectedIds.length -1];
+                if (this.currentlySelectedIds.length > 0) {
+                    let betweenA = this.currentlySelectedIds[this.currentlySelectedIds.length -1];
                     let betweenB = itemId;
-                    this.selectedIds = this.rowsBetween(betweenA, betweenB).map(it => it.getId());
+                    this.currentlySelectedIds = this.rowsBetween(betweenA, betweenB).map(it => it.getId());
 
                 } else {
-                    this.selectedIds = [itemId];
+                    this.currentlySelectedIds = [itemId];
                 }
             }
             else {
-                this.selectedIds = [itemId];
+                this.currentlySelectedIds = [itemId];
             }
         },
         isSelectBetweenClick(clickEvent) {
@@ -287,4 +270,4 @@ let PillarTable = Vue.component('pillar-table-base', {
     }
 });
 
-export { PillarTable, TableState }
+export { PillarTable }

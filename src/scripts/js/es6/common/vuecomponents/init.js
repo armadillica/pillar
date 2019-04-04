@@ -28,7 +28,6 @@ let mixins = {
 
 let table = {
     PillarTable,
-    TableState,
     columns: {
         ColumnBase,
         Created,
