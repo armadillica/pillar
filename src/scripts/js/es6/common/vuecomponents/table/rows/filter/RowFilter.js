@@ -5,8 +5,8 @@ const TEMPLATE =`
     <name-filter 
         :rowObjects="rowObjects"
         :componentState="componentState"
-        @visibleRowObjectsChanged="$emit('visibleRowObjectsChanged', ...arguments)"
-        @componentStateChanged="$emit('componentStateChanged', ...arguments)"
+        @visible-row-objects-changed="$emit('visible-row-objects-changed', ...arguments)"
+        @component-state-changed="$emit('component-state-changed', ...arguments)"
     />
 </div>
 `;

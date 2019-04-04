@@ -7,15 +7,15 @@ const TEMPLATE =`
     :componentState="componentState"
     :rowObjects="rowObjects"
     :valueExtractorCB="extractStatus"
-    @visibleRowObjectsChanged="$emit('visibleRowObjectsChanged', ...arguments)"
-    @componentStateChanged="$emit('componentStateChanged', ...arguments)"
+    @visible-row-objects-changed="$emit('visible-row-objects-changed', ...arguments)"
+    @component-state-changed="$emit('component-state-changed', ...arguments)"
 />
 `;
 /**
  * Filter row objects based on there status.
  *
  * @emits visibleRowObjectsChanged(rowObjects) When the objects to be visible has changed.
- * @emits componentStateChanged(newState) When row filter state changed.
+ * @emits component-state-changed(newState) When row filter state changed.
  */
 let StatusFilter = {
     template: TEMPLATE,

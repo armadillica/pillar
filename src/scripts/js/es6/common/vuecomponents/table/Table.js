@@ -28,8 +28,8 @@ const TEMPLATE =`
             :rowObjects="sortedRowObjects"
             :config="rowFilterConfig"
             :componentState="(componentState || {}).rowFilter"
-            @visibleRowObjectsChanged="onVisibleRowObjectsChanged"
-            @componentStateChanged="onRowFilterStateChanged"
+            @visible-row-objects-changed="onVisibleRowObjectsChanged"
+            @component-state-changed="onRowFilterStateChanged"
         />
         <pillar-table-actions
             @item-clicked="onItemClicked"
@@ -37,8 +37,8 @@ const TEMPLATE =`
         <pillar-table-column-filter
             :columns="columns"
             :componentState="(componentState || {}).columnFilter"
-            @visibleColumnsChanged="onVisibleColumnsChanged"
-            @componentStateChanged="onColumnFilterStateChanged"
+            @visible-columns-changed="onVisibleColumnsChanged"
+            @component-state-changed="onColumnFilterStateChanged"
         />
     </div>
     <div class="pillar-table">
@@ -70,9 +70,9 @@ const TEMPLATE =`
  * Extend ColumnFactoryBase to create the rows for your table
  * Extend This Table with your ColumnFactory and RowSource
  *
- * @emits isInitialized When all rows has been fetched, and are initialized.
- * @emits selectItemsChanged(selectedItems) When selected rows has changed.
- * @emits componentStateChanged(newState) When table state changed. Filtered rows, visible columns...
+ * @emits is-initialized When all rows has been fetched, and are initialized.
+ * @emits selected-items-changed(selectedItems) When selected rows has changed.
+ * @emits component-state-changed(newState) When table state changed. Filtered rows, visible columns...
  */
 let PillarTable = Vue.component('pillar-table-base', {
     template: TEMPLATE,
@@ -155,12 +155,12 @@ let PillarTable = Vue.component('pillar-table-base', {
             // Deep compare to avoid spamming un needed events
             let hasChanged =  JSON.stringify(newValue ) !== JSON.stringify(oldValue);
             if (hasChanged) {
-                this.$emit('selectItemsChanged', newValue);
+                this.$emit('selected-items-changed', newValue);
             }
         },
         isInitialized(newValue) {
             if (newValue) {
-                this.$emit('isInitialized');
+                this.$emit('is-initialized');
             }
         },
         currentComponentState(newValue, oldValue) {
@@ -168,7 +168,7 @@ let PillarTable = Vue.component('pillar-table-base', {
                 // Deep compare to avoid spamming un needed events
                 let hasChanged =  JSON.stringify(newValue ) !== JSON.stringify(oldValue);
                 if (hasChanged) {
-                    this.$emit('componentStateChanged', newValue);
+                    this.$emit('component-state-changed', newValue);
                 }
             }
         }

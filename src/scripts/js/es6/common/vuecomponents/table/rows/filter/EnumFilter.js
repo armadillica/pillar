@@ -56,7 +56,7 @@ class ComponentState {
  * Filter row objects based on enumeratable values.
  *
  * @emits visibleRowObjectsChanged(rowObjects) When the objects to be visible has changed.
- * @emits componentStateChanged(newState) When row filter state changed.
+ * @emits component-state-changed(newState) When row filter state changed.
  */
 let EnumFilter = {
     template: TEMPLATE,
@@ -107,14 +107,14 @@ let EnumFilter = {
     },
     watch: {
         visibleRowObjects(visibleRowObjects) {
-            this.$emit('visibleRowObjectsChanged', visibleRowObjects);
+            this.$emit('visible-row-objects-changed', visibleRowObjects);
         },
         currentComponentState(newValue) {
-            this.$emit('componentStateChanged', newValue);
+            this.$emit('component-state-changed', newValue);
         }
     },
     created() {
-        this.$emit('visibleRowObjectsChanged', this.visibleRowObjects);
+        this.$emit('visible-row-objects-changed', this.visibleRowObjects);
     },
     methods: {
         shouldBeVisible(rowObject) {

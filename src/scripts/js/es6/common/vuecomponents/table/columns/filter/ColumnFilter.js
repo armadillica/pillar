@@ -56,8 +56,8 @@ class ComponentState {
 /**
  * Component to select what columns to render in the table.
  *
- * @emits visibleColumnsChanged(columns) When visible columns has changed
- * @emits componentStateChanged(newState) When column filter state changed.
+ * @emits visible-columns-changed(columns) When visible columns has changed
+ * @emits component-state-changed(newState) When column filter state changed.
  */
 let Filter = Vue.component('pillar-table-column-filter', {
     template: TEMPLATE,
@@ -85,14 +85,14 @@ let Filter = Vue.component('pillar-table-column-filter', {
             this.columnStates = this.createInitialColumnStates();
         },
         visibleColumns(visibleColumns) {
-            this.$emit('visibleColumnsChanged', visibleColumns);
+            this.$emit('visible-columns-changed', visibleColumns);
         },
         columnFilterState(newValue) {
-            this.$emit('componentStateChanged', newValue);
+            this.$emit('component-state-changed', newValue);
         }
     },
     created() {
-        this.$emit('visibleColumnsChanged', this.visibleColumns);
+        this.$emit('visible-columns-changed', this.visibleColumns);
     },
     methods: {
         createInitialColumnStates() {
