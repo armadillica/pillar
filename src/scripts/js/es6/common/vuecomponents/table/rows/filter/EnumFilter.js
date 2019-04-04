@@ -63,7 +63,7 @@ let EnumFilter = {
     props: {
         label: String,
         availableValues: Array, // Array with valid values [{value: abc, displayName: xyz},...]
-        componentState: Object, // Instance of ComponentState.
+        componentState: Object, // Instance of ComponentState (but type Object since it has been deserialized)
         valueExtractorCB: {
             // Callback to extract enumvalue from a rowObject
             type: Function,

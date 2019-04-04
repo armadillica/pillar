@@ -1,3 +1,5 @@
+import {ColumnBase} from '../../columns/ColumnBase'
+
 const TEMPLATE =`
 <div class="pillar-cell header-cell"
     :class="cellClasses"
@@ -34,7 +36,7 @@ const TEMPLATE =`
 Vue.component('pillar-head-cell', {
     template: TEMPLATE,
     props: {
-        column: Object
+        column: ColumnBase,
     },
     computed: {
         cellClasses() {

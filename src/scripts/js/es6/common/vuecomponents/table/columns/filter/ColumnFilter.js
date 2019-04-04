@@ -63,7 +63,7 @@ let Filter = Vue.component('pillar-table-column-filter', {
     template: TEMPLATE,
     props: {
         columns: Array, // Instances of ColumnBase
-        componentState: Object, // Instance of ComponentState
+        componentState: Object, // Instance of ComponentState (but type Object since it has been deserialized)
     },
     data() {
         return {

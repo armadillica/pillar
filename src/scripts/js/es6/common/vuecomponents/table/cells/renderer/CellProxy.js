@@ -1,3 +1,6 @@
+import {RowBase} from '../../rows/RowObjectBase'
+import {ColumnBase} from '../../columns/ColumnBase'
+
 const TEMPLATE =`
 <component class="pillar-cell"
     :class="cellClasses"
@@ -18,8 +21,8 @@ const TEMPLATE =`
 let CellProxy = Vue.component('pillar-cell-proxy', {
     template: TEMPLATE,
     props: {
-        column: Object, // ColumnBase
-        rowObject: Object // RowObject
+        column: ColumnBase,
+        rowObject: RowBase,
     },
     computed: {
         /**

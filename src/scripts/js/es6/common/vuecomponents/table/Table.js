@@ -91,7 +91,7 @@ let PillarTable = Vue.component('pillar-table-base', {
             default: true
         },
         componentState: {
-            // Instance of ComponentState
+            // Instance of ComponentState (but type Object since it has been deserialized)
             type: Object,
             default: undefined
         }
