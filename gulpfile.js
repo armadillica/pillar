@@ -152,7 +152,7 @@ gulp.task('scripts_concat_tutti', function(done) {
 
     let toUglify = [
         source.jquery    + 'dist/jquery.min.js',
-        source.vue       + 'dist/vue.min.js',
+        source.vue       + (enabled.uglify ? 'dist/vue.min.js' : 'dist/vue.js'),
         source.popper    + 'dist/umd/popper.min.js',
         source.bootstrap + 'js/dist/index.js',
         source.bootstrap + 'js/dist/util.js',

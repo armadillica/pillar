@@ -1,5 +1,5 @@
 const TEMPLATE =`
-<input 
+<input
     :class="textInputClasses"
     :placeholder="placeholderText"
     v-model="textQuery"
@@ -9,7 +9,7 @@ const TEMPLATE =`
 class ComponentState {
     /**
      * Serializable state of this component.
-     * 
+     *
      * @param {String} textQuery
      */
     constructor(textQuery) {
@@ -19,9 +19,9 @@ class ComponentState {
 
 /**
  * Component to filter rowobjects by a text value
- * 
+ *
  * @emits visibleRowObjectsChanged(rowObjects) When the objects to be visible has changed.
- * @emits componentStateChanged(newState) When row filter state changed. Filter query...
+ * @emits component-state-changed(newState) When row filter state changed. Filter query...
  */
 let TextFilter = {
     template: TEMPLATE,
@@ -67,14 +67,14 @@ let TextFilter = {
     },
     watch: {
         visibleRowObjects(visibleRowObjects) {
-            this.$emit('visibleRowObjectsChanged', visibleRowObjects);
+            this.$emit('visible-row-objects-changed', visibleRowObjects);
         },
         currentComponentState(newValue) {
-            this.$emit('componentStateChanged', newValue);
+            this.$emit('component-state-changed', newValue);
         }
     },
     created() {
-        this.$emit('visibleRowObjectsChanged', this.visibleRowObjects);
+        this.$emit('visible-row-objects-changed', this.visibleRowObjects);
     },
     methods: {
         filterByText(rowObject) {

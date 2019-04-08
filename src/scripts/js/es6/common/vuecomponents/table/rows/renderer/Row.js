@@ -1,4 +1,5 @@
 import '../../cells/renderer/CellProxy'
+import {RowBase} from '../RowObjectBase'
 
 
 const TEMPLATE =`
@@ -21,7 +22,7 @@ const TEMPLATE =`
 Vue.component('pillar-table-row', {
     template: TEMPLATE,
     props: {
-        rowObject: Object,
+        rowObject: RowBase,
         columns: Array
     },
     computed: {

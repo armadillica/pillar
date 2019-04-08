@@ -204,7 +204,7 @@ Vue.component('comment-editor', {
                 .fail((err) => {toastr.error(pillar.utils.messageFromError(err), 'Failed to submit comment')})
             )
             .then(() => {
-                EventBus.$emit(Events.EDIT_DONE, this.comment._id);
+                EventBus.$emit(Events.EDIT_DONE);
             });
         },
         thenSubmit() {

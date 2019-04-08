@@ -77,10 +77,6 @@ function containerResizeY(window_height){
 			 'height': window_height_minus_nav + 'px'}
 		);
 
-		$('#project_context, #project_context-header').css(
-			{'top' : breadcrumbs_height}
-		);
-
 		$('#project_nav-container, #project_tree').css(
 			{'max-height': (window_height_minus_nav) + 'px',
 			 'height': (window_height_minus_nav) + 'px'}
@@ -113,18 +109,12 @@ function showProjectSidebar(){
 	Cookies.remove('bcloud_ui', 'hide_project_sidebar');
 
 	$('#project-container').addClass('is-sidebar-visible');
-
-	// Hide the toggle button.
-	$('.breadcrumbs-container .project-sidebar-toggle').hide();
 }
 
 function hideProjectSidebar(){
 	setJSONCookie('bcloud_ui', 'hide_project_sidebar', true);
 
 	$('#project-container').removeClass('is-sidebar-visible');
-
-	// Show the toggle button.
-	$('.breadcrumbs-container .project-sidebar-toggle').show();
 }
 
 function toggleProjectSidebar(){

@@ -63,7 +63,6 @@ Vue.component('comments-tree', {
             comments: [],
             showLoadingPlaceholder: true,
             user: pillar.utils.getCurrentUser(),
-            canPostComments: this.canPostCommentsStr == 'true'
         }
     },
     computed: {
@@ -73,12 +72,6 @@ Vue.component('comments-tree', {
         },
         isLoggedIn() {
             return this.user.is_authenticated;
-        },
-        iSubscriber() {
-            return this.user.hasCap('subscriber');
-        },
-        canRenewSubscription() {
-            return this.user.hasCap('can-renew-subscription');
         },
         canReply() {
             return !this.readOnly && !this.replyHidden && this.isLoggedIn;

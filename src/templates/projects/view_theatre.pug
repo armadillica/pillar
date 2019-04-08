@@ -29,14 +29,12 @@ li.nav-item
 | {% endblock %}
 
 | {% block css %}
-link(href="{{ url_for('static_pillar', filename='assets/css/font-pillar.css') }}", rel="stylesheet")
 link(href="{{ url_for('static_pillar', filename='assets/css/theatre.css') }}", rel="stylesheet")
 | {% endblock %}
 
 | {% block body %}
 #theatre-container.d-flex.position-relative.h-100.overflow-hidden(
 	class="{% if current_user.is_authenticated %}with-info{% endif %}")
-
 | {% endblock %}
 
 | {% block footer_scripts %}

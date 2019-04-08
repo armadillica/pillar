@@ -104,8 +104,8 @@ Vue.component('comment-attachment-editor', {
     methods: {
         /**
          * Replaces all spaces with underscore and removes all o
-         * @param {String} unsafe 
-         * @returns {String} 
+         * @param {String} unsafe
+         * @returns {String}
          */
         makeSafeAttachmentString(unsafe) {
             let candidate = (unsafe);
@@ -113,7 +113,7 @@ Vue.component('comment-attachment-editor', {
             candidate = candidate
                 .replace(matchSpace, '_')
                 .replace(NON_VALID_NAME_REGEXP, '')
-            
+
             return candidate || `${this.oid}`
         }
     }

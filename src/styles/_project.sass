@@ -1,4 +1,5 @@
 $node-latest-thumbnail-size: 160px
+$breadcrumbs-container-height: 26px
 
 /* Dark navbar when browsing a project. */
 body.project,
@@ -32,8 +33,11 @@ body.svnman, body.edit_node_types, body.search-project
 			+media-xl
 				left: $project_nav-width-xl
 
+			.project-sidebar-toggle
+				@extend .d-none
+
 #project-side-container
-	display: none
+	display: none // It's 'flex' when is-sidebar-visible is in #project-container
 
 	+media-xs
 		position: fixed
@@ -126,6 +130,7 @@ body.svnman, body.edit_node_types, body.search-project
 
 /* Header with name and node edit tools */
 #project_context-header
+	top: $breadcrumbs-container-height
 	right: 0
 	z-index: $z-index-base + 3
 
@@ -258,9 +263,12 @@ ul.project-edit-tools
 		border: none
 
 	.breadcrumbs-container
+		height: $breadcrumbs-container-height
 		top: $project_header-height + 1
 
 #project_context
+	padding-top: $breadcrumbs-container-height + 1
+
 	.node-details-description
 		font:
 			size: 1.2em

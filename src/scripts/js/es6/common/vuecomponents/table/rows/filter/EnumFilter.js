@@ -44,7 +44,7 @@ class EnumState{
 class ComponentState {
     /**
      * Serializable state of this component.
-     * 
+     *
      * @param {Array} selected The enums that should be visible
      */
     constructor(selected) {
@@ -53,17 +53,17 @@ class ComponentState {
 }
 
 /**
- * Filter row objects based on enumeratable values. 
- * 
+ * Filter row objects based on enumeratable values.
+ *
  * @emits visibleRowObjectsChanged(rowObjects) When the objects to be visible has changed.
- * @emits componentStateChanged(newState) When row filter state changed.
+ * @emits component-state-changed(newState) When row filter state changed.
  */
 let EnumFilter = {
     template: TEMPLATE,
     props: {
         label: String,
         availableValues: Array, // Array with valid values [{value: abc, displayName: xyz},...]
-        componentState: Object, // Instance of ComponentState.
+        componentState: Object, // Instance of ComponentState (but type Object since it has been deserialized)
         valueExtractorCB: {
             // Callback to extract enumvalue from a rowObject
             type: Function,
@@ -107,14 +107,14 @@ let EnumFilter = {
     },
     watch: {
         visibleRowObjects(visibleRowObjects) {
-            this.$emit('visibleRowObjectsChanged', visibleRowObjects);
+            this.$emit('visible-row-objects-changed', visibleRowObjects);
         },
         currentComponentState(newValue) {
-            this.$emit('componentStateChanged', newValue);
+            this.$emit('component-state-changed', newValue);
         }
     },
     created() {
-        this.$emit('visibleRowObjectsChanged', this.visibleRowObjects);
+        this.$emit('visible-row-objects-changed', this.visibleRowObjects);
     },
     methods: {
         shouldBeVisible(rowObject) {

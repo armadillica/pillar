@@ -89,7 +89,7 @@ const TEMPLATE = `
         <comment
             v-for="c in comment.replies"
             @unit-of-work="childUnitOfWork"
-            isReply=true
+            :isReply="true"
             :readOnly="readOnly"
             :comment="c"
             :user="user"
@@ -158,7 +158,7 @@ Vue.component('comment', {
         },
         cancleEdit() {
             this.doHideEditors();
-            EventBus.$emit(Events.EDIT_DONE, this.comment.id );
+            EventBus.$emit(Events.EDIT_DONE);
         },
         doHideEditors() {
             this.isReplying = false;

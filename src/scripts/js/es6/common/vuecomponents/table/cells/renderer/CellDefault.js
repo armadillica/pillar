@@ -1,3 +1,6 @@
+import {ColumnBase} from '../../columns/ColumnBase'
+import {RowBase} from '../../rows/RowObjectBase'
+
 const TEMPLATE =`
 <div>
     {{ cellValue }}
@@ -11,9 +14,9 @@ const TEMPLATE =`
 let CellDefault = Vue.component('pillar-cell-default', {
     template: TEMPLATE,
     props: {
-        column: Object,
-        rowObject: Object,
-        rawCellValue: Object
+        column: ColumnBase,
+        rowObject: RowBase,
+        rawCellValue: [String,Number,Boolean,Array,Object,Date,Function,Symbol,],
     },
     computed: {
         cellValue() {
