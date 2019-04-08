@@ -149,6 +149,12 @@ def post_node_comment(parent_id: bson.ObjectId, markdown_msg: str, attachments: 
             rating_positive=0,
             rating_negative=0,
             attachments=attachments,
+        ),
+        permissions=dict(
+            users=[dict(
+                user=current_user.objectid,
+                methods=['PUT'])
+            ]
         )
     )
     r, _, _, status = current_app.post_internal('nodes', comment)
