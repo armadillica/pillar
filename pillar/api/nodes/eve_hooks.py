@@ -7,7 +7,6 @@ from bson import ObjectId
 from werkzeug import exceptions as wz_exceptions
 
 from pillar import current_app
-import pillar.markdown
 from pillar.api.activities import activity_subscribe, activity_object_add
 from pillar.api.file_storage_backends.gcs import update_file_name
 from pillar.api.node_types import PILLAR_NAMED_NODE_TYPES
@@ -122,6 +121,7 @@ def before_inserting_nodes(items):
         # Default the 'user' property to the current user.
         item.setdefault('user', current_user.user_id)
 
+
 def get_comment_verb_and_context_object_id(comment):
     nodes_collection = current_app.data.driver.db['nodes']
     verb = 'commented'
@@ -151,7 +151,6 @@ def after_inserting_nodes(items):
                 verb, context_object_id = get_comment_verb_and_context_object_id(item)
                 # Subscribe to the parent of the parent comment (post or group)
                 activity_subscribe(item['user'], 'node', context_object_id)
-
 
         if context_object_id and item['node_type'] in PILLAR_NAMED_NODE_TYPES:
             # * Skip activity for first level items (since the context is not a
