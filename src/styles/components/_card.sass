@@ -155,14 +155,14 @@ $card-progress-height: 5px
 
 /* Tiny label for cards. e.g. 'WATCHED' on videos. */
 .card-label
-	background-color: rgba($black, .5)
-	border-radius: 3px
-	color: $white
-	display: block
+	@extend .font-weight-bold
+	@extend .position-absolute
+	@extend .rounded
+	@extend .text-white
+	@extend .bg-dark
+	bottom: $card-progress-height + 3px // enough to be above the progress-bar
 	font-size: $font-size-xxs
 	left: 5px
-	bottom: $card-progress-height + 3px // enough to be above the progress-bar
-	position: absolute
 	padding: 1px 5px
 	z-index: 1
 
