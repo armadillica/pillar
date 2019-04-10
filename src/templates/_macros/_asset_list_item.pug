@@ -49,16 +49,16 @@ a.card.asset.card-image-fade.mb-2(
 
 		ul.card-text.list-unstyled.d-flex.text-black-50.mt-auto.mb-0.text-truncate
 			| {% if node_type %}
-			li.pr-2.font-weight-bold {{ node_type | undertitle }}
+			li.item-type.pr-2.font-weight-bold {{ node_type | undertitle }}
 			| {% endif %}
 			| {% if asset.project.name %}
-			li.pr-2.text-truncate {{ asset.project.name }}
+			li.item-name.pr-2.text-truncate {{ asset.project.name }}
 			| {% endif %}
 			| {% if asset.user.full_name %}
-			li.pr-2.text-truncate {{ asset.user.full_name }}
+			li.item-full_name.pr-2.text-truncate {{ asset.user.full_name }}
 			| {% endif %}
 			| {% if asset._created %}
-			li.text-truncate {{ asset._created | pretty_date }}
+			li.item-date.text-truncate {{ asset._created | pretty_date }}
 			| {% endif %}
 
 | {% endmacro %}
