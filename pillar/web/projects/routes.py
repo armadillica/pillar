@@ -349,8 +349,7 @@ def project_navigation_links(project: typing.Type[Project], api) -> list:
 
 
 def render_project(project, api, extra_context=None, template_name=None):
-    project.picture_square = utils.get_file(project.picture_square, api=api)
-    project.picture_header = utils.get_file(project.picture_header, api=api)
+    utils.attach_project_pictures(project, api)
 
     def load_latest(list_of_ids, node_type=None):
         """Loads a list of IDs in reversed order."""
@@ -541,8 +540,7 @@ def search(project_url):
     """Search into a project"""
     api = system_util.pillar_api()
     project = find_project_or_404(project_url, api=api)
-    project.picture_square = utils.get_file(project.picture_square, api=api)
-    project.picture_header = utils.get_file(project.picture_header, api=api)
+    utils.attach_project_pictures(project, api)
 
     return render_template('nodes/search.html',
                            project=project,
