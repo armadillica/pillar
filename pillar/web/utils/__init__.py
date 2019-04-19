@@ -45,6 +45,7 @@ def attach_project_pictures(project, api):
 
     project.picture_square = get_file(project.picture_square, api=api)
     project.picture_header = get_file(project.picture_header, api=api)
+    project.picture_16_9 = get_file(project.picture_16_9, api=api)
 
 
 def mass_attach_project_pictures(projects: typing.Iterable[pillarsdk.Project], *,
