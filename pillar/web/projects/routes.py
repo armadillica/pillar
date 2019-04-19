@@ -583,6 +583,8 @@ def edit(project_url):
             project.picture_square = form.picture_square.data
         if form.picture_header.data:
             project.picture_header = form.picture_header.data
+        if form.picture_16_9.data:
+            project.picture_16_9 = form.picture_16_9.data
 
         # Update world permissions from is_private checkbox
         if form.is_private.data:
@@ -598,6 +600,8 @@ def edit(project_url):
             form.picture_square.data = project.picture_square._id
         if project.picture_header:
             form.picture_header.data = project.picture_header._id
+        if project.picture_16_9:
+            form.picture_16_9.data = project.picture_16_9._id
 
     # List of fields from the form that should be hidden to regular users
     if current_user.has_role('admin'):
