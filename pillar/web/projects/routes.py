@@ -423,7 +423,7 @@ def render_project(project, api, extra_context=None, template_name=None):
                            node=None,
                            show_node=False,
                            show_project=True,
-                           og_picture=project.picture_header,
+                           og_picture=project.picture_16_9,
                            activity_stream=activity_stream,
                            navigation_links=navigation_links,
                            extension_sidebar_links=extension_sidebar_links,
@@ -492,7 +492,7 @@ def view_node(project_url, node_id):
     og_picture = node.picture = utils.get_file(node.picture, api=api)
     if project:
         if not node.picture:
-            og_picture = utils.get_file(project.picture_header, api=api)
+            og_picture = utils.get_file(project.picture_16_9, api=api)
         project.picture_square = utils.get_file(project.picture_square, api=api)
         navigation_links = project_navigation_links(project, api)
         extension_sidebar_links = current_app.extension_sidebar_links(project)
