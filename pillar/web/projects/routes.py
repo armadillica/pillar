@@ -491,9 +491,9 @@ def view_node(project_url, node_id):
     extension_sidebar_links = ''
     og_picture = node.picture = utils.get_file(node.picture, api=api)
     if project:
+        utils.attach_project_pictures(project, api)
         if not node.picture:
-            og_picture = utils.get_file(project.picture_16_9, api=api)
-        project.picture_square = utils.get_file(project.picture_square, api=api)
+            og_picture = project.picture_16_9
         navigation_links = project_navigation_links(project, api)
         extension_sidebar_links = current_app.extension_sidebar_links(project)
 
