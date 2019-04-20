@@ -349,8 +349,7 @@ def project_navigation_links(project: typing.Type[Project], api) -> list:
 
 
 def render_project(project, api, extra_context=None, template_name=None):
-    project.picture_square = utils.get_file(project.picture_square, api=api)
-    project.picture_header = utils.get_file(project.picture_header, api=api)
+    utils.attach_project_pictures(project, api)
 
     def load_latest(list_of_ids, node_type=None):
         """Loads a list of IDs in reversed order."""
@@ -424,7 +423,7 @@ def render_project(project, api, extra_context=None, template_name=None):
                            node=None,
                            show_node=False,
                            show_project=True,
-                           og_picture=project.picture_header,
+                           og_picture=project.picture_16_9,
                            activity_stream=activity_stream,
                            navigation_links=navigation_links,
                            extension_sidebar_links=extension_sidebar_links,
@@ -492,9 +491,9 @@ def view_node(project_url, node_id):
     extension_sidebar_links = ''
     og_picture = node.picture = utils.get_file(node.picture, api=api)
     if project:
+        utils.attach_project_pictures(project, api)
         if not node.picture:
-            og_picture = utils.get_file(project.picture_header, api=api)
-        project.picture_square = utils.get_file(project.picture_square, api=api)
+            og_picture = project.picture_16_9
         navigation_links = project_navigation_links(project, api)
         extension_sidebar_links = current_app.extension_sidebar_links(project)
 
@@ -541,8 +540,7 @@ def search(project_url):
     """Search into a project"""
     api = system_util.pillar_api()
     project = find_project_or_404(project_url, api=api)
-    project.picture_square = utils.get_file(project.picture_square, api=api)
-    project.picture_header = utils.get_file(project.picture_header, api=api)
+    utils.attach_project_pictures(project, api)
 
     return render_template('nodes/search.html',
                            project=project,
@@ -583,6 +581,8 @@ def edit(project_url):
             project.picture_square = form.picture_square.data
         if form.picture_header.data:
             project.picture_header = form.picture_header.data
+        if form.picture_16_9.data:
+            project.picture_16_9 = form.picture_16_9.data
 
         # Update world permissions from is_private checkbox
         if form.is_private.data:
@@ -598,6 +598,8 @@ def edit(project_url):
             form.picture_square.data = project.picture_square._id
         if project.picture_header:
             form.picture_header.data = project.picture_header._id
+        if project.picture_16_9:
+            form.picture_16_9.data = project.picture_16_9._id
 
     # List of fields from the form that should be hidden to regular users
     if current_user.has_role('admin'):

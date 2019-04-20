@@ -30,6 +30,7 @@ class ProjectForm(FlaskForm):
         ('deleted', 'Deleted')])
     picture_header = FileSelectField('Picture header', file_format='image')
     picture_square = FileSelectField('Picture square', file_format='image')
+    picture_16_9 = FileSelectField('Picture 16:9', file_format='image')
 
     def validate(self):
         rv = FlaskForm.validate(self)
