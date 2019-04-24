@@ -4,9 +4,9 @@
 
 	| {% if field.type == 'BooleanField' %}
 	.checkbox
-		label
+		label(for='{{ field.name }}')
 			| {{ field(class='checkbox') }}
-			label {{ field.name | undertitle }}
+			label(for='{{ field.name }}') {{ _(field.name) | undertitle }}
 
 	| {% elif field.type == 'FieldList' %}
 
@@ -29,7 +29,8 @@
 		| {% endfor %}
 
 	| {% else %}
-	| {{ field.label }}
+	label(for='{{ field.name }}')
+		| {{ _(field.name) | undertitle }}
 	| {{ field(class='form-control') }}
 	| {% endif %}
 
