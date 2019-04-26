@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "pillar-devdeps"
+version = "1.0"
+description = ""
+authors = [
+    "Francesco Siddi <francesco@blender.org>",
+    "Pablo Vazquez <pablo@blender.studio>",
+    "Sybren Stüvel <sybren@blender.studio>",
+]
+
+[tool.poetry.dependencies]
+python = "~3.6"
+mypy = "0.501"
+pytest = "3.0.6"
+pytest-cov = "2.4.0"
+responses = "0.5.1"
