@@ -25,15 +25,16 @@ Don't forget to Gulp!
 
 ## Installation
 
+Dependencies are managed via [Poetry](https://poetry.eustace.io/).
+
 Make sure your /data directory exists and is writable by the current user.
 Alternatively, provide a `pillar/config_local.py` that changes the relevant
 settings.
 
 ```
 git clone git@git.blender.org:pillar-python-sdk.git ../pillar-python-sdk
-pip install -e ../pillar-python-sdk
-pip install -U -r requirements.txt
-pip install -e .
+pip install -U --user poetry
+poetry install
 ```
 
 ## HDRi viewer
