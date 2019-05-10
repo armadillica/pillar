@@ -47,18 +47,18 @@ class GlobalTimelineTest(AbstractPillarTest):
             timeline = response['groups']
             continue_from = response['continue_from']
 
-            self.assertEquals(1520229908.0, continue_from)
-            self.assertEquals(3, len(timeline))
-            self.assertEquals('Week 11, 2018', timeline[1]['label'])
-            self.assertEquals('Week 10, 2018', timeline[2]['label'])
-            self.assertEquals('Unittest project', timeline[0]['groups'][0]['label'])
-            self.assertEquals('Another Project', timeline[0]['groups'][1]['label'])
-            self.assertEquals('/p/default-project/', timeline[0]['groups'][0]['url'])
-            self.assertEquals('/p/another-url/', timeline[0]['groups'][1]['url'])
+            self.assertEqual(1520229908.0, continue_from)
+            self.assertEqual(3, len(timeline))
+            self.assertEqual('Week 11, 2018', timeline[1]['label'])
+            self.assertEqual('Week 10, 2018', timeline[2]['label'])
+            self.assertEqual('Unittest project', timeline[0]['groups'][0]['label'])
+            self.assertEqual('Another Project', timeline[0]['groups'][1]['label'])
+            self.assertEqual('/p/default-project/', timeline[0]['groups'][0]['url'])
+            self.assertEqual('/p/another-url/', timeline[0]['groups'][1]['url'])
 
             # week 12
             week = timeline[0]
-            self.assertEquals('Week 12, 2018', week['label'])
+            self.assertEqual('Week 12, 2018', week['label'])
             proj_pid1 = week['groups'][0]
 
             expected_post_ids = self.all_post_pid1_ids[0:2]
@@ -74,7 +74,7 @@ class GlobalTimelineTest(AbstractPillarTest):
 
             # week 11
             week = timeline[1]
-            self.assertEquals('Week 11, 2018', week['label'])
+            self.assertEqual('Week 11, 2018', week['label'])
             proj_pid1 = week['groups'][0]
 
             expected_post_ids = self.all_post_pid1_ids[2:9]
@@ -90,7 +90,7 @@ class GlobalTimelineTest(AbstractPillarTest):
 
             # week 10
             week = timeline[2]
-            self.assertEquals('Week 10, 2018', week['label'])
+            self.assertEqual('Week 10, 2018', week['label'])
             proj_pid1 = week['groups'][0]
 
             expected_post_ids = self.all_post_pid1_ids[9:16]
@@ -111,16 +111,16 @@ class GlobalTimelineTest(AbstractPillarTest):
             timeline = response['groups']
 
             self.assertNotIn('continue_from', response)
-            self.assertEquals(2, len(timeline))
-            self.assertEquals('Week 9, 2018', timeline[0]['label'])
-            self.assertEquals('Week 8, 2018', timeline[1]['label'])
-            self.assertEquals('Unittest project', timeline[0]['groups'][0]['label'])
-            self.assertEquals('Another Project', timeline[0]['groups'][1]['label'])
-            self.assertEquals('/p/default-project/', timeline[0]['groups'][0]['url'])
+            self.assertEqual(2, len(timeline))
+            self.assertEqual('Week 9, 2018', timeline[0]['label'])
+            self.assertEqual('Week 8, 2018', timeline[1]['label'])
+            self.assertEqual('Unittest project', timeline[0]['groups'][0]['label'])
+            self.assertEqual('Another Project', timeline[0]['groups'][1]['label'])
+            self.assertEqual('/p/default-project/', timeline[0]['groups'][0]['url'])
 
             # week 9
             week = timeline[0]
-            self.assertEquals('Week 9, 2018', week['label'])
+            self.assertEqual('Week 9, 2018', week['label'])
             proj_pid1 = week['groups'][0]
 
             expected_post_ids = self.all_post_pid1_ids[16:23]
@@ -136,7 +136,7 @@ class GlobalTimelineTest(AbstractPillarTest):
 
             # week 8
             week = timeline[1]
-            self.assertEquals('Week 8, 2018', week['label'])
+            self.assertEqual('Week 8, 2018', week['label'])
             proj_pid1 = week['groups'][0]
 
             expected_post_ids = self.all_post_pid1_ids[23:25]
@@ -151,14 +151,14 @@ class GlobalTimelineTest(AbstractPillarTest):
                                      expected_post_ids, expected_asset_ids)
 
     def assertProjectEquals(self, proj, label, url, expected_post_ids, expected_asset_ids):
-        self.assertEquals(label, proj['label'])
-        self.assertEquals(url, proj['url'])
+        self.assertEqual(label, proj['label'])
+        self.assertEqual(url, proj['url'])
 
         actual_ids = [n['_id'] for n in proj['items']['post']]
-        self.assertEquals(expected_post_ids, actual_ids)
+        self.assertEqual(expected_post_ids, actual_ids)
 
         actual_ids = [n['_id'] for n in proj['items']['asset']]
-        self.assertEquals(expected_asset_ids, actual_ids)
+        self.assertEqual(expected_asset_ids, actual_ids)
 
     def create_asset(self, pid, days, hours):
         asset_node = {

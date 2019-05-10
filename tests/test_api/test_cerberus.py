@@ -209,10 +209,10 @@ class IPRangeValidatorTest(AbstractSchemaValidationTest):
     def test_descriptive_error_message(self):
         is_valid = self.validator.validate({'iprange': '::/0'}, self.schema)
         self.assertFalse(is_valid)
-        self.assertEquals(1, len(self.validator._errors))
+        self.assertEqual(1, len(self.validator._errors))
         err = self.validator._errors[0]
-        self.assertEquals(('iprange', ), err.document_path)
-        self.assertEquals(('Zero-length prefix is not allowed',), err.info)
+        self.assertEqual(('iprange', ), err.document_path)
+        self.assertEqual(('Zero-length prefix is not allowed',), err.info)
 
 
 class MarkdownValidatorTest(AbstractSchemaValidationTest):

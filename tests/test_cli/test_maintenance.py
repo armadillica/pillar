@@ -195,8 +195,8 @@ class ReconcileNodeDurationTest(AbstractPillarTest):
         new_node = nodes_coll.find_one({'_id': nid})
         orig_node = self.orig_nodes[nid]
         self.assertNotEqual(orig_node['_etag'], new_node['_etag'])
-        self.assertEquals(self.fake_now, new_node['_updated'])
-        self.assertEquals(duration_seconds, new_node['properties']['duration_seconds'])
+        self.assertEqual(self.fake_now, new_node['_updated'])
+        self.assertEqual(duration_seconds, new_node['properties']['duration_seconds'])
 
     def assertAllUnchanged(self):
         self.assertUnChanged(*self.orig_nodes.keys())
@@ -206,7 +206,7 @@ class ReconcileNodeDurationTest(AbstractPillarTest):
         for nid in node_ids:
             new_node = nodes_coll.find_one({'_id': nid})
             orig_node = self.orig_nodes[nid]
-            self.assertEquals(orig_node, new_node)
+            self.assertEqual(orig_node, new_node)
 
     def _create_video_node(self, file_duration=None, node_duration=None, include_file=True):
         file_id, _ = self.ensure_file_exists(file_overrides={

@@ -140,10 +140,10 @@ class NotificationsTest(AbstractPillarTest):
             'notifications.web': True,
         }
         subscriptions = list(subscriptions_col.find(lookup))
-        self.assertEquals(len(subscriptions), len(user_ids))
+        self.assertEqual(len(subscriptions), len(user_ids))
         for s in subscriptions:
             self.assertIn(s['user'], user_ids)
-            self.assertEquals(s['context_object_type'], 'node')
+            self.assertEqual(s['context_object_type'], 'node')
 
     def assertNotSubscribed(self, node_id, user_id):
         subscriptions_col = self.app.data.driver.db['activities-subscriptions']
@@ -153,7 +153,7 @@ class NotificationsTest(AbstractPillarTest):
         }
         subscriptions = subscriptions_col.find(lookup)
         for s in subscriptions:
-            self.assertNotEquals(s['user'], user_id)
+            self.assertNotEqual(s['user'], user_id)
 
     def notification_for_object(self, node_id):
         notifications_url = flask.url_for('notifications.index')

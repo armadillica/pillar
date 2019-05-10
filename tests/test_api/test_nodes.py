@@ -669,10 +669,10 @@ class TaggedNodesTest(AbstractPillarTest):
                 mock_utcnow.return_value = self.fake_now
                 url = flask.url_for('nodes_api.tagged', tag='एनिमेशन')
                 resp = self.get(url).json[0]
-                self.assertEquals('01:01:01', resp['properties']['duration'])
-                self.assertEquals('Unittest project', resp['project']['name'])
-                self.assertEquals('default-project', resp['project']['url'])
-                self.assertEquals('5m ago', resp['pretty_created'])
+                self.assertEqual('01:01:01', resp['properties']['duration'])
+                self.assertEqual('Unittest project', resp['project']['name'])
+                self.assertEqual('default-project', resp['project']['url'])
+                self.assertEqual('5m ago', resp['pretty_created'])
 
 
 class NodesReferencedByProjectTest(AbstractPillarTest):

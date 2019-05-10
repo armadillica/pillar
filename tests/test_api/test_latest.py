@@ -143,8 +143,8 @@ class LatestAssetsTest(AbstractPillarTest):
             latest_assets = self.get(url).json['_items']
 
             asset = latest_assets[0]
-            self.assertEquals(str(ok_id), asset['_id'])
-            self.assertEquals('Just a node name', asset['name'])
+            self.assertEqual(str(ok_id), asset['_id'])
+            self.assertEqual('Just a node name', asset['name'])
             self.assertNotIn('user', asset)
 
 
@@ -299,7 +299,7 @@ class LatestCommentsTest(AbstractPillarTest):
             latest_comments = self.get(url).json['_items']
 
             comment = latest_comments[0]
-            self.assertEquals(str(ok_id), comment['_id'])
-            self.assertEquals('Comment', comment['name'])
-            self.assertEquals('एनिमेशन is animation in Hindi', comment['properties']['content'])
-            self.assertEquals('คนรักของผัดไทย', comment['user']['full_name'])
+            self.assertEqual(str(ok_id), comment['_id'])
+            self.assertEqual('Comment', comment['name'])
+            self.assertEqual('एनिमेशन is animation in Hindi', comment['properties']['content'])
+            self.assertEqual('คนรักของผัดไทย', comment['user']['full_name'])

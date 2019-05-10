@@ -73,7 +73,7 @@ class TestSearchNodesGlobal(AbstractPillarTest):
                 **PAGE_1
             }
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_empty_query_page_2(self):
         with self.app.app_context():
@@ -88,7 +88,7 @@ class TestSearchNodesGlobal(AbstractPillarTest):
                 **page_2
             }
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_empty_query_with_terms(self):
         with self.app.app_context():
@@ -118,7 +118,7 @@ class TestSearchNodesGlobal(AbstractPillarTest):
                 **PAGE_1
             }
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_query(self):
         with self.app.app_context():
@@ -169,7 +169,7 @@ class TestSearchNodesGlobal(AbstractPillarTest):
                 **PAGE_1
             }
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
 
 class TestSearchNodesInProject(AbstractPillarTest):
@@ -186,7 +186,7 @@ class TestSearchNodesInProject(AbstractPillarTest):
                 **PAGE_1
             }
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_empty_query_page_2(self):
         with self.app.app_context():
@@ -203,7 +203,7 @@ class TestSearchNodesInProject(AbstractPillarTest):
                 **page_2
             }
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_empty_query_with_terms(self):
         with self.app.app_context():
@@ -236,7 +236,7 @@ class TestSearchNodesInProject(AbstractPillarTest):
                 **page_2
             }
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_query(self):
         with self.app.app_context():
@@ -288,7 +288,7 @@ class TestSearchNodesInProject(AbstractPillarTest):
                 **PAGE_1
             }
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
 
 class TestSearchMultiNodes(AbstractPillarTest):
@@ -332,4 +332,4 @@ class TestSearchMultiNodes(AbstractPillarTest):
                 second
             ]
 
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())

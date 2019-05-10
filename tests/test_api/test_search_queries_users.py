@@ -48,7 +48,7 @@ class TestSearchUsers(AbstractPillarTest):
                 **AGGREGATIONS,
                 **PAGE_1
             }
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_query(self):
         with self.app.app_context():
@@ -95,7 +95,7 @@ class TestSearchUsers(AbstractPillarTest):
                 **AGGREGATIONS,
                 **PAGE_1
             }
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_email_query(self):
         with self.app.app_context():
@@ -150,7 +150,7 @@ class TestSearchUsers(AbstractPillarTest):
                 **AGGREGATIONS,
                 **PAGE_1
             }
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
 
 class TestSearchUsersAdmin(AbstractPillarTest):
@@ -163,7 +163,7 @@ class TestSearchUsersAdmin(AbstractPillarTest):
                 **AGGREGATIONS,
                 **PAGE_1
             }
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_query(self):
         with self.app.app_context():
@@ -209,7 +209,7 @@ class TestSearchUsersAdmin(AbstractPillarTest):
                 **AGGREGATIONS,
                 **PAGE_1
             }
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_terms(self):
         with self.app.app_context():
@@ -228,7 +228,7 @@ class TestSearchUsersAdmin(AbstractPillarTest):
                 **AGGREGATIONS,
                 **PAGE_1
             }
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
 
     def test_object_id_query(self):
         with self.app.app_context():
@@ -282,4 +282,4 @@ class TestSearchUsersAdmin(AbstractPillarTest):
                 **AGGREGATIONS,
                 **PAGE_1
             }
-            self.assertEquals(expected, search.to_dict())
+            self.assertEqual(expected, search.to_dict())
