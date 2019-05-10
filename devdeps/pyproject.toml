@@ -10,7 +10,7 @@ authors = [
 
 [tool.poetry.dependencies]
 python = "~3.6"
-mypy = "0.501"
-pytest = "3.0.6"
-pytest-cov = "2.4.0"
-responses = "0.5.1"
+mypy = "^0.501"
+pytest = "~4.4"
+pytest-cov = "~2.7"
+responses = "~0.10"

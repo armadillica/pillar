@@ -59,7 +59,6 @@ idna = "~2.8"
 
 
 [tool.poetry.dev-dependencies]
-mypy = "0.501"
 pillar-devdeps = {path = "./devdeps"}
 
 
