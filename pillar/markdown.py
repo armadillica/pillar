@@ -4,7 +4,7 @@ This is for user-generated stuff, like comments.
 """
 
 import bleach
-import CommonMark
+import commonmark
 
 from . import shortcodes
 
@@ -44,7 +44,7 @@ ALLOWED_STYLES = [
 
 def markdown(s: str) -> str:
     commented_shortcodes = shortcodes.comment_shortcodes(s)
-    tainted_html = CommonMark.commonmark(commented_shortcodes)
+    tainted_html = commonmark.commonmark(commented_shortcodes)
 
     # Create a Cleaner that supports parsing of bare links (see filters).
     cleaner = bleach.Cleaner(tags=ALLOWED_TAGS,
