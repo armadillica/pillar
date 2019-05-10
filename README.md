@@ -69,7 +69,7 @@ Find other Celery operations with the `manage.py celery` command.
 
 Pillar uses [Elasticsearch](https://www.elastic.co/products/elasticsearch) to power the search engine.
 You will need to run the `manage.py elastic reset_index` command to initialize the indexing.
-If you need to reindex your documents in elastic you run the `manage.py elastic reindex` command.  
+If you need to reindex your documents in elastic you run the `manage.py elastic reindex` command.
 
 ## Translations
 
