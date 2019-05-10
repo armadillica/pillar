@@ -81,7 +81,7 @@ class CommentEditTest(AbstractPillarTest):
 
         with self.app.app_context():
             proj_coll = self.app.db('projects')
-            proj_coll.update(
+            proj_coll.update_one(
                 {'_id': self.pid},
                 {'$set': {
                     'node_types': self.project['node_types'],

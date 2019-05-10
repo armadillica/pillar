@@ -24,13 +24,13 @@ class OrganizationCruTest(AbstractPillarTest):
         self.enter_app_context()
 
         # There should be no organizations to begin with.
-        db = self.app.db('organizations')
-        self.assertEqual(0, db.count())
+        org_coll = self.app.db('organizations')
+        self.assertEqual(0, org_coll.count_documents({}))
 
         admin_uid = self.create_user(24 * 'a')
         org_doc = self.app.org_manager.create_new_org('Хакеры', admin_uid, 25)
 
-        self.assertIsNotNone(db.find_one(org_doc['_id']))
+        self.assertIsNotNone(org_coll.find_one(org_doc['_id']))
         self.assertEqual(bson.ObjectId(24 * 'a'), org_doc['admin_uid'])
         self.assertEqual('Хакеры', org_doc['name'])
         self.assertEqual(25, org_doc['seat_count'])

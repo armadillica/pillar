@@ -257,7 +257,7 @@ def has_home_project(user_id):
     """Returns True iff the user has a home project."""
 
     proj_coll = current_app.data.driver.db['projects']
-    return proj_coll.count({'user': user_id, 'category': 'home', '_deleted': False}) > 0
+    return proj_coll.count_documents({'user': user_id, 'category': 'home', '_deleted': False}) > 0
 
 
 def get_home_project(user_id, projection=None):
@@ -272,10 +272,10 @@ def is_home_project(project_id, user_id):
     """Returns True iff the given project exists and is the user's home project."""
 
     proj_coll = current_app.data.driver.db['projects']
-    return proj_coll.count({'_id': project_id,
-                            'user': user_id,
-                            'category': 'home',
-                            '_deleted': False}) > 0
+    return proj_coll.count_documents({'_id': project_id,
+                                      'user': user_id,
+                                      'category': 'home',
+                                      '_deleted': False}) > 0
 
 
 def mark_node_updated(node_id):

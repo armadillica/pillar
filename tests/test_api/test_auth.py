@@ -741,7 +741,7 @@ class UserCreationTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             users_coll = self.app.db().users
-            self.assertEqual(0, users_coll.count())
+            self.assertEqual(0, users_coll.count_documents({}))
 
         self.mock_blenderid_validate_happy()
         token = 'this is my life now'
@@ -749,7 +749,7 @@ class UserCreationTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             users_coll = self.app.db().users
-            self.assertEqual(1, users_coll.count())
+            self.assertEqual(1, users_coll.count_documents({}))
 
             db_user = users_coll.find()[0]
             self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)
@@ -760,7 +760,7 @@ class UserCreationTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             users_coll = self.app.db().users
-            self.assertEqual(0, users_coll.count())
+            self.assertEqual(0, users_coll.count_documents({}))
 
         bid_resp = {'status': 'success',
                     'user': {'email': TEST_EMAIL_ADDRESS,
@@ -778,7 +778,7 @@ class UserCreationTest(AbstractPillarTest):
 
         with self.app.test_request_context():
             users_coll = self.app.db().users
-            self.assertEqual(1, users_coll.count())
+            self.assertEqual(1, users_coll.count_documents({}))
 
             db_user = users_coll.find()[0]
             self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)
@@ -789,7 +789,7 @@ class UserCreationTest(AbstractPillarTest):
         """Blender ID does not require full name, we do."""
         with self.app.app_context():
             users_coll = self.app.db().users
-            self.assertEqual(0, users_coll.count())
+            self.assertEqual(0, users_coll.count_documents({}))
 
         # First request will create the user, the 2nd request will update.
         self.mock_blenderid_validate_happy()
@@ -818,7 +818,7 @@ class UserCreationTest(AbstractPillarTest):
         self.get('/api/users/me', auth_token=token)
 
         with self.app.app_context():
-            self.assertEqual(1, users_coll.count())
+            self.assertEqual(1, users_coll.count_documents({}))
 
             db_user = users_coll.find()[0]
             self.assertEqual(db_user['email'], TEST_EMAIL_ADDRESS)

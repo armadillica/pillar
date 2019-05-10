@@ -92,8 +92,8 @@ def project_manage_users():
                     action, current_user_id)
         raise wz_exceptions.UnprocessableEntity()
 
-    users_collection.update({'_id': target_user_id},
-                            {operation: {'groups': admin_group['_id']}})
+    users_collection.update_one({'_id': target_user_id},
+                                {operation: {'groups': admin_group['_id']}})
 
     user = users_collection.find_one({'_id': target_user_id},
                                      {'username': 1, 'email': 1,
@@ -141,5 +141,3 @@ def get_allowed_methods(project_id=None, node_type=None):
     resp.status_code = 204
 
     return resp
-
-

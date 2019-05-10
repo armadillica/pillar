@@ -91,14 +91,14 @@ def notification_parse(notification):
 
 
 def notification_get_subscriptions(context_object_type, context_object_id, actor_user_id):
-    subscriptions_collection = current_app.data.driver.db['activities-subscriptions']
+    subscriptions_collection = current_app.db('activities-subscriptions')
     lookup = {
         'user': {"$ne": actor_user_id},
         'context_object_type': context_object_type,
         'context_object': context_object_id,
         'is_subscribed': True,
     }
-    return subscriptions_collection.find(lookup)
+    return subscriptions_collection.find(lookup), subscriptions_collection.count_documents(lookup)
 
 
 def activity_subscribe(user_id, context_object_type, context_object_id):
@@ -140,10 +140,10 @@ def activity_object_add(actor_user_id, verb, object_type, object_id,
     :param object_id: object id, to be traced with object_type_id
     """
 
-    subscriptions = notification_get_subscriptions(
+    subscriptions, subscription_count = notification_get_subscriptions(
         context_object_type, context_object_id, actor_user_id)
 
-    if subscriptions.count() == 0:
+    if subscription_count == 0:
         return
 
     info, status = register_activity(actor_user_id, verb, object_type, object_id,

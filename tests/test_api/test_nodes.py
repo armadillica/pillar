@@ -690,7 +690,7 @@ class NodesReferencedByProjectTest(AbstractPillarTest):
         self.node_etag = node['_etag']
 
         with self.app.app_context():
-            self.app.db('projects').update(
+            self.app.db('projects').update_one(
                 {'_id': self.pid},
                 {'$set': {
                     'header_node': self.node_id,

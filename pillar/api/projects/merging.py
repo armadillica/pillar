@@ -25,8 +25,11 @@ def merge_project(pid_from: ObjectId, pid_to: ObjectId):
 
     # Move the files first. Since this requires API calls to an external
     # service, this is more likely to go wrong than moving the nodes.
-    to_move = files_coll.find({'project': pid_from}, projection={'_id': 1})
-    log.info('Moving %d files to project %s', to_move.count(), pid_to)
+    query = {'project': pid_from}
+    to_move = files_coll.find(query, projection={'_id': 1})
+
+    to_move_count = files_coll.count_documents(query)
+    log.info('Moving %d files to project %s', to_move_count, pid_to)
     for file_doc in to_move:
         fid = file_doc['_id']
         log.debug('moving file %s to project %s', fid, pid_to)
@@ -35,7 +38,7 @@ def merge_project(pid_from: ObjectId, pid_to: ObjectId):
     # Mass-move the nodes.
     etag = random_etag()
     result = nodes_coll.update_many(
-        {'project': pid_from},
+        query,
         {'$set': {'project': pid_to,
                   '_etag': etag,
                   '_updated': utcnow(),

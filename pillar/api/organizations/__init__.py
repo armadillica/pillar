@@ -153,7 +153,7 @@ class OrgManager:
         org_coll = current_app.db('organizations')
         users_coll = current_app.db('users')
 
-        if users_coll.count({'_id': user_id}) == 0:
+        if users_coll.count_documents({'_id': user_id}) == 0:
             raise ValueError('User not found')
 
         self._log.info('Updating organization %s, setting admin user to %s', org_id, user_id)
@@ -189,7 +189,7 @@ class OrgManager:
             if user_doc is not None:
                 user_id = user_doc['_id']
 
-        if user_id and not users_coll.count({'_id': user_id}):
+        if user_id and not users_coll.count_documents({'_id': user_id}):
             raise wz_exceptions.UnprocessableEntity('User does not exist')
 
         self._log.info('Removing user %s / %s from organization %s', user_id, email, org_id)
@@ -385,7 +385,7 @@ class OrgManager:
 
         org_coll = current_app.db('organizations')
 
-        org_count = org_coll.count({'$or': [
+        org_count = org_coll.count_documents({'$or': [
             {'admin_uid': user_id},
             {'members': user_id}
         ]})
@@ -396,7 +396,7 @@ class OrgManager:
         """Return True iff the email is an unknown member of some org."""
 
         org_coll = current_app.db('organizations')
-        org_count = org_coll.count({'unknown_members': member_email})
+        org_count = org_coll.count_documents({'unknown_members': member_email})
         return bool(org_count)
 
     def roles_for_ip_address(self, remote_addr: str) -> typing.Set[str]:

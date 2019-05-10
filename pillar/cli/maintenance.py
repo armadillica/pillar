@@ -306,7 +306,7 @@ def purge_home_projects(go=False):
                 yield pid
                 continue
 
-            if users_coll.find({'_id': uid, '_deleted': {'$ne': True}}).count() == 0:
+            if users_coll.count_documents({'_id': uid, '_deleted': {'$ne': True}}) == 0:
                 log.info('Project %s has non-existing owner %s', pid, uid)
                 bad += 1
                 yield pid
@@ -1296,9 +1296,9 @@ def fix_missing_activities_subscription_defaults(user=None, context_object=None,
         lookup_is_subscribed['context_object'] = ObjectId(context_object)
         lookup_notifications['context_object'] = ObjectId(context_object)
 
-    num_need_is_subscribed_update = subscriptions_collection.count(lookup_is_subscribed)
+    num_need_is_subscribed_update = subscriptions_collection.count_documents(lookup_is_subscribed)
     log.info("Found %d documents that needs to be update 'is_subscribed'", num_need_is_subscribed_update)
-    num_need_notification_web_update = subscriptions_collection.count(lookup_notifications)
+    num_need_notification_web_update = subscriptions_collection.count_documents(lookup_notifications)
     log.info("Found %d documents that needs to be update 'notifications.web'", num_need_notification_web_update)
 
     if not go:
@@ -1306,29 +1306,27 @@ def fix_missing_activities_subscription_defaults(user=None, context_object=None,
 
     if num_need_is_subscribed_update > 0:
         log.info("Updating 'is_subscribed'")
-        resp = subscriptions_collection.update(
+        resp = subscriptions_collection.update_many(
             lookup_is_subscribed,
             {
                 '$set': {'is_subscribed': True}
             },
-            multi=True,
             upsert=False
         )
-        if resp['nModified'] is not num_need_is_subscribed_update:
+        if resp.modified_count != num_need_is_subscribed_update:
             log.warning("Expected % documents to be update, was %d",
                         num_need_is_subscribed_update, resp['nModified'])
 
     if num_need_notification_web_update > 0:
         log.info("Updating 'notifications.web'")
-        resp = subscriptions_collection.update(
+        resp = subscriptions_collection.update_many(
             lookup_notifications,
             {
                 '$set': {'notifications.web': True}
             },
-            multi=True,
             upsert=False
         )
-        if resp['nModified'] is not num_need_notification_web_update:
+        if resp.modified_count != num_need_notification_web_update:
             log.warning("Expected % documents to be update, was %d",
                         num_need_notification_web_update, resp['nModified'])
 

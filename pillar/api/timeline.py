@@ -91,7 +91,7 @@ class SearchHelper:
 
     def has_more(self, continue_from: datetime) -> bool:
         nodes_coll = current_app.db('nodes')
-        result = nodes_coll.count(self._match(continue_from))
+        result = nodes_coll.count_documents(self._match(continue_from))
         return bool(result)
 
 

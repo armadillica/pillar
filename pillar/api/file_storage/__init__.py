@@ -566,12 +566,9 @@ def on_pre_get_files(_, lookup):
     lookup_expired['link_expires'] = {'$lte': now}
 
     cursor = current_app.data.find('files', parsed_req, lookup_expired)
-    if cursor.count() == 0:
-        return
-
-    log.debug('Updating expired links for %d files that matched lookup %s',
-              cursor.count(), lookup_expired)
-    for file_doc in cursor:
+    for idx, file_doc in enumerate(cursor):
+        if idx == 0:
+            log.debug('Updating expired links for files that matched lookup %s', lookup_expired)
         # log.debug('Updating expired links for file %r.', file_doc['_id'])
         generate_all_links(file_doc, now)
 
@@ -595,15 +592,14 @@ def refresh_links_for_project(project_uuid, chunk_size, expiry_seconds):
          'link_expires': {'$lt': expire_before},
          }).sort([('link_expires', pymongo.ASCENDING)]).limit(chunk_size)
 
-    if to_refresh.count() == 0:
-        log.info('No links to refresh.')
-        return
-
+    refresh_count = 0
     for file_doc in to_refresh:
         log.debug('Refreshing links for file %s', file_doc['_id'])
         generate_all_links(file_doc, now)
+        refresh_count += 1
 
-    log.info('Refreshed %i links', min(chunk_size, to_refresh.count()))
+    if refresh_count:
+        log.info('Refreshed %i links', refresh_count)
 
 
 def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
@@ -621,14 +617,13 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
     my_log.info('Limiting to links that expire before %s', expire_before)
 
     base_query = {'backend': backend_name, '_deleted': {'$ne': True}}
-    to_refresh = files_collection.find(
-        {'$or': [{'link_expires': None, **base_query},
-                 {'link_expires': {'$lt': expire_before}, **base_query},
-                 {'link': None, **base_query}]
-         }).sort([('link_expires', pymongo.ASCENDING)]).limit(
-        chunk_size).batch_size(5)
+    to_refresh_query = {
+        '$or': [{'link_expires': None, **base_query},
+                {'link_expires': {'$lt': expire_before}, **base_query},
+                {'link': None, **base_query}]
+    }
 
-    document_count = to_refresh.count()
+    document_count = files_collection.count_documents(to_refresh_query)
     if document_count == 0:
         my_log.info('No links to refresh.')
         return
@@ -638,6 +633,11 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
                     document_count, chunk_size)
     else:
         my_log.info('Found %d documents to refresh, chunk size=%d', document_count, chunk_size)
+
+    to_refresh = files_collection.find(to_refresh_query)\
+            .sort([('link_expires', pymongo.ASCENDING)])\
+            .limit(chunk_size)\
+            .batch_size(5)
 
     refreshed = 0
     report_chunks = min(max(5, document_count // 25), 100)
@@ -649,7 +649,7 @@ def refresh_links_for_backend(backend_name, chunk_size, expiry_seconds):
                 my_log.debug('Skipping file %s, it has no project.', file_id)
                 continue
 
-            count = proj_coll.count({'_id': project_id, '$or': [
+            count = proj_coll.count_documents({'_id': project_id, '$or': [
                 {'_deleted': {'$exists': False}},
                 {'_deleted': False},
             ]})

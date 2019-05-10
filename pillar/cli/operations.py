@@ -166,49 +166,6 @@ def merge_project(src_proj_url, dest_proj_url):
 
 
 @manager_operations.command
-def index_users_rebuild():
-    """Clear users index, update settings and reindex all users."""
-
-    import concurrent.futures
-
-    from pillar.api.utils.algolia import algolia_index_user_save
-
-    users_index = current_app.algolia_index_users
-    if users_index is None:
-        log.error('Algolia is not configured properly, unable to do anything!')
-        return 1
-
-    log.info('Dropping existing index: %s', users_index)
-    users_index.clear_index()
-    index_users_update_settings()
-
-    db = current_app.db()
-    users = db['users'].find({'_deleted': {'$ne': True}})
-    user_count = users.count()
-
-    log.info('Reindexing all %i users', user_count)
-
-    real_current_app = current_app._get_current_object()._get_current_object()
-
-    def do_user(user):
-        with real_current_app.app_context():
-            algolia_index_user_save(user)
-
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_user = {executor.submit(do_user, user): user
-                          for user in users}
-        for idx, future in enumerate(concurrent.futures.as_completed(future_to_user)):
-            user = future_to_user[future]
-            user_ident = user.get('email') or user.get('_id')
-            try:
-                future.result()
-            except Exception:
-                log.exception('Error updating user %i/%i %s', idx + 1, user_count, user_ident)
-            else:
-                log.info('Updated user %i/%i %s', idx + 1, user_count, user_ident)
-
-
-@manager_operations.command
 def index_users_update_settings():
     """Configure indexing backend as required by the project"""
     users_index = current_app.algolia_index_users
@@ -234,7 +191,7 @@ def hash_auth_tokens():
     tokens_coll = current_app.db('tokens')
     query = {'token': {'$exists': True}}
     cursor = tokens_coll.find(query, projection={'token': 1, '_id': 1})
-    log.info('Updating %d tokens', cursor.count())
+    log.info('Updating %d tokens', tokens_coll.count_documents(query))
 
     for token_doc in cursor:
         hashed_token = hash_auth_token(token_doc['token'])
