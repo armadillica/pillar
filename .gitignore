@@ -17,6 +17,7 @@ config_local.py
 profile.stats
 /dump/
 /.eggs
+/devdeps/pip-wheel-metadata/
 
 /node_modules
 /.sass-cache
