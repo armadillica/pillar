@@ -382,6 +382,14 @@ version = "0.9.2"
 
 [[package]]
 category = "main"
+description = "Internationalized Domain Names in Applications (IDNA)"
+name = "idna"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+version = "2.8"
+
+[[package]]
+category = "main"
 description = "IPv4/IPv6 manipulation library"
 name = "ipaddress"
 optional = false
@@ -811,7 +819,7 @@ version = "0.6.5"
 requests = ">=1.0"
 
 [metadata]
-content-hash = "5a0259d524b9c09c3e9315a6af2bfe2f8d7f648afba4400b8ca2c47831cfed28"
+content-hash = "1f8a9f7e836916df2a86d4f30a53ccbc82e5ab63061698738299ee4b50ccc24b"
 python-versions = "~3.6"
 
 [metadata.hashes]
@@ -850,6 +858,7 @@ google-apitools = ["011b2614341d31c9113b9891a442774d0cc2107af27e376f5297f07fdc46
 googleapis-common-protos = ["627ec53fab43d06c1b5c950e217fa9819e169daf753111a7f244e94bf8fb3384"]
 html5lib = ["20b159aa3badc9d5ee8f5c647e5efd02ed2a66ab8d354930bd9ff139fc1dc0a3", "66cb0dcfdbbc4f9c3ba1a63fdb511ffdbd4f513b2b6d81b80cd26ce6b3fb3736"]
 httplib2 = ["c3aba1c9539711551f4d83e857b316b5134a1c4ddce98a875b7027be7dd6d988", "fe187f315336c3daa6616d09f327a6e6560b082fce59723f77336329fdcbfc36"]
+idna = ["c357b3f628cf53ae2c4c05627ecc484553142ca23264e593d327bcde5e9c3407", "ea8b7f6188e6fa117537c3df7da9fc686d485087abf6ac197f9c46432f7e4a3c"]
 ipaddress = ["64b28eec5e78e7510698f6d4da08800a5c575caa4a286c93d651c5d3ff7b6794", "b146c751ea45cad6188dd6cf2d9b757f6f4f8d6ffb96a023e6f2e26eea02a72c"]
 ipy = ["61da5a532b159b387176f6eabf11946e7458b6df8fb8b91ff1d345ca7a6edab8"]
 itsdangerous = ["321b033d07f2a4136d3ec762eac9f16a10ccd60f53c0c91af90217ace7ba1f19", "b12271b2047cb23eeb98c8b5622e2e5c5e9abd9784a153e9d8ef9cb4dd09d749"]

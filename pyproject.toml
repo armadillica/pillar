@@ -54,6 +54,10 @@ pillarsdk = {path = "../pillar-python-sdk"}
 # Version pins for secondary requirements
 kombu = "~4.2"
 
+# Secondary requirements that weren't installed automatically:
+idna = "~2.8"
+
+
 [tool.poetry.dev-dependencies]
 mypy = "0.501"
 pillar-devdeps = {path = "./devdeps"}
