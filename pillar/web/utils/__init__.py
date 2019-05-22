@@ -43,9 +43,38 @@ def attach_project_pictures(project, api):
     This function should be moved in the API, attached to a new Project object.
     """
 
+    # When adding to the list of pictures dealt with here, make sure
+    # you update unattach_project_pictures() too.
     project.picture_square = get_file(project.picture_square, api=api)
     project.picture_header = get_file(project.picture_header, api=api)
     project.picture_16_9 = get_file(project.picture_16_9, api=api)
+
+
+def unattach_project_pictures(project: dict):
+    """Reverts the operation of 'attach_project_pictures'.
+
+    This makes it possible to PUT the project again.
+    """
+
+    def unattach(property_name: str):
+        picture_info = project.get(property_name, None)
+        if not picture_info:
+            project.pop(property_name, None)
+            return
+
+        if not isinstance(picture_info, dict):
+            # Assume it's already is an ID.
+            return
+
+        try:
+            picture_id = picture_info['_id']
+            project[property_name] = picture_id
+        except KeyError:
+            return
+
+    unattach('picture_square')
+    unattach('picture_header')
+    unattach('picture_16_9')
 
 
 def mass_attach_project_pictures(projects: typing.Iterable[pillarsdk.Project], *,

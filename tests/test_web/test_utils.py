@@ -1,5 +1,3 @@
-# -*- encoding: utf-8 -*-
-
 import unittest
 import datetime
 
@@ -120,3 +118,40 @@ class EvePaginationTest(unittest.TestCase):
         self.assertEqual(2, lpi({'total': 10, 'max_results': 5}))
         self.assertEqual(3, lpi({'total': 11, 'max_results': 5}))
         self.assertEqual(404129352, lpi({'total': 2828905463, 'max_results': 7}))
+
+
+class UnattachPicturesTest(unittest.TestCase):
+    def test_unattach_pictures(self):
+        project = {
+            'picture_square': {'_id': 'PICTURE_SQUARE_ID', 'je': 'moeder'},
+            'picture_header': 'PICTURE_HEADER_ID',
+            'picture_16_9': {},
+            '_id': 'PROJECT_ID',
+            'name': 'Op je Hoofd™',
+        }
+        from pillar.web.utils import unattach_project_pictures
+
+        unattach_project_pictures(project)
+
+        self.assertEqual({
+            'picture_square': 'PICTURE_SQUARE_ID',
+            'picture_header': 'PICTURE_HEADER_ID',
+            '_id': 'PROJECT_ID',
+            'name': 'Op je Hoofd™',
+        }, project)
+
+    def test_missing_pictures(self):
+        project = {
+            'picture_square': None,
+            'picture_16_9': {},
+            '_id': 'PROJECT_ID',
+            'name': 'Op je Hoofd™',
+        }
+        from pillar.web.utils import unattach_project_pictures
+
+        unattach_project_pictures(project)
+
+        self.assertEqual({
+            '_id': 'PROJECT_ID',
+            'name': 'Op je Hoofd™',
+        }, project)
