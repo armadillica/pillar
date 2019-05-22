@@ -198,8 +198,9 @@ def put_project(project: dict):
     result, _, _, status_code = current_app.put_internal('projects', proj_no_none, _id=pid)
 
     if status_code != 200:
-        raise ValueError(f"Can't update project {pid}, "
-                         f"status {status_code} with issues: {result}")
+        message = f"Can't update project {pid}, status {status_code} with issues: {result}"
+        log.error(message)
+        raise ValueError(message)
 
 
 def storage(project_id: ObjectId) -> file_storage_backends.Bucket:
