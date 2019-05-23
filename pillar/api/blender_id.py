@@ -13,8 +13,10 @@ from bson import tz_util
 from rauth import OAuth2Session
 from flask import Blueprint, request, jsonify, session
 from requests.adapters import HTTPAdapter
+import urllib3.util.retry
 
 from pillar import current_app
+from pillar.auth import get_blender_id_oauth_token
 from pillar.api.utils import authentication, utcnow
 from pillar.api.utils.authentication import find_user_in_db, upsert_user
 
@@ -27,6 +29,30 @@ class LogoutUser(Exception):
 
     This indicates the user should be immediately logged out.
     """
+
+
+class Session(requests.Session):
+    """Requests Session suitable for Blender ID communication."""
+
+    def __init__(self):
+        super().__init__()
+
+        retries = urllib3.util.retry.Retry(
+            total=10,
+            backoff_factor=0.05,
+        )
+        http_adapter = requests.adapters.HTTPAdapter(max_retries=retries)
+
+        self.mount('https://', http_adapter)
+        self.mount('http://', http_adapter)
+
+    def authenticate(self):
+        """Attach the current user's authentication token to the request."""
+        bid_token = get_blender_id_oauth_token()
+        if not bid_token:
+            raise TypeError('authenticate() requires current user to be logged in with Blender ID')
+
+        self.headers['Authorization'] = f'Bearer {bid_token}'
 
 
 @blender_id.route('/store_scst', methods=['POST'])
@@ -119,12 +145,8 @@ def validate_token(user_id, token, oauth_subclient_id):
     url = urljoin(blender_id_endpoint, 'u/validate_token')
     log.debug('POSTing to %r', url)
 
-    # Retry a few times when POSTing to BlenderID fails.
-    # Source: http://stackoverflow.com/a/15431343/875379
-    s = requests.Session()
-    s.mount(blender_id_endpoint, HTTPAdapter(max_retries=5))
-
     # POST to Blender ID, handling errors as negative verification results.
+    s = Session()
     try:
         r = s.post(url, data=payload, timeout=5,
                    verify=current_app.config['TLS_CERT_FILE'])
