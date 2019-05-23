@@ -32,3 +32,4 @@ pillar/web/static/assets/js/vendor/video.min.js
 pillar/web/static/storage/
 pillar/web/static/uploads/
 pillar/web/templates/
+/poetry.lock
