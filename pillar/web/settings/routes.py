@@ -1,10 +1,12 @@
 import json
 import logging
+import urllib.parse
 
 from flask import Blueprint, flash, render_template
 from flask_login import login_required, current_user
 from werkzeug.exceptions import abort
 
+from pillar import current_app
 from pillar.web import system_util
 from pillar.web.users import forms
 from pillarsdk import User, exceptions as sdk_exceptions
@@ -34,7 +36,12 @@ def profile():
             message = json.loads(e.content)
             flash(message)
 
-    return render_template('users/settings/profile.html', form=form, title='profile')
+    blender_id_endpoint = current_app.config['BLENDER_ID_ENDPOINT']
+    blender_profile_url = urllib.parse.urljoin(blender_id_endpoint, 'settings/profile')
+
+    return render_template('users/settings/profile.html',
+                           form=form, title='profile',
+                           blender_profile_url=blender_profile_url)
 
 
 @blueprint.route('/roles')

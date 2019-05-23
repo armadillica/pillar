@@ -37,7 +37,7 @@ style.
 				p {{ current_user.email }}
 
 			.form-group
-				| {{ _("Change your full name, email, and password at") }} #[a(href="https://www.blender.org/id/settings/profile",target='_blank') Blender ID].
+				| {{ _("Change your full name, email, and password at") }} #[a(href="{{ blender_profile_url }}",target='_blank') Blender ID].
 
 			| {% if current_user.badges_html %}
 			.form-group
