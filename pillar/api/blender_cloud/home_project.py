@@ -260,7 +260,7 @@ def has_home_project(user_id):
     return proj_coll.count_documents({'user': user_id, 'category': 'home', '_deleted': False}) > 0
 
 
-def get_home_project(user_id, projection=None):
+def get_home_project(user_id: ObjectId, projection=None) -> dict:
     """Returns the home project"""
 
     proj_coll = current_app.data.driver.db['projects']
