@@ -21,38 +21,50 @@ style.
 | {% block settings_page_content %}
 .settings-form
 	form#settings-form(method='POST', action="{{url_for('settings.profile')}}")
-		.pb-3
-			.form-group
+		.row
+			.form-group.col-md-6
 				| {{ form.username.label }}
 				| {{ form.username(size=20, class='form-control') }}
 				| {% if form.username.errors %}
 				| {% for error in form.username.errors %}{{ error|e }}{% endfor %}
 				| {% endif %}
 
-			.form-group
-				label {{ _("Full name") }}
-				p {{ current_user.full_name }}
-			.form-group
-				label {{ _("E-mail") }}
-				p {{ current_user.email }}
+				button.mt-3.btn.btn-outline-success.px-5.button-submit(type='submit')
+					i.pi-check.pr-2
+					| {{ _("Save Changes") }}
 
-			.form-group
-				| {{ _("Change your full name, email, and password at") }} #[a(href="{{ blender_profile_url }}",target='_blank') Blender ID].
+		.row.mt-3
+			.col-md-9
+				.form-group
+					label {{ _("Full name") }}
+					p {{ current_user.full_name }}
+				.form-group
+					label {{ _("E-mail") }}
+					p {{ current_user.email }}
+				.form-group
+					| {{ _("Change your full name, email, avatar, and password at") }} #[a(href="{{ blender_profile_url }}",target='_blank') Blender ID].
 
-			| {% if current_user.badges_html %}
-			.form-group
-				p Your Blender ID badges:
-				| {{ current_user.badges_html|safe }}
-				p.hint-text Note that updates to these badges may take a few minutes to be visible here.
-			| {% endif %}
+				| {% if current_user.badges_html %}
+				.form-group
+					p Your Blender ID badges:
+					| {{ current_user.badges_html|safe }}
+					p.hint-text Note that updates to these badges may take a few minutes to be visible here.
+				| {% endif %}
 
-		.py-3
-			a(href="https://gravatar.com/")
-				img.rounded-circle(src="{{ current_user.gravatar }}")
-				span.p-3 {{ _("Change Gravatar") }}
+			.col-md-3
+				a(href="{{ blender_profile_url }}",target='_blank')
+					current-user-avatar
+				p
+					small Your #[a(href="{{ blender_profile_url }}",target='_blank') Blender ID] avatar
+				//- Avatar Sync button is commented out here, because it's not used by Blender Cloud.
+				//- This tag, and the commented-out script tag below, are just examples.
+				//- avatar-sync-button
 
-		.py-3
-			button.btn.btn-outline-success.px-5.button-submit(type='submit')
-				i.pi-check.pr-2
-				| {{ _("Save Changes") }}
+| {% endblock %}
+
+| {% block footer_scripts %}
+| {{ super() }}
+//- script(src="{{ url_for('static_pillar', filename='assets/js/avatar.min.js') }}")
+script.
+	new Vue({el:'#settings-form'});
 | {% endblock %}

@@ -22,6 +22,7 @@ import werkzeug.exceptions as wz_exceptions
 
 from pillar import current_app
 from pillar.api.utils import utcnow
+import pillar.api.users.avatar
 from pillar.web import system_util
 from pillar.web import utils
 from pillar.web.nodes import finders
@@ -109,7 +110,6 @@ def index():
 
     return render_template(
         'projects/index_dashboard.html',
-        gravatar=utils.gravatar(current_user.email, size=128),
         projects_user=projects_user['_items'],
         projects_deleted=projects_deleted['_items'],
         projects_shared=projects_shared['_items'],
@@ -402,7 +402,6 @@ def render_project(project, api, extra_context=None, template_name=None):
         template_name = template_name or 'projects/home_index.html'
         return render_template(
             template_name,
-            gravatar=utils.gravatar(current_user.email, size=128),
             project=project,
             api=system_util.pillar_api(),
             **extra_context)
@@ -708,15 +707,12 @@ def sharing(project_url):
     api = system_util.pillar_api()
     # Fetch the project or 404
     try:
-        project = Project.find_one({
-            'where': '{"url" : "%s"}' % (project_url)}, api=api)
+        project = Project.find_one({'where': {'url': project_url}}, api=api)
     except ResourceNotFound:
         return abort(404)
 
     # Fetch users that are part of the admin group
     users = project.get_users(api=api)
-    for user in users['_items']:
-        user['avatar'] = utils.gravatar(user['email'])
 
     if request.method == 'POST':
         user_id = request.form['user_id']
@@ -726,13 +722,14 @@ def sharing(project_url):
                 user = project.add_user(user_id, api=api)
             elif action == 'remove':
                 user = project.remove_user(user_id, api=api)
+            else:
+                raise wz_exceptions.BadRequest(f'invalid action {action}')
         except ResourceNotFound:
             log.info('/p/%s/edit/sharing: User %s not found', project_url, user_id)
             return jsonify({'_status': 'ERROR',
                             'message': 'User %s not found' % user_id}), 404
 
-        # Add gravatar to user
-        user['avatar'] = utils.gravatar(user['email'])
+        user['avatar'] = pillar.api.users.avatar.url(user)
         return jsonify(user)
 
     utils.attach_project_pictures(project, api)

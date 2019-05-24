@@ -1,7 +1,7 @@
 const TEMPLATE = `
 <div class="user-avatar">
     <img
-        :src="user.gravatar"
+        :src="user.avatar_url"
         :alt="user.full_name">
 </div>
 `;

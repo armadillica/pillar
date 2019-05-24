@@ -320,7 +320,7 @@ class UserListTests(AbstractPillarTest):
 
         user_info = json.loads(resp.data)
         regular_info = remove_private_keys(user_info)
-        self.assertEqual(PUBLIC_USER_FIELDS, set(regular_info.keys()))
+        self.assertEqual(set(), set(regular_info.keys()) - PUBLIC_USER_FIELDS)
 
     def test_own_user_subscriber(self):
         # Regular access should result in only your own info.
@@ -342,7 +342,7 @@ class UserListTests(AbstractPillarTest):
         self.assertNotIn('auth', user_info)
 
         regular_info = remove_private_keys(user_info)
-        self.assertEqual(PUBLIC_USER_FIELDS, set(regular_info.keys()))
+        self.assertEqual(set(), set(regular_info.keys()) - PUBLIC_USER_FIELDS)
 
     def test_put_user(self):
         from pillar.api.utils import remove_private_keys

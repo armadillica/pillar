@@ -3,14 +3,16 @@ import logging
 import urllib.parse
 
 from flask import Blueprint, flash, render_template
-from flask_login import login_required, current_user
+from flask_login import login_required
 from werkzeug.exceptions import abort
 
 from pillar import current_app
+from pillar.api.utils import jsonify
+import pillar.api.users.avatar
 from pillar.auth import current_user
 from pillar.web import system_util
 from pillar.web.users import forms
-from pillarsdk import User, exceptions as sdk_exceptions
+from pillarsdk import File, User, exceptions as sdk_exceptions
 
 log = logging.getLogger(__name__)
 blueprint = Blueprint('settings', __name__)
@@ -51,3 +53,19 @@ def profile():
 def roles():
     """Show roles and capabilties of the current user."""
     return render_template('users/settings/roles.html', title='roles')
+
+
+@blueprint.route('/profile/sync-avatar', methods=['POST'])
+@login_required
+def sync_avatar():
+    """Fetch the user's avatar from Blender ID and save to storage.
+
+    This is an API-like endpoint, in the sense that it returns JSON.
+    It's here in this file to have it close to the endpoint that
+    serves the only page that calls on this endpoint.
+    """
+
+    new_url = pillar.api.users.avatar.sync_avatar(current_user.user_id)
+    if not new_url:
+        return jsonify({'_message': 'Your avatar could not be updated'})
+    return new_url

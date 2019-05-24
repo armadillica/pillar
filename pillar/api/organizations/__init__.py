@@ -374,7 +374,7 @@ class OrgManager:
         member_ids = [str2id(uid) for uid in member_sting_ids]
         users_coll = current_app.db('users')
         users = users_coll.find({'_id': {'$in': member_ids}},
-                                projection={'_id': 1, 'full_name': 1, 'email': 1})
+                                projection={'_id': 1, 'full_name': 1, 'email': 1, 'avatar': 1})
         return list(users)
 
     def user_has_organizations(self, user_id: bson.ObjectId) -> bool:

@@ -10,8 +10,9 @@ import werkzeug.exceptions as wz_exceptions
 
 import pillar
 from pillar import current_app, shortcodes
+import pillar.api.users.avatar
 from pillar.api.nodes.custom.comment import patch_comment
-from pillar.api.utils import jsonify, gravatar
+from pillar.api.utils import jsonify
 from pillar.auth import current_user
 import pillar.markdown
 
@@ -22,7 +23,7 @@ log = logging.getLogger(__name__)
 class UserDO:
     id: str
     full_name: str
-    gravatar: str
+    avatar_url: str
     badges_html: str
 
 
@@ -255,7 +256,7 @@ def to_comment_data_object(mongo_comment: dict) -> CommentDO:
     user = UserDO(
         id=str(mongo_comment['user']['_id']),
         full_name=user_dict['full_name'],
-        gravatar=gravatar(user_dict['email']),
+        avatar_url=pillar.api.users.avatar.url(user_dict),
         badges_html=user_dict.get('badges', {}).get('html', '')
     )
     html = _get_markdowned_html(mongo_comment['properties'], 'content')

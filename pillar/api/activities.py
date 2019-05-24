@@ -1,7 +1,7 @@
 import logging
 
 from flask import request, current_app
-from pillar.api.utils import gravatar
+import pillar.api.users.avatar
 from pillar.auth import current_user
 
 log = logging.getLogger(__name__)
@@ -68,7 +68,7 @@ def notification_parse(notification):
     if actor:
         parsed_actor = {
             'username': actor['username'],
-            'avatar': gravatar(actor['email'])}
+            'avatar': pillar.api.users.avatar.url(actor)}
     else:
         parsed_actor = None
 

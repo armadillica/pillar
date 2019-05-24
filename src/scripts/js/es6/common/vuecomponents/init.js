@@ -19,6 +19,7 @@ import { StatusFilter } from './table/rows/filter/StatusFilter'
 import { TextFilter } from './table/rows/filter/TextFilter'
 import { NameFilter } from './table/rows/filter/NameFilter'
 import { UserAvatar } from './user/Avatar'
+import './user/CurrentUserAvatar'
 
 let mixins = {
     UnitOfWorkTracker,

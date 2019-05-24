@@ -4,9 +4,9 @@
 li.dropdown
 	| {% block menu_avatar %}
 	a.navbar-item.dropdown-toggle(href="#", data-toggle="dropdown", title="{{ current_user.email }}")
-		img.gravatar(
-		src="{{ current_user.gravatar }}",
-		alt="Avatar")
+		current-user-avatar
+	script.
+		new Vue({el: 'current-user-avatar'})
 	| {% endblock menu_avatar %}
 
 	ul.dropdown-menu.dropdown-menu-right

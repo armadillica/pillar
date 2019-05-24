@@ -1,13 +1,12 @@
 import copy
 import json
 
-import bson
 from eve.utils import parse_request
 from werkzeug import exceptions as wz_exceptions
 
 from pillar import current_app
 from pillar.api.users.routes import log
-from pillar.api.utils.authorization import user_has_role
+import pillar.api.users.avatar
 import pillar.auth
 
 USER_EDITABLE_FIELDS = {'full_name', 'username', 'email', 'settings'}
@@ -126,7 +125,7 @@ def check_put_access(request, lookup):
         raise wz_exceptions.Forbidden()
 
 
-def after_fetching_user(user):
+def after_fetching_user(user: dict) -> None:
     # Deny access to auth block; authentication stuff is managed by
     # custom end-points.
     user.pop('auth', None)

@@ -8,6 +8,7 @@ import logging
 import random
 import typing
 import urllib.request, urllib.parse, urllib.error
+import warnings
 
 import bson.objectid
 import bson.tz_util
@@ -186,6 +187,16 @@ def str2id(document_id: str) -> bson.ObjectId:
 
 
 def gravatar(email: str, size=64) -> typing.Optional[str]:
+    """Deprecated: return the Gravatar URL.
+
+    .. deprecated::
+        Use of Gravatar is deprecated, in favour of our self-hosted avatars.
+        See pillar.api.users.avatar.url(user).
+    """
+    warnings.warn('pillar.api.utils.gravatar() is deprecated, '
+                  'use pillar.api.users.avatar.url() instead',
+                  category=DeprecationWarning)
+
     if email is None:
         return None
 

@@ -136,9 +136,16 @@ def mass_attach_project_pictures(projects: typing.Iterable[pillarsdk.Project], *
 
 
 def gravatar(email: str, size=64):
+    """Deprecated: return the Gravatar URL.
+
+    .. deprecated::
+        Use of Gravatar is deprecated, in favour of our self-hosted avatars.
+        See pillar.api.users.avatar.url(user).
+    """
     import warnings
-    warnings.warn("the pillar.web.gravatar function is deprecated; use hashlib instead",
-                  DeprecationWarning, 2)
+    warnings.warn('pillar.web.utils.gravatar() is deprecated, '
+                  'use pillar.api.users.avatar.url() instead',
+                  category=DeprecationWarning, stacklevel=2)
 
     from pillar.api.utils import gravatar as api_gravatar
     return api_gravatar(email, size)

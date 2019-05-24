@@ -125,6 +125,25 @@ users_schema = {
         'type': 'dict',
         'allow_unknown': True,
     },
+    'avatar': {
+        'type': 'dict',
+        'schema': {
+            'file': {
+                'type': 'objectid',
+                'data_relation': {
+                    'resource': 'files',
+                    'field': '_id',
+                },
+            },
+            # For only downloading when things really changed:
+            'last_downloaded_url': {
+                'type': 'string',
+            },
+            'last_modified': {
+                'type': 'string',
+            },
+        },
+    },
 
     # Node-specific information for this user.
     'nodes': {

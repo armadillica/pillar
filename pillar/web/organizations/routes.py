@@ -6,7 +6,8 @@ from flask_login import current_user
 
 import pillar.flask_extra
 from pillar import current_app
-from pillar.api.utils import authorization, str2id, gravatar, jsonify
+import pillar.api.users.avatar
+from pillar.api.utils import authorization, str2id, jsonify
 from pillar.web.system_util import pillar_api
 
 from pillarsdk import Organization, User
@@ -47,7 +48,7 @@ def view_embed(organization_id: str):
 
     members = om.org_members(organization.members)
     for member in members:
-        member['avatar'] = gravatar(member.get('email'))
+        member['avatar'] = pillar.api.users.avatar.url(member)
         member['_id'] = str(member['_id'])
 
     admin_user = User.find(organization.admin_uid, api=api)

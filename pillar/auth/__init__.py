@@ -1,11 +1,14 @@
 """Authentication code common to the web and api modules."""
 
 import collections
+import contextlib
+import copy
+import functools
 import logging
 import typing
 
 import blinker
-import bson
+from bson import ObjectId
 from flask import session, g
 import flask_login
 from werkzeug.local import LocalProxy
@@ -31,18 +34,21 @@ class UserClass(flask_login.UserMixin):
     def __init__(self, token: typing.Optional[str]):
         # We store the Token instead of ID
         self.id = token
+        self.auth_token = token
         self.username: str = None
         self.full_name: str = None
-        self.user_id: bson.ObjectId = None
+        self.user_id: ObjectId = None
         self.objectid: str = None
-        self.gravatar: str = None
         self.email: str = None
         self.roles: typing.List[str] = []
         self.groups: typing.List[str] = []  # NOTE: these are stringified object IDs.
-        self.group_ids: typing.List[bson.ObjectId] = []
+        self.group_ids: typing.List[ObjectId] = []
         self.capabilities: typing.Set[str] = set()
         self.nodes: dict = {}  # see the 'nodes' key in eve_settings.py::user_schema.
         self.badges_html: str = ''
+
+        # Stored when constructing a user from the database
+        self._db_user = {}
 
         # Lazily evaluated
         self._has_organizations: typing.Optional[bool] = None
@@ -51,10 +57,9 @@ class UserClass(flask_login.UserMixin):
     def construct(cls, token: str, db_user: dict) -> 'UserClass':
         """Constructs a new UserClass instance from a Mongo user document."""
 
-        from ..api import utils
-
         user = cls(token)
 
+        user._db_user = copy.deepcopy(db_user)
         user.user_id = db_user.get('_id')
         user.roles = db_user.get('roles') or []
         user.group_ids = db_user.get('groups') or []
@@ -63,14 +68,13 @@ class UserClass(flask_login.UserMixin):
         user.full_name = db_user.get('full_name') or ''
         user.badges_html = db_user.get('badges', {}).get('html') or ''
 
-        # Be a little more specific than just db_user['nodes']
+        # Be a little more specific than just db_user['nodes'] or db_user['avatar']
         user.nodes = {
             'view_progress': db_user.get('nodes', {}).get('view_progress', {}),
         }
 
         # Derived properties
         user.objectid = str(user.user_id or '')
-        user.gravatar = utils.gravatar(user.email)
         user.groups = [str(g) for g in user.group_ids]
         user.collect_capabilities()
 
@@ -170,12 +174,23 @@ class UserClass(flask_login.UserMixin):
             'user_id': str(self.user_id),
             'username': self.username,
             'full_name': self.full_name,
-            'gravatar': self.gravatar,
+            'avatar_url': self.avatar_url,
             'email': self.email,
             'capabilities': list(self.capabilities),
             'badges_html': self.badges_html,
             'is_authenticated': self.is_authenticated,
         }
+
+    @property
+    @functools.lru_cache(maxsize=1)
+    def avatar_url(self) -> str:
+        """Return the Avatar image URL for this user.
+
+        :return: The avatar URL (the default one if the user has no avatar).
+        """
+
+        import pillar.api.users.avatar
+        return pillar.api.users.avatar.url(self._db_user)
 
 
 class AnonymousUser(flask_login.AnonymousUserMixin, UserClass):
@@ -258,6 +273,25 @@ def logout_user():
     session.clear()
     flask_login.logout_user()
     g.current_user = AnonymousUser()
+
+
+@contextlib.contextmanager
+def temporary_user(db_user: dict):
+    """Temporarily sets the given user as 'current user'.
+
+    Does not trigger login signals, as this is not a real login action.
+    """
+    try:
+        actual_current_user = g.current_user
+    except AttributeError:
+        actual_current_user = AnonymousUser()
+
+    temp_user = UserClass.construct('', db_user)
+    try:
+        g.current_user = temp_user
+        yield
+    finally:
+        g.current_user = actual_current_user
 
 
 def get_blender_id_oauth_token() -> str:

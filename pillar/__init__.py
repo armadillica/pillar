@@ -492,6 +492,7 @@ class PillarServer(BlinkerCompatibleEve):
 
         # Pillar-defined Celery task modules:
         celery_task_modules = [
+            'pillar.celery.avatar',
             'pillar.celery.badges',
             'pillar.celery.email_tasks',
             'pillar.celery.file_link_tasks',
@@ -810,6 +811,7 @@ class PillarServer(BlinkerCompatibleEve):
 
         url = self.config['URLS'][resource]
         path = '%s/%s' % (self.api_prefix, url)
+
         with self.__fake_request_url_rule('POST', path):
             return post_internal(resource, payl=payl, skip_validation=skip_validation)[:4]
 

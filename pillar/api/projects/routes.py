@@ -5,6 +5,7 @@ from bson import ObjectId
 from flask import Blueprint, request, current_app, make_response, url_for
 from werkzeug import exceptions as wz_exceptions
 
+import pillar.api.users.avatar
 from pillar.api.utils import authorization, jsonify, str2id
 from pillar.api.utils import mongo
 from pillar.api.utils.authorization import require_login, check_permissions
@@ -54,10 +55,13 @@ def project_manage_users():
         project = projects_collection.find_one({'_id': ObjectId(project_id)})
         admin_group_id = project['permissions']['groups'][0]['group']
 
-        users = users_collection.find(
+        users = list(users_collection.find(
             {'groups': {'$in': [admin_group_id]}},
-            {'username': 1, 'email': 1, 'full_name': 1})
-        return jsonify({'_status': 'OK', '_items': list(users)})
+            {'username': 1, 'email': 1, 'full_name': 1, 'avatar': 1}))
+        for user in users:
+            user['avatar_url'] = pillar.api.users.avatar.url(user)
+            user.pop('avatar', None)
+        return jsonify({'_status': 'OK', '_items': users})
 
     # The request is not a form, since it comes from the API sdk
     data = json.loads(request.data)

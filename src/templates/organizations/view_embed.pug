@@ -165,7 +165,7 @@ h4 Organization members
 		| {% for email in organization.unknown_members %}
 		li.sharing-users-item.unknown-member(data-user-email='{{ email }}')
 			.sharing-users-avatar
-				img(src="{{ email | gravatar }}")
+				img(src="{{ url_for('static_pillar', filename='assets/img/default_user_avatar.png') }}")
 			.sharing-users-details
 				span.sharing-users-email {{ email }}
 			.sharing-users-action

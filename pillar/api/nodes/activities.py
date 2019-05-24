@@ -1,6 +1,6 @@
 from eve.methods import get
 
-from pillar.api.utils import gravatar
+import pillar.api.users.avatar
 
 
 def for_node(node_id):
@@ -25,9 +25,9 @@ def _user_info(user_id):
     users, _, _, status, _ = get('users', {'_id': user_id})
     if len(users['_items']) > 0:
         user = users['_items'][0]
-        user['gravatar'] = gravatar(user['email'])
+        user['avatar'] = pillar.api.users.avatar.url(user)
 
-        public_fields = {'full_name', 'username', 'gravatar'}
+        public_fields = {'full_name', 'username', 'avatar'}
         for field in list(user.keys()):
             if field not in public_fields:
                 del user[field]

@@ -217,6 +217,8 @@ CELERY_BEAT_SCHEDULE = {
 # TODO(Sybren): A proper value should be determined after we actually have users with badges.
 BLENDER_ID_BADGE_EXPIRY = datetime.timedelta(hours=4)
 
+# How many times the Celery task for downloading an avatar is retried.
+AVATAR_DOWNLOAD_CELERY_RETRY = 3
 
 # Mapping from user role to capabilities obtained by users with that role.
 USER_CAPABILITIES = defaultdict(**{

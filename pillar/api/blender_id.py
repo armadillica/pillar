@@ -280,6 +280,16 @@ def fetch_blenderid_user() -> dict:
     return payload
 
 
+def avatar_url(blenderid_user_id: str) -> str:
+    """Return the URL to the user's avatar on Blender ID.
+
+    This avatar should be downloaded, and not served from the Blender ID URL.
+    """
+    bid_url = urljoin(current_app.config['BLENDER_ID_ENDPOINT'],
+                      f'api/user/{blenderid_user_id}/avatar')
+    return bid_url
+
+
 def setup_app(app, url_prefix):
     app.register_api_blueprint(blender_id, url_prefix=url_prefix)
 

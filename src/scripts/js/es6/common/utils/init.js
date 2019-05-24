@@ -1,6 +1,6 @@
 export { transformPlaceholder } from './placeholder'
 export { prettyDate } from './prettydate'
-export { getCurrentUser, initCurrentUser } from './currentuser'
+export { getCurrentUser, initCurrentUser, updateCurrentUser, currentUserEventBus, UserEvents } from './currentuser'
 export { thenLoadImage } from './files'
 
 
@@ -19,7 +19,7 @@ export function debounced(fn, delay=1000) {
 
 /**
  * Extracts error message from error of type String, Error or xhrError
- * @param {*} err 
+ * @param {*} err
  * @returns {String}
  */
 export function messageFromError(err){

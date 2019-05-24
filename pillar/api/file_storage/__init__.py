@@ -821,6 +821,10 @@ def stream_to_storage(project_id: str):
         local_file = uploaded_file.stream
 
     result = upload_and_process(local_file, uploaded_file, project_id)
+
+    # Local processing is done, we can close the local file so it is removed.
+    local_file.close()
+
     resp = jsonify(result)
     resp.status_code = result['status_code']
     add_access_control_headers(resp)
@@ -829,7 +833,9 @@ def stream_to_storage(project_id: str):
 
 def upload_and_process(local_file: typing.Union[io.BytesIO, typing.BinaryIO],
                        uploaded_file: werkzeug.datastructures.FileStorage,
-                       project_id: str):
+                       project_id: str,
+                       *,
+                       may_process_file=True) -> dict:
     # Figure out the file size, as we need to pass this in explicitly to GCloud.
     # Otherwise it always uses os.fstat(file_obj.fileno()).st_size, which isn't
     # supported by a BytesIO object (even though it does have a fileno
@@ -856,18 +862,15 @@ def upload_and_process(local_file: typing.Union[io.BytesIO, typing.BinaryIO],
               'size=%i as "queued_for_processing"',
               file_id, internal_fname, file_size)
     update_file_doc(file_id,
-                    status='queued_for_processing',
+                    status='queued_for_processing' if may_process_file else 'complete',
                     file_path=internal_fname,
                     length=blob.size,
                     content_type=uploaded_file.mimetype)
 
-    log.debug('Processing uploaded file id=%s, fname=%s, size=%i', file_id,
-              internal_fname, blob.size)
-    process_file(bucket, file_id, local_file)
-
-    # Local processing is done, we can close the local file so it is removed.
-    if local_file is not None:
-        local_file.close()
+    if may_process_file:
+        log.debug('Processing uploaded file id=%s, fname=%s, size=%i', file_id,
+                  internal_fname, blob.size)
+        process_file(bucket, file_id, local_file)
 
     log.debug('Handled uploaded file id=%s, fname=%s, size=%i, status=%i',
               file_id, internal_fname, blob.size, status)
@@ -981,7 +984,50 @@ def compute_aggregate_length_items(file_docs):
         compute_aggregate_length(file_doc)
 
 
+def get_file_url(file_id: ObjectId, variation='') -> str:
+    """Return the URL of a file in storage.
+
+    Note that this function is cached, see setup_app().
+
+    :param file_id: the ID of the file
+    :param variation: if non-empty, indicates the variation of of the file
+        to return the URL for; if empty, returns the URL of the original.
+
+    :return: the URL, or an empty string if the file/variation does not exist.
+    """
+
+    file_coll = current_app.db('files')
+    db_file = file_coll.find_one({'_id': file_id})
+    if not db_file:
+        return ''
+
+    ensure_valid_link(db_file)
+
+    if variation:
+        variations = file_doc.get('variations', ())
+        for file_var in variations:
+            if file_var['size'] == variation:
+                return file_var['link']
+        return ''
+
+    return db_file['link']
+
+
+def update_file_doc(file_id, **updates):
+    files = current_app.data.driver.db['files']
+    res = files.update_one({'_id': ObjectId(file_id)},
+                           {'$set': updates})
+    log.debug('update_file_doc(%s, %s): %i matched, %i updated.',
+              file_id, updates, res.matched_count, res.modified_count)
+    return res
+
+
 def setup_app(app, url_prefix):
+    global get_file_url
+
+    cached = app.cache.memoize(timeout=10)
+    get_file_url = cached(get_file_url)
+
     app.on_pre_GET_files += on_pre_get_files
 
     app.on_fetched_item_files += before_returning_file
@@ -992,12 +1038,3 @@ def setup_app(app, url_prefix):
     app.on_insert_files += compute_aggregate_length_items
 
     app.register_api_blueprint(file_storage, url_prefix=url_prefix)
-
-
-def update_file_doc(file_id, **updates):
-    files = current_app.data.driver.db['files']
-    res = files.update_one({'_id': ObjectId(file_id)},
-                           {'$set': updates})
-    log.debug('update_file_doc(%s, %s): %i matched, %i updated.',
-              file_id, updates, res.matched_count, res.modified_count)
-    return res

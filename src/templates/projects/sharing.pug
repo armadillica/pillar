@@ -19,7 +19,7 @@
 						user-id="{{ user['_id'] }}",
 						class="{% if current_user.objectid == user['_id'] %}self{% endif %}")
 						.sharing-users-avatar
-							img(src="{{ user['avatar'] }}")
+							img(src="{{ user['avatar_url'] }}")
 						.sharing-users-details
 							span.sharing-users-name
 								| {{user['full_name']}}
