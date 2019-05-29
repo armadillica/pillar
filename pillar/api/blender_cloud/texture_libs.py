@@ -104,7 +104,7 @@ def has_texture_node(proj, return_hdri=True):
     if return_hdri:
         node_types.append('group_hdri')
 
-    count = nodes_collection.count(
+    count = nodes_collection.count_documents(
         {'node_type': {'$in': node_types},
          'project': proj['_id'],
          'parent': None})

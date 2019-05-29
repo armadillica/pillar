@@ -19,7 +19,7 @@ class OrphanFilesTest(AbstractPillarTest):
             24 * 'c', project_overrides={'_id': ObjectId(), 'is_private': True})
         private2, _ = self.create_project_with_admin(
             24 * 'd', project_overrides={'_id': ObjectId(), 'is_private': None})
-        self.assertEqual(4, self.app.db('projects').count())
+        self.assertEqual(4, self.app.db('projects').count_documents({}))
 
         # Create files, some orphan and some used.
         project_ids = (public1, public2, private1, private2)
