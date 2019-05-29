@@ -823,7 +823,7 @@ def _find_orphan_files() -> typing.Set[bson.ObjectId]:
     # Find all references by iterating through the project itself and every document that has a
     # 'project' key set to this ObjectId.
     db = current_app.db()
-    for coll_name in sorted(db.collection_names(include_system_collections=False)):
+    for coll_name in sorted(db.list_collection_names()):
         if coll_name in ORPHAN_FINDER_SKIP_COLLECTIONS:
             continue
 
