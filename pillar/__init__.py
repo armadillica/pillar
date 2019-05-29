@@ -14,23 +14,28 @@ import os.path
 import pathlib
 import warnings
 
-import jinja2
-import flask
-from flask import g, render_template, request
-from flask_babel import Babel, gettext as _
-from flask.templating import TemplateNotFound
-import pymongo.database
-
-
 # These warnings have to be suppressed before the first import.
+
 # Eve is falling behind on Cerberus. See https://github.com/pyeve/eve/issues/1278
 warnings.filterwarnings(
     'ignore', category=DeprecationWarning,
     message="Methods for type testing are deprecated, use TypeDefinition and the "
             "'types_mapping'-property of a Validator-instance instead")
 
-from werkzeug.local import LocalProxy
+# Werkzeug deprecated Request.is_xhr, but it works fine with jQuery and we don't need a reminder
+# every time a unit test is run.
+warnings.filterwarnings('ignore', category=DeprecationWarning,
+                        message="'Request.is_xhr' is deprecated as of version 0.13 and will be "
+                                "removed in version 1.0.")
+
+import jinja2
+import flask
 from eve import Eve
+from flask import g, render_template, request
+from flask_babel import Babel, gettext as _
+from flask.templating import TemplateNotFound
+import pymongo.database
+from werkzeug.local import LocalProxy
 
 
 # Declare pillar.current_app before importing other Pillar modules.
@@ -913,7 +918,8 @@ class PillarServer(BlinkerCompatibleEve):
 
             yield ctx
 
-    def validator_for_resource(self, resource_name: str) -> custom_field_validation.ValidateCustomFields:
+    def validator_for_resource(self,
+                               resource_name: str) -> custom_field_validation.ValidateCustomFields:
         schema = self.config['DOMAIN'][resource_name]['schema']
         validator = self.validator(schema, resource_name)
         return validator

@@ -1,5 +1,6 @@
 import logging
 import urllib.parse
+import warnings
 
 from pillarsdk import Node
 from flask import Blueprint
@@ -7,7 +8,6 @@ from flask import current_app
 from flask import render_template
 from flask import redirect
 from flask import request
-from werkzeug.contrib.atom import AtomFeed
 
 from pillar.flask_extra import ensure_schema
 from pillar.web.utils import system_util
@@ -91,6 +91,11 @@ def error_403():
 @blueprint.route('/feeds/blogs.atom')
 def feeds_blogs():
     """Global feed generator for latest blogposts across all projects"""
+
+    # Werkzeug deprecated their Atom feed. Tracked in https://developer.blender.org/T65274.
+    with warnings.catch_warnings():
+        from werkzeug.contrib.atom import AtomFeed
+
     @current_app.cache.cached(60*5)
     def render_page():
         feed = AtomFeed('Blender Cloud - Latest updates',
