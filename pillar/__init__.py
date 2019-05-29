@@ -12,15 +12,25 @@ import typing
 import os
 import os.path
 import pathlib
+import warnings
 
 import jinja2
-from eve import Eve
 import flask
 from flask import g, render_template, request
 from flask_babel import Babel, gettext as _
 from flask.templating import TemplateNotFound
 import pymongo.database
+
+
+# These warnings have to be suppressed before the first import.
+# Eve is falling behind on Cerberus. See https://github.com/pyeve/eve/issues/1278
+warnings.filterwarnings(
+    'ignore', category=DeprecationWarning,
+    message="Methods for type testing are deprecated, use TypeDefinition and the "
+            "'types_mapping'-property of a Validator-instance instead")
+
 from werkzeug.local import LocalProxy
+from eve import Eve
 
 
 # Declare pillar.current_app before importing other Pillar modules.
