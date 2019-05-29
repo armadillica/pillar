@@ -11,12 +11,11 @@ ATTACHMENT_SLUG_REGEX = r'[a-zA-Z0-9_\-]+'
 
 attachments_embedded_schema = {
     'type': 'dict',
-    # TODO: will be renamed to 'keyschema' in Cerberus 1.0
-    'keyschema': {
+    'keysrules': {
         'type': 'string',
         'regex': '^%s$' % ATTACHMENT_SLUG_REGEX,
     },
-    'valueschema': {
+    'valuesrules': {
         'type': 'dict',
         'schema': {
             'oid': {

@@ -135,8 +135,8 @@ users_schema = {
                 'type': 'dict',
                 # Keyed by Node ID of the video asset. MongoDB doesn't support using
                 # ObjectIds as key, so we cast them to string instead.
-                'keyschema': {'type': 'string'},
-                'valueschema': {
+                'keysrules': {'type': 'string'},
+                'valuesrules': {
                     'type': 'dict',
                     'schema': {
                         'progress_in_sec': {'type': 'float', 'min': 0},

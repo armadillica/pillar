@@ -19,10 +19,19 @@ def attachment_form_group_create(schema_prop):
 
 
 def _attachment_build_single_field(schema_prop):
+    # 'keyschema' was renamed to 'keysrules' in Cerberus 1.3, but our data may still have the old
+    # names. Same for 'valueschema' and 'valuesrules'.
+    keysrules = schema_prop.get('keysrules') or schema_prop.get('keyschema')
+    if keysrules is None:
+        raise KeyError(f"missing 'keysrules' key in schema {schema_prop}")
+    valuesrules = schema_prop.get('valuesrules') or schema_prop.get('valueschema')
+    if valuesrules is None:
+        raise KeyError(f"missing 'valuesrules' key in schema {schema_prop}")
+
     # Ugly hard-coded schema.
     fake_schema = {
-        'slug': schema_prop['keyschema'],
-        'oid': schema_prop['valueschema']['schema']['oid'],
+        'slug': keysrules,
+        'oid': valuesrules['schema']['oid'],
     }
     file_select_form_group = build_file_select_form(fake_schema)
     return file_select_form_group

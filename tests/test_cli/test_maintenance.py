@@ -63,8 +63,8 @@ class UpgradeAttachmentSchemaTest(AbstractPillarTest):
                 "url": {"type": "string"},
                 "attachments": {
                     "type": "dict",
-                    "keyschema": {"type": "string", "regex": "^[a-zA-Z0-9_ ]+$"},
-                    "valueschema": {
+                    "keysrules": {"type": "string", "regex": "^[a-zA-Z0-9_ ]+$"},
+                    "valuesrules": {
                         "type": "dict",
                         "schema": {
                             "oid": {"type": "objectid", "required": True},

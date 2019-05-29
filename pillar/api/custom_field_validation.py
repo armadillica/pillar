@@ -29,7 +29,11 @@ class ValidateCustomFields(Validator):
                     dict_valueschema = schema_prop['schema']
                     properties[prop] = self.convert_properties(properties[prop], dict_valueschema)
                 except KeyError:
-                    dict_valueschema = schema_prop['valueschema']
+                    # Cerberus 1.3 changed valueschema to valuesrules.
+                    dict_valueschema = schema_prop.get('valuesrules') or \
+                                       schema_prop.get('valueschema')
+                    if dict_valueschema is None:
+                        raise KeyError(f"missing 'valuesrules' key in schema of property {prop}")
                     self.convert_dict_values(properties[prop], dict_valueschema)
 
             elif prop_type == 'list':
