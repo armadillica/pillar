@@ -470,7 +470,7 @@ def before_returning_files(response):
         ensure_valid_link(item)
 
 
-def ensure_valid_link(response):
+def ensure_valid_link(response: dict) -> None:
     """Ensures the file item has valid file links using generate_link(...)."""
 
     # Log to function-specific logger, so we can easily turn it off.
@@ -495,12 +495,13 @@ def ensure_valid_link(response):
     generate_all_links(response, now)
 
 
-def generate_all_links(response, now):
+def generate_all_links(response: dict, now: datetime.datetime) -> None:
     """Generate a new link for the file and all its variations.
 
     :param response: the file document that should be updated.
     :param now: datetime that reflects 'now', for consistent expiry generation.
     """
+    assert isinstance(response, dict), f'response must be dict, is {response!r}'
 
     project_id = str(
         response['project']) if 'project' in response else None
@@ -565,7 +566,7 @@ def on_pre_get_files(_, lookup):
     lookup_expired = lookup.copy()
     lookup_expired['link_expires'] = {'$lte': now}
 
-    cursor = current_app.data.find('files', parsed_req, lookup_expired)
+    cursor, _ = current_app.data.find('files', parsed_req, lookup_expired, perform_count=False)
     for idx, file_doc in enumerate(cursor):
         if idx == 0:
             log.debug('Updating expired links for files that matched lookup %s', lookup_expired)

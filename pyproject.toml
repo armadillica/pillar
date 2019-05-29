@@ -28,7 +28,7 @@ commonmark = "~0.9"
 elasticsearch = "~6.1"
 elasticsearch-dsl = "~6.1"
 
-Eve = "~0.8"  # currently latest is 0.9
+Eve = "~0.9"
 Flask = "~1.0"
 Flask-Babel = "~0.12"
 Flask-Caching = "~1.7"
