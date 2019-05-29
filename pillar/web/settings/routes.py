@@ -7,6 +7,7 @@ from flask_login import login_required, current_user
 from werkzeug.exceptions import abort
 
 from pillar import current_app
+from pillar.auth import current_user
 from pillar.web import system_util
 from pillar.web.users import forms
 from pillarsdk import User, exceptions as sdk_exceptions
@@ -29,11 +30,12 @@ def profile():
 
     if form.validate_on_submit():
         try:
-            user.username = form.username.data
-            user.update(api=api)
+            response = user.set_username(form.username.data, api=api)
+            log.info('updated username of %s: %s', current_user, response)
             flash("Profile updated", 'success')
-        except sdk_exceptions.ResourceInvalid as e:
-            message = json.loads(e.content)
+        except sdk_exceptions.ResourceInvalid as ex:
+            log.warning('unable to set username %s to %r: %s', current_user, form.username.data, ex)
+            message = json.loads(ex.content)
             flash(message)
 
     blender_id_endpoint = current_app.config['BLENDER_ID_ENDPOINT']

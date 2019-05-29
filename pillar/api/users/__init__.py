@@ -61,6 +61,9 @@ def _update_search_user_changed_role(sender, user: dict):
 
 def setup_app(app, api_prefix):
     from pillar.api import service
+    from . import patch
+
+    patch.setup_app(app, url_prefix=api_prefix)
 
     app.on_pre_GET_users += hooks.check_user_access
     app.on_post_GET_users += hooks.post_GET_user

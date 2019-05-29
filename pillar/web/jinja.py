@@ -11,6 +11,8 @@ import flask_login
 import jinja2.filters
 import jinja2.utils
 import werkzeug.exceptions as wz_exceptions
+from werkzeug.local import LocalProxy
+
 import pillarsdk
 
 import pillar.api.utils
@@ -225,6 +227,8 @@ def user_to_dict(user: auth.UserClass) -> dict:
 
 
 def do_json(some_object) -> str:
+    if isinstance(some_object, LocalProxy):
+        return do_json(some_object._get_current_object())
     if isinstance(some_object, pillarsdk.Resource):
         some_object = some_object.to_dict()
     if isinstance(some_object, auth.UserClass):
