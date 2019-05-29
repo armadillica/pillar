@@ -70,7 +70,7 @@ class BlinkerCompatibleEve(Eve):
 
 
 class PillarServer(BlinkerCompatibleEve):
-    def __init__(self, app_root, **kwargs):
+    def __init__(self, app_root: str, **kwargs) -> None:
         from .extension import PillarExtension
         from celery import Celery
         from flask_wtf.csrf import CSRFProtect
