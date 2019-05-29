@@ -256,7 +256,7 @@ organizations_schema = {
                 'start': {'type': 'binary', 'required': True},
                 'end': {'type': 'binary', 'required': True},
                 'prefix': {'type': 'integer', 'required': True},
-                'human': {'type': 'string', 'required': True, 'validator': 'iprange'},
+                'human': {'type': 'string', 'required': True, 'check_with': 'iprange'},
             }
         },
     },

@@ -185,7 +185,7 @@ class AbstractSchemaValidationTest(AbstractValidationTest):
 
 
 class IPRangeValidatorTest(AbstractSchemaValidationTest):
-    schema = {'iprange': {'type': 'string', 'required': True, 'validator': 'iprange'}}
+    schema = {'iprange': {'type': 'string', 'required': True, 'check_with': 'iprange'}}
 
     def test_ipv6(self):
         self.assertValid({'iprange': '2a03:b0c0:0:1010::8fe:6ef1'})

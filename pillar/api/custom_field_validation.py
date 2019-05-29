@@ -144,7 +144,7 @@ class ValidateCustomFields(Validator):
         if not value:
             self._error(field, "Value is required once the document was created")
 
-    def _validator_iprange(self, field_name: str, value: str):
+    def _check_with_iprange(self, field_name: str, value: str):
         """Ensure the field contains a valid IP address.
 
         Supports both IPv6 and IPv4 ranges. Requires the IPy module.
@@ -181,12 +181,12 @@ if __name__ == '__main__':
 
     v = ValidateCustomFields()
     v.schema = {
-        'foo': {'type': 'string', 'validator': 'markdown'},
+        'foo': {'type': 'string', 'check_with': 'markdown'},
         'foo_html': {'type': 'string'},
         'nested': {
             'type': 'dict',
             'schema': {
-                'bar': {'type': 'string', 'validator': 'markdown'},
+                'bar': {'type': 'string', 'check_with': 'markdown'},
                 'bar_html': {'type': 'string'},
             }
         }
