@@ -13,7 +13,7 @@ from pillar import current_app, shortcodes
 from pillar.api.nodes.custom.comment import patch_comment
 from pillar.api.utils import jsonify, gravatar
 from pillar.auth import current_user
-
+import pillar.markdown
 
 log = logging.getLogger(__name__)
 
@@ -79,9 +79,10 @@ class CommentTreeBuilder:
         self.nbr_of_Comments: int = 0
 
     def build(self) -> CommentTreeDO:
-        enriched_comments = self.child_comments(self.node_id,
-                                                sort={'properties.rating_positive': pymongo.DESCENDING,
-                                                      '_created': pymongo.DESCENDING})
+        enriched_comments = self.child_comments(
+            self.node_id,
+            sort={'properties.rating_positive': pymongo.DESCENDING,
+                  '_created': pymongo.DESCENDING})
         project_id = self.get_project_id()
         return CommentTreeDO(
             node_id=self.node_id,
@@ -181,7 +182,10 @@ def find_node_or_raise(node_id, *args):
     return node_to_comment
 
 
-def patch_node_comment(parent_id: bson.ObjectId, comment_id: bson.ObjectId, markdown_msg: str, attachments: dict):
+def patch_node_comment(parent_id: bson.ObjectId,
+                       comment_id: bson.ObjectId,
+                       markdown_msg: str,
+                       attachments: dict):
     _, _ = find_parent_and_comment_or_raise(parent_id, comment_id)
 
     patch = dict(
@@ -214,10 +218,9 @@ def find_parent_and_comment_or_raise(parent_id, comment_id):
 
 def validate_comment_parent_relation(comment, parent):
     if comment['parent'] != parent['_id']:
-        log.warning('User %s tried to update comment with bad parent/comment pair. parent_id: %s comment_id: %s',
-                    current_user.objectid,
-                    parent['_id'],
-                    comment['_id'])
+        log.warning('User %s tried to update comment with bad parent/comment pair.'
+                    ' parent_id: %s comment_id: %s',
+                    current_user.objectid, parent['_id'], comment['_id'])
         raise wz_exceptions.BadRequest()
 
 
