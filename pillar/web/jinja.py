@@ -1,7 +1,6 @@
 """Our custom Jinja filters and other template stuff."""
 
 import functools
-import json
 import logging
 import typing
 import urllib.parse
@@ -212,29 +211,16 @@ def do_yesno(value, arg=None):
     return no
 
 
-def user_to_dict(user: auth.UserClass) -> dict:
-    return dict(
-        user_id=str(user.user_id),
-        username=user.username,
-        full_name=user.full_name,
-        gravatar=user.gravatar,
-        email=user.email,
-        capabilities=list(user.capabilities),
-        badges_html=user.badges_html,
-        is_authenticated=user.is_authenticated
-    )
-
-
-def do_json(some_object) -> str:
+def do_json(some_object: typing.Any) -> str:
     import pillar.auth
 
     if isinstance(some_object, LocalProxy):
         return do_json(some_object._get_current_object())
     if isinstance(some_object, pillarsdk.Resource):
         some_object = some_object.to_dict()
-    if isinstance(some_object, auth.UserClass):
-        some_object = user_to_dict(some_object)
-    return json.dumps(some_object)
+    if isinstance(some_object, pillar.auth.UserClass):
+        some_object = some_object.frontend_info()
+    return pillar.api.utils.dumps(some_object)
 
 
 def setup_jinja_env(jinja_env, app_config: dict):

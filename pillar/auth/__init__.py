@@ -163,6 +163,20 @@ class UserClass(flask_login.UserMixin):
 
         return bool(self._has_organizations)
 
+    def frontend_info(self) -> dict:
+        """Return a dictionary of user info for injecting into the page."""
+
+        return {
+            'user_id': str(self.user_id),
+            'username': self.username,
+            'full_name': self.full_name,
+            'gravatar': self.gravatar,
+            'email': self.email,
+            'capabilities': list(self.capabilities),
+            'badges_html': self.badges_html,
+            'is_authenticated': self.is_authenticated,
+        }
+
 
 class AnonymousUser(flask_login.AnonymousUserMixin, UserClass):
     def __init__(self):
