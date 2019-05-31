@@ -16,7 +16,6 @@ from werkzeug.local import LocalProxy
 import pillarsdk
 
 import pillar.api.utils
-from pillar import auth
 from pillar.api.utils import pretty_duration
 from pillar.web.utils import pretty_date
 from pillar.web.nodes.routes import url_for_node
@@ -227,6 +226,8 @@ def user_to_dict(user: auth.UserClass) -> dict:
 
 
 def do_json(some_object) -> str:
+    import pillar.auth
+
     if isinstance(some_object, LocalProxy):
         return do_json(some_object._get_current_object())
     if isinstance(some_object, pillarsdk.Resource):
