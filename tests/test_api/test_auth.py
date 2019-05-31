@@ -187,16 +187,6 @@ class AuthenticationTests(AbstractPillarTest):
         db_user = fetch_user()
         self.assertEqual(['subscriber'], db_user['roles'])
 
-        # PATCH should not be allowed.
-        updated_fields = {'roles': ['admin', 'subscriber', 'demo']}
-        self.patch('/api/users/%s' % user_id,
-                   json=updated_fields,
-                   auth_token='token',
-                   etag=db_user['_etag'],
-                   expected_status=405)
-        db_user = fetch_user()
-        self.assertEqual(['subscriber'], db_user['roles'])
-
     def test_token_expiry(self):
         """Expired tokens should be deleted from the database."""
 
