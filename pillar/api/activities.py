@@ -58,7 +58,7 @@ def notification_parse(notification):
         'context_object': context_object_id,
     }
     subscription = activities_subscriptions_collection.find_one(lookup)
-    if subscription and subscription['notifications']['web'] == True:
+    if subscription and subscription['notifications']['web'] is True:
         is_subscribed = True
     else:
         is_subscribed = False
