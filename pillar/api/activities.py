@@ -1,10 +1,20 @@
 import logging
+from html.parser import HTMLParser
 
 from flask import request, current_app
 from pillar.api.utils import gravatar
 from pillar.auth import current_user
 
 log = logging.getLogger(__name__)
+
+
+class CommentHTMLParser(HTMLParser):
+    def __init__(self):
+        HTMLParser.__init__(self)
+        self.data = []
+
+    def handle_data(self, data):
+        self.data.append(data)
 
 
 def notification_parse(notification):
@@ -30,9 +40,14 @@ def notification_parse(notification):
     object_type = 'comment'
     object_name = ''
     object_id = activity['object']
+    context_object_type = node['parent']['node_type']
+
+    # If node_type is 'dillo_post', just call it 'post'
+    node_type = 'post' if context_object_type.endswith('_post') else \
+        context_object_type
 
     if node['parent']['user'] == current_user.user_id:
-        owner = "your {0}".format(node['parent']['node_type'])
+        owner = f"your {node_type}"
     else:
         parent_comment_user = users_collection.find_one(
             {'_id': node['parent']['user']})
@@ -40,10 +55,22 @@ def notification_parse(notification):
             user_name = 'their'
         else:
             user_name = "{0}'s".format(parent_comment_user['username'])
-        owner = "{0} {1}".format(user_name, node['parent']['node_type'])
 
-    context_object_type = node['parent']['node_type']
-    context_object_name = owner
+        owner = f"{user_name} {node_type}"
+
+    context_object_name = f"{node['parent']['name'][:15]}..."
+    if context_object_type == 'comment':
+        # Parse the comment content, which might be HTML and extract
+        # some text from it.
+        parser = CommentHTMLParser()
+        # Trim the comment content to 50 chars, the parser will handle it
+        parser.feed(node['parent']['properties']['content'][:50])
+        try:
+            comment_content = parser.data[0]
+        except KeyError:
+            comment_content = '...'
+        # Trim the parsed text down to 15 charss
+        context_object_name = f"{comment_content[:15]}..."
     context_object_id = activity['context_object']
     if activity['verb'] == 'replied':
         action = 'replied to'
@@ -51,6 +78,8 @@ def notification_parse(notification):
         action = 'left a comment on'
     else:
         action = activity['verb']
+
+    action = f'{action} {owner}'
 
     lookup = {
         'user': current_user.user_id,
