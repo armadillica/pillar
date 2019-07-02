@@ -58,19 +58,19 @@ def notification_parse(notification):
 
         owner = f"{user_name} {node_type}"
 
-    context_object_name = f"{node['parent']['name'][:15]}..."
+    context_object_name = f"{node['parent']['name'][:50]}..."
     if context_object_type == 'comment':
         # Parse the comment content, which might be HTML and extract
         # some text from it.
         parser = CommentHTMLParser()
         # Trim the comment content to 50 chars, the parser will handle it
-        parser.feed(node['parent']['properties']['content'][:50])
+        parser.feed(node['properties']['content'][:50])
         try:
             comment_content = parser.data[0]
         except KeyError:
             comment_content = '...'
         # Trim the parsed text down to 15 charss
-        context_object_name = f"{comment_content[:15]}..."
+        context_object_name = f"{comment_content[:50]}..."
     context_object_id = activity['context_object']
     if activity['verb'] == 'replied':
         action = 'replied to'
