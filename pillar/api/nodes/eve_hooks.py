@@ -69,6 +69,22 @@ def before_replacing_node(item, original):
     check_permissions('nodes', original, 'PUT')
     update_file_name(item)
 
+    # XXX Dillo specific feature (for Graphicall)
+    if 'download' in original['properties']:
+        # Check if the file referenced in the download property was updated.
+        # If so, mark the old file as deleted. A cronjob will take care of
+        # removing the actual file based on the _delete status of file docs.
+        original_file_id = original['properties']['download']
+        new_file_id = item['properties']['download']
+
+        if original_file_id == new_file_id:
+            return
+
+        # Mark the original file as _deleted
+        files = current_app.data.driver.db['files']
+        files.update_one({'_id': original_file_id}, {'$set': {'_deleted': True}})
+        log.info('Marking file %s as _deleted' % original_file_id)
+
 
 def after_replacing_node(item, original):
     """Push an update to the Algolia index when a node item is updated. If the
