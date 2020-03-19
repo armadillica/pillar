@@ -194,7 +194,7 @@ class OrganizationPatchHandler(patch_handler.AbstractPatchHandler):
         self.log.info('User %s edits Organization %s: %s', current_user_id, org_id, update)
 
         validator = current_app.validator_for_resource('organizations')
-        if not validator.validate_update(update, org_id):
+        if not validator.validate_update(update, org_id, persisted_document={}):
             resp = jsonify({
                 '_errors': validator.errors,
                 '_message': ', '.join(f'{field}: {error}'
