@@ -354,11 +354,12 @@ $(function() {
 
 
 function getNotificationsLoop() {
+	//- Fetch the actual notifications
 	getNotifications();
-
-	var getLoop = setTimeout(function () {
+	//- Call itself again in 60 seconds
+	setTimeout(function () {
 		getNotificationsLoop();
-	}, 30000);
+	}, 60 * 1000);
 }
 
 /* Returns a more-or-less reasonable message given an error response object. */
