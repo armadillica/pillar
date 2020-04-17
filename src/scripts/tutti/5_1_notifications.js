@@ -1,5 +1,3 @@
-
-
 /**
  * Store the number of unread notifications on load.
  * That way, if the number got higher while the page was
@@ -19,8 +17,24 @@ function clearNotificationIcon(){
 }
 
 
-// Get notifications by fetching /notifications/ JSON every 30 seconds
+/**
+ * Get notifications by fetching /notifications/ and update ul#notifications-list
+ *
+ * This is called every 60 seconds by getNotificationsLoop() but the endpoint is queried only if the
+ * doNotQueryNotifications cookie is expired. If so, the cookie is created again, with a lifetime
+ * of 65 seconds.
+ */
+
 function getNotifications(){
+	//- Check if the cookie is still valid, in which case, return
+	if( Cookies('doNotQueryNotifications') != null ) {return;}
+
+	//- Create a new cookie, which expires in 65 seconds
+	Cookies.set('doNotQueryNotifications', 'true', {
+		expires: new Date(new Date().getTime() + 65 * 1000)
+	});
+
+	//- Fetch data and update the interface
 	$.getJSON( "/notifications/", function( data ) {
 
 		if (!first_load) {
