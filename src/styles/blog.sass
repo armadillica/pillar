@@ -55,6 +55,15 @@ $pillar-font-path: "../../../../static/pillar/assets/font"
 @import _notifications
 
 body.blog
+	+media-xs
+		.comments-tree,
+		.node-details-description
+			padding-left: $spacer
+			padding-right: $spacer
+
+		.lead
+			font-size: initial
+
 	.node-details-description
 		font:
 			size: 1.3em
