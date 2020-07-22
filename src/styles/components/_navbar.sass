@@ -85,6 +85,10 @@
 				width: 30px
 
 			&.subscription-status
+				+media-xs
+					padding-left: $spacer
+					padding-right: $spacer
+
 				a, a:hover
 					color: $white
 
@@ -135,6 +139,9 @@
 $nav-secondary-bar-size: -2px
 .nav-secondary
 	align-items: center
+
+	+media-xs
+		margin-right: $spacer
 
 	.nav-link
 		color: $color-text
@@ -317,6 +324,13 @@ body.has-overlay
 
 .navbar-toggler
 	border: none
+
+.navbar
+	.navbar-collapse
+		display: none
+
+		&.show
+			display: initial
 
 // Mobile layout
 @include media-breakpoint-down(sm)
