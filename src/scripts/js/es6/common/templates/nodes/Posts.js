@@ -10,7 +10,7 @@ export class Posts extends NodesBase {
         let $title = $('<a>')
             .attr('href', '/nodes/' + post._id + '/redir')
             .attr('title', post.name)
-            .addClass('h1 text-uppercase font-weight-bold d-block pt-5 pb-2')
+            .addClass('timeline-post-title')
             .text(post.name);
         content.push($title);
         let $post = $('<div>')
