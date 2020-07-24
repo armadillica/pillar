@@ -72,6 +72,9 @@ def oauth_callback(provider):
     # Find or create user
     user_info = {'id': oauth_user.id, 'email': oauth_user.email, 'full_name': ''}
     db_user = find_user_in_db(user_info, provider=provider)
+    if '_deleted' in db_user and db_user['_deleted'] is True:
+        log.debug('User has been deleted and will not be logge in')
+        return redirect(next_after_login)
     db_id, status = upsert_user(db_user)
 
     # TODO(Sybren): If the user doesn't have any badges, but the access token
